@@ -9,6 +9,8 @@ defmodule AgentJido.Accounts.User.Senders.SendMagicLinkEmail do
   import Swoosh.Email
   alias AgentJido.Mailer
 
+  @from_name Application.compile_env!(:agent_jido, [:mailer, :from_name])
+
   @impl true
   def send(user_or_email, token, _) do
     # if you get a user, its for a user that already exists.
@@ -21,8 +23,7 @@ defmodule AgentJido.Accounts.User.Senders.SendMagicLinkEmail do
       end
 
     new()
-    # TODO: Replace with your email
-    |> from({"noreply", "noreply@example.com"})
+    |> from({@from_name, Mailer.from_email()})
     |> to(to_string(email))
     |> subject("Your login link")
     |> html_body(body(token: token, email: email))

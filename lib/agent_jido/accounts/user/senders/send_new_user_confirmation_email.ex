@@ -13,8 +13,7 @@ defmodule AgentJido.Accounts.User.Senders.SendNewUserConfirmationEmail do
   @impl true
   def send(user, token, _) do
     new()
-    # TODO: Replace with your email
-    |> from({"noreply", "noreply@example.com"})
+    |> from({"Agent Jido", Mailer.from_email()})
     |> to(to_string(user.email))
     |> subject("Confirm your email address")
     |> html_body(body(token: token))

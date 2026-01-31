@@ -95,12 +95,7 @@ defmodule AgentJido.MixProject do
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:heroicons,
-       github: "tailwindlabs/heroicons",
-       tag: "v2.2.0",
-       sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
+       github: "tailwindlabs/heroicons", tag: "v2.2.0", sparse: "optimized", app: false, compile: false, depth: 1},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
 
       # Observability & monitoring
@@ -110,12 +105,15 @@ defmodule AgentJido.MixProject do
 
       # Jido AI framework
       {:jido, "~> 2.0.0-rc"},
-      {:jido_ai, github: "agentjido/jido_ai"},
       {:jido_action, "~> 2.0.0-rc", override: true},
       {:jido_signal, "~> 2.0.0-rc"},
+      {:jido_ai, github: "agentjido/jido_ai", branch: "main"},
       {:req_llm, "~> 1.4"},
       {:timex, "~> 3.7", override: true},
       {:gettext, "~> 0.26", override: true},
+
+      # Cloud Sandboxes
+      {:sprites, github: "superfly/sprites-ex"},
 
       # Utilities
       {:jason, "~> 1.2"},
