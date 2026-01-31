@@ -34,32 +34,28 @@ RUN mix local.hex --force && \
 # set build ENV
 ENV MIX_ENV="prod"
 
-# install mix dependencies
+# install mix dependencies (cached unless mix.exs/lock change)
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
 
-# copy compile-time config files before we compile dependencies
-# to ensure any relevant config change will trigger the dependencies
-# to be re-compiled.
-COPY config/config.exs config/${MIX_ENV}.exs config/
+# compile deps BEFORE config (cached unless deps change)
 RUN mix deps.compile
 
-COPY priv priv
+# copy compile-time config files
+RUN mkdir config
+COPY config/config.exs config/${MIX_ENV}.exs config/
 
+# copy app code and assets
 COPY lib lib
-
+COPY priv priv
 COPY assets assets
 
-# compile assets
+# compile assets and app
 RUN mix do assets.setup + assets.build + assets.deploy
-
-# Compile the release
 RUN mix compile
 
-# Changes to config/runtime.exs don't require recompiling the code
+# runtime config and release
 COPY config/runtime.exs config/
-
 COPY rel rel
 RUN mix release
 
@@ -90,7 +86,7 @@ RUN chown nobody /app
 ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/petal_boilerplate ./
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/agent_jido ./
 
 # install hivemind
 RUN wget https://github.com/DarthSim/hivemind/releases/download/v1.1.0/hivemind-v1.1.0-linux-amd64.gz

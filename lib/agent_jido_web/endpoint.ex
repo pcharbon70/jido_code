@@ -15,7 +15,7 @@ defmodule AgentJidoWeb.Endpoint do
   plug :canonical_host
 
   defp canonical_host(conn, _opts) do
-    :petal_boilerplate
+    :agent_jido
     |> Application.get_env(:canonical_host)
     |> case do
       host when is_binary(host) ->

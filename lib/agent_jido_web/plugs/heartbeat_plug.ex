@@ -19,7 +19,7 @@ defmodule AgentJidoWeb.Plug.Heartbeat do
   def call(%Plug.Conn{method: "GET", request_path: "/status/" <> hash_to_check} = conn, _opts) do
     # the hash file is expected to be populated as a part of the build process
 
-    priv_dir = :code.priv_dir(:petal_boilerplate)
+    priv_dir = :code.priv_dir(:agent_jido)
     hash_file = "#{priv_dir}/hash"
 
     build_hash =
