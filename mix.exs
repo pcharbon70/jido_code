@@ -108,9 +108,17 @@ defmodule AgentJido.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:dns_cluster, "~> 0.2.0"},
 
+      # Jido AI framework
+      {:jido, "~> 2.0.0-rc"},
+      {:jido_ai, github: "agentjido/jido_ai"},
+      {:jido_action, "~> 2.0.0-rc", override: true},
+      {:jido_signal, "~> 2.0.0-rc"},
+      {:req_llm, "~> 1.4"},
+      {:timex, "~> 3.7", override: true},
+      {:gettext, "~> 0.26", override: true},
+
       # Utilities
       {:jason, "~> 1.2"},
-      {:gettext, "~> 1.0"},
       {:picosat_elixir, "~> 0.2"},
 
       # Development & testing
@@ -156,6 +164,7 @@ defmodule AgentJido.MixProject do
         "phx.digest"
       ],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],
+      sync_rules: ["usage_rules.sync AGENTS.md --all --link-to-folder deps --yes"],
       quality: [
         "compile --warnings-as-errors",
         "format --check-formatted",

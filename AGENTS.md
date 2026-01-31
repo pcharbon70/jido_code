@@ -371,3 +371,453 @@ Where the server handled it via:
       document = LazyHTML.from_fragment(html)
       matches = LazyHTML.filter(document, "your-complex-selector")
       IO.inspect(matches, label: "Matches")
+
+<!-- usage-rules-start -->
+<!-- usage-rules-header -->
+# Usage Rules
+
+**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below.
+Before attempting to use any of these packages or to discover if you should use them, review their
+usage rules to understand the correct patterns, conventions, and best practices.
+<!-- usage-rules-header-end -->
+
+<!-- req_llm-start -->
+## req_llm usage
+_req_llm_
+
+[req_llm usage rules](deps/req_llm/usage-rules.md)
+<!-- req_llm-end -->
+<!-- jido_action-start -->
+## jido_action usage
+_Composable, validated actions for Elixir applications with built-in AI tool integration_
+
+[jido_action usage rules](deps/jido_action/usage-rules.md)
+<!-- jido_action-end -->
+<!-- phoenix:ecto-start -->
+## phoenix:ecto usage
+[phoenix:ecto usage rules](deps/phoenix/usage-rules/ecto.md)
+<!-- phoenix:ecto-end -->
+<!-- phoenix:elixir-start -->
+## phoenix:elixir usage
+[phoenix:elixir usage rules](deps/phoenix/usage-rules/elixir.md)
+<!-- phoenix:elixir-end -->
+<!-- phoenix:html-start -->
+## phoenix:html usage
+[phoenix:html usage rules](deps/phoenix/usage-rules/html.md)
+<!-- phoenix:html-end -->
+<!-- phoenix:liveview-start -->
+## phoenix:liveview usage
+[phoenix:liveview usage rules](deps/phoenix/usage-rules/liveview.md)
+<!-- phoenix:liveview-end -->
+<!-- phoenix:phoenix-start -->
+## phoenix:phoenix usage
+[phoenix:phoenix usage rules](deps/phoenix/usage-rules/phoenix.md)
+<!-- phoenix:phoenix-end -->
+<!-- igniter-start -->
+## igniter usage
+_A code generation and project patching framework_
+
+[igniter usage rules](deps/igniter/usage-rules.md)
+<!-- igniter-end -->
+<!-- ash-start -->
+## ash usage
+_A declarative, extensible framework for building Elixir applications._
+
+[ash usage rules](deps/ash/usage-rules.md)
+<!-- ash-end -->
+<!-- ash_postgres-start -->
+## ash_postgres usage
+_The PostgreSQL data layer for Ash Framework_
+
+[ash_postgres usage rules](deps/ash_postgres/usage-rules.md)
+<!-- ash_postgres-end -->
+<!-- jido_ai-start -->
+## jido_ai usage
+_AI integration layer for the Jido ecosystem - Actions, Workflows, and LLM orchestration_
+
+[jido_ai usage rules](deps/jido_ai/usage-rules.md)
+<!-- jido_ai-end -->
+<!-- ash_json_api-start -->
+## ash_json_api usage
+_The JSON:API extension for the Ash Framework._
+
+[ash_json_api usage rules](deps/ash_json_api/usage-rules.md)
+<!-- ash_json_api-end -->
+<!-- ash_authentication-start -->
+## ash_authentication usage
+_Authentication extension for the Ash Framework._
+
+[ash_authentication usage rules](deps/ash_authentication/usage-rules.md)
+<!-- ash_authentication-end -->
+<!-- jido-start -->
+## jido usage
+_Pure functional agents and OTP runtime for building autonomous multi-agent workflows in Elixir._
+
+[jido usage rules](deps/jido/usage-rules.md)
+<!-- jido-end -->
+<!-- usage_rules-start -->
+## usage_rules usage
+_A dev tool for Elixir projects to gather LLM usage rules from dependencies_
+
+[usage_rules usage rules](deps/usage_rules/usage-rules.md)
+<!-- usage_rules-end -->
+<!-- usage_rules:elixir-start -->
+## usage_rules:elixir usage
+[usage_rules:elixir usage rules](deps/usage_rules/usage-rules/elixir.md)
+<!-- usage_rules:elixir-end -->
+<!-- usage_rules:otp-start -->
+## usage_rules:otp usage
+[usage_rules:otp usage rules](deps/usage_rules/usage-rules/otp.md)
+<!-- usage_rules:otp-end -->
+<!-- ash_typescript-start -->
+## ash_typescript usage
+_Generate type-safe TypeScript clients directly from your Ash resources and actions, ensuring end-to-end type safety between your backend and frontend._
+
+[ash_typescript usage rules](deps/ash_typescript/usage-rules.md)
+<!-- ash_typescript-end -->
+<!-- ash_phoenix-start -->
+## ash_phoenix usage
+_Utilities for integrating Ash and Phoenix_
+
+[ash_phoenix usage rules](deps/ash_phoenix/usage-rules.md)
+<!-- ash_phoenix-end -->
+<!-- usage-rules-end -->
+
+<!-- usage-rules-start -->
+<!-- usage-rules-header -->
+# Usage Rules
+
+**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below.
+Before attempting to use any of these packages or to discover if you should use them, review their
+usage rules to understand the correct patterns, conventions, and best practices.
+<!-- usage-rules-header-end -->
+
+<!-- req_llm-start -->
+## req_llm usage
+_req_llm_
+
+[req_llm usage rules](deps/req_llm/usage-rules.md)
+<!-- req_llm-end -->
+<!-- jido_action-start -->
+## jido_action usage
+_Composable, validated actions for Elixir applications with built-in AI tool integration_
+
+[jido_action usage rules](deps/jido_action/usage-rules.md)
+<!-- jido_action-end -->
+<!-- phoenix:ecto-start -->
+## phoenix:ecto usage
+[phoenix:ecto usage rules](deps/phoenix/usage-rules/ecto.md)
+<!-- phoenix:ecto-end -->
+<!-- phoenix:elixir-start -->
+## phoenix:elixir usage
+[phoenix:elixir usage rules](deps/phoenix/usage-rules/elixir.md)
+<!-- phoenix:elixir-end -->
+<!-- phoenix:html-start -->
+## phoenix:html usage
+[phoenix:html usage rules](deps/phoenix/usage-rules/html.md)
+<!-- phoenix:html-end -->
+<!-- phoenix:liveview-start -->
+## phoenix:liveview usage
+[phoenix:liveview usage rules](deps/phoenix/usage-rules/liveview.md)
+<!-- phoenix:liveview-end -->
+<!-- phoenix:phoenix-start -->
+## phoenix:phoenix usage
+[phoenix:phoenix usage rules](deps/phoenix/usage-rules/phoenix.md)
+<!-- phoenix:phoenix-end -->
+<!-- igniter-start -->
+## igniter usage
+_A code generation and project patching framework_
+
+[igniter usage rules](deps/igniter/usage-rules.md)
+<!-- igniter-end -->
+<!-- ash-start -->
+## ash usage
+_A declarative, extensible framework for building Elixir applications._
+
+[ash usage rules](deps/ash/usage-rules.md)
+<!-- ash-end -->
+<!-- ash_postgres-start -->
+## ash_postgres usage
+_The PostgreSQL data layer for Ash Framework_
+
+[ash_postgres usage rules](deps/ash_postgres/usage-rules.md)
+<!-- ash_postgres-end -->
+<!-- jido_ai-start -->
+## jido_ai usage
+_AI integration layer for the Jido ecosystem - Actions, Workflows, and LLM orchestration_
+
+[jido_ai usage rules](deps/jido_ai/usage-rules.md)
+<!-- jido_ai-end -->
+<!-- ash_json_api-start -->
+## ash_json_api usage
+_The JSON:API extension for the Ash Framework._
+
+[ash_json_api usage rules](deps/ash_json_api/usage-rules.md)
+<!-- ash_json_api-end -->
+<!-- ash_authentication-start -->
+## ash_authentication usage
+_Authentication extension for the Ash Framework._
+
+[ash_authentication usage rules](deps/ash_authentication/usage-rules.md)
+<!-- ash_authentication-end -->
+<!-- jido-start -->
+## jido usage
+_Pure functional agents and OTP runtime for building autonomous multi-agent workflows in Elixir._
+
+[jido usage rules](deps/jido/usage-rules.md)
+<!-- jido-end -->
+<!-- usage_rules-start -->
+## usage_rules usage
+_A dev tool for Elixir projects to gather LLM usage rules from dependencies_
+
+[usage_rules usage rules](deps/usage_rules/usage-rules.md)
+<!-- usage_rules-end -->
+<!-- usage_rules:elixir-start -->
+## usage_rules:elixir usage
+[usage_rules:elixir usage rules](deps/usage_rules/usage-rules/elixir.md)
+<!-- usage_rules:elixir-end -->
+<!-- usage_rules:otp-start -->
+## usage_rules:otp usage
+[usage_rules:otp usage rules](deps/usage_rules/usage-rules/otp.md)
+<!-- usage_rules:otp-end -->
+<!-- ash_typescript-start -->
+## ash_typescript usage
+_Generate type-safe TypeScript clients directly from your Ash resources and actions, ensuring end-to-end type safety between your backend and frontend._
+
+[ash_typescript usage rules](deps/ash_typescript/usage-rules.md)
+<!-- ash_typescript-end -->
+<!-- ash_phoenix-start -->
+## ash_phoenix usage
+_Utilities for integrating Ash and Phoenix_
+
+[ash_phoenix usage rules](deps/ash_phoenix/usage-rules.md)
+<!-- ash_phoenix-end -->
+<!-- usage-rules-end -->
+
+<!-- usage-rules-start -->
+<!-- usage-rules-header -->
+# Usage Rules
+
+**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below.
+Before attempting to use any of these packages or to discover if you should use them, review their
+usage rules to understand the correct patterns, conventions, and best practices.
+<!-- usage-rules-header-end -->
+
+<!-- req_llm-start -->
+## req_llm usage
+_req_llm_
+
+[req_llm usage rules](deps/req_llm/usage-rules.md)
+<!-- req_llm-end -->
+<!-- jido_action-start -->
+## jido_action usage
+_Composable, validated actions for Elixir applications with built-in AI tool integration_
+
+[jido_action usage rules](deps/jido_action/usage-rules.md)
+<!-- jido_action-end -->
+<!-- phoenix:ecto-start -->
+## phoenix:ecto usage
+[phoenix:ecto usage rules](deps/phoenix/usage-rules/ecto.md)
+<!-- phoenix:ecto-end -->
+<!-- phoenix:elixir-start -->
+## phoenix:elixir usage
+[phoenix:elixir usage rules](deps/phoenix/usage-rules/elixir.md)
+<!-- phoenix:elixir-end -->
+<!-- phoenix:html-start -->
+## phoenix:html usage
+[phoenix:html usage rules](deps/phoenix/usage-rules/html.md)
+<!-- phoenix:html-end -->
+<!-- phoenix:liveview-start -->
+## phoenix:liveview usage
+[phoenix:liveview usage rules](deps/phoenix/usage-rules/liveview.md)
+<!-- phoenix:liveview-end -->
+<!-- phoenix:phoenix-start -->
+## phoenix:phoenix usage
+[phoenix:phoenix usage rules](deps/phoenix/usage-rules/phoenix.md)
+<!-- phoenix:phoenix-end -->
+<!-- igniter-start -->
+## igniter usage
+_A code generation and project patching framework_
+
+[igniter usage rules](deps/igniter/usage-rules.md)
+<!-- igniter-end -->
+<!-- ash-start -->
+## ash usage
+_A declarative, extensible framework for building Elixir applications._
+
+[ash usage rules](deps/ash/usage-rules.md)
+<!-- ash-end -->
+<!-- ash_postgres-start -->
+## ash_postgres usage
+_The PostgreSQL data layer for Ash Framework_
+
+[ash_postgres usage rules](deps/ash_postgres/usage-rules.md)
+<!-- ash_postgres-end -->
+<!-- jido_ai-start -->
+## jido_ai usage
+_AI integration layer for the Jido ecosystem - Actions, Workflows, and LLM orchestration_
+
+[jido_ai usage rules](deps/jido_ai/usage-rules.md)
+<!-- jido_ai-end -->
+<!-- ash_json_api-start -->
+## ash_json_api usage
+_The JSON:API extension for the Ash Framework._
+
+[ash_json_api usage rules](deps/ash_json_api/usage-rules.md)
+<!-- ash_json_api-end -->
+<!-- ash_authentication-start -->
+## ash_authentication usage
+_Authentication extension for the Ash Framework._
+
+[ash_authentication usage rules](deps/ash_authentication/usage-rules.md)
+<!-- ash_authentication-end -->
+<!-- jido-start -->
+## jido usage
+_Pure functional agents and OTP runtime for building autonomous multi-agent workflows in Elixir._
+
+[jido usage rules](deps/jido/usage-rules.md)
+<!-- jido-end -->
+<!-- usage_rules-start -->
+## usage_rules usage
+_A dev tool for Elixir projects to gather LLM usage rules from dependencies_
+
+[usage_rules usage rules](deps/usage_rules/usage-rules.md)
+<!-- usage_rules-end -->
+<!-- usage_rules:elixir-start -->
+## usage_rules:elixir usage
+[usage_rules:elixir usage rules](deps/usage_rules/usage-rules/elixir.md)
+<!-- usage_rules:elixir-end -->
+<!-- usage_rules:otp-start -->
+## usage_rules:otp usage
+[usage_rules:otp usage rules](deps/usage_rules/usage-rules/otp.md)
+<!-- usage_rules:otp-end -->
+<!-- ash_typescript-start -->
+## ash_typescript usage
+_Generate type-safe TypeScript clients directly from your Ash resources and actions, ensuring end-to-end type safety between your backend and frontend._
+
+[ash_typescript usage rules](deps/ash_typescript/usage-rules.md)
+<!-- ash_typescript-end -->
+<!-- ash_phoenix-start -->
+## ash_phoenix usage
+_Utilities for integrating Ash and Phoenix_
+
+[ash_phoenix usage rules](deps/ash_phoenix/usage-rules.md)
+<!-- ash_phoenix-end -->
+<!-- usage-rules-end -->
+
+<!-- usage-rules-start -->
+<!-- usage-rules-header -->
+# Usage Rules
+
+**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below.
+Before attempting to use any of these packages or to discover if you should use them, review their
+usage rules to understand the correct patterns, conventions, and best practices.
+<!-- usage-rules-header-end -->
+
+<!-- jido_signal-start -->
+## jido_signal usage
+_Agent Communication Envelope and Utilities_
+
+[jido_signal usage rules](deps/jido_signal/usage-rules.md)
+<!-- jido_signal-end -->
+<!-- jido_action-start -->
+## jido_action usage
+_Composable, validated actions for Elixir applications with built-in AI tool integration_
+
+[jido_action usage rules](deps/jido_action/usage-rules.md)
+<!-- jido_action-end -->
+<!-- phoenix:ecto-start -->
+## phoenix:ecto usage
+[phoenix:ecto usage rules](deps/phoenix/usage-rules/ecto.md)
+<!-- phoenix:ecto-end -->
+<!-- phoenix:elixir-start -->
+## phoenix:elixir usage
+[phoenix:elixir usage rules](deps/phoenix/usage-rules/elixir.md)
+<!-- phoenix:elixir-end -->
+<!-- phoenix:html-start -->
+## phoenix:html usage
+[phoenix:html usage rules](deps/phoenix/usage-rules/html.md)
+<!-- phoenix:html-end -->
+<!-- phoenix:liveview-start -->
+## phoenix:liveview usage
+[phoenix:liveview usage rules](deps/phoenix/usage-rules/liveview.md)
+<!-- phoenix:liveview-end -->
+<!-- phoenix:phoenix-start -->
+## phoenix:phoenix usage
+[phoenix:phoenix usage rules](deps/phoenix/usage-rules/phoenix.md)
+<!-- phoenix:phoenix-end -->
+<!-- ash-start -->
+## ash usage
+_A declarative, extensible framework for building Elixir applications._
+
+[ash usage rules](deps/ash/usage-rules.md)
+<!-- ash-end -->
+<!-- usage_rules-start -->
+## usage_rules usage
+_A dev tool for Elixir projects to gather LLM usage rules from dependencies_
+
+[usage_rules usage rules](deps/usage_rules/usage-rules.md)
+<!-- usage_rules-end -->
+<!-- usage_rules:elixir-start -->
+## usage_rules:elixir usage
+[usage_rules:elixir usage rules](deps/usage_rules/usage-rules/elixir.md)
+<!-- usage_rules:elixir-end -->
+<!-- usage_rules:otp-start -->
+## usage_rules:otp usage
+[usage_rules:otp usage rules](deps/usage_rules/usage-rules/otp.md)
+<!-- usage_rules:otp-end -->
+<!-- igniter-start -->
+## igniter usage
+_A code generation and project patching framework_
+
+[igniter usage rules](deps/igniter/usage-rules.md)
+<!-- igniter-end -->
+<!-- ash_postgres-start -->
+## ash_postgres usage
+_The PostgreSQL data layer for Ash Framework_
+
+[ash_postgres usage rules](deps/ash_postgres/usage-rules.md)
+<!-- ash_postgres-end -->
+<!-- req_llm-start -->
+## req_llm usage
+_req_llm_
+
+[req_llm usage rules](deps/req_llm/usage-rules.md)
+<!-- req_llm-end -->
+<!-- jido_ai-start -->
+## jido_ai usage
+_AI integration layer for the Jido ecosystem - Actions, Workflows, and LLM orchestration_
+
+[jido_ai usage rules](deps/jido_ai/usage-rules.md)
+<!-- jido_ai-end -->
+<!-- ash_json_api-start -->
+## ash_json_api usage
+_The JSON:API extension for the Ash Framework._
+
+[ash_json_api usage rules](deps/ash_json_api/usage-rules.md)
+<!-- ash_json_api-end -->
+<!-- ash_authentication-start -->
+## ash_authentication usage
+_Authentication extension for the Ash Framework._
+
+[ash_authentication usage rules](deps/ash_authentication/usage-rules.md)
+<!-- ash_authentication-end -->
+<!-- jido-start -->
+## jido usage
+_Pure functional agents and OTP runtime for building autonomous multi-agent workflows in Elixir._
+
+[jido usage rules](deps/jido/usage-rules.md)
+<!-- jido-end -->
+<!-- ash_typescript-start -->
+## ash_typescript usage
+_Generate type-safe TypeScript clients directly from your Ash resources and actions, ensuring end-to-end type safety between your backend and frontend._
+
+[ash_typescript usage rules](deps/ash_typescript/usage-rules.md)
+<!-- ash_typescript-end -->
+<!-- ash_phoenix-start -->
+## ash_phoenix usage
+_Utilities for integrating Ash and Phoenix_
+
+[ash_phoenix usage rules](deps/ash_phoenix/usage-rules.md)
+<!-- ash_phoenix-end -->
+<!-- usage-rules-end -->

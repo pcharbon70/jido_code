@@ -30,17 +30,9 @@ defmodule AgentJidoWeb.Router do
   scope "/", AgentJidoWeb do
     pipe_through :browser
 
-    ash_authentication_live_session :authenticated_routes do
-      # in each liveview, add one of the following at the top of the module:
-      #
-      # If an authenticated user must be present:
-      # on_mount {AgentJidoWeb.LiveUserAuth, :live_user_required}
-      #
-      # If an authenticated user *may* be present:
-      # on_mount {AgentJidoWeb.LiveUserAuth, :live_user_optional}
-      #
-      # If an authenticated user must *not* be present:
-      # on_mount {AgentJidoWeb.LiveUserAuth, :live_no_user}
+    ash_authentication_live_session :authenticated_routes,
+      on_mount: [{AgentJidoWeb.LiveUserAuth, :live_user_required}] do
+      live "/dashboard", DashboardLive, :index
     end
 
     post "/rpc/run", AshTypescriptRpcController, :run
@@ -61,7 +53,11 @@ defmodule AgentJidoWeb.Router do
   scope "/", AgentJidoWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    ash_authentication_live_session :public_routes,
+      on_mount: [{AgentJidoWeb.LiveUserAuth, :live_user_optional}] do
+      live "/", HomeLive, :index
+    end
+
     auth_routes AuthController, AgentJido.Accounts.User, path: "/auth"
     sign_out_route AuthController
 

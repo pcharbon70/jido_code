@@ -50,6 +50,9 @@ COPY lib lib
 COPY priv priv
 COPY assets assets
 
+# install npm dependencies for React
+RUN cd assets && npm install
+
 # compile assets and app
 RUN mix do assets.setup + assets.build + assets.deploy
 RUN mix compile
