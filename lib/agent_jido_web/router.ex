@@ -39,6 +39,8 @@ defmodule AgentJidoWeb.Router do
       live "/forge", Forge.IndexLive, :index
       live "/forge/new", Forge.NewLive, :new
       live "/forge/:session_id", Forge.ShowLive, :show
+
+      live "/folio", FolioLive, :index
     end
 
     post "/rpc/run", AshTypescriptRpcController, :run

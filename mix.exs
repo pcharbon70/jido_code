@@ -74,6 +74,7 @@ defmodule AgentJido.MixProject do
       {:ash_paper_trail, "~> 0.5"},
       {:ash_cloak, "~> 0.2"},
       {:ash_typescript, "~> 0.12"},
+      {:ash_jido, github: "agentjido/ash_jido", branch: "main"},
 
       # Database
       {:ecto_sql, "~> 3.13"},
@@ -118,6 +119,7 @@ defmodule AgentJido.MixProject do
       # Utilities
       {:jason, "~> 1.2"},
       {:picosat_elixir, "~> 0.2"},
+      {:mdex, "~> 0.4"},
 
       # Development & testing
       {:igniter, "~> 0.6", only: [:dev, :test]},

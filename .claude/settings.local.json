@@ -9,7 +9,8 @@
       "Bash(npm run:*)",
       "Bash(mix phx.digest:*)",
       "mcp__Tidewave__execute_sql_query",
-      "mcp__Tidewave-Web__restart_app_server"
+      "mcp__Tidewave-Web__restart_app_server",
+      "mcp__Tidewave__get_docs"
     ],
     "defaultMode": "bypassPermissions"
   }

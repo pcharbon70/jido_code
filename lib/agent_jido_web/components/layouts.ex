@@ -37,7 +37,7 @@ defmodule AgentJidoWeb.Layouts do
     ~H"""
     <header class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 lg:px-8">
       <div class="flex-1">
-        <h1 class="text-xl font-bold">Agent Jido</h1>
+        <.link navigate={~p"/dashboard"} class="text-xl font-bold hover:opacity-80">Agent Jido</.link>
       </div>
       <div class="flex-none">
         <ul class="flex flex-row px-1 space-x-2 items-center">
