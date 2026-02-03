@@ -120,7 +120,10 @@ defmodule AgentJidoWeb.Layouts do
   def live_toast_group(assigns) do
     # Dynamically render LiveToast component
     ~H"""
-    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto">
+    <div
+      id="toast-group"
+      class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"
+    >
       <.live_component
         :if={@connected}
         module={LiveToast.LiveComponent}
@@ -129,13 +132,39 @@ defmodule AgentJidoWeb.Layouts do
         corner={@corner}
         f={@flash}
         kinds={[:info, :error]}
+        toast_class_fn={&AgentJidoWeb.Layouts.toast_class_fn/1}
       />
       <div :if={!@connected} id="toast-group">
-        <div :for={{kind, msg} <- @flash} class="bg-white group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex">
+        <div
+          :for={{kind, msg} <- @flash}
+          class={[
+            "group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex",
+            kind == :info && "bg-white text-black",
+            kind == :error && "bg-red-600 text-white border-red-700"
+          ]}
+        >
           <p class="text-sm">{msg}</p>
         </div>
       </div>
     </div>
     """
+  end
+
+  @doc """
+  Custom toast class function with improved color contrast for error toasts.
+  """
+  def toast_class_fn(assigns) do
+    [
+      # base classes
+      "group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2",
+      # start hidden if javascript is enabled
+      "[@media(scripting:enabled)]:opacity-0 [@media(scripting:enabled){[data-phx-main]_&}]:opacity-100",
+      # used to hide the disconnected flashes
+      if(assigns[:rest][:hidden] == true, do: "hidden", else: "flex"),
+      # override styles per severity
+      assigns[:kind] == :info && "bg-white text-black",
+      assigns[:kind] == :error &&
+        "bg-danger-light text-white border-danger-light dark:bg-danger-dark dark:border-danger-dark dark:text-black"
+    ]
   end
 end

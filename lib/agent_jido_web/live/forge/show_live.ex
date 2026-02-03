@@ -51,7 +51,11 @@ defmodule AgentJidoWeb.Forge.ShowLive do
     socket =
       Enum.with_index(lines)
       |> Enum.reduce(socket, fn {line, idx}, acc ->
-        stream_insert(acc, :output, %{id: "line-#{seq}-#{idx}-#{System.unique_integer()}", text: line})
+        stream_insert(acc, :output, %{
+          id: "line-#{seq}-#{idx}-#{System.unique_integer()}",
+          kind: :out,
+          text: line
+        })
       end)
 
     {:noreply, socket}
@@ -97,6 +101,41 @@ defmodule AgentJidoWeb.Forge.ShowLive do
     end
   end
 
+  def handle_info({:terminal_exec_result, {output, exit_code}}, socket) do
+    socket =
+      output
+      |> String.split("\n", trim: true)
+      |> Enum.reduce(socket, fn line, acc ->
+        stream_insert(acc, :output, %{id: uniq_line_id(), kind: :out, text: line})
+      end)
+
+    socket =
+      if exit_code != 0 do
+        stream_insert(socket, :output, %{
+          id: uniq_line_id(),
+          kind: :err,
+          text: "[exit #{exit_code}]"
+        })
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:terminal_exec_result, {:applied, _command}}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:terminal_exec_result, {:error, reason}}, socket) do
+    {:noreply,
+     stream_insert(socket, :output, %{
+       id: uniq_line_id(),
+       kind: :err,
+       text: "[error] #{inspect(reason)}"
+     })}
+  end
+
   def handle_info(_msg, socket), do: {:noreply, socket}
 
   @impl true
@@ -130,6 +169,49 @@ defmodule AgentJidoWeb.Forge.ShowLive do
 
   def handle_event("update_input", %{"input" => input}, socket) do
     {:noreply, assign(socket, :input, input)}
+  end
+
+  def handle_event("terminal_run", %{"command" => command}, socket) do
+    command = String.trim(command)
+
+    if command == "" do
+      {:noreply, socket}
+    else
+      socket =
+        stream_insert(socket, :output, %{
+          id: uniq_line_id(),
+          kind: :cmd,
+          text: "$ " <> command
+        })
+
+      session_id = socket.assigns.session_id
+      lv_pid = self()
+      is_needs_input = socket.assigns.status.state == :needs_input
+
+      Task.start(fn ->
+        result =
+          if is_needs_input do
+            case Forge.apply_input(session_id, command) do
+              :ok -> {:applied, command}
+              error -> error
+            end
+          else
+            Forge.exec(session_id, command)
+          end
+
+        send(lv_pid, {:terminal_exec_result, result})
+      end)
+
+      socket =
+        if is_needs_input do
+          socket
+          |> assign(:input_prompt, nil)
+        else
+          socket
+        end
+
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -208,7 +290,14 @@ defmodule AgentJidoWeb.Forge.ShowLive do
 
           <div class="bg-base-300 rounded-lg overflow-hidden">
             <div class="px-4 py-2 bg-base-200 border-b border-base-100 flex justify-between items-center">
-              <span class="font-bold text-sm">Output</span>
+              <span class="font-bold text-sm">Terminal</span>
+              <span class="text-xs opacity-60">
+                <%= if @status.state == :needs_input do %>
+                  <span class="text-warning">awaiting input</span>
+                <% else %>
+                  ready
+                <% end %>
+              </span>
             </div>
             <div
               id="terminal"
@@ -216,8 +305,33 @@ defmodule AgentJidoWeb.Forge.ShowLive do
               phx-hook=".ForgeTerminal"
               class="h-96 overflow-y-auto p-4 font-mono text-sm bg-neutral text-neutral-content"
             >
-              <div :for={{id, line} <- @streams.output} id={id} class="whitespace-pre-wrap">
+              <div
+                :for={{id, line} <- @streams.output}
+                id={id}
+                class={[
+                  "whitespace-pre-wrap",
+                  line.kind == :cmd && "text-primary opacity-90",
+                  line.kind == :err && "text-error"
+                ]}
+              >
                 {line.text}
+              </div>
+            </div>
+            <div class="border-t border-base-100 bg-neutral text-neutral-content px-4 py-2">
+              <div class="flex items-center gap-2 font-mono text-sm">
+                <span class="opacity-70">$</span>
+                <input
+                  id="terminal-input"
+                  type="text"
+                  disabled={@status.state in [:stopped, :stopping]}
+                  phx-hook=".ForgeTerminalInput"
+                  class="w-full bg-transparent outline-none text-neutral-content placeholder-neutral-content/50"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder={
+                    if @status.state == :needs_input, do: @input_prompt || "enter response...", else: "type command..."
+                  }
+                />
               </div>
             </div>
           </div>
@@ -235,6 +349,49 @@ defmodule AgentJidoWeb.Forge.ShowLive do
               }
             }
           </script>
+
+          <script :type={Phoenix.LiveView.ColocatedHook} name=".ForgeTerminalInput">
+            export default {
+              mounted() {
+                this.history = []
+                this.idx = -1
+
+                this.el.addEventListener("keydown", (e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault()
+                    const cmd = this.el.value
+                    if (cmd.trim().length === 0) return
+
+                    this.pushEvent("terminal_run", { command: cmd })
+                    this.history.push(cmd)
+                    this.idx = this.history.length
+                    this.el.value = ""
+                  }
+
+                  if (e.key === "ArrowUp") {
+                    if (this.history.length === 0) return
+                    e.preventDefault()
+                    this.idx = Math.max(0, this.idx - 1)
+                    this.el.value = this.history[this.idx] || ""
+                    queueMicrotask(() => this.el.setSelectionRange(this.el.value.length, this.el.value.length))
+                  }
+
+                  if (e.key === "ArrowDown") {
+                    if (this.history.length === 0) return
+                    e.preventDefault()
+                    this.idx = Math.min(this.history.length, this.idx + 1)
+                    this.el.value = this.history[this.idx] || ""
+                    queueMicrotask(() => this.el.setSelectionRange(this.el.value.length, this.el.value.length))
+                  }
+
+                  if (e.key === "Escape") {
+                    this.el.value = ""
+                    this.idx = this.history.length
+                  }
+                })
+              }
+            }
+          </script>
         <% end %>
       </div>
     </Layouts.app>
@@ -243,6 +400,10 @@ defmodule AgentJidoWeb.Forge.ShowLive do
 
   defp schedule_refresh do
     Process.send_after(self(), :refresh, 5_000)
+  end
+
+  defp uniq_line_id do
+    "line-" <> Integer.to_string(System.unique_integer([:positive]))
   end
 
   defp format_time(nil), do: "—"
