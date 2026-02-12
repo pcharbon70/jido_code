@@ -2,11 +2,11 @@ import Config
 config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
-config :agent_jido, AgentJido.Repo,
+config :jido_code, JidoCode.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "agent_jido_dev",
+  database: "jido_code_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -17,7 +17,7 @@ config :agent_jido, AgentJido.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :agent_jido, AgentJidoWeb.Endpoint,
+config :jido_code, JidoCodeWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}],
@@ -26,8 +26,8 @@ config :agent_jido, AgentJidoWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "EhyC3sZ9xWoeOHM5EvgUdSpa/MLgrYU39T1WVQ3nEioHBm9wa/kTrLj62/Zz1Aek",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:agent_jido, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:agent_jido, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:jido_code, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:jido_code, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -54,7 +54,7 @@ config :agent_jido, AgentJidoWeb.Endpoint,
 # different ports.
 
 # Reload browser tabs when matching files change.
-config :agent_jido, AgentJidoWeb.Endpoint,
+config :jido_code, JidoCodeWeb.Endpoint,
   live_reload: [
     web_console_logger: true,
     patterns: [
@@ -63,13 +63,13 @@ config :agent_jido, AgentJidoWeb.Endpoint,
       # Gettext translations
       ~r"priv/gettext/.*\.po$",
       # Router, Controllers, LiveViews and LiveComponents
-      ~r"lib/agent_jido_web/router\.ex$",
-      ~r"lib/agent_jido_web/(controllers|live|components)/.*\.(ex|heex)$"
+      ~r"lib/jido_code_web/router\.ex$",
+      ~r"lib/jido_code_web/(controllers|live|components)/.*\.(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :agent_jido, dev_routes: true, token_signing_secret: "z6qnBdiiFJ1LqYrmIirMWGK3GwB+ltgL"
+config :jido_code, dev_routes: true, token_signing_secret: "z6qnBdiiFJ1LqYrmIirMWGK3GwB+ltgL"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

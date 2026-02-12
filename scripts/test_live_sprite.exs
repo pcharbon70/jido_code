@@ -8,8 +8,8 @@ if File.exists?(".env") do
   Dotenvy.source!(".env")
 end
 
-alias AgentJido.Forge.SpriteClient
-alias AgentJido.Forge.SpriteClient.Live
+alias JidoCode.Forge.SpriteClient
+alias JidoCode.Forge.SpriteClient.Live
 
 IO.puts("=" |> String.duplicate(60))
 IO.puts("Live Sprite Round-Trip Test")

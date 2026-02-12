@@ -1,12 +1,12 @@
-defmodule AgentJido.MixProject do
+defmodule JidoCode.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @source_url "https://github.com/agentjido/agent_jido"
+  @source_url "https://github.com/agentjido/jido_code"
 
   def project do
     [
-      app: :agent_jido,
+      app: :jido_code,
       version: @version,
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -25,7 +25,7 @@ defmodule AgentJido.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {AgentJido.Application, []},
+      mod: {JidoCode.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -130,6 +130,7 @@ defmodule AgentJido.MixProject do
       {:tidewave, "~> 0.5", only: [:dev]},
       {:mishka_chelekom, "~> 0.0", only: [:dev]},
       {:live_debugger, "~> 0.5", only: [:dev]},
+      {:rename_project, "~> 0.1.0", only: :dev},
 
       # Quality tools
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
@@ -158,10 +159,10 @@ defmodule AgentJido.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ash.setup --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind agent_jido", "esbuild agent_jido"],
+      "assets.build": ["compile", "tailwind jido_code", "esbuild jido_code"],
       "assets.deploy": [
-        "tailwind agent_jido --minify",
-        "esbuild agent_jido --minify",
+        "tailwind jido_code --minify",
+        "esbuild jido_code --minify",
         "phx.digest"
       ],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],

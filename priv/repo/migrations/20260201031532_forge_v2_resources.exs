@@ -1,4 +1,4 @@
-defmodule AgentJido.Repo.Migrations.ForgeV2Resources do
+defmodule JidoCode.Repo.Migrations.ForgeV2Resources do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 

@@ -82,22 +82,22 @@ config :spark,
     ]
   ]
 
-config :agent_jido,
-  ecto_repos: [AgentJido.Repo],
+config :jido_code,
+  ecto_repos: [JidoCode.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [AgentJido.Accounts, AgentJido.GitHub, AgentJido.Forge.Domain, AgentJido.Folio],
+  ash_domains: [JidoCode.Accounts, JidoCode.GitHub, JidoCode.Forge.Domain, JidoCode.Folio],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true],
   mailer: [from_name: "Agent Jido"]
 
 # Configure the endpoint
-config :agent_jido, AgentJidoWeb.Endpoint,
+config :jido_code, JidoCodeWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: AgentJidoWeb.ErrorHTML, json: AgentJidoWeb.ErrorJSON],
+    formats: [html: JidoCodeWeb.ErrorHTML, json: JidoCodeWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: AgentJido.PubSub,
+  pubsub_server: JidoCode.PubSub,
   live_view: [signing_salt: "W6lKwmK0"]
 
 # Configure the mailer
@@ -107,12 +107,12 @@ config :agent_jido, AgentJidoWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :agent_jido, AgentJido.Mailer, adapter: Swoosh.Adapters.Local
+config :jido_code, JidoCode.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
-  agent_jido: [
+  jido_code: [
     args:
       ~w(js/index.tsx js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=. --loader:.tsx=tsx),
     cd: Path.expand("../assets", __DIR__),
@@ -132,7 +132,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "4.1.12",
-  agent_jido: [
+  jido_code: [
     args: ~w(
       --input=assets/css/app.css
       --output=priv/static/assets/css/app.css

@@ -1,4 +1,4 @@
-defmodule AgentJido.Repo.Migrations.CreateGithubDomain do
+defmodule JidoCode.Repo.Migrations.CreateGithubDomain do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 

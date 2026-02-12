@@ -1,4 +1,4 @@
-defmodule AgentJido.Repo.Migrations.InitializeAndAddAuthenticationResourcesAndAddPasswordAuthenticationAndAddPasswordAuthAndAddMagicLinkAuthAndAddApiKeyAuth do
+defmodule JidoCode.Repo.Migrations.InitializeAndAddAuthenticationResourcesAndAddPasswordAuthenticationAndAddPasswordAuthAndAddMagicLinkAuthAndAddApiKeyAuth do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 

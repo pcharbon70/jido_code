@@ -5,7 +5,7 @@
 # This script verifies the GitHub Issue Bot works correctly,
 # running through triage and research phases.
 
-alias AgentJido.GithubIssueBot.CLI.Run
+alias JidoCode.GithubIssueBot.CLI.Run
 
 IO.puts("=" |> String.duplicate(60))
 IO.puts("GitHub Issue Bot - Verification Script")

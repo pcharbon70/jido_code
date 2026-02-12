@@ -12,15 +12,15 @@ import Config
 # If you use `mix release`, you need to explicitly enable the server
 # by passing the PHX_SERVER=true when you start it:
 #
-#     PHX_SERVER=true bin/agent_jido start
+#     PHX_SERVER=true bin/jido_code start
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
 if System.get_env("PHX_SERVER") do
-  config :agent_jido, AgentJidoWeb.Endpoint, server: true
+  config :jido_code, JidoCodeWeb.Endpoint, server: true
 end
 
-config :agent_jido, AgentJidoWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+config :jido_code, JidoCodeWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
 if config_env() == :prod do
   database_url =
@@ -32,7 +32,7 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
-  config :agent_jido, AgentJido.Repo,
+  config :jido_code, JidoCode.Repo,
     # ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
@@ -54,9 +54,9 @@ if config_env() == :prod do
 
   host = System.get_env("PHX_HOST") || "example.com"
 
-  config :agent_jido, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :jido_code, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
-  config :agent_jido, AgentJidoWeb.Endpoint,
+  config :jido_code, JidoCodeWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     check_origin: [
       "https://#{host}",
@@ -72,7 +72,7 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  config :agent_jido,
+  config :jido_code,
     token_signing_secret:
       System.get_env("TOKEN_SIGNING_SECRET") ||
         raise("Missing environment variable `TOKEN_SIGNING_SECRET`!")
@@ -82,7 +82,7 @@ if config_env() == :prod do
   # To get SSL working, you will need to add the `https` key
   # to your endpoint configuration:
   #
-  #     config :agent_jido, AgentJidoWeb.Endpoint,
+  #     config :jido_code, JidoCodeWeb.Endpoint,
   #       https: [
   #         ...,
   #         port: 443,
@@ -104,7 +104,7 @@ if config_env() == :prod do
   # We also recommend setting `force_ssl` in your config/prod.exs,
   # ensuring no data is ever sent via http, always redirecting to https:
   #
-  #     config :agent_jido, AgentJidoWeb.Endpoint,
+  #     config :jido_code, JidoCodeWeb.Endpoint,
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
@@ -113,7 +113,7 @@ if config_env() == :prod do
   #
   # Using Resend for email delivery in production.
   # Set RESEND_API_KEY and MAILER_FROM_EMAIL in your environment.
-  config :agent_jido, AgentJido.Mailer,
+  config :jido_code, JidoCode.Mailer,
     adapter: Swoosh.Adapters.Resend,
     api_key: System.get_env("RESEND_API_KEY"),
     from_email: System.get_env("MAILER_FROM_EMAIL", "noreply@example.com")

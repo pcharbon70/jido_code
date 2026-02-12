@@ -1,12 +1,12 @@
 # Jido Forge Overview
 
-Forge is a **parallel sandbox execution** subsystem within AgentJido. It provisions isolated **sprites** (containers/sandboxes), runs **pluggable runners** inside them in discrete **iterations**, and persists/broadcasts session lifecycle and output so UIs and services can observe and control execution.
+Forge is a **parallel sandbox execution** subsystem within JidoCode. It provisions isolated **sprites** (containers/sandboxes), runs **pluggable runners** inside them in discrete **iterations**, and persists/broadcasts session lifecycle and output so UIs and services can observe and control execution.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          AgentJido.Forge                                │
+│                          JidoCode.Forge                                │
 │                       (Public API Facade)                               │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  start_session/2 │ stop_session/2 │ exec/3 │ cmd/4 │ run_loop/2        │
@@ -39,7 +39,7 @@ Forge is a **parallel sandbox execution** subsystem within AgentJido. It provisi
 
 ## Core Modules
 
-### 1. `AgentJido.Forge` (Public API)
+### 1. `JidoCode.Forge` (Public API)
 
 The facade module exposing the primary interface:
 
@@ -59,7 +59,7 @@ The facade module exposing the primary interface:
 | `cancel/1` | Cancel running session |
 | `create_checkpoint/2` | Snapshot session state |
 
-### 2. `AgentJido.Forge.Manager`
+### 2. `JidoCode.Forge.Manager`
 
 Global lifecycle and concurrency management:
 
@@ -68,7 +68,7 @@ Global lifecycle and concurrency management:
 - Enforces concurrency limits (default: 50 total; per runner type limits)
 - Broadcasts global session events via PubSub
 
-### 3. `AgentJido.Forge.SpriteSession`
+### 3. `JidoCode.Forge.SpriteSession`
 
 Per-session GenServer runtime that:
 
@@ -81,7 +81,7 @@ Per-session GenServer runtime that:
 
 **Runtime States**: `:starting` → `:bootstrapping` → `:initializing` → `:ready` → `:running` ↔ `:needs_input`
 
-### 4. `AgentJido.Forge.SpriteClient`
+### 4. `JidoCode.Forge.SpriteClient`
 
 Abstraction layer for sprite operations:
 

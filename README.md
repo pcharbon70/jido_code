@@ -1,8 +1,8 @@
-# AgentJido
+# JidoCode
 
-[![CI](https://github.com/agentjido/agent_jido/actions/workflows/ci.yml/badge.svg)](https://github.com/agentjido/agent_jido/actions/workflows/ci.yml)
+[![CI](https://github.com/agentjido/jido_code/actions/workflows/ci.yml/badge.svg)](https://github.com/agentjido/jido_code/actions/workflows/ci.yml)
 
-AgentJido is a Phoenix 1.8 application for the Jido AI agent ecosystem.
+JidoCode is a Phoenix 1.8 application for the Jido AI agent ecosystem.
 
 ## Features
 
@@ -23,8 +23,8 @@ AgentJido is a Phoenix 1.8 application for the Jido AI agent ecosystem.
 
 ```bash
 # Clone the repository
-git clone https://github.com/agentjido/agent_jido.git
-cd agent_jido
+git clone https://github.com/agentjido/jido_code.git
+cd jido_code
 
 # Install dependencies and setup database
 mix setup
@@ -65,15 +65,15 @@ The `quality` alias runs:
 
 ```
 lib/
-├── agent_jido/              # Core business logic
+├── jido_code/              # Core business logic
 │   ├── accounts.ex          # User accounts domain
 │   ├── error.ex             # Centralized error handling
 │   └── repo.ex              # Database repository
-├── agent_jido_web/          # Web layer
+├── jido_code_web/          # Web layer
 │   ├── components/          # Reusable UI components
 │   ├── controllers/         # HTTP controllers
 │   └── live/                # LiveView modules
-└── agent_jido.ex            # Application entry
+└── jido_code.ex            # Application entry
 ```
 
 ## Documentation

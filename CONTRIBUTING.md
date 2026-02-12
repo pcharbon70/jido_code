@@ -1,13 +1,13 @@
-# Contributing to AgentJido
+# Contributing to JidoCode
 
-Thank you for your interest in contributing to AgentJido! This document provides guidelines for contributing.
+Thank you for your interest in contributing to JidoCode! This document provides guidelines for contributing.
 
 ## Development Setup
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/agentjido/agent_jido.git
-   cd agent_jido
+   git clone https://github.com/agentjido/jido_code.git
+   cd jido_code
    ```
 
 2. Install dependencies:

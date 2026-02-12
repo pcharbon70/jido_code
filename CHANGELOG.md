@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial Phoenix 1.8 application setup
 - Ash Framework integration with authentication
-- AgentJido.Error module with Splode for centralized error handling
+- JidoCode.Error module with Splode for centralized error handling
 - GitHub Actions CI/CD workflows
 - Quality tooling (Credo, Dialyxir, Doctor, ExCoveralls)
 
