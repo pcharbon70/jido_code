@@ -130,7 +130,6 @@ defmodule JidoCode.MixProject do
       {:tidewave, "~> 0.5", only: [:dev]},
       {:mishka_chelekom, "~> 0.0", only: [:dev]},
       {:live_debugger, "~> 0.5", only: [:dev]},
-      {:rename_project, "~> 0.1.0", only: :dev},
 
       # Quality tools
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
