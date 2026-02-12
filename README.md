@@ -1,198 +1,197 @@
-# Jido Code
+# Jido Code (alpha)
 
 [![CI](https://github.com/agentjido/jido_code/actions/workflows/ci.yml/badge.svg)](https://github.com/agentjido/jido_code/actions/workflows/ci.yml)
 
-**Jido Code** is an open-source, self-hosted coding orchestrator that turns AI coding agents into **managed, observable, composable development workflows**.
+Jido Code is an **Elixir/Phoenix + LiveView** application exploring a practical "AI coding orchestrator" built on the [Jido](https://github.com/agentjido/jido) agent runtime.
 
-Instead of chatting with a single AI tool in a terminal, Jido Code lets you define **durable, multi-step workflows** that orchestrate multiple agents — Claude Code, Ampcode, custom tools — running in isolated environments, with human approval gates, automatic git operations, and pull request creation.
+Today, the repo contains two substantial, working showcases:
 
-> **Status: Alpha / Early Development**
->
-> The Phoenix app compiles and runs, and several subsystems are functional:
-> - **Forge** (sandbox sessions, runners, streaming UI) is the most complete area
-> - A **GitHub Issue Bot** (multi-agent triage, research, PR coordination) demonstrates Jido orchestration patterns
->
-> Key MVP product features (onboarding wizard, workflow definitions/runs, git/PR automation) are not yet implemented.
-> See [`specs/current_status.md`](specs/current_status.md) for the full gap analysis.
+1. **Forge** — a production-quality OTP subsystem for running **isolated, observable execution sessions** (via [Sprites](https://fly.io) sandboxes or a local fake client) with pluggable runners, iteration control, persistence, and a real streaming terminal UI.
+
+2. **GitHub Issue Bot** — a real multi-agent system demonstrating Jido patterns (coordination, fan-out, signal routing) for issue triage, research, and PR planning — currently as agent code + a debug CLI runner, not yet wired into the web UI as a product feature.
+
+> **Status: alpha / developer-focused.** Several documents in [`./specs`](specs/) describe an intended product direction; this README is intentionally limited to what exists in the codebase today.
 
 ---
 
-## Why Jido Code
+## What Works Today
 
-| Chat-based tools | Jido Code |
-|------------------|-----------|
-| Single session, ephemeral | Durable workflows with checkpoints |
-| One agent at a time | Multi-agent orchestration with handoffs |
-| Manual git operations | Automated commit + PR |
-| No observability | Full execution timeline + cost tracking |
-| No composition | Workflow pipelines (Runic DAGs) |
-| No issue management | Built-in GitHub Issue Bot agents |
+### Forge: Sandbox Sessions with Streaming UI
 
-Jido Code is also the **flagship showcase** for the [Jido framework ecosystem](https://github.com/agentjido) — demonstrating how agents, actions, signals, and durable workflows compose into a real product.
+Forge is a parallel execution subsystem with proper OTP structure:
 
----
+- **Public API** (`JidoCode.Forge`): `start_session`, `stop_session`, `exec`, `cmd`, `run_loop`, `run_iteration`, `apply_input`, `resume`, `cancel`, `create_checkpoint`
+- **Lifecycle management** (`Forge.Manager`): `DynamicSupervisor` + `Registry`, concurrency limits (default 50 total, per-runner limits)
+- **Per-session runtime** (`Forge.SpriteSession`): GenServer handling provision → bootstrap → init runner → iterate → input → cleanup
+- **Runner behaviour** (`Forge.Runner`): iteration statuses `:continue`, `:done`, `:needs_input`, `:blocked`, `:error`
+- **Built-in runners**:
+  - `ClaudeCode` — complete Claude Code CLI runner with `--output-format stream-json` parsing
+  - `Shell` — shell command runner
+  - `Workflow` — data-driven step runner
+  - `Custom` — user-provided runner
+- **Sprite clients**: `Live` (real Sprites SDK) and `Fake` (dev/test)
+- **Persistence + observability**: Ash resources for session events, PubSub broadcasting on `forge:sessions` and `forge:session:<id>`
+- **LiveView UI**: session list, creation form, and a real terminal UI with streaming output, iteration controls, input prompts, and colocated JS hooks for scrolling + command history
 
-## What's in the Repo Today
+See [`FORGE_OVERVIEW.md`](FORGE_OVERVIEW.md) for the full architecture.
 
-### Forge — Sandbox Execution Engine ✅
-- Session lifecycle management with PubSub streaming
-- Multiple runners: **Shell**, **Claude Code**, **Workflow**, **Custom**
-- Sprite clients (Fake for dev, Live for [Fly Sprites](https://fly.io) sandboxes)
-- Full LiveView UI: session index, creation, and real-time output streaming
+### GitHub Issue Bot: Multi-Agent Jido Showcase
 
-### GitHub Issue Bot — Multi-Agent Orchestration ✅
-- CoordinatorAgent → TriageAgent → ResearchCoordinator (parallel workers) → PullRequestCoordinator
-- Demonstrates Jido signals, directives, and fan-out patterns
-- CLI runner for debugging
+Agent code implementing an issue lifecycle pipeline:
 
-### GitHub Domain 🟡
-- Ash resources for repos, webhook deliveries, and issue analyses
-- WebhookSensor that converts deliveries into Jido signals
+- `CoordinatorAgent` drives: `issue.start` → triage → research → PR
+- **Research fan-out**: `ResearchCoordinator` with 4 parallel workers (CodeSearch, PRSearch, Reproduction, RootCause)
+- **PR fan-out**: `PullRequestCoordinator` with 3 workers (Patch, Quality, PRSubmit)
+- Each worker has its own agent + action module
+- Uses Jido signal routing, fan-out coordination, and directive patterns
+- Includes a CLI runner for debugging
 
-### Web App Foundation ✅
-- Phoenix 1.8 + LiveView + Tailwind v4
-- Ash Framework domains (Accounts, GitHub, Forge, Folio)
-- AshAuthentication (password + magic link)
-- ~70 UI components (Mishka Chelekom)
-- JSON:API endpoints + Swagger UI
-- Dev tools: AshAdmin, LiveDashboard
+### GitHub Domain
 
----
+- `GitHub.Repo` (AshPostgres) with code interface for CRUD + enable/disable
+- `GitHub.WebhookDelivery` — persisted webhook payloads
+- `GitHub.IssueAnalysis` — persisted analyses
+- `GitHub.WebhookSensor` — polls pending deliveries and emits Jido signals (e.g. `github.issues.opened`)
 
-## Roadmap
+### Folio: GTD Task Manager Demo
 
-### Phase 1: MVP (v0.1) — *in progress*
-- Onboarding wizard (API keys, GitHub App, environment)
-- Import GitHub repos
-- Local environment support
-- 2 builtin workflows: "Implement Task" and "Fix Failing Tests"
-- Claude Code runner
-- Manual workflow trigger from UI
-- Commit + PR on completion
-- Basic admin password auth
+A separate demo domain showcasing `Jido.AI.ReActAgent`:
 
-### Phase 2: Orchestration (v0.2)
-- Sprite (cloud sandbox) environment support
-- Custom workflow authoring (code-first, Runic DAG)
-- Ampcode runner
-- Research → Design → Implement pipeline
-- GitHub Issue Bot integration
-- Webhook-triggered workflows
-- Execution cost tracking and budgets
+- `Folio.Project`, `InboxItem`, `Action` resources (ETS data layer)
+- `FolioAgent` — ReActAgent with ~15 tools, `model: :fast`, `max_iterations: 8`
+- `FolioLive` — chat-based GTD UI with agent state polling
 
-### Phase 3: Polish (v0.3)
-- Visual workflow builder UI
-- Workflow templates library
-- Scheduled workflows (cron-style)
-- Multi-repo workflows
-- Enhanced diff viewer and artifact browser
+### Web App + Auth
 
-Full specs live in [`/specs`](specs/).
+- Phoenix 1.8 + LiveView with AshAuthentication (password, magic link, API key)
+- Authenticated routes: `/forge/*`, `/folio`, `/settings`, `/dashboard`, `/demos/chat`
+- `SettingsLive` — tabbed UI managing GitHub repos via `AshPhoenix.Form`
+- ~90 Mishka Chelekom UI components + Tailwind v4
+- JSON:API endpoints + Swagger UI at `/api/json`
+- Health check at `GET /status`
 
 ---
 
-## Getting Started
+## What Is Not Implemented (Yet)
+
+- No onboarding wizard or first-run flow
+- No `SystemConfig`, credential resources, or centralized settings store
+- No Runic workflow engine integration
+- No git operations, branch/commit automation, or PR creation in the web product flow
+- GitHub Issue Bot is not wired end-to-end (webhooks → repo workspace → Forge → PR)
+- `.env.example` does not include several keys you'll need in practice (e.g. `ANTHROPIC_API_KEY`, `SPRITES_API_TOKEN`, GitHub App credentials)
+- Dashboard is a stub
+- Test coverage is sparse (9 test files, mostly Issue Bot + controller tests)
+
+See [`specs/current_status.md`](specs/current_status.md) for the detailed gap analysis.
+
+---
+
+## Product Vision
+
+The intended direction (documented in [`specs/`](specs/)):
+
+- **Onboarding wizard** — configure API keys, GitHub App, and environment on first run
+- **Project import** — clone repos to local workspaces or Sprite sandboxes
+- **Durable workflows** — Runic DAG-based pipelines (plan → implement → test → approve → ship)
+- **Human approval gates** — nothing ships without review
+- **Auto commit + PR** — branch, commit, push, and open PRs automatically
+- **Webhook-triggered agents** — automated issue triage and research
+- **Real-time observability** — execution timelines, cost tracking, artifact browsing
+
+---
+
+## Local Development
 
 ### Prerequisites
-
-- Elixir 1.18+
+- Elixir `~> 1.18`
 - PostgreSQL 14+
-- Node.js (for assets)
-- Optional: `claude` CLI (for Claude Code runner)
 
 ### Setup
-
 ```bash
 git clone https://github.com/agentjido/jido_code.git
 cd jido_code
 
-# Install dependencies and setup database
 mix setup
-
-# Start the Phoenix server
 mix phx.server
 ```
 
-Visit [localhost:4000](http://localhost:4000).
+Visit http://localhost:4000
 
 ### Environment Variables
 
-Copy `.env.example` and configure:
+`.env.example` currently includes:
+- `SECRET_KEY_BASE`, `PORT`, `PHX_HOST`, `CANONICAL_HOST`
+- `RESEND_API_KEY`, `MAILER_FROM_EMAIL`
 
+Depending on what you run, you may also need:
+- `ANTHROPIC_API_KEY` — for the Claude Code runner
+- `SPRITES_API_TOKEN` — for the live Sprites client
+- GitHub App credentials — not yet documented
+
+### Commands
 ```bash
-cp .env.example .env
+mix test                # Run tests
+mix quality             # Compile warnings + format + credo + doctor
+mix precommit           # Compile + format + test
+mix coveralls.html      # Coverage report
 ```
-
-Key variables:
-- `ANTHROPIC_API_KEY` — for Claude Code runner
-- `GITHUB_APP_*` — for GitHub App integration
-- `SPRITES_API_TOKEN` — for Fly Sprites sandbox execution
 
 ---
 
-## Development
-
-```bash
-# Run tests
-mix test
-
-# Run all quality checks (compile warnings, format, credo, doctor)
-mix quality
-
-# Pre-commit checks (compile, format, test)
-mix precommit
-
-# Test coverage report
-mix coveralls.html
-```
-
-### Project Structure
+## Architecture
 
 ```
 lib/
-├── jido_code/                # Core business logic
-│   ├── accounts/             # User auth (Ash resources)
-│   ├── forge/                # Sandbox execution engine
-│   │   ├── runners/          # Shell, ClaudeCode, Workflow, Custom
-│   │   └── sprite_client/    # Fake + Live Sprites clients
-│   ├── folio/                # Projects domain
-│   ├── github/               # GitHub integration (repos, webhooks)
-│   └── github_issue_bot/     # Multi-agent issue bot
-│       ├── agents/           # Coordinator, Triage, Research, PR
-│       └── actions/          # Composable bot actions
-├── jido_code_web/            # Web layer
-│   ├── components/           # UI component library
-│   ├── controllers/          # HTTP controllers
-│   └── live/                 # LiveView modules
-│       ├── forge/            # Session management UI
-│       └── demos/            # Demo LiveViews
-specs/                        # Design documents & PRD
+├── jido_code/                  # Core business logic
+│   ├── accounts/               # AshAuthentication (User, Token, ApiKey)
+│   ├── forge/                  # Sandbox execution engine
+│   │   ├── runners/            # Shell, ClaudeCode, Workflow, Custom
+│   │   ├── resources/          # Ash resources (Session, Event, Checkpoint, ...)
+│   │   ├── sprite_client/      # Fake + Live Sprites clients
+│   │   ├── manager.ex          # Lifecycle + concurrency GenServer
+│   │   ├── sprite_session.ex   # Per-session GenServer
+│   │   ├── operations.ex       # Resume, cancel, checkpoint orchestration
+│   │   └── pubsub.ex           # PubSub helpers
+│   ├── folio/                  # GTD task manager demo
+│   ├── github/                 # GitHub integration (Repo, Webhook, Sensor)
+│   └── github_issue_bot/       # Multi-agent issue bot
+│       ├── issue_run/          # Coordinator agent + actions
+│       ├── triage/             # Triage agent + action
+│       ├── research/           # Research coordinator + 4 workers
+│       └── pull_request/       # PR coordinator + 3 workers
+├── jido_code_web/              # Web layer
+│   ├── components/             # ~90 Mishka Chelekom UI components
+│   ├── live/                   # LiveView modules
+│   │   ├── forge/              # Session list, create, show (terminal UI)
+│   │   ├── demos/              # Chat demo
+│   │   ├── folio_live.ex       # GTD demo
+│   │   └── settings_live.ex    # Settings (GitHub repos)
+│   └── router.ex               # Routes + AshAuthentication
+specs/                          # PRD & design documents
 ```
 
----
-
-## Jido Ecosystem
-
-Jido Code builds on:
+### Jido Ecosystem Dependencies
 
 | Package | Role |
 |---------|------|
-| [`jido`](https://github.com/agentjido/jido) | Core agent runtime, strategies, signals |
+| [`jido`](https://github.com/agentjido/jido) | Agent runtime, strategies, signals |
 | [`jido_action`](https://github.com/agentjido/jido_action) | Composable action definitions |
 | [`jido_signal`](https://github.com/agentjido/jido_signal) | Agent communication envelopes |
 | [`jido_ai`](https://github.com/agentjido/jido_ai) | LLM integration (Anthropic, OpenAI) |
 | [`req_llm`](https://github.com/agentjido/req_llm) | HTTP LLM client |
 | [`ash`](https://ash-hq.org) | Data modeling, persistence |
-| [`ash_authentication`](https://github.com/team-alembic/ash_authentication) | Auth framework |
+| [`sprites`](https://fly.io) | Cloud sandbox containers |
 
 ---
 
 ## Documentation
 
-- [Specs & PRD](specs/README.md) — Full design documents
-- [Current Status & Gaps](specs/current_status.md) — What's built vs what's planned
-- [Contributing](CONTRIBUTING.md) — Contribution guidelines
-- [Changelog](CHANGELOG.md) — Version history
+- [`FORGE_OVERVIEW.md`](FORGE_OVERVIEW.md) — Forge architecture deep dive
+- [`specs/`](specs/) — Product specs and PRD
+- [`specs/current_status.md`](specs/current_status.md) — Verified gap analysis
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — Contribution guidelines
+- [`CHANGELOG.md`](CHANGELOG.md) — Version history
 
 ---
 

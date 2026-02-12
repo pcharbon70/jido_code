@@ -1,336 +1,317 @@
-# Current Status & Gap Analysis
+# Current Status (verified against codebase)
 
-> Snapshot date: 2026-02-11
+> Snapshot: 2026-02-11
 
-This document compares the **Jido Code vision and specs** against the **current repository state**. It is intended to be honest and actionable: what's real today, what's partially there, and what's not started.
-
----
-
-## TL;DR
-
-The app **runs** (Phoenix 1.8 + Ash) and has meaningful, functional subsystems:
-
-- **Forge** sandbox sessions + streaming UI is the strongest foundation
-- **GitHub Issue Bot** multi-agent orchestration exists with tests — a real showcase of Jido patterns
-- **GitHub webhooks → signals** pipeline works via a Jido sensor
-
-The MVP **product loop** — onboarding → import repo → pick workflow → run → approve → commit + PR — is **not implemented yet**. Several areas also conflict with the specs (auth model, secrets handling, naming conventions).
+This document is a **fact-checked snapshot** of what exists in the Jido Code repository today, compared against the PRD and specs. Verified facts only, no aspirational claims.
 
 ---
 
-## MVP Requirements Scorecard
+## Executive Summary
 
-### Legend
-- ✅ Built and functional
-- 🟡 Partially built or prototyped
-- ❌ Not started
-
-| # | Spec MVP Feature | Status | Evidence / Notes |
-|---|---|:---:|---|
-| 1 | First-run onboarding wizard | ❌ | No `/setup` route. No `SystemConfig` resource. No first-run redirect logic. |
-| 2 | Single-user, optional admin password | ❌ | Code uses AshAuthentication with registration + password reset + magic link. Spec calls for simple `Plug.BasicAuth` via env var. |
-| 3 | GitHub App integration (user-provided) | 🟡 | GitHub domain exists with Repo/WebhookDelivery resources. No GitHub App JWT/installation token flow. No App setup wizard. |
-| 4 | Project import (list repos → select → clone) | ❌ | No import flow. No cloning pipeline. No workspace management. |
-| 5 | Local environment support | 🟡 | Forge can execute commands. Local workspace/project abstraction per spec not implemented. |
-| 6 | Sprite sandbox support | 🟡 | Forge has Live Sprites client + session management. Not integrated with Projects/environments model. |
-| 7 | Claude Code runner | ✅ | Forge `ClaudeCode` runner works. UI to create and stream sessions exists. |
-| 8 | Manual workflow trigger from UI | 🟡 | Can manually create Forge sessions. "Workflow runs" (Runic-based) not present. |
-| 9 | 2 builtin workflows (Implement Task, Fix Tests) | ❌ | Only spec docs exist. No Runic integration. No workflow definitions/runs. |
-| 10 | Human approval gate | ❌ | No orchestration-level `awaiting_approval` state. Forge has `needs_input` but that's runner-level. |
-| 11 | Auto commit + branch + PR | ❌ | No git operations flow. No PR creation pipeline. |
-| 12 | Secrets management + redaction | ❌ | No redactor module. `GitHub.Repo.webhook_secret` stored in DB (conflicts with env-var-only spec). |
-| 13 | Dashboard | 🟡 | `DashboardLive` exists but is a 20-line stub. |
-| 14 | Test coverage | ❌ | 11 test files, mostly GitHub Issue Bot. Zero LiveView tests. Zero Ash resource tests. |
-
-**Score: 1 ✅ / 6 🟡 / 7 ❌**
+| Area | Status |
+|------|--------|
+| **Forge** (sandbox execution) | ✅ Production-quality OTP subsystem with streaming UI |
+| **GitHub Issue Bot** (agents) | ✅ Substantial multi-agent Jido showcase with tests |
+| **GitHub domain** (Ash resources) | 🟡 Resources + sensor exist; webhook_secret stored in DB |
+| **Folio** (GTD demo) | ✅ Working demo; **not** the "Projects" domain from specs |
+| **Auth** | 🟡 AshAuthentication works; differs from spec's BasicAuth model |
+| **Onboarding / setup wizard** | ❌ Not started |
+| **Runic workflows** | ❌ Not started |
+| **Git + PR automation** | ❌ Not started |
+| **Product loop** (import → run → approve → ship) | ❌ Not started |
 
 ---
 
-## What Exists Today (by Subsystem)
+## What Exists (by subsystem)
 
-### 1. Phoenix + Ash App Foundation ✅
+### 1. Forge — Sandbox Execution Engine ✅
 
-- Phoenix 1.8 + LiveView + Tailwind v4
-- 4 Ash domains configured: `Accounts`, `GitHub`, `Forge.Domain`, `Folio`
-- 15 Ash resources across domains
-- 5 Ecto migrations
-- JSON:API router (`/api/json/...`) with Swagger UI
-- Dev tooling: Credo, Dialyxir, Doctor, Coveralls, git hooks
-- Health endpoint: `GET /status` (spec says `/healthz` — naming mismatch)
+The most complete subsystem. 21 backend files + 3 LiveViews + architecture doc.
 
-### 2. Authentication 🟡 (misaligned with spec)
+**Backend modules:**
 
-**What's built:**
-- AshAuthentication with password + magic link strategies
-- Sign-in, register, reset, confirm routes
-- `User`, `Token`, `ApiKey` resources
-- Authenticated LiveView sessions for app pages
+| Module | Purpose |
+|--------|---------|
+| `JidoCode.Forge` | Public API facade |
+| `Forge.Manager` | Lifecycle GenServer; DynamicSupervisor + Registry; concurrency limits (50 total, per-runner) |
+| `Forge.SpriteSession` | Per-session GenServer: provision → bootstrap → init runner → iterate → input → cleanup |
+| `Forge.Runner` | Behaviour with callbacks: `init`, `run_iteration`, `apply_input`, `handle_output`, `terminate` |
+| `Forge.Runners.ClaudeCode` | Claude Code CLI runner; `--output-format stream-json` parsing; directory/template setup |
+| `Forge.Runners.Shell` | Shell command runner |
+| `Forge.Runners.Workflow` | Data-driven step runner (**not** Runic) |
+| `Forge.Runners.Custom` | User-provided runner |
+| `Forge.SpriteClient` | Behaviour abstraction |
+| `Forge.SpriteClient.Fake` | Dev/test fake client |
+| `Forge.SpriteClient.Live` | Real Sprites SDK client |
+| `Forge.Operations` | resume, cancel, checkpoint, complete, mark_failed orchestration |
+| `Forge.Persistence` | Records session events to Ash resources |
+| `Forge.PubSub` | `forge:sessions` and `forge:session:<id>` topics |
+| `Forge.Bootstrap` | Runs bootstrap steps in sprite |
+| `Forge.Domain` | Ash domain: Session, SpriteSpec, Workflow, ExecSession, Event, Checkpoint |
 
-**Gap vs spec:**
-- Spec requires single-user, optional admin password via `JIDO_CODE_ADMIN_PASSWORD` env var
-- Current code has full user registration, which the spec explicitly avoids
-- Homepage still shows "Agent Jido" branding with register link
-- This mismatch impacts onboarding, security model, and time-to-first-run
+**LiveView UI:**
 
-### 3. Forge — Sandbox Execution ✅ (strongest area)
+| View | Route | Description |
+|------|-------|-------------|
+| `Forge.IndexLive` | `/forge` | Session list |
+| `Forge.NewLive` | `/forge/new` | Session creation form |
+| `Forge.ShowLive` | `/forge/:session_id` | Terminal UI: streaming output, iteration controls, input prompts, colocated JS hooks |
 
-**What's built:**
-- Session lifecycle management + Ash persistence
-- PubSub streaming output → LiveView UI
-- 4 runners: `Shell`, `ClaudeCode`, `Workflow`, `Custom`
-- Sprite client abstraction (Fake for dev, Live for real sandboxes)
-- 3 LiveViews: Index (`/forge`), New (`/forge/new`), Show (`/forge/:session_id`)
-- Streaming worker for real-time output
+**API surface:**
+- `start_session/2`, `stop_session/2`, `exec/3`, `cmd/4`
+- `run_loop/2`, `run_iteration/2`, `apply_input/2`
+- `resume/1`, `cancel/1`, `create_checkpoint/2`
 
-**What it enables today:**
-- Create a Forge session from the UI
-- Select a runner and execute commands
-- View streaming output in real-time
-
-**Gap vs spec:**
-- Not connected to product-level concepts (Projects, Workspaces, Workflows)
+**Known limitations:**
+- Checkpoint/resume: sprite-level checkpointing is stubbed (generates placeholder IDs)
+- Not yet connected to product concepts (Projects, Workspaces, Workflows, Artifacts)
 - No secrets redaction on output streams
-- No artifact collection from sessions
-- No git operations post-session
-
-### 4. GitHub Domain 🟡
-
-**What's built:**
-- `GitHub.Repo` resource (owner, name, settings, webhook_secret)
-- `WebhookDelivery` persistence
-- `IssueAnalysis` persistence
-- `WebhookSensor`: polls pending deliveries → emits Jido signals (`github.issues.opened`, etc.)
-
-**Gap vs spec:**
-- No GitHub App auth flow (JWT → installation token caching)
-- No webhook HTTP endpoint in web layer (spec: `POST /api/github/webhooks`)
-- `webhook_secret` stored in DB — spec says secrets stay in env vars only
-- No repo import/clone pipeline
-
-### 5. GitHub Issue Bot ✅ (strong orchestration example)
-
-**What's built (24 files):**
-- `CoordinatorAgent` — orchestrates the full issue lifecycle
-- `TriageAgent` — classifies and prioritizes issues
-- `ResearchCoordinator` — fan-out to 4 parallel research workers
-- `PullRequestCoordinator` — patch generation, quality check, submission
-- CLI runner for debugging
-- Most of the repo's test coverage lives here
-
-**How it fits the vision:**
-- Best current showcase of Jido agents, signals, fan-out workers, and directives
-- Not yet wired into web UI or the workflow run model
-- Could map into a "Support Agent Config" or builtin workflow in future
-
-### 6. Folio Domain 🟡
-
-**What's built:**
-- `Project`, `InboxItem`, `Action` Ash resources
-- `FolioLive` — 655-line LiveView (substantial prototyping)
-
-**Gap vs spec:**
-- Spec "Projects" domain focuses on GitHub repos + environments + workspaces
-- Folio appears to be an older/different project management concept
-- Needs alignment: either map into the spec's Project model or deprecate
-
-### 7. UI Components & Design System ✅
-
-**What's built:**
-- ~70 Mishka Chelekom components (accordion, alert, avatar, badge, banner, button, card, carousel, chat, combobox, drawer, dropdown, modal, navbar, pagination, sidebar, stepper, tabs, timeline, toast, tooltip, etc.)
-- Tailwind v4 setup with custom CSS
-- Core components (`core_components.ex`)
-- Layouts with sidebar navigation
-
-**Gap vs spec:**
-- MVP pages don't exist yet (setup wizard, projects list/detail, workflow library, run detail with timeline)
-- Components are available but unclear how many are actually used in current views
-
-### 8. LiveViews & Routes
-
-**Current LiveViews (8):**
-
-| LiveView | Route | Status |
-|----------|-------|--------|
-| `HomeLive` | `/` | Public landing page |
-| `DashboardLive` | `/dashboard` | 20-line stub |
-| `SettingsLive` | `/settings/:tab` | Functional (309 lines) |
-| `FolioLive` | `/folio` | Prototyped (655 lines) |
-| `Forge.IndexLive` | `/forge` | Functional (272 lines) |
-| `Forge.NewLive` | `/forge/new` | Functional (168 lines) |
-| `Forge.ShowLive` | `/forge/:session_id` | Functional (437 lines) |
-| `Demos.ChatLive` | `/demos/chat` | Demo (684 lines) |
-
-**Missing from specs:**
-- `/setup` — Onboarding wizard (7 steps)
-- `/projects` — Projects list
-- `/projects/:id` — Project detail with runs
-- `/projects/:id/runs/:run_id` — Run detail with timeline, output, approval gates
-- `/workflows` — Workflow definitions library
-- `/agents` — Support agent configs
-
-### 9. Supervision Tree
-
-```
-JidoCode.Application
-├── Telemetry
-├── Repo (PostgreSQL)
-├── DNSCluster
-├── PubSub
-├── Jido (agent runtime)
-├── Endpoint
-├── AshAuthentication.Supervisor
-├── Registry (SessionRegistry)
-├── DynamicSupervisor (SpriteSupervisor)
-├── DynamicSupervisor (ExecSessionSupervisor)
-├── Forge.Manager
-└── [dev] Forge.SpriteClient.Fake
-```
 
 ---
 
-## Critical Alignment Issues
+### 2. GitHub Issue Bot — Multi-Agent Showcase ✅
 
-These are places where **current code actively conflicts with specs** (not just "not built yet").
+24 files implementing a complete issue lifecycle pipeline.
 
-### A. Auth Model Mismatch ⚠️ HIGH
+**Agent architecture:**
+```
+CoordinatorAgent
+  │
+  ├── TriageAgent + TriageAction
+  │
+  ├── ResearchCoordinator
+  │     ├── CodeSearchAgent + CodeSearchAction
+  │     ├── PRSearchAgent + PRSearchAction
+  │     ├── ReproductionAgent + ReproductionAction
+  │     └── RootCauseAgent + RootCauseAction
+  │
+  └── PullRequestCoordinator
+        ├── PatchAgent + PatchAction
+        ├── QualityAgent + QualityAction
+        └── PRSubmitAgent + PRSubmitAction
+```
 
-| | Spec | Code |
-|---|---|---|
-| Strategy | Optional BasicAuth via env var | AshAuthentication (password + magic link + registration) |
-| Users | Single user, no registration | Multi-user with `/register` |
-| Impact | Onboarding, security model, UX complexity |
+**Patterns demonstrated:**
+- Jido agents with `signal_routes`
+- Fan-out parallel workers
+- Coordinator → worker delegation
+- Signal-based communication
 
-**Decision needed:** Simplify to spec's model, or update specs to accept AshAuthentication.
+**Test coverage:** 3 test files (coordinator, research coordinator, PR coordinator)
 
-### B. Secrets Strategy Mismatch ⚠️ HIGH
-
-| | Spec | Code |
-|---|---|---|
-| Storage | Env vars only; DB stores metadata | `GitHub.Repo.webhook_secret` persisted in Postgres |
-| Redaction | Centralized Redactor module | No redaction anywhere |
-| Impact | Security posture, OSS trust |
-
-### C. Naming & Branding Drift ⚠️ MEDIUM
-
-- Homepage renders "Agent Jido" — should be "Jido Code"
-- Health endpoint is `/status` — spec says `/healthz`
-- Sprites token env var is `SPRITES_TOKEN` — spec says `SPRITES_API_TOKEN`
-- Some internal references may still use `AgentJido` namespace
-
-### D. Folio vs Projects Domain ⚠️ MEDIUM
-
-- Spec defines a `Projects` domain with GitHub-repo-centric model
-- Code has a `Folio` domain with different semantics (InboxItem, Action)
-- These need to be reconciled
+**Not integrated:** The bot is agent code only. No UI wiring, no end-to-end webhook → workspace → Forge → PR pipeline.
 
 ---
 
-## What's Not Started (by Spec Area)
+### 3. GitHub Domain 🟡
 
-### Onboarding Subsystem (specs 11, 20)
-- [ ] `SystemConfig` resource (singleton, tracks setup completion)
+4 files with Ash resources and a Jido sensor.
+
+| Resource | Data Layer | Purpose |
+|----------|-----------|---------|
+| `GitHub.Repo` | AshPostgres | Repo tracking with owner/name/full_name/enabled/settings |
+| `GitHub.WebhookDelivery` | AshPostgres | Persisted webhook payloads |
+| `GitHub.IssueAnalysis` | AshPostgres | Persisted issue analyses |
+| `GitHub.WebhookSensor` | — | Polls pending deliveries, emits Jido signals |
+
+**`GitHub.Repo` code interface:** `create`, `read`, `get_by_id`, `get_by_full_name`, `update`, `disable`, `enable`, `list_enabled`
+
+**⚠️ `webhook_secret` is stored in the database** (marked `sensitive?` but persisted). The spec says secrets should stay in env vars only.
+
+---
+
+### 4. Folio — GTD Task Manager Demo ✅
+
+**Important:** This is a **GTD (Getting Things Done) task manager**, not the "Projects" domain described in the specs.
+
+| Resource | Data Layer | Purpose |
+|----------|-----------|---------|
+| `Folio.Project` | **ETS** (not Postgres) | GTD multi-step outcomes (active/someday/done/dropped) |
+| `Folio.InboxItem` | ETS | GTD inbox items |
+| `Folio.Action` | ETS | GTD next actions |
+
+**Agent:** `Folio.FolioAgent` — `Jido.AI.ReActAgent` with ~15 tools, `model: :fast`, `max_iterations: 8`
+
+**UI:** `FolioLive` — 655-line chat-based GTD interface with agent state polling
+
+---
+
+### 5. Accounts / Authentication 🟡
+
+| Resource | Purpose |
+|----------|---------|
+| `Accounts.User` | AshAuthentication: password + magic link + API key strategies |
+| `Accounts.Token` | Auth tokens |
+| `Accounts.ApiKey` | API key management |
+
+Plus 3 email senders (confirmation, magic link, password reset).
+
+**⚠️ Mismatch vs specs:** The PRD describes "single-user, optional admin password via env var, no registration." The codebase has full AshAuthentication with registration, sign-in, password reset, magic link, and API keys.
+
+---
+
+### 6. Web Layer
+
+**Verified routes:**
+
+| Route | View | Status |
+|-------|------|--------|
+| `/` | `HomeLive` | Shows "Agent Jido" branding; redirects to `/dashboard` if logged in |
+| `/dashboard` | `DashboardLive` | **20-line stub** |
+| `/settings/:tab?` | `SettingsLive` | GitHub tab manages repos via AshPhoenix.Form; Agents + Account tabs are "coming soon" stubs |
+| `/forge` | `Forge.IndexLive` | Session list |
+| `/forge/new` | `Forge.NewLive` | Session creation |
+| `/forge/:session_id` | `Forge.ShowLive` | Terminal UI |
+| `/folio` | `FolioLive` | GTD demo |
+| `/demos/chat` | `Demos.ChatLive` | Chat demo (684 lines) |
+| `/api/json/*` | AshJsonApi + SwaggerUI | JSON:API endpoints |
+| `/status` | HeartbeatPlug | Health check |
+| `/dev/dashboard` | LiveDashboard | Dev only |
+| `/admin` | AshAdmin | Dev only |
+
+**Auth routes:** `/sign-in`, `/register`, `/reset`, `/auth/*`, `/sign-out`, magic link, confirm
+
+**UI components:** ~90 Mishka Chelekom components installed
+
+---
+
+### 7. Infrastructure
+
+- `JidoCode.Jido` — Jido runtime instance (`use Jido, otp_app: :jido_code`)
+- Supervision tree: Telemetry, Repo, PubSub, Jido, Endpoint, AshAuth, Registry, 2× DynamicSupervisor, Forge.Manager, Fake sprite client (dev)
+- `JidoCode.Secrets` — handles only AshAuthentication token signing secret
+
+---
+
+### 8. Tests & Migrations
+
+**Tests (9 files):**
+- `coordinator_test.exs` — Issue Bot coordinator
+- `research_coordinator_test.exs` — Issue Bot research
+- `pull_request_coordinator_test.exs` — Issue Bot PR
+- `sprite_integration_test.exs` — Forge sprite
+- `error_html_test.exs`, `error_json_test.exs`, `page_controller_test.exs` — controllers
+- `chat_live_test.exs` — chat demo
+
+**No tests for:** Forge LiveViews, FolioLive, SettingsLive, DashboardLive, any Ash resources, Accounts domain.
+
+**Migrations (5):**
+1. Auth resources init
+2. Auth strategies (password, magic link, API key)
+3. GitHub domain
+4. Forge resources
+5. Forge v2 resources
+
+---
+
+## Gap Analysis vs PRD/Spec Requirements
+
+| Requirement | Spec Says | Code Has | Gap |
+|---|---|---|---|
+| **R1: Single-user auth** | Optional admin password via env var; no registration | AshAuthentication with registration + password + magic link + API key | Auth model mismatch |
+| **R2: Onboarding wizard** | 7-step first-run wizard; SystemConfig resource | Nothing | Not started |
+| **R3: GitHub App integration** | User-created App; env-var secrets; no secrets in DB | GitHub.Repo with webhook_secret in DB; no App JWT/token flow | Partial; secrets strategy mismatch |
+| **R4: Project import + environments** | Clone repos; uniform Workspace interface | Forge runs commands in sprites; no repo import/clone flow | Not started |
+| **R5: Durable workflows (Runic)** | Runic DAG workflows; WorkflowDefinition/Run/Artifact resources | No Runic integration; Forge.Runners.Workflow is data-driven steps, not Runic | Not started |
+| **R6: AI agent orchestration** | Workflows orchestrate agents; Claude Code runner for MVP | Claude Code runner in Forge ✅; Issue Bot agents exist but not UI-driven | Partial |
+| **R7: Commit + PR automation** | Auto branch, commit, push, open PR | Nothing in the web app | Not started |
+| **R8: Support agents (webhooks)** | Webhooks trigger Issue Bot | WebhookSensor emits signals; Issue Bot exists; no end-to-end wiring | Partial |
+| **R9: Real-time observability** | Streaming output in UI | Forge UI streams output via PubSub ✅ | Met (for Forge) |
+| **R10: OSS showcase** | Demonstrate idiomatic Jido patterns | Forge + Issue Bot are strong showcases ✅ | Met |
+| **R11: Dual deployment** | Fly + local via env vars | Standard Phoenix app; .env.example is incomplete | Partial |
+
+---
+
+## Specific Mismatches That Need Decisions
+
+### A. Auth Model ⚠️
+- **Spec:** `Plug.BasicAuth` gated by `JIDO_CODE_ADMIN_PASSWORD` env var. No user registration.
+- **Code:** Full AshAuthentication with `/register`, `/sign-in`, `/reset`, magic link, API keys.
+- **Decision needed:** Simplify to spec model, or update specs to accept AshAuthentication.
+
+### B. Secrets Strategy ⚠️
+- **Spec:** Secrets in env vars only. DB stores metadata. Centralized Redactor module.
+- **Code:** `GitHub.Repo.webhook_secret` persisted in Postgres. No redaction anywhere.
+- **Decision needed:** Migrate to env-var-only, or accept DB storage with encryption (AshCloak is in deps).
+
+### C. Folio vs Projects ⚠️
+- **Spec:** "Project" = a GitHub repository imported into Jido Code with workspace, environment, and workflow runs.
+- **Code:** `Folio.Project` = a GTD multi-step outcome on ETS. Completely different concept.
+- **Decision needed:** Build the spec's Projects domain separately, or evolve Folio.
+
+### D. Naming / Branding
+- Homepage renders "Agent Jido" — specs say "Jido Code"
+- Health endpoint is `/status` — specs say `/healthz`
+- `.env.example` doesn't document most required env vars
+
+---
+
+## Not Started (by spec area)
+
+### Onboarding (specs 11, 20)
+- [ ] `SystemConfig` resource (singleton, tracks setup state)
 - [ ] `Credential` resource (env var metadata, no secret values)
 - [ ] `GithubAppInstallation` resource
-- [ ] `/setup` LiveView wizard (7 steps)
-- [ ] First-run detection + redirect middleware
+- [ ] `/setup` LiveView wizard
+- [ ] First-run detection + redirect
 
-### Orchestration Subsystem (specs 30, 31, 32)
+### Orchestration (specs 30, 31, 32)
 - [ ] `WorkflowDefinition` resource
-- [ ] `WorkflowRun` resource (with status lifecycle)
-- [ ] `Artifact` resource (9 types)
+- [ ] `WorkflowRun` resource
+- [ ] `Artifact` resource
 - [ ] `PullRequest` resource
 - [ ] Runic DAG integration
-- [ ] Builtin workflow registration at startup
-- [ ] "Implement Task" workflow template
-- [ ] "Fix Failing Tests" workflow template
-- [ ] Approval gate UI + state machine
+- [ ] "Implement Task" builtin workflow
+- [ ] "Fix Failing Tests" builtin workflow
+- [ ] Approval gate UI
 
-### Project Import & Workspaces (specs 40, 50)
+### Project Import + Workspaces (specs 40, 50)
 - [ ] Repo list/import flow (GitHub API)
-- [ ] Clone pipeline (git clone → workspace setup)
-- [ ] Workspace behaviour (9 callbacks)
+- [ ] Clone pipeline
+- [ ] Workspace behaviour (9 callbacks per spec)
 - [ ] Local workspace implementation
 - [ ] Sprite workspace implementation
-- [ ] Per-run setup (sync, clean, branch, secrets, bootstrap)
 
-### Git & PR Automation (spec 51)
-- [ ] Branch creation (`jido-code/<workflow>/<short-id>`)
-- [ ] Commit with conventional message format
+### Git + PR Automation (spec 51)
+- [ ] Branch creation
+- [ ] Conventional commits
 - [ ] Push to remote
 - [ ] PR creation via GitHub API
-- [ ] PR body template with metadata
-- [ ] 10 safety checks (secret scan, diff size, force push protection)
-- [ ] Dry-run mode
+- [ ] Safety checks (secret scan, diff size limits)
 
-### Secrets & Redaction (spec 60)
+### Secrets + Redaction (spec 60)
 - [ ] `Redactor` module with regex patterns
-- [ ] Apply to: logging, PubSub streams, artifacts, prompts, UI
-- [ ] Migrate existing DB-stored secrets to env-var-only model
+- [ ] Apply to: logging, PubSub, artifacts, prompts, UI
+- [ ] Migrate webhook_secret out of DB
 
 ---
 
-## Gap Closure Plan (Suggested Sequence)
+## Suggested Closure Sequence
 
-Effort sizing: **S** = days, **M** = 1-2 weeks, **L** = 2-4 weeks
-
-| # | Work Item | Size | Dependencies | Notes |
-|---|-----------|:---:|---|---|
-| 1 | **Decide auth direction** | S | — | Align code to spec (BasicAuth) or update spec to accept AshAuth. Blocks onboarding. |
-| 2 | **Add SystemConfig + setup gating** | M | #1 | Singleton resource, first-run redirect to `/setup`. |
-| 3 | **Build onboarding wizard** | M | #2 | 7-step LiveView. Can start with detection-only (read env vars, show status). |
-| 4 | **Add Orchestration domain skeleton** | M | — | WorkflowDefinition, WorkflowRun, Artifact, PullRequest resources. No execution yet. |
-| 5 | **Build workflow run UI** | M | #4 | Run detail page with timeline, output stream (reuse Forge streaming). |
-| 6 | **Wire manual run → Forge** | M | #4, #5 | Create WorkflowRun → start Forge session → stream output → collect artifacts. |
-| 7 | **Add secrets redaction** | M | — | Centralized Redactor. Apply to Forge output streaming + artifacts. Fix DB secret storage. |
-| 8 | **Implement git + PR automation** | L | #6 | Shell git steps (branch, commit, push). GitHub API PR creation. Safety checks. |
-| 9 | **Build "Implement Task" workflow** | M | #6, #8 | First builtin: plan → implement → test → approve → commit + PR. |
-| 10 | **Build "Fix Failing Tests" workflow** | M | #9 | Second builtin: reproduce → diagnose → fix → verify → approve → commit + PR. |
-| 11 | **Align naming + branding** | S | — | Homepage, health endpoint, env var names, any remaining `AgentJido` references. |
-| 12 | **Test coverage push** | M | #1-#10 | LiveView tests, Ash resource tests, workflow integration tests. |
+| # | Work Item | Depends On | Notes |
+|---|-----------|:---:|---|
+| 1 | Decide auth direction | — | Align code to spec (BasicAuth) or update spec. Blocks onboarding. |
+| 2 | Decide secrets strategy | — | Env-var-only per spec, or AshCloak encryption. Blocks GitHub + redaction. |
+| 3 | Decide Folio fate | — | Keep as demo? Evolve into Projects? Build Projects separately? |
+| 4 | Fix branding + naming | — | Homepage text, health endpoint, .env.example |
+| 5 | Build SystemConfig + setup gating | #1 | Singleton resource + redirect to `/setup` |
+| 6 | Build onboarding wizard | #5 | LiveView wizard; can start with env var detection |
+| 7 | Add Orchestration domain skeleton | — | WorkflowDefinition, WorkflowRun, Artifact, PullRequest as Ash resources |
+| 8 | Wire manual run → Forge | #7 | WorkflowRun creates a Forge session → streams output |
+| 9 | Add secrets redaction | #2 | Centralized Redactor on Forge output + artifacts |
+| 10 | Implement git + PR automation | #8 | Shell git steps + GitHub API PR creation |
+| 11 | Build "Implement Task" workflow | #8, #10 | First builtin: plan → implement → test → approve → ship |
+| 12 | Expand test coverage | — | LiveView tests, Ash resource tests, integration tests |
 
 ---
 
-## Appendix: Current Route Map
+## Appendix: Strong Building Blocks
 
-```
-Public
-  GET  /                    → HomeLive
-  *    /auth/*               → AuthController (AshAuthentication)
-  GET  /sign-in              → AuthController
-  GET  /register             → AuthController
-  GET  /reset                → AuthController
+These existing subsystems are ready to build on:
 
-Authenticated (AshAuthentication session)
-  GET  /dashboard            → DashboardLive (stub)
-  GET  /settings/:tab?       → SettingsLive
-  GET  /forge                → Forge.IndexLive
-  GET  /forge/new            → Forge.NewLive
-  GET  /forge/:session_id    → Forge.ShowLive
-  GET  /folio                → FolioLive
-  GET  /demos/chat           → Demos.ChatLive
-
-API
-  *    /api/json/*            → AshJsonApi + SwaggerUI
-  POST /rpc/run              → AshTypescriptRpcController
-  POST /rpc/validate         → AshTypescriptRpcController
-
-Infrastructure
-  GET  /status               → HeartbeatPlug
-
-Dev-only
-  GET  /dev/dashboard        → Phoenix.LiveDashboard
-  GET  /dev/mailbox           → Swoosh mailbox
-  GET  /admin                → AshAdmin
-```
-
----
-
-## Appendix: Strong Building Blocks (Reusable)
-
-These existing subsystems provide a solid foundation for MVP completion:
-
-1. **Forge session lifecycle + PubSub streaming** → reusable for workflow run output, artifact collection, and future durable execution
-2. **GitHub Issue Bot agents** → showcase of Jido patterns (signals, directives, fan-out). Maps to future "support agent configs" or builtin workflows
-3. **Mishka Chelekom UI components** → ready for new pages (wizard, project list, run detail, workflow library)
-4. **Ash Framework foundation** → adding new resources/domains follows established patterns
-5. **Sprites SDK integration** → sandbox execution already works; needs wiring to project/workspace model
+1. **Forge** — session lifecycle, PubSub streaming, and persistence provide the execution substrate for workflow runs
+2. **GitHub Issue Bot** — demonstrates the full agent coordination pattern; can be wired into Forge sessions and support agent configs
+3. **Mishka Chelekom components** — ~90 components ready for new pages (wizard, project list, run detail)
+4. **Ash Framework foundation** — adding new domains/resources follows established patterns
+5. **Sprites SDK integration** — sandbox execution works; needs connection to project/workspace abstractions
+6. **Jido runtime** — `JidoCode.Jido` instance is running in the supervision tree, ready for agents
