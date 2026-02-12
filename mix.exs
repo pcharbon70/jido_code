@@ -108,7 +108,11 @@ defmodule JidoCode.MixProject do
       {:jido, "~> 2.0.0-rc"},
       {:jido_action, "~> 2.0.0-rc", override: true},
       {:jido_signal, "~> 2.0.0-rc"},
-      {:jido_ai, github: "agentjido/jido_ai", branch: "main"},
+      {:jido_ai, github: "agentjido/jido_ai", branch: "main", override: true},
+      {:jido_runic, github: "agentjido/jido_runic", branch: "main"},
+      {:libgraph, github: "zblanco/libgraph", branch: "zw/multigraph-indexes", override: true},
+      {:jido_studio, github: "agentjido/jido_studio", branch: "main"},
+      {:jido_messaging, github: "agentjido/jido_messaging", branch: "main"},
       {:req_llm, "~> 1.4", override: true},
       {:timex, "~> 3.7", override: true},
       {:gettext, "~> 0.26", override: true},
@@ -125,11 +129,12 @@ defmodule JidoCode.MixProject do
       # Development & testing
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
-      {:lazy_html, ">= 0.1.0", only: :test},
+      {:lazy_html, ">= 0.1.0"},
       {:usage_rules, "~> 1.0", only: [:dev]},
       {:tidewave, "~> 0.5", only: [:dev]},
       {:mishka_chelekom, "~> 0.0", only: [:dev]},
-      {:live_debugger, "~> 0.5", only: [:dev]},
+      # TODO: re-enable once startup perf is fixed (v0.6.0 adds ~28s to boot)
+      # {:live_debugger, "~> 0.5", only: [:dev]},
 
       # Quality tools
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

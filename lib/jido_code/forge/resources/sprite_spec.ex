@@ -7,6 +7,8 @@ defmodule JidoCode.Forge.Resources.SpriteSpec do
   postgres do
     table "forge_sprite_specs"
     repo JidoCode.Repo
+
+    migration_defaults timeouts: "nil"
   end
 
   actions do

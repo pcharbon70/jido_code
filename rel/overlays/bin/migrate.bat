@@ -1,1 +1,1 @@
-call "%~dp0\agent_jido" eval AgentJido.Release.migrate
+call "%~dp0\jido_code" eval JidoCode.Release.migrate

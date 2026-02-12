@@ -5,7 +5,7 @@
 @import "../vendor/mishka_chelekom.css";
 @source "../css";
 @source "../js";
-@source "../../lib/agent_jido_web";
+@source "../../lib/jido_code_web";
 @source "../../deps/live_toast/lib";
 
 /* A Tailwind plugin that makes "hero-#{ICON}" classes available.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Forge is the execution engine that powers Jido Code's agent runs. It provisions isolated environments (local or sprite), runs coding agents in iteration loops, streams output in real-time, and manages session lifecycle. The existing Forge subsystem is carried forward from `agent_jido` with namespace updates.
+Forge is the execution engine that powers Jido Code's agent runs. It provisions isolated environments (local or sprite), runs coding agents in iteration loops, streams output in real-time, and manages session lifecycle.
 
 ## How Workflows Use Forge
 
@@ -21,17 +21,18 @@ Workflow Step (Runic ActionNode)
 
 ## Session-to-Workflow Mapping
 
-| Workflow Concept | Forge Concept |
-|------------------|---------------|
-| Workflow Run | May create 1+ Forge Sessions |
-| Workflow Step (coding) | 1 Forge Session with ClaudeCode/Ampcode runner |
-| Workflow Step (test/shell) | 1 Forge Session with Shell runner |
-| Workflow Step (LLM-only) | No Forge Session (direct `jido_ai` call) |
-| Workflow Step (approval) | No Forge Session (signal-based) |
+| Workflow Concept           | Forge Concept                                  |
+| -------------------------- | ---------------------------------------------- |
+| Workflow Run               | May create 1+ Forge Sessions                   |
+| Workflow Step (coding)     | 1 Forge Session with ClaudeCode/Ampcode runner |
+| Workflow Step (test/shell) | 1 Forge Session with Shell runner              |
+| Workflow Step (LLM-only)   | No Forge Session (direct `jido_ai` call)       |
+| Workflow Step (approval)   | No Forge Session (signal-based)                |
 
 ## Runner Configuration per Workflow Step
 
 ### Claude Code Runner
+
 ```elixir
 %{
   runner: :claude_code,
@@ -55,6 +56,7 @@ Workflow Step (Runic ActionNode)
 ```
 
 ### Shell Runner
+
 ```elixir
 %{
   runner: :shell,
@@ -68,6 +70,7 @@ Workflow Step (Runic ActionNode)
 ```
 
 ### Ampcode Runner (Phase 2)
+
 ```elixir
 %{
   runner: :ampcode,
@@ -91,6 +94,7 @@ forge:session:<session_id>  →  {:output, %{text: "...", exit_code: nil}}
 ```
 
 The `RunDetail` LiveView subscribes to:
+
 1. `jido_code:run:<run_id>` — workflow-level events (step transitions)
 2. `forge:session:<session_id>` — active session output (changes as steps progress)
 
@@ -99,24 +103,28 @@ When the active step changes, the LiveView unsubscribes from the old session and
 ## Session Lifecycle in Workflow Context
 
 ### 1. Step Starts
+
 - Workflow engine reaches a coding/shell step
 - `JidoCode.Forge.start_session/2` called with step config
 - Session provisions workspace (or reuses existing for local)
 - Session runs bootstrap commands
 
 ### 2. Execution
+
 - Runner executes iterations
 - For `claude_code`: single long iteration (until Claude finishes or hits max_turns)
 - For `shell`: single iteration (command runs to completion)
 - Output streamed to PubSub
 
 ### 3. Step Completes
+
 - Session returns result to workflow engine
 - Result is stored as a Runic fact
 - Artifacts extracted (diff, logs, cost data)
 - Session may be kept alive (for subsequent steps in same workspace) or stopped
 
 ### 4. Cleanup
+
 - On workflow completion/failure: all associated sessions are stopped
 - Sprite sessions destroy their containers
 - Local sessions leave workspace in place
@@ -125,45 +133,47 @@ When the active step changes, the LiveView unsubscribes from the old session and
 
 Default limits (single-user, but can run parallel workflows):
 
-| Limit | Default | Notes |
-|-------|---------|-------|
-| Max total sessions | 10 | Lower than original 50 (single user) |
-| Max `claude_code` runners | 3 | LLM API rate limits |
-| Max `shell` runners | 5 | |
-| Max `ampcode` runners | 3 | |
+| Limit                     | Default | Notes                                |
+| ------------------------- | ------- | ------------------------------------ |
+| Max total sessions        | 10      | Lower than original 50 (single user) |
+| Max `claude_code` runners | 3       | LLM API rate limits                  |
+| Max `shell` runners       | 5       |                                      |
+| Max `ampcode` runners     | 3       |                                      |
 
 Configurable via `SystemConfig`.
 
 ## Error Handling
 
-| Error | Handling |
-|-------|----------|
-| Session startup failure | Retry once, then fail the workflow step |
-| Runner iteration timeout | Configurable timeout, fail step on exceed |
-| Sprite provisioning failure | Retry once, then fail step |
-| Output parsing error | Log warning, continue (non-fatal) |
-| Session crash | GenServer restarts via supervisor; workflow step sees error |
+| Error                       | Handling                                                    |
+| --------------------------- | ----------------------------------------------------------- |
+| Session startup failure     | Retry once, then fail the workflow step                     |
+| Runner iteration timeout    | Configurable timeout, fail step on exceed                   |
+| Sprite provisioning failure | Retry once, then fail step                                  |
+| Output parsing error        | Log warning, continue (non-fatal)                           |
+| Session crash               | GenServer restarts via supervisor; workflow step sees error |
 
 ## Checkpoint/Resume
 
 Current status: **partially implemented** in existing Forge code.
 
 For MVP:
+
 - Checkpoints are not relied upon
 - If a session crashes mid-step, the step is marked as failed
 - User can retry the entire workflow run
 
 For Phase 2:
+
 - Implement session checkpointing so long-running coding agent sessions can resume
 - Store checkpoint in Ash `Checkpoint` resource
 
 ## Forge Module Mapping (after rename)
 
-| Current | After Rename |
-|---------|-------------|
-| `AgentJido.Forge` | `JidoCode.Forge` |
-| `AgentJido.Forge.Manager` | `JidoCode.Forge.Manager` |
+| Current                         | After Rename                   |
+| ------------------------------- | ------------------------------ |
+| `AgentJido.Forge`               | `JidoCode.Forge`               |
+| `AgentJido.Forge.Manager`       | `JidoCode.Forge.Manager`       |
 | `AgentJido.Forge.SpriteSession` | `JidoCode.Forge.SpriteSession` |
-| `AgentJido.Forge.SpriteClient` | `JidoCode.Forge.SpriteClient` |
-| `AgentJido.Forge.Runner` | `JidoCode.Forge.Runner` |
-| `AgentJido.Forge.Runners.*` | `JidoCode.Forge.Runners.*` |
+| `AgentJido.Forge.SpriteClient`  | `JidoCode.Forge.SpriteClient`  |
+| `AgentJido.Forge.Runner`        | `JidoCode.Forge.Runner`        |
+| `AgentJido.Forge.Runners.*`     | `JidoCode.Forge.Runners.*`     |

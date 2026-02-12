@@ -35,7 +35,7 @@ Thumbs.db
 /tmp/
 
 # Ignore package tarball (built via "mix hex.build").
-agent_jido-*.tar
+jido_code-*.tar
 
 # Ignore assets that are produced by build tools.
 /priv/static/assets/

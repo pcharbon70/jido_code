@@ -20,7 +20,6 @@ import "phoenix_html";
 // Establish Phoenix Socket and LiveView configuration.
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
-import { hooks as colocatedHooks } from "phoenix-colocated/agent_jido";
 import topbar from "../vendor/topbar";
 import MishkaComponents from "../vendor/mishka_components.js";
 import { createLiveToastHook } from "../../deps/live_toast/assets/js/live_toast";
@@ -33,7 +32,6 @@ const liveSocket = new LiveSocket("/live", Socket, {
     _csrf_token: csrfToken,
   },
   hooks: {
-    ...colocatedHooks,
     ...MishkaComponents,
     LiveToast: createLiveToastHook(),
   },
