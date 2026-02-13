@@ -49,7 +49,7 @@ defmodule JidoCode.GithubIssueBot.Research.ResearchCoordinator do
     WorkerResultAction
   }
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [
       # Receive research request from parent coordinator
       {"research.request", StartResearchAction},

@@ -71,7 +71,7 @@ defmodule JidoCode.GithubIssueBot.PullRequest.PullRequestCoordinator do
     PRSubmitResultAction
   }
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [
       # Receive pull request request from parent coordinator
       {"pull_request.request", StartPullRequestAction},

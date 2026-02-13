@@ -32,7 +32,7 @@ defmodule JidoCode.GithubIssueBot.PullRequest.Workers.QualityAgent do
 
   alias JidoCode.GithubIssueBot.PullRequest.Workers.Actions.QualityAction
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [{"quality.request", QualityAction}]
   end
 end

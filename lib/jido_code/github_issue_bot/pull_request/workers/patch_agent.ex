@@ -30,7 +30,7 @@ defmodule JidoCode.GithubIssueBot.PullRequest.Workers.PatchAgent do
 
   alias JidoCode.GithubIssueBot.PullRequest.Workers.Actions.PatchAction
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [{"patch.request", PatchAction}]
   end
 end

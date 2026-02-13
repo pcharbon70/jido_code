@@ -26,7 +26,7 @@ defmodule JidoCode.GithubIssueBot.Research.Workers.CodeSearchAgent do
 
   alias JidoCode.GithubIssueBot.Research.Workers.Actions.CodeSearchAction
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [{"code_search.request", CodeSearchAction}]
   end
 end

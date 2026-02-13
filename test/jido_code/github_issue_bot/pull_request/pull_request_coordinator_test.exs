@@ -72,6 +72,10 @@ defmodule JidoCode.GithubIssueBotTest.PullRequest.PullRequestCoordinatorTest do
   }
 
   setup_all do
+    unless Process.whereis(JidoCode.Jido) do
+      start_supervised!({JidoCode.Jido, []})
+    end
+
     :ok
   end
 

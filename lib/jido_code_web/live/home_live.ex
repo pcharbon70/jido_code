@@ -1,12 +1,36 @@
 defmodule JidoCodeWeb.HomeLive do
   use JidoCodeWeb, :live_view
 
+  require Logger
+
+  alias JidoCode.Setup.SystemConfig
+
   @impl true
   def mount(_params, _session, socket) do
-    if socket.assigns[:current_user] do
-      {:ok, Phoenix.LiveView.redirect(socket, to: ~p"/dashboard")}
-    else
-      {:ok, socket}
+    case SystemConfig.load() do
+      {:ok, %SystemConfig{onboarding_completed: false, onboarding_step: onboarding_step}} ->
+        redirect_to_setup(
+          socket,
+          onboarding_step,
+          "onboarding_incomplete",
+          "Setup is incomplete. Resume onboarding to continue."
+        )
+
+      {:ok, %SystemConfig{onboarding_completed: true}} ->
+        if socket.assigns[:current_user] do
+          {:ok, Phoenix.LiveView.redirect(socket, to: ~p"/dashboard")}
+        else
+          {:ok, socket}
+        end
+
+      {:error, %{diagnostic: diagnostic, detail: detail, onboarding_step: onboarding_step}} ->
+        redirect_to_setup(
+          socket,
+          onboarding_step,
+          "system_config_unavailable",
+          diagnostic,
+          detail
+        )
     end
   end
 
@@ -35,5 +59,24 @@ defmodule JidoCodeWeb.HomeLive do
       </div>
     </div>
     """
+  end
+
+  defp redirect_to_setup(socket, onboarding_step, reason, diagnostic, detail \\ nil) do
+    log_onboarding_redirect(reason, onboarding_step, diagnostic, detail)
+
+    path = ~p"/setup?diagnostic=#{diagnostic}&reason=#{reason}&step=#{onboarding_step}"
+    {:ok, Phoenix.LiveView.redirect(socket, to: path)}
+  end
+
+  defp log_onboarding_redirect(reason, onboarding_step, diagnostic, nil) do
+    Logger.warning(
+      "onboarding_redirect route=/ reason=#{reason} step=#{onboarding_step} diagnostic=#{inspect(diagnostic)}"
+    )
+  end
+
+  defp log_onboarding_redirect(reason, onboarding_step, diagnostic, detail) do
+    Logger.warning(
+      "onboarding_redirect route=/ reason=#{reason} step=#{onboarding_step} diagnostic=#{inspect(diagnostic)} detail=#{inspect(detail)}"
+    )
   end
 end

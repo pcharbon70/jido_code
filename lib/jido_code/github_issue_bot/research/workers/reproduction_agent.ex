@@ -27,7 +27,7 @@ defmodule JidoCode.GithubIssueBot.Research.Workers.ReproductionAgent do
 
   alias JidoCode.GithubIssueBot.Research.Workers.Actions.ReproductionAction
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [{"reproduction.request", ReproductionAction}]
   end
 end

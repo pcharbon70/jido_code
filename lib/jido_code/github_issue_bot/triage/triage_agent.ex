@@ -15,7 +15,7 @@ defmodule JidoCode.GithubIssueBot.Triage.TriageAgent do
 
   alias JidoCode.GithubIssueBot.Triage.Actions.TriageAction
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [{"triage.request", TriageAction}]
   end
 end

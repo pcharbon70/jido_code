@@ -43,7 +43,10 @@ defmodule JidoCode.GithubIssueBotTest.Research.ResearchCoordinatorTest do
   }
 
   setup_all do
-    # JidoCode.Jido is already started by the application supervisor
+    unless Process.whereis(JidoCode.Jido) do
+      start_supervised!({JidoCode.Jido, []})
+    end
+
     :ok
   end
 

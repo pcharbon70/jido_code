@@ -29,7 +29,7 @@ defmodule JidoCode.GithubIssueBot.PullRequest.Workers.PRSubmitAgent do
 
   alias JidoCode.GithubIssueBot.PullRequest.Workers.Actions.PRSubmitAction
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [{"pr_submit.request", PRSubmitAction}]
   end
 end

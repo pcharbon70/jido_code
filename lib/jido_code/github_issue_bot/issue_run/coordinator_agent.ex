@@ -47,7 +47,7 @@ defmodule JidoCode.GithubIssueBot.IssueRun.CoordinatorAgent do
     PullRequestResultAction
   }
 
-  def signal_routes do
+  def signal_routes(_ctx) do
     [
       # Phase 1: Start and triage
       {"issue.start", StartRunAction},

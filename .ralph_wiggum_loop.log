@@ -1,0 +1,297 @@
+1) changed files
+- `lib/jido_code/setup/system_config.ex`
+- `lib/jido_code_web/live/home_live.ex`
+- `lib/jido_code_web/live/setup_live.ex`
+- `lib/jido_code_web/router.ex`
+- `test/jido_code_web/live/home_live_test.exs`
+- `test/jido_code_web/controllers/page_controller_test.exs`
+
+2) tests/commands executed
+- `mix test test/jido_code_web/live/home_live_test.exs test/jido_code_web/controllers/page_controller_test.exs` (pass)
+- `mix compile --warnings-as-errors` (pass)
+- `mix precommit` (fails in this environment: Mix PubSub TCP socket `:eperm`)
+- Additional diagnostics:
+  - `mix test` (fails with pre-existing unrelated GitHub Issue Bot route failures)
+  - `mix compile --warnings-as-errors --force` (fails on pre-existing warning in `lib/jido_code_web/live/forge/show_live.ex`)
+
+3) acceptance criteria coverage
+- AC1 (`/` redirects to `/setup` when `onboarding_completed=false`):
+  - Implemented in `lib/jido_code_web/live/home_live.ex` via `SystemConfig.load/0` gate and redirect branch.
+  - Verified in `test/jido_code_web/live/home_live_test.exs` and `test/jido_code_web/controllers/page_controller_test.exs`.
+- AC2 (redirect preserves onboarding step from `SystemConfig`):
+  - Step is propagated in redirect query (`step`) from `SystemConfig.onboarding_step`.
+  - Verified with step `4` assertion in `test/jido_code_web/live/home_live_test.exs`.
+- AC3 (if `SystemConfig` cannot load, still routes to `/setup` with actionable diagnostics):
+  - Implemented in `lib/jido_code/setup/system_config.ex` error diagnostics + `HomeLive` error redirect (`reason=system_config_unavailable`, diagnostic message, fallback `step=1`).
+  - `/setup` UI surfaces step/reason/diagnostic in `lib/jido_code_web/live/setup_live.ex`.
+  - Verified in `test/jido_code_web/live/home_live_test.exs`.
+
+4) blockers/assumptions
+- Blocker: `mix precommit` cannot complete in this sandbox due TCP socket restriction (`Mix.Sync.PubSub.subscribe/1` -> `:eperm`).
+- Blocker: full-suite/precommit also has pre-existing unrelated failures (GitHub Issue Bot tests and an existing compile warning), so it cannot be left fully passing without out-of-scope fixes.
+- Assumption: introducing a minimal `SystemConfig` loader module (env-backed, injectable via `:system_config_loader`) is acceptable for ST-ONB-001 before persistence stories (e.g. ST-ONB-002).
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 547598, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+    warning: variable "conn" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+  8 │     test "renders chat interface when authenticated", %{conn: conn} do
+    │                                                               ~~~~
+    │
+    └─ test/jido_code_web/live/demos/chat_live_test.exs:8:63: JidoCodeWeb.Demos.ChatLiveTest."test ChatLive renders chat interface when authenticated"/1
+
+    warning: unused import Phoenix.LiveViewTest
+    │
+  4 │   import Phoenix.LiveViewTest
+    │   ~
+    │
+    └─ test/jido_code_web/live/demos/chat_live_test.exs:4:3
+
+....16:16:00.107 request_id=GJPuLgTu2Rh28hwAAAGG [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+.**..16:16:00.315 [error] Agent test-run-5506 [routing]: No route for signal
+16:16:00.321 [error] Agent test-run-519 [routing]: No route for signal
+16:16:00.321 [error] Agent test-run-583 [routing]: No route for signal
+16:16:00.322 [error] Agent test-fail-647 [routing]: No route for signal
+16:16:00.322 [error] Agent test-patch-392 [routing]: No route for signal
+16:16:00.322 [error] Agent test-quality-424 [routing]: No route for signal
+16:16:00.322 [error] Agent test-phases-5570 [routing]: No route for signal
+16:16:00.322 [error] Agent test-pass-5602 [routing]: No route for signal
+16:16:00.322 [error] Agent test-retry-5634 [routing]: No route for signal
+16:16:00.323 [error] Agent test-run-711 [routing]: No route for signal
+16:16:00.323 [error] Agent test-run-775 [routing]: No route for signal
+16:16:00.323 [error] Agent test-run-839 [routing]: No route for signal
+16:16:00.323 [error] Agent test-run-5698 [routing]: No route for signal
+16:16:00.324 [error] Agent test-run-871 [routing]: No route for signal
+16:16:00.324 [error] Agent test-run-4550 [routing]: No route for signal
+
+
+  1) test full flow through research coordinator receives triage and research results (JidoCode.GithubIssueBotTest.IssueRun.CoordinatorTest)
+     test/jido_code/github_issue_bot/issue_run/coordinator_test.exs:51
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/issue_run/coordinator_test.exs:62: (test)
+
+
+
+  2) test idempotency duplicate triage results do not corrupt state (JidoCode.GithubIssueBotTest.IssueRun.CoordinatorTest)
+     test/jido_code/github_issue_bot/issue_run/coordinator_test.exs:87
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/issue_run/coordinator_test.exs:98: (test)
+
+
+
+  3) test coordinator spawns triage on issue.start phase becomes :awaiting_triage after start (JidoCode.GithubIssueBotTest.IssueRun.CoordinatorTest)
+     test/jido_code/github_issue_bot/issue_run/coordinator_test.exs:31
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/issue_run/coordinator_test.exs:42: (test)
+
+
+
+  4) test max retry exhaustion fails after 3 attempts for issue ending in 9 (JidoCode.GithubIssueBotTest.PullRequest.PullRequestCoordinatorTest)
+     test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:220
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:231: (test)
+
+
+
+  5) test sequential flow - success on first attempt patch result contains correct data (JidoCode.GithubIssueBotTest.PullRequest.PullRequestCoordinatorTest)
+     test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:115
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:126: (test)
+
+
+
+  6) test sequential flow - success on first attempt quality result shows all checks passed (JidoCode.GithubIssueBotTest.PullRequest.PullRequestCoordinatorTest)
+     test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:146
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:157: (test)
+
+
+
+  7) test phase transitions phases progress correctly: patching → validating → submitting → completed (JidoCode.GithubIssueBotTest.PullRequest.PullRequestCoordinatorTest)
+     test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:267
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:278: (test)
+
+
+
+  8) test sequential flow - success on first attempt completes with PR when quality passes immediately (JidoCode.GithubIssueBotTest.PullRequest.PullRequestCoordinatorTest)
+     test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:79
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:90: (test)
+
+
+
+  9) test retry flow - eventual success retries and succeeds on 3rd attempt for issue ending in 7 (JidoCode.GithubIssueBotTest.PullRequest.PullRequestCoordinatorTest)
+     test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:180
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs:191: (test)
+
+
+
+ 10) test research worker outputs pr_search finds related items (JidoCode.GithubIssueBotTest.Research.ResearchCoordinatorTest)
+     test/jido_code/github_issue_bot/research/research_coordinator_test.exs:216
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/research/research_coordinator_test.exs:227: (test)
+
+
+
+ 11) test research worker outputs code_search extracts keywords and finds files (JidoCode.GithubIssueBotTest.Research.ResearchCoordinatorTest)
+     test/jido_code/github_issue_bot/research/research_coordinator_test.exs:109
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/research/research_coordinator_test.exs:120: (test)
+
+
+
+ 12) test research worker outputs reproduction extracts steps and environment (JidoCode.GithubIssueBotTest.Research.ResearchCoordinatorTest)
+     test/jido_code/github_issue_bot/research/research_coordinator_test.exs:144
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/research/research_coordinator_test.exs:155: (test)
+
+
+
+ 13) test needs_info handling issue needing more info does not proceed to research (JidoCode.GithubIssueBotTest.Research.ResearchCoordinatorTest)
+     test/jido_code/github_issue_bot/research/research_coordinator_test.exs:250
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/research/research_coordinator_test.exs:270: (test)
+
+
+
+ 14) test full issue run with research phase coordinator progresses through triage and research phases (JidoCode.GithubIssueBotTest.Research.ResearchCoordinatorTest)
+     test/jido_code/github_issue_bot/research/research_coordinator_test.exs:51
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/research/research_coordinator_test.exs:63: (test)
+
+
+
+ 15) test research worker outputs root_cause provides hypothesis (JidoCode.GithubIssueBotTest.Research.ResearchCoordinatorTest)
+     test/jido_code/github_issue_bot/research/research_coordinator_test.exs:182
+     ** (MatchError) no match of right hand side value:
+
+         {:error, :no_matching_route}
+
+     code: {:ok, _agent} = AgentServer.call(pid, signal)
+     stacktrace:
+       test/jido_code/github_issue_bot/research/research_coordinator_test.exs:193: (test)
+
+
+Finished in 0.6 seconds (0.2s async, 0.4s sync)
+24 tests, 15 failures, 2 skipped (4 excluded)
+Applied fixes for the reported precommit breakage without committing/pushing.
+
+### What I changed
+- Fixed Jido signal routing arity mismatch by changing `signal_routes/0` to `signal_routes/1` in the GitHub bot agents/coordinators:
+  - `lib/jido_code/github_issue_bot/issue_run/coordinator_agent.ex`
+  - `lib/jido_code/github_issue_bot/triage/triage_agent.ex`
+  - `lib/jido_code/github_issue_bot/research/research_coordinator.ex`
+  - `lib/jido_code/github_issue_bot/research/workers/code_search_agent.ex`
+  - `lib/jido_code/github_issue_bot/research/workers/reproduction_agent.ex`
+  - `lib/jido_code/github_issue_bot/research/workers/root_cause_agent.ex`
+  - `lib/jido_code/github_issue_bot/research/workers/pr_search_agent.ex`
+  - `lib/jido_code/github_issue_bot/pull_request/pull_request_coordinator.ex`
+  - `lib/jido_code/github_issue_bot/pull_request/workers/patch_agent.ex`
+  - `lib/jido_code/github_issue_bot/pull_request/workers/quality_agent.ex`
+  - `lib/jido_code/github_issue_bot/pull_request/workers/pr_submit_agent.ex`
+- Fixed compile warning in `lib/jido_code_web/live/forge/show_live.ex` by guarding the generic `{:terminal_exec_result, {output, exit_code}}` clause so specific `{:applied, ...}` / `{:error, ...}` clauses are reachable.
+- Fixed test warnings in `test/jido_code_web/live/demos/chat_live_test.exs` (unused import/variable).
+- Made coordinator test setup robust by starting `JidoCode.Jido` only if it isn’t already running:
+  - `test/jido_code/github_issue_bot/issue_run/coordinator_test.exs`
+  - `test/jido_code/github_issue_bot/research/research_coordinator_test.exs`
+  - `test/jido_code/github_issue_bot/pull_request/pull_request_coordinator_test.exs`
+
+### Validation run
+- `mix compile --warnings-as-errors` ✅
+- `mix test` ✅ (`24 tests, 0 failures`)
+- `MIX_OS_CONCURRENCY_LOCK=0 mix deps.unlock --unused` ✅
+
+### Remaining blocker
+- `mix precommit` is still blocked in this sandbox with:
+  - `failed to open a TCP socket in Mix.Sync.PubSub.subscribe/1, reason: :eperm`
+- This is an environment/socket restriction, not a remaining code/test failure.
+
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 305120, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+....**16:32:55.746 request_id=GJPvGoMN56lMsAwAAABh [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+........16:32:56.260 [warning] Quality checks failed for test-fail-994 (attempt 1/3), retrying...
+16:32:56.264 [warning] Quality checks failed for test-fail-994 (attempt 2/3), retrying...
+16:32:56.269 [error] Quality checks failed for test-fail-994 after 3 attempts, giving up
+16:32:56.270 [warning] Pull request failed for test-fail-994 after 3 attempts
+...16:32:56.415 [warning] Quality checks failed for test-retry-424 (attempt 1/3), retrying...
+16:32:56.419 [warning] Quality checks failed for test-retry-424 (attempt 2/3), retrying...
+.......
+Finished in 1.3 seconds (0.2s async, 1.1s sync)
+24 tests, 0 failures, 2 skipped (4 excluded)
