@@ -1,6 +1,9 @@
 defmodule JidoCodeWeb.SetupLive do
   use JidoCodeWeb, :live_view
 
+  alias AshAuthentication.{Info, Strategy}
+  alias JidoCode.Accounts.User
+  alias JidoCode.Setup.OwnerBootstrap
   alias JidoCode.Setup.PrerequisiteChecks
   alias JidoCode.Setup.SystemConfig
 
@@ -17,6 +20,7 @@ defmodule JidoCodeWeb.SetupLive do
 
   @default_diagnostic "Setup is required before protected routes are available."
   @validation_error "Add validation notes before continuing."
+  @owner_step_validation_error "Complete owner account bootstrap before continuing."
 
   @impl true
   def mount(params, _session, socket) do
@@ -32,16 +36,19 @@ defmodule JidoCodeWeb.SetupLive do
       end
 
     prerequisite_report = resolve_prerequisite_report(onboarding_step, onboarding_state)
+    owner_bootstrap = resolve_owner_bootstrap(onboarding_step)
 
     {:ok,
      socket
      |> assign(:onboarding_step, onboarding_step)
      |> assign(:onboarding_state, onboarding_state)
      |> assign(:prerequisite_report, prerequisite_report)
-     |> assign(:save_error, nil)
+     |> assign(:owner_bootstrap, owner_bootstrap)
+     |> assign(:save_error, owner_bootstrap_error(owner_bootstrap))
      |> assign(:redirect_reason, params["reason"] || "onboarding_incomplete")
      |> assign(:diagnostic, diagnostic)
-     |> assign_step_form(onboarding_step, onboarding_state)}
+     |> assign_step_form(onboarding_step, onboarding_state)
+     |> assign_owner_form(onboarding_step, onboarding_state, owner_bootstrap)}
   end
 
   @impl true
@@ -112,7 +119,55 @@ defmodule JidoCodeWeb.SetupLive do
           </ul>
         </section>
 
-        <.form for={@step_form} id="onboarding-step-form" phx-submit="save_step" class="space-y-4">
+        <section :if={@onboarding_step == 2} id="setup-owner-bootstrap" class="space-y-3">
+          <h2 class="text-lg font-semibold">Owner account bootstrap</h2>
+          <p id="setup-owner-bootstrap-mode" class="text-sm text-base-content/80">
+            {owner_bootstrap_mode_message(@owner_bootstrap.mode)}
+          </p>
+          <p
+            :if={@owner_bootstrap.mode == :confirm and @owner_bootstrap.owner_email}
+            id="setup-owner-bootstrap-owner-email"
+            class="font-mono text-sm"
+          >
+            Existing owner: {@owner_bootstrap.owner_email}
+          </p>
+
+          <.form for={@owner_form} id="setup-owner-bootstrap-form" phx-submit="bootstrap_owner" class="space-y-4">
+            <.input
+              field={@owner_form[:email]}
+              id="setup-owner-email"
+              type="email"
+              label="Owner email"
+              required
+            />
+            <.input
+              field={@owner_form[:password]}
+              id="setup-owner-password"
+              type="password"
+              label={owner_password_label(@owner_bootstrap.mode)}
+              required
+            />
+            <.input
+              :if={@owner_bootstrap.mode == :create}
+              field={@owner_form[:password_confirmation]}
+              id="setup-owner-password-confirmation"
+              type="password"
+              label="Confirm owner password"
+              required
+            />
+            <button id="setup-owner-bootstrap-submit" type="submit" class="btn btn-primary">
+              {owner_submit_label(@owner_bootstrap.mode)}
+            </button>
+          </.form>
+        </section>
+
+        <.form
+          :if={@onboarding_step != 2}
+          for={@step_form}
+          id="onboarding-step-form"
+          phx-submit="save_step"
+          class="space-y-4"
+        >
           <.input
             field={@step_form[:validated_note]}
             id="onboarding-validated-note"
@@ -147,6 +202,51 @@ defmodule JidoCodeWeb.SetupLive do
   end
 
   @impl true
+  def handle_event("save_step", _params, %{assigns: %{onboarding_step: 2}} = socket) do
+    {:noreply, assign(socket, :save_error, @owner_step_validation_error)}
+  end
+
+  def handle_event("bootstrap_owner", %{"owner" => owner_params}, socket) do
+    case OwnerBootstrap.bootstrap(owner_params) do
+      {:ok, owner_bootstrap_result} ->
+        step_state = %{
+          "validated_note" => owner_bootstrap_result.validated_note,
+          "owner_email" => to_string(owner_bootstrap_result.owner.email),
+          "owner_mode" => Atom.to_string(owner_bootstrap_result.owner_mode)
+        }
+
+        case SystemConfig.save_step_progress(step_state) do
+          {:ok, %SystemConfig{} = config} ->
+            {:noreply,
+             socket
+             |> assign_config_state(config)
+             |> assign(:save_error, nil)
+             |> redirect(to: owner_sign_in_with_token_path(owner_bootstrap_result.token))}
+
+          {:error, %{diagnostic: diagnostic}} ->
+            {:noreply, assign(socket, :save_error, diagnostic)}
+        end
+
+      {:error, {_error_type, diagnostic}} ->
+        owner_bootstrap = resolve_owner_bootstrap(socket.assigns.onboarding_step)
+
+        {:noreply,
+         socket
+         |> assign(:owner_bootstrap, owner_bootstrap)
+         |> assign(:save_error, diagnostic)
+         |> assign_owner_form(
+           socket.assigns.onboarding_step,
+           socket.assigns.onboarding_state,
+           owner_bootstrap,
+           owner_params
+         )}
+    end
+  end
+
+  def handle_event("bootstrap_owner", _params, socket) do
+    {:noreply, assign(socket, :save_error, @owner_step_validation_error)}
+  end
+
   def handle_event("save_step", %{"step" => %{"validated_note" => validated_note}}, socket) do
     case normalize_validated_note(validated_note) do
       {:ok, normalized_note} ->
@@ -179,6 +279,45 @@ defmodule JidoCodeWeb.SetupLive do
       |> Map.get("validated_note", "")
 
     assign(socket, :step_form, to_form(%{"validated_note" => persisted_note}, as: :step))
+  end
+
+  defp assign_owner_form(
+         socket,
+         onboarding_step,
+         onboarding_state,
+         owner_bootstrap,
+         owner_params \\ %{}
+       ) do
+    if onboarding_step == 2 do
+      persisted_owner_email =
+        onboarding_state
+        |> fetch_step_state(2)
+        |> Map.get("owner_email", "")
+
+      owner_email =
+        owner_params["email"] ||
+          owner_bootstrap.owner_email ||
+          persisted_owner_email
+
+      assign(
+        socket,
+        :owner_form,
+        to_form(
+          %{
+            "email" => owner_email,
+            "password" => "",
+            "password_confirmation" => ""
+          },
+          as: :owner
+        )
+      )
+    else
+      assign(
+        socket,
+        :owner_form,
+        to_form(%{"email" => "", "password" => "", "password_confirmation" => ""}, as: :owner)
+      )
+    end
   end
 
   defp normalize_validated_note(validated_note) when is_binary(validated_note) do
@@ -234,9 +373,7 @@ defmodule JidoCodeWeb.SetupLive do
       {:ok, %SystemConfig{} = config} ->
         {:noreply,
          socket
-         |> assign(:onboarding_step, config.onboarding_step)
-         |> assign(:onboarding_state, config.onboarding_state)
-         |> assign(:prerequisite_report, resolve_prerequisite_report(config.onboarding_step, config.onboarding_state))
+         |> assign_config_state(config)
          |> assign(:save_error, nil)
          |> assign_step_form(config.onboarding_step, config.onboarding_state)}
 
@@ -285,6 +422,82 @@ defmodule JidoCodeWeb.SetupLive do
 
   defp step_title(step) do
     Map.get(@wizard_steps, step, "Onboarding step #{step}")
+  end
+
+  defp assign_config_state(socket, %SystemConfig{} = config) do
+    owner_bootstrap = resolve_owner_bootstrap(config.onboarding_step)
+
+    socket
+    |> assign(:onboarding_step, config.onboarding_step)
+    |> assign(:onboarding_state, config.onboarding_state)
+    |> assign(
+      :prerequisite_report,
+      resolve_prerequisite_report(config.onboarding_step, config.onboarding_state)
+    )
+    |> assign(:owner_bootstrap, owner_bootstrap)
+    |> assign_owner_form(config.onboarding_step, config.onboarding_state, owner_bootstrap)
+  end
+
+  defp resolve_owner_bootstrap(2) do
+    case OwnerBootstrap.status() do
+      {:ok, %{mode: :create}} ->
+        %{mode: :create, owner_email: nil, error: nil}
+
+      {:ok, %{mode: :confirm, owner: owner}} ->
+        %{mode: :confirm, owner_email: to_string(owner.email), error: nil}
+
+      {:error, {_error_type, diagnostic}} ->
+        %{mode: :error, owner_email: nil, error: diagnostic}
+    end
+  end
+
+  defp resolve_owner_bootstrap(_step), do: %{mode: :inactive, owner_email: nil, error: nil}
+
+  defp owner_bootstrap_error(%{error: diagnostic})
+       when is_binary(diagnostic) and diagnostic != "",
+       do: diagnostic
+
+  defp owner_bootstrap_error(_owner_bootstrap), do: nil
+
+  defp owner_bootstrap_mode_message(:create),
+    do: "No owner account exists yet. Create one owner to continue."
+
+  defp owner_bootstrap_mode_message(:confirm),
+    do: "An owner account already exists. Confirm owner credentials to continue."
+
+  defp owner_bootstrap_mode_message(:error),
+    do: "Owner bootstrap is currently blocked by a single-user policy issue."
+
+  defp owner_bootstrap_mode_message(:inactive), do: ""
+
+  defp owner_password_label(:create), do: "Owner password"
+  defp owner_password_label(:confirm), do: "Owner password for confirmation"
+  defp owner_password_label(_mode), do: "Owner password"
+
+  defp owner_submit_label(:create), do: "Create owner account"
+  defp owner_submit_label(:confirm), do: "Confirm owner account"
+  defp owner_submit_label(_mode), do: "Continue"
+
+  defp owner_sign_in_with_token_path(token) do
+    strategy = Info.strategy!(User, :password)
+
+    strategy_path =
+      strategy
+      |> Strategy.routes()
+      |> Enum.find_value(fn
+        {path, :sign_in_with_token} -> path
+        _ -> nil
+      end)
+
+    path =
+      Path.join(
+        "/auth",
+        String.trim_leading(strategy_path || "/user/password/sign_in_with_token", "/")
+      )
+
+    query = URI.encode_query(%{"token" => token})
+
+    "#{path}?#{query}"
   end
 
   defp step_number(step_key), do: parse_step(step_key)
