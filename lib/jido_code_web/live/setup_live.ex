@@ -4,6 +4,7 @@ defmodule JidoCodeWeb.SetupLive do
   alias AshAuthentication.{Info, Strategy}
   alias JidoCode.Accounts.User
   alias JidoCode.Setup.OwnerBootstrap
+  alias JidoCode.Setup.ProviderCredentialChecks
   alias JidoCode.Setup.PrerequisiteChecks
   alias JidoCode.Setup.RuntimeMode
   alias JidoCode.Setup.SystemConfig
@@ -37,6 +38,10 @@ defmodule JidoCodeWeb.SetupLive do
       end
 
     prerequisite_report = resolve_prerequisite_report(onboarding_step, onboarding_state)
+
+    provider_credential_report =
+      resolve_provider_credential_report(onboarding_step, onboarding_state)
+
     owner_bootstrap = resolve_owner_bootstrap(onboarding_step)
 
     {:ok,
@@ -44,6 +49,7 @@ defmodule JidoCodeWeb.SetupLive do
      |> assign(:onboarding_step, onboarding_step)
      |> assign(:onboarding_state, onboarding_state)
      |> assign(:prerequisite_report, prerequisite_report)
+     |> assign(:provider_credential_report, provider_credential_report)
      |> assign(:owner_bootstrap, owner_bootstrap)
      |> assign(:save_error, owner_bootstrap_error(owner_bootstrap))
      |> assign(:redirect_reason, params["reason"] || "onboarding_incomplete")
@@ -115,6 +121,56 @@ defmodule JidoCodeWeb.SetupLive do
                 class="text-sm text-warning"
               >
                 {check.remediation}
+              </p>
+            </li>
+          </ul>
+        </section>
+
+        <section
+          :if={@provider_credential_report}
+          id="setup-provider-credentials"
+          class="space-y-3"
+        >
+          <h2 class="text-lg font-semibold">LLM provider credential verification</h2>
+          <p id="setup-provider-checked-at" class="text-sm text-base-content/70">
+            Last checked: {format_checked_at(@provider_credential_report.checked_at)}
+          </p>
+
+          <ul class="space-y-2">
+            <li
+              :for={credential <- @provider_credential_report.credentials}
+              id={"setup-provider-#{provider_dom_id(credential.provider)}"}
+              class="rounded-lg border border-base-300 bg-base-100 p-3"
+            >
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="font-medium">{credential.name}</p>
+                <span
+                  id={"setup-provider-#{provider_dom_id(credential.provider)}-status"}
+                  class={["badge", provider_status_class(credential.status)]}
+                >
+                  {provider_status_label(credential.status)}
+                </span>
+              </div>
+              <p
+                id={"setup-provider-transition-#{provider_dom_id(credential.provider)}"}
+                class="text-sm text-base-content/80"
+              >
+                Status transition: {credential.transition}
+              </p>
+              <p class="text-sm text-base-content/80">{credential.detail}</p>
+              <p
+                :if={credential.verified_at}
+                id={"setup-provider-verified-at-#{provider_dom_id(credential.provider)}"}
+                class="text-xs text-base-content/70"
+              >
+                Verified at: {format_checked_at(credential.verified_at)}
+              </p>
+              <p
+                :if={credential.status != :active}
+                id={"setup-provider-remediation-#{provider_dom_id(credential.provider)}"}
+                class="text-sm text-warning"
+              >
+                {credential.remediation}
               </p>
             </li>
           </ul>
@@ -352,22 +408,53 @@ defmodule JidoCodeWeb.SetupLive do
     end
   end
 
-  defp save_step_progress(socket, validated_note) do
-    if socket.assigns.onboarding_step == 1 do
-      prerequisite_report = PrerequisiteChecks.run()
-
-      socket = assign(socket, :prerequisite_report, prerequisite_report)
-
-      if PrerequisiteChecks.blocked?(prerequisite_report) do
-        {:noreply, assign(socket, :save_error, prerequisite_block_message(prerequisite_report))}
-      else
-        persist_step_progress(socket, %{
-          "validated_note" => validated_note,
-          "prerequisite_checks" => PrerequisiteChecks.serialize_for_state(prerequisite_report)
-        })
-      end
+  defp resolve_provider_credential_report(onboarding_step, onboarding_state) do
+    if onboarding_step == 3 do
+      onboarding_state
+      |> fetch_step_state(3)
+      |> Map.get("provider_credentials")
+      |> ProviderCredentialChecks.run()
     else
-      persist_step_progress(socket, %{"validated_note" => validated_note})
+      nil
+    end
+  end
+
+  defp save_step_progress(socket, validated_note) do
+    case socket.assigns.onboarding_step do
+      1 ->
+        prerequisite_report = PrerequisiteChecks.run()
+
+        socket = assign(socket, :prerequisite_report, prerequisite_report)
+
+        if PrerequisiteChecks.blocked?(prerequisite_report) do
+          {:noreply, assign(socket, :save_error, prerequisite_block_message(prerequisite_report))}
+        else
+          persist_step_progress(socket, %{
+            "validated_note" => validated_note,
+            "prerequisite_checks" => PrerequisiteChecks.serialize_for_state(prerequisite_report)
+          })
+        end
+
+      3 ->
+        provider_credential_report =
+          socket.assigns.onboarding_state
+          |> fetch_step_state(3)
+          |> Map.get("provider_credentials")
+          |> ProviderCredentialChecks.run()
+
+        socket = assign(socket, :provider_credential_report, provider_credential_report)
+
+        if ProviderCredentialChecks.blocked?(provider_credential_report) do
+          {:noreply, assign(socket, :save_error, provider_block_message(provider_credential_report))}
+        else
+          persist_step_progress(socket, %{
+            "validated_note" => validated_note,
+            "provider_credentials" => ProviderCredentialChecks.serialize_for_state(provider_credential_report)
+          })
+        end
+
+      _step ->
+        persist_step_progress(socket, %{"validated_note" => validated_note})
     end
   end
 
@@ -405,6 +492,18 @@ defmodule JidoCodeWeb.SetupLive do
     String.trim("#{prefix} #{remediation}")
   end
 
+  defp provider_block_message(report) do
+    remediation =
+      report
+      |> ProviderCredentialChecks.blocked_credentials()
+      |> Enum.map(fn credential -> "#{credential.name}: #{credential.remediation}" end)
+      |> Enum.join(" ")
+
+    String.trim(
+      "At least one provider credential must verify as Active before continuing to GitHub setup. No setup progress was saved. #{remediation}"
+    )
+  end
+
   defp prerequisite_status_label(:pass), do: "Pass"
   defp prerequisite_status_label(:timeout), do: "Timeout"
   defp prerequisite_status_label(:fail), do: "Fail"
@@ -412,6 +511,16 @@ defmodule JidoCodeWeb.SetupLive do
   defp prerequisite_status_class(:pass), do: "badge-success"
   defp prerequisite_status_class(:timeout), do: "badge-warning"
   defp prerequisite_status_class(:fail), do: "badge-error"
+
+  defp provider_status_label(:active), do: "Active"
+  defp provider_status_label(:invalid), do: "Invalid"
+  defp provider_status_label(:not_set), do: "Not set"
+  defp provider_status_label(:rotating), do: "Rotating"
+
+  defp provider_status_class(:active), do: "badge-success"
+  defp provider_status_class(:invalid), do: "badge-error"
+  defp provider_status_class(:not_set), do: "badge-warning"
+  defp provider_status_class(:rotating), do: "badge-info"
 
   defp format_checked_at(%DateTime{} = checked_at), do: DateTime.to_iso8601(checked_at)
   defp format_checked_at(_), do: "unknown"
@@ -436,6 +545,10 @@ defmodule JidoCodeWeb.SetupLive do
     |> assign(
       :prerequisite_report,
       resolve_prerequisite_report(config.onboarding_step, config.onboarding_state)
+    )
+    |> assign(
+      :provider_credential_report,
+      resolve_provider_credential_report(config.onboarding_step, config.onboarding_state)
     )
     |> assign(:owner_bootstrap, owner_bootstrap)
     |> assign_owner_form(config.onboarding_step, config.onboarding_state, owner_bootstrap)
@@ -512,4 +625,8 @@ defmodule JidoCodeWeb.SetupLive do
   end
 
   defp step_number(step_key), do: parse_step(step_key)
+
+  defp provider_dom_id(provider) when is_atom(provider), do: Atom.to_string(provider)
+  defp provider_dom_id(provider) when is_binary(provider), do: provider
+  defp provider_dom_id(_provider), do: "unknown"
 end

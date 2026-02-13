@@ -15,6 +15,10 @@ defmodule JidoCodeWeb.SetupLiveTest do
     original_saver = Application.get_env(:jido_code, :system_config_saver, :__missing__)
     original_config = Application.get_env(:jido_code, :system_config, :__missing__)
     original_checker = Application.get_env(:jido_code, :setup_prerequisite_checker, :__missing__)
+
+    original_provider_checker =
+      Application.get_env(:jido_code, :setup_provider_credential_checker, :__missing__)
+
     original_runtime_mode = Application.get_env(:jido_code, :runtime_mode, :__missing__)
 
     original_timeout =
@@ -25,6 +29,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
       restore_env(:system_config_saver, original_saver)
       restore_env(:system_config, original_config)
       restore_env(:setup_prerequisite_checker, original_checker)
+      restore_env(:setup_provider_credential_checker, original_provider_checker)
       restore_env(:setup_prerequisite_timeout_ms, original_timeout)
       restore_env(:runtime_mode, original_runtime_mode)
     end)
@@ -32,6 +37,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
     Application.delete_env(:jido_code, :system_config_loader)
     Application.delete_env(:jido_code, :system_config_saver)
     Application.delete_env(:jido_code, :setup_prerequisite_timeout_ms)
+    Application.delete_env(:jido_code, :setup_provider_credential_checker)
     Application.put_env(:jido_code, :runtime_mode, :test)
 
     Application.put_env(:jido_code, :system_config, %{
@@ -42,6 +48,10 @@ defmodule JidoCodeWeb.SetupLiveTest do
 
     Application.put_env(:jido_code, :setup_prerequisite_checker, fn _timeout_ms ->
       passing_prerequisite_report()
+    end)
+
+    Application.put_env(:jido_code, :setup_provider_credential_checker, fn _context ->
+      passing_provider_credential_report()
     end)
 
     reset_owner_state!()
@@ -372,6 +382,103 @@ defmodule JidoCodeWeb.SetupLiveTest do
     assert Map.fetch!(persisted_config, :onboarding_state) == %{}
   end
 
+  test "step 3 requires one active provider and persists verified provider status before GitHub setup",
+       %{conn: conn} do
+    Application.put_env(:jido_code, :setup_provider_credential_checker, fn _context ->
+      mixed_provider_credential_report()
+    end)
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 3,
+      onboarding_state: %{
+        "1" => %{"validated_note" => "Prerequisite checks passed"},
+        "2" => %{"validated_note" => "Owner account confirmed"}
+      }
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-provider-anthropic-status", "Active")
+    assert has_element?(view, "#setup-provider-transition-anthropic", "Not set -> Active")
+    assert has_element?(view, "#setup-provider-openai-status", "Invalid")
+    assert has_element?(view, "#setup-provider-remediation-openai", "OPENAI_API_KEY")
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{"validated_note" => "Provider setup confirmed"}
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 4")
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 4
+
+    provider_state =
+      persisted_config
+      |> Map.fetch!(:onboarding_state)
+      |> Map.fetch!("3")
+      |> Map.fetch!("provider_credentials")
+
+    assert provider_state["status"] == "active"
+
+    credentials_by_provider =
+      provider_state["credentials"]
+      |> Enum.map(fn credential -> {credential["provider"], credential} end)
+      |> Map.new()
+
+    assert credentials_by_provider["anthropic"]["status"] == "active"
+    assert is_binary(credentials_by_provider["anthropic"]["verified_at"])
+    assert credentials_by_provider["openai"]["status"] == "invalid"
+    assert is_nil(credentials_by_provider["openai"]["verified_at"])
+  end
+
+  test "step 3 blocks progression when all provider checks fail and does not save false success",
+       %{conn: conn} do
+    test_pid = self()
+
+    Application.put_env(:jido_code, :setup_provider_credential_checker, fn _context ->
+      failing_provider_credential_report()
+    end)
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 3,
+      onboarding_state: %{
+        "1" => %{"validated_note" => "Prerequisite checks passed"},
+        "2" => %{"validated_note" => "Owner account confirmed"}
+      }
+    })
+
+    Application.put_env(:jido_code, :system_config_saver, fn _config ->
+      send(test_pid, :unexpected_save)
+      {:ok, %{onboarding_completed: false, onboarding_step: 4, onboarding_state: %{}}}
+    end)
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-provider-anthropic-status", "Not set")
+    assert has_element?(view, "#setup-provider-openai-status", "Invalid")
+    assert has_element?(view, "#setup-provider-transition-openai", "Not set -> Invalid")
+    assert has_element?(view, "#setup-provider-remediation-openai", "OPENAI_API_KEY")
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{"validated_note" => "Attempting provider bypass"}
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 3")
+    assert has_element?(view, "#setup-save-error", "must verify as Active")
+    assert has_element?(view, "#setup-save-error", "No setup progress was saved")
+    refute_received :unexpected_save
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 3
+    refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "3")
+  end
+
   test "save failure keeps the same step and shows a retry-safe error", %{conn: conn} do
     Application.put_env(:jido_code, :system_config, %{
       onboarding_completed: false,
@@ -515,6 +622,83 @@ defmodule JidoCodeWeb.SetupLiveTest do
           status: :timeout,
           detail: "Check timed out after 3000ms.",
           remediation: "Set endpoint URL host (or env `PHX_HOST`) and restart JidoCode.",
+          checked_at: @checked_at
+        }
+      ]
+    }
+  end
+
+  defp passing_provider_credential_report do
+    %{
+      checked_at: @checked_at,
+      status: :active,
+      credentials: [
+        %{
+          provider: :anthropic,
+          name: "Anthropic",
+          status: :active,
+          detail: "ANTHROPIC_API_KEY is configured and passed verification checks.",
+          remediation: "Credential is active.",
+          verified_at: @checked_at,
+          checked_at: @checked_at
+        },
+        %{
+          provider: :openai,
+          name: "OpenAI",
+          status: :not_set,
+          detail: "No OPENAI_API_KEY credential is configured.",
+          remediation: "Set `OPENAI_API_KEY` and retry verification.",
+          checked_at: @checked_at
+        }
+      ]
+    }
+  end
+
+  defp mixed_provider_credential_report do
+    %{
+      checked_at: @checked_at,
+      status: :active,
+      credentials: [
+        %{
+          provider: :anthropic,
+          name: "Anthropic",
+          status: :active,
+          detail: "ANTHROPIC_API_KEY is configured and passed verification checks.",
+          remediation: "Credential is active.",
+          verified_at: @checked_at,
+          checked_at: @checked_at
+        },
+        %{
+          provider: :openai,
+          name: "OpenAI",
+          status: :invalid,
+          detail: "Configured OPENAI_API_KEY failed verification checks.",
+          remediation: "Set a valid `OPENAI_API_KEY` (typically prefixed with `sk-`) and retry verification.",
+          checked_at: @checked_at
+        }
+      ]
+    }
+  end
+
+  defp failing_provider_credential_report do
+    %{
+      checked_at: @checked_at,
+      status: :invalid,
+      credentials: [
+        %{
+          provider: :anthropic,
+          name: "Anthropic",
+          status: :not_set,
+          detail: "No ANTHROPIC_API_KEY credential is configured.",
+          remediation: "Set `ANTHROPIC_API_KEY` and retry verification.",
+          checked_at: @checked_at
+        },
+        %{
+          provider: :openai,
+          name: "OpenAI",
+          status: :invalid,
+          detail: "Configured OPENAI_API_KEY failed verification checks.",
+          remediation: "Set a valid `OPENAI_API_KEY` (typically prefixed with `sk-`) and retry verification.",
           checked_at: @checked_at
         }
       ]
