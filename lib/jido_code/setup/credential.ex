@@ -1,4 +1,5 @@
 defmodule JidoCode.Setup.Credential do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :jido_code,
     domain: JidoCode.Setup,
@@ -41,6 +42,8 @@ defmodule JidoCode.Setup.Credential do
     end
 
     update :set_status do
+      require_atomic? false
+
       argument :status, :atom do
         allow_nil? false
         constraints one_of: [:active, :invalid, :expired, :not_set]

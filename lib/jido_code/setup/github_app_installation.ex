@@ -1,4 +1,5 @@
 defmodule JidoCode.Setup.GithubAppInstallation do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :jido_code,
     domain: JidoCode.Setup,
@@ -54,6 +55,8 @@ defmodule JidoCode.Setup.GithubAppInstallation do
     end
 
     update :cache_access_token do
+      require_atomic? false
+
       argument :cached_access_token, :string do
         allow_nil? false
       end

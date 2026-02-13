@@ -84,6 +84,7 @@ config :spark,
 
 config :jido_code,
   ecto_repos: [JidoCode.Repo],
+  runtime_env: config_env(),
   generators: [timestamp_type: :utc_datetime],
   ash_domains: [
     JidoCode.Accounts,

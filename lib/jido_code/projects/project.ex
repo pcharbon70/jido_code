@@ -1,4 +1,5 @@
 defmodule JidoCode.Projects.Project do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :jido_code,
     domain: JidoCode.Projects,
@@ -26,6 +27,7 @@ defmodule JidoCode.Projects.Project do
 
     create :create do
       primary? true
+
       accept [
         :name,
         :github_owner,
@@ -53,6 +55,7 @@ defmodule JidoCode.Projects.Project do
 
     update :update do
       primary? true
+
       accept [
         :name,
         :default_branch,
@@ -66,6 +69,8 @@ defmodule JidoCode.Projects.Project do
     end
 
     update :set_clone_status do
+      require_atomic? false
+
       accept [:local_path]
 
       argument :clone_status, :atom do

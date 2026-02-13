@@ -1,4 +1,5 @@
 defmodule JidoCode.Setup do
+  @moduledoc false
   use Ash.Domain, otp_app: :jido_code, extensions: [AshAdmin.Domain]
 
   admin do
@@ -11,4 +12,3 @@ defmodule JidoCode.Setup do
     resource JidoCode.Setup.GithubAppInstallation
   end
 end
-

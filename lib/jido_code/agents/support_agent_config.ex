@@ -1,4 +1,5 @@
 defmodule JidoCode.Agents.SupportAgentConfig do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :jido_code,
     domain: JidoCode.Agents,

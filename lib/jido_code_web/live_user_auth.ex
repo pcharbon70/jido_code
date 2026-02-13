@@ -5,6 +5,8 @@ defmodule JidoCodeWeb.LiveUserAuth do
 
   require Ash.Query
 
+  alias AshAuthentication.Phoenix.LiveSession
+
   import Phoenix.Component
   use JidoCodeWeb, :verified_routes
 
@@ -12,7 +14,7 @@ defmodule JidoCodeWeb.LiveUserAuth do
   # To use, place the following at the top of that liveview:
   # on_mount {JidoCodeWeb.LiveUserAuth, :current_user}
   def on_mount(:current_user, _params, session, socket) do
-    {:cont, AshAuthentication.Phoenix.LiveSession.assign_new_resources(socket, session)}
+    {:cont, LiveSession.assign_new_resources(socket, session)}
   end
 
   def on_mount(:live_user_optional, _params, _session, socket) do

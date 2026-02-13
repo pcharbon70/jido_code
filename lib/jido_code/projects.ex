@@ -1,4 +1,5 @@
 defmodule JidoCode.Projects do
+  @moduledoc false
   use Ash.Domain, otp_app: :jido_code, extensions: [AshAdmin.Domain]
 
   admin do
@@ -10,4 +11,3 @@ defmodule JidoCode.Projects do
     resource JidoCode.Projects.ProjectSecret
   end
 end
-

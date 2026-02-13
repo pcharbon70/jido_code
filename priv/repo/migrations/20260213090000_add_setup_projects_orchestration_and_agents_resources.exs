@@ -60,7 +60,9 @@ defmodule JidoCode.Repo.Migrations.AddSetupProjectsOrchestrationAndAgentsResourc
       timestamps(type: :utc_datetime_usec)
     end
 
-    create unique_index(:projects, [:github_full_name], name: "projects_unique_github_full_name_index")
+    create unique_index(:projects, [:github_full_name],
+             name: "projects_unique_github_full_name_index"
+           )
 
     create table(:workflow_definitions, primary_key: false) do
       add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
@@ -77,7 +79,9 @@ defmodule JidoCode.Repo.Migrations.AddSetupProjectsOrchestrationAndAgentsResourc
       timestamps(type: :utc_datetime_usec)
     end
 
-    create unique_index(:workflow_definitions, [:name], name: "workflow_definitions_unique_name_index")
+    create unique_index(:workflow_definitions, [:name],
+             name: "workflow_definitions_unique_name_index"
+           )
 
     create table(:workflow_runs, primary_key: false) do
       add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
@@ -224,7 +228,9 @@ defmodule JidoCode.Repo.Migrations.AddSetupProjectsOrchestrationAndAgentsResourc
           ),
           null: false
 
-      add :inserted_at, :utc_datetime_usec, null: false, default: fragment("(now() AT TIME ZONE 'utc')")
+      add :inserted_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
     end
 
     create index(:artifacts, [:workflow_run_id])
@@ -292,4 +298,3 @@ defmodule JidoCode.Repo.Migrations.AddSetupProjectsOrchestrationAndAgentsResourc
     drop table(:system_configs)
   end
 end
-

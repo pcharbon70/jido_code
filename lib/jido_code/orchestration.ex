@@ -1,4 +1,5 @@
 defmodule JidoCode.Orchestration do
+  @moduledoc false
   use Ash.Domain, otp_app: :jido_code, extensions: [AshAdmin.Domain]
 
   admin do
@@ -12,4 +13,3 @@ defmodule JidoCode.Orchestration do
     resource JidoCode.Orchestration.PullRequest
   end
 end
-

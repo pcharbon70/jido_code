@@ -1,4 +1,5 @@
 defmodule JidoCode.Agents do
+  @moduledoc false
   use Ash.Domain, otp_app: :jido_code, extensions: [AshAdmin.Domain]
 
   admin do
@@ -9,4 +10,3 @@ defmodule JidoCode.Agents do
     resource JidoCode.Agents.SupportAgentConfig
   end
 end
-

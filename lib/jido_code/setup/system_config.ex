@@ -1,4 +1,5 @@
 defmodule JidoCode.Setup.SystemConfig do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :jido_code,
     domain: JidoCode.Setup,
@@ -24,6 +25,7 @@ defmodule JidoCode.Setup.SystemConfig do
 
     create :create do
       primary? true
+
       accept [
         :onboarding_completed,
         :onboarding_step,
@@ -35,6 +37,7 @@ defmodule JidoCode.Setup.SystemConfig do
 
     update :update do
       primary? true
+
       accept [
         :onboarding_completed,
         :onboarding_step,
@@ -49,6 +52,8 @@ defmodule JidoCode.Setup.SystemConfig do
     end
 
     update :set_onboarding_step do
+      require_atomic? false
+
       argument :onboarding_step, :integer do
         allow_nil? false
       end
@@ -60,6 +65,8 @@ defmodule JidoCode.Setup.SystemConfig do
     end
 
     update :set_default_environment do
+      require_atomic? false
+
       argument :default_environment, :atom do
         allow_nil? false
         constraints one_of: [:local, :sprite]
