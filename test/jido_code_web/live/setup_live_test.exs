@@ -6,6 +6,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
   alias JidoCode.Accounts.User
   alias JidoCode.GitHub.Repo, as: GitHubRepo
   alias JidoCode.Repo
+  alias JidoCode.Security.SecretRefs
 
   import Phoenix.LiveViewTest
 
@@ -623,6 +624,54 @@ defmodule JidoCodeWeb.SetupLiveTest do
     assert is_binary(credentials_by_provider["anthropic"]["verified_at"])
     assert credentials_by_provider["openai"]["status"] == "invalid"
     assert is_nil(credentials_by_provider["openai"]["verified_at"])
+  end
+
+  test "step 3 exposes source resolution diagnostics without rendering secret material", %{conn: conn} do
+    original_anthropic_env = fetch_system_env("ANTHROPIC_API_KEY")
+    original_anthropic_app_env = Application.get_env(:jido_code, :anthropic_api_key, :__missing__)
+
+    on_exit(fn ->
+      restore_system_env("ANTHROPIC_API_KEY", original_anthropic_env)
+      restore_env(:anthropic_api_key, original_anthropic_app_env)
+    end)
+
+    env_secret = "sk-ant-env-#{System.unique_integer([:positive])}"
+    db_secret = "sk-ant-db-#{System.unique_integer([:positive])}"
+
+    System.put_env("ANTHROPIC_API_KEY", env_secret)
+    Application.delete_env(:jido_code, :anthropic_api_key)
+    Application.delete_env(:jido_code, :setup_provider_credential_checker)
+
+    assert {:ok, _metadata} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: SecretRefs.provider_secret_ref_name(:anthropic),
+               value: db_secret,
+               source: :onboarding
+             })
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 3,
+      onboarding_state: %{
+        "1" => %{"validated_note" => "Prerequisite checks passed"},
+        "2" => %{"validated_note" => "Owner account confirmed"}
+      }
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-provider-anthropic", "source=env")
+    assert has_element?(view, "#setup-provider-anthropic", "outcome=resolved")
+
+    assert has_element?(
+             view,
+             "#setup-provider-anthropic",
+             "secret_ref_name=providers/anthropic_api_key"
+           )
+
+    refute has_element?(view, "#setup-provider-anthropic", env_secret)
+    refute has_element?(view, "#setup-provider-anthropic", db_secret)
   end
 
   test "step 3 blocks progression when all provider checks fail and does not save false success",
@@ -1330,6 +1379,16 @@ defmodule JidoCodeWeb.SetupLiveTest do
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)
   defp restore_env(key, value), do: Application.put_env(:jido_code, key, value)
+
+  defp fetch_system_env(key) do
+    case System.get_env(key) do
+      nil -> :__missing__
+      value -> value
+    end
+  end
+
+  defp restore_system_env(key, :__missing__), do: System.delete_env(key)
+  defp restore_system_env(key, value), do: System.put_env(key, value)
 
   defp register_owner(email, password) do
     strategy = Info.strategy!(User, :password)

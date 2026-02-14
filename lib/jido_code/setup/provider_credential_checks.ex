@@ -3,6 +3,8 @@ defmodule JidoCode.Setup.ProviderCredentialChecks do
   Verifies LLM provider credentials before setup step 3 can advance.
   """
 
+  alias JidoCode.Security.{Encryption, SecretRefs}
+
   @default_checker_remediation "Verify provider credential checker configuration and retry setup."
   @default_not_set_remediation "Set this provider credential and retry verification."
   @default_invalid_remediation "Replace this provider credential and retry verification."
@@ -133,28 +135,43 @@ defmodule JidoCode.Setup.ProviderCredentialChecks do
       previous_verified_at = Map.get(previous_verified_ats, definition.provider)
 
       {status, detail, remediation, error_type, verified_at} =
-        case credential_value(definition) do
-          nil ->
-            {
-              :not_set,
-              definition.not_set_detail,
-              definition.not_set_remediation,
-              definition.not_set_error_type,
-              previous_verified_at
-            }
-
-          credential ->
+        case resolve_credential_value(definition) do
+          {:ok, credential, diagnostics} ->
             if definition.valid?.(credential) do
-              {:active, definition.active_detail, "Credential is active.", nil, checked_at}
+              {
+                :active,
+                with_resolution_diagnostics(definition.active_detail, diagnostics),
+                "Credential is active.",
+                nil,
+                checked_at
+              }
             else
               {
                 :invalid,
-                definition.invalid_detail,
+                with_resolution_diagnostics(definition.invalid_detail, diagnostics),
                 definition.invalid_remediation,
                 definition.invalid_error_type,
                 previous_verified_at
               }
             end
+
+          {:error, :secret_unavailable, diagnostics} ->
+            {
+              :not_set,
+              with_resolution_diagnostics(definition.not_set_detail, diagnostics),
+              definition.not_set_remediation,
+              definition.not_set_error_type,
+              previous_verified_at
+            }
+
+          {:error, :resolution_failed, diagnostics} ->
+            {
+              :invalid,
+              with_resolution_diagnostics(definition.secret_resolution_failed_detail, diagnostics),
+              definition.secret_resolution_failed_remediation,
+              definition.secret_resolution_failed_error_type,
+              previous_verified_at
+            }
         end
 
       %{
@@ -367,15 +384,22 @@ defmodule JidoCode.Setup.ProviderCredentialChecks do
         name: "Anthropic",
         env: "ANTHROPIC_API_KEY",
         app_env: :anthropic_api_key,
+        secret_ref_scope: :integration,
+        secret_ref_name: SecretRefs.provider_secret_ref_name(:anthropic),
         valid?: &valid_anthropic_key?/1,
         active_detail: "ANTHROPIC_API_KEY is configured and passed verification checks.",
         invalid_detail: "Configured ANTHROPIC_API_KEY failed verification checks.",
         invalid_remediation:
           "Set a valid `ANTHROPIC_API_KEY` (typically prefixed with `sk-ant-`) and retry verification.",
         invalid_error_type: "anthropic_credentials_invalid",
-        not_set_detail: "No ANTHROPIC_API_KEY credential is configured.",
-        not_set_remediation: "Set `ANTHROPIC_API_KEY` and retry verification.",
-        not_set_error_type: "anthropic_not_set",
+        not_set_detail: "No ANTHROPIC_API_KEY credential resolved from env root secrets or encrypted SecretRef.",
+        not_set_remediation:
+          "Set `ANTHROPIC_API_KEY` or persist encrypted SecretRef `providers/anthropic_api_key`, then retry verification.",
+        not_set_error_type: "anthropic_secret_unavailable",
+        secret_resolution_failed_detail: "ANTHROPIC_API_KEY credential resolution from encrypted SecretRef failed.",
+        secret_resolution_failed_remediation:
+          "Set `ANTHROPIC_API_KEY` or repair SecretRef `providers/anthropic_api_key`, then retry verification.",
+        secret_resolution_failed_error_type: "anthropic_secret_resolution_failed",
         rotating_error_type: "anthropic_credentials_rotating",
         checker_failed_error_type: "anthropic_provider_check_failed"
       },
@@ -384,14 +408,21 @@ defmodule JidoCode.Setup.ProviderCredentialChecks do
         name: "OpenAI",
         env: "OPENAI_API_KEY",
         app_env: :openai_api_key,
+        secret_ref_scope: :integration,
+        secret_ref_name: SecretRefs.provider_secret_ref_name(:openai),
         valid?: &valid_openai_key?/1,
         active_detail: "OPENAI_API_KEY is configured and passed verification checks.",
         invalid_detail: "Configured OPENAI_API_KEY failed verification checks.",
         invalid_remediation: "Set a valid `OPENAI_API_KEY` (typically prefixed with `sk-`) and retry verification.",
         invalid_error_type: "openai_credentials_invalid",
-        not_set_detail: "No OPENAI_API_KEY credential is configured.",
-        not_set_remediation: "Set `OPENAI_API_KEY` and retry verification.",
-        not_set_error_type: "openai_not_set",
+        not_set_detail: "No OPENAI_API_KEY credential resolved from env root secrets or encrypted SecretRef.",
+        not_set_remediation:
+          "Set `OPENAI_API_KEY` or persist encrypted SecretRef `providers/openai_api_key`, then retry verification.",
+        not_set_error_type: "openai_secret_unavailable",
+        secret_resolution_failed_detail: "OPENAI_API_KEY credential resolution from encrypted SecretRef failed.",
+        secret_resolution_failed_remediation:
+          "Set `OPENAI_API_KEY` or repair SecretRef `providers/openai_api_key`, then retry verification.",
+        secret_resolution_failed_error_type: "openai_secret_resolution_failed",
         rotating_error_type: "openai_credentials_rotating",
         checker_failed_error_type: "openai_provider_check_failed"
       }
@@ -408,19 +439,147 @@ defmodule JidoCode.Setup.ProviderCredentialChecks do
     Enum.at(providers, index, hd(providers))
   end
 
-  defp credential_value(definition) do
-    definition.env
-    |> System.get_env()
-    |> present_runtime_value()
-    |> case do
-      nil ->
-        Application.get_env(:jido_code, definition.app_env)
-        |> present_runtime_value()
+  defp resolve_credential_value(definition) do
+    case root_secret_value(definition) do
+      {:ok, credential, root_source} ->
+        {:ok, credential,
+         %{
+           selected_source: :env,
+           outcome: :resolved,
+           root_source: root_source,
+           resolution_error_type: nil,
+           env_var: definition.env,
+           secret_ref_scope: definition.secret_ref_scope,
+           secret_ref_name: definition.secret_ref_name,
+           secret_ref_key_version: nil,
+           secret_ref_source: nil
+         }}
 
-      value ->
-        value
+      :not_found ->
+        resolve_secret_ref_value(definition)
     end
   end
+
+  defp root_secret_value(definition) do
+    case System.get_env(definition.env) |> present_runtime_value() do
+      nil ->
+        case Application.get_env(:jido_code, definition.app_env) |> present_runtime_value() do
+          nil -> :not_found
+          value -> {:ok, value, :application_env}
+        end
+
+      value ->
+        {:ok, value, :system_env}
+    end
+  end
+
+  defp resolve_secret_ref_value(definition) do
+    diagnostics_base = %{
+      selected_source: :unavailable,
+      outcome: :missing,
+      root_source: :none,
+      resolution_error_type: nil,
+      env_var: definition.env,
+      secret_ref_scope: definition.secret_ref_scope,
+      secret_ref_name: definition.secret_ref_name,
+      secret_ref_key_version: nil,
+      secret_ref_source: nil
+    }
+
+    case SecretRefs.provider_credential_context(definition.provider) do
+      {:ok, context} ->
+        case decrypt_secret_ref_value(context.ciphertext) do
+          {:ok, credential} ->
+            {:ok, credential,
+             diagnostics_base
+             |> Map.put(:selected_source, :secret_ref)
+             |> Map.put(:outcome, :resolved)
+             |> Map.put(:secret_ref_key_version, context.key_version)
+             |> Map.put(:secret_ref_source, context.source)}
+
+          {:error, reason} ->
+            {:error, :resolution_failed,
+             diagnostics_base
+             |> Map.put(:selected_source, :secret_ref)
+             |> Map.put(:outcome, :error)
+             |> Map.put(:resolution_error_type, reason)}
+        end
+
+      {:error, %{error_type: "provider_credential_missing"}} ->
+        {:error, :secret_unavailable, diagnostics_base}
+
+      {:error, %{error_type: error_type}} ->
+        {:error, :resolution_failed,
+         diagnostics_base
+         |> Map.put(:selected_source, :secret_ref)
+         |> Map.put(:outcome, :error)
+         |> Map.put(:resolution_error_type, error_type)}
+
+      {:error, _reason} ->
+        {:error, :resolution_failed,
+         diagnostics_base
+         |> Map.put(:selected_source, :secret_ref)
+         |> Map.put(:outcome, :error)
+         |> Map.put(:resolution_error_type, :provider_credential_unavailable)}
+    end
+  end
+
+  defp decrypt_secret_ref_value(ciphertext) do
+    with {:ok, decrypted_value} <- Encryption.decrypt(ciphertext),
+         value when is_binary(value) <- present_runtime_value(decrypted_value) do
+      {:ok, value}
+    else
+      nil ->
+        {:error, :secret_ref_empty}
+
+      {:error, :decryption_config_unavailable} ->
+        {:error, :secret_ref_decryption_unavailable}
+
+      {:error, :decryption_failed} ->
+        {:error, :secret_ref_decryption_failed}
+
+      {:error, reason} ->
+        {:error, reason}
+
+      _other ->
+        {:error, :secret_ref_decryption_failed}
+    end
+  end
+
+  defp with_resolution_diagnostics(detail, diagnostics) do
+    String.trim("#{detail} #{resolution_diagnostics(diagnostics)}")
+  end
+
+  defp resolution_diagnostics(diagnostics) do
+    fields =
+      [
+        {:source, Map.get(diagnostics, :selected_source)},
+        {:outcome, Map.get(diagnostics, :outcome)},
+        {:root_source, Map.get(diagnostics, :root_source)},
+        {:env_var, Map.get(diagnostics, :env_var)},
+        {:secret_ref_scope, Map.get(diagnostics, :secret_ref_scope)},
+        {:secret_ref_name, Map.get(diagnostics, :secret_ref_name)},
+        {:secret_ref_key_version, Map.get(diagnostics, :secret_ref_key_version)},
+        {:secret_ref_source, Map.get(diagnostics, :secret_ref_source)},
+        {:resolution_error_type, Map.get(diagnostics, :resolution_error_type)}
+      ]
+
+    fields
+    |> Enum.flat_map(fn
+      {_field, nil} ->
+        []
+
+      {field, value} ->
+        ["#{field}=#{format_diagnostic_value(value)}"]
+    end)
+    |> Enum.join(" ")
+    |> then(&"[resolution #{&1}]")
+  end
+
+  defp format_diagnostic_value(value) when is_atom(value), do: Atom.to_string(value)
+  defp format_diagnostic_value(value) when is_integer(value), do: Integer.to_string(value)
+  defp format_diagnostic_value(value) when is_binary(value), do: value
+  defp format_diagnostic_value(value), do: inspect(value)
 
   defp valid_anthropic_key?(value), do: String.starts_with?(value, "sk-ant-")
 

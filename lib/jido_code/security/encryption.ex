@@ -30,6 +30,34 @@ defmodule JidoCode.Security.Encryption do
 
   def encrypt(_value), do: {:error, :encryption_failed}
 
+  @spec decrypt(String.t()) :: {:ok, String.t()} | {:error, atom()}
+  def decrypt(encoded_ciphertext) when is_binary(encoded_ciphertext) do
+    with {:ok, key} <- fetch_key(),
+         {:ok, ciphertext} <- decode_ciphertext(encoded_ciphertext),
+         {:ok, value} <- GCM.decrypt(ciphertext, key: key, tag: @aad_tag, iv_length: @iv_length) do
+      {:ok, value}
+    else
+      {:error, :missing_key} ->
+        {:error, :decryption_config_unavailable}
+
+      {:error, :invalid_key} ->
+        {:error, :decryption_config_unavailable}
+
+      {:error, :invalid_ciphertext} ->
+        {:error, :decryption_failed}
+
+      :error ->
+        {:error, :decryption_failed}
+
+      {:error, _reason} ->
+        {:error, :decryption_failed}
+    end
+  rescue
+    _error -> {:error, :decryption_failed}
+  end
+
+  def decrypt(_encoded_ciphertext), do: {:error, :decryption_failed}
+
   defp fetch_key do
     case Application.get_env(:jido_code, :secret_ref_encryption_key) do
       key when is_binary(key) ->
@@ -50,6 +78,13 @@ defmodule JidoCode.Security.Encryption do
 
       :error ->
         {:error, :invalid_key}
+    end
+  end
+
+  defp decode_ciphertext(encoded_ciphertext) do
+    case Base.decode64(encoded_ciphertext) do
+      {:ok, ciphertext} -> {:ok, ciphertext}
+      :error -> {:error, :invalid_ciphertext}
     end
   end
 end
