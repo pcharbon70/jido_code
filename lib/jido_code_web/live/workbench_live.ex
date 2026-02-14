@@ -1,7 +1,7 @@
 defmodule JidoCodeWeb.WorkbenchLive do
   use JidoCodeWeb, :live_view
 
-  alias JidoCode.Workbench.Inventory
+  alias JidoCode.Workbench.{FixWorkflowKickoff, Inventory}
 
   @fallback_row_id_prefix "workbench-row-"
   @filter_validation_error_type "workbench_filter_values_invalid"
@@ -55,6 +55,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
       |> assign(:stale_warning, nil)
       |> assign(:filter_validation_notice, nil)
       |> assign(:sort_validation_notice, nil)
+      |> assign(:fix_workflow_kickoff_states, %{})
       |> assign(:filter_values, initial_filter_values)
       |> assign(:filter_form, to_filter_form(initial_filter_values))
       |> assign(:filter_chips, filter_chips(initial_filter_values, []))
@@ -79,7 +80,10 @@ defmodule JidoCodeWeb.WorkbenchLive do
       {:error, field, invalid_value} ->
         socket =
           socket
-          |> assign(:filter_validation_notice, filter_restore_validation_notice(field, invalid_value))
+          |> assign(
+            :filter_validation_notice,
+            filter_restore_validation_notice(field, invalid_value)
+          )
           |> apply_filters(@default_filter_values)
 
         {:noreply, socket}
@@ -110,6 +114,34 @@ defmodule JidoCodeWeb.WorkbenchLive do
       socket
       |> apply_invalid_filter_defaults("filters", "missing")
       |> push_filter_state_patch()
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "kickoff_fix_workflow",
+        %{"project_id" => project_id, "context_item_type" => context_item_type},
+        socket
+      ) do
+    project_row = find_project_row(socket.assigns.inventory_rows_all, project_id)
+    kickoff_result = FixWorkflowKickoff.kickoff(project_row, context_item_type)
+
+    state_project_id =
+      case project_row do
+        %{} ->
+          project_row
+          |> map_get("id", :id)
+          |> normalize_optional_string()
+
+        _other ->
+          nil
+      end || normalize_optional_string(project_id) || "unknown-project"
+
+    socket =
+      socket
+      |> put_fix_workflow_kickoff_state(state_project_id, context_item_type, kickoff_result)
+      |> refresh_project_row(project_row)
 
     {:noreply, socket}
   end
@@ -304,6 +336,26 @@ defmodule JidoCodeWeb.WorkbenchLive do
                       target={project_detail_path(project, @filter_values)}
                       disabled_reason={project_detail_unavailable_reason()}
                     />
+                    <button
+                      id={"workbench-project-issues-fix-action-#{project.id}"}
+                      type="button"
+                      class="btn btn-xs btn-outline btn-primary w-fit mt-1"
+                      phx-click="kickoff_fix_workflow"
+                      phx-value-project_id={project.id}
+                      phx-value-context_item_type="issue"
+                    >
+                      Kick off fix workflow
+                    </button>
+                    <.fix_workflow_kickoff_feedback
+                      feedback={
+                        fix_workflow_kickoff_feedback(
+                          @fix_workflow_kickoff_states,
+                          project.id,
+                          :issue
+                        )
+                      }
+                      dom_prefix={"workbench-project-issues-fix-#{project.id}"}
+                    />
                   </div>
                 </div>
                 <div id={"workbench-project-prs-links-#{project.id}"}>
@@ -325,6 +377,26 @@ defmodule JidoCodeWeb.WorkbenchLive do
                       label="Project detail"
                       target={project_detail_path(project, @filter_values)}
                       disabled_reason={project_detail_unavailable_reason()}
+                    />
+                    <button
+                      id={"workbench-project-prs-fix-action-#{project.id}"}
+                      type="button"
+                      class="btn btn-xs btn-outline btn-primary w-fit mt-1"
+                      phx-click="kickoff_fix_workflow"
+                      phx-value-project_id={project.id}
+                      phx-value-context_item_type="pull_request"
+                    >
+                      Kick off fix workflow
+                    </button>
+                    <.fix_workflow_kickoff_feedback
+                      feedback={
+                        fix_workflow_kickoff_feedback(
+                          @fix_workflow_kickoff_states,
+                          project.id,
+                          :pull_request
+                        )
+                      }
+                      dom_prefix={"workbench-project-prs-fix-#{project.id}"}
                     />
                   </div>
                 </div>
@@ -416,7 +488,10 @@ defmodule JidoCodeWeb.WorkbenchLive do
     |> assign(:sort_validation_notice, sort_validation_notice)
     |> assign(:filter_values, applied_filter_values)
     |> assign(:filter_form, to_filter_form(applied_filter_values))
-    |> assign(:filter_chips, filter_chips(applied_filter_values, socket.assigns.inventory_rows_all))
+    |> assign(
+      :filter_chips,
+      filter_chips(applied_filter_values, socket.assigns.inventory_rows_all)
+    )
     |> assign(:project_filter_options, project_options)
     |> stream(:inventory_rows, sorted_rows, reset: true)
   end
@@ -838,7 +913,8 @@ defmodule JidoCodeWeb.WorkbenchLive do
     requested_sort_label =
       option_label(@sort_order_options, requested_sort_order, requested_sort_order)
 
-    fallback_sort_label = option_label(@sort_order_options, fallback_sort_order, fallback_sort_order)
+    fallback_sort_label =
+      option_label(@sort_order_options, fallback_sort_order, fallback_sort_order)
 
     %{
       error_type: @sort_validation_error_type,
@@ -849,7 +925,10 @@ defmodule JidoCodeWeb.WorkbenchLive do
   end
 
   defp sort_failure_reason(:malformed_backlog_data), do: "malformed backlog fields were detected"
-  defp sort_failure_reason(:malformed_recent_activity_data), do: "malformed activity fields were detected"
+
+  defp sort_failure_reason(:malformed_recent_activity_data),
+    do: "malformed activity fields were detected"
+
   defp sort_failure_reason(:unknown_sort_order), do: "unsupported sort value was submitted"
   defp sort_failure_reason(_reason), do: "sorting metadata validation failed"
 
@@ -896,6 +975,90 @@ defmodule JidoCodeWeb.WorkbenchLive do
       Map.has_key?(map, atom_key) -> Map.get(map, atom_key)
       true -> nil
     end
+  end
+
+  defp find_project_row(rows, project_id) when is_list(rows) do
+    normalized_project_id = normalize_optional_string(project_id)
+
+    Enum.find(rows, fn row ->
+      row
+      |> map_get("id", :id)
+      |> normalize_optional_string() == normalized_project_id
+    end)
+  end
+
+  defp find_project_row(_rows, _project_id), do: nil
+
+  defp put_fix_workflow_kickoff_state(socket, project_id, context_item_type, kickoff_result) do
+    state_key = fix_workflow_kickoff_state_key(project_id, context_item_type)
+
+    state_value =
+      case kickoff_result do
+        {:ok, kickoff_run} ->
+          %{status: :ok, run: kickoff_run}
+
+        {:error, kickoff_error} ->
+          %{status: :error, error: kickoff_error}
+      end
+
+    update(socket, :fix_workflow_kickoff_states, &Map.put(&1, state_key, state_value))
+  end
+
+  defp refresh_project_row(socket, project_row) when is_map(project_row) do
+    stream_insert(socket, :inventory_rows, project_row)
+  end
+
+  defp refresh_project_row(socket, _project_row), do: socket
+
+  defp fix_workflow_kickoff_feedback(states, project_id, context_item_type) when is_map(states) do
+    Map.get(states, fix_workflow_kickoff_state_key(project_id, context_item_type))
+  end
+
+  defp fix_workflow_kickoff_feedback(_states, _project_id, _context_item_type), do: nil
+
+  defp fix_workflow_kickoff_state_key(project_id, context_item_type) do
+    normalized_project_id = normalize_optional_string(project_id) || "unknown-project"
+    normalized_context_item_type = normalize_context_item_type_for_state_key(context_item_type)
+    "#{normalized_project_id}:#{normalized_context_item_type}"
+  end
+
+  defp normalize_context_item_type_for_state_key(:issue), do: :issue
+  defp normalize_context_item_type_for_state_key("issue"), do: :issue
+  defp normalize_context_item_type_for_state_key(:pull_request), do: :pull_request
+  defp normalize_context_item_type_for_state_key("pull_request"), do: :pull_request
+  defp normalize_context_item_type_for_state_key(_context_item_type), do: :unknown
+
+  attr(:feedback, :map, default: nil)
+  attr(:dom_prefix, :string, required: true)
+
+  defp fix_workflow_kickoff_feedback(assigns) do
+    ~H"""
+    <section :if={@feedback} id={"#{@dom_prefix}-feedback"} class="space-y-1 pt-1">
+      <%= case @feedback.status do %>
+        <% :ok -> %>
+          <p id={"#{@dom_prefix}-run-id"} class="text-[11px] text-success">
+            Run: <span class="font-mono">{@feedback.run.run_id}</span>
+          </p>
+          <.link
+            id={"#{@dom_prefix}-run-link"}
+            class="link link-primary text-[11px]"
+            href={@feedback.run.detail_path}
+          >
+            Open run detail
+          </.link>
+        <% :error -> %>
+          <p id={"#{@dom_prefix}-error-type"} class="text-[11px] text-error">
+            Typed kickoff error: {@feedback.error.error_type}
+          </p>
+          <p id={"#{@dom_prefix}-error-detail"} class="text-[11px] text-error">
+            {@feedback.error.detail}
+          </p>
+          <p id={"#{@dom_prefix}-error-remediation"} class="text-[11px] text-base-content/60">
+            {@feedback.error.remediation}
+          </p>
+      <% end %>
+    </section>
+    """
   end
 
   attr(:link_id, :string, required: true)

@@ -11,6 +11,9 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     original_workbench_loader =
       Application.get_env(:jido_code, :workbench_inventory_loader, :__missing__)
 
+    original_fix_workflow_launcher =
+      Application.get_env(:jido_code, :workbench_fix_workflow_launcher, :__missing__)
+
     original_system_config_loader =
       Application.get_env(:jido_code, :system_config_loader, :__missing__)
 
@@ -27,6 +30,7 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
 
     on_exit(fn ->
       restore_env(:workbench_inventory_loader, original_workbench_loader)
+      restore_env(:workbench_fix_workflow_launcher, original_fix_workflow_launcher)
       restore_env(:system_config_loader, original_system_config_loader)
     end)
 
@@ -288,6 +292,157 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     refute has_element?(view, "[id^='workbench-project-prs-project-link-workbench-row-']")
   end
 
+  test "issue and PR quick actions kick off fix workflow runs with tracked run links", %{
+    conn: _conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-fixable",
+        github_full_name: "owner/repo-fixable",
+        default_branch: "main",
+        settings: %{
+          "inventory" => %{
+            "open_issue_count" => 5,
+            "open_pr_count" => 2,
+            "recent_activity_summary" => "Actionable queue."
+          }
+        }
+      })
+
+    project_id = project.id
+    launcher_requests = start_supervised!({Agent, fn -> [] end})
+
+    Application.put_env(:jido_code, :workbench_fix_workflow_launcher, fn kickoff_request ->
+      Agent.update(launcher_requests, fn requests -> [kickoff_request | requests] end)
+
+      run_id =
+        case kickoff_request.context_item.type do
+          :issue -> "run-issue-123"
+          :pull_request -> "run-pr-456"
+        end
+
+      {:ok, %{run_id: run_id}}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    assert has_element?(view, "#workbench-project-issues-fix-action-#{project_id}")
+    assert has_element?(view, "#workbench-project-prs-fix-action-#{project_id}")
+
+    view
+    |> element("#workbench-project-issues-fix-action-#{project_id}")
+    |> render_click()
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-fix-#{project_id}-run-id",
+             "run-issue-123"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-fix-#{project_id}-run-link[href='/projects/#{project_id}/runs/run-issue-123']"
+           )
+
+    refute has_element?(view, "#workbench-project-issues-fix-#{project_id}-error-type")
+
+    view
+    |> element("#workbench-project-prs-fix-action-#{project_id}")
+    |> render_click()
+
+    assert has_element?(view, "#workbench-project-prs-fix-#{project_id}-run-id", "run-pr-456")
+
+    assert has_element?(
+             view,
+             "#workbench-project-prs-fix-#{project_id}-run-link[href='/projects/#{project_id}/runs/run-pr-456']"
+           )
+
+    refute has_element?(view, "#workbench-project-prs-fix-#{project_id}-error-type")
+
+    recorded_requests = launcher_requests |> Agent.get(&Enum.reverse(&1))
+
+    assert [
+             %{
+               project_id: ^project_id,
+               workflow_name: "fix_failing_tests",
+               context_item: %{type: :issue}
+             },
+             %{
+               project_id: ^project_id,
+               workflow_name: "fix_failing_tests",
+               context_item: %{type: :pull_request}
+             }
+           ] = recorded_requests
+  end
+
+  test "inline kickoff validation failures render details and do not create runs", %{
+    conn: _conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
+      {:ok,
+       [
+         %{
+           id: "",
+           name: "repo-without-id",
+           github_full_name: "owner/repo-without-id",
+           open_issue_count: 1,
+           open_pr_count: 1,
+           recent_activity_summary: "Missing project scope."
+         }
+       ], nil}
+    end)
+
+    launcher_invocations = start_supervised!({Agent, fn -> 0 end})
+
+    Application.put_env(:jido_code, :workbench_fix_workflow_launcher, fn _kickoff_request ->
+      Agent.update(launcher_invocations, &(&1 + 1))
+      {:ok, %{run_id: "unexpected-run"}}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    assert has_element?(view, "[id^='workbench-project-issues-fix-action-workbench-row-']")
+    assert has_element?(view, "[id^='workbench-project-prs-fix-action-workbench-row-']")
+
+    view
+    |> element("[id^='workbench-project-issues-fix-action-workbench-row-']")
+    |> render_click()
+
+    assert has_element?(
+             view,
+             "[id^='workbench-project-issues-fix-workbench-row-'][id$='-error-type']",
+             "workbench_fix_workflow_validation_failed"
+           )
+
+    assert has_element?(
+             view,
+             "[id^='workbench-project-issues-fix-workbench-row-'][id$='-error-detail']",
+             "synthetic"
+           )
+
+    assert has_element?(
+             view,
+             "[id^='workbench-project-issues-fix-workbench-row-'][id$='-error-remediation']"
+           )
+
+    refute has_element?(
+             view,
+             "[id^='workbench-project-issues-fix-workbench-row-'][id$='-run-id']"
+           )
+
+    assert Agent.get(launcher_invocations, & &1) == 0
+  end
+
   test "applies project, state, and freshness filters without route changes", %{conn: _conn} do
     register_owner("owner@example.com", "owner-password-123")
 
@@ -433,7 +588,12 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     apply_workbench_filters(view, %{"sort_order" => "recent_activity_desc"})
 
     assert_project_row_order(view, ["owner-repo-gamma", "owner-repo-alpha", "owner-repo-beta"])
-    assert has_element?(view, "#workbench-filter-chip-sort-order", "Recent activity (most recent first)")
+
+    assert has_element?(
+             view,
+             "#workbench-filter-chip-sort-order",
+             "Recent activity (most recent first)"
+           )
   end
 
   test "keeps selected sort order after retry refresh events", %{conn: _conn} do
@@ -571,7 +731,12 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
 
     assert has_element?(view, "#workbench-sort-validation-detail", "Backlog size (highest first)")
     assert has_element?(view, "#workbench-filter-chip-sort-order", "Project name (A-Z)")
-    assert has_element?(view, "#workbench-filter-sort-order option[value='project_name_asc'][selected]")
+
+    assert has_element?(
+             view,
+             "#workbench-filter-sort-order option[value='project_name_asc'][selected]"
+           )
+
     assert_project_row_order(view, ["owner-repo-beta", "workbench-row-2"])
   end
 
@@ -634,7 +799,11 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     assert has_element?(view, "#workbench-filter-project option[value='all'][selected]")
     assert has_element?(view, "#workbench-filter-work-state option[value='all'][selected]")
     assert has_element?(view, "#workbench-filter-freshness-window option[value='any'][selected]")
-    assert has_element?(view, "#workbench-filter-sort-order option[value='project_name_asc'][selected]")
+
+    assert has_element?(
+             view,
+             "#workbench-filter-sort-order option[value='project_name_asc'][selected]"
+           )
   end
 
   test "preserves filter and sort state across navigation context and restores from workbench URL",
@@ -698,18 +867,45 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
              "#workbench-project-prs-project-link-owner-repo-beta[href='/projects/owner-repo-beta?return_to=#{encoded_return_to}']"
            )
 
-    {:ok, restored_view, _html} = live(recycle(authed_conn), workbench_state_path, on_error: :warn)
+    {:ok, restored_view, _html} =
+      live(recycle(authed_conn), workbench_state_path, on_error: :warn)
 
     assert has_element?(restored_view, "#workbench-project-name-owner-repo-beta")
     refute has_element?(restored_view, "#workbench-project-name-owner-repo-alpha")
     assert has_element?(restored_view, "#workbench-filter-chip-project", "owner/repo-beta")
     assert has_element?(restored_view, "#workbench-filter-chip-work-state", "PRs open")
-    assert has_element?(restored_view, "#workbench-filter-chip-freshness-window", "Active in last 24 hours")
-    assert has_element?(restored_view, "#workbench-filter-chip-sort-order", "Recent activity (most recent first)")
-    assert has_element?(restored_view, "#workbench-filter-project option[value='owner-repo-beta'][selected]")
-    assert has_element?(restored_view, "#workbench-filter-work-state option[value='prs_open'][selected]")
-    assert has_element?(restored_view, "#workbench-filter-freshness-window option[value='active_24h'][selected]")
-    assert has_element?(restored_view, "#workbench-filter-sort-order option[value='recent_activity_desc'][selected]")
+
+    assert has_element?(
+             restored_view,
+             "#workbench-filter-chip-freshness-window",
+             "Active in last 24 hours"
+           )
+
+    assert has_element?(
+             restored_view,
+             "#workbench-filter-chip-sort-order",
+             "Recent activity (most recent first)"
+           )
+
+    assert has_element?(
+             restored_view,
+             "#workbench-filter-project option[value='owner-repo-beta'][selected]"
+           )
+
+    assert has_element?(
+             restored_view,
+             "#workbench-filter-work-state option[value='prs_open'][selected]"
+           )
+
+    assert has_element?(
+             restored_view,
+             "#workbench-filter-freshness-window option[value='active_24h'][selected]"
+           )
+
+    assert has_element?(
+             restored_view,
+             "#workbench-filter-sort-order option[value='recent_activity_desc'][selected]"
+           )
   end
 
   test "invalid restored workbench state falls back to defaults with a reset reason notice", %{
@@ -765,7 +961,12 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     assert has_element?(view, "#workbench-filter-project option[value='all'][selected]")
     assert has_element?(view, "#workbench-filter-work-state option[value='all'][selected]")
     assert has_element?(view, "#workbench-filter-freshness-window option[value='any'][selected]")
-    assert has_element?(view, "#workbench-filter-sort-order option[value='project_name_asc'][selected]")
+
+    assert has_element?(
+             view,
+             "#workbench-filter-sort-order option[value='project_name_asc'][selected]"
+           )
+
     assert has_element?(view, "#workbench-project-name-owner-repo-one", "owner/repo-one")
     assert has_element?(view, "#workbench-project-name-owner-repo-two", "owner/repo-two")
   end
