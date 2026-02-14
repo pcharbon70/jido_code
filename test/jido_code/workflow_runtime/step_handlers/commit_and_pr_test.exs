@@ -3,7 +3,7 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
 
   alias JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR
 
-  test "execute derives deterministic branch names and persists workspace cleanliness policy checks" do
+  test "execute derives deterministic branch names and persists workspace and secret scan policy checks" do
     branch_setup_calls = start_supervised!({Agent, fn -> [] end})
 
     branch_setup_runner = fn branch_context ->
@@ -59,7 +59,30 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
              operation: "validate_workspace_cleanliness"
            } = first_result.run_artifacts.policy_checks.workspace_cleanliness.step_metadata
 
-    assert first_result.shipping_flow.completed_stage == "workspace_policy_check"
+    assert %{
+             id: "secret_scan",
+             name: "Secret scan policy check",
+             status: "passed",
+             scan_status: "clean",
+             violation_count: 0,
+             blocked_actions: [],
+             blocked_action_details: []
+           } = first_result.run_artifacts.policy_checks.secret_scan
+
+    assert %{
+             workflow_name: "Implement Task",
+             run_id: "RUN-12345",
+             branch_name: "jidocode/implement-task/run-12345",
+             environment_mode: "cloud"
+           } = first_result.run_artifacts.policy_checks.secret_scan.run_metadata
+
+    assert %{
+             step: "CommitAndPR",
+             stage: "pre_ship_secret_scan_policy",
+             operation: "validate_secret_scan"
+           } = first_result.run_artifacts.policy_checks.secret_scan.step_metadata
+
+    assert first_result.shipping_flow.completed_stage == "secret_scan_policy_check"
     assert first_result.shipping_flow.next_stage == "commit_changes"
 
     recorded_calls = branch_setup_calls |> Agent.get(&Enum.reverse(&1))
@@ -129,8 +152,12 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
 
     assert beta_result.run_artifacts.branch_name == "jidocode/fix-failing-tests/#{beta_short_id}"
 
-    assert alpha_result.run_artifacts.policy_checks.workspace_cleanliness.environment_mode == "local"
+    assert alpha_result.run_artifacts.policy_checks.workspace_cleanliness.environment_mode ==
+             "local"
+
     assert alpha_result.run_artifacts.policy_checks.workspace_cleanliness.status == "passed"
+    assert alpha_result.run_artifacts.policy_checks.secret_scan.status == "passed"
+    assert alpha_result.run_artifacts.policy_checks.secret_scan.scan_status == "clean"
   end
 
   test "branch collision retries once with deterministic suffix and non-destructive behavior" do
@@ -186,7 +213,8 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
              force_push: false
            } = first_result.run_artifacts.collision_handling
 
-    assert first_result.branch_setup.collision_handling == first_result.run_artifacts.collision_handling
+    assert first_result.branch_setup.collision_handling ==
+             first_result.run_artifacts.collision_handling
 
     recorded_calls = branch_setup_calls |> Agent.get(&Enum.reverse(&1))
 
@@ -345,6 +373,136 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
              stage: "pre_ship_workspace_policy",
              operation: "validate_workspace_cleanliness"
            } = typed_error.policy_check.step_metadata
+
+    assert Agent.get(commit_probe_calls, & &1) == 0
+  end
+
+  test "secret scan executes before commit probe in shipping path" do
+    ordered_calls = start_supervised!({Agent, fn -> [] end})
+
+    secret_scan_runner = fn _args, _branch_context ->
+      Agent.update(ordered_calls, fn calls -> [:secret_scan | calls] end)
+      {:ok, %{status: "passed", scan_status: "clean", violation_count: 0}}
+    end
+
+    commit_probe = fn _branch_context ->
+      Agent.update(ordered_calls, fn calls -> [:commit_probe | calls] end)
+    end
+
+    {:ok, result} =
+      CommitAndPR.execute(
+        nil,
+        %{workflow_name: "implement_task", run_id: "run-secret-order-01", workspace_clean: true},
+        branch_setup_runner: fn _branch_context -> :ok end,
+        secret_scan_runner: secret_scan_runner,
+        commit_probe: commit_probe
+      )
+
+    assert result.policy_checks.secret_scan.status == "passed"
+    assert result.policy_checks.secret_scan.scan_status == "clean"
+
+    assert ordered_calls
+           |> Agent.get(&Enum.reverse(&1))
+           |> Enum.take(2) == [:secret_scan, :commit_probe]
+  end
+
+  test "secret scan violations block shipping with policy_violation and blocked action details" do
+    commit_probe_calls = start_supervised!({Agent, fn -> 0 end})
+
+    commit_probe = fn _branch_context ->
+      Agent.update(commit_probe_calls, &(&1 + 1))
+    end
+
+    assert {:error, typed_error} =
+             CommitAndPR.execute(
+               nil,
+               %{
+                 workflow_name: "implement_task",
+                 run_id: "run-secret-block-01",
+                 workspace_clean: true
+               },
+               branch_setup_runner: fn _branch_context -> :ok end,
+               secret_scan_runner: fn _args, _branch_context ->
+                 {:ok,
+                  %{
+                    status: "failed",
+                    scan_status: "violations_detected",
+                    violation_count: 2,
+                    findings: [
+                      %{path: "lib/example.ex", rule: "github_token"},
+                      %{path: "config/runtime.exs", rule: "api_key"}
+                    ],
+                    detail: "Secret scan detected plaintext credentials."
+                  }}
+               end,
+               commit_probe: commit_probe
+             )
+
+    assert typed_error.error_type == "workflow_commit_and_pr_secret_scan_policy_failed"
+    assert typed_error.operation == "validate_secret_scan"
+    assert typed_error.reason_type == "policy_violation"
+    assert typed_error.blocked_stage == "commit_changes"
+    assert typed_error.blocked_actions == ["commit", "push", "create_pr"]
+    assert typed_error.halted_before_commit == true
+    assert typed_error.halted_before_push == true
+    assert typed_error.halted_before_pr == true
+
+    assert %{
+             id: "secret_scan",
+             status: "failed",
+             scan_status: "violations_detected",
+             violation_count: 2,
+             blocked_actions: ["commit", "push", "create_pr"]
+           } = typed_error.policy_check
+
+    assert Enum.map(typed_error.policy_check.blocked_action_details, & &1.action) ==
+             ["commit", "push", "create_pr"]
+
+    assert Enum.all?(typed_error.policy_check.blocked_action_details, fn action_detail ->
+             action_detail.blocked == true and action_detail.reason == "secret_scan_violation"
+           end)
+
+    assert Agent.get(commit_probe_calls, & &1) == 0
+  end
+
+  test "secret scan tooling errors fail closed and no commit probe is executed" do
+    commit_probe_calls = start_supervised!({Agent, fn -> 0 end})
+
+    commit_probe = fn _branch_context ->
+      Agent.update(commit_probe_calls, &(&1 + 1))
+    end
+
+    assert {:error, typed_error} =
+             CommitAndPR.execute(
+               nil,
+               %{
+                 workflow_name: "implement_task",
+                 run_id: "run-secret-tooling-01",
+                 workspace_clean: true
+               },
+               branch_setup_runner: fn _branch_context -> :ok end,
+               secret_scan_runner: fn _args, _branch_context ->
+                 {:error, %{reason_type: "scanner_timeout", detail: "secret scan timed out"}}
+               end,
+               commit_probe: commit_probe
+             )
+
+    assert typed_error.error_type == "workflow_commit_and_pr_secret_scan_policy_failed"
+    assert typed_error.operation == "validate_secret_scan"
+    assert typed_error.reason_type == "policy_violation"
+    assert typed_error.blocked_actions == ["commit", "push", "create_pr"]
+    assert typed_error.halted_before_commit == true
+    assert typed_error.halted_before_push == true
+    assert typed_error.halted_before_pr == true
+    assert typed_error.policy_check.status == "failed"
+    assert typed_error.policy_check.scan_status == "tooling_error"
+
+    assert Enum.map(typed_error.policy_check.blocked_action_details, & &1.reason) ==
+             [
+               "secret_scan_tooling_error",
+               "secret_scan_tooling_error",
+               "secret_scan_tooling_error"
+             ]
 
     assert Agent.get(commit_probe_calls, & &1) == 0
   end

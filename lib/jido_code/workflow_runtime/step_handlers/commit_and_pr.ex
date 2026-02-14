@@ -1,6 +1,6 @@
 defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
   @moduledoc """
-  Handles the `CommitAndPR` shipping step branch setup phase.
+  Handles the `CommitAndPR` shipping step branch setup and pre-ship policy phases.
 
   This MVP implementation derives deterministic run branch names using
   `jidocode/<workflow>/<short-run-id>`, attempts branch setup, and returns
@@ -47,6 +47,17 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
   @workspace_policy_check_name "Workspace cleanliness policy check"
   @workspace_policy_mode "clean_room"
   @required_workspace_state "clean"
+  @secret_scan_policy_error_type "workflow_commit_and_pr_secret_scan_policy_failed"
+  @secret_scan_policy_operation "validate_secret_scan"
+  @secret_scan_policy_stage "pre_ship_secret_scan_policy"
+  @secret_scan_policy_remediation """
+  Remove detected secrets or restore secret-scan tooling health, then retry CommitAndPR shipping.
+  """
+  @secret_scan_check_id "secret_scan"
+  @secret_scan_check_name "Secret scan policy check"
+  @secret_scan_clean_state "clean"
+  @secret_scan_violation_state "violations_detected"
+  @secret_scan_tooling_error_state "tooling_error"
   @blocked_shipping_actions ["commit", "push", "create_pr"]
 
   @impl true
@@ -55,7 +66,9 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
          {:ok, %{branch_context: resolved_branch_context, branch_setup: branch_setup}} <-
            setup_branch(branch_context, opts),
          {:ok, workspace_policy_check} <-
-           validate_workspace_cleanliness(args, resolved_branch_context) do
+           validate_workspace_cleanliness(args, resolved_branch_context),
+         {:ok, secret_scan_policy_check} <-
+           validate_secret_scan(args, resolved_branch_context, opts) do
       maybe_probe_commit(resolved_branch_context, opts)
 
       {:ok,
@@ -65,15 +78,17 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
            branch_derivation: Map.fetch!(resolved_branch_context, :branch_derivation),
            collision_handling: branch_setup |> map_get(:collision_handling, "collision_handling") |> normalize_map(),
            policy_checks: %{
-             workspace_cleanliness: workspace_policy_check
+             workspace_cleanliness: workspace_policy_check,
+             secret_scan: secret_scan_policy_check
            }
          },
          branch_setup: branch_setup,
          policy_checks: %{
-           workspace_cleanliness: workspace_policy_check
+           workspace_cleanliness: workspace_policy_check,
+           secret_scan: secret_scan_policy_check
          },
          shipping_flow: %{
-           completed_stage: "workspace_policy_check",
+           completed_stage: "secret_scan_policy_check",
            next_stage: "commit_changes"
          }
        }}
@@ -202,7 +217,8 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
   end
 
   defp maybe_retry_branch_collision(branch_setup_runner, branch_context, first_failure)
-       when is_function(branch_setup_runner, 1) and is_map(branch_context) and is_map(first_failure) do
+       when is_function(branch_setup_runner, 1) and is_map(branch_context) and
+              is_map(first_failure) do
     first_failure_reason = map_get(first_failure, :reason, "reason")
 
     if branch_collision_reason?(first_failure_reason) do
@@ -312,7 +328,9 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
 
   defp build_collision_retry_branch_context(branch_context, first_failure)
        when is_map(branch_context) and is_map(first_failure) do
-    source_branch_name = branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
+    source_branch_name =
+      branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
+
     retry_suffix = branch_collision_retry_suffix(source_branch_name)
     retry_branch_name = build_collision_retry_branch_name(source_branch_name, retry_suffix)
 
@@ -342,10 +360,18 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
 
   defp build_collision_retry_branch_context(branch_context, _first_failure), do: branch_context
 
-  defp merge_collision_retry_success(retry_branch_setup, branch_context, retry_branch_context, first_failure)
+  defp merge_collision_retry_success(
+         retry_branch_setup,
+         branch_context,
+         retry_branch_context,
+         first_failure
+       )
        when is_map(retry_branch_context) and is_map(first_failure) do
-    source_branch_name = branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
-    retry_branch_name = retry_branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
+    source_branch_name =
+      branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
+
+    retry_branch_name =
+      retry_branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
 
     retry_branch_setup
     |> normalize_map()
@@ -357,8 +383,13 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     )
   end
 
-  defp merge_collision_retry_success(retry_branch_setup, _branch_context, _retry_branch_context, _first_failure),
-    do: normalize_map(retry_branch_setup)
+  defp merge_collision_retry_success(
+         retry_branch_setup,
+         _branch_context,
+         _retry_branch_context,
+         _first_failure
+       ),
+       do: normalize_map(retry_branch_setup)
 
   defp branch_collision_retry_error(
          branch_context,
@@ -368,8 +399,12 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
        )
        when is_map(branch_context) and is_map(retry_branch_context) and is_map(first_failure) and
               is_map(retry_failure) do
-    source_branch_name = branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
-    retry_branch_name = retry_branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
+    source_branch_name =
+      branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
+
+    retry_branch_name =
+      retry_branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string()
+
     retry_reason = map_get(retry_failure, :reason, "reason")
 
     branch_setup_error(
@@ -434,7 +469,8 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     _exception -> []
   end
 
-  defp branch_collision_retry_suffix(branch_name) when is_binary(branch_name) and branch_name != "" do
+  defp branch_collision_retry_suffix(branch_name)
+       when is_binary(branch_name) and branch_name != "" do
     hash =
       "collision:#{branch_name}"
       |> then(&:crypto.hash(:sha256, &1))
@@ -463,7 +499,12 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
   defp build_collision_retry_branch_name(source_branch_name, _retry_suffix),
     do: source_branch_name
 
-  defp collision_handling_context(source_branch_name, retry_branch_name, first_failure, retry_failure)
+  defp collision_handling_context(
+         source_branch_name,
+         retry_branch_name,
+         first_failure,
+         retry_failure
+       )
        when is_map(first_failure) do
     %{
       collision_detected: true,
@@ -480,7 +521,12 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     |> maybe_add_retry_failure_context(retry_failure)
   end
 
-  defp collision_handling_context(source_branch_name, retry_branch_name, _first_failure, _retry_failure) do
+  defp collision_handling_context(
+         source_branch_name,
+         retry_branch_name,
+         _first_failure,
+         _retry_failure
+       ) do
     %{
       collision_detected: true,
       strategy: @branch_collision_retry_strategy,
@@ -500,7 +546,10 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
       :retry_failure_reason_type,
       retry_failure |> map_get(:reason_type, "reason_type") |> normalize_reason_type()
     )
-    |> Map.put(:retry_failure_reason, retry_failure |> map_get(:reason, "reason") |> format_failure_reason())
+    |> Map.put(
+      :retry_failure_reason,
+      retry_failure |> map_get(:reason, "reason") |> format_failure_reason()
+    )
   end
 
   defp maybe_add_retry_failure_context(collision_handling_context, _retry_failure),
@@ -516,7 +565,11 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
       {:error,
        workspace_policy_error(
          workspace_policy_reason_type(workspace_policy_check),
-         Map.get(workspace_policy_check, :detail, "Workspace cleanliness policy blocked shipping."),
+         Map.get(
+           workspace_policy_check,
+           :detail,
+           "Workspace cleanliness policy blocked shipping."
+         ),
          branch_context,
          workspace_policy_check
        )}
@@ -547,6 +600,337 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
        branch_context,
        fallback_policy_check
      )}
+  end
+
+  @doc false
+  @spec default_secret_scan_runner(map(), map()) :: {:ok, map()} | {:error, map()}
+  def default_secret_scan_runner(args, _branch_context) when is_map(args) do
+    case secret_scan_signal_from_args(args) do
+      {:passed, _violation_count, _findings} ->
+        {:ok,
+         %{
+           status: "passed",
+           scan_status: @secret_scan_clean_state,
+           violation_count: 0,
+           findings: [],
+           detail: "Secret scan passed with no detected plaintext secrets."
+         }}
+
+      {:violation, violation_count, findings} ->
+        {:ok,
+         %{
+           status: "failed",
+           scan_status: @secret_scan_violation_state,
+           violation_count: violation_count,
+           findings: findings,
+           detail: "Secret scan detected potential plaintext secrets and blocked shipping."
+         }}
+
+      {:tooling_error, reason} ->
+        {:error,
+         %{
+           reason_type: "secret_scan_tooling_error",
+           detail: "Secret scan tooling failed and shipping is blocked by fail-closed policy.",
+           reason: reason
+         }}
+    end
+  end
+
+  def default_secret_scan_runner(_args, _branch_context) do
+    {:error,
+     %{
+       reason_type: "secret_scan_tooling_error",
+       detail: "Secret scan input payload is invalid and shipping is blocked by fail-closed policy.",
+       reason: :invalid_secret_scan_args
+     }}
+  end
+
+  defp validate_secret_scan(args, branch_context, opts)
+       when is_map(args) and is_map(branch_context) and is_list(opts) do
+    secret_scan_runner =
+      Keyword.get(opts, :secret_scan_runner, &__MODULE__.default_secret_scan_runner/2)
+
+    case invoke_secret_scan_runner(secret_scan_runner, args, branch_context) do
+      {:ok, secret_scan_result} ->
+        secret_scan_policy_check =
+          build_secret_scan_policy_check(args, branch_context, secret_scan_result)
+
+        if secret_scan_policy_check.status == "passed" do
+          {:ok, secret_scan_policy_check}
+        else
+          {:error,
+           secret_scan_policy_error(
+             "policy_violation",
+             Map.get(secret_scan_policy_check, :detail, "Secret scan policy blocked shipping."),
+             branch_context,
+             secret_scan_policy_check,
+             map_get(secret_scan_result, :reason, "reason")
+           )}
+        end
+
+      {:error, secret_scan_runner_failure} ->
+        secret_scan_policy_check =
+          build_secret_scan_tooling_failure_policy_check(
+            args,
+            branch_context,
+            secret_scan_runner_failure
+          )
+
+        {:error,
+         secret_scan_policy_error(
+           "policy_violation",
+           Map.get(
+             secret_scan_policy_check,
+             :detail,
+             "Secret scan tooling failed and shipping is blocked by fail-closed policy."
+           ),
+           branch_context,
+           secret_scan_policy_check,
+           secret_scan_runner_failure
+         )}
+    end
+  end
+
+  defp validate_secret_scan(_args, branch_context, _opts) do
+    secret_scan_policy_check =
+      build_secret_scan_tooling_failure_policy_check(
+        %{},
+        branch_context,
+        :invalid_secret_scan_args
+      )
+
+    {:error,
+     secret_scan_policy_error(
+       "policy_violation",
+       Map.get(
+         secret_scan_policy_check,
+         :detail,
+         "Secret scan tooling failed and shipping is blocked by fail-closed policy."
+       ),
+       branch_context,
+       secret_scan_policy_check,
+       :invalid_secret_scan_args
+     )}
+  end
+
+  defp invoke_secret_scan_runner(secret_scan_runner, args, branch_context)
+       when is_function(secret_scan_runner, 2) and is_map(args) and is_map(branch_context) do
+    safe_invoke_secret_scan_runner(secret_scan_runner, args, branch_context)
+  end
+
+  defp invoke_secret_scan_runner(secret_scan_runner, args, branch_context)
+       when is_function(secret_scan_runner, 1) and is_map(args) and is_map(branch_context) do
+    safe_invoke_secret_scan_runner(
+      fn _args, context -> secret_scan_runner.(context) end,
+      args,
+      branch_context
+    )
+  end
+
+  defp invoke_secret_scan_runner(_secret_scan_runner, _args, _branch_context) do
+    {:error,
+     %{
+       reason_type: "secret_scan_runner_invalid",
+       detail: "Secret scan runner configuration is invalid."
+     }}
+  end
+
+  defp safe_invoke_secret_scan_runner(secret_scan_runner, args, branch_context)
+       when is_function(secret_scan_runner, 2) and is_map(args) and is_map(branch_context) do
+    try do
+      case secret_scan_runner.(args, branch_context) do
+        :ok ->
+          {:ok, %{status: "passed", scan_status: @secret_scan_clean_state}}
+
+        {:ok, result} when is_map(result) ->
+          {:ok, result}
+
+        {:ok, result} ->
+          {:ok, %{status: "passed", scan_status: @secret_scan_clean_state, detail: inspect(result)}}
+
+        {:error, reason} ->
+          {:error, reason}
+
+        other ->
+          {:error,
+           %{
+             reason_type: "secret_scan_invalid_result",
+             detail: "Secret scan runner returned an invalid result (#{inspect(other)}).",
+             reason: other
+           }}
+      end
+    rescue
+      exception ->
+        {:error,
+         %{
+           reason_type: "secret_scan_runner_crashed",
+           detail: "Secret scan runner crashed (#{Exception.message(exception)}).",
+           reason: exception
+         }}
+    catch
+      kind, reason ->
+        {:error,
+         %{
+           reason_type: "secret_scan_runner_threw",
+           detail: "Secret scan runner threw #{inspect({kind, reason})}.",
+           reason: {kind, reason}
+         }}
+    end
+  end
+
+  defp build_secret_scan_policy_check(args, branch_context, secret_scan_result)
+       when is_map(args) and is_map(branch_context) and is_map(secret_scan_result) do
+    environment_mode = environment_mode_from_args(args)
+
+    branch_derivation =
+      branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    status =
+      secret_scan_result
+      |> map_get(:status, "status")
+      |> normalize_secret_scan_check_status()
+      |> case do
+        "passed" -> "passed"
+        "failed" -> "failed"
+        _other -> "failed"
+      end
+
+    scan_status = normalize_secret_scan_outcome(secret_scan_result, status)
+
+    findings =
+      secret_scan_result |> map_get(:findings, "findings") |> normalize_secret_scan_findings()
+
+    violation_count =
+      secret_scan_result
+      |> map_get(:violation_count, "violation_count")
+      |> normalize_secret_scan_violation_count(length(findings))
+      |> normalize_violation_count(status, findings)
+
+    blocked_actions = secret_scan_blocked_actions(status)
+
+    %{
+      id: @secret_scan_check_id,
+      name: @secret_scan_check_name,
+      status: status,
+      scan_status: scan_status,
+      violation_count: violation_count,
+      findings: findings,
+      blocked_actions: blocked_actions,
+      blocked_action_details: secret_scan_blocked_action_details(scan_status, blocked_actions),
+      detail:
+        secret_scan_result
+        |> map_get(
+          :detail,
+          "detail",
+          secret_scan_policy_detail(status, scan_status, violation_count)
+        )
+        |> normalize_optional_string() ||
+          secret_scan_policy_detail(status, scan_status, violation_count),
+      remediation:
+        secret_scan_result
+        |> map_get(
+          :remediation,
+          "remediation",
+          secret_scan_policy_remediation(status, scan_status)
+        )
+        |> normalize_optional_string() || secret_scan_policy_remediation(status, scan_status),
+      run_metadata: %{
+        workflow_name:
+          branch_derivation
+          |> map_get(:workflow_name, "workflow_name")
+          |> normalize_optional_string(),
+        run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
+        branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+        environment_mode: environment_mode
+      },
+      step_metadata: secret_scan_step_metadata(),
+      checked_at: timestamp_now()
+    }
+  end
+
+  defp build_secret_scan_policy_check(_args, branch_context, _secret_scan_result) do
+    build_secret_scan_tooling_failure_policy_check(
+      %{},
+      branch_context,
+      :invalid_secret_scan_result
+    )
+  end
+
+  defp build_secret_scan_tooling_failure_policy_check(args, branch_context, reason)
+       when is_map(args) and is_map(branch_context) do
+    environment_mode = environment_mode_from_args(args)
+
+    branch_derivation =
+      branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    detail =
+      map_get(
+        reason,
+        :detail,
+        "detail",
+        "Secret scan tooling failed and shipping is blocked by fail-closed policy."
+      )
+
+    %{
+      id: @secret_scan_check_id,
+      name: @secret_scan_check_name,
+      status: "failed",
+      scan_status: @secret_scan_tooling_error_state,
+      violation_count: 0,
+      findings: [],
+      blocked_actions: @blocked_shipping_actions,
+      blocked_action_details:
+        secret_scan_blocked_action_details(
+          @secret_scan_tooling_error_state,
+          @blocked_shipping_actions
+        ),
+      detail: detail,
+      remediation: @secret_scan_policy_remediation,
+      run_metadata: %{
+        workflow_name:
+          branch_derivation
+          |> map_get(:workflow_name, "workflow_name")
+          |> normalize_optional_string(),
+        run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
+        branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+        environment_mode: environment_mode
+      },
+      step_metadata: secret_scan_step_metadata(),
+      checked_at: timestamp_now()
+    }
+  end
+
+  defp build_secret_scan_tooling_failure_policy_check(_args, branch_context, _reason) do
+    branch_derivation =
+      branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    %{
+      id: @secret_scan_check_id,
+      name: @secret_scan_check_name,
+      status: "failed",
+      scan_status: @secret_scan_tooling_error_state,
+      violation_count: 0,
+      findings: [],
+      blocked_actions: @blocked_shipping_actions,
+      blocked_action_details:
+        secret_scan_blocked_action_details(
+          @secret_scan_tooling_error_state,
+          @blocked_shipping_actions
+        ),
+      detail: "Secret scan tooling failed and shipping is blocked by fail-closed policy.",
+      remediation: @secret_scan_policy_remediation,
+      run_metadata: %{
+        workflow_name:
+          branch_derivation
+          |> map_get(:workflow_name, "workflow_name")
+          |> normalize_optional_string(),
+        run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
+        branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+        environment_mode: "cloud"
+      },
+      step_metadata: secret_scan_step_metadata(),
+      checked_at: timestamp_now()
+    }
   end
 
   defp maybe_probe_commit(branch_context, opts) when is_map(branch_context) and is_list(opts) do
@@ -626,7 +1010,9 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     environment_mode = environment_mode_from_args(args)
     observed_state = workspace_state_from_args(args)
     status = workspace_policy_status(observed_state)
-    branch_derivation = branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    branch_derivation =
+      branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
 
     %{
       id: @workspace_policy_check_id,
@@ -639,7 +1025,10 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
       detail: workspace_policy_detail(status, environment_mode, observed_state),
       remediation: workspace_policy_remediation(status),
       run_metadata: %{
-        workflow_name: branch_derivation |> map_get(:workflow_name, "workflow_name") |> normalize_optional_string(),
+        workflow_name:
+          branch_derivation
+          |> map_get(:workflow_name, "workflow_name")
+          |> normalize_optional_string(),
         run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
         branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
         environment_mode: environment_mode
@@ -664,12 +1053,335 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     "#{String.capitalize(environment_mode)} mode requires a clean workspace, but workspace cleanliness was unknown."
   end
 
-  defp workspace_policy_remediation("passed"), do: "Workspace meets clean-room shipping requirements."
+  defp workspace_policy_remediation("passed"),
+    do: "Workspace meets clean-room shipping requirements."
+
   defp workspace_policy_remediation(_status), do: @workspace_policy_remediation
 
   defp workspace_policy_reason_type(%{observed_state: "dirty"}), do: "workspace_dirty"
   defp workspace_policy_reason_type(%{observed_state: "unknown"}), do: "workspace_state_unknown"
   defp workspace_policy_reason_type(_workspace_policy_check), do: "workspace_policy_failed"
+
+  defp secret_scan_signal_from_args(args) when is_map(args) do
+    status_hint =
+      args
+      |> map_get(
+        :secret_scan_status,
+        "secret_scan_status",
+        map_get(args, :secret_scan_result, "secret_scan_result")
+      )
+      |> normalize_secret_scan_status_hint()
+
+    findings =
+      args
+      |> map_get(
+        :secret_scan_findings,
+        "secret_scan_findings",
+        map_get(args, :secret_scan_matches, "secret_scan_matches")
+      )
+      |> normalize_secret_scan_findings()
+
+    violation_count =
+      args
+      |> map_get(
+        :secret_scan_violation_count,
+        "secret_scan_violation_count",
+        map_get(args, :secret_scan_violations, "secret_scan_violations")
+      )
+      |> normalize_secret_scan_violation_count(length(findings))
+
+    secret_scan_passed =
+      args
+      |> map_get(:secret_scan_passed, "secret_scan_passed")
+      |> normalize_optional_boolean()
+
+    tooling_error_reason =
+      map_get(
+        args,
+        :secret_scan_error,
+        "secret_scan_error",
+        map_get(args, :secret_scan_tooling_error, "secret_scan_tooling_error")
+      )
+
+    cond do
+      status_hint == :tooling_error ->
+        {:tooling_error, tooling_error_reason || :secret_scan_tooling_error}
+
+      not is_nil(tooling_error_reason) ->
+        {:tooling_error, tooling_error_reason}
+
+      status_hint == :violation ->
+        {:violation, ensure_violation_count(violation_count), findings}
+
+      secret_scan_passed == false ->
+        {:violation, ensure_violation_count(violation_count), findings}
+
+      violation_count > 0 ->
+        {:violation, violation_count, findings}
+
+      findings != [] ->
+        {:violation, ensure_violation_count(violation_count, length(findings)), findings}
+
+      status_hint == :passed ->
+        {:passed, 0, []}
+
+      secret_scan_passed == true ->
+        {:passed, 0, []}
+
+      true ->
+        {:passed, 0, []}
+    end
+  end
+
+  defp secret_scan_signal_from_args(_args), do: {:tooling_error, :invalid_secret_scan_args}
+
+  defp normalize_secret_scan_status_hint(value) when is_boolean(value) do
+    if value, do: :passed, else: :violation
+  end
+
+  defp normalize_secret_scan_status_hint(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        nil
+
+      normalized_status ->
+        case String.downcase(normalized_status) do
+          "passed" -> :passed
+          "pass" -> :passed
+          "clean" -> :passed
+          "ok" -> :passed
+          "success" -> :passed
+          "failed" -> :violation
+          "fail" -> :violation
+          "violation" -> :violation
+          "violations" -> :violation
+          "violations_detected" -> :violation
+          "blocked" -> :violation
+          "error" -> :tooling_error
+          "tooling_error" -> :tooling_error
+          "runner_error" -> :tooling_error
+          "scanner_error" -> :tooling_error
+          "unavailable" -> :tooling_error
+          _other -> nil
+        end
+    end
+  end
+
+  defp normalize_secret_scan_check_status(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        nil
+
+      normalized_status ->
+        case String.downcase(normalized_status) do
+          "passed" -> "passed"
+          "clean" -> "passed"
+          "ok" -> "passed"
+          "failed" -> "failed"
+          "error" -> "failed"
+          "blocked" -> "failed"
+          "violations_detected" -> "failed"
+          _other -> nil
+        end
+    end
+  end
+
+  defp normalize_secret_scan_outcome(secret_scan_result, status)
+       when is_map(secret_scan_result) and is_binary(status) do
+    outcome =
+      secret_scan_result
+      |> map_get(:scan_status, "scan_status")
+      |> normalize_optional_string()
+      |> case do
+        nil ->
+          nil
+
+        normalized_scan_status ->
+          case String.downcase(normalized_scan_status) do
+            "clean" -> @secret_scan_clean_state
+            "passed" -> @secret_scan_clean_state
+            "ok" -> @secret_scan_clean_state
+            "violation" -> @secret_scan_violation_state
+            "violations" -> @secret_scan_violation_state
+            "violations_detected" -> @secret_scan_violation_state
+            "failed" -> @secret_scan_violation_state
+            "blocked" -> @secret_scan_violation_state
+            "tooling_error" -> @secret_scan_tooling_error_state
+            "error" -> @secret_scan_tooling_error_state
+            "runner_error" -> @secret_scan_tooling_error_state
+            "scanner_error" -> @secret_scan_tooling_error_state
+            "unavailable" -> @secret_scan_tooling_error_state
+            _other -> nil
+          end
+      end
+
+    case {status, outcome} do
+      {"passed", _any_outcome} ->
+        @secret_scan_clean_state
+
+      {"failed", nil} ->
+        @secret_scan_violation_state
+
+      {"failed", @secret_scan_clean_state} ->
+        @secret_scan_violation_state
+
+      {"failed", normalized_outcome} ->
+        normalized_outcome
+
+      _other ->
+        @secret_scan_tooling_error_state
+    end
+  end
+
+  defp normalize_secret_scan_outcome(_secret_scan_result, _status),
+    do: @secret_scan_tooling_error_state
+
+  defp normalize_secret_scan_findings(findings) when is_list(findings) do
+    findings
+    |> Enum.map(&normalize_secret_scan_finding/1)
+    |> Enum.reject(fn finding -> finding == %{} end)
+  end
+
+  defp normalize_secret_scan_findings(%{} = finding) do
+    finding = normalize_secret_scan_finding(finding)
+
+    if finding == %{} do
+      []
+    else
+      [finding]
+    end
+  end
+
+  defp normalize_secret_scan_findings(findings) when is_binary(findings) do
+    case String.trim(findings) do
+      "" -> []
+      summary -> [%{summary: summary}]
+    end
+  end
+
+  defp normalize_secret_scan_findings(_findings), do: []
+
+  defp normalize_secret_scan_finding(%{} = finding), do: finding
+
+  defp normalize_secret_scan_finding(finding) when is_binary(finding) do
+    case String.trim(finding) do
+      "" -> %{}
+      summary -> %{summary: summary}
+    end
+  end
+
+  defp normalize_secret_scan_finding(finding), do: %{summary: inspect(finding)}
+
+  defp normalize_secret_scan_violation_count(value, fallback)
+
+  defp normalize_secret_scan_violation_count(value, _fallback)
+       when is_integer(value) and value >= 0,
+       do: value
+
+  defp normalize_secret_scan_violation_count(value, _fallback) when is_list(value),
+    do: length(value)
+
+  defp normalize_secret_scan_violation_count(true, _fallback), do: 1
+  defp normalize_secret_scan_violation_count(false, _fallback), do: 0
+
+  defp normalize_secret_scan_violation_count(value, fallback) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        fallback
+
+      normalized_value ->
+        case Integer.parse(normalized_value) do
+          {parsed_count, ""} when parsed_count >= 0 -> parsed_count
+          _other -> fallback
+        end
+    end
+  end
+
+  defp normalize_violation_count(_violation_count, "passed", _findings), do: 0
+
+  defp normalize_violation_count(violation_count, "failed", findings)
+       when is_list(findings) and is_integer(violation_count) do
+    ensure_violation_count(violation_count, length(findings))
+  end
+
+  defp normalize_violation_count(violation_count, _status, _findings), do: violation_count
+
+  defp ensure_violation_count(violation_count, findings_count \\ 0)
+
+  defp ensure_violation_count(violation_count, _findings_count)
+       when is_integer(violation_count) and violation_count > 0,
+       do: violation_count
+
+  defp ensure_violation_count(_violation_count, findings_count)
+       when is_integer(findings_count) and findings_count > 0,
+       do: findings_count
+
+  defp ensure_violation_count(_violation_count, _findings_count), do: 1
+
+  defp secret_scan_blocked_actions("failed"), do: @blocked_shipping_actions
+  defp secret_scan_blocked_actions(_status), do: []
+
+  defp secret_scan_blocked_action_details(_scan_status, blocked_actions)
+       when is_list(blocked_actions) and blocked_actions == [] do
+    []
+  end
+
+  defp secret_scan_blocked_action_details(scan_status, blocked_actions)
+       when is_list(blocked_actions) do
+    Enum.map(blocked_actions, fn blocked_action ->
+      %{
+        action: blocked_action,
+        blocked: true,
+        reason: secret_scan_block_reason(scan_status),
+        detail: "Secret scan policy blocked #{blocked_action}."
+      }
+    end)
+  end
+
+  defp secret_scan_blocked_action_details(_scan_status, _blocked_actions), do: []
+
+  defp secret_scan_block_reason(@secret_scan_tooling_error_state), do: "secret_scan_tooling_error"
+  defp secret_scan_block_reason(@secret_scan_violation_state), do: "secret_scan_violation"
+  defp secret_scan_block_reason(_scan_status), do: "policy_violation"
+
+  defp secret_scan_policy_detail("passed", @secret_scan_clean_state, _violation_count) do
+    "Secret scan passed with no detected plaintext secrets."
+  end
+
+  defp secret_scan_policy_detail("failed", @secret_scan_violation_state, violation_count) do
+    "Secret scan detected #{violation_count} potential secret finding(s); commit, push, and PR creation are blocked."
+  end
+
+  defp secret_scan_policy_detail("failed", @secret_scan_tooling_error_state, _violation_count) do
+    "Secret scan tooling failed and shipping is blocked by fail-closed policy."
+  end
+
+  defp secret_scan_policy_detail(_status, _scan_status, _violation_count) do
+    "Secret scan policy blocked shipping."
+  end
+
+  defp secret_scan_policy_remediation("passed", @secret_scan_clean_state),
+    do: "Secret scan policy satisfied."
+
+  defp secret_scan_policy_remediation("failed", @secret_scan_violation_state) do
+    "Remove detected secrets from the workspace and retry CommitAndPR shipping."
+  end
+
+  defp secret_scan_policy_remediation("failed", @secret_scan_tooling_error_state) do
+    "Restore secret-scan tooling availability and retry CommitAndPR shipping."
+  end
+
+  defp secret_scan_policy_remediation(_status, _scan_status), do: @secret_scan_policy_remediation
+
+  defp secret_scan_step_metadata do
+    step_metadata(@secret_scan_policy_stage, @secret_scan_policy_operation)
+  end
 
   defp environment_mode_from_args(args) when is_map(args) do
     args
@@ -770,11 +1482,35 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     end
   end
 
+  defp normalize_optional_boolean(value) when is_boolean(value), do: value
+
+  defp normalize_optional_boolean(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        nil
+
+      normalized_value ->
+        case String.downcase(normalized_value) do
+          "true" -> true
+          "false" -> false
+          "1" -> true
+          "0" -> false
+          _other -> nil
+        end
+    end
+  end
+
   defp default_step_metadata do
+    step_metadata(@workspace_policy_stage, @workspace_policy_operation)
+  end
+
+  defp step_metadata(stage, operation) do
     %{
       step: "CommitAndPR",
-      stage: @workspace_policy_stage,
-      operation: @workspace_policy_operation
+      stage: stage,
+      operation: operation
     }
   end
 
@@ -793,7 +1529,13 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     }
   end
 
-  defp workspace_policy_error(reason_type, detail, branch_context, workspace_policy_check, reason \\ nil) do
+  defp workspace_policy_error(
+         reason_type,
+         detail,
+         branch_context,
+         workspace_policy_check,
+         reason \\ nil
+       ) do
     %{
       error_type: @workspace_policy_error_type,
       operation: @workspace_policy_operation,
@@ -811,6 +1553,34 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
       branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
       branch_derivation: branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map(),
       policy_check: normalize_map(workspace_policy_check),
+      timestamp: timestamp_now()
+    }
+  end
+
+  defp secret_scan_policy_error(
+         reason_type,
+         detail,
+         branch_context,
+         secret_scan_policy_check,
+         reason
+       ) do
+    %{
+      error_type: @secret_scan_policy_error_type,
+      operation: @secret_scan_policy_operation,
+      reason_type: normalize_reason_type(reason_type),
+      detail: format_failure_detail(detail, reason),
+      remediation:
+        secret_scan_policy_check
+        |> map_get(:remediation, "remediation", @secret_scan_policy_remediation)
+        |> normalize_optional_string() || @secret_scan_policy_remediation,
+      blocked_stage: "commit_changes",
+      blocked_actions: @blocked_shipping_actions,
+      halted_before_commit: true,
+      halted_before_push: true,
+      halted_before_pr: true,
+      branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+      branch_derivation: branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map(),
+      policy_check: normalize_map(secret_scan_policy_check),
       timestamp: timestamp_now()
     }
   end
