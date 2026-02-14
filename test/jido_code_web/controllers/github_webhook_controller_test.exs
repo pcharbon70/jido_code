@@ -26,12 +26,16 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
     original_issue_triage_artifact_persister =
       Application.get_env(:jido_code, :issue_triage_artifact_persister, :__missing__)
 
+    original_issue_triage_response_poster =
+      Application.get_env(:jido_code, :issue_triage_response_poster, :__missing__)
+
     on_exit(fn ->
       Logger.configure(level: original_log_level)
       restore_env(:github_webhook_secret, original_secret)
       restore_env(:github_webhook_verified_dispatcher, original_dispatcher)
       restore_env(:system_config, original_system_config)
       restore_env(:issue_triage_artifact_persister, original_issue_triage_artifact_persister)
+      restore_env(:issue_triage_response_poster, original_issue_triage_response_poster)
     end)
 
     :ok
@@ -780,6 +784,197 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
     assert map_get(follow_up_comment, :body, "body") =~ "follow-up"
     assert map_get(follow_up_comment, :html_url, "html_url") =~ "#issuecomment-92001"
     assert map_get(follow_up_run.inputs, :issue_reference, "issue_reference") == "#{repo_full_name}#80"
+  end
+
+  test "auto-post policy posts approved response and persists GitHub comment URL artifact", %{
+    conn: conn
+  } do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "auto-post-owner-#{unique_suffix}"
+    name = "auto-post-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"],
+              "approval_mode" => "auto_post"
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(test_pid, {:verified_delivery_handoff, delivery.delivery_id})
+      :ok
+    end)
+
+    Application.put_env(:jido_code, :issue_triage_response_poster, fn post_request ->
+      send(test_pid, {:issue_triage_post_request, post_request})
+
+      {:ok,
+       %{
+         status: "posted",
+         provider: "github",
+         comment_url: "https://github.com/#{repo_full_name}/issues/96#issuecomment-96001",
+         comment_api_url: "https://api.github.com/repos/#{repo_full_name}/issues/comments/96001",
+         comment_id: 96_001,
+         posted_at: "2026-02-15T09:00:00Z"
+       }}
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "opened",
+        "issue" => %{
+          "id" => 90_601,
+          "number" => 96,
+          "title" => "Bug: auto-post should persist comment URL",
+          "body" => "Issue bot should post and persist URL.",
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/96",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/96"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-auto-post-#{System.unique_integer([:positive])}"
+
+    response =
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("x-hub-signature-256", sign(payload, secret))
+      |> put_req_header("x-github-delivery", delivery_id)
+      |> put_req_header("x-github-event", "issues")
+      |> post(@webhook_path, payload)
+      |> json_response(202)
+
+    assert response["status"] == "accepted"
+    assert_receive {:verified_delivery_handoff, ^delivery_id}
+
+    assert_receive {:issue_triage_post_request, post_request}
+    assert map_get(post_request, :repo_full_name, "repo_full_name") == repo_full_name
+    assert map_get(post_request, :issue_number, "issue_number") == 96
+    assert map_get(post_request, :body, "body") =~ "We triaged this as"
+
+    assert {:ok, [%WorkflowRun{} = run]} = workflow_runs_for_project(project.id)
+    assert run.status == :completed
+    assert run.current_step == "post_github_comment"
+
+    post_artifact = map_get(run.step_results, :post_issue_response, "post_issue_response", %{})
+
+    assert map_get(post_artifact, :status, "status") == "posted"
+    assert map_get(post_artifact, :posted, "posted") == true
+
+    assert map_get(post_artifact, :comment_url, "comment_url") ==
+             "https://github.com/#{repo_full_name}/issues/96#issuecomment-96001"
+
+    assert map_get(post_artifact, :comment_id, "comment_id") == 96_001
+    assert map_get(post_artifact, :approval_mode, "approval_mode") == "auto_post"
+    assert map_get(post_artifact, :approval_decision, "approval_decision") == "auto_approved"
+  end
+
+  test "auto-post failure captures typed auth error artifact and does not mark response posted", %{
+    conn: conn
+  } do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "auto-post-failure-owner-#{unique_suffix}"
+    name = "auto-post-failure-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"],
+              "approval_mode" => "auto_post"
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(test_pid, {:verified_delivery_handoff, delivery.delivery_id})
+      :ok
+    end)
+
+    Application.put_env(:jido_code, :issue_triage_response_poster, fn _post_request ->
+      {:error,
+       %{
+         error_type: "github_issue_comment_authentication_failed",
+         reason_type: "authentication",
+         detail: "Bad credentials for Issue Bot posting token.",
+         remediation: "Rotate token and retry."
+       }}
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "opened",
+        "issue" => %{
+          "id" => 90_701,
+          "number" => 97,
+          "title" => "Bug: posting auth fails",
+          "body" => "Issue bot posting should capture auth failure.",
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/97",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/97"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-auto-post-failed-#{System.unique_integer([:positive])}"
+
+    response =
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("x-hub-signature-256", sign(payload, secret))
+      |> put_req_header("x-github-delivery", delivery_id)
+      |> put_req_header("x-github-event", "issues")
+      |> post(@webhook_path, payload)
+      |> json_response(202)
+
+    assert response["status"] == "accepted"
+    assert_receive {:verified_delivery_handoff, ^delivery_id}
+
+    assert {:ok, [%WorkflowRun{} = run]} = workflow_runs_for_project(project.id)
+    assert run.status == :failed
+    assert run.current_step == "post_github_comment"
+    assert get_in(run.error, ["error_type"]) == "github_issue_comment_authentication_failed"
+    assert get_in(run.error, ["reason_type"]) == "auth_error"
+    assert get_in(run.error, ["failed_step"]) == "post_github_comment"
+    assert get_in(run.error, ["last_successful_step"]) == "compose_issue_response"
+
+    post_artifact = map_get(run.step_results, :post_issue_response, "post_issue_response", %{})
+    post_typed_failure = map_get(post_artifact, :typed_failure, "typed_failure", %{})
+
+    assert map_get(post_artifact, :status, "status") == "failed"
+    assert map_get(post_artifact, :posted, "posted") == false
+    assert is_nil(map_get(post_artifact, :comment_url, "comment_url"))
+    assert map_get(post_typed_failure, :reason_type, "reason_type") == "auth_error"
   end
 
   test "records issue_comment.created deliveries as no-op when project Issue Bot is disabled", %{

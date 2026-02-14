@@ -5,6 +5,7 @@ defmodule JidoCode.Orchestration.WorkflowRun do
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 
+  alias JidoCode.GitHub.IssueCommentClient
   alias JidoCode.Orchestration.RunPubSub
 
   @statuses [:pending, :running, :awaiting_approval, :completed, :failed, :cancelled]
@@ -25,6 +26,21 @@ defmodule JidoCode.Orchestration.WorkflowRun do
   @retry_initial_step "queued"
   @retryable_terminal_statuses [:failed, :cancelled]
   @rejection_policy_default "cancel"
+  @issue_triage_workflow_name "issue_triage"
+  @issue_triage_request_approval_step "request_approval"
+  @issue_triage_approval_gate_step "approval_gate"
+  @issue_triage_post_step "post_github_comment"
+  @issue_triage_post_operation "post_issue_triage_response"
+  @issue_triage_post_artifact_key "post_issue_response"
+  @issue_triage_post_failure_error_type "issue_triage_response_post_failed"
+  @issue_triage_post_default_detail "Issue Bot could not post the approved response to GitHub."
+  @issue_triage_post_default_remediation """
+  Verify GitHub credentials and provider availability, then retry posting the Issue Bot response.
+  """
+  @issue_triage_post_default_last_successful_step "compose_issue_response"
+  @issue_triage_auto_post_mode "auto_post"
+  @issue_triage_approval_required_mode "approval_required"
+  @issue_triage_auto_approver_id "issue_bot_auto_approver"
   @allowed_transitions %{
     pending: MapSet.new([:running, :cancelled]),
     running: MapSet.new([:awaiting_approval, :completed, :failed, :cancelled]),
@@ -290,16 +306,11 @@ defmodule JidoCode.Orchestration.WorkflowRun do
     approved_at = params |> map_get(:approved_at, "approved_at") |> normalize_datetime()
     actor = params |> map_get(:actor, "actor", %{}) |> normalize_actor()
     current_step = approval_resume_step(params, persisted_run)
+    approval_decision = approval_decision(actor, approved_at)
 
     with :ok <- validate_approval_preconditions(persisted_run),
-         transition_metadata <- %{"approval_decision" => approval_decision(actor, approved_at)},
          {:ok, approved_run} <-
-           transition_status(persisted_run, %{
-             to_status: :running,
-             current_step: current_step,
-             transitioned_at: approved_at,
-             transition_metadata: transition_metadata
-           }) do
+           approve_transition(persisted_run, approval_decision, approved_at, current_step) do
       {:ok, approved_run}
     else
       {:error, typed_failure} when is_map(typed_failure) ->
@@ -523,6 +534,54 @@ defmodule JidoCode.Orchestration.WorkflowRun do
      )}
   end
 
+  @spec advance_issue_triage_run(t()) :: {:ok, t()} | {:error, map()}
+  def advance_issue_triage_run(run)
+
+  def advance_issue_triage_run(run) when is_struct(run, __MODULE__) do
+    persisted_run = reload_run(run)
+
+    if issue_triage_workflow?(persisted_run) do
+      case issue_triage_post_mode(persisted_run) do
+        :auto_post ->
+          approved_at = DateTime.utc_now() |> DateTime.truncate(:second)
+          actor = %{"id" => @issue_triage_auto_approver_id, "email" => nil}
+          decision = auto_approval_decision(actor, approved_at)
+          finalize_issue_triage_posting(persisted_run, decision, approved_at)
+
+        :approval_required ->
+          route_issue_triage_to_approval_gate(persisted_run)
+      end
+    else
+      {:ok, persisted_run}
+    end
+  end
+
+  def advance_issue_triage_run(_run) do
+    {:error,
+     %{
+       error_type: @issue_triage_post_failure_error_type,
+       reason_type: "invalid_run",
+       operation: @issue_triage_post_operation,
+       detail: "Issue triage run reference is invalid and cannot advance posting lifecycle.",
+       remediation: @issue_triage_post_default_remediation,
+       timestamp: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+     }}
+  end
+
+  defp approve_transition(run, approval_decision, approved_at, current_step)
+       when is_struct(run, __MODULE__) and is_map(approval_decision) and is_binary(current_step) do
+    if issue_triage_workflow?(run) do
+      finalize_issue_triage_posting(run, approval_decision, approved_at)
+    else
+      transition_status(run, %{
+        to_status: :running,
+        current_step: current_step,
+        transitioned_at: approved_at,
+        transition_metadata: %{"approval_decision" => approval_decision}
+      })
+    end
+  end
+
   defp apply_transition(changeset, from_status, to_status) do
     transitioned_at =
       changeset
@@ -728,14 +787,24 @@ defmodule JidoCode.Orchestration.WorkflowRun do
 
   defp maybe_capture_approval_context(changeset, _to_status), do: changeset
 
-  defp maybe_capture_transition_audit(
+  defp maybe_capture_transition_audit(changeset, from_status, to_status, transition_metadata) do
+    changeset
+    |> maybe_capture_approval_decision_audit(from_status, to_status, transition_metadata)
+    |> maybe_capture_issue_response_post_artifact(transition_metadata)
+  end
+
+  defp maybe_capture_approval_decision_audit(
          changeset,
          :awaiting_approval,
          to_status,
-         %{"approval_decision" => approval_decision}
+         transition_metadata
        )
        when to_status in [:running, :cancelled] do
-    normalized_approval_decision = normalize_map(approval_decision)
+    normalized_approval_decision =
+      transition_metadata
+      |> normalize_map()
+      |> map_get(:approval_decision, "approval_decision", %{})
+      |> normalize_map()
 
     if map_size(normalized_approval_decision) == 0 do
       changeset
@@ -760,8 +829,31 @@ defmodule JidoCode.Orchestration.WorkflowRun do
     end
   end
 
-  defp maybe_capture_transition_audit(changeset, _from_status, _to_status, _transition_metadata),
+  defp maybe_capture_approval_decision_audit(changeset, _from_status, _to_status, _transition_metadata),
     do: changeset
+
+  defp maybe_capture_issue_response_post_artifact(changeset, transition_metadata) do
+    issue_response_post =
+      transition_metadata
+      |> normalize_map()
+      |> map_get(:issue_response_post, "issue_response_post", %{})
+      |> normalize_map()
+
+    if map_size(issue_response_post) == 0 do
+      changeset
+    else
+      step_results =
+        changeset
+        |> Ash.Changeset.get_data(:step_results)
+        |> normalize_step_results()
+
+      Ash.Changeset.force_change_attribute(
+        changeset,
+        :step_results,
+        Map.put(step_results, @issue_triage_post_artifact_key, issue_response_post)
+      )
+    end
+  end
 
   defp maybe_capture_failure_context(
          changeset,
@@ -1706,6 +1798,661 @@ defmodule JidoCode.Orchestration.WorkflowRun do
       }
     }
   end
+
+  defp finalize_issue_triage_posting(run, approval_decision, approved_at)
+       when is_struct(run, __MODULE__) and is_map(approval_decision) do
+    with {:ok, running_run} <-
+           ensure_issue_triage_status(
+             run,
+             :running,
+             @issue_triage_post_step,
+             approved_at,
+             %{"approval_decision" => approval_decision}
+           ),
+         {:ok, post_request} <- issue_triage_post_request(running_run) do
+      case safe_invoke_issue_triage_response_poster(post_request) do
+        {:ok, post_result} ->
+          issue_response_post =
+            issue_triage_post_artifact_success(
+              post_result,
+              running_run,
+              approval_decision,
+              approved_at
+            )
+
+          transition_status(running_run, %{
+            to_status: :completed,
+            current_step: @issue_triage_post_step,
+            transitioned_at: approved_at,
+            transition_metadata: %{"issue_response_post" => issue_response_post}
+          })
+
+        {:error, post_failure_reason} ->
+          typed_failure =
+            normalize_issue_triage_post_failure(post_failure_reason, running_run)
+
+          fail_issue_triage_posting(
+            running_run,
+            approved_at,
+            approval_decision,
+            typed_failure
+          )
+      end
+    else
+      {:error, typed_failure} when is_map(typed_failure) ->
+        fail_issue_triage_posting(run, approved_at, approval_decision, typed_failure)
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp finalize_issue_triage_posting(_run, _approval_decision, _approved_at) do
+    {:error,
+     %{
+       error_type: @issue_triage_post_failure_error_type,
+       reason_type: "provider_error",
+       operation: @issue_triage_post_operation,
+       detail: @issue_triage_post_default_detail,
+       remediation: @issue_triage_post_default_remediation,
+       failed_step: @issue_triage_post_step,
+       last_successful_step: @issue_triage_post_default_last_successful_step,
+       timestamp: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+     }}
+  end
+
+  defp fail_issue_triage_posting(run, approved_at, approval_decision, typed_failure)
+       when is_struct(run, __MODULE__) and is_map(typed_failure) do
+    with {:ok, running_run} <-
+           ensure_issue_triage_status(
+             run,
+             :running,
+             @issue_triage_post_step,
+             approved_at,
+             %{"approval_decision" => approval_decision}
+           ),
+         issue_response_post <-
+           issue_triage_post_artifact_failure(
+             typed_failure,
+             running_run,
+             approval_decision,
+             approved_at
+           ),
+         {:ok, failed_run} <-
+           transition_status(running_run, %{
+             to_status: :failed,
+             current_step: @issue_triage_post_step,
+             transitioned_at: approved_at,
+             transition_metadata: %{
+               "typed_failure" => typed_failure,
+               "failure_context" => typed_failure,
+               "issue_response_post" => issue_response_post
+             }
+           }) do
+      {:ok, failed_run}
+    end
+  end
+
+  defp fail_issue_triage_posting(_run, _approved_at, _approval_decision, typed_failure)
+       when is_map(typed_failure) do
+    {:error, typed_failure}
+  end
+
+  defp route_issue_triage_to_approval_gate(run) when is_struct(run, __MODULE__) do
+    transitioned_at = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    with {:ok, running_run} <-
+           ensure_issue_triage_status(
+             run,
+             :running,
+             @issue_triage_request_approval_step,
+             transitioned_at
+           ),
+         {:ok, awaiting_run} <-
+           ensure_issue_triage_status(
+             running_run,
+             :awaiting_approval,
+             @issue_triage_approval_gate_step,
+             transitioned_at
+           ) do
+      {:ok, awaiting_run}
+    end
+  end
+
+  defp route_issue_triage_to_approval_gate(_run) do
+    {:error,
+     %{
+       error_type: @issue_triage_post_failure_error_type,
+       reason_type: "invalid_run",
+       operation: @issue_triage_post_operation,
+       detail: "Issue triage run is invalid and cannot route to approval.",
+       remediation: @issue_triage_post_default_remediation,
+       failed_step: @issue_triage_approval_gate_step,
+       last_successful_step: @issue_triage_post_default_last_successful_step,
+       timestamp: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+     }}
+  end
+
+  defp ensure_issue_triage_status(run, target_status, current_step, transitioned_at, transition_metadata \\ %{})
+
+  defp ensure_issue_triage_status(
+         run,
+         target_status,
+         current_step,
+         transitioned_at,
+         transition_metadata
+       )
+       when is_struct(run, __MODULE__) and is_atom(target_status) and is_binary(current_step) and
+              is_map(transition_metadata) do
+    case Map.get(run, :status) do
+      ^target_status ->
+        {:ok, run}
+
+      _other ->
+        transition_status(run, %{
+          to_status: target_status,
+          current_step: current_step,
+          transitioned_at: transitioned_at,
+          transition_metadata: transition_metadata
+        })
+    end
+  end
+
+  defp ensure_issue_triage_status(_run, _target_status, _current_step, _transitioned_at, _transition_metadata) do
+    {:error,
+     %{
+       error_type: @issue_triage_post_failure_error_type,
+       reason_type: "invalid_run",
+       operation: @issue_triage_post_operation,
+       detail: "Issue triage run state is invalid and transition could not be applied.",
+       remediation: @issue_triage_post_default_remediation,
+       failed_step: @issue_triage_post_step,
+       last_successful_step: @issue_triage_post_default_last_successful_step,
+       timestamp: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+     }}
+  end
+
+  defp issue_triage_workflow?(run) when is_struct(run, __MODULE__) do
+    run
+    |> Map.get(:workflow_name)
+    |> normalize_optional_string() == @issue_triage_workflow_name
+  end
+
+  defp issue_triage_workflow?(_run), do: false
+
+  defp issue_triage_post_mode(run) when is_struct(run, __MODULE__) do
+    run
+    |> Map.get(:trigger, %{})
+    |> normalize_map()
+    |> trigger_approval_policy()
+    |> issue_triage_post_mode_from_policy()
+  end
+
+  defp issue_triage_post_mode(_run), do: :approval_required
+
+  defp issue_triage_post_mode_from_policy(approval_policy) when is_map(approval_policy) do
+    mode =
+      approval_policy
+      |> map_get(:mode, "mode", map_get(approval_policy, :post_behavior, "post_behavior"))
+      |> normalize_issue_triage_post_mode()
+
+    cond do
+      mode == :auto_post ->
+        :auto_post
+
+      auto_post_policy?(approval_policy) ->
+        :auto_post
+
+      true ->
+        :approval_required
+    end
+  end
+
+  defp issue_triage_post_mode_from_policy(_approval_policy), do: :approval_required
+
+  defp normalize_issue_triage_post_mode(mode) when is_binary(mode) do
+    case mode |> String.trim() |> String.downcase() do
+      "auto_post" -> :auto_post
+      "auto-post" -> :auto_post
+      "auto" -> :auto_post
+      "approval_required" -> :approval_required
+      "approval-required" -> :approval_required
+      "manual" -> :approval_required
+      "manual_gate" -> :approval_required
+      "manual-gate" -> :approval_required
+      _other -> nil
+    end
+  end
+
+  defp normalize_issue_triage_post_mode(mode) when is_atom(mode) do
+    mode
+    |> Atom.to_string()
+    |> normalize_issue_triage_post_mode()
+  end
+
+  defp normalize_issue_triage_post_mode(_mode), do: nil
+
+  defp auto_post_policy?(approval_policy) when is_map(approval_policy) do
+    map_get(approval_policy, :auto_post, "auto_post", false) == true
+  end
+
+  defp auto_post_policy?(_approval_policy), do: false
+
+  defp auto_approval_decision(actor, approved_at) do
+    %{
+      "decision" => "auto_approved",
+      "actor" => actor,
+      "timestamp" => DateTime.to_iso8601(approved_at)
+    }
+  end
+
+  defp issue_triage_post_request(run) when is_struct(run, __MODULE__) do
+    step_results =
+      run
+      |> Map.get(:step_results, %{})
+      |> normalize_step_results()
+
+    response_artifact =
+      step_results
+      |> map_get(:compose_issue_response, "compose_issue_response", %{})
+      |> normalize_map()
+
+    proposed_response =
+      response_artifact
+      |> map_get(:proposed_response, "proposed_response")
+      |> normalize_optional_string()
+
+    issue_number =
+      run
+      |> issue_triage_source_issue()
+      |> map_get(:number, "number")
+      |> normalize_optional_positive_integer() ||
+        run
+        |> issue_triage_issue_reference()
+        |> parse_issue_reference_issue_number()
+
+    repo_full_name = resolve_issue_triage_repo_full_name(run)
+
+    cond do
+      is_nil(repo_full_name) ->
+        {:error, issue_triage_post_failure("GitHub repository reference is missing from run metadata.", run)}
+
+      is_nil(issue_number) ->
+        {:error, issue_triage_post_failure("Issue number is missing from run metadata.", run)}
+
+      is_nil(proposed_response) ->
+        {:error, issue_triage_post_failure("Proposed response artifact is missing and cannot be posted.", run)}
+
+      true ->
+        {:ok,
+         %{
+           repo_full_name: repo_full_name,
+           issue_number: issue_number,
+           body: proposed_response
+         }}
+    end
+  end
+
+  defp issue_triage_post_request(_run) do
+    {:error,
+     %{
+       error_type: @issue_triage_post_failure_error_type,
+       reason_type: "provider_error",
+       operation: @issue_triage_post_operation,
+       detail: @issue_triage_post_default_detail,
+       remediation: @issue_triage_post_default_remediation,
+       failed_step: @issue_triage_post_step,
+       last_successful_step: @issue_triage_post_default_last_successful_step,
+       timestamp: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+     }}
+  end
+
+  defp resolve_issue_triage_repo_full_name(run) when is_struct(run, __MODULE__) do
+    source_row_repo =
+      run
+      |> Map.get(:trigger, %{})
+      |> normalize_map()
+      |> map_get(:source_row, "source_row", %{})
+      |> normalize_map()
+      |> map_get(:project_github_full_name, "project_github_full_name")
+      |> normalize_optional_string()
+
+    source_row_repo ||
+      run
+      |> issue_triage_issue_reference()
+      |> parse_issue_reference_repo_full_name()
+  end
+
+  defp resolve_issue_triage_repo_full_name(_run), do: nil
+
+  defp parse_issue_reference_repo_full_name(issue_reference) when is_binary(issue_reference) do
+    cond do
+      String.contains?(issue_reference, "#") ->
+        issue_reference
+        |> String.split("#", parts: 2)
+        |> List.first()
+        |> normalize_optional_string()
+        |> case do
+          nil ->
+            nil
+
+          candidate ->
+            if String.contains?(candidate, "/") and not String.contains?(candidate, "://"),
+              do: candidate,
+              else: nil
+        end
+
+      true ->
+        case Regex.run(~r|https?://github\.com/([^/\s]+/[^/\s]+)/issues/\d+|, issue_reference) do
+          [_, repo_full_name] -> repo_full_name
+          _other -> nil
+        end
+    end
+  end
+
+  defp parse_issue_reference_repo_full_name(_issue_reference), do: nil
+
+  defp parse_issue_reference_issue_number(issue_reference) when is_binary(issue_reference) do
+    cond do
+      String.contains?(issue_reference, "#") ->
+        issue_reference
+        |> String.split("#", parts: 2)
+        |> List.last()
+        |> normalize_optional_positive_integer()
+
+      true ->
+        case Regex.run(~r|https?://github\.com/[^/\s]+/[^/\s]+/issues/(\d+)|, issue_reference) do
+          [_, issue_number] -> normalize_optional_positive_integer(issue_number)
+          _other -> nil
+        end
+    end
+  end
+
+  defp parse_issue_reference_issue_number(_issue_reference), do: nil
+
+  defp safe_invoke_issue_triage_response_poster(post_request) when is_map(post_request) do
+    poster =
+      Application.get_env(
+        :jido_code,
+        :issue_triage_response_poster,
+        &IssueCommentClient.post_issue_comment/1
+      )
+
+    safe_invoke_issue_triage_response_poster(poster, post_request)
+  end
+
+  defp safe_invoke_issue_triage_response_poster(poster, post_request)
+       when is_function(poster, 1) and is_map(post_request) do
+    try do
+      case poster.(post_request) do
+        {:ok, post_result} when is_map(post_result) ->
+          {:ok, post_result}
+
+        {:error, typed_failure} when is_map(typed_failure) ->
+          {:error, typed_failure}
+
+        other ->
+          {:error,
+           %{
+             error_type: @issue_triage_post_failure_error_type,
+             reason_type: "provider_error",
+             operation: @issue_triage_post_operation,
+             detail: "Issue Bot response poster returned invalid result #{inspect(other)}.",
+             remediation: @issue_triage_post_default_remediation
+           }}
+      end
+    rescue
+      exception ->
+        {:error,
+         %{
+           error_type: @issue_triage_post_failure_error_type,
+           reason_type: "provider_error",
+           operation: @issue_triage_post_operation,
+           detail: "Issue Bot response poster crashed (#{Exception.message(exception)}).",
+           remediation: @issue_triage_post_default_remediation
+         }}
+    catch
+      kind, reason ->
+        {:error,
+         %{
+           error_type: @issue_triage_post_failure_error_type,
+           reason_type: "provider_error",
+           operation: @issue_triage_post_operation,
+           detail: "Issue Bot response poster threw #{inspect({kind, reason})}.",
+           remediation: @issue_triage_post_default_remediation
+         }}
+    end
+  end
+
+  defp safe_invoke_issue_triage_response_poster(_poster, _post_request) do
+    {:error,
+     %{
+       error_type: @issue_triage_post_failure_error_type,
+       reason_type: "provider_error",
+       operation: @issue_triage_post_operation,
+       detail: "Issue Bot response poster is invalid.",
+       remediation: @issue_triage_post_default_remediation
+     }}
+  end
+
+  defp issue_triage_post_artifact_success(post_result, run, approval_decision, approved_at)
+       when is_map(post_result) and is_struct(run, __MODULE__) and is_map(approval_decision) do
+    %{
+      "status" => "posted",
+      "provider" => "github",
+      "posted" => true,
+      "approval_mode" => issue_triage_post_mode_label(run),
+      "approval_decision" => approval_decision |> map_get(:decision, "decision") |> normalize_optional_string(),
+      "comment_url" =>
+        post_result
+        |> map_get(:comment_url, "comment_url", map_get(post_result, :html_url, "html_url"))
+        |> normalize_optional_string(),
+      "comment_api_url" =>
+        post_result
+        |> map_get(:comment_api_url, "comment_api_url", map_get(post_result, :url, "url"))
+        |> normalize_optional_string(),
+      "comment_id" =>
+        post_result
+        |> map_get(:comment_id, "comment_id", map_get(post_result, :id, "id"))
+        |> normalize_optional_positive_integer(),
+      "posted_at" =>
+        post_result
+        |> map_get(:posted_at, "posted_at", map_get(post_result, :created_at, "created_at"))
+        |> normalize_optional_iso8601() || DateTime.to_iso8601(approved_at),
+      "issue_reference" => issue_triage_issue_reference(run),
+      "source_issue" => issue_triage_source_issue(run),
+      "repo_full_name" => resolve_issue_triage_repo_full_name(run)
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_post_artifact_success(_post_result, run, approval_decision, approved_at) do
+    issue_triage_post_artifact_failure(
+      issue_triage_post_failure(@issue_triage_post_default_detail, run),
+      run,
+      approval_decision,
+      approved_at
+    )
+  end
+
+  defp issue_triage_post_artifact_failure(typed_failure, run, approval_decision, approved_at)
+       when is_map(typed_failure) and is_struct(run, __MODULE__) do
+    %{
+      "status" => "failed",
+      "provider" => "github",
+      "posted" => false,
+      "approval_mode" => issue_triage_post_mode_label(run),
+      "approval_decision" => approval_decision |> map_get(:decision, "decision") |> normalize_optional_string(),
+      "attempted_at" => DateTime.to_iso8601(approved_at),
+      "issue_reference" => issue_triage_issue_reference(run),
+      "source_issue" => issue_triage_source_issue(run),
+      "repo_full_name" => resolve_issue_triage_repo_full_name(run),
+      "typed_failure" => typed_failure
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_post_artifact_failure(typed_failure, _run, _approval_decision, _approved_at)
+       when is_map(typed_failure) do
+    %{
+      "status" => "failed",
+      "provider" => "github",
+      "posted" => false,
+      "typed_failure" => typed_failure
+    }
+  end
+
+  defp issue_triage_post_failure(detail, run) when is_struct(run, __MODULE__) do
+    %{
+      "error_type" => @issue_triage_post_failure_error_type,
+      "reason_type" => "provider_error",
+      "operation" => @issue_triage_post_operation,
+      "detail" => detail,
+      "remediation" => @issue_triage_post_default_remediation,
+      "failed_step" => @issue_triage_post_step,
+      "last_successful_step" => @issue_triage_post_default_last_successful_step,
+      "run_id" => run |> Map.get(:run_id) |> normalize_optional_string(),
+      "issue_reference" => issue_triage_issue_reference(run),
+      "source_issue" => issue_triage_source_issue(run),
+      "timestamp" => DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_post_failure(detail, _run) do
+    %{
+      "error_type" => @issue_triage_post_failure_error_type,
+      "reason_type" => "provider_error",
+      "operation" => @issue_triage_post_operation,
+      "detail" => detail,
+      "remediation" => @issue_triage_post_default_remediation,
+      "failed_step" => @issue_triage_post_step,
+      "last_successful_step" => @issue_triage_post_default_last_successful_step,
+      "timestamp" => DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+  end
+
+  defp normalize_issue_triage_post_failure(failure_reason, run) when is_struct(run, __MODULE__) do
+    error_type =
+      failure_reason
+      |> map_get(:error_type, "error_type")
+      |> normalize_optional_string() || @issue_triage_post_failure_error_type
+
+    provider_reason_type =
+      failure_reason
+      |> map_get(:reason_type, "reason_type")
+      |> normalize_optional_string()
+
+    detail =
+      failure_reason
+      |> map_get(:detail, "detail")
+      |> normalize_optional_string() || @issue_triage_post_default_detail
+
+    remediation =
+      failure_reason
+      |> map_get(:remediation, "remediation")
+      |> normalize_optional_string() || @issue_triage_post_default_remediation
+
+    %{
+      "error_type" => error_type,
+      "reason_type" => issue_triage_failure_reason_type(provider_reason_type),
+      "provider_reason_type" => provider_reason_type,
+      "operation" => @issue_triage_post_operation,
+      "detail" => detail,
+      "remediation" => remediation,
+      "failed_step" => @issue_triage_post_step,
+      "last_successful_step" => @issue_triage_post_default_last_successful_step,
+      "run_id" => run |> Map.get(:run_id) |> normalize_optional_string(),
+      "issue_reference" => issue_triage_issue_reference(run),
+      "source_issue" => issue_triage_source_issue(run),
+      "timestamp" => DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+    |> reject_nil_values()
+  end
+
+  defp normalize_issue_triage_post_failure(failure_reason, _run) when is_map(failure_reason) do
+    %{
+      "error_type" =>
+        failure_reason
+        |> map_get(:error_type, "error_type")
+        |> normalize_optional_string() || @issue_triage_post_failure_error_type,
+      "reason_type" =>
+        failure_reason
+        |> map_get(:reason_type, "reason_type")
+        |> normalize_optional_string()
+        |> issue_triage_failure_reason_type(),
+      "operation" => @issue_triage_post_operation,
+      "detail" =>
+        failure_reason
+        |> map_get(:detail, "detail")
+        |> normalize_optional_string() || @issue_triage_post_default_detail,
+      "remediation" =>
+        failure_reason
+        |> map_get(:remediation, "remediation")
+        |> normalize_optional_string() || @issue_triage_post_default_remediation,
+      "failed_step" => @issue_triage_post_step,
+      "last_successful_step" => @issue_triage_post_default_last_successful_step,
+      "timestamp" => DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+  end
+
+  defp normalize_issue_triage_post_failure(_failure_reason, run) do
+    issue_triage_post_failure(@issue_triage_post_default_detail, run)
+  end
+
+  defp issue_triage_failure_reason_type(reason_type) do
+    if auth_reason_type?(reason_type), do: "auth_error", else: "provider_error"
+  end
+
+  defp auth_reason_type?(reason_type) when is_binary(reason_type) do
+    normalized = String.downcase(String.trim(reason_type))
+    normalized in ["authentication", "forbidden", "auth", "auth_error", "github_authentication_failed"]
+  end
+
+  defp auth_reason_type?(reason_type) when is_atom(reason_type) do
+    reason_type
+    |> Atom.to_string()
+    |> auth_reason_type?()
+  end
+
+  defp auth_reason_type?(_reason_type), do: false
+
+  defp issue_triage_issue_reference(run) when is_struct(run, __MODULE__) do
+    run
+    |> Map.get(:inputs, %{})
+    |> normalize_map()
+    |> map_get(:issue_reference, "issue_reference")
+    |> normalize_optional_string()
+  end
+
+  defp issue_triage_issue_reference(_run), do: nil
+
+  defp issue_triage_source_issue(run) when is_struct(run, __MODULE__) do
+    run
+    |> Map.get(:trigger, %{})
+    |> normalize_map()
+    |> map_get(:source_issue, "source_issue", %{})
+    |> normalize_map()
+  end
+
+  defp issue_triage_source_issue(_run), do: %{}
+
+  defp issue_triage_post_mode_label(run) when is_struct(run, __MODULE__) do
+    case issue_triage_post_mode(run) do
+      :auto_post -> @issue_triage_auto_post_mode
+      _other -> @issue_triage_approval_required_mode
+    end
+  end
+
+  defp issue_triage_post_mode_label(_run), do: @issue_triage_approval_required_mode
+
+  defp reject_nil_values(map) when is_map(map) do
+    Enum.reduce(map, %{}, fn {key, value}, acc ->
+      if is_nil(value), do: acc, else: Map.put(acc, key, value)
+    end)
+  end
+
+  defp reject_nil_values(_map), do: %{}
 
   defp awaiting_approval_status?(status) when is_atom(status), do: status == :awaiting_approval
   defp awaiting_approval_status?(status) when is_binary(status), do: String.trim(status) == "awaiting_approval"

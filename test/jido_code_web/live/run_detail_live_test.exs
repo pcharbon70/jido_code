@@ -156,6 +156,17 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
               "issue_reference" => "owner/repo-run-detail-issue-triage-artifacts#91",
               "source_issue" => %{"number" => 91, "id" => 91_001}
             }
+          },
+          "post_issue_response" => %{
+            "status" => "posted",
+            "provider" => "github",
+            "posted" => true,
+            "approval_mode" => "auto_post",
+            "approval_decision" => "auto_approved",
+            "comment_url" =>
+              "https://github.com/owner/repo-run-detail-issue-triage-artifacts/issues/91#issuecomment-91001",
+            "comment_id" => 91_001,
+            "posted_at" => "2026-02-15T06:02:00Z"
           }
         }
       })
@@ -183,6 +194,17 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
              "We triaged this as bug and prepared a response draft."
            )
 
+    assert has_element?(view, "#run-detail-issue-response-post-status", "posted")
+
+    assert has_element?(
+             view,
+             "#run-detail-issue-response-post-url",
+             "https://github.com/owner/repo-run-detail-issue-triage-artifacts/issues/91#issuecomment-91001"
+           )
+
+    assert has_element?(view, "#run-detail-issue-response-post-comment-id", "91001")
+    assert has_element?(view, "#run-detail-issue-response-posted-at", "2026-02-15T06:02:00Z")
+
     assert has_element?(
              view,
              "#run-detail-issue-artifact-issue-reference",
@@ -192,6 +214,128 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
     assert has_element?(view, "#run-detail-issue-artifact-source-issue-number", "91")
     assert has_element?(view, "#run-detail-issue-artifact-run-id", run_id)
     refute has_element?(view, "#run-detail-issue-artifact-persistence-error")
+    refute has_element?(view, "#run-detail-issue-response-post-error")
+  end
+
+  test "renders typed Issue Bot response post failure artifact details", %{conn: _conn} do
+    register_owner("issue-triage-post-failure-owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("issue-triage-post-failure-owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-run-detail-issue-triage-post-failure",
+        github_full_name: "owner/repo-run-detail-issue-triage-post-failure",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    run_id = "run-detail-issue-triage-post-failure-#{System.unique_integer([:positive])}"
+
+    {:ok, _run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: run_id,
+        workflow_name: "issue_triage",
+        workflow_version: 1,
+        trigger: %{
+          source: "github_webhook",
+          mode: "webhook",
+          source_issue: %{"number" => 102, "id" => 102_001}
+        },
+        inputs: %{"issue_reference" => "owner/repo-run-detail-issue-triage-post-failure#102"},
+        input_metadata: %{
+          "issue_reference" => %{
+            "required" => true,
+            "source" => "github_webhook"
+          }
+        },
+        initiating_actor: %{id: "github_webhook", email: nil},
+        current_step: "post_github_comment",
+        started_at: ~U[2026-02-15 06:30:00Z],
+        step_results: %{
+          "run_issue_triage" => %{"classification" => "bug"},
+          "run_issue_research" => %{"summary" => "Research summary for failed posting run."},
+          "compose_issue_response" => %{
+            "proposed_response" => "Thanks for the report. We attempted to post this response."
+          },
+          "post_issue_response" => %{
+            "status" => "failed",
+            "provider" => "github",
+            "posted" => false,
+            "approval_mode" => "approval_required",
+            "approval_decision" => "approved",
+            "attempted_at" => "2026-02-15T06:31:00Z",
+            "typed_failure" => %{
+              "error_type" => "github_issue_comment_authentication_failed",
+              "reason_type" => "auth_error",
+              "detail" => "Bad credentials for GitHub issue comment post.",
+              "remediation" => "Rotate posting token and retry."
+            }
+          }
+        }
+      })
+
+    {:ok, run} =
+      WorkflowRun.get_by_project_and_run_id(%{
+        project_id: project.id,
+        run_id: run_id
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "post_github_comment",
+        transitioned_at: ~U[2026-02-15 06:30:30Z]
+      })
+
+    {:ok, _failed_run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :failed,
+        current_step: "post_github_comment",
+        transitioned_at: ~U[2026-02-15 06:31:00Z],
+        transition_metadata: %{
+          "typed_failure" => %{
+            "error_type" => "github_issue_comment_authentication_failed",
+            "reason_type" => "auth_error",
+            "detail" => "Bad credentials for GitHub issue comment post.",
+            "remediation" => "Rotate posting token and retry.",
+            "failed_step" => "post_github_comment",
+            "last_successful_step" => "compose_issue_response"
+          }
+        }
+      })
+
+    {:ok, view, _html} =
+      live(
+        recycle(authed_conn),
+        ~p"/projects/#{project.id}/runs/#{run_id}",
+        on_error: :warn
+      )
+
+    assert has_element?(view, "#run-detail-issue-response-post-status", "failed")
+    assert has_element?(view, "#run-detail-issue-response-post-error")
+
+    assert has_element?(
+             view,
+             "#run-detail-issue-response-post-error-type",
+             "github_issue_comment_authentication_failed"
+           )
+
+    assert has_element?(
+             view,
+             "#run-detail-issue-response-post-error-detail",
+             "Bad credentials for GitHub issue comment post."
+           )
+
+    assert has_element?(
+             view,
+             "#run-detail-issue-response-post-error-remediation",
+             "Rotate posting token and retry."
+           )
+
+    refute has_element?(view, "#run-detail-issue-response-post-url")
   end
 
   test "renders approval payload context and enables explicit approve action", %{

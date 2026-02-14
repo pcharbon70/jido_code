@@ -170,6 +170,38 @@ defmodule JidoCodeWeb.RunDetailLive do
               <p id="run-detail-issue-response-draft" class="text-sm text-base-content/80">
                 {@issue_triage_artifacts.proposed_response}
               </p>
+              <p id="run-detail-issue-response-post-status" class="text-sm text-base-content/80">
+                Response post status: {@issue_triage_artifacts.response_post_status}
+              </p>
+              <p
+                :if={@issue_triage_artifacts.posted_comment_url}
+                id="run-detail-issue-response-post-url"
+                class="text-sm text-base-content/80"
+              >
+                Posted comment:
+                <.link
+                  href={@issue_triage_artifacts.posted_comment_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link link-primary break-all"
+                >
+                  {@issue_triage_artifacts.posted_comment_url}
+                </.link>
+              </p>
+              <p
+                :if={@issue_triage_artifacts.posted_comment_id}
+                id="run-detail-issue-response-post-comment-id"
+                class="text-xs text-base-content/70"
+              >
+                Posted comment ID: {@issue_triage_artifacts.posted_comment_id}
+              </p>
+              <p
+                :if={@issue_triage_artifacts.response_posted_at}
+                id="run-detail-issue-response-posted-at"
+                class="text-xs text-base-content/70"
+              >
+                Posted at: {@issue_triage_artifacts.response_posted_at}
+              </p>
               <p
                 :if={@issue_triage_artifacts.issue_reference}
                 id="run-detail-issue-artifact-issue-reference"
@@ -205,6 +237,23 @@ defmodule JidoCodeWeb.RunDetailLive do
                   </p>
                   <p id="run-detail-issue-artifact-persistence-error-remediation" class="text-sm text-base-content/80">
                     {@issue_triage_artifacts.typed_failure.remediation}
+                  </p>
+                </section>
+              <% end %>
+
+              <%= if @issue_triage_artifacts.response_post_failure do %>
+                <section
+                  id="run-detail-issue-response-post-error"
+                  class="space-y-1 rounded border border-error/40 bg-error/5 p-3"
+                >
+                  <p id="run-detail-issue-response-post-error-type" class="text-sm font-semibold text-error">
+                    Typed post failure: {@issue_triage_artifacts.response_post_failure.error_type}
+                  </p>
+                  <p id="run-detail-issue-response-post-error-detail" class="text-sm text-base-content/80">
+                    {@issue_triage_artifacts.response_post_failure.detail}
+                  </p>
+                  <p id="run-detail-issue-response-post-error-remediation" class="text-sm text-base-content/80">
+                    {@issue_triage_artifacts.response_post_failure.remediation}
                   </p>
                 </section>
               <% end %>
@@ -602,8 +651,14 @@ defmodule JidoCodeWeb.RunDetailLive do
         |> map_get(:issue_bot_artifact_lineage, "issue_bot_artifact_lineage", %{})
         |> normalize_map()
 
+      response_post_artifact =
+        step_results
+        |> map_get(:post_issue_response, "post_issue_response", %{})
+        |> normalize_map()
+
       if map_size(triage_artifact) == 0 and map_size(research_artifact) == 0 and
-           map_size(response_artifact) == 0 and map_size(artifact_lineage) == 0 do
+           map_size(response_artifact) == 0 and map_size(artifact_lineage) == 0 and
+           map_size(response_post_artifact) == 0 do
         nil
       else
         linked_run =
@@ -678,6 +733,31 @@ defmodule JidoCodeWeb.RunDetailLive do
               nil
           end
 
+        response_post_failure =
+          response_post_artifact
+          |> map_get(:typed_failure, "typed_failure")
+          |> normalize_map()
+          |> case do
+            typed_failure when map_size(typed_failure) > 0 ->
+              %{
+                error_type:
+                  typed_failure
+                  |> map_get(:error_type, "error_type")
+                  |> normalize_optional_string() || "issue_triage_response_post_failed",
+                detail:
+                  typed_failure
+                  |> map_get(:detail, "detail")
+                  |> normalize_optional_string() || "Issue response post failed.",
+                remediation:
+                  typed_failure
+                  |> map_get(:remediation, "remediation")
+                  |> normalize_optional_string() || "Retry issue response posting from run detail."
+              }
+
+            _other ->
+              nil
+          end
+
         %{
           classification:
             triage_artifact
@@ -691,6 +771,22 @@ defmodule JidoCodeWeb.RunDetailLive do
             response_artifact
             |> map_get(:proposed_response, "proposed_response")
             |> normalize_optional_string() || "Proposed response draft is unavailable.",
+          response_post_status:
+            response_post_artifact
+            |> map_get(:status, "status")
+            |> normalize_optional_string() || "not_attempted",
+          posted_comment_url:
+            response_post_artifact
+            |> map_get(:comment_url, "comment_url")
+            |> normalize_optional_string(),
+          posted_comment_id:
+            response_post_artifact
+            |> map_get(:comment_id, "comment_id")
+            |> normalize_optional_integer(),
+          response_posted_at:
+            response_post_artifact
+            |> map_get(:posted_at, "posted_at", map_get(response_post_artifact, :attempted_at, "attempted_at"))
+            |> normalize_optional_string(),
           issue_reference:
             linked_run
             |> map_get(:issue_reference, "issue_reference")
@@ -714,7 +810,8 @@ defmodule JidoCodeWeb.RunDetailLive do
             artifact_lineage
             |> map_get(:status, "status")
             |> normalize_optional_string() || "unknown",
-          typed_failure: typed_failure
+          typed_failure: typed_failure,
+          response_post_failure: response_post_failure
         }
       end
     else

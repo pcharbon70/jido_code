@@ -13,8 +13,12 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
     original_broadcaster =
       Application.get_env(:jido_code, :workflow_run_event_broadcaster, Phoenix.PubSub)
 
+    original_issue_triage_response_poster =
+      Application.get_env(:jido_code, :issue_triage_response_poster, :__missing__)
+
     on_exit(fn ->
       Application.put_env(:jido_code, :workflow_run_event_broadcaster, original_broadcaster)
+      restore_env(:issue_triage_response_poster, original_issue_triage_response_poster)
     end)
 
     Application.put_env(:jido_code, :workflow_run_event_broadcaster, Phoenix.PubSub)
@@ -397,6 +401,178 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
                }
              }
            ] = approved_run.status_transitions |> Enum.take(-1)
+  end
+
+  test "approve posts issue_triage response and persists posted GitHub URL artifact" do
+    {:ok, project} = create_project("owner/repo-issue-triage-approved-post")
+    test_pid = self()
+
+    Application.put_env(:jido_code, :issue_triage_response_poster, fn post_request ->
+      send(test_pid, {:issue_triage_post_request, post_request})
+
+      {:ok,
+       %{
+         status: "posted",
+         provider: "github",
+         comment_url: "https://github.com/owner/repo-issue-triage-approved-post/issues/41#issuecomment-41001",
+         comment_api_url: "https://api.github.com/repos/owner/repo-issue-triage-approved-post/issues/comments/41001",
+         comment_id: 41_001,
+         posted_at: "2026-02-15T04:13:00Z"
+       }}
+    end)
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: "run-issue-triage-approved-post-#{System.unique_integer([:positive])}",
+        workflow_name: "issue_triage",
+        workflow_version: 1,
+        trigger: %{
+          source: "github_webhook",
+          mode: "webhook",
+          source_row: %{"project_github_full_name" => "owner/repo-issue-triage-approved-post"},
+          source_issue: %{"id" => 4101, "number" => 41},
+          approval_policy: %{"mode" => "approval_required", "auto_post" => false}
+        },
+        inputs: %{"issue_reference" => "owner/repo-issue-triage-approved-post#41"},
+        input_metadata: %{
+          "issue_reference" => %{"required" => true, "source" => "github_webhook"}
+        },
+        initiating_actor: %{id: "github_webhook", email: nil},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 04:10:00Z],
+        step_results: %{
+          "run_issue_triage" => %{"classification" => "bug"},
+          "run_issue_research" => %{"summary" => "Research summary for issue #41."},
+          "compose_issue_response" => %{
+            "proposed_response" => "Thanks for reporting this regression. We are preparing a fix."
+          }
+        }
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "run_issue_research",
+        transitioned_at: ~U[2026-02-15 04:11:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-15 04:12:00Z]
+      })
+
+    {:ok, approved_run} =
+      WorkflowRun.approve(run, %{
+        actor: %{id: "maintainer-41", email: "maintainer-41@example.com"},
+        current_step: "resume_execution",
+        approved_at: ~U[2026-02-15 04:13:00Z]
+      })
+
+    assert_receive {:issue_triage_post_request, post_request}
+    assert post_request.repo_full_name == "owner/repo-issue-triage-approved-post"
+    assert post_request.issue_number == 41
+    assert post_request.body =~ "Thanks for reporting"
+
+    assert approved_run.status == :completed
+    assert approved_run.current_step == "post_github_comment"
+
+    post_artifact = get_in(approved_run.step_results, ["post_issue_response"])
+
+    assert post_artifact["status"] == "posted"
+    assert post_artifact["posted"] == true
+
+    assert post_artifact["comment_url"] ==
+             "https://github.com/owner/repo-issue-triage-approved-post/issues/41#issuecomment-41001"
+
+    assert post_artifact["comment_id"] == 41_001
+    assert post_artifact["approval_mode"] == "approval_required"
+    assert post_artifact["approval_decision"] == "approved"
+
+    assert get_in(approved_run.step_results, ["approval_decision", "decision"]) == "approved"
+  end
+
+  test "approve captures typed auth post failure for issue_triage and does not mark post successful" do
+    {:ok, project} = create_project("owner/repo-issue-triage-post-failure")
+
+    Application.put_env(:jido_code, :issue_triage_response_poster, fn _post_request ->
+      {:error,
+       %{
+         error_type: "github_issue_comment_authentication_failed",
+         reason_type: "authentication",
+         detail: "GitHub token was rejected.",
+         remediation: "Rotate GitHub token and retry posting."
+       }}
+    end)
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: "run-issue-triage-post-failure-#{System.unique_integer([:positive])}",
+        workflow_name: "issue_triage",
+        workflow_version: 1,
+        trigger: %{
+          source: "github_webhook",
+          mode: "webhook",
+          source_row: %{"project_github_full_name" => "owner/repo-issue-triage-post-failure"},
+          source_issue: %{"id" => 5101, "number" => 51},
+          approval_policy: %{"mode" => "approval_required", "auto_post" => false}
+        },
+        inputs: %{"issue_reference" => "owner/repo-issue-triage-post-failure#51"},
+        input_metadata: %{
+          "issue_reference" => %{"required" => true, "source" => "github_webhook"}
+        },
+        initiating_actor: %{id: "github_webhook", email: nil},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 04:20:00Z],
+        step_results: %{
+          "run_issue_triage" => %{"classification" => "bug"},
+          "run_issue_research" => %{"summary" => "Research summary for issue #51."},
+          "compose_issue_response" => %{
+            "proposed_response" => "We reproduced this issue and will prepare a patch."
+          }
+        }
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "run_issue_research",
+        transitioned_at: ~U[2026-02-15 04:21:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-15 04:22:00Z]
+      })
+
+    {:ok, approved_run} =
+      WorkflowRun.approve(run, %{
+        actor: %{id: "maintainer-51", email: "maintainer-51@example.com"},
+        current_step: "resume_execution",
+        approved_at: ~U[2026-02-15 04:23:00Z]
+      })
+
+    assert approved_run.status == :failed
+    assert approved_run.current_step == "post_github_comment"
+    assert get_in(approved_run.error, ["error_type"]) == "github_issue_comment_authentication_failed"
+    assert get_in(approved_run.error, ["reason_type"]) == "auth_error"
+    assert get_in(approved_run.error, ["failed_step"]) == "post_github_comment"
+    assert get_in(approved_run.error, ["last_successful_step"]) == "compose_issue_response"
+
+    post_artifact = get_in(approved_run.step_results, ["post_issue_response"])
+    post_typed_failure = post_artifact["typed_failure"]
+
+    assert post_artifact["status"] == "failed"
+    assert post_artifact["posted"] == false
+    assert post_artifact["approval_mode"] == "approval_required"
+    assert post_artifact["approval_decision"] == "approved"
+    assert is_nil(post_artifact["comment_url"])
+    assert post_typed_failure["reason_type"] == "auth_error"
   end
 
   test "approve keeps run awaiting_approval and returns typed action failure when blocked" do
@@ -1190,4 +1366,7 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
     assert diagnostic["message"] == "Run topic event publication failed."
     assert {:ok, _timestamp, 0} = DateTime.from_iso8601(diagnostic["timestamp"])
   end
+
+  defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)
+  defp restore_env(key, value), do: Application.put_env(:jido_code, key, value)
 end

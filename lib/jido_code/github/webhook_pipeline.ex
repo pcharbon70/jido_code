@@ -719,14 +719,23 @@ defmodule JidoCode.GitHub.WebhookPipeline do
          artifact_persistence_failure <- Map.get(issue_triage_run_plan, :artifact_persistence_failure),
          {:ok, %WorkflowRun{} = workflow_run} <-
            WorkflowRun.create(run_attributes, authorize?: false),
-         :ok <- maybe_mark_issue_triage_run_failed(workflow_run, artifact_persistence_failure) do
+         :ok <- maybe_mark_issue_triage_run_failed(workflow_run, artifact_persistence_failure),
+         {:ok, %WorkflowRun{} = finalized_run} <-
+           maybe_advance_issue_triage_run(workflow_run, artifact_persistence_failure) do
       artifact_persistence_status =
         if is_map(artifact_persistence_failure),
           do: "partial_failed",
           else: "persisted"
 
+      run_status =
+        finalized_run
+        |> Map.get(:status)
+        |> normalize_optional_string() || "unknown"
+
+      posting_status = issue_triage_posting_status(finalized_run)
+
       Logger.info(
-        "github_webhook_issue_triage_run_created delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))} trigger_event=#{issue_bot_event} run_id=#{workflow_run.run_id} workflow_name=#{workflow_run.workflow_name} artifact_persistence=#{artifact_persistence_status}"
+        "github_webhook_issue_triage_run_created delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))} trigger_event=#{issue_bot_event} run_id=#{workflow_run.run_id} workflow_name=#{workflow_run.workflow_name} artifact_persistence=#{artifact_persistence_status} status=#{run_status} posting=#{posting_status}"
       )
 
       :ok
@@ -926,6 +935,34 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   defp maybe_mark_issue_triage_run_failed(_workflow_run, _artifact_persistence_failure) do
     {:error, :invalid_issue_triage_run}
   end
+
+  defp maybe_advance_issue_triage_run(%WorkflowRun{} = workflow_run, nil) do
+    case WorkflowRun.advance_issue_triage_run(workflow_run) do
+      {:ok, %WorkflowRun{} = finalized_run} ->
+        {:ok, finalized_run}
+
+      {:error, reason} ->
+        {:error, {:issue_triage_run_advance_failed, reason}}
+    end
+  end
+
+  defp maybe_advance_issue_triage_run(%WorkflowRun{} = workflow_run, _artifact_persistence_failure) do
+    {:ok, workflow_run}
+  end
+
+  defp maybe_advance_issue_triage_run(_workflow_run, _artifact_persistence_failure) do
+    {:error, :invalid_issue_triage_run}
+  end
+
+  defp issue_triage_posting_status(%WorkflowRun{} = run) do
+    run
+    |> Map.get(:step_results, %{})
+    |> map_get(:post_issue_response, "post_issue_response", %{})
+    |> map_get(:status, "status")
+    |> normalize_optional_string() || "pending"
+  end
+
+  defp issue_triage_posting_status(_run), do: "unknown"
 
   @spec default_issue_triage_artifact_persister(map()) :: :ok
   def default_issue_triage_artifact_persister(%{} = _artifact_persistence_context), do: :ok
