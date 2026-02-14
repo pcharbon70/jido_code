@@ -28,6 +28,12 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   @approval_policy_source "support_agent_config.github_issue_bot.approval_mode"
   @retriage_prior_issue_analysis_limit 25
   @issue_reference_input_name "issue_reference"
+  @issue_triage_artifact_persistence_error_type "issue_triage_artifact_persistence_failed"
+  @issue_triage_artifact_persistence_operation "persist_issue_triage_artifacts"
+  @issue_triage_artifact_persistence_failed_step "persist_issue_triage_artifacts"
+  @issue_triage_artifact_persistence_remediation """
+  Restore Issue Bot artifact persistence health, then retry issue triage so run detail can capture full triage and response artifacts.
+  """
 
   @type verified_delivery :: %{
           delivery_id: String.t() | nil,
@@ -707,12 +713,20 @@ defmodule JidoCode.GitHub.WebhookPipeline do
 
   defp maybe_create_issue_triage_run(delivery, issue_bot_event, %Project{} = project)
        when issue_bot_event in @issue_triage_workflow_trigger_events do
-    with {:ok, run_attributes} <-
+    with {:ok, issue_triage_run_plan} <-
            build_issue_triage_run_attributes(delivery, project, issue_bot_event),
+         run_attributes <- Map.fetch!(issue_triage_run_plan, :run_attributes),
+         artifact_persistence_failure <- Map.get(issue_triage_run_plan, :artifact_persistence_failure),
          {:ok, %WorkflowRun{} = workflow_run} <-
-           WorkflowRun.create(run_attributes, authorize?: false) do
+           WorkflowRun.create(run_attributes, authorize?: false),
+         :ok <- maybe_mark_issue_triage_run_failed(workflow_run, artifact_persistence_failure) do
+      artifact_persistence_status =
+        if is_map(artifact_persistence_failure),
+          do: "partial_failed",
+          else: "persisted"
+
       Logger.info(
-        "github_webhook_issue_triage_run_created delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))} trigger_event=#{issue_bot_event} run_id=#{workflow_run.run_id} workflow_name=#{workflow_run.workflow_name}"
+        "github_webhook_issue_triage_run_created delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))} trigger_event=#{issue_bot_event} run_id=#{workflow_run.run_id} workflow_name=#{workflow_run.workflow_name} artifact_persistence=#{artifact_persistence_status}"
       )
 
       :ok
@@ -737,10 +751,12 @@ defmodule JidoCode.GitHub.WebhookPipeline do
          {:ok, issue_identifiers} <- source_issue_identifiers(issue_payload),
          issue_reference when is_binary(issue_reference) <-
            issue_reference(source_repo_full_name(payload, project), issue_identifiers) do
+      run_id = generated_run_id()
       delivery_id = delivery |> Map.get(:delivery_id) |> normalize_optional_string()
       event = delivery |> Map.get(:event) |> normalize_optional_string()
       action = normalize_action(payload)
       project_id = project |> Map.get(:id) |> normalize_optional_string()
+      started_at = DateTime.utc_now() |> DateTime.truncate(:second)
 
       project_github_full_name =
         project |> Map.get(:github_full_name) |> normalize_optional_string()
@@ -793,24 +809,542 @@ defmodule JidoCode.GitHub.WebhookPipeline do
         }
       }
 
-      {:ok,
-       %{
-         run_id: generated_run_id(),
-         project_id: project_id,
-         workflow_name: @issue_triage_workflow_name,
-         workflow_version: @issue_triage_workflow_version,
-         trigger: trigger,
-         inputs: %{@issue_reference_input_name => issue_reference},
-         input_metadata: input_metadata,
-         initiating_actor: %{"id" => "github_webhook", "email" => nil},
-         current_step: "queued",
-         started_at: DateTime.utc_now() |> DateTime.truncate(:second)
-       }}
+      artifact_bundle =
+        issue_triage_artifact_bundle(run_id, issue_reference, issue_identifiers, issue_payload, started_at)
+
+      artifact_persistence_context =
+        %{
+          "run_id" => run_id,
+          "workflow_name" => @issue_triage_workflow_name,
+          "issue_reference" => issue_reference,
+          "source_issue" => issue_identifiers,
+          "artifacts" => artifact_bundle
+        }
+        |> reject_nil_values()
+
+      case persist_issue_triage_artifacts(artifact_persistence_context) do
+        :ok ->
+          {:ok,
+           %{
+             run_attributes: %{
+               run_id: run_id,
+               project_id: project_id,
+               workflow_name: @issue_triage_workflow_name,
+               workflow_version: @issue_triage_workflow_version,
+               trigger: trigger,
+               inputs: %{@issue_reference_input_name => issue_reference},
+               input_metadata: input_metadata,
+               initiating_actor: %{"id" => "github_webhook", "email" => nil},
+               current_step: "queued",
+               started_at: started_at,
+               step_results:
+                 issue_triage_step_results(
+                   artifact_bundle,
+                   issue_triage_artifact_linkage(run_id, issue_reference, issue_identifiers),
+                   "persisted"
+                 )
+             },
+             artifact_persistence_failure: nil
+           }}
+
+        {:error, artifact_failure_reason} ->
+          artifact_persistence_failure =
+            issue_triage_artifact_persistence_failure(
+              artifact_failure_reason,
+              run_id,
+              issue_reference,
+              issue_identifiers
+            )
+
+          partial_artifact_bundle =
+            %{
+              "run_issue_triage" =>
+                artifact_bundle
+                |> map_get(:run_issue_triage, "run_issue_triage", %{})
+            }
+            |> reject_nil_values()
+
+          {:ok,
+           %{
+             run_attributes: %{
+               run_id: run_id,
+               project_id: project_id,
+               workflow_name: @issue_triage_workflow_name,
+               workflow_version: @issue_triage_workflow_version,
+               trigger: trigger,
+               inputs: %{@issue_reference_input_name => issue_reference},
+               input_metadata: input_metadata,
+               initiating_actor: %{"id" => "github_webhook", "email" => nil},
+               current_step: "queued",
+               started_at: started_at,
+               step_results:
+                 issue_triage_step_results(
+                   partial_artifact_bundle,
+                   issue_triage_artifact_linkage(run_id, issue_reference, issue_identifiers),
+                   "partial_persistence_failed",
+                   artifact_persistence_failure
+                 )
+             },
+             artifact_persistence_failure: artifact_persistence_failure
+           }}
+      end
     else
       _other ->
         {:error, :invalid_issue_payload}
     end
   end
+
+  defp maybe_mark_issue_triage_run_failed(%WorkflowRun{} = _workflow_run, nil), do: :ok
+
+  defp maybe_mark_issue_triage_run_failed(%WorkflowRun{} = workflow_run, artifact_persistence_failure)
+       when is_map(artifact_persistence_failure) do
+    failed_at = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    with {:ok, %WorkflowRun{} = running_run} <-
+           WorkflowRun.transition_status(workflow_run, %{
+             to_status: :running,
+             current_step: @issue_triage_artifact_persistence_failed_step,
+             transitioned_at: failed_at
+           }),
+         {:ok, %WorkflowRun{}} <-
+           WorkflowRun.transition_status(running_run, %{
+             to_status: :failed,
+             current_step: @issue_triage_artifact_persistence_failed_step,
+             transitioned_at: failed_at,
+             transition_metadata: %{
+               "typed_failure" => artifact_persistence_failure,
+               "failure_context" => artifact_persistence_failure
+             }
+           }) do
+      :ok
+    else
+      {:error, reason} ->
+        {:error, {:issue_triage_artifact_failure_transition_failed, reason}}
+    end
+  end
+
+  defp maybe_mark_issue_triage_run_failed(_workflow_run, _artifact_persistence_failure) do
+    {:error, :invalid_issue_triage_run}
+  end
+
+  @spec default_issue_triage_artifact_persister(map()) :: :ok
+  def default_issue_triage_artifact_persister(%{} = _artifact_persistence_context), do: :ok
+
+  def default_issue_triage_artifact_persister(_artifact_persistence_context), do: :ok
+
+  defp persist_issue_triage_artifacts(%{} = artifact_persistence_context) do
+    persister =
+      Application.get_env(
+        :jido_code,
+        :issue_triage_artifact_persister,
+        &__MODULE__.default_issue_triage_artifact_persister/1
+      )
+
+    safe_invoke_issue_triage_artifact_persister(persister, artifact_persistence_context)
+  end
+
+  defp persist_issue_triage_artifacts(_artifact_persistence_context) do
+    {:error, normalize_issue_triage_artifact_persistence_failure(:invalid_artifact_context)}
+  end
+
+  defp safe_invoke_issue_triage_artifact_persister(persister, artifact_persistence_context)
+       when is_function(persister, 1) and is_map(artifact_persistence_context) do
+    try do
+      case persister.(artifact_persistence_context) do
+        :ok ->
+          :ok
+
+        {:ok, _result} ->
+          :ok
+
+        {:error, reason} ->
+          {:error, normalize_issue_triage_artifact_persistence_failure(reason)}
+
+        other ->
+          {:error, normalize_issue_triage_artifact_persistence_failure({:invalid_artifact_persister_result, other})}
+      end
+    rescue
+      exception ->
+        {:error,
+         normalize_issue_triage_artifact_persistence_failure(%{
+           reason_type: "artifact_persister_exception",
+           detail: "Issue triage artifact persister crashed (#{Exception.message(exception)})."
+         })}
+    catch
+      kind, reason ->
+        {:error,
+         normalize_issue_triage_artifact_persistence_failure(%{
+           reason_type: "artifact_persister_throw",
+           detail: "Issue triage artifact persister threw #{inspect({kind, reason})}."
+         })}
+    end
+  end
+
+  defp safe_invoke_issue_triage_artifact_persister(_persister, _artifact_persistence_context) do
+    {:error, normalize_issue_triage_artifact_persistence_failure(:invalid_artifact_persister)}
+  end
+
+  defp normalize_issue_triage_artifact_persistence_failure(%{} = artifact_failure) do
+    reason_type =
+      artifact_failure
+      |> map_get(:reason_type, "reason_type")
+      |> normalize_optional_string() ||
+        "artifact_persistence_failed"
+
+    detail =
+      artifact_failure
+      |> map_get(:detail, "detail")
+      |> normalize_optional_string() ||
+        "Issue triage artifact persistence failed."
+
+    remediation =
+      artifact_failure
+      |> map_get(:remediation, "remediation")
+      |> normalize_optional_string() ||
+        @issue_triage_artifact_persistence_remediation
+
+    %{
+      "reason_type" => reason_type,
+      "detail" => detail,
+      "remediation" => remediation
+    }
+  end
+
+  defp normalize_issue_triage_artifact_persistence_failure(artifact_failure) do
+    %{
+      "reason_type" => "artifact_persistence_failed",
+      "detail" => "Issue triage artifact persistence failed (#{inspect(artifact_failure)}).",
+      "remediation" => @issue_triage_artifact_persistence_remediation
+    }
+  end
+
+  defp issue_triage_artifact_persistence_failure(
+         artifact_failure_reason,
+         run_id,
+         issue_reference,
+         issue_identifiers
+       ) do
+    normalized_failure = normalize_issue_triage_artifact_persistence_failure(artifact_failure_reason)
+
+    %{
+      "error_type" => @issue_triage_artifact_persistence_error_type,
+      "operation" => @issue_triage_artifact_persistence_operation,
+      "reason_type" => normalized_failure |> map_get(:reason_type, "reason_type"),
+      "detail" => normalized_failure |> map_get(:detail, "detail"),
+      "remediation" => normalized_failure |> map_get(:remediation, "remediation"),
+      "failed_step" => @issue_triage_artifact_persistence_failed_step,
+      "last_successful_step" => "run_issue_triage",
+      "run_id" => normalize_optional_string(run_id),
+      "issue_reference" => normalize_optional_string(issue_reference),
+      "source_issue" => issue_identifiers,
+      "timestamp" => DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_artifact_bundle(
+         run_id,
+         issue_reference,
+         issue_identifiers,
+         issue_payload,
+         generated_at
+       )
+       when is_map(issue_identifiers) and is_map(issue_payload) do
+    linkage = issue_triage_artifact_linkage(run_id, issue_reference, issue_identifiers)
+    triage_artifact = issue_triage_classification_artifact(issue_payload, linkage, generated_at)
+
+    research_artifact =
+      issue_triage_research_artifact(issue_payload, triage_artifact, linkage, generated_at)
+
+    response_artifact =
+      issue_triage_response_draft_artifact(
+        issue_payload,
+        triage_artifact,
+        research_artifact,
+        linkage,
+        generated_at
+      )
+
+    %{
+      "run_issue_triage" => triage_artifact,
+      "run_issue_research" => research_artifact,
+      "compose_issue_response" => response_artifact
+    }
+  end
+
+  defp issue_triage_artifact_bundle(
+         _run_id,
+         _issue_reference,
+         _issue_identifiers,
+         _issue_payload,
+         _generated_at
+       ) do
+    %{}
+  end
+
+  defp issue_triage_step_results(
+         artifact_bundle,
+         linkage,
+         persistence_status,
+         artifact_persistence_failure \\ nil
+       )
+
+  defp issue_triage_step_results(
+         artifact_bundle,
+         linkage,
+         persistence_status,
+         artifact_persistence_failure
+       )
+       when is_map(artifact_bundle) and is_map(linkage) and is_binary(persistence_status) do
+    artifact_keys =
+      artifact_bundle
+      |> Map.keys()
+      |> Enum.map(&normalize_optional_string/1)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.sort()
+
+    persistence_metadata =
+      %{
+        "status" => persistence_status,
+        "artifact_keys" => artifact_keys,
+        "linked_run" => linkage
+      }
+      |> maybe_put_typed_failure(artifact_persistence_failure)
+      |> reject_nil_values()
+
+    artifact_bundle
+    |> Map.put("issue_bot_artifact_lineage", persistence_metadata)
+  end
+
+  defp issue_triage_step_results(_artifact_bundle, _linkage, _persistence_status, _artifact_persistence_failure) do
+    %{}
+  end
+
+  defp maybe_put_typed_failure(map, nil) when is_map(map), do: map
+
+  defp maybe_put_typed_failure(map, artifact_persistence_failure)
+       when is_map(map) and is_map(artifact_persistence_failure) do
+    Map.put(map, "typed_failure", artifact_persistence_failure)
+  end
+
+  defp maybe_put_typed_failure(map, _artifact_persistence_failure) when is_map(map), do: map
+
+  defp issue_triage_artifact_linkage(run_id, issue_reference, issue_identifiers)
+       when is_map(issue_identifiers) do
+    %{
+      "run_id" => normalize_optional_string(run_id),
+      "workflow_name" => @issue_triage_workflow_name,
+      "issue_reference" => normalize_optional_string(issue_reference),
+      "source_issue" => issue_identifiers
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_artifact_linkage(_run_id, _issue_reference, _issue_identifiers), do: %{}
+
+  defp issue_triage_classification_artifact(issue_payload, linkage, generated_at)
+       when is_map(issue_payload) and is_map(linkage) do
+    classification = issue_triage_classification(issue_payload)
+
+    %{
+      "classification" => classification,
+      "confidence" => issue_triage_classification_confidence(issue_payload),
+      "summary" => "Issue triage classified this report as #{classification}.",
+      "linked_run" => linkage,
+      "generated_at" => generated_at |> normalize_generated_at()
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_classification_artifact(_issue_payload, _linkage, _generated_at), do: %{}
+
+  defp issue_triage_research_artifact(issue_payload, triage_artifact, linkage, generated_at)
+       when is_map(issue_payload) and is_map(triage_artifact) and is_map(linkage) do
+    classification =
+      triage_artifact
+      |> map_get(:classification, "classification")
+      |> normalize_optional_string() || "needs_triage"
+
+    issue_subject = issue_subject(issue_payload)
+
+    %{
+      "summary" =>
+        "Initial research for #{issue_subject} focused on #{classification} signals and reproducibility context.",
+      "linked_run" => linkage,
+      "generated_at" => generated_at |> normalize_generated_at()
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_research_artifact(_issue_payload, _triage_artifact, _linkage, _generated_at), do: %{}
+
+  defp issue_triage_response_draft_artifact(
+         issue_payload,
+         triage_artifact,
+         research_artifact,
+         linkage,
+         generated_at
+       )
+       when is_map(issue_payload) and is_map(triage_artifact) and is_map(research_artifact) and
+              is_map(linkage) do
+    classification =
+      triage_artifact
+      |> map_get(:classification, "classification")
+      |> normalize_optional_string() || "needs_triage"
+
+    research_summary =
+      research_artifact
+      |> map_get(:summary, "summary")
+      |> normalize_optional_string() || "Initial research summary is available in run artifacts."
+
+    issue_subject = issue_subject(issue_payload)
+
+    %{
+      "proposed_response" =>
+        "Thanks for reporting #{issue_subject}. We triaged this as #{classification}. #{research_summary} Maintainers can review and post this response once approved.",
+      "linked_run" => linkage,
+      "generated_at" => generated_at |> normalize_generated_at()
+    }
+    |> reject_nil_values()
+  end
+
+  defp issue_triage_response_draft_artifact(
+         _issue_payload,
+         _triage_artifact,
+         _research_artifact,
+         _linkage,
+         _generated_at
+       ) do
+    %{}
+  end
+
+  defp issue_triage_classification(issue_payload) when is_map(issue_payload) do
+    issue_text = issue_payload_text(issue_payload)
+
+    cond do
+      contains_any?(issue_text, [
+        "bug",
+        "error",
+        "failing",
+        "failure",
+        "exception",
+        "panic",
+        "regression",
+        "crash"
+      ]) ->
+        "bug"
+
+      contains_any?(issue_text, ["feature", "enhancement", "request", "proposal", "improvement"]) ->
+        "feature"
+
+      contains_any?(issue_text, ["docs", "documentation", "readme", "typo"]) ->
+        "documentation"
+
+      contains_any?(issue_text, ["question", "help", "how do", "how to"]) ->
+        "question"
+
+      true ->
+        "needs_triage"
+    end
+  end
+
+  defp issue_triage_classification(_issue_payload), do: "needs_triage"
+
+  defp issue_triage_classification_confidence(issue_payload) when is_map(issue_payload) do
+    issue_text = issue_payload_text(issue_payload)
+
+    cond do
+      issue_text == "" ->
+        "low"
+
+      contains_any?(issue_text, [
+        "bug",
+        "error",
+        "failing",
+        "failure",
+        "exception",
+        "panic",
+        "regression",
+        "crash",
+        "feature",
+        "enhancement",
+        "request",
+        "proposal",
+        "docs",
+        "documentation"
+      ]) ->
+        "medium"
+
+      true ->
+        "low"
+    end
+  end
+
+  defp issue_triage_classification_confidence(_issue_payload), do: "low"
+
+  defp issue_payload_text(issue_payload) when is_map(issue_payload) do
+    title =
+      issue_payload
+      |> map_get(:title, "title")
+      |> normalize_optional_string()
+      |> case do
+        nil -> ""
+        normalized_title -> normalized_title
+      end
+
+    body =
+      issue_payload
+      |> map_get(:body, "body")
+      |> normalize_optional_string()
+      |> case do
+        nil -> ""
+        normalized_body -> normalized_body
+      end
+
+    [title, body]
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.join("\n")
+    |> String.downcase()
+  end
+
+  defp issue_payload_text(_issue_payload), do: ""
+
+  defp issue_subject(issue_payload) when is_map(issue_payload) do
+    title =
+      issue_payload
+      |> map_get(:title, "title")
+      |> normalize_optional_string()
+
+    issue_number =
+      issue_payload
+      |> map_get(:number, "number")
+      |> normalize_optional_positive_integer()
+
+    cond do
+      is_binary(title) ->
+        title
+
+      is_integer(issue_number) ->
+        "issue ##{issue_number}"
+
+      true ->
+        "this issue"
+    end
+  end
+
+  defp issue_subject(_issue_payload), do: "this issue"
+
+  defp contains_any?(value, candidates) when is_binary(value) and is_list(candidates) do
+    Enum.any?(candidates, fn candidate ->
+      is_binary(candidate) and String.contains?(value, candidate)
+    end)
+  end
+
+  defp contains_any?(_value, _candidates), do: false
+
+  defp normalize_generated_at(%DateTime{} = generated_at), do: DateTime.to_iso8601(generated_at)
+  defp normalize_generated_at(generated_at) when is_binary(generated_at), do: generated_at
+  defp normalize_generated_at(_generated_at), do: nil
 
   defp issue_payload(payload) when is_map(payload) do
     case map_get(payload, :issue, "issue") do

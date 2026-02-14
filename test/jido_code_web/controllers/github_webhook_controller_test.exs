@@ -23,11 +23,15 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
 
     original_system_config = Application.get_env(:jido_code, :system_config, :__missing__)
 
+    original_issue_triage_artifact_persister =
+      Application.get_env(:jido_code, :issue_triage_artifact_persister, :__missing__)
+
     on_exit(fn ->
       Logger.configure(level: original_log_level)
       restore_env(:github_webhook_secret, original_secret)
       restore_env(:github_webhook_verified_dispatcher, original_dispatcher)
       restore_env(:system_config, original_system_config)
+      restore_env(:issue_triage_artifact_persister, original_issue_triage_artifact_persister)
     end)
 
     :ok
@@ -326,6 +330,207 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
     assert map_get(source_issue, :number, "number") == 77
     assert map_get(source_issue, :id, "id") == 90_001
     assert map_get(run.inputs, :issue_reference, "issue_reference") == "#{repo_full_name}#77"
+  end
+
+  test "persists triage, research, and response draft artifacts linked to workflow run and source issue metadata",
+       %{
+         conn: conn
+       } do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "artifact-owner-#{unique_suffix}"
+    name = "artifact-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"]
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(test_pid, {:verified_delivery_handoff, delivery.delivery_id})
+      :ok
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "opened",
+        "issue" => %{
+          "id" => 90_101,
+          "number" => 88,
+          "title" => "Bug: state persistence fails on retry",
+          "body" => "When retries run, the state update fails with an exception.",
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/88",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/88"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-artifacts-#{System.unique_integer([:positive])}"
+
+    response =
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("x-hub-signature-256", sign(payload, secret))
+      |> put_req_header("x-github-delivery", delivery_id)
+      |> put_req_header("x-github-event", "issues")
+      |> post(@webhook_path, payload)
+      |> json_response(202)
+
+    assert response["status"] == "accepted"
+    assert_receive {:verified_delivery_handoff, ^delivery_id}
+
+    assert {:ok, [%WorkflowRun{} = run]} = workflow_runs_for_project(project.id)
+    assert run.workflow_name == "issue_triage"
+
+    triage_artifact = map_get(run.step_results, :run_issue_triage, "run_issue_triage", %{})
+    research_artifact = map_get(run.step_results, :run_issue_research, "run_issue_research", %{})
+
+    response_artifact =
+      map_get(run.step_results, :compose_issue_response, "compose_issue_response", %{})
+
+    artifact_lineage =
+      map_get(run.step_results, :issue_bot_artifact_lineage, "issue_bot_artifact_lineage", %{})
+
+    triage_linked_run = map_get(triage_artifact, :linked_run, "linked_run", %{})
+    linked_source_issue = map_get(triage_linked_run, :source_issue, "source_issue", %{})
+
+    assert map_get(triage_artifact, :classification, "classification") == "bug"
+
+    assert map_get(research_artifact, :summary, "summary") =~
+             "Initial research for Bug: state persistence fails on retry focused on bug signals"
+
+    assert map_get(response_artifact, :proposed_response, "proposed_response") =~
+             "We triaged this as bug"
+
+    assert map_get(artifact_lineage, :status, "status") == "persisted"
+
+    assert Enum.sort(map_get(artifact_lineage, :artifact_keys, "artifact_keys", [])) == [
+             "compose_issue_response",
+             "run_issue_research",
+             "run_issue_triage"
+           ]
+
+    assert map_get(triage_linked_run, :run_id, "run_id") == run.run_id
+    assert map_get(triage_linked_run, :issue_reference, "issue_reference") == "#{repo_full_name}#88"
+    assert map_get(linked_source_issue, :number, "number") == 88
+    assert map_get(linked_source_issue, :id, "id") == 90_101
+  end
+
+  test "marks run failed with typed persistence error and preserves partial issue triage artifacts when artifact persistence fails",
+       %{
+         conn: conn
+       } do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "artifact-failure-owner-#{unique_suffix}"
+    name = "artifact-failure-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"]
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(test_pid, {:verified_delivery_handoff, delivery.delivery_id})
+      :ok
+    end)
+
+    Application.put_env(:jido_code, :issue_triage_artifact_persister, fn _context ->
+      {:error,
+       %{
+         reason_type: "artifact_store_unavailable",
+         detail: "Issue triage artifact store is unavailable for this webhook delivery.",
+         remediation: "Restore artifact storage health and retry issue triage."
+       }}
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "opened",
+        "issue" => %{
+          "id" => 90_201,
+          "number" => 89,
+          "title" => "Bug: webhook triage artifact persistence fails",
+          "body" => "Persistence errors prevent issue artifacts from being stored.",
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/89",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/89"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-artifacts-failed-#{System.unique_integer([:positive])}"
+
+    response =
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("x-hub-signature-256", sign(payload, secret))
+      |> put_req_header("x-github-delivery", delivery_id)
+      |> put_req_header("x-github-event", "issues")
+      |> post(@webhook_path, payload)
+      |> json_response(202)
+
+    assert response["status"] == "accepted"
+    assert_receive {:verified_delivery_handoff, ^delivery_id}
+
+    assert {:ok, [%WorkflowRun{} = run]} = workflow_runs_for_project(project.id)
+    assert run.workflow_name == "issue_triage"
+    assert run.status == :failed
+    assert run.current_step == "persist_issue_triage_artifacts"
+    assert get_in(run.error, ["error_type"]) == "issue_triage_artifact_persistence_failed"
+    assert get_in(run.error, ["reason_type"]) == "artifact_store_unavailable"
+    assert get_in(run.error, ["failed_step"]) == "persist_issue_triage_artifacts"
+    assert get_in(run.error, ["last_successful_step"]) == "run_issue_triage"
+
+    triage_artifact = map_get(run.step_results, :run_issue_triage, "run_issue_triage", %{})
+    research_artifact = map_get(run.step_results, :run_issue_research, "run_issue_research")
+    response_artifact = map_get(run.step_results, :compose_issue_response, "compose_issue_response")
+
+    artifact_lineage =
+      map_get(run.step_results, :issue_bot_artifact_lineage, "issue_bot_artifact_lineage", %{})
+
+    typed_failure = map_get(artifact_lineage, :typed_failure, "typed_failure", %{})
+
+    assert map_get(triage_artifact, :classification, "classification") == "bug"
+    assert is_nil(research_artifact)
+    assert is_nil(response_artifact)
+    assert map_get(artifact_lineage, :status, "status") == "partial_persistence_failed"
+
+    assert map_get(typed_failure, :error_type, "error_type") ==
+             "issue_triage_artifact_persistence_failed"
   end
 
   test "creates retriage runs for issues.edited with prior issue analysis artifact linkage", %{

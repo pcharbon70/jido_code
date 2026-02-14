@@ -152,6 +152,65 @@ defmodule JidoCodeWeb.RunDetailLive do
             </p>
           </section>
 
+          <%= if @issue_triage_artifacts do %>
+            <section
+              id="run-detail-issue-triage-artifacts"
+              class="space-y-2 rounded border border-base-300 bg-base-100 p-4"
+            >
+              <h2 class="text-lg font-semibold">Issue triage artifacts</h2>
+              <p id="run-detail-issue-artifact-persistence-status" class="text-sm text-base-content/80">
+                Persistence status: {@issue_triage_artifacts.persistence_status}
+              </p>
+              <p id="run-detail-issue-triage-classification" class="text-sm">
+                Classification: {@issue_triage_artifacts.classification}
+              </p>
+              <p id="run-detail-issue-research-summary" class="text-sm text-base-content/80">
+                {@issue_triage_artifacts.research_summary}
+              </p>
+              <p id="run-detail-issue-response-draft" class="text-sm text-base-content/80">
+                {@issue_triage_artifacts.proposed_response}
+              </p>
+              <p
+                :if={@issue_triage_artifacts.issue_reference}
+                id="run-detail-issue-artifact-issue-reference"
+                class="text-xs text-base-content/70"
+              >
+                Issue reference: {@issue_triage_artifacts.issue_reference}
+              </p>
+              <p
+                :if={@issue_triage_artifacts.source_issue_number}
+                id="run-detail-issue-artifact-source-issue-number"
+                class="text-xs text-base-content/70"
+              >
+                Source issue number: {@issue_triage_artifacts.source_issue_number}
+              </p>
+              <p
+                :if={@issue_triage_artifacts.linked_run_id}
+                id="run-detail-issue-artifact-run-id"
+                class="text-xs text-base-content/70"
+              >
+                Linked run: <span class="font-mono">{@issue_triage_artifacts.linked_run_id}</span>
+              </p>
+
+              <%= if @issue_triage_artifacts.typed_failure do %>
+                <section
+                  id="run-detail-issue-artifact-persistence-error"
+                  class="space-y-1 rounded border border-error/40 bg-error/5 p-3"
+                >
+                  <p id="run-detail-issue-artifact-persistence-error-type" class="text-sm font-semibold text-error">
+                    Typed persistence failure: {@issue_triage_artifacts.typed_failure.error_type}
+                  </p>
+                  <p id="run-detail-issue-artifact-persistence-error-detail" class="text-sm text-base-content/80">
+                    {@issue_triage_artifacts.typed_failure.detail}
+                  </p>
+                  <p id="run-detail-issue-artifact-persistence-error-remediation" class="text-sm text-base-content/80">
+                    {@issue_triage_artifacts.typed_failure.remediation}
+                  </p>
+                </section>
+              <% end %>
+            </section>
+          <% end %>
+
           <%= if @failure_context do %>
             <section id="run-detail-failure-context" class="space-y-2 rounded border border-error/40 bg-error/5 p-4">
               <h2 class="text-lg font-semibold text-error">Failure context</h2>
@@ -421,6 +480,7 @@ defmodule JidoCodeWeb.RunDetailLive do
     |> assign(:timeline_entries, [])
     |> assign(:retry_lineage_entries, [])
     |> assign(:failure_context, nil)
+    |> assign(:issue_triage_artifacts, nil)
     |> assign(:approval_context, nil)
     |> assign(:approval_context_blocker, nil)
     |> assign(:step_retry_state, step_retry_state(nil))
@@ -442,6 +502,7 @@ defmodule JidoCodeWeb.RunDetailLive do
     |> assign(:timeline_entries, timeline_entries(run))
     |> assign(:retry_lineage_entries, retry_lineage_entries(run))
     |> assign(:failure_context, failure_context(run))
+    |> assign(:issue_triage_artifacts, issue_triage_artifacts(run))
     |> assign(:approval_context, approval_context(run))
     |> assign(:approval_context_blocker, approval_context_blocker(run))
     |> assign(:step_retry_state, step_retry_state(run))
@@ -508,6 +569,160 @@ defmodule JidoCodeWeb.RunDetailLive do
   end
 
   defp failure_context(_run), do: nil
+
+  defp issue_triage_artifacts(%WorkflowRun{} = run) do
+    workflow_name =
+      run
+      |> Map.get(:workflow_name)
+      |> normalize_optional_string()
+
+    if workflow_name == "issue_triage" do
+      step_results =
+        run
+        |> Map.get(:step_results, %{})
+        |> normalize_map()
+
+      triage_artifact =
+        step_results
+        |> map_get(:run_issue_triage, "run_issue_triage", %{})
+        |> normalize_map()
+
+      research_artifact =
+        step_results
+        |> map_get(:run_issue_research, "run_issue_research", %{})
+        |> normalize_map()
+
+      response_artifact =
+        step_results
+        |> map_get(:compose_issue_response, "compose_issue_response", %{})
+        |> normalize_map()
+
+      artifact_lineage =
+        step_results
+        |> map_get(:issue_bot_artifact_lineage, "issue_bot_artifact_lineage", %{})
+        |> normalize_map()
+
+      if map_size(triage_artifact) == 0 and map_size(research_artifact) == 0 and
+           map_size(response_artifact) == 0 and map_size(artifact_lineage) == 0 do
+        nil
+      else
+        linked_run =
+          triage_artifact
+          |> map_get(:linked_run, "linked_run")
+          |> normalize_map()
+          |> case do
+            linked_run when map_size(linked_run) > 0 ->
+              linked_run
+
+            _other ->
+              research_artifact
+              |> map_get(:linked_run, "linked_run")
+              |> normalize_map()
+              |> case do
+                linked_run when map_size(linked_run) > 0 ->
+                  linked_run
+
+                _other ->
+                  response_artifact
+                  |> map_get(:linked_run, "linked_run")
+                  |> normalize_map()
+                  |> case do
+                    linked_run when map_size(linked_run) > 0 ->
+                      linked_run
+
+                    _other ->
+                      artifact_lineage
+                      |> map_get(:linked_run, "linked_run", %{})
+                      |> normalize_map()
+                  end
+              end
+          end
+
+        source_issue =
+          linked_run
+          |> map_get(:source_issue, "source_issue")
+          |> normalize_map()
+          |> case do
+            source_issue when map_size(source_issue) > 0 ->
+              source_issue
+
+            _other ->
+              run
+              |> Map.get(:trigger, %{})
+              |> map_get(:source_issue, "source_issue", %{})
+              |> normalize_map()
+          end
+
+        typed_failure =
+          artifact_lineage
+          |> map_get(:typed_failure, "typed_failure")
+          |> normalize_map()
+          |> case do
+            typed_failure when map_size(typed_failure) > 0 ->
+              %{
+                error_type:
+                  typed_failure
+                  |> map_get(:error_type, "error_type")
+                  |> normalize_optional_string() || "issue_triage_artifact_persistence_failed",
+                detail:
+                  typed_failure
+                  |> map_get(:detail, "detail")
+                  |> normalize_optional_string() || "Issue triage artifact persistence failed.",
+                remediation:
+                  typed_failure
+                  |> map_get(:remediation, "remediation")
+                  |> normalize_optional_string() || "Retry artifact persistence from run detail."
+              }
+
+            _other ->
+              nil
+          end
+
+        %{
+          classification:
+            triage_artifact
+            |> map_get(:classification, "classification")
+            |> normalize_optional_string() || "unavailable",
+          research_summary:
+            research_artifact
+            |> map_get(:summary, "summary")
+            |> normalize_optional_string() || "Research summary is unavailable.",
+          proposed_response:
+            response_artifact
+            |> map_get(:proposed_response, "proposed_response")
+            |> normalize_optional_string() || "Proposed response draft is unavailable.",
+          issue_reference:
+            linked_run
+            |> map_get(:issue_reference, "issue_reference")
+            |> normalize_optional_string() ||
+              run
+              |> Map.get(:inputs, %{})
+              |> map_get(:issue_reference, "issue_reference")
+              |> normalize_optional_string(),
+          source_issue_number:
+            source_issue
+            |> map_get(:number, "number")
+            |> normalize_optional_integer(),
+          linked_run_id:
+            linked_run
+            |> map_get(:run_id, "run_id")
+            |> normalize_optional_string() ||
+              run
+              |> Map.get(:run_id)
+              |> normalize_optional_string(),
+          persistence_status:
+            artifact_lineage
+            |> map_get(:status, "status")
+            |> normalize_optional_string() || "unknown",
+          typed_failure: typed_failure
+        }
+      end
+    else
+      nil
+    end
+  end
+
+  defp issue_triage_artifacts(_run), do: nil
 
   defp approval_context(%WorkflowRun{} = run) do
     step_results =

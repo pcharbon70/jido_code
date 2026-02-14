@@ -76,6 +76,124 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
     assert has_element?(view, "#run-detail-timeline-at-3", "2026-02-14T22:02:00Z")
   end
 
+  test "renders issue triage artifact set for issue_triage workflow runs", %{conn: _conn} do
+    register_owner("issue-triage-artifacts-owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("issue-triage-artifacts-owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-run-detail-issue-triage-artifacts",
+        github_full_name: "owner/repo-run-detail-issue-triage-artifacts",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    run_id = "run-detail-issue-triage-artifacts-#{System.unique_integer([:positive])}"
+
+    {:ok, _run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: run_id,
+        workflow_name: "issue_triage",
+        workflow_version: 1,
+        trigger: %{
+          source: "github_webhook",
+          mode: "webhook",
+          source_issue: %{"number" => 91, "id" => 91_001}
+        },
+        inputs: %{"issue_reference" => "owner/repo-run-detail-issue-triage-artifacts#91"},
+        input_metadata: %{
+          "issue_reference" => %{
+            "required" => true,
+            "source" => "github_webhook",
+            "source_issue" => %{"number" => 91, "id" => 91_001}
+          }
+        },
+        initiating_actor: %{id: "github_webhook", email: nil},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 06:00:00Z],
+        step_results: %{
+          "run_issue_triage" => %{
+            "classification" => "bug",
+            "summary" => "Issue triage classified this report as bug.",
+            "linked_run" => %{
+              "run_id" => run_id,
+              "workflow_name" => "issue_triage",
+              "issue_reference" => "owner/repo-run-detail-issue-triage-artifacts#91",
+              "source_issue" => %{"number" => 91, "id" => 91_001}
+            }
+          },
+          "run_issue_research" => %{
+            "summary" => "Initial research summary for issue reproduction and root-cause direction.",
+            "linked_run" => %{
+              "run_id" => run_id,
+              "workflow_name" => "issue_triage",
+              "issue_reference" => "owner/repo-run-detail-issue-triage-artifacts#91",
+              "source_issue" => %{"number" => 91, "id" => 91_001}
+            }
+          },
+          "compose_issue_response" => %{
+            "proposed_response" => "Thanks for the report. We triaged this as bug and prepared a response draft.",
+            "linked_run" => %{
+              "run_id" => run_id,
+              "workflow_name" => "issue_triage",
+              "issue_reference" => "owner/repo-run-detail-issue-triage-artifacts#91",
+              "source_issue" => %{"number" => 91, "id" => 91_001}
+            }
+          },
+          "issue_bot_artifact_lineage" => %{
+            "status" => "persisted",
+            "artifact_keys" => [
+              "compose_issue_response",
+              "run_issue_research",
+              "run_issue_triage"
+            ],
+            "linked_run" => %{
+              "run_id" => run_id,
+              "workflow_name" => "issue_triage",
+              "issue_reference" => "owner/repo-run-detail-issue-triage-artifacts#91",
+              "source_issue" => %{"number" => 91, "id" => 91_001}
+            }
+          }
+        }
+      })
+
+    {:ok, view, _html} =
+      live(
+        recycle(authed_conn),
+        ~p"/projects/#{project.id}/runs/#{run_id}",
+        on_error: :warn
+      )
+
+    assert has_element?(view, "#run-detail-issue-triage-artifacts")
+    assert has_element?(view, "#run-detail-issue-artifact-persistence-status", "persisted")
+    assert has_element?(view, "#run-detail-issue-triage-classification", "bug")
+
+    assert has_element?(
+             view,
+             "#run-detail-issue-research-summary",
+             "Initial research summary for issue reproduction and root-cause direction."
+           )
+
+    assert has_element?(
+             view,
+             "#run-detail-issue-response-draft",
+             "We triaged this as bug and prepared a response draft."
+           )
+
+    assert has_element?(
+             view,
+             "#run-detail-issue-artifact-issue-reference",
+             "owner/repo-run-detail-issue-triage-artifacts#91"
+           )
+
+    assert has_element?(view, "#run-detail-issue-artifact-source-issue-number", "91")
+    assert has_element?(view, "#run-detail-issue-artifact-run-id", run_id)
+    refute has_element?(view, "#run-detail-issue-artifact-persistence-error")
+  end
+
   test "renders approval payload context and enables explicit approve action", %{
     conn: _conn
   } do
