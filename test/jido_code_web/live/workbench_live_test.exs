@@ -365,6 +365,216 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     assert has_element?(view, "#workbench-filter-results-count", "Showing 1 of 3")
   end
 
+  test "supports backlog and recent activity sort ordering with deterministic results", %{
+    conn: _conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    now = DateTime.utc_now()
+
+    Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
+      {:ok,
+       [
+         %{
+           id: "owner-repo-alpha",
+           name: "repo-alpha",
+           github_full_name: "owner/repo-alpha",
+           open_issue_count: 2,
+           open_pr_count: 1,
+           recent_activity_summary: "Alpha summary",
+           recent_activity_at: DateTime.add(now, -2 * 60 * 60, :second) |> DateTime.to_iso8601()
+         },
+         %{
+           id: "owner-repo-beta",
+           name: "repo-beta",
+           github_full_name: "owner/repo-beta",
+           open_issue_count: 5,
+           open_pr_count: 4,
+           recent_activity_summary: "Beta summary",
+           recent_activity_at: DateTime.add(now, -9 * 60 * 60, :second) |> DateTime.to_iso8601()
+         },
+         %{
+           id: "owner-repo-gamma",
+           name: "repo-gamma",
+           github_full_name: "owner/repo-gamma",
+           open_issue_count: 1,
+           open_pr_count: 0,
+           recent_activity_summary: "Gamma summary",
+           recent_activity_at: DateTime.add(now, -60 * 60, :second) |> DateTime.to_iso8601()
+         }
+       ], nil}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    assert has_element?(
+             view,
+             "#workbench-filter-sort-order option[value='backlog_desc']",
+             "Backlog size (highest first)"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-filter-sort-order option[value='recent_activity_desc']",
+             "Recent activity (most recent first)"
+           )
+
+    apply_workbench_filters(view, %{"sort_order" => "backlog_desc"})
+
+    assert_project_row_order(view, ["owner-repo-beta", "owner-repo-alpha", "owner-repo-gamma"])
+
+    apply_workbench_filters(view, %{"sort_order" => "backlog_desc"})
+
+    assert_project_row_order(view, ["owner-repo-beta", "owner-repo-alpha", "owner-repo-gamma"])
+
+    apply_workbench_filters(view, %{"sort_order" => "recent_activity_desc"})
+
+    assert_project_row_order(view, ["owner-repo-gamma", "owner-repo-alpha", "owner-repo-beta"])
+    assert has_element?(view, "#workbench-filter-chip-sort-order", "Recent activity (most recent first)")
+  end
+
+  test "keeps selected sort order after retry refresh events", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    stale_warning = %{
+      error_type: "workbench_refresh_state_warning",
+      detail: "Refresh is available.",
+      remediation: "Use retry to refresh data."
+    }
+
+    loader_state = start_supervised!({Agent, fn -> 0 end})
+
+    Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
+      Agent.get_and_update(loader_state, fn call_count ->
+        rows =
+          if call_count < 2 do
+            [
+              %{
+                id: "owner-repo-alpha",
+                name: "repo-alpha",
+                github_full_name: "owner/repo-alpha",
+                open_issue_count: 5,
+                open_pr_count: 0,
+                recent_activity_summary: "Alpha summary"
+              },
+              %{
+                id: "owner-repo-beta",
+                name: "repo-beta",
+                github_full_name: "owner/repo-beta",
+                open_issue_count: 2,
+                open_pr_count: 0,
+                recent_activity_summary: "Beta summary"
+              },
+              %{
+                id: "owner-repo-gamma",
+                name: "repo-gamma",
+                github_full_name: "owner/repo-gamma",
+                open_issue_count: 1,
+                open_pr_count: 0,
+                recent_activity_summary: "Gamma summary"
+              }
+            ]
+          else
+            [
+              %{
+                id: "owner-repo-alpha",
+                name: "repo-alpha",
+                github_full_name: "owner/repo-alpha",
+                open_issue_count: 0,
+                open_pr_count: 0,
+                recent_activity_summary: "Alpha refreshed summary"
+              },
+              %{
+                id: "owner-repo-beta",
+                name: "repo-beta",
+                github_full_name: "owner/repo-beta",
+                open_issue_count: 4,
+                open_pr_count: 2,
+                recent_activity_summary: "Beta refreshed summary"
+              },
+              %{
+                id: "owner-repo-gamma",
+                name: "repo-gamma",
+                github_full_name: "owner/repo-gamma",
+                open_issue_count: 3,
+                open_pr_count: 0,
+                recent_activity_summary: "Gamma refreshed summary"
+              }
+            ]
+          end
+
+        {{:ok, rows, stale_warning}, call_count + 1}
+      end)
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    apply_workbench_filters(view, %{"sort_order" => "backlog_desc"})
+    assert_project_row_order(view, ["owner-repo-alpha", "owner-repo-beta", "owner-repo-gamma"])
+
+    view
+    |> element("#workbench-retry-fetch")
+    |> render_click()
+
+    assert_project_row_order(view, ["owner-repo-beta", "owner-repo-gamma", "owner-repo-alpha"])
+
+    assert has_element?(
+             view,
+             "#workbench-filter-sort-order option[value='backlog_desc'][selected]"
+           )
+
+    assert has_element?(view, "#workbench-filter-chip-sort-order", "Backlog size (highest first)")
+  end
+
+  test "falls back to default sort order with notice when sort data is malformed", %{
+    conn: _conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
+      {:ok,
+       [
+         %{
+           id: "owner-repo-beta",
+           name: "repo-beta",
+           github_full_name: "owner/repo-beta",
+           open_issue_count: 3,
+           open_pr_count: 1,
+           recent_activity_summary: "Beta summary"
+         },
+         :invalid_row_payload
+       ], nil}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    refute has_element?(view, "#workbench-sort-validation-notice")
+
+    apply_workbench_filters(view, %{"sort_order" => "backlog_desc"})
+
+    assert has_element?(view, "#workbench-sort-validation-notice")
+
+    assert has_element?(
+             view,
+             "#workbench-sort-validation-type",
+             "workbench_sort_order_fallback"
+           )
+
+    assert has_element?(view, "#workbench-sort-validation-detail", "Backlog size (highest first)")
+    assert has_element?(view, "#workbench-filter-chip-sort-order", "Project name (A-Z)")
+    assert has_element?(view, "#workbench-filter-sort-order option[value='project_name_asc'][selected]")
+    assert_project_row_order(view, ["owner-repo-beta", "workbench-row-2"])
+  end
+
   test "invalid filter values reset defaults and show typed validation notice", %{conn: _conn} do
     register_owner("owner@example.com", "owner-password-123")
 
@@ -417,12 +627,14 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     assert has_element?(view, "#workbench-filter-chip-project", "All projects")
     assert has_element?(view, "#workbench-filter-chip-work-state", "Any issue or PR state")
     assert has_element?(view, "#workbench-filter-chip-freshness-window", "Any freshness")
+    assert has_element?(view, "#workbench-filter-chip-sort-order", "Project name (A-Z)")
     assert has_element?(view, "#workbench-filter-results-count", "Showing 2 of 2")
     assert has_element?(view, "#workbench-project-name-owner-repo-one", "owner/repo-one")
     assert has_element?(view, "#workbench-project-name-owner-repo-two", "owner/repo-two")
     assert has_element?(view, "#workbench-filter-project option[value='all'][selected]")
     assert has_element?(view, "#workbench-filter-work-state option[value='all'][selected]")
     assert has_element?(view, "#workbench-filter-freshness-window option[value='any'][selected]")
+    assert has_element?(view, "#workbench-filter-sort-order option[value='project_name_asc'][selected]")
   end
 
   defp register_owner(email, password) do
@@ -497,8 +709,20 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     %{
       "project_id" => "all",
       "work_state" => "all",
-      "freshness_window" => "any"
+      "freshness_window" => "any",
+      "sort_order" => "project_name_asc"
     }
+  end
+
+  defp assert_project_row_order(view, row_ids) when is_list(row_ids) do
+    row_ids
+    |> Enum.with_index(1)
+    |> Enum.each(fn {row_id, index} ->
+      assert has_element?(
+               view,
+               "#workbench-project-rows tr:nth-child(#{index}) #workbench-project-name-#{row_id}"
+             )
+    end)
   end
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)

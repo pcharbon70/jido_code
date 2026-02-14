@@ -5,11 +5,13 @@ defmodule JidoCodeWeb.WorkbenchLive do
 
   @fallback_row_id_prefix "workbench-row-"
   @filter_validation_error_type "workbench_filter_values_invalid"
+  @sort_validation_error_type "workbench_sort_order_fallback"
 
   @default_filter_values %{
     "project_id" => "all",
     "work_state" => "all",
-    "freshness_window" => "any"
+    "freshness_window" => "any",
+    "sort_order" => "project_name_asc"
   }
 
   @work_state_filter_options [
@@ -26,9 +28,18 @@ defmodule JidoCodeWeb.WorkbenchLive do
     {"Stale for 30+ days", "stale_30d"}
   ]
 
+  @sort_order_options [
+    {"Project name (A-Z)", "project_name_asc"},
+    {"Backlog size (highest first)", "backlog_desc"},
+    {"Backlog size (lowest first)", "backlog_asc"},
+    {"Recent activity (most recent first)", "recent_activity_desc"},
+    {"Recent activity (oldest first)", "recent_activity_asc"}
+  ]
+
   @default_project_filter_value Map.fetch!(@default_filter_values, "project_id")
   @default_work_state_filter_value Map.fetch!(@default_filter_values, "work_state")
   @default_freshness_filter_value Map.fetch!(@default_filter_values, "freshness_window")
+  @default_sort_order_value Map.fetch!(@default_filter_values, "sort_order")
 
   @impl true
   def mount(_params, _session, socket) do
@@ -39,6 +50,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
       |> assign(:inventory_rows_all, [])
       |> assign(:stale_warning, nil)
       |> assign(:filter_validation_notice, nil)
+      |> assign(:sort_validation_notice, nil)
       |> assign(:filter_values, @default_filter_values)
       |> assign(:filter_form, to_filter_form(@default_filter_values))
       |> assign(:filter_chips, filter_chips(@default_filter_values, []))
@@ -124,13 +136,32 @@ defmodule JidoCodeWeb.WorkbenchLive do
         </p>
       </section>
 
+      <section
+        :if={@sort_validation_notice}
+        id="workbench-sort-validation-notice"
+        class="rounded-lg border border-warning/60 bg-warning/10 p-4 space-y-2"
+      >
+        <p id="workbench-sort-validation-label" class="font-semibold">
+          Workbench sort fell back to default order
+        </p>
+        <p id="workbench-sort-validation-type" class="text-sm">
+          Typed sort notice: {@sort_validation_notice.error_type}
+        </p>
+        <p id="workbench-sort-validation-detail" class="text-sm">
+          {@sort_validation_notice.detail}
+        </p>
+        <p id="workbench-sort-validation-remediation" class="text-sm">
+          {@sort_validation_notice.remediation}
+        </p>
+      </section>
+
       <section id="workbench-filters-panel" class="rounded-lg border border-base-300 bg-base-100 p-4">
         <.form
           for={@filter_form}
           id="workbench-filters-form"
           phx-change="apply_filters"
           phx-submit="apply_filters"
-          class="grid gap-3 lg:grid-cols-[minmax(14rem,1fr)_minmax(14rem,1fr)_minmax(14rem,1fr)_auto]"
+          class="grid gap-3 lg:grid-cols-[minmax(12rem,1fr)_minmax(12rem,1fr)_minmax(12rem,1fr)_minmax(14rem,1fr)_auto]"
         >
           <.input
             id="workbench-filter-project"
@@ -153,6 +184,13 @@ defmodule JidoCodeWeb.WorkbenchLive do
             label="Freshness window"
             options={freshness_filter_options()}
           />
+          <.input
+            id="workbench-filter-sort-order"
+            field={@filter_form[:sort_order]}
+            type="select"
+            label="Sort rows by"
+            options={sort_order_options()}
+          />
           <button id="workbench-apply-filters" type="submit" class="btn btn-primary btn-sm lg:self-end">
             Apply filters
           </button>
@@ -167,6 +205,9 @@ defmodule JidoCodeWeb.WorkbenchLive do
           </span>
           <span id="workbench-filter-chip-freshness-window" class="badge badge-outline">
             Freshness: {@filter_chips.freshness_window}
+          </span>
+          <span id="workbench-filter-chip-sort-order" class="badge badge-outline">
+            Sort: {@filter_chips.sort_order}
           </span>
         </div>
 
@@ -285,6 +326,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
         |> assign(:inventory_total_count, 0)
         |> assign(:inventory_rows_all, [])
         |> assign(:stale_warning, stale_warning)
+        |> assign(:sort_validation_notice, nil)
         |> assign(:project_filter_options, project_filter_options([]))
         |> assign(:filter_values, filter_values)
         |> assign(:filter_form, to_filter_form(filter_values))
@@ -315,16 +357,21 @@ defmodule JidoCodeWeb.WorkbenchLive do
 
   defp apply_filters(socket, filter_values) do
     rows = filter_rows(socket.assigns.inventory_rows_all, filter_values)
+
+    {sorted_rows, applied_filter_values, sort_validation_notice} =
+      sort_rows_with_fallback(rows, filter_values)
+
     project_options = project_filter_options(socket.assigns.inventory_rows_all)
 
     socket
-    |> assign(:inventory_count, length(rows))
+    |> assign(:inventory_count, length(sorted_rows))
     |> assign(:inventory_total_count, length(socket.assigns.inventory_rows_all))
-    |> assign(:filter_values, filter_values)
-    |> assign(:filter_form, to_filter_form(filter_values))
-    |> assign(:filter_chips, filter_chips(filter_values, socket.assigns.inventory_rows_all))
+    |> assign(:sort_validation_notice, sort_validation_notice)
+    |> assign(:filter_values, applied_filter_values)
+    |> assign(:filter_form, to_filter_form(applied_filter_values))
+    |> assign(:filter_chips, filter_chips(applied_filter_values, socket.assigns.inventory_rows_all))
     |> assign(:project_filter_options, project_options)
-    |> stream(:inventory_rows, rows, reset: true)
+    |> stream(:inventory_rows, sorted_rows, reset: true)
   end
 
   defp filter_rows(rows, filter_values) do
@@ -410,7 +457,11 @@ defmodule JidoCodeWeb.WorkbenchLive do
       "freshness_window" =>
         filter_values
         |> map_get("freshness_window", :freshness_window)
-        |> normalize_optional_string() || @default_freshness_filter_value
+        |> normalize_optional_string() || @default_freshness_filter_value,
+      "sort_order" =>
+        filter_values
+        |> map_get("sort_order", :sort_order)
+        |> normalize_optional_string() || @default_sort_order_value
     }
   end
 
@@ -435,6 +486,9 @@ defmodule JidoCodeWeb.WorkbenchLive do
     valid_freshness_values =
       @freshness_filter_options |> Enum.map(&elem(&1, 1)) |> MapSet.new()
 
+    valid_sort_order_values =
+      @sort_order_options |> Enum.map(&elem(&1, 1)) |> MapSet.new()
+
     with :ok <-
            validate_filter_value(
              "project_id",
@@ -452,6 +506,12 @@ defmodule JidoCodeWeb.WorkbenchLive do
              "freshness_window",
              Map.fetch!(filter_values, "freshness_window"),
              valid_freshness_values
+           ),
+         :ok <-
+           validate_filter_value(
+             "sort_order",
+             Map.fetch!(filter_values, "sort_order"),
+             valid_sort_order_values
            ) do
       :ok
     end
@@ -501,9 +561,178 @@ defmodule JidoCodeWeb.WorkbenchLive do
           @freshness_filter_options,
           Map.fetch!(filter_values, "freshness_window"),
           "Any freshness"
+        ),
+      sort_order:
+        option_label(
+          @sort_order_options,
+          Map.fetch!(filter_values, "sort_order"),
+          "Project name (A-Z)"
         )
     }
   end
+
+  defp sort_rows_with_fallback(rows, filter_values) do
+    requested_sort_order = Map.fetch!(filter_values, "sort_order")
+
+    case sort_rows(rows, requested_sort_order) do
+      {:ok, sorted_rows} ->
+        {sorted_rows, filter_values, nil}
+
+      {:error, reason} ->
+        fallback_sort_order = @default_sort_order_value
+        {:ok, fallback_rows} = sort_rows(rows, fallback_sort_order)
+
+        {
+          fallback_rows,
+          Map.put(filter_values, "sort_order", fallback_sort_order),
+          sort_validation_notice(requested_sort_order, fallback_sort_order, reason)
+        }
+    end
+  end
+
+  defp sort_rows(rows, @default_sort_order_value) do
+    {:ok, Enum.sort_by(rows, &project_sort_key/1)}
+  end
+
+  defp sort_rows(rows, "backlog_desc") do
+    with :ok <- validate_rows_for_sort(rows, :backlog) do
+      sorted_rows =
+        Enum.sort_by(rows, fn row ->
+          {-backlog_size(row), project_sort_key(row)}
+        end)
+
+      {:ok, sorted_rows}
+    end
+  end
+
+  defp sort_rows(rows, "backlog_asc") do
+    with :ok <- validate_rows_for_sort(rows, :backlog) do
+      sorted_rows =
+        Enum.sort_by(rows, fn row ->
+          {backlog_size(row), project_sort_key(row)}
+        end)
+
+      {:ok, sorted_rows}
+    end
+  end
+
+  defp sort_rows(rows, "recent_activity_desc") do
+    with :ok <- validate_rows_for_sort(rows, :recent_activity) do
+      sorted_rows =
+        Enum.sort_by(rows, fn row ->
+          recent_activity_sort_key(row, :desc)
+        end)
+
+      {:ok, sorted_rows}
+    end
+  end
+
+  defp sort_rows(rows, "recent_activity_asc") do
+    with :ok <- validate_rows_for_sort(rows, :recent_activity) do
+      sorted_rows =
+        Enum.sort_by(rows, fn row ->
+          recent_activity_sort_key(row, :asc)
+        end)
+
+      {:ok, sorted_rows}
+    end
+  end
+
+  defp sort_rows(_rows, _sort_order), do: {:error, :unknown_sort_order}
+
+  defp validate_rows_for_sort(rows, :backlog) do
+    if Enum.any?(rows, &malformed_row_for_backlog_sort?/1) do
+      {:error, :malformed_backlog_data}
+    else
+      :ok
+    end
+  end
+
+  defp validate_rows_for_sort(rows, :recent_activity) do
+    if Enum.any?(rows, &malformed_row_for_recent_activity_sort?/1) do
+      {:error, :malformed_recent_activity_data}
+    else
+      :ok
+    end
+  end
+
+  defp backlog_size(row) do
+    Map.get(row, :open_issue_count, 0) + Map.get(row, :open_pr_count, 0)
+  end
+
+  defp recent_activity_sort_key(row, direction) do
+    activity_at = row_recent_activity_at(row)
+    missing_activity = is_nil(activity_at)
+    activity_unix = if activity_at, do: DateTime.to_unix(activity_at, :microsecond), else: 0
+
+    case direction do
+      :desc ->
+        {if(missing_activity, do: 1, else: 0), -activity_unix, project_sort_key(row)}
+
+      :asc ->
+        {if(missing_activity, do: 1, else: 0), activity_unix, project_sort_key(row)}
+    end
+  end
+
+  defp malformed_row_for_backlog_sort?(row) do
+    fallback_row_id?(row) or
+      not non_negative_integer?(Map.get(row, :open_issue_count)) or
+      not non_negative_integer?(Map.get(row, :open_pr_count))
+  end
+
+  defp malformed_row_for_recent_activity_sort?(row) do
+    fallback_row_id?(row) or
+      case row_recent_activity_at(row) do
+        %DateTime{} -> false
+        nil -> false
+        _other -> true
+      end
+  end
+
+  defp fallback_row_id?(row) do
+    case row |> Map.get(:id) |> normalize_optional_string() do
+      <<@fallback_row_id_prefix, _::binary>> -> true
+      _other -> false
+    end
+  end
+
+  defp non_negative_integer?(value), do: is_integer(value) and value >= 0
+
+  defp project_sort_key(row) do
+    {
+      row |> Map.get(:github_full_name) |> sort_string_key(),
+      row |> Map.get(:name) |> sort_string_key(),
+      row |> Map.get(:id) |> sort_string_key()
+    }
+  end
+
+  defp sort_string_key(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil -> ""
+      normalized -> String.downcase(normalized)
+    end
+  end
+
+  defp sort_validation_notice(requested_sort_order, fallback_sort_order, reason) do
+    requested_sort_label =
+      option_label(@sort_order_options, requested_sort_order, requested_sort_order)
+
+    fallback_sort_label = option_label(@sort_order_options, fallback_sort_order, fallback_sort_order)
+
+    %{
+      error_type: @sort_validation_error_type,
+      detail:
+        "Sort order #{requested_sort_label} could not be applied (#{sort_failure_reason(reason)}). #{fallback_sort_label} was applied instead.",
+      remediation: "Refresh workbench data and verify backlog and activity metadata before retrying."
+    }
+  end
+
+  defp sort_failure_reason(:malformed_backlog_data), do: "malformed backlog fields were detected"
+  defp sort_failure_reason(:malformed_recent_activity_data), do: "malformed activity fields were detected"
+  defp sort_failure_reason(:unknown_sort_order), do: "unsupported sort value was submitted"
+  defp sort_failure_reason(_reason), do: "sorting metadata validation failed"
 
   defp option_label(options, value, default_label) do
     Enum.find_value(options, default_label, fn
@@ -536,6 +765,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
 
   defp work_state_filter_options, do: @work_state_filter_options
   defp freshness_filter_options, do: @freshness_filter_options
+  defp sort_order_options, do: @sort_order_options
   defp to_filter_form(filter_values), do: to_form(filter_values, as: :filters)
 
   defp empty_state_message(0), do: "No imported projects available yet."
