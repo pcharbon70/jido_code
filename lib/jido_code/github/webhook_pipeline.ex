@@ -5,8 +5,10 @@ defmodule JidoCode.GitHub.WebhookPipeline do
 
   require Logger
 
+  alias JidoCode.Agents.SupportAgentConfigs
   alias JidoCode.GitHub.Repo
   alias JidoCode.GitHub.WebhookDelivery
+  alias JidoCode.Projects.Project
   alias JidoCode.Setup.GitHubInstallationSync
 
   @type verified_delivery :: %{
@@ -24,7 +26,7 @@ defmodule JidoCode.GitHub.WebhookPipeline do
       case dispatch_decision do
         :dispatch ->
           maybe_sync_installation_metadata(delivery)
-          dispatch_verified_delivery(delivery)
+          maybe_dispatch_configured_issue_bot_delivery(delivery)
 
         :duplicate ->
           :ok
@@ -52,7 +54,8 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   @spec persist_delivery_for_idempotency(verified_delivery()) ::
           {:ok, dispatch_decision()} | {:error, term()}
   defp persist_delivery_for_idempotency(%{} = delivery) do
-    with {:ok, delivery_id} <- normalize_required_string(Map.get(delivery, :delivery_id), :missing_delivery_id),
+    with {:ok, delivery_id} <-
+           normalize_required_string(Map.get(delivery, :delivery_id), :missing_delivery_id),
          {:ok, existing_delivery} <- get_delivery_by_id(delivery_id),
          {:ok, dispatch_decision} <-
            persist_or_acknowledge_duplicate(existing_delivery, delivery, delivery_id) do
@@ -60,7 +63,11 @@ defmodule JidoCode.GitHub.WebhookPipeline do
     end
   end
 
-  @spec persist_or_acknowledge_duplicate(WebhookDelivery.t() | nil, verified_delivery(), String.t()) ::
+  @spec persist_or_acknowledge_duplicate(
+          WebhookDelivery.t() | nil,
+          verified_delivery(),
+          String.t()
+        ) ::
           {:ok, dispatch_decision()} | {:error, term()}
   defp persist_or_acknowledge_duplicate(%WebhookDelivery{}, delivery, delivery_id) do
     log_duplicate_delivery_ack(delivery_id, Map.get(delivery, :event))
@@ -249,10 +256,12 @@ defmodule JidoCode.GitHub.WebhookPipeline do
     end
   end
 
-  @spec maybe_update_repo_installation(Repo.t(), integer() | nil) :: {:ok, Repo.t()} | {:error, term()}
+  @spec maybe_update_repo_installation(Repo.t(), integer() | nil) ::
+          {:ok, Repo.t()} | {:error, term()}
   defp maybe_update_repo_installation(%Repo{} = repo, nil), do: {:ok, repo}
 
-  defp maybe_update_repo_installation(%Repo{} = repo, installation_id) when is_integer(installation_id) do
+  defp maybe_update_repo_installation(%Repo{} = repo, installation_id)
+       when is_integer(installation_id) do
     current_installation_id = Map.get(repo, :github_app_installation_id)
 
     if current_installation_id == installation_id do
@@ -268,7 +277,8 @@ defmodule JidoCode.GitHub.WebhookPipeline do
     end
   end
 
-  @spec split_repo_full_name(String.t()) :: {:ok, String.t(), String.t()} | {:error, :invalid_repository_full_name}
+  @spec split_repo_full_name(String.t()) ::
+          {:ok, String.t(), String.t()} | {:error, :invalid_repository_full_name}
   defp split_repo_full_name(repo_full_name) when is_binary(repo_full_name) do
     case String.split(repo_full_name, "/", parts: 2) do
       [owner, name] when owner != "" and name != "" ->
@@ -279,7 +289,8 @@ defmodule JidoCode.GitHub.WebhookPipeline do
     end
   end
 
-  @spec repository_name_candidates(map()) :: {:ok, [String.t()]} | {:error, :missing_repository_candidates}
+  @spec repository_name_candidates(map()) ::
+          {:ok, [String.t()]} | {:error, :missing_repository_candidates}
   defp repository_name_candidates(payload) when is_map(payload) do
     candidates =
       payload
@@ -298,7 +309,8 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   defp first_repository_candidate([repo_full_name | _rest]) when is_binary(repo_full_name),
     do: {:ok, repo_full_name}
 
-  defp first_repository_candidate(_repository_candidates), do: {:error, :missing_repository_candidates}
+  defp first_repository_candidate(_repository_candidates),
+    do: {:error, :missing_repository_candidates}
 
   @spec repository_candidate_sources(map()) :: [term()]
   defp repository_candidate_sources(payload) when is_map(payload) do
@@ -395,7 +407,8 @@ defmodule JidoCode.GitHub.WebhookPipeline do
 
   defp normalize_installation_id(_value), do: nil
 
-  @spec extract_repo_full_name(map()) :: {:ok, String.t()} | {:error, :missing_repository_full_name}
+  @spec extract_repo_full_name(map()) ::
+          {:ok, String.t()} | {:error, :missing_repository_full_name}
   defp extract_repo_full_name(payload) when is_map(payload) do
     repository =
       Map.get(payload, "repository") ||
@@ -502,6 +515,117 @@ defmodule JidoCode.GitHub.WebhookPipeline do
     end
   end
 
+  defp maybe_dispatch_configured_issue_bot_delivery(delivery) do
+    case issue_bot_delivery_event(delivery) do
+      nil ->
+        dispatch_verified_delivery(delivery)
+
+      issue_bot_event ->
+        if issue_bot_candidate_event?(issue_bot_event) do
+          configured_events = configured_issue_bot_events_for_delivery(delivery)
+
+          if issue_bot_event in configured_events do
+            dispatch_verified_delivery(delivery)
+          else
+            Logger.info(
+              "github_webhook_trigger_filtered outcome=noop policy=support_agent_config.github_issue_bot.webhook_events delivery_id=#{log_value(Map.get(delivery, :delivery_id))} event=#{issue_bot_event} configured_events=#{log_repositories(configured_events)}"
+            )
+
+            :ok
+          end
+        else
+          dispatch_verified_delivery(delivery)
+        end
+    end
+  end
+
+  defp issue_bot_delivery_event(%{} = delivery) do
+    event =
+      delivery
+      |> Map.get(:event)
+      |> normalize_optional_string()
+
+    action =
+      delivery
+      |> Map.get(:payload)
+      |> case do
+        payload when is_map(payload) -> normalize_action(payload)
+        _other -> nil
+      end
+
+    cond do
+      is_nil(event) ->
+        nil
+
+      String.contains?(event, ".") ->
+        event
+
+      is_binary(action) ->
+        "#{event}.#{action}"
+
+      true ->
+        event
+    end
+  end
+
+  defp issue_bot_delivery_event(_delivery), do: nil
+
+  defp issue_bot_candidate_event?(event) when is_binary(event) do
+    String.starts_with?(event, "issues.") or String.starts_with?(event, "issue_comment.")
+  end
+
+  defp issue_bot_candidate_event?(_event), do: false
+
+  defp configured_issue_bot_events_for_delivery(delivery) do
+    case fetch_project_for_delivery(delivery) do
+      {:ok, %Project{} = project} ->
+        project_issue_bot_webhook_events(project)
+
+      _other ->
+        supported_issue_bot_webhook_events()
+    end
+  end
+
+  defp fetch_project_for_delivery(%{} = delivery) do
+    with payload when is_map(payload) <- Map.get(delivery, :payload),
+         {:ok, repo_full_name} <- extract_repo_full_name(payload),
+         {:ok, projects} <-
+           Project.read(
+             query: [filter: [github_full_name: repo_full_name], limit: 1],
+             authorize?: false
+           ),
+         [%Project{} = project | _rest] <- projects do
+      {:ok, project}
+    else
+      _other -> {:error, :project_not_found}
+    end
+  end
+
+  defp fetch_project_for_delivery(_delivery), do: {:error, :project_not_found}
+
+  defp project_issue_bot_webhook_events(%Project{} = project) do
+    issue_bot_settings =
+      project
+      |> map_get(:settings, "settings", %{})
+      |> map_get(:support_agent_config, "support_agent_config", %{})
+      |> map_get(:github_issue_bot, "github_issue_bot", %{})
+
+    if map_has_key?(issue_bot_settings, :webhook_events, "webhook_events") do
+      issue_bot_settings
+      |> map_get(:webhook_events, "webhook_events")
+      |> normalize_webhook_events()
+      |> sort_webhook_events_by_supported_order()
+    else
+      supported_issue_bot_webhook_events()
+    end
+  end
+
+  defp project_issue_bot_webhook_events(_project), do: supported_issue_bot_webhook_events()
+
+  defp supported_issue_bot_webhook_events do
+    SupportAgentConfigs.supported_issue_bot_webhook_events()
+  end
+
   defp dispatch_verified_delivery(delivery) do
     dispatcher =
       Application.get_env(
@@ -542,6 +666,31 @@ defmodule JidoCode.GitHub.WebhookPipeline do
 
   defp safe_dispatch(_dispatcher, _delivery), do: {:error, :invalid_dispatcher}
 
+  defp sort_webhook_events_by_supported_order(webhook_events) when is_list(webhook_events) do
+    supported_issue_bot_webhook_events()
+    |> Enum.filter(&(&1 in webhook_events))
+  end
+
+  defp sort_webhook_events_by_supported_order(_webhook_events), do: []
+
+  defp normalize_webhook_events(webhook_events) when is_binary(webhook_events) do
+    webhook_events
+    |> normalize_optional_string()
+    |> case do
+      nil -> []
+      normalized_event -> [normalized_event]
+    end
+  end
+
+  defp normalize_webhook_events(webhook_events) when is_list(webhook_events) do
+    webhook_events
+    |> Enum.map(&normalize_optional_string/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  defp normalize_webhook_events(_webhook_events), do: []
+
   defp map_get(map, atom_key, string_key, default \\ nil)
 
   defp map_get(map, atom_key, string_key, default) when is_map(map) do
@@ -553,6 +702,12 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   end
 
   defp map_get(_map, _atom_key, _string_key, default), do: default
+
+  defp map_has_key?(map, atom_key, string_key) when is_map(map) do
+    Map.has_key?(map, atom_key) or Map.has_key?(map, string_key)
+  end
+
+  defp map_has_key?(_map, _atom_key, _string_key), do: false
 
   defp log_value(value) when is_binary(value) and value != "", do: value
   defp log_value(_value), do: "unknown"

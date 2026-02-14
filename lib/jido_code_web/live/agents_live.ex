@@ -8,6 +8,10 @@ defmodule JidoCodeWeb.AgentsLive do
     socket =
       socket
       |> assign(:issue_bot_error, nil)
+      |> assign(
+        :issue_bot_supported_webhook_events,
+        SupportAgentConfigs.supported_issue_bot_webhook_events()
+      )
       |> assign(:project_count, 0)
       |> stream(:project_configs, [], reset: true)
       |> load_project_configs()
@@ -43,6 +47,35 @@ defmodule JidoCodeWeb.AgentsLive do
   end
 
   @impl true
+  def handle_event(
+        "set_issue_bot_webhook_events",
+        %{"project_id" => project_id} = params,
+        socket
+      ) do
+    webhook_events = Map.get(params, "webhook_events", [])
+
+    case SupportAgentConfigs.set_issue_bot_webhook_events(project_id, webhook_events) do
+      {:ok, project_config} ->
+        {:noreply,
+         socket
+         |> assign(:issue_bot_error, nil)
+         |> stream_insert(:project_configs, project_config)}
+
+      {:error, typed_error} ->
+        {:noreply, assign(socket, :issue_bot_error, typed_error)}
+    end
+  end
+
+  def handle_event("set_issue_bot_webhook_events", _params, socket) do
+    {:noreply,
+     assign(socket, :issue_bot_error, %{
+       error_type: "support_agent_config_validation_failed",
+       detail: "Issue Bot webhook event update is missing a project identifier.",
+       remediation: "Submit webhook event selections from a valid project row and retry."
+     })}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={%{}}>
@@ -74,12 +107,13 @@ defmodule JidoCodeWeb.AgentsLive do
             <tr>
               <th>Project</th>
               <th>Issue Bot status</th>
+              <th>Webhook events</th>
               <th>Controls</th>
             </tr>
           </thead>
           <tbody id="agents-project-rows" phx-update="stream">
             <tr :if={@project_count == 0} id="agents-project-empty">
-              <td colspan="3" class="text-center text-sm text-base-content/70 py-8">
+              <td colspan="4" class="text-center text-sm text-base-content/70 py-8">
                 No projects are available for Issue Bot configuration.
               </td>
             </tr>
@@ -97,6 +131,43 @@ defmodule JidoCodeWeb.AgentsLive do
                 <span class={issue_bot_status_class(project_config.enabled)}>
                   {issue_bot_status_label(project_config.enabled)}
                 </span>
+              </td>
+              <td>
+                <form
+                  id={"agents-issue-bot-events-form-#{project_config.id}"}
+                  phx-submit="set_issue_bot_webhook_events"
+                  class="space-y-2"
+                >
+                  <input type="hidden" name="project_id" value={project_config.id} />
+                  <div class="grid gap-1">
+                    <label
+                      :for={event <- @issue_bot_supported_webhook_events}
+                      id={
+                        "agents-issue-bot-event-option-#{project_config.id}-#{issue_bot_webhook_event_dom_id(event)}"
+                      }
+                      class="label cursor-pointer justify-start gap-2 py-0"
+                    >
+                      <input
+                        id={
+                          "agents-issue-bot-event-checkbox-#{project_config.id}-#{issue_bot_webhook_event_dom_id(event)}"
+                        }
+                        type="checkbox"
+                        name="webhook_events[]"
+                        value={event}
+                        checked={issue_bot_webhook_event_selected?(project_config.webhook_events, event)}
+                        class="checkbox checkbox-xs"
+                      />
+                      <span class="text-xs">{event}</span>
+                    </label>
+                  </div>
+                  <button
+                    id={"agents-issue-bot-events-save-#{project_config.id}"}
+                    type="submit"
+                    class="btn btn-xs btn-outline"
+                  >
+                    Save events
+                  </button>
+                </form>
               </td>
               <td>
                 <div class="flex flex-wrap gap-2">
@@ -153,4 +224,23 @@ defmodule JidoCodeWeb.AgentsLive do
 
   defp issue_bot_status_class(true), do: "badge badge-success"
   defp issue_bot_status_class(false), do: "badge badge-warning"
+
+  defp issue_bot_webhook_event_selected?(webhook_events, event) when is_list(webhook_events) do
+    event in webhook_events
+  end
+
+  defp issue_bot_webhook_event_selected?(_webhook_events, _event), do: false
+
+  defp issue_bot_webhook_event_dom_id(event) when is_binary(event) do
+    event
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9]+/u, "-")
+    |> String.trim("-")
+    |> case do
+      "" -> "unknown"
+      dom_id -> dom_id
+    end
+  end
+
+  defp issue_bot_webhook_event_dom_id(_event), do: "unknown"
 end

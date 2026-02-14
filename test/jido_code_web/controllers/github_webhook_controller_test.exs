@@ -5,6 +5,7 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
 
   alias JidoCode.GitHub.Repo, as: GitHubRepo
   alias JidoCode.GitHub.WebhookDelivery
+  alias JidoCode.Projects.Project
 
   require Logger
 
@@ -31,9 +32,10 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
     :ok
   end
 
-  test "accepts verified deliveries, persists delivery ID before dispatch, and forwards handoff", %{
-    conn: conn
-  } do
+  test "accepts verified deliveries, persists delivery ID before dispatch, and forwards handoff",
+       %{
+         conn: conn
+       } do
     secret = "webhook-secret-#{System.unique_integer([:positive])}"
     Application.put_env(:jido_code, :github_webhook_secret, secret)
     repo = create_repo!()
@@ -73,6 +75,7 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
       end)
 
     assert_receive {:verified_delivery_handoff, handoff, {:ok, %WebhookDelivery{} = persisted_delivery}}
+
     assert handoff.delivery_id == delivery_id
     assert handoff.event == event
     assert handoff.payload["action"] == "opened"
@@ -145,7 +148,103 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
     assert persisted_delivery.event_type == event
   end
 
-  test "rejects delivery when signature verification fails and does not route side effects", %{conn: conn} do
+  test "uses stored project Issue Bot webhook event list when evaluating deliveries", %{
+    conn: conn
+  } do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "event-owner-#{unique_suffix}"
+    name = "event-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, _project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.edited"]
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(
+        test_pid,
+        {:verified_delivery_handoff, delivery.delivery_id, delivery.event, delivery.payload["action"]}
+      )
+
+      :ok
+    end)
+
+    blocked_payload =
+      Jason.encode!(%{
+        "action" => "opened",
+        "issue" => %{"number" => 55},
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    blocked_delivery_id = "delivery-blocked-#{System.unique_integer([:positive])}"
+
+    blocked_log =
+      capture_log([level: :info], fn ->
+        response =
+          conn
+          |> put_req_header("content-type", "application/json")
+          |> put_req_header("x-hub-signature-256", sign(blocked_payload, secret))
+          |> put_req_header("x-github-delivery", blocked_delivery_id)
+          |> put_req_header("x-github-event", "issues")
+          |> post(@webhook_path, blocked_payload)
+          |> json_response(202)
+
+        assert response["status"] == "accepted"
+      end)
+
+    refute_receive {:verified_delivery_handoff, ^blocked_delivery_id, _, _}
+    assert blocked_log =~ "github_webhook_trigger_filtered"
+
+    assert {:ok, %WebhookDelivery{} = blocked_delivery} =
+             WebhookDelivery.get_by_github_delivery_id(blocked_delivery_id, authorize?: false)
+
+    assert blocked_delivery.event_type == "issues"
+    assert blocked_delivery.action == "opened"
+
+    allowed_payload =
+      Jason.encode!(%{
+        "action" => "edited",
+        "issue" => %{"number" => 56},
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    allowed_delivery_id = "delivery-allowed-#{System.unique_integer([:positive])}"
+
+    response =
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("x-hub-signature-256", sign(allowed_payload, secret))
+      |> put_req_header("x-github-delivery", allowed_delivery_id)
+      |> put_req_header("x-github-event", "issues")
+      |> post(@webhook_path, allowed_payload)
+      |> json_response(202)
+
+    assert response["status"] == "accepted"
+
+    assert_receive {:verified_delivery_handoff, ^allowed_delivery_id, "issues", "edited"}
+  end
+
+  test "rejects delivery when signature verification fails and does not route side effects", %{
+    conn: conn
+  } do
     secret = "webhook-secret-#{System.unique_integer([:positive])}"
     Application.put_env(:jido_code, :github_webhook_secret, secret)
 
@@ -317,7 +416,11 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
 
     assert github_app_path["status"] == "ready"
     assert github_app_path["repository_access"] == "confirmed"
-    assert Enum.map(github_app_path["repositories"], & &1["full_name"]) == ["owner/repo-one", "owner/repo-two"]
+
+    assert Enum.map(github_app_path["repositories"], & &1["full_name"]) == [
+             "owner/repo-one",
+             "owner/repo-two"
+           ]
 
     assert log_output =~ "github_installation_sync outcome=updated"
     assert log_output =~ "affected_repositories=owner/repo-one,owner/repo-two"

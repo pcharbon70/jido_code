@@ -142,6 +142,107 @@ defmodule JidoCodeWeb.AgentsLiveTest do
     assert issue_bot_enabled(refreshed_project.settings) == true
   end
 
+  test "agents page persists explicit per-project webhook event list updates", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-events",
+        github_full_name: "owner/repo-events",
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"]
+            }
+          }
+        }
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/agents", on_error: :warn)
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-event-checkbox-#{project.id}-issues-opened"
+           )
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-event-checkbox-#{project.id}-issues-edited"
+           )
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-event-checkbox-#{project.id}-issue-comment-created"
+           )
+
+    view
+    |> element("#agents-issue-bot-events-form-#{project.id}")
+    |> render_submit(%{
+      "project_id" => project.id,
+      "webhook_events" => ["issues.edited", "issue_comment.created"]
+    })
+
+    refreshed_project = read_project!(project.id)
+
+    assert issue_bot_webhook_events(refreshed_project.settings) == [
+             "issues.edited",
+             "issue_comment.created"
+           ]
+  end
+
+  test "agents page rejects unsupported webhook event values with typed validation errors", %{
+    conn: _conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-event-validation",
+        github_full_name: "owner/repo-event-validation",
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"]
+            }
+          }
+        }
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/agents", on_error: :warn)
+
+    view
+    |> element("#agents-issue-bot-events-form-#{project.id}")
+    |> render_submit(%{
+      "project_id" => project.id,
+      "webhook_events" => ["issues.opened", "issues.invalid_action"]
+    })
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-error-type",
+             "support_agent_config_validation_failed"
+           )
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-error-detail",
+             "issues.invalid_action"
+           )
+
+    refreshed_project = read_project!(project.id)
+    assert issue_bot_webhook_events(refreshed_project.settings) == ["issues.opened"]
+  end
+
   defp register_owner(email, password) do
     strategy = Info.strategy!(User, :password)
 
@@ -205,6 +306,21 @@ defmodule JidoCodeWeb.AgentsLiveTest do
   end
 
   defp issue_bot_enabled(_settings), do: true
+
+  defp issue_bot_webhook_events(settings) when is_map(settings) do
+    settings
+    |> map_get(:support_agent_config, "support_agent_config", %{})
+    |> normalize_map()
+    |> map_get(:github_issue_bot, "github_issue_bot", %{})
+    |> normalize_map()
+    |> map_get(:webhook_events, "webhook_events", [])
+    |> case do
+      webhook_events when is_list(webhook_events) -> webhook_events
+      _other -> []
+    end
+  end
+
+  defp issue_bot_webhook_events(_settings), do: []
 
   defp owner_sign_in_with_token_path(strategy, token) do
     strategy_path =

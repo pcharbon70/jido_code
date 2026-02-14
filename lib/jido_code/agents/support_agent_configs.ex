@@ -18,6 +18,10 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
   Select a valid project row and choose either Enable or Disable Issue Bot.
   """
 
+  @webhook_events_validation_remediation """
+  Select only supported webhook events and retry saving Issue Bot webhook event settings.
+  """
+
   @not_found_remediation """
   Refresh the Agents page and retry from an existing project row.
   """
@@ -25,6 +29,12 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
   @persistence_remediation """
   Retry the Issue Bot toggle. If this persists, verify project settings persistence health.
   """
+
+  @supported_issue_bot_webhook_events [
+    "issues.opened",
+    "issues.edited",
+    "issue_comment.created"
+  ]
 
   @type typed_error :: %{
           error_type: String.t(),
@@ -36,8 +46,14 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
           id: String.t(),
           name: String.t(),
           github_full_name: String.t(),
-          enabled: boolean()
+          enabled: boolean(),
+          webhook_events: [String.t()]
         }
+
+  @spec supported_issue_bot_webhook_events() :: [String.t()]
+  def supported_issue_bot_webhook_events do
+    @supported_issue_bot_webhook_events
+  end
 
   @spec list_issue_bot_configs() :: {:ok, [issue_bot_config()]} | {:error, typed_error()}
   def list_issue_bot_configs do
@@ -69,6 +85,30 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
          typed_error(
            @persistence_error_type,
            "Issue Bot configuration update returned an unexpected result (#{inspect(other)}).",
+           @persistence_remediation
+         )}
+    end
+  end
+
+  @spec set_issue_bot_webhook_events(term(), term()) ::
+          {:ok, issue_bot_config()} | {:error, typed_error()}
+  def set_issue_bot_webhook_events(project_id, webhook_events_value) do
+    with {:ok, normalized_project_id} <- normalize_project_id(project_id),
+         {:ok, webhook_events} <- normalize_webhook_events_input(webhook_events_value),
+         {:ok, project} <- fetch_project(normalized_project_id),
+         settings <- project |> map_get(:settings, "settings", %{}) |> normalize_map(),
+         updated_settings <- put_issue_bot_webhook_events(settings, webhook_events),
+         {:ok, updated_project} <- persist_project_settings(project, updated_settings) do
+      {:ok, to_issue_bot_config(updated_project)}
+    else
+      {:error, typed_error} ->
+        {:error, typed_error}
+
+      other ->
+        {:error,
+         typed_error(
+           @persistence_error_type,
+           "Issue Bot webhook event configuration update returned an unexpected result (#{inspect(other)}).",
            @persistence_remediation
          )}
     end
@@ -168,6 +208,23 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
        "Issue Bot enabled state is invalid. Expected true or false.",
        @validation_remediation
      )}
+  end
+
+  defp normalize_webhook_events_input(webhook_events_value) do
+    normalized_events = normalize_webhook_events(webhook_events_value)
+
+    unsupported_events = normalized_events -- @supported_issue_bot_webhook_events
+
+    if unsupported_events == [] do
+      {:ok, sort_webhook_events_by_supported_order(normalized_events)}
+    else
+      {:error,
+       typed_error(
+         @validation_error_type,
+         "Issue Bot webhook event list contains unsupported values: #{Enum.join(unsupported_events, ", ")}.",
+         @webhook_events_validation_remediation
+       )}
+    end
   end
 
   defp fetch_project(project_id) do
@@ -282,7 +339,8 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
           project
           |> map_get(:name, "name")
           |> normalize_optional_string() || "unknown-project",
-      enabled: issue_bot_enabled(settings)
+      enabled: issue_bot_enabled(settings),
+      webhook_events: issue_bot_webhook_events(settings)
     }
   end
 
@@ -298,26 +356,65 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
 
   defp issue_bot_enabled(_settings), do: true
 
+  defp issue_bot_webhook_events(settings) when is_map(settings) do
+    issue_bot_settings = issue_bot_settings(settings)
+
+    if map_has_key?(issue_bot_settings, :webhook_events, "webhook_events") do
+      issue_bot_settings
+      |> map_get(:webhook_events, "webhook_events")
+      |> normalize_webhook_events()
+      |> sort_webhook_events_by_supported_order()
+    else
+      @supported_issue_bot_webhook_events
+    end
+  end
+
+  defp issue_bot_webhook_events(_settings), do: @supported_issue_bot_webhook_events
+
   defp put_issue_bot_enabled(settings, enabled) when is_map(settings) do
-    support_agent_config =
-      settings
-      |> map_get(:support_agent_config, "support_agent_config", %{})
-      |> normalize_map()
-
-    issue_bot_config =
-      support_agent_config
-      |> map_get(:github_issue_bot, "github_issue_bot", %{})
-      |> normalize_map()
-      |> Map.put("enabled", enabled)
-
-    support_agent_config
-    |> Map.put("github_issue_bot", issue_bot_config)
-    |> then(&Map.put(settings, "support_agent_config", &1))
+    settings
+    |> issue_bot_settings()
+    |> Map.put("enabled", enabled)
+    |> put_issue_bot_settings(settings)
   end
 
   defp put_issue_bot_enabled(_settings, enabled) do
     put_issue_bot_enabled(%{}, enabled)
   end
+
+  defp put_issue_bot_webhook_events(settings, webhook_events) when is_map(settings) do
+    settings
+    |> issue_bot_settings()
+    |> Map.put("webhook_events", webhook_events)
+    |> put_issue_bot_settings(settings)
+  end
+
+  defp put_issue_bot_webhook_events(_settings, webhook_events) do
+    put_issue_bot_webhook_events(%{}, webhook_events)
+  end
+
+  defp issue_bot_settings(settings) when is_map(settings) do
+    settings
+    |> map_get(:support_agent_config, "support_agent_config", %{})
+    |> normalize_map()
+    |> map_get(:github_issue_bot, "github_issue_bot", %{})
+    |> normalize_map()
+  end
+
+  defp issue_bot_settings(_settings), do: %{}
+
+  defp put_issue_bot_settings(issue_bot_config, settings) when is_map(settings) do
+    support_agent_config =
+      settings
+      |> map_get(:support_agent_config, "support_agent_config", %{})
+      |> normalize_map()
+      |> Map.put("github_issue_bot", normalize_map(issue_bot_config))
+
+    Map.put(settings, "support_agent_config", support_agent_config)
+  end
+
+  defp put_issue_bot_settings(issue_bot_config, _settings),
+    do: put_issue_bot_settings(issue_bot_config, %{})
 
   defp normalize_typed_error(error, fallback_error_type, fallback_remediation) do
     typed_error(
@@ -352,6 +449,31 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
   defp normalize_enabled(:disabled, _default), do: false
   defp normalize_enabled(_enabled, default), do: default
 
+  defp sort_webhook_events_by_supported_order(webhook_events) when is_list(webhook_events) do
+    @supported_issue_bot_webhook_events
+    |> Enum.filter(&(&1 in webhook_events))
+  end
+
+  defp sort_webhook_events_by_supported_order(_webhook_events), do: []
+
+  defp normalize_webhook_events(webhook_events) when is_binary(webhook_events) do
+    webhook_events
+    |> normalize_optional_string()
+    |> case do
+      nil -> []
+      normalized_event -> [normalized_event]
+    end
+  end
+
+  defp normalize_webhook_events(webhook_events) when is_list(webhook_events) do
+    webhook_events
+    |> Enum.map(&normalize_optional_string/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  defp normalize_webhook_events(_webhook_events), do: []
+
   defp normalize_optional_string(value) when is_binary(value) do
     case String.trim(value) do
       "" -> nil
@@ -379,4 +501,10 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
   end
 
   defp map_get(_map, _atom_key, _string_key, default), do: default
+
+  defp map_has_key?(map, atom_key, string_key) when is_map(map) do
+    Map.has_key?(map, atom_key) or Map.has_key?(map, string_key)
+  end
+
+  defp map_has_key?(_map, _atom_key, _string_key), do: false
 end
