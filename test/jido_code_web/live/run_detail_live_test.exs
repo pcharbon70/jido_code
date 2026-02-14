@@ -8,7 +8,7 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
   alias JidoCode.Orchestration.WorkflowRun
   alias JidoCode.Projects.Project
 
-  test "renders persisted status transition timeline entries with current step context", %{
+  test "renders persisted status transition timeline entries with per-step durations", %{
     conn: _conn
   } do
     register_owner("owner@example.com", "owner-password-123")
@@ -63,17 +63,84 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
     assert has_element?(view, "#run-detail-timeline-entry-1")
     assert has_element?(view, "#run-detail-timeline-transition-1", "pending")
     assert has_element?(view, "#run-detail-timeline-step-1", "queued")
+    assert has_element?(view, "#run-detail-timeline-duration-1", "1m 0s")
     assert has_element?(view, "#run-detail-timeline-at-1", "2026-02-14T22:00:00Z")
 
     assert has_element?(view, "#run-detail-timeline-entry-2")
     assert has_element?(view, "#run-detail-timeline-transition-2", "running")
     assert has_element?(view, "#run-detail-timeline-step-2", "plan_changes")
+    assert has_element?(view, "#run-detail-timeline-duration-2", "1m 0s")
     assert has_element?(view, "#run-detail-timeline-at-2", "2026-02-14T22:01:00Z")
 
     assert has_element?(view, "#run-detail-timeline-entry-3")
     assert has_element?(view, "#run-detail-timeline-transition-3", "awaiting_approval")
     assert has_element?(view, "#run-detail-timeline-step-3", "approval_gate")
+    assert has_element?(view, "#run-detail-timeline-duration-3", "unknown")
     assert has_element?(view, "#run-detail-timeline-at-3", "2026-02-14T22:02:00Z")
+  end
+
+  test "updates timeline entries in near real time for active runs and marks missing duration as unknown",
+       %{conn: _conn} do
+    register_owner("timeline-live-owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("timeline-live-owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-run-detail-live-timeline",
+        github_full_name: "owner/repo-run-detail-live-timeline",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    run_id = "run-detail-live-timeline-#{System.unique_integer([:positive])}"
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: run_id,
+        workflow_name: "implement_task",
+        workflow_version: 2,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Render near real-time timeline"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-14 22:10:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-14 22:11:00Z]
+      })
+
+    {:ok, view, _html} =
+      live(
+        recycle(authed_conn),
+        ~p"/projects/#{project.id}/runs/#{run_id}",
+        on_error: :warn
+      )
+
+    assert has_element?(view, "#run-detail-status", "running")
+    assert has_element?(view, "#run-detail-timeline-transition-2", "running")
+    assert has_element?(view, "#run-detail-timeline-duration-2", "unknown")
+
+    {:ok, _run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-14 22:12:00Z]
+      })
+
+    assert_eventually(fn ->
+      has_element?(view, "#run-detail-status", "awaiting_approval") and
+        has_element?(view, "#run-detail-timeline-transition-3", "awaiting_approval") and
+        has_element?(view, "#run-detail-timeline-duration-2", "1m 0s") and
+        has_element?(view, "#run-detail-timeline-duration-3", "unknown")
+    end)
   end
 
   test "renders issue triage artifact set for issue_triage workflow runs", %{conn: _conn} do
@@ -1267,6 +1334,24 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
     refute has_element?(view, "#run-detail-step-retry-button")
     assert has_element?(view, "#run-detail-step-retry-guidance-detail", "does not declare")
     assert has_element?(view, "#run-detail-step-retry-guidance-remediation", "step-level retry")
+  end
+
+  defp assert_eventually(assertion_fun, attempts \\ 20)
+
+  defp assert_eventually(assertion_fun, attempts) when attempts > 0 do
+    if assertion_fun.() do
+      :ok
+    else
+      receive do
+      after
+        25 ->
+          assert_eventually(assertion_fun, attempts - 1)
+      end
+    end
+  end
+
+  defp assert_eventually(_assertion_fun, 0) do
+    flunk("expected condition to become true")
   end
 
   defp register_owner(email, password) do

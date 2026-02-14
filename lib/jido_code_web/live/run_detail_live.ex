@@ -1,27 +1,59 @@
 defmodule JidoCodeWeb.RunDetailLive do
   use JidoCodeWeb, :live_view
 
-  alias JidoCode.Orchestration.WorkflowRun
+  alias JidoCode.Orchestration.{RunPubSub, WorkflowRun}
+
+  @run_events_for_refresh MapSet.new([
+                            "run_started",
+                            "step_started",
+                            "step_completed",
+                            "step_failed",
+                            "approval_requested",
+                            "approval_granted",
+                            "approval_rejected",
+                            "run_completed",
+                            "run_failed",
+                            "run_cancelled"
+                          ])
+  @run_event_refresh_delay_ms 50
 
   @impl true
   def mount(%{"id" => project_id, "run_id" => run_id}, _session, socket) do
-    case WorkflowRun.get_by_project_and_run_id(%{project_id: project_id, run_id: run_id}) do
-      {:ok, %WorkflowRun{} = run} ->
-        {:ok,
-         socket
-         |> assign(:project_id, project_id)
-         |> assign(:run_id, run_id)
-         |> assign_run(run)
-         |> assign(:approval_action_error, nil)
-         |> assign(:retry_action_error, nil)}
+    socket =
+      case WorkflowRun.get_by_project_and_run_id(%{project_id: project_id, run_id: run_id}) do
+        {:ok, %WorkflowRun{} = run} ->
+          socket
+          |> assign(:project_id, project_id)
+          |> assign(:run_id, run_id)
+          |> assign_run(run)
+          |> assign(:approval_action_error, nil)
+          |> assign(:retry_action_error, nil)
 
-      {:ok, nil} ->
-        {:ok, assign_missing_run(socket, project_id, run_id)}
+        {:ok, nil} ->
+          assign_missing_run(socket, project_id, run_id)
 
-      {:error, _reason} ->
-        {:ok, assign_missing_run(socket, project_id, run_id)}
+        {:error, _reason} ->
+          assign_missing_run(socket, project_id, run_id)
+      end
+
+    {:ok, maybe_subscribe_run_events(socket)}
+  end
+
+  @impl true
+  def handle_info({:run_event, payload}, socket) do
+    if refresh_for_run_event?(payload, socket) do
+      Process.send_after(self(), :refresh_run_after_event, @run_event_refresh_delay_ms)
+      {:noreply, refresh_run_assigns(socket)}
+    else
+      {:noreply, socket}
     end
   end
+
+  @impl true
+  def handle_info(:refresh_run_after_event, socket), do: {:noreply, refresh_run_assigns(socket)}
+
+  @impl true
+  def handle_info(_message, socket), do: {:noreply, socket}
 
   @impl true
   def handle_event("approve_run", _params, %{assigns: %{run: %WorkflowRun{} = run}} = socket) do
@@ -496,6 +528,9 @@ defmodule JidoCodeWeb.RunDetailLive do
                   <p id={"run-detail-timeline-step-#{index}"} class="text-xs text-base-content/80">
                     Step: {entry.current_step}
                   </p>
+                  <p id={"run-detail-timeline-duration-#{index}"} class="text-xs text-base-content/70">
+                    Duration: {entry.duration}
+                  </p>
                   <p id={"run-detail-timeline-at-#{index}"} class="text-xs text-base-content/70">
                     Recorded at: {entry.transitioned_at}
                   </p>
@@ -562,6 +597,39 @@ defmodule JidoCodeWeb.RunDetailLive do
       {:ok, %WorkflowRun{} = run} -> assign_run(socket, run)
       _other -> assign_missing_run(socket, project_id, run_id)
     end
+  end
+
+  defp maybe_subscribe_run_events(socket) do
+    run_id =
+      socket.assigns
+      |> Map.get(:run_id)
+      |> normalize_optional_string()
+
+    if connected?(socket) and run_id do
+      :ok = RunPubSub.subscribe_run(run_id)
+    end
+
+    socket
+  end
+
+  defp refresh_for_run_event?(payload, socket) do
+    event_name =
+      payload
+      |> map_get(:event, "event")
+      |> normalize_optional_string()
+
+    payload_run_id =
+      payload
+      |> map_get(:run_id, "run_id")
+      |> normalize_optional_string()
+
+    socket_run_id =
+      socket.assigns
+      |> Map.get(:run_id)
+      |> normalize_optional_string()
+
+    MapSet.member?(@run_events_for_refresh, event_name) and
+      (is_nil(payload_run_id) or payload_run_id == socket_run_id)
   end
 
   defp failure_context(%WorkflowRun{} = run) do
@@ -986,24 +1054,42 @@ defmodule JidoCodeWeb.RunDetailLive do
   defp awaiting_approval?(_status), do: false
 
   defp normalize_timeline_entries(entries) when is_list(entries) do
-    Enum.map(entries, fn entry ->
-      approval_audit = normalize_timeline_approval_audit(entry)
-
-      %{
-        to_status:
-          entry
-          |> map_get(:to_status, "to_status")
-          |> normalize_optional_string() || "unknown",
-        current_step:
-          entry
-          |> map_get(:current_step, "current_step")
-          |> normalize_optional_string() || "unknown",
-        transitioned_at:
+    normalized_entries =
+      Enum.map(entries, fn entry ->
+        transitioned_at =
           entry
           |> map_get(:transitioned_at, "transitioned_at")
-          |> format_transitioned_at(),
-        approval_audit: approval_audit
-      }
+          |> normalize_transitioned_at_datetime()
+
+        %{
+          to_status:
+            entry
+            |> map_get(:to_status, "to_status")
+            |> normalize_optional_string() || "unknown",
+          current_step:
+            entry
+            |> map_get(:current_step, "current_step")
+            |> normalize_optional_string() || "unknown",
+          transitioned_at: format_transitioned_at(transitioned_at),
+          transitioned_at_datetime: transitioned_at,
+          approval_audit: normalize_timeline_approval_audit(entry)
+        }
+      end)
+
+    next_entries = Enum.drop(normalized_entries, 1) ++ [nil]
+
+    normalized_entries
+    |> Enum.zip(next_entries)
+    |> Enum.map(fn {entry, next_entry} ->
+      duration =
+        timeline_duration(
+          Map.get(entry, :transitioned_at_datetime),
+          next_entry && Map.get(next_entry, :transitioned_at_datetime)
+        )
+
+      entry
+      |> Map.put(:duration, duration)
+      |> Map.delete(:transitioned_at_datetime)
     end)
   end
 
@@ -1120,6 +1206,19 @@ defmodule JidoCodeWeb.RunDetailLive do
     end
   end
 
+  defp normalize_transitioned_at_datetime(%DateTime{} = transitioned_at) do
+    DateTime.truncate(transitioned_at, :second)
+  end
+
+  defp normalize_transitioned_at_datetime(transitioned_at) when is_binary(transitioned_at) do
+    case DateTime.from_iso8601(transitioned_at) do
+      {:ok, parsed_transitioned_at, _offset} -> DateTime.truncate(parsed_transitioned_at, :second)
+      _other -> nil
+    end
+  end
+
+  defp normalize_transitioned_at_datetime(_transitioned_at), do: nil
+
   defp format_transitioned_at(%DateTime{} = transitioned_at) do
     DateTime.to_iso8601(transitioned_at)
   end
@@ -1132,6 +1231,32 @@ defmodule JidoCodeWeb.RunDetailLive do
   end
 
   defp format_transitioned_at(_transitioned_at), do: "unknown"
+
+  defp timeline_duration(%DateTime{} = started_at, %DateTime{} = completed_at) do
+    case DateTime.diff(completed_at, started_at, :second) do
+      seconds when is_integer(seconds) and seconds >= 0 ->
+        format_duration_seconds(seconds)
+
+      _other ->
+        "unknown"
+    end
+  end
+
+  defp timeline_duration(_started_at, _completed_at), do: "unknown"
+
+  defp format_duration_seconds(seconds) when seconds < 60, do: "#{seconds}s"
+
+  defp format_duration_seconds(seconds) when seconds < 3_600 do
+    "#{div(seconds, 60)}m #{rem(seconds, 60)}s"
+  end
+
+  defp format_duration_seconds(seconds) do
+    hours = div(seconds, 3_600)
+    minutes = div(rem(seconds, 3_600), 60)
+    remaining_seconds = rem(seconds, 60)
+
+    "#{hours}h #{minutes}m #{remaining_seconds}s"
+  end
 
   defp normalize_timeline_approval_audit(entry) when is_map(entry) do
     decision =
