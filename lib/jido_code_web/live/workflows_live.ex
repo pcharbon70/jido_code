@@ -165,6 +165,9 @@ defmodule JidoCodeWeb.WorkflowsLive do
               <p id="workflows-run-feedback-run-id" class="text-sm text-success">
                 Run: <span class="font-mono">{@run_feedback.run.run_id}</span>
               </p>
+              <p id="workflows-run-feedback-workflow-version" class="text-sm text-success">
+                Workflow version: {run_workflow_version_summary(@run_feedback.run.workflow_version)}
+              </p>
               <.link
                 id="workflows-run-feedback-run-link"
                 class="link link-primary text-sm"
@@ -207,6 +210,7 @@ defmodule JidoCodeWeb.WorkflowsLive do
             <tr>
               <th>Run ID</th>
               <th>Workflow</th>
+              <th>Version</th>
               <th>Project</th>
               <th>Trigger</th>
               <th>Inputs</th>
@@ -215,7 +219,7 @@ defmodule JidoCodeWeb.WorkflowsLive do
           </thead>
           <tbody :if={@run_count == 0} id="workflows-runs-empty-body">
             <tr id="workflows-runs-empty-state">
-              <td colspan="6" class="py-8 text-center text-sm text-base-content/70">
+              <td colspan="7" class="py-8 text-center text-sm text-base-content/70">
                 No workflow runs started from this page yet.
               </td>
             </tr>
@@ -226,6 +230,9 @@ defmodule JidoCodeWeb.WorkflowsLive do
                 {run.run_id}
               </td>
               <td id={"workflows-run-workflow-#{run_dom_token(run.run_id)}"}>{run.workflow_name}</td>
+              <td id={"workflows-run-workflow-version-#{run_dom_token(run.run_id)}"} class="text-xs">
+                {run_workflow_version_summary(run.workflow_version)}
+              </td>
               <td id={"workflows-run-project-#{run_dom_token(run.run_id)}"}>{run.project_name}</td>
               <td id={"workflows-run-trigger-#{run_dom_token(run.run_id)}"} class="text-xs">
                 {run_trigger_summary(run.trigger)}
@@ -396,6 +403,11 @@ defmodule JidoCodeWeb.WorkflowsLive do
   end
 
   defp run_input_summary(_inputs), do: "no inputs"
+
+  defp run_workflow_version_summary(version) when is_integer(version) and version > 0,
+    do: "v#{version}"
+
+  defp run_workflow_version_summary(_version), do: "unknown"
 
   defp summary_value(value) do
     value

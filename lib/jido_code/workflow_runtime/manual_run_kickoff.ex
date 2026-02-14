@@ -9,6 +9,8 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
   @validation_error_type "workflow_run_validation_failed"
   @workflow_unsupported_error_type "workflow_template_unsupported"
   @project_lookup_error_type "workflow_project_lookup_failed"
+  @workflow_definition_lookup_error_type "workflow_definition_lookup_failed"
+  @workflow_version_pinning_error_type "workflow_version_pinning_failed"
 
   @validation_remediation """
   Select a workflow template and provide all required inputs, then retry from `/workflows`.
@@ -22,9 +24,14 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
   Ensure the project is imported and available, then retry kickoff from `/workflows`.
   """
 
+  @workflow_definition_remediation """
+  Verify workflow definition metadata and retry kickoff from `/workflows`.
+  """
+
   @supported_workflows [
     %{
       name: "implement_task",
+      version: 1,
       label: "Implement task",
       description: "Plan and implement an operator-scoped coding task.",
       required_inputs: [
@@ -37,6 +44,7 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
     },
     %{
       name: "fix_failing_tests",
+      version: 1,
       label: "Fix failing tests",
       description: "Diagnose and repair a known failing test signal.",
       required_inputs: [
@@ -49,6 +57,7 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
     },
     %{
       name: "issue_triage",
+      version: 1,
       label: "Issue triage and research",
       description: "Run manual issue triage with operator-provided issue context.",
       required_inputs: [
@@ -77,6 +86,7 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
   @type kickoff_run :: %{
           run_id: String.t(),
           workflow_name: String.t(),
+          workflow_version: pos_integer(),
           project_id: String.t(),
           project_name: String.t(),
           project_defaults: map(),
@@ -93,6 +103,7 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
     Enum.map(@supported_workflows, fn workflow ->
       %{
         name: workflow.name,
+        version: workflow.version,
         label: workflow.label,
         description: workflow.description,
         required_inputs:
@@ -145,6 +156,12 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
   end
 
   @doc false
+  @spec default_workflow_definition_loader() :: {:ok, [map()]}
+  def default_workflow_definition_loader do
+    {:ok, @supported_workflows}
+  end
+
+  @doc false
   @spec default_launcher(map()) :: {:ok, map()}
   def default_launcher(_kickoff_request) do
     {:ok,
@@ -175,16 +192,24 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
   end
 
   defp workflow_definition(run_params) do
+    with {:ok, workflow_definitions} <- load_workflow_definitions() do
+      workflow_definition(run_params, workflow_definitions)
+    end
+  end
+
+  defp workflow_definition(run_params, workflow_definitions) do
     workflow_name =
       run_params
       |> map_get(:workflow_name, "workflow_name")
       |> normalize_optional_string()
 
-    case Enum.find(@supported_workflows, fn workflow ->
-           workflow.name == workflow_name
+    case Enum.find(workflow_definitions, fn workflow ->
+           map_get(workflow, :name, "name") == workflow_name
          end) do
       %{} = workflow ->
-        {:ok, workflow}
+        with {:ok, workflow_version} <- workflow_version(workflow, workflow_name) do
+          {:ok, Map.put(workflow, :version, workflow_version)}
+        end
 
       nil when is_nil(workflow_name) ->
         {:error,
@@ -200,6 +225,80 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
            "Workflow template #{inspect(workflow_name)} is not supported.",
            @validation_remediation,
            [field_error("workflow_name", "unsupported", "Choose one of the listed workflow templates.")]
+         )}
+    end
+  end
+
+  defp workflow_version(workflow_definition, workflow_name) do
+    workflow_version =
+      workflow_definition
+      |> map_get(:version, "version")
+      |> normalize_optional_positive_integer()
+
+    if is_integer(workflow_version) do
+      {:ok, workflow_version}
+    else
+      {:error,
+       kickoff_error(
+         @workflow_version_pinning_error_type,
+         "Workflow template #{inspect(workflow_name)} is missing a valid version and cannot be pinned.",
+         @workflow_definition_remediation
+       )}
+    end
+  end
+
+  defp load_workflow_definitions do
+    loader =
+      Application.get_env(
+        :jido_code,
+        :workflow_manual_definition_loader,
+        &__MODULE__.default_workflow_definition_loader/0
+      )
+
+    if is_function(loader, 0) do
+      safe_invoke_workflow_definition_loader(loader)
+    else
+      {:error,
+       kickoff_error(
+         @workflow_definition_lookup_error_type,
+         "Workflow definition loader configuration is invalid.",
+         @workflow_definition_remediation
+       )}
+    end
+  end
+
+  defp safe_invoke_workflow_definition_loader(loader) do
+    try do
+      case loader.() do
+        {:ok, workflow_definitions} when is_list(workflow_definitions) ->
+          {:ok, workflow_definitions}
+
+        {:error, error} ->
+          {:error, normalize_workflow_definition_error(error)}
+
+        other ->
+          {:error,
+           kickoff_error(
+             @workflow_definition_lookup_error_type,
+             "Workflow definition loader returned an invalid result (#{inspect(other)}).",
+             @workflow_definition_remediation
+           )}
+      end
+    rescue
+      exception ->
+        {:error,
+         kickoff_error(
+           @workflow_definition_lookup_error_type,
+           "Workflow definition loader crashed (#{Exception.message(exception)}).",
+           @workflow_definition_remediation
+         )}
+    catch
+      kind, reason ->
+        {:error,
+         kickoff_error(
+           @workflow_definition_lookup_error_type,
+           "Workflow definition loader threw #{inspect({kind, reason})}.",
+           @workflow_definition_remediation
          )}
     end
   end
@@ -390,10 +489,12 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
          initiating_actor
        ) do
     workflow_name = Map.fetch!(workflow_definition, :name)
+    workflow_version = Map.fetch!(workflow_definition, :version)
     project_id = Map.fetch!(project_scope, :project_id)
 
     %{
       workflow_name: workflow_name,
+      workflow_version: workflow_version,
       project_id: project_id,
       project_name: Map.fetch!(project_scope, :project_name),
       project_defaults: %{
@@ -406,7 +507,8 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
         source_row: %{
           route: "/workflows",
           project_id: project_id,
-          workflow_name: workflow_name
+          workflow_name: workflow_name,
+          workflow_version: workflow_version
         }
       },
       inputs: inputs,
@@ -487,6 +589,7 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
        %{
          run_id: run_id,
          workflow_name: Map.fetch!(kickoff_request, :workflow_name),
+         workflow_version: Map.fetch!(kickoff_request, :workflow_version),
          project_id: project_id,
          project_name: Map.fetch!(kickoff_request, :project_name),
          project_defaults: Map.fetch!(kickoff_request, :project_defaults),
@@ -569,6 +672,15 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
       map_get(error, :error_type, "error_type", @project_lookup_error_type),
       map_get(error, :detail, "detail", "Project lookup failed."),
       map_get(error, :remediation, "remediation", @project_lookup_remediation),
+      map_get(error, :field_errors, "field_errors", [])
+    )
+  end
+
+  defp normalize_workflow_definition_error(error) do
+    kickoff_error(
+      map_get(error, :error_type, "error_type", @workflow_definition_lookup_error_type),
+      map_get(error, :detail, "detail", "Workflow definitions could not be loaded."),
+      map_get(error, :remediation, "remediation", @workflow_definition_remediation),
       map_get(error, :field_errors, "field_errors", [])
     )
   end
@@ -666,6 +778,17 @@ defmodule JidoCode.WorkflowRuntime.ManualRunKickoff do
   end
 
   defp normalize_optional_datetime(_value), do: nil
+
+  defp normalize_optional_positive_integer(value) when is_integer(value) and value > 0, do: value
+
+  defp normalize_optional_positive_integer(value) when is_binary(value) do
+    case Integer.parse(String.trim(value)) do
+      {parsed_value, ""} when parsed_value > 0 -> parsed_value
+      _other -> nil
+    end
+  end
+
+  defp normalize_optional_positive_integer(_value), do: nil
 
   defp format_reason(%{diagnostic: diagnostic}) when is_binary(diagnostic), do: diagnostic
   defp format_reason(reason), do: inspect(reason)

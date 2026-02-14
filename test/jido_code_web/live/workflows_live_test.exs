@@ -8,10 +8,14 @@ defmodule JidoCodeWeb.WorkflowsLiveTest do
   alias JidoCode.Projects.Project
 
   setup do
+    original_workflow_definition_loader =
+      Application.get_env(:jido_code, :workflow_manual_definition_loader, :__missing__)
+
     original_workflow_manual_run_launcher =
       Application.get_env(:jido_code, :workflow_manual_run_launcher, :__missing__)
 
     on_exit(fn ->
+      restore_env(:workflow_manual_definition_loader, original_workflow_definition_loader)
       restore_env(:workflow_manual_run_launcher, original_workflow_manual_run_launcher)
     end)
 
@@ -36,6 +40,10 @@ defmodule JidoCodeWeb.WorkflowsLiveTest do
     project_id = project.id
 
     launch_requests = start_supervised!({Agent, fn -> [] end})
+
+    Application.put_env(:jido_code, :workflow_manual_definition_loader, fn ->
+      {:ok, [workflow_definition("implement_task", 4)]}
+    end)
 
     Application.put_env(:jido_code, :workflow_manual_run_launcher, fn kickoff_request ->
       Agent.update(launch_requests, fn requests -> [kickoff_request | requests] end)
@@ -63,6 +71,7 @@ defmodule JidoCodeWeb.WorkflowsLiveTest do
 
     assert has_element?(view, "#workflows-run-feedback-status", "Run creation succeeded.")
     assert has_element?(view, "#workflows-run-feedback-run-id", "run-manual-123")
+    assert has_element?(view, "#workflows-run-feedback-workflow-version", "v4")
 
     assert has_element?(
              view,
@@ -71,6 +80,7 @@ defmodule JidoCodeWeb.WorkflowsLiveTest do
 
     assert has_element?(view, "#workflows-run-id-run-manual-123", "run-manual-123")
     assert has_element?(view, "#workflows-run-workflow-run-manual-123", "implement_task")
+    assert has_element?(view, "#workflows-run-workflow-version-run-manual-123", "v4")
     assert has_element?(view, "#workflows-run-project-run-manual-123", "repo-workflows")
     assert has_element?(view, "#workflows-run-trigger-run-manual-123", "/workflows")
 
@@ -86,6 +96,7 @@ defmodule JidoCodeWeb.WorkflowsLiveTest do
     assert [
              %{
                workflow_name: "implement_task",
+               workflow_version: 4,
                project_id: ^project_id,
                project_defaults: %{
                  default_branch: "main",
@@ -97,7 +108,8 @@ defmodule JidoCodeWeb.WorkflowsLiveTest do
                  source_row: %{
                    route: "/workflows",
                    project_id: ^project_id,
-                   workflow_name: "implement_task"
+                   workflow_name: "implement_task",
+                   workflow_version: 4
                  }
                },
                inputs: %{"task_summary" => "Ship onboarding copy updates with tests."},
@@ -228,6 +240,22 @@ defmodule JidoCodeWeb.WorkflowsLiveTest do
 
     query = URI.encode_query(%{"token" => token})
     "#{path}?#{query}"
+  end
+
+  defp workflow_definition(name, version) do
+    %{
+      name: name,
+      version: version,
+      label: "Implement task",
+      description: "Plan and implement an operator-scoped coding task.",
+      required_inputs: [
+        %{
+          name: :task_summary,
+          label: "Task summary",
+          placeholder: "Describe the task this run should implement."
+        }
+      ]
+    }
   end
 
   defp restore_env(key, :__missing__) do
