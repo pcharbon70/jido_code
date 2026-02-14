@@ -1,0 +1,229 @@
+defmodule JidoCodeWeb.ProjectInventoryLiveTest do
+  use JidoCodeWeb.ConnCase, async: false
+
+  import Phoenix.LiveViewTest
+
+  alias AshAuthentication.{Info, Strategy}
+  alias JidoCode.Accounts.User
+  alias JidoCode.Projects.Project
+
+  test "supports project search and filtering on /projects and preserves query context in project links",
+       %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project_alpha} =
+      Project.create(%{
+        name: "repo-alpha",
+        github_full_name: "owner/repo-alpha",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    {:ok, project_beta} =
+      Project.create(%{
+        name: "repo-beta",
+        github_full_name: "owner/repo-beta",
+        default_branch: "release",
+        settings: %{}
+      })
+
+    {:ok, project_gamma} =
+      Project.create(%{
+        name: "repo-gamma",
+        github_full_name: "owner/repo-gamma",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/projects", on_error: :warn)
+
+    assert has_element?(view, "#project-inventory-table")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_alpha.id}", "owner/repo-alpha")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_beta.id}", "owner/repo-beta")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_gamma.id}", "owner/repo-gamma")
+
+    view
+    |> element("#project-inventory-filters-form")
+    |> render_change(%{
+      "filters" => %{
+        "search" => "beta",
+        "default_branch" => "release"
+      }
+    })
+
+    inventory_state_path = "/projects?search=beta&default_branch=release"
+    assert_patch(view, inventory_state_path)
+
+    refute has_element?(view, "#project-inventory-github-full-name-#{project_alpha.id}")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_beta.id}", "owner/repo-beta")
+    refute has_element?(view, "#project-inventory-github-full-name-#{project_gamma.id}")
+    assert has_element?(view, "#project-inventory-results-count", "Showing 1 of 3")
+
+    encoded_return_to = URI.encode_www_form(inventory_state_path)
+
+    assert has_element?(
+             view,
+             "#project-inventory-open-#{project_beta.id}[href='/projects/#{project_beta.id}?return_to=#{encoded_return_to}']"
+           )
+  end
+
+  test "empty search query resets to default inventory results without error noise", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project_alpha} =
+      Project.create(%{
+        name: "repo-alpha",
+        github_full_name: "owner/repo-alpha",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    {:ok, project_beta} =
+      Project.create(%{
+        name: "repo-beta",
+        github_full_name: "owner/repo-beta",
+        default_branch: "release",
+        settings: %{}
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/projects", on_error: :warn)
+
+    view
+    |> element("#project-inventory-filters-form")
+    |> render_change(%{
+      "filters" => %{
+        "search" => "alpha",
+        "default_branch" => "main"
+      }
+    })
+
+    assert_patch(view, "/projects?search=alpha&default_branch=main")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_alpha.id}", "owner/repo-alpha")
+    refute has_element?(view, "#project-inventory-github-full-name-#{project_beta.id}")
+
+    view
+    |> element("#project-inventory-filters-form")
+    |> render_change(%{
+      "filters" => %{
+        "search" => "   ",
+        "default_branch" => "all"
+      }
+    })
+
+    assert_patch(view, "/projects")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_alpha.id}", "owner/repo-alpha")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_beta.id}", "owner/repo-beta")
+    assert has_element?(view, "#project-inventory-results-count", "Showing 2 of 2")
+    refute has_element?(view, "#project-inventory-filter-validation-notice")
+  end
+
+  test "invalid query params reset inventory to defaults without error noise", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project_alpha} =
+      Project.create(%{
+        name: "repo-alpha",
+        github_full_name: "owner/repo-alpha",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    {:ok, project_beta} =
+      Project.create(%{
+        name: "repo-beta",
+        github_full_name: "owner/repo-beta",
+        default_branch: "release",
+        settings: %{}
+      })
+
+    invalid_path =
+      "/projects?" <>
+        URI.encode_query(%{
+          "search" => "<script>alert('x')</script>",
+          "default_branch" => "unknown-branch"
+        })
+
+    {:ok, view, _html} = live(recycle(authed_conn), invalid_path, on_error: :warn)
+
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_alpha.id}", "owner/repo-alpha")
+    assert has_element?(view, "#project-inventory-github-full-name-#{project_beta.id}", "owner/repo-beta")
+    assert has_element?(view, "#project-inventory-results-count", "Showing 2 of 2")
+    assert has_element?(view, "#project-inventory-filter-search[value='']")
+
+    assert has_element?(
+             view,
+             "#project-inventory-filter-default-branch option[value='all'][selected]"
+           )
+
+    refute has_element?(view, "#project-inventory-filter-validation-notice")
+  end
+
+  defp register_owner(email, password) do
+    strategy = Info.strategy!(User, :password)
+
+    {:ok, _owner} =
+      Strategy.action(
+        strategy,
+        :register,
+        %{
+          "email" => email,
+          "password" => password,
+          "password_confirmation" => password
+        },
+        context: %{token_type: :sign_in}
+      )
+
+    :ok
+  end
+
+  defp authenticate_owner_conn(email, password) do
+    strategy = Info.strategy!(User, :password)
+
+    {:ok, owner} =
+      Strategy.action(
+        strategy,
+        :sign_in,
+        %{"email" => email, "password" => password},
+        context: %{token_type: :sign_in}
+      )
+
+    token =
+      owner
+      |> Map.get(:__metadata__, %{})
+      |> Map.fetch!(:token)
+
+    auth_response = build_conn() |> get(owner_sign_in_with_token_path(strategy, token))
+    assert redirected_to(auth_response, 302) == "/"
+    session_token = get_session(auth_response, "user_token")
+    assert is_binary(session_token)
+    {recycle(auth_response), session_token}
+  end
+
+  defp owner_sign_in_with_token_path(strategy, token) do
+    strategy_path =
+      strategy
+      |> Strategy.routes()
+      |> Enum.find_value(fn
+        {path, :sign_in_with_token} -> path
+        _other -> nil
+      end)
+
+    path =
+      Path.join(
+        "/auth",
+        String.trim_leading(strategy_path || "/user/password/sign_in_with_token", "/")
+      )
+
+    query = URI.encode_query(%{"token" => token})
+    "#{path}?#{query}"
+  end
+end
