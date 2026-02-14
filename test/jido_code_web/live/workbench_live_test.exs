@@ -8,8 +8,11 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
   alias JidoCode.Projects.Project
 
   setup do
-    original_workbench_loader = Application.get_env(:jido_code, :workbench_inventory_loader, :__missing__)
-    original_system_config_loader = Application.get_env(:jido_code, :system_config_loader, :__missing__)
+    original_workbench_loader =
+      Application.get_env(:jido_code, :workbench_inventory_loader, :__missing__)
+
+    original_system_config_loader =
+      Application.get_env(:jido_code, :system_config_loader, :__missing__)
 
     Application.put_env(:jido_code, :system_config_loader, fn ->
       {:ok,
@@ -30,11 +33,14 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     :ok
   end
 
-  test "renders cross-project workbench inventory rows with issue and PR counts plus activity summary", %{
-    conn: _conn
-  } do
+  test "renders cross-project workbench inventory rows with issue and PR counts plus activity summary",
+       %{
+         conn: _conn
+       } do
     register_owner("owner@example.com", "owner-password-123")
-    {authed_conn, _session_token} = authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
 
     {:ok, project_one} =
       Project.create(%{
@@ -138,7 +144,9 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     conn: _conn
   } do
     register_owner("owner@example.com", "owner-password-123")
-    {authed_conn, _session_token} = authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
 
     # LiveView mounts twice (disconnected + connected), so fail both initial loads
     # and recover on explicit retry.
@@ -185,7 +193,13 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     |> render_click()
 
     refute has_element?(view, "#workbench-stale-warning")
-    assert has_element?(view, "#workbench-project-name-owner-repo-recovered", "owner/repo-recovered")
+
+    assert has_element?(
+             view,
+             "#workbench-project-name-owner-repo-recovered",
+             "owner/repo-recovered"
+           )
+
     assert has_element?(view, "#workbench-project-open-issues-owner-repo-recovered", "7")
     assert has_element?(view, "#workbench-project-open-prs-owner-repo-recovered", "2")
 
@@ -200,7 +214,9 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     conn: _conn
   } do
     register_owner("owner@example.com", "owner-password-123")
-    {authed_conn, _session_token} = authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
 
     Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
       {:ok,
@@ -272,6 +288,143 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     refute has_element?(view, "[id^='workbench-project-prs-project-link-workbench-row-']")
   end
 
+  test "applies project, state, and freshness filters without route changes", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    now = DateTime.utc_now()
+
+    Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
+      {:ok,
+       [
+         %{
+           id: "owner-repo-alpha",
+           name: "repo-alpha",
+           github_full_name: "owner/repo-alpha",
+           open_issue_count: 5,
+           open_pr_count: 0,
+           recent_activity_summary: "Alpha summary",
+           recent_activity_at: DateTime.add(now, -45 * 24 * 60 * 60, :second) |> DateTime.to_iso8601()
+         },
+         %{
+           id: "owner-repo-beta",
+           name: "repo-beta",
+           github_full_name: "owner/repo-beta",
+           open_issue_count: 0,
+           open_pr_count: 4,
+           recent_activity_summary: "Beta summary",
+           recent_activity_at: DateTime.add(now, -2 * 60 * 60, :second) |> DateTime.to_iso8601()
+         },
+         %{
+           id: "owner-repo-gamma",
+           name: "repo-gamma",
+           github_full_name: "owner/repo-gamma",
+           open_issue_count: 2,
+           open_pr_count: 1,
+           recent_activity_summary: "Gamma summary",
+           recent_activity_at: DateTime.add(now, -10 * 24 * 60 * 60, :second) |> DateTime.to_iso8601()
+         }
+       ], nil}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    assert has_element?(view, "#workbench-filters-form")
+    assert has_element?(view, "#workbench-project-name-owner-repo-alpha", "owner/repo-alpha")
+    assert has_element?(view, "#workbench-project-name-owner-repo-beta", "owner/repo-beta")
+    assert has_element?(view, "#workbench-project-name-owner-repo-gamma", "owner/repo-gamma")
+    assert has_element?(view, "#workbench-filter-results-count", "Showing 3 of 3")
+
+    apply_workbench_filters(view, %{"project_id" => "owner-repo-beta"})
+
+    assert has_element?(view, "#workbench-filters-form")
+    assert has_element?(view, "#workbench-project-name-owner-repo-beta", "owner/repo-beta")
+    refute has_element?(view, "#workbench-project-name-owner-repo-alpha")
+    refute has_element?(view, "#workbench-project-name-owner-repo-gamma")
+    assert has_element?(view, "#workbench-filter-chip-project", "owner/repo-beta")
+    assert has_element?(view, "#workbench-filter-results-count", "Showing 1 of 3")
+
+    apply_workbench_filters(view, %{"work_state" => "issues_open"})
+
+    assert has_element?(view, "#workbench-filters-form")
+    assert has_element?(view, "#workbench-project-name-owner-repo-alpha", "owner/repo-alpha")
+    refute has_element?(view, "#workbench-project-name-owner-repo-beta")
+    assert has_element?(view, "#workbench-project-name-owner-repo-gamma", "owner/repo-gamma")
+    assert has_element?(view, "#workbench-filter-chip-work-state", "Issues open")
+    assert has_element?(view, "#workbench-filter-results-count", "Showing 2 of 3")
+
+    apply_workbench_filters(view, %{"freshness_window" => "stale_30d"})
+
+    assert has_element?(view, "#workbench-filters-form")
+    assert has_element?(view, "#workbench-project-name-owner-repo-alpha", "owner/repo-alpha")
+    refute has_element?(view, "#workbench-project-name-owner-repo-beta")
+    refute has_element?(view, "#workbench-project-name-owner-repo-gamma")
+    assert has_element?(view, "#workbench-filter-chip-freshness-window", "Stale for 30+ days")
+    assert has_element?(view, "#workbench-filter-results-count", "Showing 1 of 3")
+  end
+
+  test "invalid filter values reset defaults and show typed validation notice", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
+      {:ok,
+       [
+         %{
+           id: "owner-repo-one",
+           name: "repo-one",
+           github_full_name: "owner/repo-one",
+           open_issue_count: 1,
+           open_pr_count: 0,
+           recent_activity_summary: "Repo one summary"
+         },
+         %{
+           id: "owner-repo-two",
+           name: "repo-two",
+           github_full_name: "owner/repo-two",
+           open_issue_count: 0,
+           open_pr_count: 2,
+           recent_activity_summary: "Repo two summary"
+         }
+       ], nil}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    view
+    |> element("#workbench-filters-form")
+    |> render_change(%{
+      "filters" => %{
+        "project_id" => "owner-repo-missing",
+        "work_state" => "broken-state",
+        "freshness_window" => "future-only"
+      }
+    })
+
+    assert has_element?(view, "#workbench-filter-validation-notice")
+
+    assert has_element?(
+             view,
+             "#workbench-filter-validation-type",
+             "workbench_filter_values_invalid"
+           )
+
+    assert has_element?(view, "#workbench-filter-validation-detail", "project_id")
+    assert has_element?(view, "#workbench-filter-chip-project", "All projects")
+    assert has_element?(view, "#workbench-filter-chip-work-state", "Any issue or PR state")
+    assert has_element?(view, "#workbench-filter-chip-freshness-window", "Any freshness")
+    assert has_element?(view, "#workbench-filter-results-count", "Showing 2 of 2")
+    assert has_element?(view, "#workbench-project-name-owner-repo-one", "owner/repo-one")
+    assert has_element?(view, "#workbench-project-name-owner-repo-two", "owner/repo-two")
+    assert has_element?(view, "#workbench-filter-project option[value='all'][selected]")
+    assert has_element?(view, "#workbench-filter-work-state option[value='all'][selected]")
+    assert has_element?(view, "#workbench-filter-freshness-window option[value='any'][selected]")
+  end
+
   defp register_owner(email, password) do
     strategy = Info.strategy!(User, :password)
 
@@ -330,6 +483,22 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
 
     query = URI.encode_query(%{"token" => token})
     "#{path}?#{query}"
+  end
+
+  defp apply_workbench_filters(view, overrides) do
+    filter_params = Map.merge(default_workbench_filter_params(), overrides)
+
+    view
+    |> element("#workbench-filters-form")
+    |> render_change(%{"filters" => filter_params})
+  end
+
+  defp default_workbench_filter_params do
+    %{
+      "project_id" => "all",
+      "work_state" => "all",
+      "freshness_window" => "any"
+    }
   end
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)

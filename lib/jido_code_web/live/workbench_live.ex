@@ -4,13 +4,45 @@ defmodule JidoCodeWeb.WorkbenchLive do
   alias JidoCode.Workbench.Inventory
 
   @fallback_row_id_prefix "workbench-row-"
+  @filter_validation_error_type "workbench_filter_values_invalid"
+
+  @default_filter_values %{
+    "project_id" => "all",
+    "work_state" => "all",
+    "freshness_window" => "any"
+  }
+
+  @work_state_filter_options [
+    {"Any issue or PR state", "all"},
+    {"Issues open", "issues_open"},
+    {"PRs open", "prs_open"},
+    {"Issues and PRs open", "issues_and_prs_open"}
+  ]
+
+  @freshness_filter_options [
+    {"Any freshness", "any"},
+    {"Active in last 24 hours", "active_24h"},
+    {"Stale for 7+ days", "stale_7d"},
+    {"Stale for 30+ days", "stale_30d"}
+  ]
+
+  @default_project_filter_value Map.fetch!(@default_filter_values, "project_id")
+  @default_work_state_filter_value Map.fetch!(@default_filter_values, "work_state")
+  @default_freshness_filter_value Map.fetch!(@default_filter_values, "freshness_window")
 
   @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(:inventory_count, 0)
+      |> assign(:inventory_total_count, 0)
+      |> assign(:inventory_rows_all, [])
       |> assign(:stale_warning, nil)
+      |> assign(:filter_validation_notice, nil)
+      |> assign(:filter_values, @default_filter_values)
+      |> assign(:filter_form, to_filter_form(@default_filter_values))
+      |> assign(:filter_chips, filter_chips(@default_filter_values, []))
+      |> assign(:project_filter_options, project_filter_options([]))
       |> stream(:inventory_rows, [], reset: true)
       |> load_inventory()
 
@@ -20,6 +52,16 @@ defmodule JidoCodeWeb.WorkbenchLive do
   @impl true
   def handle_event("retry_fetch", _params, socket) do
     {:noreply, load_inventory(socket)}
+  end
+
+  @impl true
+  def handle_event("apply_filters", %{"filters" => filter_params}, socket) do
+    {:noreply, apply_filter_event(socket, filter_params)}
+  end
+
+  @impl true
+  def handle_event("apply_filters", _params, socket) do
+    {:noreply, apply_invalid_filter_defaults(socket, "filters", "missing")}
   end
 
   @impl true
@@ -63,6 +105,76 @@ defmodule JidoCodeWeb.WorkbenchLive do
         </div>
       </section>
 
+      <section
+        :if={@filter_validation_notice}
+        id="workbench-filter-validation-notice"
+        class="rounded-lg border border-warning/60 bg-warning/10 p-4 space-y-2"
+      >
+        <p id="workbench-filter-validation-label" class="font-semibold">
+          Workbench filters were reset to defaults
+        </p>
+        <p id="workbench-filter-validation-type" class="text-sm">
+          Typed validation notice: {@filter_validation_notice.error_type}
+        </p>
+        <p id="workbench-filter-validation-detail" class="text-sm">
+          {@filter_validation_notice.detail}
+        </p>
+        <p id="workbench-filter-validation-remediation" class="text-sm">
+          {@filter_validation_notice.remediation}
+        </p>
+      </section>
+
+      <section id="workbench-filters-panel" class="rounded-lg border border-base-300 bg-base-100 p-4">
+        <.form
+          for={@filter_form}
+          id="workbench-filters-form"
+          phx-change="apply_filters"
+          phx-submit="apply_filters"
+          class="grid gap-3 lg:grid-cols-[minmax(14rem,1fr)_minmax(14rem,1fr)_minmax(14rem,1fr)_auto]"
+        >
+          <.input
+            id="workbench-filter-project"
+            field={@filter_form[:project_id]}
+            type="select"
+            label="Project"
+            options={@project_filter_options}
+          />
+          <.input
+            id="workbench-filter-work-state"
+            field={@filter_form[:work_state]}
+            type="select"
+            label="Issue/PR state"
+            options={work_state_filter_options()}
+          />
+          <.input
+            id="workbench-filter-freshness-window"
+            field={@filter_form[:freshness_window]}
+            type="select"
+            label="Freshness window"
+            options={freshness_filter_options()}
+          />
+          <button id="workbench-apply-filters" type="submit" class="btn btn-primary btn-sm lg:self-end">
+            Apply filters
+          </button>
+        </.form>
+
+        <div id="workbench-filter-chips" class="flex flex-wrap gap-2 pt-2">
+          <span id="workbench-filter-chip-project" class="badge badge-outline">
+            Project: {@filter_chips.project}
+          </span>
+          <span id="workbench-filter-chip-work-state" class="badge badge-outline">
+            State: {@filter_chips.work_state}
+          </span>
+          <span id="workbench-filter-chip-freshness-window" class="badge badge-outline">
+            Freshness: {@filter_chips.freshness_window}
+          </span>
+        </div>
+
+        <p id="workbench-filter-results-count" class="pt-2 text-xs text-base-content/70">
+          Showing {@inventory_count} of {@inventory_total_count} projects.
+        </p>
+      </section>
+
       <section class="rounded-lg border border-base-300 bg-base-100 overflow-x-auto">
         <table id="workbench-project-table" class="table table-zebra w-full">
           <thead>
@@ -77,7 +189,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
           <tbody id="workbench-project-rows" phx-update="stream">
             <tr :if={@inventory_count == 0} id="workbench-empty-state">
               <td colspan="5" class="text-center text-sm text-base-content/70 py-8">
-                No imported projects available yet.
+                {empty_state_message(@inventory_total_count)}
               </td>
             </tr>
             <tr :for={{dom_id, project} <- @streams.inventory_rows} id={dom_id}>
@@ -149,16 +261,291 @@ defmodule JidoCodeWeb.WorkbenchLive do
   defp load_inventory(socket) do
     case Inventory.load() do
       {:ok, rows, stale_warning} ->
+        filter_values =
+          socket.assigns
+          |> Map.get(:filter_values, @default_filter_values)
+          |> normalize_filter_values()
+          |> validated_filter_values_or_default(rows)
+
         socket
-        |> assign(:inventory_count, length(rows))
+        |> assign(:inventory_rows_all, rows)
         |> assign(:stale_warning, stale_warning)
-        |> stream(:inventory_rows, rows, reset: true)
+        |> assign(:project_filter_options, project_filter_options(rows))
+        |> apply_filters(filter_values)
 
       {:error, stale_warning} ->
+        filter_values =
+          socket.assigns
+          |> Map.get(:filter_values, @default_filter_values)
+          |> normalize_filter_values()
+          |> validated_filter_values_or_default([])
+
         socket
         |> assign(:inventory_count, 0)
+        |> assign(:inventory_total_count, 0)
+        |> assign(:inventory_rows_all, [])
         |> assign(:stale_warning, stale_warning)
+        |> assign(:project_filter_options, project_filter_options([]))
+        |> assign(:filter_values, filter_values)
+        |> assign(:filter_form, to_filter_form(filter_values))
+        |> assign(:filter_chips, filter_chips(filter_values, []))
         |> stream(:inventory_rows, [], reset: true)
+    end
+  end
+
+  defp apply_filter_event(socket, filter_params) do
+    filter_values = normalize_filter_values(filter_params)
+
+    case validate_filter_values(filter_values, socket.assigns.inventory_rows_all) do
+      :ok ->
+        socket
+        |> assign(:filter_validation_notice, nil)
+        |> apply_filters(filter_values)
+
+      {:error, field, invalid_value} ->
+        apply_invalid_filter_defaults(socket, field, invalid_value)
+    end
+  end
+
+  defp apply_invalid_filter_defaults(socket, field, invalid_value) do
+    socket
+    |> assign(:filter_validation_notice, filter_validation_notice(field, invalid_value))
+    |> apply_filters(@default_filter_values)
+  end
+
+  defp apply_filters(socket, filter_values) do
+    rows = filter_rows(socket.assigns.inventory_rows_all, filter_values)
+    project_options = project_filter_options(socket.assigns.inventory_rows_all)
+
+    socket
+    |> assign(:inventory_count, length(rows))
+    |> assign(:inventory_total_count, length(socket.assigns.inventory_rows_all))
+    |> assign(:filter_values, filter_values)
+    |> assign(:filter_form, to_filter_form(filter_values))
+    |> assign(:filter_chips, filter_chips(filter_values, socket.assigns.inventory_rows_all))
+    |> assign(:project_filter_options, project_options)
+    |> stream(:inventory_rows, rows, reset: true)
+  end
+
+  defp filter_rows(rows, filter_values) do
+    now = DateTime.utc_now()
+    project_id = Map.fetch!(filter_values, "project_id")
+    work_state = Map.fetch!(filter_values, "work_state")
+    freshness_window = Map.fetch!(filter_values, "freshness_window")
+
+    Enum.filter(rows, fn row ->
+      project_filter_match?(row, project_id) and
+        work_state_filter_match?(row, work_state) and
+        freshness_filter_match?(row, freshness_window, now)
+    end)
+  end
+
+  defp project_filter_match?(_row, @default_project_filter_value), do: true
+  defp project_filter_match?(row, project_id), do: Map.get(row, :id) == project_id
+
+  defp work_state_filter_match?(_row, @default_work_state_filter_value), do: true
+
+  defp work_state_filter_match?(row, "issues_open"),
+    do: Map.get(row, :open_issue_count, 0) > 0
+
+  defp work_state_filter_match?(row, "prs_open"),
+    do: Map.get(row, :open_pr_count, 0) > 0
+
+  defp work_state_filter_match?(row, "issues_and_prs_open"),
+    do: Map.get(row, :open_issue_count, 0) > 0 and Map.get(row, :open_pr_count, 0) > 0
+
+  defp work_state_filter_match?(_row, _work_state), do: false
+
+  defp freshness_filter_match?(_row, @default_freshness_filter_value, _now), do: true
+
+  defp freshness_filter_match?(row, "active_24h", now),
+    do: recent_activity_within?(row, now, 24 * 60 * 60)
+
+  defp freshness_filter_match?(row, "stale_7d", now),
+    do: stale_for_or_missing?(row, now, 7 * 24 * 60 * 60)
+
+  defp freshness_filter_match?(row, "stale_30d", now),
+    do: stale_for_or_missing?(row, now, 30 * 24 * 60 * 60)
+
+  defp freshness_filter_match?(_row, _freshness_window, _now), do: false
+
+  defp recent_activity_within?(row, now, seconds) do
+    case row_recent_activity_at(row) do
+      %DateTime{} = activity_at ->
+        cutoff = DateTime.add(now, -seconds, :second)
+        DateTime.compare(activity_at, cutoff) in [:eq, :gt]
+
+      _other ->
+        false
+    end
+  end
+
+  defp stale_for_or_missing?(row, now, seconds) do
+    case row_recent_activity_at(row) do
+      %DateTime{} = activity_at ->
+        cutoff = DateTime.add(now, -seconds, :second)
+        DateTime.compare(activity_at, cutoff) in [:lt, :eq]
+
+      _other ->
+        true
+    end
+  end
+
+  defp row_recent_activity_at(row) do
+    row
+    |> Map.get(:recent_activity_at)
+    |> normalize_optional_datetime()
+  end
+
+  defp normalize_filter_values(filter_values) when is_map(filter_values) do
+    %{
+      "project_id" =>
+        filter_values
+        |> map_get("project_id", :project_id)
+        |> normalize_optional_string() || @default_project_filter_value,
+      "work_state" =>
+        filter_values
+        |> map_get("work_state", :work_state)
+        |> normalize_optional_string() || @default_work_state_filter_value,
+      "freshness_window" =>
+        filter_values
+        |> map_get("freshness_window", :freshness_window)
+        |> normalize_optional_string() || @default_freshness_filter_value
+    }
+  end
+
+  defp normalize_filter_values(_filter_values), do: @default_filter_values
+
+  defp validated_filter_values_or_default(filter_values, rows) do
+    case validate_filter_values(filter_values, rows) do
+      :ok -> filter_values
+      {:error, _field, _invalid_value} -> @default_filter_values
+    end
+  end
+
+  defp validate_filter_values(filter_values, rows) do
+    valid_project_values =
+      rows
+      |> Enum.map(&Map.get(&1, :id))
+      |> Enum.reject(&is_nil/1)
+      |> then(&MapSet.new([@default_project_filter_value | &1]))
+
+    valid_work_state_values = @work_state_filter_options |> Enum.map(&elem(&1, 1)) |> MapSet.new()
+
+    valid_freshness_values =
+      @freshness_filter_options |> Enum.map(&elem(&1, 1)) |> MapSet.new()
+
+    with :ok <-
+           validate_filter_value(
+             "project_id",
+             Map.fetch!(filter_values, "project_id"),
+             valid_project_values
+           ),
+         :ok <-
+           validate_filter_value(
+             "work_state",
+             Map.fetch!(filter_values, "work_state"),
+             valid_work_state_values
+           ),
+         :ok <-
+           validate_filter_value(
+             "freshness_window",
+             Map.fetch!(filter_values, "freshness_window"),
+             valid_freshness_values
+           ) do
+      :ok
+    end
+  end
+
+  defp validate_filter_value(field, value, valid_values) do
+    if MapSet.member?(valid_values, value) do
+      :ok
+    else
+      {:error, field, inspect(value)}
+    end
+  end
+
+  defp filter_validation_notice(field, invalid_value) do
+    %{
+      error_type: @filter_validation_error_type,
+      detail: "Invalid #{field} value #{invalid_value} was submitted for workbench filters; defaults were restored.",
+      remediation: "Select values from the listed project, state, and freshness options and retry."
+    }
+  end
+
+  defp filter_chips(filter_values, rows) do
+    project_label =
+      case Map.fetch!(filter_values, "project_id") do
+        @default_project_filter_value ->
+          "All projects"
+
+        project_id ->
+          rows
+          |> Enum.find(fn row -> Map.get(row, :id) == project_id end)
+          |> case do
+            nil -> "All projects"
+            row -> row |> Map.get(:github_full_name) |> normalize_optional_string() || project_id
+          end
+      end
+
+    %{
+      project: project_label,
+      work_state:
+        option_label(
+          @work_state_filter_options,
+          Map.fetch!(filter_values, "work_state"),
+          "Any issue or PR state"
+        ),
+      freshness_window:
+        option_label(
+          @freshness_filter_options,
+          Map.fetch!(filter_values, "freshness_window"),
+          "Any freshness"
+        )
+    }
+  end
+
+  defp option_label(options, value, default_label) do
+    Enum.find_value(options, default_label, fn
+      {label, ^value} -> label
+      _other -> nil
+    end)
+  end
+
+  defp project_filter_options(rows) do
+    dynamic_options =
+      rows
+      |> Enum.map(fn row ->
+        label =
+          row
+          |> Map.get(:github_full_name)
+          |> normalize_optional_string() ||
+            row
+            |> Map.get(:name)
+            |> normalize_optional_string() ||
+            Map.get(row, :id)
+
+        {label, Map.get(row, :id)}
+      end)
+      |> Enum.reject(fn {label, value} -> is_nil(label) or is_nil(value) end)
+      |> Enum.uniq_by(fn {_label, value} -> value end)
+      |> Enum.sort_by(fn {label, _value} -> String.downcase(label) end)
+
+    [{"All projects", @default_project_filter_value} | dynamic_options]
+  end
+
+  defp work_state_filter_options, do: @work_state_filter_options
+  defp freshness_filter_options, do: @freshness_filter_options
+  defp to_filter_form(filter_values), do: to_form(filter_values, as: :filters)
+
+  defp empty_state_message(0), do: "No imported projects available yet."
+  defp empty_state_message(_inventory_total_count), do: "No projects match the active filters."
+
+  defp map_get(map, string_key, atom_key) do
+    cond do
+      Map.has_key?(map, string_key) -> Map.get(map, string_key)
+      Map.has_key?(map, atom_key) -> Map.get(map, atom_key)
+      true -> nil
     end
   end
 
@@ -272,6 +659,33 @@ defmodule JidoCodeWeb.WorkbenchLive do
   defp normalize_optional_string(value) when is_integer(value), do: Integer.to_string(value)
   defp normalize_optional_string(value) when is_float(value), do: :erlang.float_to_binary(value)
   defp normalize_optional_string(_value), do: nil
+
+  defp normalize_optional_datetime(%DateTime{} = datetime), do: datetime
+
+  defp normalize_optional_datetime(%NaiveDateTime{} = datetime) do
+    case DateTime.from_naive(datetime, "Etc/UTC") do
+      {:ok, parsed_datetime} -> parsed_datetime
+      _other -> nil
+    end
+  end
+
+  defp normalize_optional_datetime(value) when is_binary(value) do
+    case DateTime.from_iso8601(value) do
+      {:ok, parsed_datetime, _offset} ->
+        parsed_datetime
+
+      _other ->
+        case NaiveDateTime.from_iso8601(value) do
+          {:ok, parsed_naive_datetime} ->
+            normalize_optional_datetime(parsed_naive_datetime)
+
+          _fallback ->
+            nil
+        end
+    end
+  end
+
+  defp normalize_optional_datetime(_value), do: nil
 
   defp github_url_unavailable_reason, do: "GitHub repository URL is unavailable for this row."
   defp project_detail_unavailable_reason, do: "Project detail link is unavailable for this row."

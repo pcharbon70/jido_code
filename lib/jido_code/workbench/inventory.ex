@@ -18,7 +18,8 @@ defmodule JidoCode.Workbench.Inventory do
           github_full_name: String.t(),
           open_issue_count: non_neg_integer(),
           open_pr_count: non_neg_integer(),
-          recent_activity_summary: String.t()
+          recent_activity_summary: String.t(),
+          recent_activity_at: DateTime.t() | nil
         }
 
   @type stale_warning :: %{
@@ -169,6 +170,9 @@ defmodule JidoCode.Workbench.Inventory do
     github_settings = settings |> map_get(:github, "github", %{}) |> normalize_map()
     workspace_settings = settings |> map_get(:workspace, "workspace", %{}) |> normalize_map()
 
+    recent_activity_at =
+      resolve_recent_activity_at(project, inventory_settings, github_settings, workspace_settings)
+
     %{
       id:
         project
@@ -208,21 +212,20 @@ defmodule JidoCode.Workbench.Inventory do
         ]),
       recent_activity_summary:
         resolve_recent_activity_summary(
-          project,
           settings,
           inventory_settings,
           github_settings,
-          workspace_settings
-        )
+          recent_activity_at
+        ),
+      recent_activity_at: recent_activity_at
     }
   end
 
   defp resolve_recent_activity_summary(
-         project,
          settings,
          inventory_settings,
          github_settings,
-         workspace_settings
+         recent_activity_at
        ) do
     summary =
       first_non_empty_string([
@@ -235,18 +238,27 @@ defmodule JidoCode.Workbench.Inventory do
       ])
 
     summary ||
-      case first_datetime([
-             map_get(inventory_settings, :recent_activity_at, "recent_activity_at"),
-             map_get(inventory_settings, :last_activity_at, "last_activity_at"),
-             map_get(github_settings, :pushed_at, "pushed_at"),
-             map_get(github_settings, :updated_at, "updated_at"),
-             map_get(workspace_settings, :last_synced_at, "last_synced_at"),
-             map_get(project, :updated_at, "updated_at"),
-             map_get(project, :inserted_at, "inserted_at")
-           ]) do
+      case recent_activity_at do
         nil -> "No recent activity metadata."
         datetime -> "Last activity: #{format_utc_datetime(datetime)}"
       end
+  end
+
+  defp resolve_recent_activity_at(
+         project,
+         inventory_settings,
+         github_settings,
+         workspace_settings
+       ) do
+    first_datetime([
+      map_get(inventory_settings, :recent_activity_at, "recent_activity_at"),
+      map_get(inventory_settings, :last_activity_at, "last_activity_at"),
+      map_get(github_settings, :pushed_at, "pushed_at"),
+      map_get(github_settings, :updated_at, "updated_at"),
+      map_get(workspace_settings, :last_synced_at, "last_synced_at"),
+      map_get(project, :updated_at, "updated_at"),
+      map_get(project, :inserted_at, "inserted_at")
+    ])
   end
 
   defp normalize_rows(rows) do
@@ -267,6 +279,11 @@ defmodule JidoCode.Workbench.Inventory do
       row
       |> map_get(:name, "name")
       |> normalize_optional_string()
+
+    recent_activity_at =
+      row
+      |> map_get(:recent_activity_at, "recent_activity_at")
+      |> normalize_optional_datetime()
 
     %{
       id:
@@ -294,7 +311,12 @@ defmodule JidoCode.Workbench.Inventory do
       recent_activity_summary:
         row
         |> map_get(:recent_activity_summary, "recent_activity_summary")
-        |> normalize_optional_string() || "No recent activity metadata."
+        |> normalize_optional_string() ||
+          case recent_activity_at do
+            nil -> "No recent activity metadata."
+            datetime -> "Last activity: #{format_utc_datetime(datetime)}"
+          end,
+      recent_activity_at: recent_activity_at
     }
   end
 
@@ -307,7 +329,8 @@ defmodule JidoCode.Workbench.Inventory do
       github_full_name: fallback_id,
       open_issue_count: 0,
       open_pr_count: 0,
-      recent_activity_summary: "No recent activity metadata."
+      recent_activity_summary: "No recent activity metadata.",
+      recent_activity_at: nil
     }
   end
 
