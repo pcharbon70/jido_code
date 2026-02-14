@@ -5,6 +5,8 @@ defmodule JidoCode.Orchestration.WorkflowRun do
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 
+  alias JidoCode.Orchestration.RunPubSub
+
   @statuses [:pending, :running, :awaiting_approval, :completed, :failed, :cancelled]
   @terminal_statuses [:completed, :failed, :cancelled]
   @allowed_transitions %{
@@ -69,6 +71,7 @@ defmodule JidoCode.Orchestration.WorkflowRun do
           :status_transitions,
           [transition_entry(nil, :pending, current_step, started_at)]
         )
+        |> publish_run_started_event(started_at, current_step)
       end
     end
 
@@ -263,6 +266,7 @@ defmodule JidoCode.Orchestration.WorkflowRun do
     |> Ash.Changeset.force_change_attribute(:status_transitions, status_transitions)
     |> maybe_set_started_at(to_status, transitioned_at)
     |> maybe_set_completed_at(to_status, transitioned_at)
+    |> publish_transition_events(from_status, to_status, current_step, transitioned_at)
   end
 
   defp maybe_set_started_at(changeset, :running, transitioned_at) do
@@ -284,6 +288,157 @@ defmodule JidoCode.Orchestration.WorkflowRun do
   defp maybe_set_completed_at(changeset, _to_status, _transitioned_at) do
     Ash.Changeset.force_change_attribute(changeset, :completed_at, nil)
   end
+
+  defp publish_run_started_event(changeset, timestamp, current_step) do
+    correlation_id = Ecto.UUID.generate()
+
+    publish_required_events(changeset, ["run_started"], fn event_name ->
+      build_event_payload(
+        changeset,
+        event_name,
+        nil,
+        :pending,
+        current_step,
+        timestamp,
+        correlation_id
+      )
+    end)
+  end
+
+  defp publish_transition_events(changeset, from_status, to_status, current_step, transitioned_at) do
+    correlation_id = Ecto.UUID.generate()
+    events = required_transition_events(from_status, to_status)
+
+    publish_required_events(changeset, events, fn event_name ->
+      build_event_payload(
+        changeset,
+        event_name,
+        from_status,
+        to_status,
+        current_step,
+        transitioned_at,
+        correlation_id
+      )
+    end)
+  end
+
+  defp publish_required_events(changeset, events, payload_builder) when is_list(events) do
+    diagnostics =
+      Enum.reduce(events, [], fn event_name, acc ->
+        payload = payload_builder.(event_name)
+
+        case RunPubSub.broadcast_run_event(payload["run_id"], payload) do
+          :ok ->
+            acc
+
+          {:error, typed_diagnostic} ->
+            [typed_diagnostic | acc]
+        end
+      end)
+      |> Enum.reverse()
+
+    case diagnostics do
+      [] -> changeset
+      _diagnostics -> capture_event_channel_diagnostics(changeset, diagnostics)
+    end
+  end
+
+  defp required_transition_events(from_status, to_status) do
+    case {from_status, to_status} do
+      {:awaiting_approval, :running} -> ["approval_granted", "step_started"]
+      {_from, :running} -> ["step_started"]
+      {_from, :awaiting_approval} -> ["approval_requested"]
+      {:awaiting_approval, :cancelled} -> ["approval_rejected", "run_cancelled"]
+      {_from, :completed} -> ["step_completed", "run_completed"]
+      {_from, :failed} -> ["step_failed", "run_failed"]
+      {_from, :cancelled} -> ["run_cancelled"]
+      _other -> []
+    end
+  end
+
+  defp build_event_payload(
+         changeset,
+         event_name,
+         from_status,
+         to_status,
+         current_step,
+         timestamp,
+         correlation_id
+       ) do
+    %{
+      "event" => event_name,
+      "run_id" => changeset_attribute(changeset, :run_id),
+      "workflow_name" => changeset_attribute(changeset, :workflow_name),
+      "workflow_version" => normalize_workflow_version(changeset_attribute(changeset, :workflow_version)),
+      "timestamp" => timestamp |> normalize_datetime() |> DateTime.to_iso8601(),
+      "correlation_id" => correlation_id,
+      "from_status" => stringify_status(from_status),
+      "to_status" => stringify_status(to_status),
+      "current_step" => normalize_current_step(current_step)
+    }
+  end
+
+  defp capture_event_channel_diagnostics(changeset, diagnostics) do
+    existing_error =
+      changeset
+      |> changeset_attribute(:error)
+      |> normalize_error_map()
+
+    existing_diagnostics =
+      existing_error
+      |> Map.get("event_channel_diagnostics", [])
+      |> normalize_diagnostics()
+
+    Ash.Changeset.force_change_attribute(
+      changeset,
+      :error,
+      Map.put(existing_error, "event_channel_diagnostics", existing_diagnostics ++ diagnostics)
+    )
+  end
+
+  defp changeset_attribute(changeset, attribute) when is_atom(attribute) do
+    case Ash.Changeset.get_attribute(changeset, attribute) do
+      nil ->
+        changeset
+        |> Ash.Changeset.get_data(attribute)
+        |> normalize_changeset_attribute(attribute)
+
+      value ->
+        normalize_changeset_attribute(value, attribute)
+    end
+  end
+
+  defp normalize_changeset_attribute(value, :run_id), do: normalize_string(value, "unknown")
+  defp normalize_changeset_attribute(value, :workflow_name), do: normalize_string(value, "unknown")
+  defp normalize_changeset_attribute(value, :error), do: normalize_error_map(value)
+  defp normalize_changeset_attribute(value, _attribute), do: value
+
+  defp normalize_workflow_version(value) when is_integer(value), do: value
+
+  defp normalize_workflow_version(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {version, ""} -> version
+      _other -> 0
+    end
+  end
+
+  defp normalize_workflow_version(_value), do: 0
+
+  defp normalize_diagnostics(diagnostics) when is_list(diagnostics) do
+    Enum.filter(diagnostics, &is_map/1)
+  end
+
+  defp normalize_diagnostics(_diagnostics), do: []
+
+  defp normalize_error_map(%{} = map), do: map
+  defp normalize_error_map(_value), do: %{}
+
+  defp normalize_string(value, _fallback) when is_binary(value) and value != "", do: value
+
+  defp normalize_string(value, fallback) when is_atom(value),
+    do: value |> Atom.to_string() |> normalize_string(fallback)
+
+  defp normalize_string(_value, fallback), do: fallback
 
   defp allowed_transition?(from_status, to_status) when is_atom(from_status) and is_atom(to_status),
     do: @allowed_transitions |> Map.get(from_status, MapSet.new()) |> MapSet.member?(to_status)

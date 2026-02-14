@@ -1,8 +1,25 @@
 defmodule JidoCode.Orchestration.WorkflowRunTest do
   use JidoCode.DataCase, async: false
 
-  alias JidoCode.Orchestration.WorkflowRun
+  alias JidoCode.Orchestration.{RunPubSub, WorkflowRun}
   alias JidoCode.Projects.Project
+
+  defmodule FailingRunEventBroadcaster do
+    def broadcast(_pubsub, _topic, _message),
+      do: {:error, %{error_type: "forced_publish_failure"}}
+  end
+
+  setup do
+    original_broadcaster =
+      Application.get_env(:jido_code, :workflow_run_event_broadcaster, Phoenix.PubSub)
+
+    on_exit(fn ->
+      Application.put_env(:jido_code, :workflow_run_event_broadcaster, original_broadcaster)
+    end)
+
+    Application.put_env(:jido_code, :workflow_run_event_broadcaster, Phoenix.PubSub)
+    :ok
+  end
 
   test "persists allowed lifecycle transitions with timestamps and current step context" do
     {:ok, project} = create_project("owner/repo-lifecycle")
@@ -63,8 +80,12 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
 
     assert persisted_run.status == :completed
     assert persisted_run.current_step == "publish_pr"
-    assert DateTime.compare(DateTime.truncate(persisted_run.started_at, :second), started_at) == :eq
-    assert DateTime.compare(DateTime.truncate(persisted_run.completed_at, :second), completed_at) == :eq
+
+    assert DateTime.compare(DateTime.truncate(persisted_run.started_at, :second), started_at) ==
+             :eq
+
+    assert DateTime.compare(DateTime.truncate(persisted_run.completed_at, :second), completed_at) ==
+             :eq
 
     assert [
              %{
@@ -98,6 +119,142 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
                "transitioned_at" => "2026-02-14T20:04:00Z"
              }
            ] = persisted_run.status_transitions
+  end
+
+  test "publishes required run topic events with run metadata across step approval and terminal transitions" do
+    {:ok, project} = create_project("owner/repo-run-events")
+
+    completed_run_id = "run-events-completed-#{System.unique_integer([:positive])}"
+    failed_run_id = "run-events-failed-#{System.unique_integer([:positive])}"
+    rejected_run_id = "run-events-rejected-#{System.unique_integer([:positive])}"
+
+    assert :ok = RunPubSub.subscribe_run(completed_run_id)
+    assert :ok = RunPubSub.subscribe_run(failed_run_id)
+    assert :ok = RunPubSub.subscribe_run(rejected_run_id)
+
+    {:ok, completed_run} = create_run(project.id, completed_run_id, ~U[2026-02-14 22:00:00Z])
+
+    {:ok, completed_run} =
+      WorkflowRun.transition_status(completed_run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-14 22:01:00Z]
+      })
+
+    {:ok, completed_run} =
+      WorkflowRun.transition_status(completed_run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-14 22:02:00Z]
+      })
+
+    {:ok, completed_run} =
+      WorkflowRun.transition_status(completed_run, %{
+        to_status: :running,
+        current_step: "apply_feedback",
+        transitioned_at: ~U[2026-02-14 22:03:00Z]
+      })
+
+    {:ok, _completed_run} =
+      WorkflowRun.transition_status(completed_run, %{
+        to_status: :completed,
+        current_step: "publish_pr",
+        transitioned_at: ~U[2026-02-14 22:04:00Z]
+      })
+
+    assert_run_event_sequence(
+      completed_run_id,
+      [
+        "run_started",
+        "step_started",
+        "approval_requested",
+        "approval_granted",
+        "step_started",
+        "step_completed",
+        "run_completed"
+      ]
+    )
+
+    {:ok, failed_run} = create_run(project.id, failed_run_id, ~U[2026-02-14 23:00:00Z])
+
+    {:ok, failed_run} =
+      WorkflowRun.transition_status(failed_run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-14 23:01:00Z]
+      })
+
+    {:ok, _failed_run} =
+      WorkflowRun.transition_status(failed_run, %{
+        to_status: :failed,
+        current_step: "run_tests",
+        transitioned_at: ~U[2026-02-14 23:02:00Z]
+      })
+
+    assert_run_event_sequence(failed_run_id, [
+      "run_started",
+      "step_started",
+      "step_failed",
+      "run_failed"
+    ])
+
+    {:ok, rejected_run} = create_run(project.id, rejected_run_id, ~U[2026-02-15 00:00:00Z])
+
+    {:ok, rejected_run} =
+      WorkflowRun.transition_status(rejected_run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-15 00:01:00Z]
+      })
+
+    {:ok, rejected_run} =
+      WorkflowRun.transition_status(rejected_run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-15 00:02:00Z]
+      })
+
+    {:ok, _rejected_run} =
+      WorkflowRun.transition_status(rejected_run, %{
+        to_status: :cancelled,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-15 00:03:00Z]
+      })
+
+    assert_run_event_sequence(
+      rejected_run_id,
+      ["run_started", "step_started", "approval_requested", "approval_rejected", "run_cancelled"]
+    )
+  end
+
+  test "captures typed event-channel diagnostics when run topic publication fails" do
+    Application.put_env(:jido_code, :workflow_run_event_broadcaster, FailingRunEventBroadcaster)
+
+    {:ok, project} = create_project("owner/repo-run-event-failures")
+    run_id = "run-events-failure-#{System.unique_integer([:positive])}"
+
+    {:ok, run} = create_run(project.id, run_id, ~U[2026-02-15 01:00:00Z])
+
+    assert diagnostics = get_in(run.error, ["event_channel_diagnostics"])
+    assert length(diagnostics) == 1
+    assert_typed_publication_diagnostic(List.first(diagnostics), run_id, "run_started")
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-15 01:01:00Z]
+      })
+
+    assert run.status == :running
+    assert transition_diagnostics = get_in(run.error, ["event_channel_diagnostics"])
+    assert length(transition_diagnostics) == 2
+
+    assert_typed_publication_diagnostic(
+      Enum.at(transition_diagnostics, 1),
+      run_id,
+      "step_started"
+    )
   end
 
   test "rejects invalid transitions and leaves persisted run state unchanged" do
@@ -153,5 +310,45 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
       default_branch: "main",
       settings: %{}
     })
+  end
+
+  defp create_run(project_id, run_id, started_at) do
+    WorkflowRun.create(%{
+      project_id: project_id,
+      run_id: run_id,
+      workflow_name: "implement_task",
+      workflow_version: 1,
+      trigger: %{source: "workflows", mode: "manual"},
+      inputs: %{"task_summary" => "Publish run topic events"},
+      input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+      initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+      current_step: "queued",
+      started_at: started_at
+    })
+  end
+
+  defp assert_run_event_sequence(run_id, expected_events) do
+    Enum.each(expected_events, fn expected_event ->
+      assert_receive {:run_event, payload}
+
+      assert payload["event"] == expected_event
+      assert payload["run_id"] == run_id
+      assert payload["workflow_name"] == "implement_task"
+      assert payload["workflow_version"] == 1
+      assert is_binary(payload["correlation_id"])
+      assert payload["correlation_id"] != ""
+      assert {:ok, _timestamp, 0} = DateTime.from_iso8601(payload["timestamp"])
+    end)
+  end
+
+  defp assert_typed_publication_diagnostic(diagnostic, run_id, event_name) do
+    assert diagnostic["error_type"] == "workflow_run_event_publication_failed"
+    assert diagnostic["channel"] == "run_topic"
+    assert diagnostic["operation"] == "broadcast_run_event"
+    assert diagnostic["topic"] == RunPubSub.run_topic(run_id)
+    assert diagnostic["event"] == event_name
+    assert diagnostic["reason_type"] == "forced_publish_failure"
+    assert diagnostic["message"] == "Run topic event publication failed."
+    assert {:ok, _timestamp, 0} = DateTime.from_iso8601(diagnostic["timestamp"])
   end
 end
