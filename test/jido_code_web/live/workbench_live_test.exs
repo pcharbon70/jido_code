@@ -567,6 +567,18 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
 
     assert has_element?(
              view,
+             "[id^='workbench-project-name-workbench-row-']",
+             "owner/repo-without-id"
+           )
+
+    assert has_element?(
+             view,
+             "[id^='workbench-project-issues-fix-workbench-row-'][id$='-status']",
+             "Kickoff failed"
+           )
+
+    assert has_element?(
+             view,
              "[id^='workbench-project-issues-fix-workbench-row-'][id$='-error-type']",
              "workbench_fix_workflow_validation_failed"
            )
@@ -588,6 +600,73 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
            )
 
     assert Agent.get(launcher_invocations, & &1) == 0
+  end
+
+  test "network interruption after kickoff resolves explicit run creation state", %{
+    conn: _conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-network-resolution",
+        github_full_name: "owner/repo-network-resolution",
+        default_branch: "main",
+        settings: %{
+          "inventory" => %{
+            "open_issue_count" => 2,
+            "open_pr_count" => 1,
+            "recent_activity_summary" => "Kickoff retries are active."
+          }
+        }
+      })
+
+    project_id = project.id
+
+    Application.put_env(:jido_code, :workbench_fix_workflow_launcher, fn _kickoff_request ->
+      {:error,
+       %{
+         error_type: "workbench_fix_workflow_kickoff_interrupted",
+         detail: "Network interruption occurred after kickoff request.",
+         remediation: "Open the resolved run and continue monitoring there.",
+         run_creation_state: :created,
+         run_id: "run-recovered-789"
+       }}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    view
+    |> element("#workbench-project-issues-fix-action-#{project_id}")
+    |> render_click()
+
+    assert has_element?(
+             view,
+             "#workbench-project-name-#{project_id}",
+             "owner/repo-network-resolution"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-fix-#{project_id}-status",
+             "Kickoff confirmed after interruption"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-fix-#{project_id}-run-id",
+             "run-recovered-789"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-fix-#{project_id}-run-link[href='/projects/#{project_id}/runs/run-recovered-789']"
+           )
+
+    refute has_element?(view, "#workbench-project-issues-fix-#{project_id}-error-type")
   end
 
   test "applies project, state, and freshness filters without route changes", %{conn: _conn} do

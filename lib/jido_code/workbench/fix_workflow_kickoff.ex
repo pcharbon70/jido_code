@@ -20,7 +20,9 @@ defmodule JidoCode.Workbench.FixWorkflowKickoff do
   @type kickoff_error :: %{
           error_type: String.t(),
           detail: String.t(),
-          remediation: String.t()
+          remediation: String.t(),
+          run_creation_state: :created | :not_created | nil,
+          run_id: String.t() | nil
         }
 
   @type kickoff_run :: %{
@@ -260,17 +262,27 @@ defmodule JidoCode.Workbench.FixWorkflowKickoff do
     kickoff_error(
       map_get(error, :error_type, "error_type", @default_error_type),
       map_get(error, :detail, "detail", "Fix workflow kickoff failed."),
-      map_get(error, :remediation, "remediation", @launcher_remediation)
+      map_get(error, :remediation, "remediation", @launcher_remediation),
+      map_get(error, :run_creation_state, "run_creation_state"),
+      map_get(error, :run_id, "run_id")
     )
   end
 
-  defp kickoff_error(error_type, detail, remediation) do
+  defp kickoff_error(error_type, detail, remediation, run_creation_state \\ nil, run_id \\ nil) do
     %{
       error_type: normalize_optional_string(error_type) || @default_error_type,
       detail: normalize_optional_string(detail) || "Fix workflow kickoff failed.",
-      remediation: normalize_optional_string(remediation) || @launcher_remediation
+      remediation: normalize_optional_string(remediation) || @launcher_remediation,
+      run_creation_state: normalize_run_creation_state(run_creation_state),
+      run_id: normalize_optional_string(run_id)
     }
   end
+
+  defp normalize_run_creation_state(:created), do: :created
+  defp normalize_run_creation_state("created"), do: :created
+  defp normalize_run_creation_state(:not_created), do: :not_created
+  defp normalize_run_creation_state("not_created"), do: :not_created
+  defp normalize_run_creation_state(_run_creation_state), do: nil
 
   defp github_repository_path(github_full_name) do
     github_full_name

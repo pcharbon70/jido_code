@@ -1054,15 +1054,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
 
   defp put_fix_workflow_kickoff_state(socket, project_id, context_item_type, kickoff_result) do
     state_key = fix_workflow_kickoff_state_key(project_id, context_item_type)
-
-    state_value =
-      case kickoff_result do
-        {:ok, kickoff_run} ->
-          %{status: :ok, run: kickoff_run}
-
-        {:error, kickoff_error} ->
-          %{status: :error, error: kickoff_error}
-      end
+    state_value = kickoff_feedback_state(kickoff_result, project_id)
 
     update(socket, :fix_workflow_kickoff_states, &Map.put(&1, state_key, state_value))
   end
@@ -1074,17 +1066,63 @@ defmodule JidoCodeWeb.WorkbenchLive do
          kickoff_result
        ) do
     state_key = issue_triage_workflow_kickoff_state_key(project_id, context_item_type)
-
-    state_value =
-      case kickoff_result do
-        {:ok, kickoff_run} ->
-          %{status: :ok, run: kickoff_run}
-
-        {:error, kickoff_error} ->
-          %{status: :error, error: kickoff_error}
-      end
+    state_value = kickoff_feedback_state(kickoff_result, project_id)
 
     update(socket, :issue_triage_workflow_kickoff_states, &Map.put(&1, state_key, state_value))
+  end
+
+  defp kickoff_feedback_state({:ok, kickoff_run}, _project_id) when is_map(kickoff_run) do
+    %{status: :ok, run: kickoff_run, confirmation_state: :confirmed}
+  end
+
+  defp kickoff_feedback_state({:error, kickoff_error}, project_id) when is_map(kickoff_error) do
+    run_creation_state =
+      kickoff_error
+      |> map_get("run_creation_state", :run_creation_state)
+      |> normalize_run_creation_state()
+
+    run_id =
+      kickoff_error
+      |> map_get("run_id", :run_id)
+      |> normalize_optional_string()
+
+    case {run_creation_state, run_id} do
+      {:created, resolved_run_id} when is_binary(resolved_run_id) ->
+        %{
+          status: :ok,
+          run: %{
+            run_id: resolved_run_id,
+            detail_path: run_detail_path(project_id, resolved_run_id)
+          },
+          confirmation_state: :confirmed_after_interruption
+        }
+
+      {:not_created, _resolved_run_id} ->
+        %{status: :error, error: kickoff_error, confirmation_state: :not_created_after_interruption}
+
+      _other ->
+        %{status: :error, error: kickoff_error, confirmation_state: :failed}
+    end
+  end
+
+  defp kickoff_feedback_state(_kickoff_result, _project_id) do
+    %{
+      status: :error,
+      error: %{
+        error_type: "workbench_workflow_kickoff_invalid_result",
+        detail: "Workflow kickoff returned an invalid response shape.",
+        remediation: "Retry workflow kickoff from this row.",
+        run_creation_state: nil,
+        run_id: nil
+      },
+      confirmation_state: :failed
+    }
+  end
+
+  defp run_detail_path(project_id, run_id) do
+    normalized_project_id = normalize_optional_string(project_id) || "unknown-project"
+    normalized_run_id = normalize_optional_string(run_id) || "unknown-run"
+    "/projects/#{URI.encode(normalized_project_id)}/runs/#{URI.encode(normalized_run_id)}"
   end
 
   defp refresh_project_row(socket, project_row) when is_map(project_row) do
@@ -1128,6 +1166,12 @@ defmodule JidoCodeWeb.WorkbenchLive do
   defp normalize_context_item_type_for_state_key("pull_request"), do: :pull_request
   defp normalize_context_item_type_for_state_key(_context_item_type), do: :unknown
 
+  defp normalize_run_creation_state(:created), do: :created
+  defp normalize_run_creation_state("created"), do: :created
+  defp normalize_run_creation_state(:not_created), do: :not_created
+  defp normalize_run_creation_state("not_created"), do: :not_created
+  defp normalize_run_creation_state(_run_creation_state), do: nil
+
   attr(:feedback, :map, default: nil)
   attr(:dom_prefix, :string, required: true)
 
@@ -1136,6 +1180,9 @@ defmodule JidoCodeWeb.WorkbenchLive do
     <section :if={@feedback} id={"#{@dom_prefix}-feedback"} class="space-y-1 pt-1">
       <%= case @feedback.status do %>
         <% :ok -> %>
+          <p id={"#{@dom_prefix}-status"} class="text-[11px] text-success">
+            {kickoff_success_status(@feedback)}
+          </p>
           <p id={"#{@dom_prefix}-run-id"} class="text-[11px] text-success">
             Run: <span class="font-mono">{@feedback.run.run_id}</span>
           </p>
@@ -1147,6 +1194,9 @@ defmodule JidoCodeWeb.WorkbenchLive do
             Open run detail
           </.link>
         <% :error -> %>
+          <p id={"#{@dom_prefix}-status"} class="text-[11px] text-error">
+            {kickoff_error_status(@feedback)}
+          </p>
           <p id={"#{@dom_prefix}-error-type"} class="text-[11px] text-error">
             Typed kickoff error: {@feedback.error.error_type}
           </p>
@@ -1169,6 +1219,9 @@ defmodule JidoCodeWeb.WorkbenchLive do
     <section :if={@feedback} id={"#{@dom_prefix}-feedback"} class="space-y-1 pt-1">
       <%= case @feedback.status do %>
         <% :ok -> %>
+          <p id={"#{@dom_prefix}-status"} class="text-[11px] text-success">
+            {kickoff_success_status(@feedback)}
+          </p>
           <p id={"#{@dom_prefix}-run-id"} class="text-[11px] text-success">
             Run: <span class="font-mono">{@feedback.run.run_id}</span>
           </p>
@@ -1180,6 +1233,9 @@ defmodule JidoCodeWeb.WorkbenchLive do
             Open run detail
           </.link>
         <% :error -> %>
+          <p id={"#{@dom_prefix}-status"} class="text-[11px] text-error">
+            {kickoff_error_status(@feedback)}
+          </p>
           <p id={"#{@dom_prefix}-error-type"} class="text-[11px] text-error">
             Typed kickoff error: {@feedback.error.error_type}
           </p>
@@ -1192,6 +1248,26 @@ defmodule JidoCodeWeb.WorkbenchLive do
       <% end %>
     </section>
     """
+  end
+
+  defp kickoff_success_status(feedback) when is_map(feedback) do
+    case Map.get(feedback, :confirmation_state) do
+      :confirmed_after_interruption ->
+        "Kickoff confirmed after interruption: run was created."
+
+      _other ->
+        "Kickoff confirmed: run was created."
+    end
+  end
+
+  defp kickoff_error_status(feedback) when is_map(feedback) do
+    case Map.get(feedback, :confirmation_state) do
+      :not_created_after_interruption ->
+        "Kickoff failed after interruption: run was not created."
+
+      _other ->
+        "Kickoff failed: review typed error details."
+    end
   end
 
   attr(:policy_state, :map, required: true)
