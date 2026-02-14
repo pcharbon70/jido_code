@@ -14,9 +14,13 @@ defmodule JidoCode.Security.SecretRefsTest do
     original_rotation_validator =
       Application.get_env(:jido_code, :provider_credential_rotation_validator, :__missing__)
 
+    original_audit_persister =
+      Application.get_env(:jido_code, :secret_lifecycle_audit_persister, :__missing__)
+
     on_exit(fn ->
       restore_env(:secret_ref_encryption_key, original_key)
       restore_env(:provider_credential_rotation_validator, original_rotation_validator)
+      restore_env(:secret_lifecycle_audit_persister, original_audit_persister)
     end)
 
     Application.put_env(:jido_code, :secret_ref_encryption_key, @valid_test_encryption_key)
@@ -62,6 +66,58 @@ defmodule JidoCode.Security.SecretRefsTest do
     assert %DateTime{} = metadata_row.last_rotated_at
     refute Map.has_key?(metadata_row, :ciphertext)
     refute Enum.any?(Map.values(metadata_row), &(&1 == plaintext_value))
+  end
+
+  test "secret lifecycle actions persist actor timestamp action target and outcome audit metadata" do
+    name = "providers/audit_secret_#{System.unique_integer([:positive])}"
+    actor = %{id: "owner-123", email: "owner@example.com"}
+
+    assert {:ok, created_secret} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: name,
+               value: "initial-secret-#{System.unique_integer([:positive])}",
+               actor: actor
+             })
+
+    assert {:ok, _rotated_secret} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: name,
+               value: "rotated-secret-#{System.unique_integer([:positive])}",
+               actor: actor
+             })
+
+    assert {:ok, _revoked_secret} =
+             SecretRefs.revoke_operational_secret(%{
+               id: created_secret.id,
+               actor: actor
+             })
+
+    assert {:ok, audits} = SecretRefs.list_secret_lifecycle_audits()
+
+    create_audit =
+      Enum.find(audits, fn audit ->
+        audit.action_type == :create and audit.name == name and audit.scope == :integration
+      end)
+
+    rotate_audit =
+      Enum.find(audits, fn audit ->
+        audit.action_type == :rotate and audit.name == name and audit.scope == :integration
+      end)
+
+    revoke_audit =
+      Enum.find(audits, fn audit ->
+        audit.action_type == :revoke and audit.name == name and audit.scope == :integration
+      end)
+
+    for audit <- [create_audit, rotate_audit, revoke_audit] do
+      assert audit.outcome_status == :succeeded
+      assert audit.actor_id == actor.id
+      assert audit.actor_email == actor.email
+      assert %DateTime{} = audit.occurred_at
+      assert audit.secret_ref_id == created_secret.id
+    end
   end
 
   test "persist_operational_secret rotation increments key_version and refreshes last_rotated_at" do
@@ -153,6 +209,43 @@ defmodule JidoCode.Security.SecretRefsTest do
     assert persisted_secret_ref.source == :onboarding
     assert persisted_secret_ref.key_version == max_bigint
     assert DateTime.compare(persisted_secret_ref.last_rotated_at, initial_last_rotated_at) == :eq
+  end
+
+  test "persist_operational_secret treats audit persistence failure as failed and keeps prior state active" do
+    name = "github/audit_failure_#{System.unique_integer([:positive])}"
+
+    assert {:ok, initial_metadata} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: name,
+               value: "initial-secret-#{System.unique_integer([:positive])}",
+               source: :onboarding
+             })
+
+    query =
+      SecretRef
+      |> Ash.Query.filter(scope == :integration and name == ^name)
+      |> Ash.Query.limit(1)
+
+    assert {:ok, [initial_secret_ref]} = Ash.read(query, domain: Security, authorize?: false)
+
+    Application.put_env(:jido_code, :secret_lifecycle_audit_persister, fn _attributes ->
+      {:error, :forced_audit_failure}
+    end)
+
+    assert {:error, typed_error} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: name,
+               value: "rotated-secret-#{System.unique_integer([:positive])}"
+             })
+
+    assert typed_error.error_type == "secret_audit_persistence_failed"
+
+    assert {:ok, [persisted_secret_ref]} = Ash.read(query, domain: Security, authorize?: false)
+    assert persisted_secret_ref.id == initial_metadata.id
+    assert persisted_secret_ref.ciphertext == initial_secret_ref.ciphertext
+    assert persisted_secret_ref.key_version == initial_secret_ref.key_version
   end
 
   test "persist_operational_secret blocks writes with typed remediation when encryption is unavailable" do
@@ -262,6 +355,43 @@ defmodule JidoCode.Security.SecretRefsTest do
     assert context_after_rotation.key_version == context_before_rotation.key_version
     assert context_after_rotation.ciphertext == context_before_rotation.ciphertext
     assert context_after_rotation.source == context_before_rotation.source
+  end
+
+  test "rotate_provider_credential treats audit persistence failure as failed and keeps prior credential active" do
+    provider_name = SecretRefs.provider_secret_ref_name(:anthropic)
+    initial_value = "sk-ant-initial-#{System.unique_integer([:positive])}"
+    rotated_value = "sk-ant-rotated-#{System.unique_integer([:positive])}"
+
+    assert {:ok, _metadata} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: provider_name,
+               value: initial_value,
+               source: :onboarding
+             })
+
+    assert {:ok, context_before_rotation} = SecretRefs.provider_credential_context(:anthropic)
+
+    Application.put_env(:jido_code, :provider_credential_rotation_validator, fn
+      %{stage: :before} -> {:ok, "Existing credential context validated."}
+      %{stage: :after} -> {:ok, "Rotated credential validated."}
+    end)
+
+    Application.put_env(:jido_code, :secret_lifecycle_audit_persister, fn _attributes ->
+      {:error, :forced_audit_failure}
+    end)
+
+    assert {:error, typed_error} =
+             SecretRefs.rotate_provider_credential(%{
+               provider: :anthropic,
+               value: rotated_value
+             })
+
+    assert typed_error.error_type == "secret_audit_persistence_failed"
+
+    assert {:ok, context_after_rotation} = SecretRefs.provider_credential_context(:anthropic)
+    assert context_after_rotation.key_version == context_before_rotation.key_version
+    assert context_after_rotation.ciphertext == context_before_rotation.ciphertext
   end
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)

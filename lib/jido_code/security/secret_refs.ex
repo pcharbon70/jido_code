@@ -3,7 +3,10 @@ defmodule JidoCode.Security.SecretRefs do
   SecretRef persistence and metadata reads for `/settings/security`.
   """
 
-  alias JidoCode.Security.{Encryption, SecretRef}
+  require Ash.Query
+
+  alias JidoCode.{Repo, Security}
+  alias JidoCode.Security.{Encryption, SecretLifecycleAudit, SecretRef}
 
   @provider_secret_specs %{
     anthropic: %{scope: :integration, name: "providers/anthropic_api_key"},
@@ -36,6 +39,16 @@ defmodule JidoCode.Security.SecretRefs do
   Rotation validation failed and rollback could not be confirmed. Pause new runs and follow containment steps in the security playbook.
   """
 
+  @audit_failed_recovery_instruction """
+  Retry the lifecycle action. If audit writes keep failing, pause credential changes and inspect database health.
+  """
+
+  @revoke_failed_recovery_instruction """
+  Retry revocation. If it still fails, pause new runs that depend on this secret and follow containment steps.
+  """
+
+  @default_actor_id "system"
+
   @typedoc """
   Typed secret persistence/read error payload with remediation guidance.
   """
@@ -56,6 +69,31 @@ defmodule JidoCode.Security.SecretRefs do
           source: :env | :onboarding | :rotation,
           last_rotated_at: DateTime.t(),
           expires_at: DateTime.t() | nil
+        }
+
+  @typedoc """
+  Persisted lifecycle audit entry for secret create/rotate/revoke actions.
+  """
+  @type secret_lifecycle_audit :: %{
+          id: Ecto.UUID.t(),
+          secret_ref_id: Ecto.UUID.t(),
+          scope: :instance | :project | :integration,
+          name: String.t(),
+          action_type: :create | :rotate | :revoke,
+          outcome_status: :succeeded | :failed,
+          actor_id: String.t(),
+          actor_email: String.t() | nil,
+          occurred_at: DateTime.t()
+        }
+
+  @typedoc """
+  Revocation metadata returned when a SecretRef is revoked.
+  """
+  @type revoked_secret :: %{
+          id: Ecto.UUID.t(),
+          scope: :instance | :project | :integration,
+          name: String.t(),
+          revoked_at: DateTime.t()
         }
 
   @typedoc """
@@ -166,6 +204,8 @@ defmodule JidoCode.Security.SecretRefs do
   @spec rotate_provider_credential(map()) ::
           {:ok, provider_rotation_report()} | {:error, typed_error()}
   def rotate_provider_credential(params) when is_map(params) do
+    actor = extract_actor(params)
+
     with {:ok, provider} <- normalize_provider(Map.get(params, :provider) || Map.get(params, "provider")),
          {:ok, value} <- normalize_value(Map.get(params, :value) || Map.get(params, "value")),
          {:ok, %{scope: scope, name: name} = provider_spec} <- provider_secret_spec(provider),
@@ -177,17 +217,32 @@ defmodule JidoCode.Security.SecretRefs do
          {:ok, rotated_secret_ref} <- create_secret_ref(scope, name, encrypted_ciphertext, :rotation) do
       case verify_rotation_stage(:after, provider, rotated_secret_ref, active_secret_ref, value) do
         {:ok, after_verification} ->
-          {:ok,
-           build_rotation_report(
-             provider,
-             provider_spec,
-             active_secret_ref,
-             rotated_secret_ref,
-             before_verification,
-             after_verification,
-             rollback_performed: false,
-             continuity_alarm: false
-           )}
+          report =
+            build_rotation_report(
+              provider,
+              provider_spec,
+              active_secret_ref,
+              rotated_secret_ref,
+              before_verification,
+              after_verification,
+              rollback_performed: false,
+              continuity_alarm: false
+            )
+
+          case persist_secret_lifecycle_audit(rotated_secret_ref, :rotate, :succeeded, actor) do
+            {:ok, _audit_entry} ->
+              {:ok, report}
+
+            {:error, :audit_persistence_failed} ->
+              rollback_after_audit_failure(
+                provider,
+                provider_spec,
+                active_secret_ref,
+                rotated_secret_ref,
+                before_verification,
+                after_verification
+              )
+          end
 
         {:error, {:after_validation_failed, failed_after_verification}} ->
           rollback_after_validation_failure(
@@ -272,12 +327,15 @@ defmodule JidoCode.Security.SecretRefs do
   """
   @spec persist_operational_secret(map()) :: {:ok, secret_metadata()} | {:error, typed_error()}
   def persist_operational_secret(params) when is_map(params) do
+    actor = extract_actor(params)
+
     with {:ok, scope} <- normalize_scope(Map.get(params, :scope) || Map.get(params, "scope")),
          {:ok, name} <- normalize_name(Map.get(params, :name) || Map.get(params, "name")),
          {:ok, value} <- normalize_value(Map.get(params, :value) || Map.get(params, "value")),
          {:ok, source} <- normalize_source(Map.get(params, :source) || Map.get(params, "source")),
          {:ok, encrypted_ciphertext} <- Encryption.encrypt(value),
-         {:ok, secret_ref} <- create_secret_ref(scope, name, encrypted_ciphertext, source) do
+         {:ok, secret_ref} <-
+           persist_secret_ref_with_audit(scope, name, encrypted_ciphertext, source, actor) do
       {:ok, to_metadata(secret_ref)}
     else
       {:error, :invalid_scope} ->
@@ -328,6 +386,14 @@ defmodule JidoCode.Security.SecretRefs do
            @write_failed_recovery_instruction
          )}
 
+      {:error, :audit_persistence_failed} ->
+        {:error,
+         typed_error(
+           "secret_audit_persistence_failed",
+           "Secret lifecycle audit persistence failed and no secret was persisted.",
+           @audit_failed_recovery_instruction
+         )}
+
       {:error, _reason} ->
         {:error,
          typed_error(
@@ -344,6 +410,61 @@ defmodule JidoCode.Security.SecretRefs do
        "secret_persistence_failed",
        "Secret persistence failed and no secret was persisted.",
        @write_failed_recovery_instruction
+     )}
+  end
+
+  @doc """
+  Revokes an operational SecretRef and records lifecycle audit metadata.
+  """
+  @spec revoke_operational_secret(map()) :: {:ok, revoked_secret()} | {:error, typed_error()}
+  def revoke_operational_secret(params) when is_map(params) do
+    actor = extract_actor(params)
+
+    with {:ok, secret_ref_id} <-
+           normalize_secret_ref_id(Map.get(params, :id) || Map.get(params, "id")),
+         {:ok, revoked_secret} <- revoke_secret_ref_with_audit(secret_ref_id, actor) do
+      {:ok, revoked_secret}
+    else
+      {:error, :invalid_secret_ref_id} ->
+        {:error,
+         typed_error(
+           "secret_not_found",
+           "SecretRef could not be found.",
+           @revoke_failed_recovery_instruction
+         )}
+
+      {:error, :not_found} ->
+        {:error,
+         typed_error(
+           "secret_not_found",
+           "SecretRef could not be found.",
+           @revoke_failed_recovery_instruction
+         )}
+
+      {:error, :audit_persistence_failed} ->
+        {:error,
+         typed_error(
+           "secret_audit_persistence_failed",
+           "Secret lifecycle audit persistence failed and the secret was not revoked.",
+           @audit_failed_recovery_instruction
+         )}
+
+      {:error, _reason} ->
+        {:error,
+         typed_error(
+           "secret_revocation_failed",
+           "Secret revocation failed. Secret state is unchanged.",
+           @revoke_failed_recovery_instruction
+         )}
+    end
+  end
+
+  def revoke_operational_secret(_params) do
+    {:error,
+     typed_error(
+       "secret_revocation_failed",
+       "Secret revocation failed. Secret state is unchanged.",
+       @revoke_failed_recovery_instruction
      )}
   end
 
@@ -366,6 +487,147 @@ defmodule JidoCode.Security.SecretRefs do
     end
   end
 
+  @doc """
+  Reads persisted secret lifecycle audit history for `/settings/security`.
+  """
+  @spec list_secret_lifecycle_audits() :: {:ok, [secret_lifecycle_audit()]} | {:error, typed_error()}
+  def list_secret_lifecycle_audits do
+    query =
+      SecretLifecycleAudit
+      |> Ash.Query.sort(occurred_at: :desc, inserted_at: :desc)
+
+    case Ash.read(query, domain: Security, authorize?: false) do
+      {:ok, records} ->
+        {:ok, Enum.map(records, &to_lifecycle_audit/1)}
+
+      {:error, _reason} ->
+        {:error,
+         typed_error(
+           "secret_audit_unavailable",
+           "Secret lifecycle audit records could not be loaded.",
+           @read_failed_recovery_instruction
+         )}
+    end
+  end
+
+  defp persist_secret_ref_with_audit(scope, name, encrypted_ciphertext, source, actor) do
+    case Repo.transaction(fn ->
+           with {:ok, secret_ref} <- create_secret_ref(scope, name, encrypted_ciphertext, source),
+                {:ok, _audit_entry} <-
+                  persist_secret_lifecycle_audit(
+                    secret_ref,
+                    lifecycle_action_for_secret_ref(secret_ref),
+                    :succeeded,
+                    actor
+                  ) do
+             secret_ref
+           else
+             {:error, :audit_persistence_failed} ->
+               Repo.rollback(:audit_persistence_failed)
+
+             {:error, reason} ->
+               Repo.rollback(reason)
+           end
+         end) do
+      {:ok, secret_ref} -> {:ok, secret_ref}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp revoke_secret_ref_with_audit(secret_ref_id, actor) do
+    case Repo.transaction(fn ->
+           with {:ok, secret_ref} <- get_secret_ref_by_id(secret_ref_id),
+                :ok <- destroy_secret_ref(secret_ref),
+                {:ok, _audit_entry} <-
+                  persist_secret_lifecycle_audit(secret_ref, :revoke, :succeeded, actor) do
+             %{
+               id: secret_ref.id,
+               scope: secret_ref.scope,
+               name: secret_ref.name,
+               revoked_at: DateTime.utc_now() |> DateTime.truncate(:second)
+             }
+           else
+             {:error, :not_found} ->
+               Repo.rollback(:not_found)
+
+             {:error, :audit_persistence_failed} ->
+               Repo.rollback(:audit_persistence_failed)
+
+             {:error, reason} ->
+               Repo.rollback(reason)
+           end
+         end) do
+      {:ok, revoked_secret} -> {:ok, revoked_secret}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp persist_secret_lifecycle_audit(
+         %SecretRef{} = secret_ref,
+         action_type,
+         outcome_status,
+         actor
+       )
+       when action_type in [:create, :rotate, :revoke] and outcome_status in [:succeeded, :failed] do
+    attributes = %{
+      secret_ref_id: secret_ref.id,
+      scope: secret_ref.scope,
+      name: secret_ref.name,
+      action_type: action_type,
+      outcome_status: outcome_status,
+      actor_id: actor.id,
+      actor_email: actor.email,
+      occurred_at: DateTime.utc_now() |> DateTime.truncate(:second)
+    }
+
+    case invoke_secret_lifecycle_audit_persister(attributes) do
+      {:ok, _audit_record} -> {:ok, :persisted}
+      {:error, _reason} -> {:error, :audit_persistence_failed}
+    end
+  end
+
+  defp invoke_secret_lifecycle_audit_persister(attributes) when is_map(attributes) do
+    persister =
+      Application.get_env(
+        :jido_code,
+        :secret_lifecycle_audit_persister,
+        &__MODULE__.default_secret_lifecycle_audit_persister/1
+      )
+
+    safe_invoke_secret_lifecycle_audit_persister(persister, attributes)
+  end
+
+  defp safe_invoke_secret_lifecycle_audit_persister(persister, attributes)
+       when is_function(persister, 1) do
+    try do
+      normalize_secret_lifecycle_audit_persist_result(persister.(attributes))
+    rescue
+      _exception ->
+        {:error, :audit_persister_exception}
+    catch
+      _kind, _reason ->
+        {:error, :audit_persister_throw}
+    end
+  end
+
+  defp safe_invoke_secret_lifecycle_audit_persister(_persister, _attributes),
+    do: {:error, :invalid_audit_persister}
+
+  defp normalize_secret_lifecycle_audit_persist_result(:ok), do: {:ok, :persisted}
+
+  defp normalize_secret_lifecycle_audit_persist_result({:ok, _audit_record}),
+    do: {:ok, :persisted}
+
+  defp normalize_secret_lifecycle_audit_persist_result({:error, reason}), do: {:error, reason}
+
+  defp normalize_secret_lifecycle_audit_persist_result(_other),
+    do: {:error, :invalid_audit_persister_result}
+
+  @doc false
+  def default_secret_lifecycle_audit_persister(attributes) when is_map(attributes) do
+    SecretLifecycleAudit.create(attributes, authorize?: false)
+  end
+
   defp create_secret_ref(scope, name, encrypted_ciphertext, source) do
     with {:ok, existing_secret_ref} <- get_secret_ref(scope, name),
          {:ok, key_version} <- next_key_version(existing_secret_ref) do
@@ -383,6 +645,13 @@ defmodule JidoCode.Security.SecretRefs do
     end
   end
 
+  defp destroy_secret_ref(%SecretRef{} = secret_ref) do
+    case Ash.destroy(secret_ref, domain: Security, authorize?: false) do
+      :ok -> :ok
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   defp get_secret_ref(scope, name) do
     case SecretRef.get_by_scope_name(scope, name, authorize?: false) do
       {:ok, %SecretRef{} = secret_ref} ->
@@ -397,6 +666,19 @@ defmodule JidoCode.Security.SecretRefs do
         else
           {:error, reason}
         end
+    end
+  end
+
+  defp get_secret_ref_by_id(secret_ref_id) do
+    query =
+      SecretRef
+      |> Ash.Query.filter(id == ^secret_ref_id)
+      |> Ash.Query.limit(1)
+
+    case Ash.read(query, domain: Security, authorize?: false) do
+      {:ok, [secret_ref | _rest]} -> {:ok, secret_ref}
+      {:ok, []} -> {:error, :not_found}
+      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -419,6 +701,12 @@ defmodule JidoCode.Security.SecretRefs do
   end
 
   defp next_key_version(_secret_ref), do: {:error, :invalid_key_version}
+
+  defp lifecycle_action_for_secret_ref(%SecretRef{key_version: key_version})
+       when is_integer(key_version) and key_version > 1,
+       do: :rotate
+
+  defp lifecycle_action_for_secret_ref(%SecretRef{}), do: :create
 
   defp metadata_source(source, nil), do: source
   defp metadata_source(:env, %SecretRef{}), do: :env
@@ -459,6 +747,70 @@ defmodule JidoCode.Security.SecretRefs do
   defp normalize_provider("anthropic"), do: {:ok, :anthropic}
   defp normalize_provider("openai"), do: {:ok, :openai}
   defp normalize_provider(_provider), do: {:error, :invalid_provider}
+
+  defp normalize_secret_ref_id(secret_ref_id) when is_binary(secret_ref_id) do
+    case String.trim(secret_ref_id) do
+      "" -> {:error, :invalid_secret_ref_id}
+      normalized_id -> {:ok, normalized_id}
+    end
+  end
+
+  defp normalize_secret_ref_id(_secret_ref_id), do: {:error, :invalid_secret_ref_id}
+
+  defp extract_actor(params) when is_map(params) do
+    normalize_actor(Map.get(params, :actor) || Map.get(params, "actor"))
+  end
+
+  defp normalize_actor(%{} = actor) do
+    %{
+      id:
+        actor
+        |> Map.get(:id)
+        |> case do
+          nil -> Map.get(actor, "id")
+          actor_id -> actor_id
+        end
+        |> normalize_actor_value(@default_actor_id),
+      email:
+        actor
+        |> Map.get(:email)
+        |> case do
+          nil -> Map.get(actor, "email")
+          actor_email -> actor_email
+        end
+        |> normalize_optional_actor_value()
+    }
+  end
+
+  defp normalize_actor(_actor), do: %{id: @default_actor_id, email: nil}
+
+  defp normalize_actor_value(value, fallback) when is_binary(value) do
+    case String.trim(value) do
+      "" -> fallback
+      normalized_value -> normalized_value
+    end
+  end
+
+  defp normalize_actor_value(value, _fallback) when is_integer(value), do: Integer.to_string(value)
+  defp normalize_actor_value(value, _fallback) when is_atom(value), do: Atom.to_string(value)
+
+  defp normalize_actor_value(value, fallback) do
+    case to_string(value) do
+      "" -> fallback
+      normalized_value -> normalized_value
+    end
+  rescue
+    _exception -> fallback
+  end
+
+  defp normalize_optional_actor_value(nil), do: nil
+
+  defp normalize_optional_actor_value(value) do
+    case normalize_actor_value(value, "") do
+      "" -> nil
+      normalized_value -> normalized_value
+    end
+  end
 
   defp provider_secret_spec(provider) when provider in [:anthropic, :openai] do
     {:ok, Map.fetch!(@provider_secret_specs, provider)}
@@ -588,6 +940,59 @@ defmodule JidoCode.Security.SecretRefs do
          typed_error(
            "provider_rotation_rollback_failed",
            "Post-rotation validation failed and rollback could not be confirmed.",
+           @rotation_rollback_failed_recovery_instruction,
+           %{rotation_report: report}
+         )}
+    end
+  end
+
+  defp rollback_after_audit_failure(
+         provider,
+         provider_spec,
+         active_secret_ref,
+         rotated_secret_ref,
+         before_verification,
+         after_verification
+       ) do
+    case restore_secret_ref(active_secret_ref) do
+      {:ok, _rolled_back_secret_ref} ->
+        report =
+          build_rotation_report(
+            provider,
+            provider_spec,
+            active_secret_ref,
+            rotated_secret_ref,
+            before_verification,
+            after_verification,
+            rollback_performed: true,
+            continuity_alarm: false
+          )
+
+        {:error,
+         typed_error(
+           "secret_audit_persistence_failed",
+           "Secret lifecycle audit persistence failed and credential references were rolled back to the prior version.",
+           @audit_failed_recovery_instruction,
+           %{rotation_report: report}
+         )}
+
+      {:error, _reason} ->
+        report =
+          build_rotation_report(
+            provider,
+            provider_spec,
+            active_secret_ref,
+            rotated_secret_ref,
+            before_verification,
+            after_verification,
+            rollback_performed: false,
+            continuity_alarm: true
+          )
+
+        {:error,
+         typed_error(
+           "provider_rotation_rollback_failed",
+           "Secret lifecycle audit persistence failed and rollback could not be confirmed.",
            @rotation_rollback_failed_recovery_instruction,
            %{rotation_report: report}
          )}
@@ -736,6 +1141,20 @@ defmodule JidoCode.Security.SecretRefs do
       source: secret_ref.source,
       last_rotated_at: secret_ref.last_rotated_at,
       expires_at: secret_ref.expires_at
+    }
+  end
+
+  defp to_lifecycle_audit(%SecretLifecycleAudit{} = audit) do
+    %{
+      id: audit.id,
+      secret_ref_id: audit.secret_ref_id,
+      scope: audit.scope,
+      name: audit.name,
+      action_type: audit.action_type,
+      outcome_status: audit.outcome_status,
+      actor_id: audit.actor_id,
+      actor_email: audit.actor_email,
+      occurred_at: audit.occurred_at
     }
   end
 end

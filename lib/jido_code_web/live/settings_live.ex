@@ -28,6 +28,8 @@ defmodule JidoCodeWeb.SettingsLive do
       |> assign(:security_secret_refs, [])
       |> assign(:security_secret_error, nil)
       |> assign(:security_secret_form, empty_security_secret_form())
+      |> assign(:security_secret_lifecycle_audits, [])
+      |> assign(:security_secret_audit_error, nil)
       |> assign(:security_provider_rotation_error, nil)
       |> assign(:security_provider_rotation_report, nil)
       |> assign(:security_provider_rotation_form, empty_security_provider_rotation_form())
@@ -129,6 +131,8 @@ defmodule JidoCodeWeb.SettingsLive do
                   security_secret_refs={@security_secret_refs}
                   security_secret_error={@security_secret_error}
                   security_secret_form={@security_secret_form}
+                  security_secret_lifecycle_audits={@security_secret_lifecycle_audits}
+                  security_secret_audit_error={@security_secret_audit_error}
                   secret_scope_options={@secret_scope_options}
                   security_provider_rotation_error={@security_provider_rotation_error}
                   security_provider_rotation_report={@security_provider_rotation_report}
@@ -419,44 +423,56 @@ defmodule JidoCodeWeb.SettingsLive do
               padding="medium"
               rounded="large"
             >
-              <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <div>
-                  <dt class="text-xs uppercase text-base-content/60">Scope</dt>
-                  <dd id={"settings-security-secret-scope-value-#{secret.id}"} class="font-medium">
-                    {secret.scope}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-xs uppercase text-base-content/60">Name</dt>
-                  <dd id={"settings-security-secret-name-value-#{secret.id}"} class="font-medium">
-                    {secret.name}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-xs uppercase text-base-content/60">Source</dt>
-                  <dd id={"settings-security-secret-source-value-#{secret.id}"} class="font-medium">
-                    {secret.source}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-xs uppercase text-base-content/60">Key Version</dt>
-                  <dd id={"settings-security-secret-key-version-#{secret.id}"} class="font-medium">
-                    {secret.key_version}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-xs uppercase text-base-content/60">Last Rotated At</dt>
-                  <dd id={"settings-security-secret-rotated-at-#{secret.id}"} class="font-medium">
-                    {format_security_datetime(secret.last_rotated_at)}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-xs uppercase text-base-content/60">Expires At</dt>
-                  <dd id={"settings-security-secret-expires-at-#{secret.id}"} class="font-medium">
-                    {format_optional_security_datetime(secret.expires_at)}
-                  </dd>
-                </div>
-              </dl>
+              <div class="space-y-3">
+                <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div>
+                    <dt class="text-xs uppercase text-base-content/60">Scope</dt>
+                    <dd id={"settings-security-secret-scope-value-#{secret.id}"} class="font-medium">
+                      {secret.scope}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs uppercase text-base-content/60">Name</dt>
+                    <dd id={"settings-security-secret-name-value-#{secret.id}"} class="font-medium">
+                      {secret.name}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs uppercase text-base-content/60">Source</dt>
+                    <dd id={"settings-security-secret-source-value-#{secret.id}"} class="font-medium">
+                      {secret.source}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs uppercase text-base-content/60">Key Version</dt>
+                    <dd id={"settings-security-secret-key-version-#{secret.id}"} class="font-medium">
+                      {secret.key_version}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs uppercase text-base-content/60">Last Rotated At</dt>
+                    <dd id={"settings-security-secret-rotated-at-#{secret.id}"} class="font-medium">
+                      {format_security_datetime(secret.last_rotated_at)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs uppercase text-base-content/60">Expires At</dt>
+                    <dd id={"settings-security-secret-expires-at-#{secret.id}"} class="font-medium">
+                      {format_optional_security_datetime(secret.expires_at)}
+                    </dd>
+                  </div>
+                </dl>
+                <.button
+                  id={"settings-security-secret-revoke-#{secret.id}"}
+                  type="button"
+                  variant="outline"
+                  color="danger"
+                  phx-click="revoke_security_secret_ref"
+                  phx-value-id={secret.id}
+                >
+                  Revoke secret
+                </.button>
+              </div>
             </.card>
           </div>
         </div>
@@ -573,6 +589,44 @@ defmodule JidoCodeWeb.SettingsLive do
               </div>
             </dl>
           </.card>
+        </div>
+      </.card>
+
+      <.card id="settings-security-secret-audit-log" padding="medium" rounded="large">
+        <div class="space-y-3">
+          <h3 class="text-lg font-semibold">Secret Lifecycle Audit</h3>
+
+          <.card
+            :if={@security_secret_audit_error}
+            id="settings-security-secret-audit-error"
+            padding="medium"
+            rounded="large"
+            class="border border-warning/50 bg-warning/10"
+          >
+            <p id="settings-security-secret-audit-error-type" class="text-sm font-medium">
+              Typed error: {@security_secret_audit_error.error_type}
+            </p>
+            <p id="settings-security-secret-audit-error-message" class="text-sm mt-1">
+              {@security_secret_audit_error.message}
+            </p>
+            <p id="settings-security-secret-audit-error-recovery" class="text-sm mt-1">
+              {@security_secret_audit_error.recovery_instruction}
+            </p>
+          </.card>
+
+          <ul class="space-y-2">
+            <li
+              :for={audit <- @security_secret_lifecycle_audits}
+              id={"settings-security-secret-audit-entry-#{audit.id}"}
+              class="text-sm"
+            >
+              {security_secret_lifecycle_audit_message(audit)}
+            </li>
+          </ul>
+
+          <p :if={Enum.empty?(@security_secret_lifecycle_audits)} class="text-sm text-base-content/60">
+            No secret lifecycle events recorded yet.
+          </p>
         </div>
       </.card>
 
@@ -786,13 +840,14 @@ defmodule JidoCodeWeb.SettingsLive do
   end
 
   def handle_event("save_security_secret_ref", %{"security_secret" => params}, socket) do
-    case SecretRefs.persist_operational_secret(params) do
+    case SecretRefs.persist_operational_secret(Map.put(params, "actor", current_actor(socket))) do
       {:ok, _secret_metadata} ->
         socket =
           socket
           |> assign(:security_secret_error, nil)
           |> assign(:security_secret_form, empty_security_secret_form())
           |> load_security_secret_metadata()
+          |> load_security_secret_lifecycle_audits()
           |> put_flash(:info, "SecretRef saved.")
 
         {:noreply, socket}
@@ -815,7 +870,7 @@ defmodule JidoCodeWeb.SettingsLive do
   end
 
   def handle_event("rotate_security_provider_credential", %{"security_provider_rotation" => params}, socket) do
-    case SecretRefs.rotate_provider_credential(params) do
+    case SecretRefs.rotate_provider_credential(Map.put(params, "actor", current_actor(socket))) do
       {:ok, rotation_report} ->
         socket =
           socket
@@ -829,6 +884,7 @@ defmodule JidoCodeWeb.SettingsLive do
             })
           )
           |> load_security_secret_metadata()
+          |> load_security_secret_lifecycle_audits()
           |> put_flash(:info, "Provider credential rotated.")
 
         {:noreply, socket}
@@ -846,8 +902,28 @@ defmodule JidoCodeWeb.SettingsLive do
             })
           )
           |> load_security_secret_metadata()
+          |> load_security_secret_lifecycle_audits()
 
         {:noreply, socket}
+    end
+  end
+
+  def handle_event("revoke_security_secret_ref", %{"id" => secret_ref_id}, socket) do
+    params = %{"id" => secret_ref_id, "actor" => current_actor(socket)}
+
+    case SecretRefs.revoke_operational_secret(params) do
+      {:ok, _revoked_secret} ->
+        socket =
+          socket
+          |> assign(:security_secret_error, nil)
+          |> load_security_secret_metadata()
+          |> load_security_secret_lifecycle_audits()
+          |> put_flash(:info, "SecretRef revoked.")
+
+        {:noreply, socket}
+
+      {:error, typed_error} ->
+        {:noreply, assign(socket, :security_secret_error, typed_error)}
     end
   end
 
@@ -893,6 +969,7 @@ defmodule JidoCodeWeb.SettingsLive do
     socket
     |> load_security_status()
     |> load_security_secret_metadata()
+    |> load_security_secret_lifecycle_audits()
   end
 
   defp maybe_load_security_tab(socket, _tab), do: socket
@@ -937,12 +1014,41 @@ defmodule JidoCodeWeb.SettingsLive do
     end
   end
 
+  defp load_security_secret_lifecycle_audits(socket) do
+    case SecretRefs.list_secret_lifecycle_audits() do
+      {:ok, audits} ->
+        socket
+        |> assign(:security_secret_lifecycle_audits, audits)
+        |> assign(:security_secret_audit_error, nil)
+
+      {:error, typed_error} ->
+        socket
+        |> assign(:security_secret_lifecycle_audits, [])
+        |> assign(:security_secret_audit_error, typed_error)
+    end
+  end
+
   defp current_owner_id(socket) do
     socket.assigns
     |> Map.get(:current_user)
     |> case do
       %{id: id} -> id
       _ -> nil
+    end
+  end
+
+  defp current_actor(socket) do
+    socket.assigns
+    |> Map.get(:current_user)
+    |> case do
+      %{id: id} = user ->
+        %{
+          "id" => id,
+          "email" => Map.get(user, :email)
+        }
+
+      _other ->
+        %{}
     end
   end
 
@@ -978,6 +1084,20 @@ defmodule JidoCodeWeb.SettingsLive do
       end
 
     "#{source_label} #{Map.get(audit, :id)} revoked at #{format_security_datetime(Map.get(audit, :revoked_at))}."
+  end
+
+  defp security_secret_lifecycle_audit_message(audit) do
+    action = audit |> Map.get(:action_type) |> to_string() |> String.upcase()
+    outcome = audit |> Map.get(:outcome_status) |> to_string()
+    target = "#{Map.get(audit, :scope)}/#{Map.get(audit, :name)}"
+
+    actor =
+      case Map.get(audit, :actor_email) do
+        email when is_binary(email) and email != "" -> email
+        _ -> Map.get(audit, :actor_id)
+      end
+
+    "#{action} #{target} outcome=#{outcome} actor=#{actor} at #{format_security_datetime(Map.get(audit, :occurred_at))}."
   end
 
   defp repo_settings_summary(settings) when is_map(settings) and map_size(settings) > 0 do

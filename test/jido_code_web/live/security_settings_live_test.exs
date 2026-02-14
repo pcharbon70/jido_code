@@ -153,6 +153,9 @@ defmodule JidoCodeWeb.SecuritySettingsLiveTest do
 
     assert has_element?(view, "#settings-security-secret-key-version-#{secret_id}", "1")
     assert has_element?(view, "#settings-security-secret-rotated-at-#{secret_id}")
+    assert has_element?(view, "#settings-security-secret-audit-log", "CREATE")
+    assert has_element?(view, "#settings-security-secret-audit-log", "outcome=succeeded")
+    assert has_element?(view, "#settings-security-secret-audit-log", "owner@example.com")
 
     rotated_plaintext_value = "rotated-secret-value-#{System.unique_integer([:positive])}"
 
@@ -168,7 +171,15 @@ defmodule JidoCodeWeb.SecuritySettingsLiveTest do
 
     assert has_element?(view, "#settings-security-secret-key-version-#{secret_id}", "2")
     assert has_element?(view, "#settings-security-secret-source-value-#{secret_id}", "rotation")
+    assert has_element?(view, "#settings-security-secret-audit-log", "ROTATE")
     refute has_element?(view, "#settings-security-secret-metadata", rotated_plaintext_value)
+
+    view
+    |> element("#settings-security-secret-revoke-#{secret_id}")
+    |> render_click()
+
+    refute has_element?(view, "#settings-security-secret-metadata", secret_name)
+    assert has_element?(view, "#settings-security-secret-audit-log", "REVOKE")
   end
 
   test "security tab rotates provider credentials with before and after verification status", %{
@@ -328,6 +339,47 @@ defmodule JidoCodeWeb.SecuritySettingsLiveTest do
            )
 
     refute has_element?(view, "#settings-security-secret-metadata", secret_name)
+  end
+
+  test "security tab treats secret save as failed when lifecycle audit persistence fails", %{conn: _conn} do
+    original_audit_persister =
+      Application.get_env(:jido_code, :secret_lifecycle_audit_persister, :__missing__)
+
+    on_exit(fn ->
+      restore_env(:secret_lifecycle_audit_persister, original_audit_persister)
+    end)
+
+    Application.put_env(:jido_code, :secret_lifecycle_audit_persister, fn _attributes ->
+      {:error, :forced_audit_failure}
+    end)
+
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token, _owner} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/settings/security", on_error: :warn)
+
+    secret_name = "audit/failure_#{System.unique_integer([:positive])}"
+
+    view
+    |> form("#settings-security-secret-form", %{
+      "security_secret" => %{
+        "scope" => "integration",
+        "name" => secret_name,
+        "value" => "must-not-persist-#{System.unique_integer([:positive])}"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(
+             view,
+             "#settings-security-secret-error-type",
+             "secret_audit_persistence_failed"
+           )
+
+    refute has_element?(view, "#settings-security-secret-metadata", secret_name)
+    assert has_element?(view, "#settings-security-secret-audit-log", "No secret lifecycle events recorded yet.")
   end
 
   test "github settings render masked placeholders for known secret patterns", %{conn: _conn} do

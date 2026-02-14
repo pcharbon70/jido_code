@@ -7,5 +7,6 @@ defmodule JidoCode.Security do
 
   resources do
     resource JidoCode.Security.SecretRef
+    resource JidoCode.Security.SecretLifecycleAudit
   end
 end
