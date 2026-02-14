@@ -9,6 +9,9 @@ defmodule JidoCode.Orchestration.WorkflowRun do
 
   @statuses [:pending, :running, :awaiting_approval, :completed, :failed, :cancelled]
   @terminal_statuses [:completed, :failed, :cancelled]
+  @approval_action_error_type "workflow_run_approval_action_failed"
+  @approval_action_operation "approve_run"
+  @approval_resume_step "resume_execution"
   @allowed_transitions %{
     pending: MapSet.new([:running, :cancelled]),
     running: MapSet.new([:awaiting_approval, :completed, :failed, :cancelled]),
@@ -99,6 +102,10 @@ defmodule JidoCode.Orchestration.WorkflowRun do
       end
 
       argument :transitioned_at, :utc_datetime_usec do
+        allow_nil? true
+      end
+
+      argument :transition_metadata, :map do
         allow_nil? true
       end
 
@@ -239,6 +246,50 @@ defmodule JidoCode.Orchestration.WorkflowRun do
     identity :unique_run_per_project, [:project_id, :run_id]
   end
 
+  @spec approve(t(), map() | nil) :: {:ok, t()} | {:error, map()}
+  def approve(run, params \\ nil)
+
+  def approve(run, params) when is_struct(run, __MODULE__) do
+    params = if(is_map(params), do: params, else: %{})
+    persisted_run = reload_run(run)
+    approved_at = params |> map_get(:approved_at, "approved_at") |> normalize_datetime()
+    actor = params |> map_get(:actor, "actor", %{}) |> normalize_actor()
+    current_step = approval_resume_step(params, persisted_run)
+
+    with :ok <- validate_approval_preconditions(persisted_run),
+         transition_metadata <- %{"approval_decision" => approval_decision(actor, approved_at)},
+         {:ok, approved_run} <-
+           transition_status(persisted_run, %{
+             to_status: :running,
+             current_step: current_step,
+             transitioned_at: approved_at,
+             transition_metadata: transition_metadata
+           }) do
+      {:ok, approved_run}
+    else
+      {:error, typed_failure} when is_map(typed_failure) ->
+        {:error, typed_failure}
+
+      {:error, reason} ->
+        {:error,
+         approval_action_failure(
+           "status_transition_failed",
+           "Approve action could not be applied while run remained blocked.",
+           "Retry approval from run detail after resolving the blocking condition.",
+           reason
+         )}
+    end
+  end
+
+  def approve(_run, _params) do
+    {:error,
+     approval_action_failure(
+       "invalid_run",
+       "Run reference is invalid and cannot be approved.",
+       "Reload run detail and retry approval."
+     )}
+  end
+
   defp apply_transition(changeset, from_status, to_status) do
     transitioned_at =
       changeset
@@ -254,17 +305,23 @@ defmodule JidoCode.Orchestration.WorkflowRun do
         |> normalize_current_step()
       )
 
+    transition_metadata =
+      changeset
+      |> Ash.Changeset.get_argument(:transition_metadata)
+      |> normalize_map()
+
     status_transitions =
       changeset
       |> Ash.Changeset.get_data(:status_transitions)
       |> normalize_status_transitions()
-      |> Kernel.++([transition_entry(from_status, to_status, current_step, transitioned_at)])
+      |> Kernel.++([transition_entry(from_status, to_status, current_step, transitioned_at, transition_metadata)])
 
     changeset
     |> Ash.Changeset.force_change_attribute(:status, to_status)
     |> Ash.Changeset.force_change_attribute(:current_step, current_step)
     |> Ash.Changeset.force_change_attribute(:status_transitions, status_transitions)
     |> maybe_capture_approval_context(to_status)
+    |> maybe_capture_transition_audit(from_status, to_status, transition_metadata)
     |> maybe_set_started_at(to_status, transitioned_at)
     |> maybe_set_completed_at(to_status, transitioned_at)
     |> publish_transition_events(from_status, to_status, current_step, transitioned_at)
@@ -421,6 +478,40 @@ defmodule JidoCode.Orchestration.WorkflowRun do
 
   defp maybe_capture_approval_context(changeset, _to_status), do: changeset
 
+  defp maybe_capture_transition_audit(
+         changeset,
+         :awaiting_approval,
+         :running,
+         %{"approval_decision" => approval_decision}
+       ) do
+    normalized_approval_decision = normalize_map(approval_decision)
+
+    if map_size(normalized_approval_decision) == 0 do
+      changeset
+    else
+      step_results =
+        changeset
+        |> Ash.Changeset.get_data(:step_results)
+        |> normalize_step_results()
+
+      approval_decision_history =
+        step_results
+        |> map_get(:approval_decisions, "approval_decisions", [])
+        |> normalize_map_list()
+
+      Ash.Changeset.force_change_attribute(
+        changeset,
+        :step_results,
+        step_results
+        |> Map.put("approval_decision", normalized_approval_decision)
+        |> Map.put("approval_decisions", approval_decision_history ++ [normalized_approval_decision])
+      )
+    end
+  end
+
+  defp maybe_capture_transition_audit(changeset, _from_status, _to_status, _transition_metadata),
+    do: changeset
+
   defp build_approval_context(step_results) when is_map(step_results) do
     context_source =
       step_results
@@ -553,6 +644,14 @@ defmodule JidoCode.Orchestration.WorkflowRun do
 
   defp normalize_diagnostics(_diagnostics), do: []
 
+  defp normalize_map_list(list) when is_list(list) do
+    list
+    |> Enum.filter(&is_map/1)
+    |> Enum.map(&normalize_map/1)
+  end
+
+  defp normalize_map_list(_list), do: []
+
   defp normalize_step_results(%{} = step_results), do: step_results
   defp normalize_step_results(_step_results), do: %{}
 
@@ -600,13 +699,21 @@ defmodule JidoCode.Orchestration.WorkflowRun do
 
   defp allowed_transition?(_from_status, _to_status), do: false
 
-  defp transition_entry(from_status, to_status, current_step, transitioned_at) do
-    %{
+  defp transition_entry(from_status, to_status, current_step, transitioned_at, transition_metadata \\ %{}) do
+    base_entry = %{
       "from_status" => stringify_status(from_status),
       "to_status" => stringify_status(to_status),
       "current_step" => normalize_current_step(current_step),
       "transitioned_at" => DateTime.to_iso8601(transitioned_at)
     }
+
+    normalized_transition_metadata = normalize_map(transition_metadata)
+
+    if map_size(normalized_transition_metadata) == 0 do
+      base_entry
+    else
+      Map.put(base_entry, "metadata", normalized_transition_metadata)
+    end
   end
 
   defp normalize_status_transitions(status_transitions) when is_list(status_transitions), do: status_transitions
@@ -635,6 +742,152 @@ defmodule JidoCode.Orchestration.WorkflowRun do
 
   defp normalize_datetime(%DateTime{} = datetime), do: DateTime.truncate(datetime, :second)
   defp normalize_datetime(_datetime), do: DateTime.utc_now() |> DateTime.truncate(:second)
+
+  defp reload_run(run) when is_struct(run, __MODULE__) do
+    run_id = run |> Map.get(:run_id) |> normalize_optional_string()
+
+    project_id =
+      run
+      |> Map.get(:project_id)
+      |> normalize_optional_string()
+
+    case {project_id, run_id} do
+      {nil, _run_id} ->
+        run
+
+      {_project_id, nil} ->
+        run
+
+      {resolved_project_id, resolved_run_id} ->
+        case get_by_project_and_run_id(%{project_id: resolved_project_id, run_id: resolved_run_id}) do
+          {:ok, persisted_run} when is_struct(persisted_run, __MODULE__) -> persisted_run
+          _other -> run
+        end
+    end
+  end
+
+  defp validate_approval_preconditions(run) when is_struct(run, __MODULE__) do
+    cond do
+      not awaiting_approval_status?(Map.get(run, :status)) ->
+        {:error,
+         approval_action_failure(
+           "invalid_run_status",
+           "Approve action is only allowed when run status is awaiting_approval.",
+           "Reload run detail and retry once run enters awaiting_approval."
+         )}
+
+      approval_context_blocked?(run) ->
+        {:error,
+         approval_action_failure(
+           "approval_context_blocked",
+           "Approve action is blocked because approval context generation failed.",
+           "Regenerate diff summary, test summary, and risk notes before retrying approval."
+         )}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validate_approval_preconditions(_run) do
+    {:error,
+     approval_action_failure(
+       "invalid_run",
+       "Run reference is invalid and cannot be approved.",
+       "Reload run detail and retry approval."
+     )}
+  end
+
+  defp awaiting_approval_status?(status) when is_atom(status), do: status == :awaiting_approval
+  defp awaiting_approval_status?(status) when is_binary(status), do: String.trim(status) == "awaiting_approval"
+  defp awaiting_approval_status?(_status), do: false
+
+  defp approval_context_blocked?(run) when is_struct(run, __MODULE__) do
+    step_results =
+      run
+      |> Map.get(:step_results, %{})
+      |> normalize_step_results()
+
+    approval_context =
+      step_results
+      |> map_get(:approval_context, "approval_context", %{})
+      |> normalize_map()
+
+    approval_context_diagnostics =
+      run
+      |> Map.get(:error, %{})
+      |> normalize_error_map()
+      |> Map.get("approval_context_diagnostics", [])
+      |> normalize_diagnostics()
+
+    map_size(approval_context) == 0 or approval_context_diagnostics != []
+  end
+
+  defp approval_context_blocked?(_run), do: true
+
+  defp approval_resume_step(params, run) do
+    params
+    |> map_get(:current_step, "current_step", Map.get(run, :current_step))
+    |> normalize_current_step(@approval_resume_step)
+  end
+
+  defp approval_decision(actor, approved_at) do
+    %{
+      "decision" => "approved",
+      "actor" => actor,
+      "timestamp" => DateTime.to_iso8601(approved_at)
+    }
+  end
+
+  defp normalize_actor(actor) when is_map(actor) do
+    %{
+      "id" => actor |> map_get(:id, "id") |> normalize_optional_string() || "unknown",
+      "email" => actor |> map_get(:email, "email") |> normalize_optional_string()
+    }
+  end
+
+  defp normalize_actor(_actor), do: %{"id" => "unknown", "email" => nil}
+
+  defp approval_action_failure(reason_type, detail, remediation, reason \\ nil) do
+    %{
+      error_type: @approval_action_error_type,
+      operation: @approval_action_operation,
+      reason_type: normalize_reason_type(reason_type),
+      detail: format_failure_detail(detail, reason),
+      remediation: remediation,
+      timestamp: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+  end
+
+  defp format_failure_detail(detail, nil), do: detail
+  defp format_failure_detail(detail, ""), do: detail
+
+  defp format_failure_detail(detail, reason) do
+    "#{detail} (#{format_failure_reason(reason)})"
+  end
+
+  defp format_failure_reason(reason) when is_binary(reason), do: reason
+
+  defp format_failure_reason(reason) do
+    reason
+    |> Exception.message()
+    |> normalize_optional_string()
+    |> case do
+      nil -> inspect(reason)
+      message -> message
+    end
+  rescue
+    _exception -> inspect(reason)
+  end
+
+  defp normalize_reason_type(reason_type) do
+    reason_type
+    |> normalize_optional_string()
+    |> case do
+      nil -> "unknown"
+      value -> String.replace(value, ~r/[^a-zA-Z0-9._-]/, "_")
+    end
+  end
 
   defp normalize_optional_string(nil), do: nil
   defp normalize_optional_string(value) when is_boolean(value), do: nil

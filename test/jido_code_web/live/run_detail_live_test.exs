@@ -76,7 +76,7 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
     assert has_element?(view, "#run-detail-timeline-at-3", "2026-02-14T22:02:00Z")
   end
 
-  test "renders approval payload context before approve or reject actions are enabled", %{
+  test "renders approval payload context and enables explicit approve action", %{
     conn: _conn
   } do
     register_owner("approval-owner@example.com", "owner-password-123")
@@ -156,11 +156,94 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
              "No credential or secret writes detected."
            )
 
-    assert has_element?(view, "#run-detail-approve-button[disabled]")
+    assert has_element?(view, "#run-detail-approve-button")
+    refute has_element?(view, "#run-detail-approve-button[disabled]")
     assert has_element?(view, "#run-detail-reject-button[disabled]")
   end
 
-  test "shows explicit remediation guidance when approval context generation fails", %{
+  test "approves awaiting run, resumes execution, and records timeline audit metadata", %{conn: _conn} do
+    register_owner("approval-resume-owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("approval-resume-owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-run-detail-approval-resume",
+        github_full_name: "owner/repo-run-detail-approval-resume",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: "run-detail-approval-resume-#{System.unique_integer([:positive])}",
+        workflow_name: "implement_task",
+        workflow_version: 2,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Resume on approval"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-14 23:05:00Z],
+        step_results: %{
+          "diff_summary" => "2 files changed (+9/-1).",
+          "test_summary" => "mix test: 18 passed, 0 failed.",
+          "risk_notes" => ["Touches approval resume wiring."]
+        }
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-14 23:06:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-14 23:07:00Z]
+      })
+
+    {:ok, view, _html} =
+      live(
+        recycle(authed_conn),
+        ~p"/projects/#{project.id}/runs/#{run.run_id}",
+        on_error: :warn
+      )
+
+    render_click(element(view, "#run-detail-approve-button"))
+
+    {:ok, persisted_run} =
+      WorkflowRun.get_by_project_and_run_id(%{
+        project_id: project.id,
+        run_id: run.run_id
+      })
+
+    timeline_index = length(persisted_run.status_transitions)
+
+    assert has_element?(view, "#run-detail-status", "running")
+    refute has_element?(view, "#run-detail-approval-panel")
+    assert has_element?(view, "#run-detail-timeline-transition-#{timeline_index}", "running")
+    assert has_element?(view, "#run-detail-timeline-step-#{timeline_index}", "resume_execution")
+
+    assert has_element?(
+             view,
+             "#run-detail-timeline-approval-audit-#{timeline_index}",
+             "approval-resume-owner@example.com"
+           )
+
+    assert persisted_run.status == :running
+    assert get_in(persisted_run.step_results, ["approval_decision", "decision"]) == "approved"
+
+    assert get_in(persisted_run.step_results, ["approval_decision", "actor", "email"]) ==
+             "approval-resume-owner@example.com"
+  end
+
+  test "shows typed approval action failure when approval context generation is blocked", %{
     conn: _conn
   } do
     register_owner("approval-failure-owner@example.com", "owner-password-123")
@@ -240,7 +323,36 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
              "Publish diff summary, test summary, and risk notes"
            )
 
-    assert has_element?(view, "#run-detail-approve-button[disabled]")
+    render_click(element(view, "#run-detail-approve-button"))
+
+    assert has_element?(view, "#run-detail-status", "awaiting_approval")
+
+    assert has_element?(
+             view,
+             "#run-detail-approval-action-error-type",
+             "workflow_run_approval_action_failed"
+           )
+
+    assert has_element?(
+             view,
+             "#run-detail-approval-action-error-detail",
+             "Approve action is blocked because approval context generation failed."
+           )
+
+    assert has_element?(
+             view,
+             "#run-detail-approval-action-error-remediation",
+             "Regenerate diff summary, test summary, and risk notes before retrying approval."
+           )
+
+    {:ok, persisted_run} =
+      WorkflowRun.get_by_project_and_run_id(%{
+        project_id: project.id,
+        run_id: run.run_id
+      })
+
+    assert persisted_run.status == :awaiting_approval
+
     assert has_element?(view, "#run-detail-reject-button[disabled]")
   end
 

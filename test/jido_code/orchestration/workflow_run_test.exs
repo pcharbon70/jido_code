@@ -220,6 +220,131 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
     assert {:ok, _timestamp, 0} = DateTime.from_iso8601(diagnostic["timestamp"])
   end
 
+  test "approve transitions run from awaiting_approval to running with approval audit metadata" do
+    {:ok, project} = create_project("owner/repo-approval-resume")
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: "run-approval-resume-#{System.unique_integer([:positive])}",
+        workflow_name: "implement_task",
+        workflow_version: 1,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Resume run after approval"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 03:10:00Z],
+        step_results: %{
+          "diff_summary" => "2 files changed (+14/-3).",
+          "test_summary" => "mix test: 44 passed, 0 failed.",
+          "risk_notes" => ["Touches approval gate resume path."]
+        }
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-15 03:11:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-15 03:12:00Z]
+      })
+
+    approved_at = ~U[2026-02-15 03:13:00Z]
+
+    {:ok, approved_run} =
+      WorkflowRun.approve(run, %{
+        actor: %{id: "maintainer-1", email: "maintainer@example.com"},
+        current_step: "resume_execution",
+        approved_at: approved_at
+      })
+
+    assert approved_run.status == :running
+    assert approved_run.current_step == "resume_execution"
+
+    assert %{
+             "decision" => "approved",
+             "actor" => %{"id" => "maintainer-1", "email" => "maintainer@example.com"},
+             "timestamp" => "2026-02-15T03:13:00Z"
+           } = get_in(approved_run.step_results, ["approval_decision"])
+
+    assert [
+             %{
+               "from_status" => "awaiting_approval",
+               "to_status" => "running",
+               "current_step" => "resume_execution",
+               "transitioned_at" => "2026-02-15T03:13:00Z",
+               "metadata" => %{
+                 "approval_decision" => %{
+                   "decision" => "approved",
+                   "actor" => %{"id" => "maintainer-1", "email" => "maintainer@example.com"},
+                   "timestamp" => "2026-02-15T03:13:00Z"
+                 }
+               }
+             }
+           ] = approved_run.status_transitions |> Enum.take(-1)
+  end
+
+  test "approve keeps run awaiting_approval and returns typed action failure when blocked" do
+    {:ok, project} = create_project("owner/repo-approval-failure")
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: "run-approval-failure-#{System.unique_integer([:positive])}",
+        workflow_name: "implement_task",
+        workflow_version: 1,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Block approval action"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 03:20:00Z],
+        step_results: %{
+          "approval_context_generation_error" => "Risk summary artifact is unavailable."
+        }
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-15 03:21:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :awaiting_approval,
+        current_step: "approval_gate",
+        transitioned_at: ~U[2026-02-15 03:22:00Z]
+      })
+
+    assert {:error, typed_failure} =
+             WorkflowRun.approve(run, %{actor: %{id: "owner-1", email: "owner@example.com"}})
+
+    assert typed_failure.error_type == "workflow_run_approval_action_failed"
+    assert typed_failure.operation == "approve_run"
+    assert typed_failure.reason_type == "approval_context_blocked"
+    assert typed_failure.detail =~ "approval context generation failed"
+    assert typed_failure.remediation =~ "diff summary"
+    assert {:ok, _timestamp, 0} = DateTime.from_iso8601(typed_failure.timestamp)
+
+    {:ok, persisted_run} =
+      WorkflowRun.get_by_project_and_run_id(%{
+        project_id: project.id,
+        run_id: run.run_id
+      })
+
+    assert persisted_run.status == :awaiting_approval
+    assert persisted_run.current_step == "approval_gate"
+  end
+
   test "publishes required run topic events with run metadata across step approval and terminal transitions" do
     {:ok, project} = create_project("owner/repo-run-events")
 
@@ -248,10 +373,10 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
       })
 
     {:ok, completed_run} =
-      WorkflowRun.transition_status(completed_run, %{
-        to_status: :running,
+      WorkflowRun.approve(completed_run, %{
+        actor: %{id: "owner-1", email: "owner@example.com"},
         current_step: "apply_feedback",
-        transitioned_at: ~U[2026-02-14 22:03:00Z]
+        approved_at: ~U[2026-02-14 22:03:00Z]
       })
 
     {:ok, _completed_run} =
@@ -422,7 +547,12 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
       input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
       initiating_actor: %{id: "owner-1", email: "owner@example.com"},
       current_step: "queued",
-      started_at: started_at
+      started_at: started_at,
+      step_results: %{
+        "diff_summary" => "1 file changed (+2/-0).",
+        "test_summary" => "mix test: 1 passed, 0 failed.",
+        "risk_notes" => ["No privileged operations detected."]
+      }
     })
   end
 

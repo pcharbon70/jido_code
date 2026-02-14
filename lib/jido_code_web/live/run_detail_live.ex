@@ -11,10 +11,8 @@ defmodule JidoCodeWeb.RunDetailLive do
          socket
          |> assign(:project_id, project_id)
          |> assign(:run_id, run_id)
-         |> assign(:run, run)
-         |> assign(:timeline_entries, timeline_entries(run))
-         |> assign(:approval_context, approval_context(run))
-         |> assign(:approval_context_blocker, approval_context_blocker(run))}
+         |> assign_run(run)
+         |> assign(:approval_action_error, nil)}
 
       {:ok, nil} ->
         {:ok, assign_missing_run(socket, project_id, run_id)}
@@ -23,6 +21,26 @@ defmodule JidoCodeWeb.RunDetailLive do
         {:ok, assign_missing_run(socket, project_id, run_id)}
     end
   end
+
+  @impl true
+  def handle_event("approve_run", _params, %{assigns: %{run: %WorkflowRun{} = run}} = socket) do
+    case WorkflowRun.approve(run, %{actor: approving_actor(socket), current_step: "resume_execution"}) do
+      {:ok, %WorkflowRun{} = approved_run} ->
+        {:noreply,
+         socket
+         |> assign_run(approved_run)
+         |> assign(:approval_action_error, nil)}
+
+      {:error, typed_failure} ->
+        {:noreply,
+         socket
+         |> refresh_run_assigns()
+         |> assign(:approval_action_error, normalize_approval_action_failure(typed_failure))}
+    end
+  end
+
+  @impl true
+  def handle_event("approve_run", _params, socket), do: {:noreply, socket}
 
   @impl true
   def render(assigns) do
@@ -47,7 +65,7 @@ defmodule JidoCodeWeb.RunDetailLive do
             <section id="run-detail-approval-panel" class="space-y-3 rounded border border-base-300 bg-base-100 p-4">
               <h2 class="text-lg font-semibold">Approval request payload</h2>
               <p id="run-detail-approval-panel-note" class="text-sm text-base-content/80">
-                Review this context before approval decisions are enabled.
+                Review this context before approving.
               </p>
 
               <%= if @approval_context do %>
@@ -94,13 +112,35 @@ defmodule JidoCodeWeb.RunDetailLive do
               <% end %>
 
               <div id="run-detail-approval-actions" class="flex gap-2">
-                <button id="run-detail-approve-button" type="button" class="btn btn-primary" disabled>
+                <button
+                  id="run-detail-approve-button"
+                  type="button"
+                  class="btn btn-primary"
+                  phx-click="approve_run"
+                >
                   Approve
                 </button>
                 <button id="run-detail-reject-button" type="button" class="btn btn-outline" disabled>
                   Reject
                 </button>
               </div>
+
+              <%= if @approval_action_error do %>
+                <section
+                  id="run-detail-approval-action-error"
+                  class="space-y-1 rounded border border-error/40 bg-error/5 p-3"
+                >
+                  <p id="run-detail-approval-action-error-type" class="text-sm font-semibold text-error">
+                    Typed action failure: {@approval_action_error.error_type}
+                  </p>
+                  <p id="run-detail-approval-action-error-detail" class="text-sm text-base-content/80">
+                    {@approval_action_error.detail}
+                  </p>
+                  <p id="run-detail-approval-action-error-remediation" class="text-sm text-base-content/80">
+                    {@approval_action_error.remediation}
+                  </p>
+                </section>
+              <% end %>
             </section>
           <% end %>
 
@@ -127,6 +167,11 @@ defmodule JidoCodeWeb.RunDetailLive do
                   <p id={"run-detail-timeline-at-#{index}"} class="text-xs text-base-content/70">
                     Recorded at: {entry.transitioned_at}
                   </p>
+                  <%= if entry.approval_audit do %>
+                    <p id={"run-detail-timeline-approval-audit-#{index}"} class="text-xs text-base-content/80">
+                      Approval audit: {entry.approval_audit}
+                    </p>
+                  <% end %>
                 </li>
               </ol>
             <% end %>
@@ -152,6 +197,7 @@ defmodule JidoCodeWeb.RunDetailLive do
     |> assign(:timeline_entries, [])
     |> assign(:approval_context, nil)
     |> assign(:approval_context_blocker, nil)
+    |> assign(:approval_action_error, nil)
   end
 
   defp timeline_entries(%WorkflowRun{} = run) do
@@ -161,6 +207,21 @@ defmodule JidoCodeWeb.RunDetailLive do
   end
 
   defp timeline_entries(_run), do: []
+
+  defp assign_run(socket, %WorkflowRun{} = run) do
+    socket
+    |> assign(:run, run)
+    |> assign(:timeline_entries, timeline_entries(run))
+    |> assign(:approval_context, approval_context(run))
+    |> assign(:approval_context_blocker, approval_context_blocker(run))
+  end
+
+  defp refresh_run_assigns(%{assigns: %{project_id: project_id, run_id: run_id}} = socket) do
+    case WorkflowRun.get_by_project_and_run_id(%{project_id: project_id, run_id: run_id}) do
+      {:ok, %WorkflowRun{} = run} -> assign_run(socket, run)
+      _other -> assign_missing_run(socket, project_id, run_id)
+    end
+  end
 
   defp approval_context(%WorkflowRun{} = run) do
     step_results =
@@ -231,6 +292,8 @@ defmodule JidoCodeWeb.RunDetailLive do
 
   defp normalize_timeline_entries(entries) when is_list(entries) do
     Enum.map(entries, fn entry ->
+      approval_audit = normalize_timeline_approval_audit(entry)
+
       %{
         to_status:
           entry
@@ -243,7 +306,8 @@ defmodule JidoCodeWeb.RunDetailLive do
         transitioned_at:
           entry
           |> map_get(:transitioned_at, "transitioned_at")
-          |> format_transitioned_at()
+          |> format_transitioned_at(),
+        approval_audit: approval_audit
       }
     end)
   end
@@ -281,6 +345,37 @@ defmodule JidoCodeWeb.RunDetailLive do
 
   defp normalize_approval_context_diagnostic(_diagnostic), do: nil
 
+  defp normalize_approval_action_failure(typed_failure) when is_map(typed_failure) do
+    error_type =
+      typed_failure
+      |> map_get(:error_type, "error_type")
+      |> normalize_optional_string()
+
+    detail =
+      typed_failure
+      |> map_get(:detail, "detail")
+      |> normalize_optional_string()
+
+    remediation =
+      typed_failure
+      |> map_get(:remediation, "remediation")
+      |> normalize_optional_string()
+
+    %{
+      error_type: error_type || "workflow_run_approval_action_failed",
+      detail: detail || "Approve action failed and run remains blocked.",
+      remediation: remediation || "Review run state and retry approval."
+    }
+  end
+
+  defp normalize_approval_action_failure(_typed_failure) do
+    %{
+      error_type: "workflow_run_approval_action_failed",
+      detail: "Approve action failed and run remains blocked.",
+      remediation: "Review run state and retry approval."
+    }
+  end
+
   defp status_label(status) do
     status
     |> normalize_optional_string()
@@ -311,6 +406,50 @@ defmodule JidoCodeWeb.RunDetailLive do
   end
 
   defp format_transitioned_at(_transitioned_at), do: "unknown"
+
+  defp normalize_timeline_approval_audit(entry) when is_map(entry) do
+    actor =
+      entry
+      |> map_get(:metadata, "metadata", %{})
+      |> map_get(:approval_decision, "approval_decision", %{})
+      |> map_get(:actor, "actor", %{})
+
+    actor_id = actor |> map_get(:id, "id") |> normalize_optional_string()
+    actor_email = actor |> map_get(:email, "email") |> normalize_optional_string()
+
+    timestamp =
+      entry
+      |> map_get(:metadata, "metadata", %{})
+      |> map_get(:approval_decision, "approval_decision", %{})
+      |> map_get(:timestamp, "timestamp")
+      |> normalize_optional_string()
+
+    actor_label = actor_email || actor_id
+
+    case {actor_label, timestamp} do
+      {nil, nil} -> nil
+      {label, nil} -> "actor=#{label}"
+      {nil, at} -> "at=#{format_transitioned_at(at)}"
+      {label, at} -> "actor=#{label} at=#{format_transitioned_at(at)}"
+    end
+  end
+
+  defp normalize_timeline_approval_audit(_entry), do: nil
+
+  defp approving_actor(socket) do
+    socket.assigns
+    |> Map.get(:current_user)
+    |> case do
+      %{} = user ->
+        %{
+          id: user |> Map.get(:id) |> normalize_optional_string() || "unknown",
+          email: user |> Map.get(:email) |> normalize_optional_string()
+        }
+
+      _other ->
+        %{id: "unknown", email: nil}
+    end
+  end
 
   defp normalize_map(%{} = map), do: map
   defp normalize_map(_value), do: %{}
