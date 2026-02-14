@@ -10,6 +10,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
   import Phoenix.LiveViewTest
 
   @checked_at ~U[2026-02-13 12:34:56Z]
+  @owner_recovery_audit_event [:jido_code, :auth, :owner_recovery, :completed]
 
   setup do
     original_loader = Application.get_env(:jido_code, :system_config_loader, :__missing__)
@@ -251,6 +252,171 @@ defmodule JidoCodeWeb.SetupLiveTest do
                }
              }
            } = Application.get_env(:jido_code, :system_config)
+  end
+
+  test "step 2 recovery requires explicit verification, resets credentials, and records recovery audit metadata",
+       %{conn: conn} do
+    attach_owner_recovery_audit_handler()
+    register_owner("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 2,
+      onboarding_state: %{"1" => %{"validated_note" => "Prerequisite checks passed"}}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-owner-recovery-form")
+
+    assert has_element?(
+             view,
+             "#setup-owner-recovery-verification-target",
+             "RECOVER OWNER ACCESS"
+           )
+
+    view
+    |> form("#setup-owner-recovery-form", %{
+      "owner_recovery" => %{
+        "email" => "owner@example.com",
+        "password" => "owner-recovered-password-789",
+        "password_confirmation" => "owner-recovered-password-789",
+        "verification_phrase" => "RECOVER OWNER ACCESS",
+        "verification_ack" => "true"
+      }
+    })
+    |> render_submit()
+
+    auth_redirect_path =
+      view
+      |> assert_redirect()
+      |> redirect_path()
+
+    authed_response = build_conn() |> get(auth_redirect_path)
+    assert redirected_to(authed_response, 302) == "/"
+
+    {:ok, dashboard_view, _html} = live(recycle(authed_response), ~p"/dashboard", on_error: :warn)
+    assert has_element?(dashboard_view, "p", "owner@example.com")
+
+    strategy = Info.strategy!(User, :password)
+
+    assert {:error, _reason} =
+             Strategy.action(
+               strategy,
+               :sign_in,
+               %{"email" => "owner@example.com", "password" => "owner-password-123"},
+               context: %{token_type: :sign_in}
+             )
+
+    assert {:ok, _owner} =
+             Strategy.action(
+               strategy,
+               :sign_in,
+               %{"email" => "owner@example.com", "password" => "owner-recovered-password-789"},
+               context: %{token_type: :sign_in}
+             )
+
+    assert_receive {:owner_recovery_audit, event_name, measurements, metadata}
+    assert event_name == @owner_recovery_audit_event
+    assert measurements.count == 1
+    assert is_integer(measurements.recovery_timestamp)
+    assert metadata.route == "/setup"
+    assert metadata.owner_email == "owner@example.com"
+    assert metadata.recovery_mode == "bootstrap"
+
+    assert metadata.verification_steps == [
+             "owner_email_match",
+             "verification_phrase",
+             "manual_acknowledgement"
+           ]
+
+    assert is_binary(metadata.verified_at)
+    assert_owner_count(1)
+
+    assert %{
+             onboarding_step: 3,
+             onboarding_state: %{
+               "2" => %{
+                 "owner_email" => "owner@example.com",
+                 "owner_mode" => "recovered",
+                 "validated_note" => "Owner account recovered.",
+                 "owner_recovery_audit" => %{
+                   "route" => "/setup",
+                   "owner_email" => "owner@example.com",
+                   "recovery_mode" => "bootstrap",
+                   "verification_steps" => [
+                     "owner_email_match",
+                     "verification_phrase",
+                     "manual_acknowledgement"
+                   ]
+                 }
+               }
+             }
+           } = Application.get_env(:jido_code, :system_config)
+
+    verified_at =
+      Application.get_env(:jido_code, :system_config)
+      |> Map.fetch!(:onboarding_state)
+      |> Map.fetch!("2")
+      |> Map.fetch!("owner_recovery_audit")
+      |> Map.fetch!("verified_at")
+
+    assert is_binary(verified_at)
+  end
+
+  test "step 2 recovery denies credential reset when verification fails and leaves owner state unchanged",
+       %{conn: conn} do
+    attach_owner_recovery_audit_handler()
+    register_owner("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 2,
+      onboarding_state: %{"1" => %{"validated_note" => "Prerequisite checks passed"}}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#setup-owner-recovery-form", %{
+      "owner_recovery" => %{
+        "email" => "owner@example.com",
+        "password" => "owner-recovered-password-789",
+        "password_confirmation" => "owner-recovered-password-789",
+        "verification_phrase" => "INVALID PHRASE",
+        "verification_ack" => "true"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 2")
+    assert has_element?(view, "#setup-save-error", "verification failed")
+    assert has_element?(view, "#setup-save-error", "state is unchanged")
+
+    strategy = Info.strategy!(User, :password)
+
+    assert {:ok, _owner} =
+             Strategy.action(
+               strategy,
+               :sign_in,
+               %{"email" => "owner@example.com", "password" => "owner-password-123"},
+               context: %{token_type: :sign_in}
+             )
+
+    assert {:error, _reason} =
+             Strategy.action(
+               strategy,
+               :sign_in,
+               %{"email" => "owner@example.com", "password" => "owner-recovered-password-789"},
+               context: %{token_type: :sign_in}
+             )
+
+    refute_receive {:owner_recovery_audit, _event_name, _measurements, _metadata}
+    assert_owner_count(1)
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 2
+    refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "2")
   end
 
   test "step 2 blocks additional owner creation attempts with a single-user policy error", %{
@@ -1092,6 +1258,23 @@ defmodule JidoCodeWeb.SetupLiveTest do
 
     persisted_config = Application.get_env(:jido_code, :system_config)
     assert Map.fetch!(persisted_config, :onboarding_step) == 3
+  end
+
+  defp attach_owner_recovery_audit_handler do
+    test_pid = self()
+    handler_id = "setup-owner-recovery-audit-handler-#{System.unique_integer([:positive])}"
+
+    :ok =
+      :telemetry.attach(
+        handler_id,
+        @owner_recovery_audit_event,
+        fn event_name, measurements, metadata, _config ->
+          send(test_pid, {:owner_recovery_audit, event_name, measurements, metadata})
+        end,
+        nil
+      )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
   end
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)

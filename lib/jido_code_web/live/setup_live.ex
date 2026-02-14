@@ -6,6 +6,7 @@ defmodule JidoCodeWeb.SetupLive do
   alias JidoCode.Setup.EnvironmentDefaults
   alias JidoCode.Setup.GitHubCredentialChecks
   alias JidoCode.Setup.OwnerBootstrap
+  alias JidoCode.Setup.OwnerRecovery
   alias JidoCode.Setup.ProjectImport
   alias JidoCode.Setup.ProviderCredentialChecks
   alias JidoCode.Setup.PrerequisiteChecks
@@ -27,6 +28,7 @@ defmodule JidoCodeWeb.SetupLive do
   @default_diagnostic "Setup is required before protected routes are available."
   @validation_error "Add validation notes before continuing."
   @owner_step_validation_error "Complete owner account bootstrap before continuing."
+  @owner_recovery_validation_error "Complete owner recovery verification before attempting credential reset."
 
   @impl true
   def mount(params, _session, socket) do
@@ -83,7 +85,8 @@ defmodule JidoCodeWeb.SetupLive do
      |> assign(:redirect_reason, params["reason"] || "onboarding_incomplete")
      |> assign(:diagnostic, diagnostic)
      |> assign_step_form(onboarding_step, onboarding_state, default_environment, workspace_root)
-     |> assign_owner_form(onboarding_step, onboarding_state, owner_bootstrap)}
+     |> assign_owner_form(onboarding_step, onboarding_state, owner_bootstrap)
+     |> assign_recovery_form(onboarding_step, onboarding_state, owner_bootstrap)}
   end
 
   @impl true
@@ -545,6 +548,75 @@ defmodule JidoCodeWeb.SetupLive do
               {owner_submit_label(@owner_bootstrap.mode)}
             </button>
           </.form>
+
+          <section
+            :if={@owner_bootstrap.mode == :confirm}
+            id="setup-owner-recovery"
+            class="space-y-3 rounded-lg border border-base-300 bg-base-100 p-3"
+          >
+            <h3 class="text-base font-semibold">Owner recovery bootstrap path</h3>
+            <p id="setup-owner-recovery-summary" class="text-sm text-base-content/80">
+              Use this path only if owner credentials are lost. Recovery verification must pass before reset.
+            </p>
+            <ol id="setup-owner-recovery-steps" class="list-decimal space-y-1 pl-5 text-sm text-base-content/80">
+              <li id="setup-owner-recovery-step-email">Confirm the existing owner email.</li>
+              <li id="setup-owner-recovery-step-phrase">
+                Type the recovery verification phrase exactly.
+              </li>
+              <li id="setup-owner-recovery-step-ack">
+                Acknowledge the credential reset action.
+              </li>
+            </ol>
+            <p id="setup-owner-recovery-verification-target" class="font-mono text-sm">
+              Verification phrase: {OwnerRecovery.verification_phrase()}
+            </p>
+
+            <.form
+              for={@owner_recovery_form}
+              id="setup-owner-recovery-form"
+              phx-submit="recover_owner"
+              class="space-y-4"
+            >
+              <.input
+                field={@owner_recovery_form[:email]}
+                id="setup-owner-recovery-email"
+                type="email"
+                label="Owner email verification"
+                required
+              />
+              <.input
+                field={@owner_recovery_form[:password]}
+                id="setup-owner-recovery-password"
+                type="password"
+                label="New owner password"
+                required
+              />
+              <.input
+                field={@owner_recovery_form[:password_confirmation]}
+                id="setup-owner-recovery-password-confirmation"
+                type="password"
+                label="Confirm new owner password"
+                required
+              />
+              <.input
+                field={@owner_recovery_form[:verification_phrase]}
+                id="setup-owner-recovery-verification-phrase"
+                type="text"
+                label="Recovery verification phrase"
+                required
+              />
+              <.input
+                field={@owner_recovery_form[:verification_ack]}
+                id="setup-owner-recovery-verification-ack"
+                type="checkbox"
+                label="I verified owner identity and approve credential reset."
+                required
+              />
+              <button id="setup-owner-recovery-submit" type="submit" class="btn btn-warning">
+                Recover owner credentials
+              </button>
+            </.form>
+          </section>
         </section>
 
         <.form
@@ -670,6 +742,55 @@ defmodule JidoCodeWeb.SetupLive do
     {:noreply, assign(socket, :save_error, @owner_step_validation_error)}
   end
 
+  def handle_event("recover_owner", %{"owner_recovery" => recovery_params}, socket) do
+    case OwnerRecovery.recover(recovery_params) do
+      {:ok, owner_recovery_result} ->
+        step_state =
+          %{
+            "validated_note" => owner_recovery_result.validated_note,
+            "owner_email" => to_string(owner_recovery_result.owner.email),
+            "owner_mode" => Atom.to_string(owner_recovery_result.owner_mode),
+            "owner_recovery_audit" => OwnerRecovery.serialize_audit_for_state(owner_recovery_result.audit)
+          }
+          |> maybe_mark_registration_lockout()
+
+        case SystemConfig.save_step_progress(step_state) do
+          {:ok, %SystemConfig{} = config} ->
+            {:noreply,
+             socket
+             |> assign_config_state(config)
+             |> assign(:save_error, nil)
+             |> redirect(to: owner_sign_in_with_token_path(owner_recovery_result.token))}
+
+          {:error, %{diagnostic: diagnostic}} ->
+            {:noreply, assign(socket, :save_error, diagnostic)}
+        end
+
+      {:error, {_error_type, diagnostic}} ->
+        owner_bootstrap = resolve_owner_bootstrap(socket.assigns.onboarding_step)
+
+        {:noreply,
+         socket
+         |> assign(:owner_bootstrap, owner_bootstrap)
+         |> assign(:save_error, diagnostic)
+         |> assign_owner_form(
+           socket.assigns.onboarding_step,
+           socket.assigns.onboarding_state,
+           owner_bootstrap
+         )
+         |> assign_recovery_form(
+           socket.assigns.onboarding_step,
+           socket.assigns.onboarding_state,
+           owner_bootstrap,
+           recovery_params
+         )}
+    end
+  end
+
+  def handle_event("recover_owner", _params, socket) do
+    {:noreply, assign(socket, :save_error, @owner_recovery_validation_error)}
+  end
+
   def handle_event("save_step", %{"step" => step_params}, socket) when is_map(step_params) do
     case normalize_validated_note(Map.get(step_params, "validated_note")) do
       {:ok, normalized_note} ->
@@ -792,6 +913,83 @@ defmodule JidoCodeWeb.SetupLive do
       )
     end
   end
+
+  defp assign_recovery_form(
+         socket,
+         onboarding_step,
+         onboarding_state,
+         owner_bootstrap,
+         recovery_params \\ %{}
+       ) do
+    if onboarding_step == 2 and owner_bootstrap.mode == :confirm do
+      persisted_owner_email =
+        onboarding_state
+        |> fetch_step_state(2)
+        |> Map.get("owner_email", "")
+
+      recovery_email =
+        recovery_params["email"] ||
+          owner_bootstrap.owner_email ||
+          persisted_owner_email
+
+      recovery_phrase =
+        recovery_params
+        |> Map.get("verification_phrase", "")
+        |> normalize_recovery_phrase_input()
+
+      recovery_ack =
+        recovery_params
+        |> Map.get("verification_ack")
+        |> normalize_recovery_ack_input(false)
+
+      assign(
+        socket,
+        :owner_recovery_form,
+        to_form(
+          %{
+            "email" => recovery_email,
+            "password" => "",
+            "password_confirmation" => "",
+            "verification_phrase" => recovery_phrase,
+            "verification_ack" => recovery_ack
+          },
+          as: :owner_recovery
+        )
+      )
+    else
+      assign(
+        socket,
+        :owner_recovery_form,
+        to_form(
+          %{
+            "email" => "",
+            "password" => "",
+            "password_confirmation" => "",
+            "verification_phrase" => "",
+            "verification_ack" => false
+          },
+          as: :owner_recovery
+        )
+      )
+    end
+  end
+
+  defp normalize_recovery_phrase_input(verification_phrase) when is_binary(verification_phrase) do
+    String.trim(verification_phrase)
+  end
+
+  defp normalize_recovery_phrase_input(_verification_phrase), do: ""
+
+  defp normalize_recovery_ack_input(true, _fallback), do: true
+  defp normalize_recovery_ack_input("true", _fallback), do: true
+  defp normalize_recovery_ack_input("1", _fallback), do: true
+  defp normalize_recovery_ack_input(1, _fallback), do: true
+  defp normalize_recovery_ack_input("on", _fallback), do: true
+  defp normalize_recovery_ack_input(false, _fallback), do: false
+  defp normalize_recovery_ack_input("false", _fallback), do: false
+  defp normalize_recovery_ack_input("0", _fallback), do: false
+  defp normalize_recovery_ack_input(0, _fallback), do: false
+  defp normalize_recovery_ack_input(_verification_ack, fallback), do: fallback
 
   defp normalize_validated_note(validated_note) when is_binary(validated_note) do
     normalized_note = String.trim(validated_note)
@@ -1494,6 +1692,7 @@ defmodule JidoCodeWeb.SetupLive do
     )
     |> assign(:owner_bootstrap, owner_bootstrap)
     |> assign_owner_form(config.onboarding_step, config.onboarding_state, owner_bootstrap)
+    |> assign_recovery_form(config.onboarding_step, config.onboarding_state, owner_bootstrap)
   end
 
   defp resolve_owner_bootstrap(2) do

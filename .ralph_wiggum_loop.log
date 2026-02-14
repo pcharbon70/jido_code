@@ -7058,3 +7058,80 @@ Excluding tags: [:sprite_integration]
 ......
 Finished in 3.1 seconds (1.0s async, 2.1s sync)
 72 tests, 0 failures, 2 skipped (4 excluded)
+1) changed files
+- `lib/jido_code/setup/owner_recovery.ex`: new owner recovery service for `/setup` step 2 with explicit verification, credential reset, sign-in token issuance, and telemetry audit emission.
+- `lib/jido_code_web/live/setup_live.ex`: integrated recovery UI/form and `recover_owner` event flow; persists recovery audit metadata in onboarding state.
+- `test/jido_code_web/live/setup_live_test.exs`: added happy-path and failure-path tests for owner recovery verification/reset/audit behavior.
+
+2) tests/commands executed
+- `MIX_OS_CONCURRENCY_LOCK=0 elixir -r /tmp/mix_sync_pubsub_override.ex -S mix format lib/jido_code/setup/owner_recovery.ex lib/jido_code_web/live/setup_live.ex test/jido_code_web/live/setup_live_test.exs` (pass)
+- `MIX_OS_CONCURRENCY_LOCK=0 elixir -r /tmp/mix_sync_pubsub_override.ex -S mix format --check-formatted` (pass)
+- `MIX_OS_CONCURRENCY_LOCK=0 elixir -r /tmp/mix_sync_pubsub_override.ex -S mix compile --warnings-as-errors` (pass)
+- `MIX_OS_CONCURRENCY_LOCK=0 elixir -r /tmp/mix_sync_pubsub_override.ex -S mix test test/jido_code_web/live/setup_live_test.exs` (fails: DB connection blocked, `tcp connect (localhost:5432): ... :eperm`)
+- `MIX_OS_CONCURRENCY_LOCK=0 elixir -r /tmp/mix_sync_pubsub_override.ex -S mix precommit` (fails for same DB connectivity reason)
+
+3) acceptance criteria coverage
+- AC1: explicit verification before reset
+  - Enforced in `lib/jido_code/setup/owner_recovery.ex:56` and `lib/jido_code/setup/owner_recovery.ex:164` (`email match`, exact phrase, explicit acknowledgement) before any reset call.
+  - Recovery steps are documented in `/setup` UI at `lib/jido_code_web/live/setup_live.ex:552`.
+- AC2: successful recovery yields valid new credentials + recovery audit metadata
+  - Reset + sign-in with new password in `lib/jido_code/setup/owner_recovery.ex:173`.
+  - Audit telemetry event emitted in `lib/jido_code/setup/owner_recovery.ex:238`.
+  - Recovery audit metadata persisted to onboarding step state in `lib/jido_code_web/live/setup_live.ex:748`.
+  - Verified by test `test/jido_code_web/live/setup_live_test.exs:257`.
+- AC3: verification failure does not mutate owner state and returns safe denial reason
+  - Safe denial error message in `lib/jido_code/setup/owner_recovery.ex:15`.
+  - Verification failure short-circuits before reset in `lib/jido_code/setup/owner_recovery.ex:59`.
+  - Verified unchanged credential behavior and no step mutation in `test/jido_code_web/live/setup_live_test.exs:367`.
+
+4) blockers/assumptions
+- Blocker: this environment cannot open local TCP connections to Postgres (`localhost:5432`, `:eperm`), so `mix test`/`mix precommit` cannot complete end-to-end here.
+- Assumption: in a normal dev/CI environment with Postgres доступ, the added tests run as written and `mix precommit` can pass.
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 737113, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+.............    warning: Phoenix.ConnTest.get_flash/2 is deprecated. get_flash/2 is deprecated. Use Phoenix.Flash.get/2 instead
+    │
+ 19 │     assert get_flash(sign_out_response, :info) == "You are now signed out"
+    │            ~
+    │
+    └─ test/jido_code_web/live/auth_sign_out_live_test.exs:19:12: JidoCodeWeb.AuthSignOutLiveTest."test sign out clears browser session credentials and redirects protected routes to sign-in"/1
+    └─ test/jido_code_web/live/auth_sign_out_live_test.exs:45:12: JidoCodeWeb.AuthSignOutLiveTest."test failed session invalidation provides retry guidance and keeps session unchanged"/1
+
+.......**20:29:34.867 request_id=GJP8BIUDbVZztSkAAAYF [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.SettingsLive reason=missing_or_expired_session
+.20:29:34.888 request_id=GJP8BIhiQXRACUkAAAal [warning] auth_sign_out_failed reason=:forced_invalidation_failure
+20:29:34.892 request_id=GJP8BIieaVtACUkAAAbF [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:29:35.050 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+...20:29:35.166 request_id=GJP8BJjEPzyY0YAAAC5h [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:29:35.175 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:29:35.179 request_id=GJP8BJnAsDyY0YAAAAdF [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:29:35.188 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.20:29:35.210 request_id=GJP8BJvH5jREpUMAAC8h [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+...20:29:35.306 request_id=GJP8BKEE3NPc9_YAAAoF [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:29:35.315 request_id=GJP8BKGan9vc9_YAAARm [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:29:35.327 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.20:29:35.378 request_id=GJP8BKVqEGxwwqAAAAWG [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:29:35.405 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.20:29:35.445 request_id=GJP8BKlxChwfX0sAAAam [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:29:35.456 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+...20:29:35.719 [warning] Quality checks failed for test-fail-12482 (attempt 1/3), retrying...
+20:29:35.726 [warning] Quality checks failed for test-fail-12482 (attempt 2/3), retrying...
+20:29:35.731 [error] Quality checks failed for test-fail-12482 after 3 attempts, giving up
+20:29:35.732 [warning] Pull request failed for test-fail-12482 after 3 attempts
+.20:29:35.768 [warning] Quality checks failed for test-retry-328 (attempt 1/3), retrying...
+20:29:35.772 [warning] Quality checks failed for test-retry-328 (attempt 2/3), retrying...
+...20:29:35.906 request_id=GJP8BMVIFD7nLuAAADFB [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+..20:29:35.929 request_id=GJP8BMZ6YSvQKOcAAA3l [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+............20:29:36.469 request_id=GJP8BOaaZc1kjxEAADRh [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:29:36.478 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+..20:29:36.533 request_id=GJP8BOom7-ZszT0AADYB [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:29:36.540 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+........20:29:36.718 request_id=GJP8BPV7WcIVtxoAADlB [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:29:36.722 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+..20:29:36.770 request_id=GJP8BPiYMxaNyPEAAAiC [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:29:36.773 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+.........
+Finished in 3.2 seconds (0.9s async, 2.2s sync)
+74 tests, 0 failures, 2 skipped (4 excluded)
