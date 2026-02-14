@@ -469,6 +469,285 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
            ]
   end
 
+  test "creates follow-up issue_triage runs for issue_comment.created with approval policy context",
+       %{conn: conn} do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "follow-up-owner-#{unique_suffix}"
+    name = "follow-up-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issue_comment.created"],
+              "approval_mode" => "auto_post"
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(
+        test_pid,
+        {:verified_delivery_handoff, delivery.delivery_id, delivery.event, delivery.payload["action"]}
+      )
+
+      :ok
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "created",
+        "issue" => %{
+          "id" => 90_005,
+          "number" => 80,
+          "node_id" => "I_kwDOABC5678",
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/80",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/80"
+        },
+        "comment" => %{
+          "id" => 92_001,
+          "node_id" => "IC_kwDOABC5678",
+          "body" => "/jido follow-up please investigate regression behavior",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/80#issuecomment-92001",
+          "author_association" => "MEMBER",
+          "user" => %{"login" => "maintainer-user"}
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-follow-up-#{System.unique_integer([:positive])}"
+
+    response =
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("x-hub-signature-256", sign(payload, secret))
+      |> put_req_header("x-github-delivery", delivery_id)
+      |> put_req_header("x-github-event", "issue_comment")
+      |> post(@webhook_path, payload)
+      |> json_response(202)
+
+    assert response["status"] == "accepted"
+    assert_receive {:verified_delivery_handoff, ^delivery_id, "issue_comment", "created"}
+
+    assert {:ok, [%WorkflowRun{} = follow_up_run]} = workflow_runs_for_project(project.id)
+    assert follow_up_run.workflow_name == "issue_triage"
+
+    source_row = map_get(follow_up_run.trigger, :source_row, "source_row", %{})
+    webhook_context = map_get(follow_up_run.trigger, :webhook, "webhook", %{})
+    policy = map_get(follow_up_run.trigger, :policy, "policy", %{})
+    approval_policy = map_get(follow_up_run.trigger, :approval_policy, "approval_policy", %{})
+    policy_approval_policy = map_get(policy, :approval_policy, "approval_policy", %{})
+    follow_up = map_get(follow_up_run.trigger, :follow_up, "follow_up", %{})
+    follow_up_comment = map_get(follow_up, :comment, "comment", %{})
+
+    assert map_get(source_row, :route, "route") == "/api/github/webhooks"
+    assert map_get(source_row, :delivery_id, "delivery_id") == delivery_id
+    assert map_get(webhook_context, :event, "event") == "issue_comment"
+    assert map_get(webhook_context, :action, "action") == "created"
+    assert map_get(policy, :name, "name") == "issue_triage_webhook_follow_up"
+    assert map_get(approval_policy, :mode, "mode") == "auto_post"
+    assert map_get(approval_policy, :post_behavior, "post_behavior") == "auto_post"
+    assert map_get(approval_policy, :auto_post, "auto_post") == true
+    assert map_get(approval_policy, :requires_approval, "requires_approval") == false
+
+    assert map_get(approval_policy, :source, "source") ==
+             "support_agent_config.github_issue_bot.approval_mode"
+
+    assert policy_approval_policy == approval_policy
+    assert map_get(follow_up, :event, "event") == "issue_comment.created"
+    assert map_get(follow_up_comment, :id, "id") == 92_001
+    assert map_get(follow_up_comment, :author_login, "author_login") == "maintainer-user"
+    assert map_get(follow_up_comment, :author_association, "author_association") == "MEMBER"
+    assert map_get(follow_up_comment, :body, "body") =~ "follow-up"
+    assert map_get(follow_up_comment, :html_url, "html_url") =~ "#issuecomment-92001"
+    assert map_get(follow_up_run.inputs, :issue_reference, "issue_reference") == "#{repo_full_name}#80"
+  end
+
+  test "records issue_comment.created deliveries as no-op when project Issue Bot is disabled", %{
+    conn: conn
+  } do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "comment-disabled-owner-#{unique_suffix}"
+    name = "comment-disabled-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => false,
+              "webhook_events" => ["issue_comment.created"],
+              "approval_mode" => "auto_post"
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(
+        test_pid,
+        {:verified_delivery_handoff, delivery.delivery_id, delivery.event, delivery.payload["action"]}
+      )
+
+      :ok
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "created",
+        "issue" => %{
+          "id" => 90_006,
+          "number" => 81,
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/81",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/81"
+        },
+        "comment" => %{
+          "id" => 92_002,
+          "body" => "/jido follow-up",
+          "author_association" => "MEMBER"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-comment-disabled-#{System.unique_integer([:positive])}"
+
+    log_output =
+      capture_log([level: :info], fn ->
+        response =
+          conn
+          |> put_req_header("content-type", "application/json")
+          |> put_req_header("x-hub-signature-256", sign(payload, secret))
+          |> put_req_header("x-github-delivery", delivery_id)
+          |> put_req_header("x-github-event", "issue_comment")
+          |> post(@webhook_path, payload)
+          |> json_response(202)
+
+        assert response["status"] == "accepted"
+      end)
+
+    refute_receive {:verified_delivery_handoff, ^delivery_id, _, _}
+    assert log_output =~ "github_webhook_trigger_filtered outcome=noop"
+    assert log_output =~ "policy=support_agent_config.github_issue_bot.enabled"
+    assert log_output =~ "event=issue_comment.created"
+    assert {:ok, []} = workflow_runs_for_project(project.id)
+
+    assert {:ok, %WebhookDelivery{} = persisted_delivery} =
+             WebhookDelivery.get_by_github_delivery_id(delivery_id, authorize?: false)
+
+    assert persisted_delivery.event_type == "issue_comment"
+    assert persisted_delivery.action == "created"
+  end
+
+  test "records issue_comment.created deliveries as no-op when follow-up trigger is disabled",
+       %{conn: conn} do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "comment-filter-owner-#{unique_suffix}"
+    name = "comment-filter-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"],
+              "approval_mode" => "approval_required"
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(
+        test_pid,
+        {:verified_delivery_handoff, delivery.delivery_id, delivery.event, delivery.payload["action"]}
+      )
+
+      :ok
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "created",
+        "issue" => %{
+          "id" => 90_007,
+          "number" => 82,
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/82",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/82"
+        },
+        "comment" => %{
+          "id" => 92_003,
+          "body" => "/jido follow-up on flaky behavior",
+          "author_association" => "MEMBER"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-comment-filtered-#{System.unique_integer([:positive])}"
+
+    log_output =
+      capture_log([level: :info], fn ->
+        response =
+          conn
+          |> put_req_header("content-type", "application/json")
+          |> put_req_header("x-hub-signature-256", sign(payload, secret))
+          |> put_req_header("x-github-delivery", delivery_id)
+          |> put_req_header("x-github-event", "issue_comment")
+          |> post(@webhook_path, payload)
+          |> json_response(202)
+
+        assert response["status"] == "accepted"
+      end)
+
+    refute_receive {:verified_delivery_handoff, ^delivery_id, _, _}
+    assert log_output =~ "github_webhook_trigger_filtered outcome=noop"
+    assert log_output =~ "policy=support_agent_config.github_issue_bot.webhook_events"
+    assert log_output =~ "event=issue_comment.created"
+    assert {:ok, []} = workflow_runs_for_project(project.id)
+
+    assert {:ok, %WebhookDelivery{} = persisted_delivery} =
+             WebhookDelivery.get_by_github_delivery_id(delivery_id, authorize?: false)
+
+    assert persisted_delivery.event_type == "issue_comment"
+    assert persisted_delivery.action == "created"
+  end
+
   test "records issues.edited deliveries as no-op when filtered by project Issue Bot webhook policy",
        %{conn: conn} do
     secret = "webhook-secret-#{System.unique_integer([:positive])}"

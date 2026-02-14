@@ -16,6 +16,16 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   @issue_triage_workflow_version 1
   @issue_triage_webhook_opened_policy "issue_triage_webhook_opened"
   @issue_triage_webhook_retriage_policy "issue_triage_webhook_retriage"
+  @issue_triage_webhook_follow_up_policy "issue_triage_webhook_follow_up"
+  @issue_triage_workflow_trigger_events [
+    "issues.opened",
+    "issues.edited",
+    "issue_comment.created"
+  ]
+  @approval_mode_auto_post "auto_post"
+  @approval_mode_approval_required "approval_required"
+  @default_issue_bot_approval_mode @approval_mode_approval_required
+  @approval_policy_source "support_agent_config.github_issue_bot.approval_mode"
   @retriage_prior_issue_analysis_limit 25
   @issue_reference_input_name "issue_reference"
 
@@ -649,11 +659,7 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   defp fetch_project_for_delivery(_delivery), do: {:error, :project_not_found}
 
   defp project_issue_bot_webhook_events(%Project{} = project) do
-    issue_bot_settings =
-      project
-      |> map_get(:settings, "settings", %{})
-      |> map_get(:support_agent_config, "support_agent_config", %{})
-      |> map_get(:github_issue_bot, "github_issue_bot", %{})
+    issue_bot_settings = issue_bot_settings(project)
 
     if map_has_key?(issue_bot_settings, :webhook_events, "webhook_events") do
       issue_bot_settings
@@ -668,38 +674,52 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   defp project_issue_bot_webhook_events(_project), do: supported_issue_bot_webhook_events()
 
   defp project_issue_bot_enabled?(%Project{} = project) do
-    issue_bot_settings =
-      project
-      |> map_get(:settings, "settings", %{})
-      |> map_get(:support_agent_config, "support_agent_config", %{})
-      |> map_get(:github_issue_bot, "github_issue_bot", %{})
-
-    issue_bot_settings
+    project
+    |> issue_bot_settings()
     |> map_get(:enabled, "enabled")
     |> normalize_enabled(true)
   end
 
   defp project_issue_bot_enabled?(_project), do: true
 
+  defp issue_bot_settings(%Project{} = project) do
+    project
+    |> map_get(:settings, "settings", %{})
+    |> map_get(:support_agent_config, "support_agent_config", %{})
+    |> map_get(:github_issue_bot, "github_issue_bot", %{})
+  end
+
+  defp issue_bot_settings(_project), do: %{}
+
+  defp project_issue_bot_approval_policy(%Project{} = project) do
+    project
+    |> issue_bot_settings()
+    |> map_get(:approval_mode, "approval_mode")
+    |> issue_bot_approval_policy()
+  end
+
+  defp project_issue_bot_approval_policy(_project),
+    do: issue_bot_approval_policy(@default_issue_bot_approval_mode)
+
   defp maybe_create_issue_triage_run(_delivery, issue_bot_event, _project)
-       when issue_bot_event not in ["issues.opened", "issues.edited"],
+       when issue_bot_event not in @issue_triage_workflow_trigger_events,
        do: :ok
 
   defp maybe_create_issue_triage_run(delivery, issue_bot_event, %Project{} = project)
-       when issue_bot_event in ["issues.opened", "issues.edited"] do
+       when issue_bot_event in @issue_triage_workflow_trigger_events do
     with {:ok, run_attributes} <-
            build_issue_triage_run_attributes(delivery, project, issue_bot_event),
          {:ok, %WorkflowRun{} = workflow_run} <-
            WorkflowRun.create(run_attributes, authorize?: false) do
       Logger.info(
-        "github_webhook_issue_triage_run_created delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))} run_id=#{workflow_run.run_id} workflow_name=#{workflow_run.workflow_name}"
+        "github_webhook_issue_triage_run_created delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))} trigger_event=#{issue_bot_event} run_id=#{workflow_run.run_id} workflow_name=#{workflow_run.workflow_name}"
       )
 
       :ok
     else
       {:error, reason} ->
         Logger.error(
-          "github_webhook_issue_triage_run_create_failed reason=#{inspect(reason)} delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))}"
+          "github_webhook_issue_triage_run_create_failed reason=#{inspect(reason)} delivery_id=#{log_value(Map.get(delivery, :delivery_id))} project_id=#{log_value(Map.get(project, :id))} trigger_event=#{issue_bot_event}"
         )
 
         {:error, :issue_triage_run_create_failed}
@@ -725,8 +745,13 @@ defmodule JidoCode.GitHub.WebhookPipeline do
       project_github_full_name =
         project |> Map.get(:github_full_name) |> normalize_optional_string()
 
+      policy_name = issue_triage_webhook_policy_name(issue_bot_event)
+      approval_policy = project_issue_bot_approval_policy(project)
+
       retriage_context =
         retriage_context(issue_bot_event, project, issue_identifiers, issue_reference)
+
+      follow_up_context = follow_up_context(issue_bot_event, payload)
 
       trigger =
         %{
@@ -749,9 +774,12 @@ defmodule JidoCode.GitHub.WebhookPipeline do
             }),
           "source_issue" => issue_identifiers,
           "retriage" => retriage_context,
+          "follow_up" => follow_up_context,
+          "approval_policy" => approval_policy,
           "policy" => %{
-            "name" => issue_triage_webhook_policy_name(issue_bot_event),
-            "source" => "support_agent_config.github_issue_bot"
+            "name" => policy_name,
+            "source" => "support_agent_config.github_issue_bot",
+            "approval_policy" => approval_policy
           }
         }
         |> reject_nil_values()
@@ -872,8 +900,52 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   defp issue_triage_webhook_policy_name("issues.edited"),
     do: @issue_triage_webhook_retriage_policy
 
+  defp issue_triage_webhook_policy_name("issue_comment.created"),
+    do: @issue_triage_webhook_follow_up_policy
+
   defp issue_triage_webhook_policy_name(_issue_bot_event),
     do: @issue_triage_webhook_opened_policy
+
+  defp follow_up_context("issue_comment.created", payload) when is_map(payload) do
+    comment =
+      payload
+      |> map_get(:comment, "comment", %{})
+      |> case do
+        %{} = comment_payload -> comment_payload
+        _other -> %{}
+      end
+
+    comment_author =
+      comment
+      |> map_get(:user, "user", %{})
+      |> case do
+        %{} = author -> author
+        _other -> %{}
+      end
+
+    comment_context =
+      %{
+        "id" => comment |> map_get(:id, "id") |> normalize_optional_positive_integer(),
+        "node_id" => comment |> map_get(:node_id, "node_id") |> normalize_optional_string(),
+        "html_url" => comment |> map_get(:html_url, "html_url") |> normalize_optional_string(),
+        "body" => comment |> map_get(:body, "body") |> normalize_optional_string(),
+        "author_login" => comment_author |> map_get(:login, "login") |> normalize_optional_string(),
+        "author_association" =>
+          comment |> map_get(:author_association, "author_association") |> normalize_optional_string()
+      }
+      |> reject_nil_values()
+
+    if map_size(comment_context) > 0 do
+      %{
+        "event" => "issue_comment.created",
+        "comment" => comment_context
+      }
+    else
+      nil
+    end
+  end
+
+  defp follow_up_context(_issue_bot_event, _payload), do: nil
 
   defp retriage_context(
          "issues.edited",
@@ -1110,6 +1182,50 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   end
 
   defp normalize_webhook_events(_webhook_events), do: []
+
+  defp issue_bot_approval_policy(approval_mode) do
+    normalized_mode = normalize_issue_bot_approval_mode(approval_mode)
+
+    if normalized_mode == @approval_mode_auto_post do
+      %{
+        "mode" => @approval_mode_auto_post,
+        "post_behavior" => @approval_mode_auto_post,
+        "auto_post" => true,
+        "requires_approval" => false,
+        "source" => @approval_policy_source
+      }
+    else
+      %{
+        "mode" => @approval_mode_approval_required,
+        "post_behavior" => @approval_mode_approval_required,
+        "auto_post" => false,
+        "requires_approval" => true,
+        "source" => @approval_policy_source
+      }
+    end
+  end
+
+  defp normalize_issue_bot_approval_mode(approval_mode) when is_binary(approval_mode) do
+    case approval_mode |> String.trim() |> String.downcase() do
+      "auto_post" -> @approval_mode_auto_post
+      "auto-post" -> @approval_mode_auto_post
+      "auto" -> @approval_mode_auto_post
+      "approval_required" -> @approval_mode_approval_required
+      "approval-required" -> @approval_mode_approval_required
+      "manual" -> @approval_mode_approval_required
+      "manual_gate" -> @approval_mode_approval_required
+      "manual-gate" -> @approval_mode_approval_required
+      _other -> @default_issue_bot_approval_mode
+    end
+  end
+
+  defp normalize_issue_bot_approval_mode(approval_mode) when is_atom(approval_mode) do
+    approval_mode
+    |> Atom.to_string()
+    |> normalize_issue_bot_approval_mode()
+  end
+
+  defp normalize_issue_bot_approval_mode(_approval_mode), do: @default_issue_bot_approval_mode
 
   defp normalize_enabled(true, _default), do: true
   defp normalize_enabled(false, _default), do: false
