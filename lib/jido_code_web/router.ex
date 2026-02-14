@@ -52,6 +52,7 @@ defmodule JidoCodeWeb.Router do
     ash_authentication_live_session :authenticated_routes,
       on_mount: [{JidoCodeWeb.LiveUserAuth, :live_user_required}] do
       live("/dashboard", DashboardLive, :index)
+      live("/workbench", WorkbenchLive, :index)
       live("/settings", SettingsLive, :index)
       live("/settings/:tab", SettingsLive, :index)
 
