@@ -14,7 +14,11 @@ defmodule JidoCodeWeb.AshTypescriptRpcController do
   end
 
   def validate(conn, params) do
-    execute_rpc(conn, params, &AshTypescript.Rpc.validate_action(:jido_code, &1, &2))
+    execute_rpc(conn, params, fn request_conn, request_params ->
+      :jido_code
+      |> AshTypescript.Rpc.validate_action(request_conn, request_params)
+      |> normalize_validation_response()
+    end)
   end
 
   defp execute_rpc(conn, params, rpc_callback) do
@@ -232,7 +236,98 @@ defmodule JidoCodeWeb.AshTypescriptRpcController do
 
   defp attach_actor_auth_mode(result, auth_mode) when is_map(result) do
     Map.update(result, :meta, %{actor_auth_mode: auth_mode}, fn meta ->
-      if is_map(meta), do: Map.put(meta, :actor_auth_mode, auth_mode), else: %{actor_auth_mode: auth_mode}
+      if is_map(meta),
+        do: Map.put(meta, :actor_auth_mode, auth_mode),
+        else: %{actor_auth_mode: auth_mode}
     end)
+  end
+
+  defp normalize_validation_response(result) when is_map(result) do
+    success = map_get(result, :success, "success")
+    errors = map_get(result, :errors, "errors")
+
+    if success == false and is_list(errors) do
+      normalized_errors = Enum.map(errors, &normalize_validation_error/1)
+      put_map_value(result, :errors, "errors", normalized_errors)
+    else
+      result
+    end
+  end
+
+  defp normalize_validation_response(result), do: result
+
+  defp normalize_validation_error(error) when is_map(error) do
+    case map_get(error, :type, "type") do
+      "action_not_found" ->
+        action_name =
+          error
+          |> map_get(:vars, "vars", %{})
+          |> map_get(:action_name, "action_name")
+
+        error
+        |> put_map_value(:type, "type", "contract_mismatch")
+        |> put_map_value(:short_message, "short_message", "Contract mismatch")
+        |> put_map_value(
+          :message,
+          "message",
+          "RPC action %{action_name} does not match the public action contract"
+        )
+        |> Map.update(
+          map_key(error, :vars, "vars"),
+          map_default(error, :vars, "vars", %{action_name: action_name}),
+          fn vars ->
+            if is_map(vars) do
+              put_map_value(vars, :action_name, "action_name", action_name)
+            else
+              %{action_name: action_name}
+            end
+          end
+        )
+        |> Map.update(
+          map_key(error, :details, "details"),
+          map_default(error, :details, "details", %{
+            reason: "unknown_action",
+            original_type: "action_not_found"
+          }),
+          fn details ->
+            if is_map(details) do
+              details
+              |> put_map_value(:reason, "reason", "unknown_action")
+              |> put_map_value(
+                :original_type,
+                "original_type",
+                map_get(details, :original_type, "original_type", "action_not_found")
+              )
+            else
+              %{reason: "unknown_action", original_type: "action_not_found"}
+            end
+          end
+        )
+
+      _other ->
+        error
+    end
+  end
+
+  defp normalize_validation_error(error), do: error
+
+  defp map_get(map, atom_key, string_key, default \\ nil) when is_map(map) do
+    cond do
+      Map.has_key?(map, atom_key) -> Map.get(map, atom_key)
+      Map.has_key?(map, string_key) -> Map.get(map, string_key)
+      true -> default
+    end
+  end
+
+  defp map_key(map, atom_key, string_key) when is_map(map) do
+    if Map.has_key?(map, string_key), do: string_key, else: atom_key
+  end
+
+  defp map_default(map, atom_key, string_key, default) when is_map(map) do
+    if Map.has_key?(map, atom_key) or Map.has_key?(map, string_key), do: %{}, else: default
+  end
+
+  defp put_map_value(map, atom_key, string_key, value) when is_map(map) do
+    Map.put(map, map_key(map, atom_key, string_key), value)
   end
 end

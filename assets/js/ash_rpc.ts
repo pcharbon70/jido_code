@@ -5,12 +5,111 @@
 
 
 
+export type UUID = string;
+
+// GitHubRepo Schema
+export type GitHubRepoResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "owner" | "name" | "fullName" | "webhookId" | "enabled" | "settings" | "githubAppInstallationId" | "userId";
+  id: UUID;
+  owner: string;
+  name: string;
+  fullName: string;
+  webhookId: number | null;
+  enabled: boolean;
+  settings: Record<string, any> | null;
+  githubAppInstallationId: number | null;
+  userId: UUID | null;
+};
+
+
+
+export type GitHubRepoAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "owner" | "name" | "fullName" | "webhookId" | "enabled" | "settings" | "githubAppInstallationId" | "userId";
+  id: UUID;
+  owner: string;
+  name: string;
+  fullName: string;
+  webhookId: number | null;
+  enabled: boolean;
+  settings: Record<string, any> | null;
+  githubAppInstallationId: number | null;
+  userId: UUID | null;
+};
 
 
 
 
+export type GitHubRepoFilterInput = {
+  and?: Array<GitHubRepoFilterInput>;
+  or?: Array<GitHubRepoFilterInput>;
+  not?: Array<GitHubRepoFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  owner?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  fullName?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  webhookId?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  enabled?: {
+    eq?: boolean;
+    notEq?: boolean;
+  };
+
+  settings?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+  githubAppInstallationId?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  userId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
 
 
+
+};
 
 
 // Utility Types
@@ -633,5 +732,104 @@ export async function executeValidationRpcRequest<T>(
 
 
 
+export type RpcListRepositoriesFields = UnifiedFieldSelection<GitHubRepoResourceSchema>[];
+
+
+export type InferRpcListRepositoriesResult<
+  Fields extends RpcListRepositoriesFields | undefined,
+  Page extends RpcListRepositoriesConfig["page"] = undefined
+> = ConditionalPaginatedResultMixed<Page, Array<InferResult<GitHubRepoResourceSchema, Fields>>, {
+  results: Array<InferResult<GitHubRepoResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+  count?: number | null;
+  type: "offset";
+}, {
+  results: Array<InferResult<GitHubRepoResourceSchema, Fields>>;
+  hasMore: boolean;
+  limit: number;
+  after: string | null;
+  before: string | null;
+  previousPage: string;
+  nextPage: string;
+  count?: number | null;
+  type: "keyset";
+}>;
+
+export type RpcListRepositoriesConfig = {
+  tenant?: string;
+  fields: RpcListRepositoriesFields;
+  filter?: GitHubRepoFilterInput;
+  sort?: string;
+  page?: (
+    {
+      limit?: number;
+      offset?: number;
+      count?: boolean;
+    } | {
+      limit?: number;
+      after?: string;
+      before?: string;
+    }
+  );
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
+export type RpcListRepositoriesResult<Fields extends RpcListRepositoriesFields, Page extends RpcListRepositoriesConfig["page"] = undefined> = | { success: true; data: InferRpcListRepositoriesResult<Fields, Page>; }
+| { success: false; errors: AshRpcError[]; }
+
+;
+
+/**
+ * Read Repo records
+ *
+ * @ashActionType :read
+ */
+export async function rpcListRepositories<Fields extends RpcListRepositoriesFields, Config extends RpcListRepositoriesConfig = RpcListRepositoriesConfig>(
+  config: Config & { fields: Fields }
+): Promise<RpcListRepositoriesResult<Fields, Config["page"]>> {
+  const payload = {
+    action: "rpc_list_repositories",
+    ...(config.tenant !== undefined && { tenant: config.tenant }),
+    ...(config.fields !== undefined && { fields: config.fields }),
+    ...(config.filter && { filter: config.filter }),
+    ...(config.sort && { sort: config.sort }),
+    ...(config.page && { page: config.page })
+  };
+
+  return executeActionRpcRequest<RpcListRepositoriesResult<Fields, Config["page"]>>(
+    payload,
+    config
+  );
+}
+
+
+/**
+ * Validate: Read Repo records
+ *
+ * @ashActionType :read
+ * @validation true
+ */
+export async function validateRpcListRepositories(
+  config: {
+  tenant?: string;
+  headers?: Record<string, string>;
+  fetchOptions?: RequestInit;
+  customFetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+}
+): Promise<ValidationResult> {
+  const payload = {
+    action: "rpc_list_repositories",
+    ...(config.tenant !== undefined && { tenant: config.tenant })
+  };
+
+  return executeValidationRpcRequest<ValidationResult>(
+    payload,
+    config
+  );
+}
 
 

@@ -9,6 +9,8 @@ defmodule JidoCodeWeb.AshTypescriptRpcControllerTest do
 
   @api_key_audit_event [:jido_code, :rpc, :api_key, :used]
   @run_action_params %{"action" => "rpc_list_repositories", "fields" => ["id"]}
+  @invalid_validate_action_params %{"fields" => ["id"]}
+  @unknown_validate_action_params %{"action" => "rpc_unknown_action", "fields" => ["id"]}
 
   test "valid bearer token executes rpc action and returns auth mode metadata", %{conn: conn} do
     bearer_token = issue_bearer_token()
@@ -86,6 +88,56 @@ defmodule JidoCodeWeb.AshTypescriptRpcControllerTest do
     assert metadata.api_key_id == api_key_record.id
   end
 
+  test "validate endpoint accepts action identifier and payload and returns typed success", %{
+    conn: conn
+  } do
+    response =
+      conn
+      |> post(~p"/rpc/validate", @run_action_params)
+      |> json_response(200)
+
+    assert response["success"] == true
+    assert get_in(response, ["meta", "actor_auth_mode"]) == "anonymous"
+    assert response["errors"] in [nil, []]
+    refute Map.has_key?(response, "data")
+  end
+
+  test "validate endpoint returns structured validation errors without execution payload", %{
+    conn: conn
+  } do
+    response =
+      conn
+      |> post(~p"/rpc/validate", @invalid_validate_action_params)
+      |> json_response(200)
+
+    assert response["success"] == false
+    assert get_in(response, ["meta", "actor_auth_mode"]) == "anonymous"
+    refute Map.has_key?(response, "data")
+
+    [error | _] = response["errors"]
+    assert is_binary(error["type"])
+    assert is_binary(error["message"])
+    assert is_map(error["details"])
+    assert is_list(error["fields"])
+    assert is_list(error["path"])
+  end
+
+  test "validate endpoint returns typed contract mismatch when action is unknown", %{conn: conn} do
+    response =
+      conn
+      |> post(~p"/rpc/validate", @unknown_validate_action_params)
+      |> json_response(200)
+
+    assert response["success"] == false
+    assert get_in(response, ["meta", "actor_auth_mode"]) == "anonymous"
+    refute Map.has_key?(response, "data")
+
+    [error | _] = response["errors"]
+    assert error["type"] == "contract_mismatch"
+    assert error["details"]["reason"] == "unknown_action"
+    assert error["details"]["original_type"] == "action_not_found"
+  end
+
   test "valid api key executes rpc action through run endpoint", %{conn: conn} do
     %{api_key: api_key} = issue_api_key()
 
@@ -101,7 +153,9 @@ defmodule JidoCodeWeb.AshTypescriptRpcControllerTest do
     refute Jason.encode!(response) =~ api_key
   end
 
-  test "revoked api key returns typed authorization failure and performs no RPC action", %{conn: conn} do
+  test "revoked api key returns typed authorization failure and performs no RPC action", %{
+    conn: conn
+  } do
     attach_api_key_audit_handler()
     %{api_key: api_key, api_key_record: api_key_record} = issue_api_key()
     assert :ok = Ash.destroy(api_key_record, authorize?: false)
