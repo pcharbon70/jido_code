@@ -32,6 +32,12 @@ defmodule JidoCodeWeb.SetupLiveTest do
     original_project_importer =
       Application.get_env(:jido_code, :setup_project_importer, :__missing__)
 
+    original_clone_provisioner =
+      Application.get_env(:jido_code, :setup_project_clone_provisioner, :__missing__)
+
+    original_baseline_syncer =
+      Application.get_env(:jido_code, :setup_project_baseline_syncer, :__missing__)
+
     original_repository_fetcher =
       Application.get_env(:jido_code, :setup_github_repository_fetcher, :__missing__)
 
@@ -49,6 +55,8 @@ defmodule JidoCodeWeb.SetupLiveTest do
       restore_env(:setup_github_credential_checker, original_github_checker)
       restore_env(:setup_webhook_simulation_checker, original_webhook_simulation_checker)
       restore_env(:setup_project_importer, original_project_importer)
+      restore_env(:setup_project_clone_provisioner, original_clone_provisioner)
+      restore_env(:setup_project_baseline_syncer, original_baseline_syncer)
       restore_env(:setup_github_repository_fetcher, original_repository_fetcher)
       restore_env(:setup_prerequisite_timeout_ms, original_timeout)
       restore_env(:runtime_mode, original_runtime_mode)
@@ -61,6 +69,8 @@ defmodule JidoCodeWeb.SetupLiveTest do
     Application.delete_env(:jido_code, :setup_github_credential_checker)
     Application.delete_env(:jido_code, :setup_webhook_simulation_checker)
     Application.delete_env(:jido_code, :setup_project_importer)
+    Application.delete_env(:jido_code, :setup_project_clone_provisioner)
+    Application.delete_env(:jido_code, :setup_project_baseline_syncer)
     Application.delete_env(:jido_code, :setup_github_repository_fetcher)
     Application.put_env(:jido_code, :runtime_mode, :test)
 
@@ -1385,6 +1395,10 @@ defmodule JidoCodeWeb.SetupLiveTest do
     |> render_submit()
 
     assert has_element?(view, "#resolved-onboarding-step", "Step 8")
+    assert has_element?(view, "#setup-project-import-clone-status", "Ready")
+    assert has_element?(view, "#setup-project-import-clone-transition", "Pending -> Cloning -> Ready")
+    assert has_element?(view, "#setup-project-import-baseline-branch", "main")
+    assert has_element?(view, "#setup-project-import-last-sync-at")
 
     post_import_config = Application.get_env(:jido_code, :system_config)
     assert Map.fetch!(post_import_config, :onboarding_step) == 8
@@ -1399,12 +1413,17 @@ defmodule JidoCodeWeb.SetupLiveTest do
     assert project_import_state["status"] == "ready"
     assert project_import_state["selected_repository"] == "owner/repo-one"
     assert project_import_state["baseline_metadata"]["status"] == "ready"
+    assert project_import_state["project_record"]["clone_status"] == "ready"
+    assert project_import_state["baseline_metadata"]["synced_branch"] == "main"
+    assert is_binary(project_import_state["baseline_metadata"]["last_synced_at"])
 
     {:ok, [imported_project]} =
       Project.read(query: [filter: [github_full_name: "owner/repo-one"], limit: 1])
 
     assert imported_project.github_full_name == "owner/repo-one"
     assert imported_project.default_branch == "main"
+    assert imported_project.settings["workspace"]["clone_status"] == "ready"
+    assert is_binary(imported_project.settings["workspace"]["last_synced_at"])
 
     view
     |> form("#onboarding-step-form", %{
@@ -1490,6 +1509,50 @@ defmodule JidoCodeWeb.SetupLiveTest do
 
     {:ok, projects} = Project.read(query: [filter: [github_full_name: "owner/repo-one"]])
     assert length(projects) == 1
+  end
+
+  test "step 7 baseline sync failure marks clone status as error with retry guidance", %{
+    conn: conn
+  } do
+    Application.put_env(:jido_code, :setup_project_baseline_syncer, fn _context ->
+      {:error, {"baseline_sync_unavailable", "Baseline sync worker timed out before checkout."}}
+    end)
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 7,
+      onboarding_state: onboarding_state_through_step_6()
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{
+        "repository_full_name" => "owner/repo-one",
+        "validated_note" => "Import project with baseline sync failure"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 7")
+    assert has_element?(view, "#setup-project-import-status", "Blocked")
+    assert has_element?(view, "#setup-project-import-error-type", "baseline_sync_unavailable")
+    assert has_element?(view, "#setup-project-import-clone-status", "Error")
+    assert has_element?(view, "#setup-project-import-remediation", "Retry step 7")
+    assert has_element?(view, "#setup-save-error", "baseline_sync_unavailable")
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 7
+    assert Map.fetch!(persisted_config, :onboarding_completed) == false
+    refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "7")
+
+    {:ok, [project]} =
+      Project.read(query: [filter: [github_full_name: "owner/repo-one"], limit: 1])
+
+    assert project.settings["workspace"]["clone_status"] == "error"
+    assert project.settings["workspace"]["last_error_type"] == "baseline_sync_unavailable"
+    assert project.settings["workspace"]["retry_instructions"] =~ "Retry step 7"
   end
 
   test "step 7 import failure blocks onboarding completion and leaves completion flag unset", %{

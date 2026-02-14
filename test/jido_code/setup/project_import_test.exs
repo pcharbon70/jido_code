@@ -4,7 +4,11 @@ defmodule JidoCode.Setup.ProjectImportTest do
   alias JidoCode.Projects.Project
   alias JidoCode.Setup.ProjectImport
 
-  @managed_env_keys [:setup_project_importer]
+  @managed_env_keys [
+    :setup_project_importer,
+    :setup_project_clone_provisioner,
+    :setup_project_baseline_syncer
+  ]
 
   setup do
     original_env =
@@ -19,6 +23,8 @@ defmodule JidoCode.Setup.ProjectImportTest do
     end)
 
     Application.delete_env(:jido_code, :setup_project_importer)
+    Application.delete_env(:jido_code, :setup_project_clone_provisioner)
+    Application.delete_env(:jido_code, :setup_project_baseline_syncer)
     :ok
   end
 
@@ -45,12 +51,26 @@ defmodule JidoCode.Setup.ProjectImportTest do
     assert report.project_record.github_full_name == "owner/repo-one"
     assert report.project_record.default_branch == "develop"
     assert report.project_record.import_mode == :created
+    assert report.project_record.clone_status == :ready
+    assert Enum.map(report.project_record.clone_status_history, & &1.status) == [:pending, :cloning, :ready]
+    assert %DateTime{} = report.project_record.last_synced_at
+    assert report.baseline_metadata.synced_branch == "develop"
+    assert %DateTime{} = report.baseline_metadata.last_synced_at
 
     {:ok, [project]} =
       Project.read(query: [filter: [github_full_name: "owner/repo-one"], limit: 1])
 
     assert project.github_full_name == "owner/repo-one"
     assert project.default_branch == "develop"
+    assert project.settings["workspace"]["clone_status"] == "ready"
+
+    assert Enum.map(project.settings["workspace"]["clone_status_history"], & &1["status"]) == [
+             "pending",
+             "cloning",
+             "ready"
+           ]
+
+    assert is_binary(project.settings["workspace"]["last_synced_at"])
   end
 
   test "run/3 does not create duplicate project records for repeat imports" do
@@ -108,6 +128,48 @@ defmodule JidoCode.Setup.ProjectImportTest do
 
     {:ok, projects} = Project.read(query: [filter: [github_full_name: "owner/repo-one"]])
     assert projects == []
+  end
+
+  test "run/3 marks clone status error with retry remediation when baseline sync fails" do
+    Application.put_env(:jido_code, :setup_project_baseline_syncer, fn _context ->
+      {:error, {"baseline_sync_unavailable", "Baseline sync worker timed out before checkout."}}
+    end)
+
+    onboarding_state = %{
+      "4" => %{
+        "github_credentials" => %{
+          "paths" => [
+            %{
+              "status" => "ready",
+              "repositories" => [
+                %{"full_name" => "owner/repo-one", "default_branch" => "main"}
+              ]
+            }
+          ]
+        }
+      }
+    }
+
+    report = ProjectImport.run(nil, "owner/repo-one", onboarding_state)
+
+    assert ProjectImport.blocked?(report)
+    assert report.status == :blocked
+    assert report.error_type == "baseline_sync_unavailable"
+    assert report.remediation =~ "Retry step 7"
+    assert report.project_record.clone_status == :error
+
+    assert Enum.map(report.project_record.clone_status_history, & &1.status) == [
+             :pending,
+             :cloning,
+             :error
+           ]
+
+    {:ok, [project]} =
+      Project.read(query: [filter: [github_full_name: "owner/repo-one"], limit: 1])
+
+    assert project.settings["workspace"]["clone_status"] == "error"
+    assert project.settings["workspace"]["last_error_type"] == "baseline_sync_unavailable"
+    assert project.settings["workspace"]["retry_instructions"] =~ "Retry step 7"
   end
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)

@@ -498,13 +498,17 @@ defmodule JidoCodeWeb.SetupLive do
           </div>
         </section>
 
-        <section :if={@onboarding_step == 7} id="setup-project-import" class="space-y-3">
+        <section :if={@onboarding_step in [7, 8]} id="setup-project-import" class="space-y-3">
           <h2 class="text-lg font-semibold">First project import readiness</h2>
           <p id="setup-project-import-step-note" class="text-sm text-base-content/80">
-            Select one repository and import baseline metadata before onboarding can complete.
+            Select one repository and complete clone provisioning plus baseline sync before onboarding can complete.
           </p>
 
-          <div id="setup-project-repository-listing" class="rounded-lg border border-base-300 bg-base-100 p-3">
+          <div
+            :if={@onboarding_step == 7}
+            id="setup-project-repository-listing"
+            class="rounded-lg border border-base-300 bg-base-100 p-3"
+          >
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p class="font-medium">Accessible repositories for import</p>
               <button
@@ -553,7 +557,7 @@ defmodule JidoCodeWeb.SetupLive do
           </div>
 
           <div
-            :if={!Enum.empty?(@available_repositories)}
+            :if={@onboarding_step == 7 and !Enum.empty?(@available_repositories)}
             id="setup-project-repository-options"
             class="rounded-lg border border-base-300 bg-base-100 p-3"
           >
@@ -597,6 +601,40 @@ defmodule JidoCodeWeb.SetupLive do
               class="font-mono text-sm text-base-content/80"
             >
               Selected repository: {@project_import_report.selected_repository}
+            </p>
+            <p
+              :if={project_import_clone_status(@project_import_report)}
+              id="setup-project-import-clone-status"
+              class="text-sm text-base-content/80"
+            >
+              Clone status:
+              <span class={[
+                "badge ml-1",
+                project_clone_status_class(project_import_clone_status(@project_import_report))
+              ]}>
+                {project_clone_status_label(project_import_clone_status(@project_import_report))}
+              </span>
+            </p>
+            <p
+              :if={project_import_clone_transition(@project_import_report)}
+              id="setup-project-import-clone-transition"
+              class="text-sm text-base-content/80"
+            >
+              Clone transitions: {project_import_clone_transition(@project_import_report)}
+            </p>
+            <p
+              :if={project_import_baseline_branch(@project_import_report)}
+              id="setup-project-import-baseline-branch"
+              class="font-mono text-sm text-base-content/80"
+            >
+              Baseline branch: {project_import_baseline_branch(@project_import_report)}
+            </p>
+            <p
+              :if={project_import_last_synced_at(@project_import_report)}
+              id="setup-project-import-last-sync-at"
+              class="text-sm text-base-content/80"
+            >
+              Last baseline sync: {format_checked_at(project_import_last_synced_at(@project_import_report))}
             </p>
             <p id="setup-project-import-detail" class="text-sm text-base-content/80">
               {@project_import_report.detail}
@@ -1853,6 +1891,136 @@ defmodule JidoCodeWeb.SetupLive do
   defp project_import_status_class(:blocked), do: "badge-error"
   defp project_import_status_class(_status), do: "badge-warning"
 
+  defp project_import_clone_status(%{} = report) do
+    report
+    |> Map.get(:project_record, Map.get(report, "project_record", %{}))
+    |> case do
+      %{} = project_record ->
+        project_record
+        |> Map.get(:clone_status, Map.get(project_record, "clone_status"))
+        |> normalize_project_clone_status()
+
+      _other ->
+        nil
+    end
+  end
+
+  defp project_import_clone_status(_report), do: nil
+
+  defp project_import_clone_transition(%{} = report) do
+    statuses =
+      report
+      |> project_import_clone_history()
+      |> Enum.map(&Map.get(&1, :status))
+      |> Enum.uniq()
+
+    case statuses do
+      [] ->
+        nil
+
+      clone_statuses ->
+        clone_statuses
+        |> Enum.map(&project_clone_status_label/1)
+        |> Enum.join(" -> ")
+    end
+  end
+
+  defp project_import_clone_transition(_report), do: nil
+
+  defp project_import_baseline_branch(%{} = report) do
+    report
+    |> Map.get(:baseline_metadata, Map.get(report, "baseline_metadata", %{}))
+    |> case do
+      %{} = baseline_metadata ->
+        baseline_metadata
+        |> Map.get(:synced_branch, Map.get(baseline_metadata, "synced_branch"))
+        |> case do
+          branch when is_binary(branch) and branch != "" -> branch
+          _other -> nil
+        end
+
+      _other ->
+        nil
+    end
+  end
+
+  defp project_import_baseline_branch(_report), do: nil
+
+  defp project_import_last_synced_at(%{} = report) do
+    project_record =
+      Map.get(report, :project_record) || Map.get(report, "project_record") || %{}
+
+    baseline_metadata =
+      Map.get(report, :baseline_metadata) || Map.get(report, "baseline_metadata") || %{}
+
+    project_record
+    |> Map.get(:last_synced_at, Map.get(project_record, "last_synced_at"))
+    |> case do
+      nil ->
+        baseline_metadata
+        |> Map.get(:last_synced_at, Map.get(baseline_metadata, "last_synced_at"))
+
+      datetime ->
+        datetime
+    end
+    |> normalize_live_datetime()
+  end
+
+  defp project_import_last_synced_at(_report), do: nil
+
+  defp project_import_clone_history(%{} = report) do
+    project_record =
+      Map.get(report, :project_record) || Map.get(report, "project_record") || %{}
+
+    project_record
+    |> Map.get(:clone_status_history, Map.get(project_record, "clone_status_history", []))
+    |> Enum.flat_map(fn
+      %{} = entry ->
+        status =
+          entry
+          |> Map.get(:status, Map.get(entry, "status"))
+          |> normalize_project_clone_status()
+
+        transitioned_at =
+          entry
+          |> Map.get(:transitioned_at, Map.get(entry, "transitioned_at"))
+          |> normalize_live_datetime()
+
+        if is_nil(status) or is_nil(transitioned_at) do
+          []
+        else
+          [%{status: status, transitioned_at: transitioned_at}]
+        end
+
+      _other ->
+        []
+    end)
+  end
+
+  defp project_import_clone_history(_report), do: []
+
+  defp normalize_project_clone_status(:pending), do: :pending
+  defp normalize_project_clone_status(:cloning), do: :cloning
+  defp normalize_project_clone_status(:ready), do: :ready
+  defp normalize_project_clone_status(:error), do: :error
+  defp normalize_project_clone_status("pending"), do: :pending
+  defp normalize_project_clone_status("cloning"), do: :cloning
+  defp normalize_project_clone_status("ready"), do: :ready
+  defp normalize_project_clone_status("error"), do: :error
+  defp normalize_project_clone_status(_status), do: nil
+
+  defp project_clone_status_label(:pending), do: "Pending"
+  defp project_clone_status_label(:cloning), do: "Cloning"
+  defp project_clone_status_label(:ready), do: "Ready"
+  defp project_clone_status_label(:error), do: "Error"
+  defp project_clone_status_label(_status), do: "Unknown"
+
+  defp project_clone_status_class(:pending), do: "badge-warning"
+  defp project_clone_status_class(:cloning), do: "badge-info"
+  defp project_clone_status_class(:ready), do: "badge-success"
+  defp project_clone_status_class(:error), do: "badge-error"
+  defp project_clone_status_class(_status), do: "badge-warning"
+
   defp issue_bot_default_enabled(issue_bot_defaults) when is_map(issue_bot_defaults) do
     issue_bot_defaults
     |> Map.get("enabled")
@@ -1890,6 +2058,17 @@ defmodule JidoCodeWeb.SetupLive do
 
   defp format_checked_at(%DateTime{} = checked_at), do: DateTime.to_iso8601(checked_at)
   defp format_checked_at(_), do: "unknown"
+
+  defp normalize_live_datetime(%DateTime{} = datetime), do: datetime
+
+  defp normalize_live_datetime(datetime) when is_binary(datetime) do
+    case DateTime.from_iso8601(datetime) do
+      {:ok, parsed_datetime, _offset} -> parsed_datetime
+      _other -> nil
+    end
+  end
+
+  defp normalize_live_datetime(_datetime), do: nil
 
   defp fetch_step_state(onboarding_state, onboarding_step) when is_map(onboarding_state) do
     step_key = Integer.to_string(onboarding_step)

@@ -7,10 +7,16 @@ defmodule JidoCode.Setup.ProjectImport do
 
   @default_selection_remediation "Select one of the repositories validated in step 4 and retry import."
   @default_importer_remediation "Verify project import configuration and retry step 7."
+  @default_clone_retry_remediation "Retry step 7 after confirming workspace provisioning and repository access."
+  @default_sync_retry_remediation "Retry step 7 after confirming baseline sync can target the configured default branch."
   @default_branch "main"
+  @clone_stage_error_type "project_clone_failed"
+  @baseline_sync_stage_error_type "project_baseline_sync_failed"
+  @clone_status_update_error_type "project_clone_status_update_failed"
 
   @type status :: :ready | :blocked
   @type import_mode :: :created | :existing
+  @type clone_status :: :pending | :cloning | :ready | :error
 
   @type project_record :: %{
           id: String.t(),
@@ -18,7 +24,10 @@ defmodule JidoCode.Setup.ProjectImport do
           github_full_name: String.t(),
           default_branch: String.t(),
           import_mode: import_mode(),
-          imported_at: DateTime.t()
+          imported_at: DateTime.t(),
+          clone_status: clone_status(),
+          clone_status_history: [map()],
+          last_synced_at: DateTime.t() | nil
         }
 
   @type baseline_metadata :: %{
@@ -27,7 +36,11 @@ defmodule JidoCode.Setup.ProjectImport do
           default_workflow_registered: boolean(),
           agent_configuration_registered: boolean(),
           status: :ready,
-          initialized_at: DateTime.t()
+          initialized_at: DateTime.t(),
+          synced_branch: String.t(),
+          last_synced_at: DateTime.t(),
+          workspace_environment: :sprite | :local,
+          workspace_path: String.t() | nil
         }
 
   @type report :: %{
@@ -176,11 +189,14 @@ defmodule JidoCode.Setup.ProjectImport do
         status
       end
 
+    retain_project_record? =
+      normalized_status == :ready or clone_or_sync_error?(error_type)
+
     %{
       checked_at: checked_at,
       status: normalized_status,
       selected_repository: selected_repository,
-      project_record: if(normalized_status == :ready, do: project_record, else: nil),
+      project_record: if(retain_project_record?, do: project_record, else: nil),
       baseline_metadata: if(normalized_status == :ready, do: baseline_metadata, else: nil),
       detail: detail,
       remediation: remediation,
@@ -223,27 +239,36 @@ defmodule JidoCode.Setup.ProjectImport do
 
         with {:ok, _owner, name} <- split_repository(selected_repository),
              {:ok, project, import_mode} <-
-               ensure_project_record(name, selected_repository, default_branch) do
-          baseline_metadata = baseline_metadata(checked_at)
+               ensure_project_record(name, selected_repository, default_branch),
+             {:ok, synced_project, baseline_metadata} <-
+               provision_clone_and_sync(
+                 project,
+                 selected_repository,
+                 default_branch,
+                 checked_at,
+                 onboarding_state,
+                 import_mode
+               ) do
+          synced_branch =
+            baseline_metadata
+            |> map_get(:synced_branch, "synced_branch", default_branch)
+            |> normalize_branch_name(default_branch)
 
           %{
             checked_at: checked_at,
             status: :ready,
             selected_repository: selected_repository,
-            project_record: %{
-              id: to_string(project.id),
-              name: to_string(project.name),
-              github_full_name: to_string(project.github_full_name),
-              default_branch: to_string(project.default_branch),
-              import_mode: import_mode,
-              imported_at: checked_at
-            },
+            project_record: project_record(synced_project, import_mode, checked_at),
             baseline_metadata: baseline_metadata,
-            detail: "Repository import is complete and baseline metadata is ready.",
+            detail:
+              "Repository import is complete. Workspace clone is ready and baseline synced to `#{synced_branch}`.",
             remediation: "Project import is ready.",
             error_type: nil
           }
         else
+          {:error, %{} = clone_or_sync_report} ->
+            clone_or_sync_report
+
           {:error, {error_type, detail}} ->
             blocked_report(
               checked_at,
@@ -264,6 +289,366 @@ defmodule JidoCode.Setup.ProjectImport do
       "Project importer context is invalid.",
       @default_importer_remediation
     )
+  end
+
+  defp provision_clone_and_sync(
+         project,
+         selected_repository,
+         default_branch,
+         checked_at,
+         onboarding_state,
+         import_mode
+       ) do
+    workspace_context =
+      onboarding_state
+      |> workspace_context(selected_repository)
+      |> Map.put(:default_branch, default_branch)
+      |> Map.put(:checked_at, checked_at)
+
+    with {:ok, pending_project} <-
+           persist_clone_status(
+             project,
+             :pending,
+             checked_at,
+             default_branch,
+             workspace_context
+           ),
+         {:ok, cloning_project} <-
+           persist_clone_status(
+             pending_project,
+             :cloning,
+             checked_at,
+             default_branch,
+             workspace_context
+           ) do
+      clone_context = %{
+        checked_at: checked_at,
+        selected_repository: selected_repository,
+        project: cloning_project,
+        default_branch: default_branch,
+        workspace_context: workspace_context,
+        onboarding_state: onboarding_state
+      }
+
+      with {:ok, clone_result} <- run_clone_provisioner(clone_context),
+           {:ok, normalized_clone_result} <- normalize_clone_result(clone_result, workspace_context),
+           {:ok, baseline_sync_result} <-
+             run_baseline_syncer(Map.put(clone_context, :clone_result, normalized_clone_result)),
+           {:ok, normalized_baseline_sync} <-
+             normalize_baseline_sync_result(
+               baseline_sync_result,
+               checked_at,
+               default_branch,
+               workspace_context
+             ),
+           baseline_metadata <-
+             baseline_metadata(
+               checked_at,
+               default_branch,
+               normalized_clone_result,
+               normalized_baseline_sync
+             ),
+           ready_settings_context <-
+             workspace_context
+             |> Map.merge(normalized_clone_result)
+             |> Map.merge(normalized_baseline_sync),
+           {:ok, ready_project} <-
+             persist_clone_status(
+               cloning_project,
+               :ready,
+               checked_at,
+               default_branch,
+               ready_settings_context
+             ) do
+        {:ok, ready_project, baseline_metadata}
+      else
+        {:error, {error_type, detail, remediation}} ->
+          {:error,
+           clone_or_sync_error_report(
+             cloning_project,
+             checked_at,
+             selected_repository,
+             default_branch,
+             import_mode,
+             error_type,
+             detail,
+             remediation,
+             workspace_context
+           )}
+
+        {:error, {error_type, detail}} ->
+          {:error,
+           clone_or_sync_error_report(
+             cloning_project,
+             checked_at,
+             selected_repository,
+             default_branch,
+             import_mode,
+             error_type,
+             detail,
+             @default_importer_remediation,
+             workspace_context
+           )}
+
+        {:error, reason} ->
+          {:error,
+           clone_or_sync_error_report(
+             cloning_project,
+             checked_at,
+             selected_repository,
+             default_branch,
+             import_mode,
+             @clone_stage_error_type,
+             "Clone or baseline sync failed (#{inspect(reason)}).",
+             @default_importer_remediation,
+             workspace_context
+           )}
+      end
+    else
+      {:error, {error_type, detail}} ->
+        {:error, {error_type, detail}}
+    end
+  end
+
+  defp clone_or_sync_error_report(
+         project,
+         checked_at,
+         selected_repository,
+         default_branch,
+         import_mode,
+         error_type,
+         detail,
+         remediation,
+         workspace_context
+       ) do
+    clone_error_type = normalize_error_type(error_type) || @clone_stage_error_type
+    clone_error_detail = normalize_error_detail(detail)
+
+    failed_project =
+      case persist_clone_status(
+             project,
+             :error,
+             checked_at,
+             default_branch,
+             Map.merge(workspace_context, %{
+               error_type: clone_error_type,
+               error_detail: clone_error_detail,
+               remediation: remediation
+             })
+           ) do
+        {:ok, updated_project} -> updated_project
+        {:error, _reason} -> project
+      end
+
+    blocked_report(
+      checked_at,
+      selected_repository,
+      clone_error_type,
+      clone_error_detail,
+      remediation,
+      project_record(failed_project, import_mode, checked_at)
+    )
+  end
+
+  @doc false
+  def default_clone_provisioner(%{
+        selected_repository: selected_repository,
+        workspace_context: workspace_context,
+        checked_at: checked_at
+      }) do
+    workspace_environment =
+      workspace_context
+      |> map_get(:workspace_environment, "workspace_environment", :sprite)
+      |> normalize_workspace_environment(:sprite)
+
+    workspace_root =
+      workspace_context
+      |> map_get(:workspace_root, "workspace_root")
+      |> normalize_workspace_root()
+
+    case workspace_environment do
+      :sprite ->
+        {:ok,
+         %{
+           workspace_initialized: true,
+           workspace_environment: :sprite,
+           workspace_root: nil,
+           workspace_path: nil,
+           cloned_at: checked_at
+         }}
+
+      :local ->
+        cond do
+          is_nil(workspace_root) ->
+            {:error, {"workspace_root_missing", "Local workspace root is missing for clone provisioning."}}
+
+          Path.type(workspace_root) != :absolute ->
+            {:error, {"workspace_root_invalid", "Local workspace root must be an absolute path."}}
+
+          not File.dir?(workspace_root) ->
+            {:error, {"workspace_root_not_found", "Local workspace root directory does not exist."}}
+
+          true ->
+            workspace_path =
+              Path.join(workspace_root, repository_workspace_dir(selected_repository))
+
+            case File.mkdir_p(workspace_path) do
+              :ok ->
+                {:ok,
+                 %{
+                   workspace_initialized: true,
+                   workspace_environment: :local,
+                   workspace_root: workspace_root,
+                   workspace_path: workspace_path,
+                   cloned_at: checked_at
+                 }}
+
+              {:error, reason} ->
+                {:error,
+                 {"workspace_clone_provision_failed", "Failed to provision workspace path: #{inspect(reason)}."}}
+            end
+        end
+    end
+  end
+
+  def default_clone_provisioner(_context) do
+    {:error, {"workspace_clone_context_invalid", "Clone provisioning context is invalid."}}
+  end
+
+  @doc false
+  def default_baseline_syncer(%{
+        checked_at: checked_at,
+        default_branch: default_branch,
+        clone_result: clone_result,
+        workspace_context: workspace_context
+      }) do
+    workspace_environment =
+      clone_result
+      |> map_get(:workspace_environment, "workspace_environment")
+      |> normalize_workspace_environment(
+        workspace_context
+        |> map_get(:workspace_environment, "workspace_environment", :sprite)
+        |> normalize_workspace_environment(:sprite)
+      )
+
+    workspace_path =
+      clone_result
+      |> map_get(:workspace_path, "workspace_path")
+      |> normalize_workspace_root()
+
+    cond do
+      not is_binary(default_branch) or String.trim(default_branch) == "" ->
+        {:error, {"baseline_sync_branch_missing", "Configured default branch is missing for baseline sync."}}
+
+      workspace_environment == :local and (is_nil(workspace_path) or not File.dir?(workspace_path)) ->
+        {:error, {"baseline_sync_workspace_missing", "Local workspace path is unavailable for baseline sync."}}
+
+      true ->
+        {:ok,
+         %{
+           baseline_synced: true,
+           synced_branch: default_branch,
+           last_synced_at: checked_at
+         }}
+    end
+  end
+
+  def default_baseline_syncer(_context) do
+    {:error, {"baseline_sync_context_invalid", "Baseline sync context is invalid."}}
+  end
+
+  defp run_clone_provisioner(context) do
+    provisioner =
+      Application.get_env(
+        :jido_code,
+        :setup_project_clone_provisioner,
+        &__MODULE__.default_clone_provisioner/1
+      )
+
+    invoke_stage(
+      provisioner,
+      context,
+      @clone_stage_error_type,
+      "Workspace clone provisioning failed during project import.",
+      @default_clone_retry_remediation
+    )
+  end
+
+  defp run_baseline_syncer(context) do
+    syncer =
+      Application.get_env(
+        :jido_code,
+        :setup_project_baseline_syncer,
+        &__MODULE__.default_baseline_syncer/1
+      )
+
+    invoke_stage(
+      syncer,
+      context,
+      @baseline_sync_stage_error_type,
+      "Baseline sync failed during project import.",
+      @default_sync_retry_remediation
+    )
+  end
+
+  defp invoke_stage(stage, context, default_error_type, default_detail, default_remediation)
+       when is_function(stage, 1) do
+    try do
+      case stage.(context) do
+        {:ok, %{} = result} ->
+          {:ok, result}
+
+        %{} = result ->
+          {:ok, result}
+
+        {:error, {error_type, detail, remediation}} ->
+          {:error,
+           {
+             normalize_error_type(error_type) || default_error_type,
+             normalize_error_detail(detail),
+             normalize_remediation(remediation, :blocked)
+           }}
+
+        {:error, {error_type, detail}} ->
+          {:error,
+           {
+             normalize_error_type(error_type) || default_error_type,
+             normalize_error_detail(detail),
+             default_remediation
+           }}
+
+        {:error, detail} ->
+          {:error, {default_error_type, normalize_error_detail(detail), default_remediation}}
+
+        other ->
+          {:error,
+           {
+             default_error_type,
+             "#{default_detail} Invalid stage result: #{inspect(other)}.",
+             default_remediation
+           }}
+      end
+    rescue
+      exception ->
+        {:error,
+         {
+           default_error_type,
+           "#{default_detail} Stage raised #{Exception.message(exception)}.",
+           default_remediation
+         }}
+    catch
+      kind, reason ->
+        {:error,
+         {
+           default_error_type,
+           "#{default_detail} Stage threw #{inspect({kind, reason})}.",
+           default_remediation
+         }}
+    end
+  end
+
+  defp invoke_stage(_stage, _context, default_error_type, default_detail, default_remediation) do
+    {:error, {default_error_type, default_detail, default_remediation}}
   end
 
   defp safe_invoke_importer(importer, context) when is_function(importer, 1) do
@@ -324,13 +709,21 @@ defmodule JidoCode.Setup.ProjectImport do
     )
   end
 
-  defp blocked_report(checked_at, selected_repository, error_type, detail, remediation) do
+  defp blocked_report(
+         checked_at,
+         selected_repository,
+         error_type,
+         detail,
+         remediation,
+         project_record \\ nil,
+         baseline_metadata \\ nil
+       ) do
     %{
       checked_at: checked_at,
       status: :blocked,
       selected_repository: selected_repository,
-      project_record: nil,
-      baseline_metadata: nil,
+      project_record: project_record,
+      baseline_metadata: baseline_metadata,
       detail: detail,
       remediation: remediation,
       error_type: error_type
@@ -373,16 +766,324 @@ defmodule JidoCode.Setup.ProjectImport do
     end
   end
 
-  defp baseline_metadata(checked_at) do
+  defp baseline_metadata(checked_at, default_branch, clone_result, baseline_sync_result) do
+    synced_branch =
+      baseline_sync_result
+      |> map_get(:synced_branch, "synced_branch", default_branch)
+      |> normalize_branch_name(default_branch)
+
+    workspace_environment =
+      clone_result
+      |> map_get(:workspace_environment, "workspace_environment", :sprite)
+      |> normalize_workspace_environment(:sprite)
+
     %{
-      workspace_initialized: true,
-      baseline_synced: true,
+      workspace_initialized: map_get(clone_result, :workspace_initialized, "workspace_initialized", false) == true,
+      baseline_synced: map_get(baseline_sync_result, :baseline_synced, "baseline_synced", false) == true,
       default_workflow_registered: true,
       agent_configuration_registered: true,
       status: :ready,
-      initialized_at: checked_at
+      initialized_at: checked_at,
+      synced_branch: synced_branch,
+      last_synced_at:
+        baseline_sync_result
+        |> map_get(:last_synced_at, "last_synced_at", checked_at)
+        |> normalize_datetime(checked_at),
+      workspace_environment: workspace_environment,
+      workspace_path:
+        clone_result
+        |> map_get(:workspace_path, "workspace_path")
+        |> normalize_workspace_root()
     }
   end
+
+  defp project_record(project, import_mode, imported_at) when is_map(project) do
+    workspace_settings = project_workspace_settings(project)
+
+    %{
+      id: project |> map_get(:id, "id") |> to_string(),
+      name: project |> map_get(:name, "name") |> to_string(),
+      github_full_name:
+        project
+        |> map_get(:github_full_name, "github_full_name")
+        |> to_string(),
+      default_branch:
+        project
+        |> map_get(:default_branch, "default_branch", @default_branch)
+        |> to_string(),
+      import_mode: normalize_import_mode(import_mode, :existing),
+      imported_at: imported_at,
+      clone_status:
+        workspace_settings
+        |> map_get(:clone_status, "clone_status", :pending)
+        |> normalize_clone_status(:pending),
+      clone_status_history:
+        workspace_settings
+        |> map_get(:clone_status_history, "clone_status_history", [])
+        |> normalize_clone_status_history(imported_at),
+      last_synced_at:
+        workspace_settings
+        |> map_get(:last_synced_at, "last_synced_at")
+        |> normalize_optional_datetime()
+    }
+  end
+
+  defp persist_clone_status(project, clone_status, checked_at, default_branch, context)
+       when is_map(project) do
+    clone_status_history =
+      project
+      |> project_workspace_settings()
+      |> map_get(:clone_status_history, "clone_status_history", [])
+      |> normalize_clone_status_history(checked_at)
+      |> Kernel.++([
+        %{status: clone_status, transitioned_at: checked_at}
+      ])
+
+    workspace_settings =
+      project
+      |> project_workspace_settings()
+      |> normalize_keyed_map()
+      |> Map.put("clone_status", Atom.to_string(clone_status))
+      |> Map.put("default_branch", default_branch)
+      |> Map.put("clone_status_history", serialize_clone_status_history(clone_status_history))
+      |> Map.put("workspace_initialized", context_flag(context, :workspace_initialized, clone_status == :ready))
+      |> Map.put("baseline_synced", context_flag(context, :baseline_synced, clone_status == :ready))
+      |> put_if_present("workspace_environment", context_environment(context))
+      |> put_if_present(
+        "workspace_root",
+        context |> map_get(:workspace_root, "workspace_root") |> normalize_workspace_root()
+      )
+      |> put_if_present(
+        "workspace_path",
+        context |> map_get(:workspace_path, "workspace_path") |> normalize_workspace_root()
+      )
+      |> put_if_present(
+        "last_synced_at",
+        context
+        |> map_get(:last_synced_at, "last_synced_at")
+        |> normalize_optional_datetime()
+        |> serialize_optional_datetime()
+      )
+      |> put_if_present(
+        "synced_branch",
+        context
+        |> map_get(:synced_branch, "synced_branch")
+        |> case do
+          nil -> nil
+          synced_branch -> normalize_branch_name(synced_branch, default_branch)
+        end
+      )
+
+    workspace_settings =
+      if clone_status == :error do
+        workspace_settings
+        |> put_if_present("last_error_type", context |> map_get(:error_type, "error_type"))
+        |> put_if_present("last_error_detail", context |> map_get(:error_detail, "error_detail"))
+        |> put_if_present("retry_instructions", context |> map_get(:remediation, "remediation"))
+      else
+        Map.drop(
+          workspace_settings,
+          ["last_error_type", "last_error_detail", "retry_instructions"]
+        )
+      end
+
+    updated_settings =
+      project
+      |> map_get(:settings, "settings", %{})
+      |> normalize_keyed_map()
+      |> Map.put("workspace", workspace_settings)
+
+    case Project.update(project, %{settings: updated_settings}) do
+      {:ok, updated_project} ->
+        {:ok, updated_project}
+
+      {:error, reason} ->
+        {:error, {@clone_status_update_error_type, "Failed to persist clone status: #{format_reason(reason)}"}}
+    end
+  end
+
+  defp persist_clone_status(_project, _clone_status, _checked_at, _default_branch, _context) do
+    {:error, {@clone_status_update_error_type, "Project context is unavailable."}}
+  end
+
+  defp project_workspace_settings(project) do
+    project
+    |> map_get(:settings, "settings", %{})
+    |> normalize_keyed_map()
+    |> Map.get("workspace", %{})
+    |> normalize_keyed_map()
+  end
+
+  defp normalize_clone_result(clone_result, workspace_context) when is_map(clone_result) do
+    workspace_environment =
+      clone_result
+      |> map_get(:workspace_environment, "workspace_environment")
+      |> normalize_workspace_environment(context_environment(workspace_context))
+
+    workspace_root =
+      clone_result
+      |> map_get(:workspace_root, "workspace_root")
+      |> normalize_workspace_root()
+      |> case do
+        nil ->
+          workspace_context
+          |> map_get(:workspace_root, "workspace_root")
+          |> normalize_workspace_root()
+
+        normalized_workspace_root ->
+          normalized_workspace_root
+      end
+
+    workspace_path =
+      clone_result
+      |> map_get(:workspace_path, "workspace_path")
+      |> normalize_workspace_root()
+
+    workspace_initialized =
+      map_get(clone_result, :workspace_initialized, "workspace_initialized", false) == true
+
+    cond do
+      workspace_environment == :local and is_nil(workspace_path) ->
+        {:error,
+         {
+           @clone_stage_error_type,
+           "Local clone provisioning did not return a workspace path.",
+           @default_clone_retry_remediation
+         }}
+
+      workspace_initialized != true ->
+        {:error,
+         {
+           @clone_stage_error_type,
+           "Clone provisioning did not initialize the workspace.",
+           @default_clone_retry_remediation
+         }}
+
+      true ->
+        {:ok,
+         %{
+           workspace_environment: workspace_environment,
+           workspace_root: workspace_root,
+           workspace_path: workspace_path,
+           workspace_initialized: true
+         }}
+    end
+  end
+
+  defp normalize_clone_result(_clone_result, _workspace_context) do
+    {:error,
+     {
+       @clone_stage_error_type,
+       "Clone provisioning returned invalid metadata.",
+       @default_clone_retry_remediation
+     }}
+  end
+
+  defp normalize_baseline_sync_result(
+         baseline_sync_result,
+         checked_at,
+         default_branch,
+         workspace_context
+       )
+       when is_map(baseline_sync_result) do
+    synced_branch =
+      baseline_sync_result
+      |> map_get(:synced_branch, "synced_branch", default_branch)
+      |> normalize_branch_name(default_branch)
+
+    baseline_synced =
+      map_get(baseline_sync_result, :baseline_synced, "baseline_synced", false) == true
+
+    workspace_environment =
+      baseline_sync_result
+      |> map_get(:workspace_environment, "workspace_environment")
+      |> normalize_workspace_environment(context_environment(workspace_context))
+
+    cond do
+      baseline_synced != true ->
+        {:error,
+         {
+           @baseline_sync_stage_error_type,
+           "Baseline sync did not report a successful synchronization.",
+           @default_sync_retry_remediation
+         }}
+
+      synced_branch != default_branch ->
+        {:error,
+         {
+           @baseline_sync_stage_error_type,
+           "Baseline sync aligned to `#{synced_branch}` instead of configured default `#{default_branch}`.",
+           @default_sync_retry_remediation
+         }}
+
+      true ->
+        {:ok,
+         %{
+           baseline_synced: true,
+           synced_branch: synced_branch,
+           last_synced_at:
+             baseline_sync_result
+             |> map_get(:last_synced_at, "last_synced_at", checked_at)
+             |> normalize_datetime(checked_at),
+           workspace_environment: workspace_environment
+         }}
+    end
+  end
+
+  defp normalize_baseline_sync_result(
+         _baseline_sync_result,
+         _checked_at,
+         _default_branch,
+         _workspace_context
+       ) do
+    {:error,
+     {
+       @baseline_sync_stage_error_type,
+       "Baseline sync returned invalid metadata.",
+       @default_sync_retry_remediation
+     }}
+  end
+
+  defp workspace_context(onboarding_state, selected_repository) do
+    environment_defaults =
+      onboarding_state
+      |> fetch_step_state(5)
+      |> map_get(:environment_defaults, "environment_defaults", %{})
+
+    workspace_environment =
+      environment_defaults
+      |> map_get(
+        :default_environment,
+        "default_environment",
+        environment_defaults |> map_get(:mode, "mode", :sprite)
+      )
+      |> normalize_workspace_environment(:sprite)
+
+    workspace_root =
+      environment_defaults
+      |> map_get(:workspace_root, "workspace_root")
+      |> normalize_workspace_root()
+
+    %{
+      workspace_environment: workspace_environment,
+      workspace_root: workspace_root,
+      repository_workspace_dir: repository_workspace_dir(selected_repository)
+    }
+  end
+
+  defp repository_workspace_dir(selected_repository) when is_binary(selected_repository) do
+    selected_repository
+    |> String.downcase()
+    |> String.replace("/", "__")
+    |> String.replace(~r/[^a-z0-9._-]/, "-")
+    |> String.trim("-")
+    |> case do
+      "" -> "project-import"
+      sanitized_repository -> sanitized_repository
+    end
+  end
+
+  defp repository_workspace_dir(_selected_repository), do: "project-import"
 
   defp split_repository(selected_repository) when is_binary(selected_repository) do
     case String.split(selected_repository, "/", parts: 2) do
@@ -400,6 +1101,8 @@ defmodule JidoCode.Setup.ProjectImport do
   defp serialize_project_record(nil), do: nil
 
   defp serialize_project_record(project_record) when is_map(project_record) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
     %{
       "id" => map_get(project_record, :id, "id"),
       "name" => map_get(project_record, :name, "name"),
@@ -418,8 +1121,23 @@ defmodule JidoCode.Setup.ProjectImport do
       "imported_at" =>
         project_record
         |> map_get(:imported_at, "imported_at")
-        |> normalize_datetime(DateTime.utc_now() |> DateTime.truncate(:second))
-        |> DateTime.to_iso8601()
+        |> normalize_datetime(now)
+        |> DateTime.to_iso8601(),
+      "clone_status" =>
+        project_record
+        |> map_get(:clone_status, "clone_status", :pending)
+        |> normalize_clone_status(:pending)
+        |> Atom.to_string(),
+      "clone_status_history" =>
+        project_record
+        |> map_get(:clone_status_history, "clone_status_history", [])
+        |> normalize_clone_status_history(now)
+        |> serialize_clone_status_history(),
+      "last_synced_at" =>
+        project_record
+        |> map_get(:last_synced_at, "last_synced_at")
+        |> normalize_optional_datetime()
+        |> serialize_optional_datetime()
     }
   end
 
@@ -428,6 +1146,8 @@ defmodule JidoCode.Setup.ProjectImport do
   defp serialize_baseline_metadata(nil), do: nil
 
   defp serialize_baseline_metadata(baseline_metadata) when is_map(baseline_metadata) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
     %{
       "workspace_initialized" => map_get(baseline_metadata, :workspace_initialized, "workspace_initialized", false),
       "baseline_synced" => map_get(baseline_metadata, :baseline_synced, "baseline_synced", false),
@@ -453,8 +1173,26 @@ defmodule JidoCode.Setup.ProjectImport do
       "initialized_at" =>
         baseline_metadata
         |> map_get(:initialized_at, "initialized_at")
-        |> normalize_datetime(DateTime.utc_now() |> DateTime.truncate(:second))
-        |> DateTime.to_iso8601()
+        |> normalize_datetime(now)
+        |> DateTime.to_iso8601(),
+      "synced_branch" =>
+        baseline_metadata
+        |> map_get(:synced_branch, "synced_branch", @default_branch)
+        |> normalize_branch_name(@default_branch),
+      "last_synced_at" =>
+        baseline_metadata
+        |> map_get(:last_synced_at, "last_synced_at")
+        |> normalize_optional_datetime()
+        |> serialize_optional_datetime(),
+      "workspace_environment" =>
+        baseline_metadata
+        |> map_get(:workspace_environment, "workspace_environment", :sprite)
+        |> normalize_workspace_environment(:sprite)
+        |> Atom.to_string(),
+      "workspace_path" =>
+        baseline_metadata
+        |> map_get(:workspace_path, "workspace_path")
+        |> normalize_workspace_root()
     }
   end
 
@@ -496,7 +1234,19 @@ defmodule JidoCode.Setup.ProjectImport do
         imported_at:
           project_record
           |> map_get(:imported_at, "imported_at")
-          |> normalize_datetime(default_imported_at)
+          |> normalize_datetime(default_imported_at),
+        clone_status:
+          project_record
+          |> map_get(:clone_status, "clone_status", :pending)
+          |> normalize_clone_status(:pending),
+        clone_status_history:
+          project_record
+          |> map_get(:clone_status_history, "clone_status_history", [])
+          |> normalize_clone_status_history(default_imported_at),
+        last_synced_at:
+          project_record
+          |> map_get(:last_synced_at, "last_synced_at")
+          |> normalize_optional_datetime()
       }
     else
       nil
@@ -546,6 +1296,30 @@ defmodule JidoCode.Setup.ProjectImport do
       |> map_get(:initialized_at, "initialized_at")
       |> normalize_datetime(default_initialized_at)
 
+    synced_branch =
+      baseline_metadata
+      |> map_get(:synced_branch, "synced_branch", @default_branch)
+      |> normalize_branch_name(@default_branch)
+
+    last_synced_at =
+      baseline_metadata
+      |> map_get(:last_synced_at, "last_synced_at")
+      |> normalize_optional_datetime()
+      |> case do
+        nil -> initialized_at
+        datetime -> datetime
+      end
+
+    workspace_environment =
+      baseline_metadata
+      |> map_get(:workspace_environment, "workspace_environment", :sprite)
+      |> normalize_workspace_environment(:sprite)
+
+    workspace_path =
+      baseline_metadata
+      |> map_get(:workspace_path, "workspace_path")
+      |> normalize_workspace_root()
+
     if status == :ready do
       %{
         workspace_initialized: workspace_initialized,
@@ -553,7 +1327,11 @@ defmodule JidoCode.Setup.ProjectImport do
         default_workflow_registered: default_workflow_registered,
         agent_configuration_registered: agent_configuration_registered,
         status: :ready,
-        initialized_at: initialized_at
+        initialized_at: initialized_at,
+        synced_branch: synced_branch,
+        last_synced_at: last_synced_at,
+        workspace_environment: workspace_environment,
+        workspace_path: workspace_path
       }
     else
       nil
@@ -624,6 +1402,20 @@ defmodule JidoCode.Setup.ProjectImport do
     if is_map(project_record) and is_map(baseline_metadata), do: :ready, else: :blocked
   end
 
+  defp clone_or_sync_error?(error_type) do
+    normalized_error_type = normalize_error_type(error_type)
+
+    normalized_error_type in [
+      @clone_stage_error_type,
+      @baseline_sync_stage_error_type,
+      @clone_status_update_error_type
+    ] or
+      (is_binary(normalized_error_type) and
+         String.starts_with?(normalized_error_type, "workspace_")) or
+      (is_binary(normalized_error_type) and
+         String.starts_with?(normalized_error_type, "baseline_sync_"))
+  end
+
   defp default_baseline_status(true, true, true, true), do: :ready
   defp default_baseline_status(_, _, _, _), do: :blocked
 
@@ -639,6 +1431,16 @@ defmodule JidoCode.Setup.ProjectImport do
   defp normalize_import_mode("existing", _default), do: :existing
   defp normalize_import_mode(_import_mode, default), do: default
 
+  defp normalize_clone_status(:pending, _default), do: :pending
+  defp normalize_clone_status(:cloning, _default), do: :cloning
+  defp normalize_clone_status(:ready, _default), do: :ready
+  defp normalize_clone_status(:error, _default), do: :error
+  defp normalize_clone_status("pending", _default), do: :pending
+  defp normalize_clone_status("cloning", _default), do: :cloning
+  defp normalize_clone_status("ready", _default), do: :ready
+  defp normalize_clone_status("error", _default), do: :error
+  defp normalize_clone_status(_clone_status, default), do: default
+
   defp normalize_status(:ready, _default), do: :ready
   defp normalize_status(:blocked, _default), do: :blocked
   defp normalize_status("ready", _default), do: :ready
@@ -648,6 +1450,48 @@ defmodule JidoCode.Setup.ProjectImport do
   defp normalize_path_status(:ready, _default), do: :ready
   defp normalize_path_status("ready", _default), do: :ready
   defp normalize_path_status(_status, default), do: default
+
+  defp normalize_clone_status_history(history, fallback_datetime) when is_list(history) do
+    history
+    |> Enum.flat_map(fn
+      %{} = entry ->
+        status =
+          entry
+          |> map_get(:status, "status", :pending)
+          |> normalize_clone_status(:pending)
+
+        transitioned_at =
+          entry
+          |> map_get(:transitioned_at, "transitioned_at")
+          |> normalize_datetime(fallback_datetime)
+
+        [%{status: status, transitioned_at: transitioned_at}]
+
+      _other ->
+        []
+    end)
+  end
+
+  defp normalize_clone_status_history(_history, _fallback_datetime), do: []
+
+  defp serialize_clone_status_history(history) when is_list(history) do
+    Enum.map(history, fn entry ->
+      %{
+        "status" =>
+          entry
+          |> map_get(:status, "status", :pending)
+          |> normalize_clone_status(:pending)
+          |> Atom.to_string(),
+        "transitioned_at" =>
+          entry
+          |> map_get(:transitioned_at, "transitioned_at")
+          |> normalize_datetime(DateTime.utc_now() |> DateTime.truncate(:second))
+          |> DateTime.to_iso8601()
+      }
+    end)
+  end
+
+  defp serialize_clone_status_history(_history), do: []
 
   defp normalize_datetime(%DateTime{} = datetime, _default), do: datetime
 
@@ -659,6 +1503,19 @@ defmodule JidoCode.Setup.ProjectImport do
   end
 
   defp normalize_datetime(_datetime, default), do: default
+
+  defp normalize_optional_datetime(nil), do: nil
+
+  defp normalize_optional_datetime(value) do
+    case normalize_datetime(value, nil) do
+      %DateTime{} = datetime -> datetime
+      _other -> nil
+    end
+  end
+
+  defp serialize_optional_datetime(nil), do: nil
+  defp serialize_optional_datetime(%DateTime{} = datetime), do: DateTime.to_iso8601(datetime)
+  defp serialize_optional_datetime(_datetime), do: nil
 
   defp normalize_repository(repository, fallback) when is_binary(repository) do
     case String.trim(repository) do
@@ -689,8 +1546,60 @@ defmodule JidoCode.Setup.ProjectImport do
 
   defp normalize_branch_name(_value, fallback), do: fallback
 
+  defp normalize_workspace_environment(:sprite, _default), do: :sprite
+  defp normalize_workspace_environment(:local, _default), do: :local
+  defp normalize_workspace_environment(:cloud, _default), do: :sprite
+  defp normalize_workspace_environment("sprite", _default), do: :sprite
+  defp normalize_workspace_environment("local", _default), do: :local
+  defp normalize_workspace_environment("cloud", _default), do: :sprite
+  defp normalize_workspace_environment(_workspace_environment, default), do: default
+
+  defp normalize_workspace_root(workspace_root) when is_binary(workspace_root) do
+    workspace_root
+    |> String.trim()
+    |> case do
+      "" -> nil
+      normalized_workspace_root -> normalized_workspace_root
+    end
+  end
+
+  defp normalize_workspace_root(_workspace_root), do: nil
+
+  defp context_environment(context) do
+    context
+    |> map_get(:workspace_environment, "workspace_environment", :sprite)
+    |> normalize_workspace_environment(:sprite)
+  end
+
+  defp context_flag(context, key, default) do
+    context
+    |> map_get(key, Atom.to_string(key), default)
+    |> case do
+      true -> true
+      _other -> false
+    end
+  end
+
+  defp normalize_keyed_map(map) when is_map(map) do
+    Enum.reduce(map, %{}, fn
+      {key, value}, acc when is_atom(key) ->
+        Map.put(acc, Atom.to_string(key), value)
+
+      {key, value}, acc when is_binary(key) ->
+        Map.put(acc, key, value)
+
+      {key, value}, acc ->
+        Map.put(acc, to_string(key), value)
+    end)
+  end
+
+  defp normalize_keyed_map(_map), do: %{}
+
+  defp put_if_present(map, _key, nil), do: map
+  defp put_if_present(map, key, value), do: Map.put(map, key, value)
+
   defp normalize_detail(nil, :ready),
-    do: "Repository import is complete and baseline metadata is ready."
+    do: "Repository import is complete. Workspace clone and baseline sync are ready."
 
   defp normalize_detail(nil, :blocked),
     do: "Repository import is blocked until a valid repository is selected and import succeeds."
@@ -701,7 +1610,7 @@ defmodule JidoCode.Setup.ProjectImport do
   defp normalize_remediation(nil, :ready), do: "Project import is ready."
 
   defp normalize_remediation(nil, :blocked),
-    do: "Resolve project import validation failures and retry step 7."
+    do: "Resolve clone or baseline sync failures and retry step 7."
 
   defp normalize_remediation(remediation, _status)
        when is_binary(remediation) and remediation != "",
