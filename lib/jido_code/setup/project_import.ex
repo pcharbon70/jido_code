@@ -344,7 +344,6 @@ defmodule JidoCode.Setup.ProjectImport do
         create_attributes = %{
           owner: owner,
           name: name,
-          webhook_secret: generated_webhook_secret(),
           settings: merge_baseline_settings(%{}, checked_at)
         }
 
@@ -386,12 +385,6 @@ defmodule JidoCode.Setup.ProjectImport do
       "status" => "ready",
       "initialized_at" => DateTime.to_iso8601(checked_at)
     }
-  end
-
-  defp generated_webhook_secret do
-    24
-    |> :crypto.strong_rand_bytes()
-    |> Base.url_encode64(padding: false)
   end
 
   defp split_repository(selected_repository) when is_binary(selected_repository) do

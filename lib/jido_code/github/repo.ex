@@ -1,4 +1,6 @@
 defmodule JidoCode.GitHub.Repo do
+  require Logger
+
   use Ash.Resource,
     otp_app: :jido_code,
     domain: JidoCode.GitHub,
@@ -26,6 +28,13 @@ defmodule JidoCode.GitHub.Repo do
     define :list_enabled, action: :list_enabled
   end
 
+  @webhook_secret_placeholder "__managed_by_secret_ref__"
+  @plaintext_secret_error_type "plaintext_secret_persistence_blocked"
+  @plaintext_secret_policy "operational_secret_plaintext_forbidden"
+  @plaintext_secret_remediation """
+  Persist operational secrets through encrypted SecretRef entries and retry without plaintext secret fields.
+  """
+
   actions do
     defaults [:read, :destroy]
 
@@ -34,20 +43,20 @@ defmodule JidoCode.GitHub.Repo do
       primary? true
 
       change fn changeset, _ctx ->
-        owner = Ash.Changeset.get_attribute(changeset, :owner)
-        name = Ash.Changeset.get_attribute(changeset, :name)
-
-        if owner && name do
-          Ash.Changeset.force_change_attribute(changeset, :full_name, "#{owner}/#{name}")
-        else
-          changeset
-        end
+        changeset
+        |> reject_plaintext_secret_persistence()
+        |> assign_full_name()
       end
     end
 
     update :update do
       accept [:webhook_secret, :webhook_id, :settings, :enabled, :github_app_installation_id]
       primary? true
+      require_atomic? false
+
+      change fn changeset, _ctx ->
+        reject_plaintext_secret_persistence(changeset)
+      end
     end
 
     update :disable do
@@ -104,8 +113,9 @@ defmodule JidoCode.GitHub.Repo do
 
     attribute :webhook_secret, :string do
       allow_nil? false
+      default @webhook_secret_placeholder
       sensitive? true
-      description "Secret for verifying webhook signatures"
+      description "Placeholder marker; webhook secrets are stored via encrypted SecretRef entries"
     end
 
     attribute :webhook_id, :integer do
@@ -157,4 +167,80 @@ defmodule JidoCode.GitHub.Repo do
   identities do
     identity :unique_full_name, [:full_name]
   end
+
+  defp assign_full_name(changeset) do
+    owner = Ash.Changeset.get_attribute(changeset, :owner)
+    name = Ash.Changeset.get_attribute(changeset, :name)
+
+    if owner && name do
+      Ash.Changeset.force_change_attribute(changeset, :full_name, "#{owner}/#{name}")
+    else
+      changeset
+    end
+  end
+
+  defp reject_plaintext_secret_persistence(changeset) do
+    if plaintext_webhook_secret_input?(changeset) do
+      emit_plaintext_secret_audit(changeset)
+
+      Ash.Changeset.add_error(
+        changeset,
+        field: :webhook_secret,
+        message: "plaintext webhook secret persistence is forbidden",
+        type: @plaintext_secret_error_type,
+        error_type: @plaintext_secret_error_type,
+        policy: @plaintext_secret_policy,
+        remediation: String.trim(@plaintext_secret_remediation)
+      )
+    else
+      changeset
+    end
+  end
+
+  defp plaintext_webhook_secret_input?(changeset) do
+    params = changeset.params || %{}
+    Map.has_key?(params, :webhook_secret) or Map.has_key?(params, "webhook_secret")
+  end
+
+  defp emit_plaintext_secret_audit(changeset) do
+    actor = actor_from_changeset(changeset)
+    actor_id = actor_identifier(actor, :id)
+    actor_email = actor_identifier(actor, :email)
+    action_name = changeset.action && changeset.action.name
+
+    Logger.warning(
+      "security_audit=blocked_plaintext_secret_persistence resource=github_repo field=webhook_secret action=#{action_name} actor_id=#{actor_id} actor_email=#{actor_email}"
+    )
+  end
+
+  defp actor_from_changeset(changeset) do
+    context = changeset.context || %{}
+
+    case context do
+      %{private: %{actor: actor}} when not is_nil(actor) ->
+        actor
+
+      _other ->
+        Map.get(context, :actor)
+    end
+  end
+
+  defp actor_identifier(%{} = actor, field) do
+    actor
+    |> Map.get(field)
+    |> normalize_actor_identifier()
+  end
+
+  defp actor_identifier(_actor, _field), do: "unknown"
+
+  defp normalize_actor_identifier(nil), do: "unknown"
+
+  defp normalize_actor_identifier(value) when is_binary(value) do
+    case String.trim(value) do
+      "" -> "unknown"
+      normalized_value -> normalized_value
+    end
+  end
+
+  defp normalize_actor_identifier(value), do: to_string(value)
 end

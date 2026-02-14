@@ -151,11 +151,9 @@ defmodule JidoCodeWeb.SettingsLive do
             label="Repository Name"
             placeholder="e.g., jido"
           />
-          <.text_field
-            field={@form[:webhook_secret]}
-            label="Webhook Secret"
-            placeholder="A secret string for webhook verification"
-          />
+          <p class="text-sm text-base-content/60">
+            Webhook secrets are managed in Security settings via encrypted SecretRef entries.
+          </p>
           <div class="flex justify-end gap-3 mt-6">
             <.button type="button" variant="outline" phx-click="close_add_modal">
               Cancel

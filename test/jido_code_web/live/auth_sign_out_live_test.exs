@@ -16,7 +16,7 @@ defmodule JidoCodeWeb.AuthSignOutLiveTest do
     sign_out_response = get(authed_conn, ~p"/sign-out")
 
     assert redirected_to(sign_out_response, 302) == "/"
-    assert get_flash(sign_out_response, :info) == "You are now signed out"
+    assert Phoenix.Flash.get(sign_out_response.assigns.flash, :info) == "You are now signed out"
     assert get_session(sign_out_response, "user_token") == nil
 
     assert {:error, {:redirect, %{to: "/sign-in"}}} =
@@ -42,7 +42,7 @@ defmodule JidoCodeWeb.AuthSignOutLiveTest do
 
     assert redirected_to(sign_out_response, 302) == "/"
 
-    assert get_flash(sign_out_response, :error) ==
+    assert Phoenix.Flash.get(sign_out_response.assigns.flash, :error) ==
              "Sign-out could not complete. Please retry; your current session is still active."
 
     assert get_session(sign_out_response, "user_token") == session_token

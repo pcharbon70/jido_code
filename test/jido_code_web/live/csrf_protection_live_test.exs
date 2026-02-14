@@ -56,8 +56,7 @@ defmodule JidoCodeWeb.CsrfProtectionLiveTest do
     |> form("#add-repo-modal form", %{
       "form" => %{
         "owner" => owner,
-        "name" => name,
-        "webhook_secret" => "csrf-secret-#{unique_suffix}"
+        "name" => name
       }
     })
     |> render_submit()
