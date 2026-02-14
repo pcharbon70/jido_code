@@ -20,22 +20,40 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
   @branch_setup_error_type "workflow_commit_and_pr_branch_setup_failed"
   @branch_setup_operation "setup_run_branch"
   @branch_setup_remediation "Resolve branch creation preconditions and retry CommitAndPR shipping."
+  @workspace_policy_error_type "workflow_commit_and_pr_workspace_policy_failed"
+  @workspace_policy_operation "validate_workspace_cleanliness"
+  @workspace_policy_stage "pre_ship_workspace_policy"
+  @workspace_policy_remediation """
+  Clean or discard unintended workspace changes, then retry CommitAndPR shipping.
+  """
+  @workspace_policy_check_id "workspace_cleanliness"
+  @workspace_policy_check_name "Workspace cleanliness policy check"
+  @workspace_policy_mode "clean_room"
+  @required_workspace_state "clean"
+  @blocked_shipping_actions ["commit", "push", "create_pr"]
 
   @impl true
   def execute(_sprite_client, args, opts) when is_map(args) and is_list(opts) do
     with {:ok, branch_context} <- derive_branch_context(args),
-         {:ok, branch_setup} <- setup_branch(branch_context, opts) do
+         {:ok, branch_setup} <- setup_branch(branch_context, opts),
+         {:ok, workspace_policy_check} <- validate_workspace_cleanliness(args, branch_context) do
       maybe_probe_commit(branch_context, opts)
 
       {:ok,
        %{
          run_artifacts: %{
            branch_name: Map.fetch!(branch_context, :branch_name),
-           branch_derivation: Map.fetch!(branch_context, :branch_derivation)
+           branch_derivation: Map.fetch!(branch_context, :branch_derivation),
+           policy_checks: %{
+             workspace_cleanliness: workspace_policy_check
+           }
          },
          branch_setup: branch_setup,
+         policy_checks: %{
+           workspace_cleanliness: workspace_policy_check
+         },
          shipping_flow: %{
-           completed_stage: "branch_setup",
+           completed_stage: "workspace_policy_check",
            next_stage: "commit_changes"
          }
        }}
@@ -197,6 +215,49 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     end
   end
 
+  defp validate_workspace_cleanliness(args, branch_context)
+       when is_map(args) and is_map(branch_context) do
+    workspace_policy_check = build_workspace_policy_check(args, branch_context)
+
+    if workspace_policy_check.status == "passed" do
+      {:ok, workspace_policy_check}
+    else
+      {:error,
+       workspace_policy_error(
+         workspace_policy_reason_type(workspace_policy_check),
+         Map.get(workspace_policy_check, :detail, "Workspace cleanliness policy blocked shipping."),
+         branch_context,
+         workspace_policy_check
+       )}
+    end
+  end
+
+  defp validate_workspace_cleanliness(_args, branch_context) do
+    fallback_policy_check =
+      %{
+        id: @workspace_policy_check_id,
+        name: @workspace_policy_check_name,
+        status: "failed",
+        policy_mode: @workspace_policy_mode,
+        required_state: @required_workspace_state,
+        observed_state: "unknown",
+        environment_mode: "cloud",
+        detail: "Workspace cleanliness state is unavailable and shipping is blocked.",
+        remediation: @workspace_policy_remediation,
+        run_metadata: %{},
+        step_metadata: default_step_metadata(),
+        checked_at: timestamp_now()
+      }
+
+    {:error,
+     workspace_policy_error(
+       "workspace_state_unknown",
+       "Workspace cleanliness state is unavailable and shipping is blocked.",
+       branch_context,
+       fallback_policy_check
+     )}
+  end
+
   defp maybe_probe_commit(branch_context, opts) when is_map(branch_context) and is_list(opts) do
     case Keyword.get(opts, :commit_probe) do
       commit_probe when is_function(commit_probe, 1) ->
@@ -269,6 +330,163 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     |> String.slice(0, @hash_suffix_length)
   end
 
+  defp build_workspace_policy_check(args, branch_context)
+       when is_map(args) and is_map(branch_context) do
+    environment_mode = environment_mode_from_args(args)
+    observed_state = workspace_state_from_args(args)
+    status = workspace_policy_status(observed_state)
+    branch_derivation = branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    %{
+      id: @workspace_policy_check_id,
+      name: @workspace_policy_check_name,
+      status: status,
+      policy_mode: @workspace_policy_mode,
+      required_state: @required_workspace_state,
+      observed_state: observed_state,
+      environment_mode: environment_mode,
+      detail: workspace_policy_detail(status, environment_mode, observed_state),
+      remediation: workspace_policy_remediation(status),
+      run_metadata: %{
+        workflow_name: branch_derivation |> map_get(:workflow_name, "workflow_name") |> normalize_optional_string(),
+        run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
+        branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+        environment_mode: environment_mode
+      },
+      step_metadata: default_step_metadata(),
+      checked_at: timestamp_now()
+    }
+  end
+
+  defp workspace_policy_status("clean"), do: "passed"
+  defp workspace_policy_status(_observed_state), do: "failed"
+
+  defp workspace_policy_detail("passed", environment_mode, "clean") do
+    "Workspace is clean and satisfies #{environment_mode} clean-room shipping policy."
+  end
+
+  defp workspace_policy_detail("failed", environment_mode, "dirty") do
+    "#{String.capitalize(environment_mode)} mode requires a clean workspace before commit, push, and PR."
+  end
+
+  defp workspace_policy_detail("failed", environment_mode, _observed_state) do
+    "#{String.capitalize(environment_mode)} mode requires a clean workspace, but workspace cleanliness was unknown."
+  end
+
+  defp workspace_policy_remediation("passed"), do: "Workspace meets clean-room shipping requirements."
+  defp workspace_policy_remediation(_status), do: @workspace_policy_remediation
+
+  defp workspace_policy_reason_type(%{observed_state: "dirty"}), do: "workspace_dirty"
+  defp workspace_policy_reason_type(%{observed_state: "unknown"}), do: "workspace_state_unknown"
+  defp workspace_policy_reason_type(_workspace_policy_check), do: "workspace_policy_failed"
+
+  defp environment_mode_from_args(args) when is_map(args) do
+    args
+    |> map_get(
+      :environment_mode,
+      "environment_mode",
+      map_get(args, :workspace_mode, "workspace_mode", map_get(args, :mode, "mode", "cloud"))
+    )
+    |> normalize_environment_mode()
+  end
+
+  defp environment_mode_from_args(_args), do: "cloud"
+
+  defp workspace_state_from_args(args) when is_map(args) do
+    explicit_state =
+      args
+      |> map_get(:workspace_state, "workspace_state")
+      |> normalize_workspace_state()
+
+    status_state =
+      args
+      |> map_get(:workspace_status, "workspace_status")
+      |> normalize_workspace_state()
+
+    clean_flag_state =
+      args
+      |> map_get(
+        :workspace_clean,
+        "workspace_clean",
+        map_get(args, :workspace_is_clean, "workspace_is_clean")
+      )
+      |> normalize_workspace_clean_flag()
+
+    explicit_state || status_state || clean_flag_state || "unknown"
+  end
+
+  defp workspace_state_from_args(_args), do: "unknown"
+
+  defp normalize_environment_mode(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        "cloud"
+
+      normalized_mode ->
+        case String.downcase(normalized_mode) do
+          "local" -> "local"
+          "cloud" -> "cloud"
+          "sprite" -> "cloud"
+          _other -> "cloud"
+        end
+    end
+  end
+
+  defp normalize_workspace_state(value) when is_boolean(value),
+    do: normalize_workspace_clean_flag(value)
+
+  defp normalize_workspace_state(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        nil
+
+      normalized_state ->
+        case String.downcase(normalized_state) do
+          "clean" -> "clean"
+          "ready" -> "clean"
+          "pristine" -> "clean"
+          "dirty" -> "dirty"
+          "modified" -> "dirty"
+          "changes" -> "dirty"
+          "changes_present" -> "dirty"
+          _other -> nil
+        end
+    end
+  end
+
+  defp normalize_workspace_clean_flag(true), do: "clean"
+  defp normalize_workspace_clean_flag(false), do: "dirty"
+
+  defp normalize_workspace_clean_flag(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        nil
+
+      normalized_value ->
+        case String.downcase(normalized_value) do
+          "true" -> "clean"
+          "false" -> "dirty"
+          "1" -> "clean"
+          "0" -> "dirty"
+          _other -> nil
+        end
+    end
+  end
+
+  defp default_step_metadata do
+    %{
+      step: "CommitAndPR",
+      stage: @workspace_policy_stage,
+      operation: @workspace_policy_operation
+    }
+  end
+
   defp branch_setup_error(reason_type, detail, branch_context, reason \\ nil) do
     %{
       error_type: @branch_setup_error_type,
@@ -280,8 +498,34 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
       halted_before_commit: true,
       branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
       branch_derivation: branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map(),
-      timestamp: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+      timestamp: timestamp_now()
     }
+  end
+
+  defp workspace_policy_error(reason_type, detail, branch_context, workspace_policy_check, reason \\ nil) do
+    %{
+      error_type: @workspace_policy_error_type,
+      operation: @workspace_policy_operation,
+      reason_type: normalize_reason_type(reason_type),
+      detail: format_failure_detail(detail, reason),
+      remediation:
+        workspace_policy_check
+        |> map_get(:remediation, "remediation", @workspace_policy_remediation)
+        |> normalize_optional_string() || @workspace_policy_remediation,
+      blocked_stage: "commit_changes",
+      blocked_actions: @blocked_shipping_actions,
+      halted_before_commit: true,
+      halted_before_push: true,
+      halted_before_pr: true,
+      branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+      branch_derivation: branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map(),
+      policy_check: normalize_map(workspace_policy_check),
+      timestamp: timestamp_now()
+    }
+  end
+
+  defp timestamp_now do
+    DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
   end
 
   defp format_failure_detail(detail, nil), do: detail
