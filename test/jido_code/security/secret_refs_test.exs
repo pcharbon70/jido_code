@@ -11,8 +11,12 @@ defmodule JidoCode.Security.SecretRefsTest do
   setup do
     original_key = Application.get_env(:jido_code, :secret_ref_encryption_key, :__missing__)
 
+    original_rotation_validator =
+      Application.get_env(:jido_code, :provider_credential_rotation_validator, :__missing__)
+
     on_exit(fn ->
       restore_env(:secret_ref_encryption_key, original_key)
+      restore_env(:provider_credential_rotation_validator, original_rotation_validator)
     end)
 
     Application.put_env(:jido_code, :secret_ref_encryption_key, @valid_test_encryption_key)
@@ -173,6 +177,91 @@ defmodule JidoCode.Security.SecretRefsTest do
       |> Ash.Query.limit(1)
 
     assert {:ok, []} = Ash.read(query, domain: Security, authorize?: false)
+  end
+
+  test "rotate_provider_credential swaps versions atomically while in-flight context keeps prior version" do
+    provider_name = SecretRefs.provider_secret_ref_name(:anthropic)
+    initial_value = "sk-ant-initial-#{System.unique_integer([:positive])}"
+    rotated_value = "sk-ant-rotated-#{System.unique_integer([:positive])}"
+
+    assert {:ok, _metadata} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: provider_name,
+               value: initial_value,
+               source: :onboarding
+             })
+
+    assert {:ok, in_flight_context} = SecretRefs.provider_credential_context(:anthropic)
+
+    Application.put_env(:jido_code, :provider_credential_rotation_validator, fn
+      %{stage: :before} ->
+        {:ok, "Existing credential context validated."}
+
+      %{stage: :after} ->
+        {:ok, "Rotated credential validated."}
+    end)
+
+    assert {:ok, rotation_report} =
+             SecretRefs.rotate_provider_credential(%{
+               provider: :anthropic,
+               value: rotated_value
+             })
+
+    assert rotation_report.before.key_version == in_flight_context.key_version
+    assert rotation_report.after.key_version == in_flight_context.key_version + 1
+    assert rotation_report.before.verification.status == :passed
+    assert rotation_report.after.verification.status == :passed
+    assert rotation_report.rollback_performed == false
+    assert rotation_report.continuity_alarm == false
+
+    assert {:ok, new_context} = SecretRefs.provider_credential_context(:anthropic)
+    assert new_context.key_version == in_flight_context.key_version + 1
+    assert new_context.ciphertext != in_flight_context.ciphertext
+    assert in_flight_context.key_version == 1
+  end
+
+  test "rotate_provider_credential rolls references back when post-rotation validation fails" do
+    provider_name = SecretRefs.provider_secret_ref_name(:openai)
+    initial_value = "sk-initial-#{System.unique_integer([:positive])}"
+    rotated_value = "sk-rotated-#{System.unique_integer([:positive])}"
+
+    assert {:ok, _metadata} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: provider_name,
+               value: initial_value,
+               source: :onboarding
+             })
+
+    assert {:ok, context_before_rotation} = SecretRefs.provider_credential_context(:openai)
+
+    Application.put_env(:jido_code, :provider_credential_rotation_validator, fn
+      %{stage: :before} ->
+        {:ok, "Existing credential context validated."}
+
+      %{stage: :after} ->
+        {:error, :provider_health_check_failed}
+    end)
+
+    assert {:error, typed_error} =
+             SecretRefs.rotate_provider_credential(%{
+               provider: :openai,
+               value: rotated_value
+             })
+
+    assert typed_error.error_type == "provider_rotation_validation_failed"
+    assert typed_error.message =~ "rolled back to the prior version"
+    assert typed_error.recovery_instruction =~ "rolled back"
+    assert typed_error.rotation_report.rollback_performed == true
+    assert typed_error.rotation_report.before.verification.status == :passed
+    assert typed_error.rotation_report.after.verification.status == :failed
+    assert typed_error.rotation_report.continuity_alarm == false
+
+    assert {:ok, context_after_rotation} = SecretRefs.provider_credential_context(:openai)
+    assert context_after_rotation.key_version == context_before_rotation.key_version
+    assert context_after_rotation.ciphertext == context_before_rotation.ciphertext
+    assert context_after_rotation.source == context_before_rotation.source
   end
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)

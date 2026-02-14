@@ -171,6 +171,121 @@ defmodule JidoCodeWeb.SecuritySettingsLiveTest do
     refute has_element?(view, "#settings-security-secret-metadata", rotated_plaintext_value)
   end
 
+  test "security tab rotates provider credentials with before and after verification status", %{
+    conn: _conn
+  } do
+    original_validator =
+      Application.get_env(:jido_code, :provider_credential_rotation_validator, :__missing__)
+
+    on_exit(fn ->
+      restore_env(:provider_credential_rotation_validator, original_validator)
+    end)
+
+    Application.put_env(:jido_code, :provider_credential_rotation_validator, fn
+      %{stage: :before} ->
+        {:ok, "Pre-rotation validation passed."}
+
+      %{stage: :after} ->
+        {:ok, "Post-rotation validation passed."}
+    end)
+
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token, _owner} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    provider_secret_name = SecretRefs.provider_secret_ref_name(:anthropic)
+
+    assert {:ok, _metadata} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: provider_secret_name,
+               value: "sk-ant-initial-#{System.unique_integer([:positive])}",
+               source: :onboarding
+             })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/settings/security", on_error: :warn)
+
+    view
+    |> form("#settings-security-provider-rotation-form", %{
+      "security_provider_rotation" => %{
+        "provider" => "anthropic",
+        "value" => "sk-ant-rotated-#{System.unique_integer([:positive])}"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#settings-security-provider-rotation-before-status", "Passed")
+    assert has_element?(view, "#settings-security-provider-rotation-after-status", "Passed")
+    assert has_element?(view, "#settings-security-provider-rotation-rollback-status", "No")
+    assert has_element?(view, "#settings-security-provider-rotation-continuity-alarm", "None")
+
+    assert {:ok, provider_context} = SecretRefs.provider_credential_context(:anthropic)
+    assert provider_context.key_version == 2
+  end
+
+  test "security tab rolls provider credential references back when post-rotation validation fails", %{
+    conn: _conn
+  } do
+    original_validator =
+      Application.get_env(:jido_code, :provider_credential_rotation_validator, :__missing__)
+
+    on_exit(fn ->
+      restore_env(:provider_credential_rotation_validator, original_validator)
+    end)
+
+    Application.put_env(:jido_code, :provider_credential_rotation_validator, fn
+      %{stage: :before} ->
+        {:ok, "Pre-rotation validation passed."}
+
+      %{stage: :after} ->
+        {:error, :provider_unreachable}
+    end)
+
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token, _owner} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    provider_secret_name = SecretRefs.provider_secret_ref_name(:openai)
+
+    assert {:ok, _metadata} =
+             SecretRefs.persist_operational_secret(%{
+               scope: :integration,
+               name: provider_secret_name,
+               value: "sk-initial-#{System.unique_integer([:positive])}",
+               source: :onboarding
+             })
+
+    assert {:ok, context_before_rotation} = SecretRefs.provider_credential_context(:openai)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/settings/security", on_error: :warn)
+
+    view
+    |> form("#settings-security-provider-rotation-form", %{
+      "security_provider_rotation" => %{
+        "provider" => "openai",
+        "value" => "sk-rotated-#{System.unique_integer([:positive])}"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(
+             view,
+             "#settings-security-provider-rotation-error-type",
+             "provider_rotation_validation_failed"
+           )
+
+    assert has_element?(view, "#settings-security-provider-rotation-before-status", "Passed")
+    assert has_element?(view, "#settings-security-provider-rotation-after-status", "Failed")
+    assert has_element?(view, "#settings-security-provider-rotation-rollback-status", "Yes")
+    assert has_element?(view, "#settings-security-provider-rotation-continuity-alarm", "None")
+
+    assert {:ok, context_after_rotation} = SecretRefs.provider_credential_context(:openai)
+    assert context_after_rotation.key_version == context_before_rotation.key_version
+    assert context_after_rotation.ciphertext == context_before_rotation.ciphertext
+  end
+
   test "security tab blocks secret persistence with typed remediation when encryption config is missing",
        %{conn: _conn} do
     original_key = Application.get_env(:jido_code, :secret_ref_encryption_key, :__missing__)

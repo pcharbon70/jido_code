@@ -28,7 +28,11 @@ defmodule JidoCodeWeb.SettingsLive do
       |> assign(:security_secret_refs, [])
       |> assign(:security_secret_error, nil)
       |> assign(:security_secret_form, empty_security_secret_form())
+      |> assign(:security_provider_rotation_error, nil)
+      |> assign(:security_provider_rotation_report, nil)
+      |> assign(:security_provider_rotation_form, empty_security_provider_rotation_form())
       |> assign(:secret_scope_options, @secret_scope_options)
+      |> assign(:provider_rotation_options, SecretRefs.provider_rotation_options())
       |> stream(:repos, repos)
 
     {:ok, socket}
@@ -126,6 +130,10 @@ defmodule JidoCodeWeb.SettingsLive do
                   security_secret_error={@security_secret_error}
                   security_secret_form={@security_secret_form}
                   secret_scope_options={@secret_scope_options}
+                  security_provider_rotation_error={@security_provider_rotation_error}
+                  security_provider_rotation_report={@security_provider_rotation_report}
+                  security_provider_rotation_form={@security_provider_rotation_form}
+                  provider_rotation_options={@provider_rotation_options}
                 />
               <% _ -> %>
                 <.github_tab repos={@streams.repos} show_add_modal={@show_add_modal} form={@form} />
@@ -454,6 +462,120 @@ defmodule JidoCodeWeb.SettingsLive do
         </div>
       </.card>
 
+      <.card id="settings-security-provider-rotation" padding="medium" rounded="large">
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-lg font-semibold">Provider Credential Rotation</h3>
+            <p class="text-sm text-base-content/70">
+              Rotate provider credentials with atomic reference updates and rollback protection.
+            </p>
+          </div>
+
+          <.card
+            :if={@security_provider_rotation_error}
+            id="settings-security-provider-rotation-error"
+            padding="medium"
+            rounded="large"
+            class="border border-warning/50 bg-warning/10"
+          >
+            <p id="settings-security-provider-rotation-error-type" class="text-sm font-medium">
+              Typed error: {@security_provider_rotation_error.error_type}
+            </p>
+            <p id="settings-security-provider-rotation-error-message" class="text-sm mt-1">
+              {@security_provider_rotation_error.message}
+            </p>
+            <p id="settings-security-provider-rotation-error-recovery" class="text-sm mt-1">
+              {@security_provider_rotation_error.recovery_instruction}
+            </p>
+          </.card>
+
+          <.form
+            id="settings-security-provider-rotation-form"
+            for={@security_provider_rotation_form}
+            phx-submit="rotate_security_provider_credential"
+            class="grid gap-4 md:grid-cols-2"
+          >
+            <.input
+              id="settings-security-provider-rotation-provider"
+              field={@security_provider_rotation_form[:provider]}
+              type="select"
+              options={@provider_rotation_options}
+              label="Provider"
+            />
+            <.input
+              id="settings-security-provider-rotation-value"
+              field={@security_provider_rotation_form[:value]}
+              type="password"
+              label="New credential value"
+              placeholder="Never shown after rotation"
+            />
+            <div class="md:col-span-2">
+              <.button id="settings-security-provider-rotation-submit" type="submit" color="primary">
+                Rotate provider credential
+              </.button>
+            </div>
+          </.form>
+
+          <.card
+            :if={@security_provider_rotation_report}
+            id="settings-security-provider-rotation-report"
+            padding="medium"
+            rounded="large"
+          >
+            <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Provider</dt>
+                <dd id="settings-security-provider-rotation-provider-value" class="font-medium">
+                  {@security_provider_rotation_report.provider}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Credential Name</dt>
+                <dd id="settings-security-provider-rotation-name-value" class="font-medium">
+                  {@security_provider_rotation_report.name}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Before Version</dt>
+                <dd id="settings-security-provider-rotation-before-version" class="font-medium">
+                  {@security_provider_rotation_report.before.key_version}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Before Verification</dt>
+                <dd id="settings-security-provider-rotation-before-status" class="font-medium">
+                  {provider_rotation_verification_label(@security_provider_rotation_report.before.verification.status)}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">After Version</dt>
+                <dd id="settings-security-provider-rotation-after-version" class="font-medium">
+                  {@security_provider_rotation_report.after.key_version}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">After Verification</dt>
+                <dd id="settings-security-provider-rotation-after-status" class="font-medium">
+                  {provider_rotation_verification_label(@security_provider_rotation_report.after.verification.status)}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Rollback</dt>
+                <dd id="settings-security-provider-rotation-rollback-status" class="font-medium">
+                  {provider_rotation_rollback_label(@security_provider_rotation_report.rollback_performed)}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Continuity Alarm</dt>
+                <dd id="settings-security-provider-rotation-continuity-alarm" class="font-medium">
+                  {provider_rotation_alarm_label(@security_provider_rotation_report.continuity_alarm)}
+                </dd>
+              </div>
+            </dl>
+          </.card>
+        </div>
+      </.card>
+
       <div id="settings-security-token-status" class="space-y-3">
         <h3 class="text-lg font-semibold">Session Tokens</h3>
 
@@ -692,6 +814,43 @@ defmodule JidoCodeWeb.SettingsLive do
     end
   end
 
+  def handle_event("rotate_security_provider_credential", %{"security_provider_rotation" => params}, socket) do
+    case SecretRefs.rotate_provider_credential(params) do
+      {:ok, rotation_report} ->
+        socket =
+          socket
+          |> assign(:security_provider_rotation_error, nil)
+          |> assign(:security_provider_rotation_report, rotation_report)
+          |> assign(
+            :security_provider_rotation_form,
+            empty_security_provider_rotation_form(%{
+              "provider" => Map.get(params, "provider", "anthropic"),
+              "value" => ""
+            })
+          )
+          |> load_security_secret_metadata()
+          |> put_flash(:info, "Provider credential rotated.")
+
+        {:noreply, socket}
+
+      {:error, typed_error} ->
+        socket =
+          socket
+          |> assign(:security_provider_rotation_error, typed_error)
+          |> assign(:security_provider_rotation_report, Map.get(typed_error, :rotation_report))
+          |> assign(
+            :security_provider_rotation_form,
+            empty_security_provider_rotation_form(%{
+              "provider" => Map.get(params, "provider", "anthropic"),
+              "value" => ""
+            })
+          )
+          |> load_security_secret_metadata()
+
+        {:noreply, socket}
+    end
+  end
+
   def handle_event("revoke_security_token", %{"jti" => jti}, socket) do
     owner_id = current_owner_id(socket)
 
@@ -805,6 +964,12 @@ defmodule JidoCodeWeb.SettingsLive do
     to_form(params, as: :security_secret)
   end
 
+  defp empty_security_provider_rotation_form(params \\ %{}) do
+    defaults = %{"provider" => "anthropic", "value" => ""}
+    params = Map.merge(defaults, params)
+    to_form(params, as: :security_provider_rotation)
+  end
+
   defp security_audit_message(audit) do
     source_label =
       case Map.get(audit, :source) do
@@ -833,4 +998,14 @@ defmodule JidoCodeWeb.SettingsLive do
       alert_message: nil
     }
   end
+
+  defp provider_rotation_verification_label(:passed), do: "Passed"
+  defp provider_rotation_verification_label(:failed), do: "Failed"
+  defp provider_rotation_verification_label(_status), do: "Unavailable"
+
+  defp provider_rotation_rollback_label(true), do: "Yes"
+  defp provider_rotation_rollback_label(false), do: "No"
+
+  defp provider_rotation_alarm_label(true), do: "Raised"
+  defp provider_rotation_alarm_label(false), do: "None"
 end
