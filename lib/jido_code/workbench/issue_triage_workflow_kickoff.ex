@@ -1,0 +1,582 @@
+defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
+  @moduledoc """
+  Validates policy and launches issue triage workflow runs from workbench issue quick actions.
+  """
+
+  @fallback_row_id_prefix "workbench-row-"
+  @workflow_name "issue_triage"
+
+  @default_policy "issue_triage_manual_launch"
+  @default_error_type "workbench_issue_triage_workflow_kickoff_failed"
+  @validation_error_type "workbench_issue_triage_workflow_validation_failed"
+  @policy_error_type "workbench_issue_triage_policy_blocked"
+
+  @validation_remediation """
+  Select a valid imported project issue row and retry triage kickoff from workbench.
+  """
+
+  @policy_remediation """
+  Enable issue triage policy for this project and retry from workbench.
+  """
+
+  @launcher_remediation """
+  Verify issue triage workflow runtime setup and retry kickoff from workbench.
+  """
+
+  @type kickoff_error :: %{
+          error_type: String.t(),
+          detail: String.t(),
+          remediation: String.t()
+        }
+
+  @type policy_state :: %{
+          status: :enabled | :disabled,
+          enabled: boolean(),
+          policy: String.t(),
+          error_type: String.t() | nil,
+          detail: String.t() | nil,
+          remediation: String.t() | nil
+        }
+
+  @type kickoff_run :: %{
+          run_id: String.t(),
+          workflow_name: String.t(),
+          project_id: String.t(),
+          project_name: String.t(),
+          context_item_type: :issue,
+          context_item_label: String.t(),
+          context_item_url: String.t() | nil,
+          trigger: map(),
+          initiating_actor: map(),
+          detail_path: String.t(),
+          started_at: DateTime.t()
+        }
+
+  @spec kickoff(map() | nil, term(), map() | nil) :: {:ok, kickoff_run()} | {:error, kickoff_error()}
+  def kickoff(project_row, context_item_type, initiating_actor) do
+    with {:ok, project_scope} <- normalize_project_scope(project_row),
+         {:ok, normalized_context_item_type} <- normalize_context_item_type(context_item_type),
+         {:ok, triage_policy_state} <- ensure_policy_enabled(project_row),
+         normalized_actor <- normalize_initiating_actor(initiating_actor),
+         kickoff_request <-
+           build_kickoff_request(
+             project_scope,
+             normalized_context_item_type,
+             normalized_actor,
+             triage_policy_state
+           ),
+         {:ok, kickoff_run} <- invoke_launcher(kickoff_request) do
+      {:ok, kickoff_run}
+    else
+      {:error, error} ->
+        {:error, normalize_error(error)}
+
+      other ->
+        {:error,
+         kickoff_error(
+           @default_error_type,
+           "Issue triage workflow kickoff failed with an unexpected result (#{inspect(other)}).",
+           @launcher_remediation
+         )}
+    end
+  end
+
+  @spec policy_state(map() | nil) :: policy_state()
+  def policy_state(project_row) when is_map(project_row) do
+    case map_get(project_row, :issue_triage_policy, "issue_triage_policy") do
+      triage_policy when is_map(triage_policy) ->
+        normalize_policy_state(triage_policy)
+
+      _other ->
+        project_row
+        |> map_get(:settings, "settings", %{})
+        |> normalize_map()
+        |> policy_state_from_settings()
+    end
+  end
+
+  def policy_state(_project_row), do: enabled_policy_state()
+
+  @doc false
+  @spec default_launcher(map()) :: {:ok, map()}
+  def default_launcher(_kickoff_request) do
+    {:ok,
+     %{
+       run_id: generated_run_id(),
+       started_at: DateTime.utc_now() |> DateTime.truncate(:second)
+     }}
+  end
+
+  defp invoke_launcher(kickoff_request) do
+    launcher =
+      Application.get_env(
+        :jido_code,
+        :workbench_issue_triage_workflow_launcher,
+        &__MODULE__.default_launcher/1
+      )
+
+    if is_function(launcher, 1) do
+      safe_invoke_launcher(launcher, kickoff_request)
+    else
+      {:error,
+       kickoff_error(
+         @default_error_type,
+         "Workbench issue triage workflow launcher configuration is invalid.",
+         @launcher_remediation
+       )}
+    end
+  end
+
+  defp safe_invoke_launcher(launcher, kickoff_request) do
+    try do
+      case launcher.(kickoff_request) do
+        {:ok, run_result} ->
+          normalize_run_result(run_result, kickoff_request)
+
+        {:error, error} ->
+          {:error, normalize_error(error)}
+
+        other ->
+          {:error,
+           kickoff_error(
+             @default_error_type,
+             "Issue triage workflow launcher returned an invalid result (#{inspect(other)}).",
+             @launcher_remediation
+           )}
+      end
+    rescue
+      exception ->
+        {:error,
+         kickoff_error(
+           @default_error_type,
+           "Issue triage workflow launcher crashed (#{Exception.message(exception)}).",
+           @launcher_remediation
+         )}
+    catch
+      kind, reason ->
+        {:error,
+         kickoff_error(
+           @default_error_type,
+           "Issue triage workflow launcher threw #{inspect({kind, reason})}.",
+           @launcher_remediation
+         )}
+    end
+  end
+
+  defp normalize_run_result(run_result, kickoff_request) do
+    run_id = extract_run_id(run_result)
+
+    if is_binary(run_id) do
+      started_at =
+        run_result
+        |> map_get(:started_at, "started_at")
+        |> normalize_optional_datetime() ||
+          DateTime.utc_now() |> DateTime.truncate(:second)
+
+      context_item = Map.fetch!(kickoff_request, :context_item)
+      project_id = Map.fetch!(kickoff_request, :project_id)
+
+      {:ok,
+       %{
+         run_id: run_id,
+         workflow_name: Map.fetch!(kickoff_request, :workflow_name),
+         project_id: project_id,
+         project_name: Map.fetch!(kickoff_request, :project_name),
+         context_item_type: Map.fetch!(context_item, :type),
+         context_item_label: Map.fetch!(context_item, :label),
+         context_item_url: Map.get(context_item, :github_url),
+         trigger: Map.fetch!(kickoff_request, :trigger),
+         initiating_actor: Map.fetch!(kickoff_request, :initiating_actor),
+         detail_path: "/projects/#{URI.encode(project_id)}/runs/#{URI.encode(run_id)}",
+         started_at: started_at
+       }}
+    else
+      {:error,
+       kickoff_error(
+         @default_error_type,
+         "Issue triage workflow kickoff did not return a run identifier.",
+         @launcher_remediation
+       )}
+    end
+  end
+
+  defp extract_run_id(run_result) when is_binary(run_result),
+    do: normalize_optional_string(run_result)
+
+  defp extract_run_id(run_result) when is_map(run_result) do
+    run_result
+    |> map_get(:run_id, "run_id")
+    |> normalize_optional_string()
+  end
+
+  defp extract_run_id(_run_result), do: nil
+
+  defp build_kickoff_request(project_scope, :issue = context_item_type, initiating_actor, triage_policy_state) do
+    project_id = Map.fetch!(project_scope, :project_id)
+
+    %{
+      workflow_name: @workflow_name,
+      project_id: project_id,
+      project_name: Map.fetch!(project_scope, :project_name),
+      trigger: %{
+        source: "workbench",
+        mode: "manual",
+        source_row: %{
+          route: "/workbench",
+          project_id: project_id,
+          context_item_type: context_item_type
+        },
+        policy: %{
+          name: Map.fetch!(triage_policy_state, :policy)
+        }
+      },
+      initiating_actor: initiating_actor,
+      context_item: %{
+        type: context_item_type,
+        label: context_item_label(context_item_type),
+        github_url:
+          context_item_github_url(
+            Map.get(project_scope, :github_full_name),
+            context_item_type
+          )
+      }
+    }
+  end
+
+  defp context_item_label(:issue), do: "Issue row"
+
+  defp context_item_github_url(nil, _context_item_type), do: nil
+
+  defp context_item_github_url(github_full_name, :issue) do
+    with {:ok, repository_path} <- github_repository_path(github_full_name) do
+      "#{repository_path}/issues"
+    end
+  end
+
+  defp normalize_project_scope(project_row) when is_map(project_row) do
+    project_id =
+      project_row
+      |> map_get(:id, "id")
+      |> normalize_optional_string()
+
+    github_full_name =
+      project_row
+      |> map_get(:github_full_name, "github_full_name")
+      |> normalize_optional_string()
+
+    project_name =
+      project_row
+      |> map_get(:name, "name")
+      |> normalize_optional_string()
+
+    cond do
+      is_nil(project_id) ->
+        {:error, validation_error("Workbench row is missing a durable project identifier for issue triage kickoff.")}
+
+      String.starts_with?(project_id, @fallback_row_id_prefix) ->
+        {:error,
+         validation_error("Workbench row #{project_id} is synthetic and cannot scope issue triage workflow runs.")}
+
+      true ->
+        {:ok,
+         %{
+           project_id: project_id,
+           project_name: github_full_name || project_name || project_id,
+           github_full_name: github_full_name
+         }}
+    end
+  end
+
+  defp normalize_project_scope(_project_row) do
+    {:error, validation_error("Workbench row is unavailable for issue triage kickoff.")}
+  end
+
+  defp normalize_context_item_type(:issue), do: {:ok, :issue}
+  defp normalize_context_item_type("issue"), do: {:ok, :issue}
+
+  defp normalize_context_item_type(other) do
+    {:error, validation_error("Workbench triage kickoff context #{inspect(other)} is invalid. Use issue.")}
+  end
+
+  defp ensure_policy_enabled(project_row) do
+    triage_policy_state = policy_state(project_row)
+
+    if Map.get(triage_policy_state, :enabled, true) do
+      {:ok, triage_policy_state}
+    else
+      {:error, policy_blocked_error(triage_policy_state)}
+    end
+  end
+
+  defp policy_state_from_settings(settings) when is_map(settings) do
+    issue_triage_policy =
+      settings
+      |> map_get(:issue_triage_policy, "issue_triage_policy")
+      |> normalize_map_or_nil()
+
+    issue_triage_settings =
+      settings
+      |> map_get(:issue_triage, "issue_triage")
+      |> normalize_map_or_nil()
+
+    issue_bot_settings =
+      settings
+      |> map_get(:issue_bot, "issue_bot")
+      |> normalize_map_or_nil()
+
+    support_agent_issue_bot_settings =
+      settings
+      |> map_get(:support_agent_config, "support_agent_config", %{})
+      |> normalize_map()
+      |> map_get(:github_issue_bot, "github_issue_bot")
+      |> normalize_map_or_nil()
+
+    cond do
+      is_map(issue_triage_policy) ->
+        normalize_policy_state(issue_triage_policy)
+
+      policy_explicitly_disabled?(issue_triage_settings) ->
+        disabled_policy_state(
+          "Issue triage workflow launches are disabled for this project.",
+          issue_triage_settings,
+          "issue_triage.enabled"
+        )
+
+      policy_explicitly_disabled?(issue_bot_settings) ->
+        disabled_policy_state(
+          "Issue Bot is disabled for this project.",
+          issue_bot_settings,
+          "issue_bot.enabled"
+        )
+
+      policy_explicitly_disabled?(support_agent_issue_bot_settings) ->
+        disabled_policy_state(
+          "Issue Bot support agent is disabled for this project.",
+          support_agent_issue_bot_settings,
+          "support_agent_config.github_issue_bot.enabled"
+        )
+
+      true ->
+        enabled_policy_state()
+    end
+  end
+
+  defp policy_state_from_settings(_settings), do: enabled_policy_state()
+
+  defp normalize_policy_state(policy) when is_map(policy) do
+    policy_name = normalize_optional_string(map_get(policy, :policy, "policy")) || @default_policy
+
+    if policy_explicitly_disabled?(policy) do
+      disabled_policy_state(
+        map_get(policy, :detail, "detail", nil),
+        policy,
+        policy_name
+      )
+    else
+      enabled_policy_state(policy_name)
+    end
+  end
+
+  defp normalize_policy_state(_policy), do: enabled_policy_state()
+
+  defp policy_explicitly_disabled?(policy) when is_map(policy) do
+    case map_get(policy, :enabled, "enabled", :__missing__) do
+      :__missing__ ->
+        policy
+        |> map_get(:status, "status")
+        |> normalize_optional_string()
+        |> case do
+          "disabled" -> true
+          "blocked" -> true
+          _other -> false
+        end
+
+      enabled_value ->
+        normalize_enabled(enabled_value, true) == false
+    end
+  end
+
+  defp policy_explicitly_disabled?(_policy), do: false
+
+  defp enabled_policy_state(policy_name \\ @default_policy) do
+    %{
+      status: :enabled,
+      enabled: true,
+      policy: normalize_optional_string(policy_name) || @default_policy,
+      error_type: nil,
+      detail: nil,
+      remediation: nil
+    }
+  end
+
+  defp disabled_policy_state(detail, policy_source, fallback_policy_name) do
+    %{
+      status: :disabled,
+      enabled: false,
+      policy:
+        normalize_optional_string(map_get(policy_source, :policy, "policy", fallback_policy_name)) || @default_policy,
+      error_type:
+        normalize_optional_string(map_get(policy_source, :error_type, "error_type", @policy_error_type)) ||
+          @policy_error_type,
+      detail:
+        normalize_optional_string(detail) ||
+          normalize_optional_string(map_get(policy_source, :detail, "detail")) ||
+          "Issue triage workflow launches from workbench are disabled by policy.",
+      remediation:
+        normalize_optional_string(map_get(policy_source, :remediation, "remediation", @policy_remediation)) ||
+          @policy_remediation
+    }
+  end
+
+  defp policy_blocked_error(triage_policy_state) do
+    kickoff_error(
+      Map.get(triage_policy_state, :error_type) || @policy_error_type,
+      Map.get(triage_policy_state, :detail) || "Issue triage workflow launch is blocked by policy.",
+      Map.get(triage_policy_state, :remediation) || @policy_remediation
+    )
+  end
+
+  defp normalize_initiating_actor(actor) when is_map(actor) do
+    actor_id =
+      actor
+      |> map_get(:id, "id")
+      |> normalize_optional_string() || "unknown"
+
+    %{
+      id: actor_id,
+      email:
+        actor
+        |> map_get(:email, "email")
+        |> normalize_optional_string()
+    }
+  end
+
+  defp normalize_initiating_actor(_actor), do: %{id: "unknown", email: nil}
+
+  defp validation_error(detail) do
+    kickoff_error(@validation_error_type, detail, @validation_remediation)
+  end
+
+  defp normalize_error(error) do
+    kickoff_error(
+      map_get(error, :error_type, "error_type", @default_error_type),
+      map_get(error, :detail, "detail", "Issue triage workflow kickoff failed."),
+      map_get(error, :remediation, "remediation", @launcher_remediation)
+    )
+  end
+
+  defp kickoff_error(error_type, detail, remediation) do
+    %{
+      error_type: normalize_optional_string(error_type) || @default_error_type,
+      detail: normalize_optional_string(detail) || "Issue triage workflow kickoff failed.",
+      remediation: normalize_optional_string(remediation) || @launcher_remediation
+    }
+  end
+
+  defp github_repository_path(github_full_name) do
+    github_full_name
+    |> normalize_optional_string()
+    |> parse_github_repository_name()
+    |> case do
+      {:ok, owner, repository} -> {:ok, "https://github.com/#{owner}/#{repository}"}
+      :error -> :error
+    end
+  end
+
+  defp parse_github_repository_name(nil), do: :error
+
+  defp parse_github_repository_name(github_full_name) do
+    case String.split(github_full_name, "/", parts: 2) do
+      [owner, repository] ->
+        owner = String.trim(owner)
+        repository = String.trim(repository)
+
+        if owner == "" or repository == "" or String.contains?(owner <> repository, " ") do
+          :error
+        else
+          {:ok, owner, repository}
+        end
+
+      _other ->
+        :error
+    end
+  end
+
+  defp generated_run_id do
+    unique_integer = System.unique_integer([:positive, :monotonic])
+    "run-#{unique_integer}"
+  end
+
+  defp map_get(map, atom_key, string_key, default \\ nil)
+
+  defp map_get(map, atom_key, string_key, default) when is_map(map) do
+    cond do
+      Map.has_key?(map, atom_key) -> Map.get(map, atom_key)
+      Map.has_key?(map, string_key) -> Map.get(map, string_key)
+      true -> default
+    end
+  end
+
+  defp map_get(_map, _atom_key, _string_key, default), do: default
+
+  defp normalize_optional_string(nil), do: nil
+  defp normalize_optional_string(value) when is_boolean(value), do: nil
+
+  defp normalize_optional_string(value) when is_binary(value) do
+    case String.trim(value) do
+      "" -> nil
+      normalized_value -> normalized_value
+    end
+  end
+
+  defp normalize_optional_string(value) when is_atom(value),
+    do: value |> Atom.to_string() |> normalize_optional_string()
+
+  defp normalize_optional_string(value) when is_integer(value), do: Integer.to_string(value)
+  defp normalize_optional_string(value) when is_float(value), do: :erlang.float_to_binary(value)
+  defp normalize_optional_string(_value), do: nil
+
+  defp normalize_optional_datetime(%DateTime{} = datetime), do: datetime
+
+  defp normalize_optional_datetime(%NaiveDateTime{} = datetime) do
+    case DateTime.from_naive(datetime, "Etc/UTC") do
+      {:ok, parsed_datetime} -> parsed_datetime
+      _other -> nil
+    end
+  end
+
+  defp normalize_optional_datetime(value) when is_binary(value) do
+    case DateTime.from_iso8601(value) do
+      {:ok, parsed_datetime, _offset} ->
+        parsed_datetime
+
+      _other ->
+        case NaiveDateTime.from_iso8601(value) do
+          {:ok, parsed_naive_datetime} ->
+            normalize_optional_datetime(parsed_naive_datetime)
+
+          _fallback ->
+            nil
+        end
+    end
+  end
+
+  defp normalize_optional_datetime(_value), do: nil
+
+  defp normalize_enabled(true, _default), do: true
+  defp normalize_enabled(false, _default), do: false
+  defp normalize_enabled("true", _default), do: true
+  defp normalize_enabled("false", _default), do: false
+  defp normalize_enabled(:enabled, _default), do: true
+  defp normalize_enabled(:disabled, _default), do: false
+  defp normalize_enabled("enabled", _default), do: true
+  defp normalize_enabled("disabled", _default), do: false
+  defp normalize_enabled("blocked", _default), do: false
+  defp normalize_enabled(_value, default), do: default
+
+  defp normalize_map(value) when is_map(value), do: value
+  defp normalize_map(_value), do: %{}
+
+  defp normalize_map_or_nil(value) when is_map(value), do: value
+  defp normalize_map_or_nil(_value), do: nil
+end

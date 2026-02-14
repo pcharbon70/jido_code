@@ -14,6 +14,9 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     original_fix_workflow_launcher =
       Application.get_env(:jido_code, :workbench_fix_workflow_launcher, :__missing__)
 
+    original_issue_triage_workflow_launcher =
+      Application.get_env(:jido_code, :workbench_issue_triage_workflow_launcher, :__missing__)
+
     original_system_config_loader =
       Application.get_env(:jido_code, :system_config_loader, :__missing__)
 
@@ -31,6 +34,7 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     on_exit(fn ->
       restore_env(:workbench_inventory_loader, original_workbench_loader)
       restore_env(:workbench_fix_workflow_launcher, original_fix_workflow_launcher)
+      restore_env(:workbench_issue_triage_workflow_launcher, original_issue_triage_workflow_launcher)
       restore_env(:system_config_loader, original_system_config_loader)
     end)
 
@@ -378,6 +382,149 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
                context_item: %{type: :pull_request}
              }
            ] = recorded_requests
+  end
+
+  test "issue triage quick action starts issue_triage with manual trigger metadata and initiating actor",
+       %{
+         conn: _conn
+       } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-triageable",
+        github_full_name: "owner/repo-triageable",
+        default_branch: "main",
+        settings: %{
+          "inventory" => %{
+            "open_issue_count" => 6,
+            "open_pr_count" => 1,
+            "recent_activity_summary" => "Issue queue needs triage."
+          }
+        }
+      })
+
+    project_id = project.id
+    launcher_requests = start_supervised!({Agent, fn -> [] end})
+
+    Application.put_env(:jido_code, :workbench_issue_triage_workflow_launcher, fn kickoff_request ->
+      Agent.update(launcher_requests, fn requests -> [kickoff_request | requests] end)
+      {:ok, %{run_id: "run-triage-789"}}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    assert has_element?(view, "#workbench-project-issues-triage-action-#{project_id}")
+
+    view
+    |> element("#workbench-project-issues-triage-action-#{project_id}")
+    |> render_click()
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-triage-#{project_id}-run-id",
+             "run-triage-789"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-triage-#{project_id}-run-link[href='/projects/#{project_id}/runs/run-triage-789']"
+           )
+
+    refute has_element?(view, "#workbench-project-issues-triage-#{project_id}-error-type")
+
+    recorded_requests = launcher_requests |> Agent.get(&Enum.reverse(&1))
+
+    assert [
+             %{
+               project_id: ^project_id,
+               workflow_name: "issue_triage",
+               context_item: %{type: :issue},
+               trigger: %{
+                 source: "workbench",
+                 mode: "manual",
+                 source_row: %{
+                   route: "/workbench",
+                   project_id: ^project_id,
+                   context_item_type: :issue
+                 }
+               },
+               initiating_actor: %{id: actor_id}
+             }
+           ] = recorded_requests
+
+    assert Map.has_key?(hd(recorded_requests).initiating_actor, :email)
+    assert is_binary(actor_id)
+    refute actor_id == ""
+  end
+
+  test "triage action disabled by policy shows blocking policy state in workbench UI", %{
+    conn: _conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :workbench_inventory_loader, fn ->
+      {:ok,
+       [
+         %{
+           id: "owner-repo-policy-blocked",
+           name: "repo-policy-blocked",
+           github_full_name: "owner/repo-policy-blocked",
+           open_issue_count: 3,
+           open_pr_count: 0,
+           recent_activity_summary: "Policy blocks issue triage launches.",
+           issue_triage_policy: %{
+             enabled: false,
+             policy: "support_agent_config.github_issue_bot.enabled",
+             error_type: "issue_triage_policy_disabled",
+             detail: "Issue triage workflow launches are disabled for this project.",
+             remediation: "Enable Issue Bot for this project to allow manual triage launches."
+           }
+         }
+       ], nil}
+    end)
+
+    launcher_invocations = start_supervised!({Agent, fn -> 0 end})
+
+    Application.put_env(:jido_code, :workbench_issue_triage_workflow_launcher, fn _kickoff_request ->
+      Agent.update(launcher_invocations, &(&1 + 1))
+      {:ok, %{run_id: "unexpected-run"}}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-triage-disabled-owner-repo-policy-blocked[aria-disabled='true']",
+             "Kick off issue triage workflow"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-triage-disabled-owner-repo-policy-blocked-type",
+             "issue_triage_policy_disabled"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-triage-disabled-owner-repo-policy-blocked-reason",
+             "disabled for this project"
+           )
+
+    assert has_element?(
+             view,
+             "#workbench-project-issues-triage-disabled-owner-repo-policy-blocked-remediation",
+             "Enable Issue Bot"
+           )
+
+    refute has_element?(view, "#workbench-project-issues-triage-action-owner-repo-policy-blocked")
+    assert Agent.get(launcher_invocations, & &1) == 0
   end
 
   test "inline kickoff validation failures render details and do not create runs", %{

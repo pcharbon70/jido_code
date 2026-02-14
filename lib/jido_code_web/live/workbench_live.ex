@@ -1,7 +1,7 @@
 defmodule JidoCodeWeb.WorkbenchLive do
   use JidoCodeWeb, :live_view
 
-  alias JidoCode.Workbench.{FixWorkflowKickoff, Inventory}
+  alias JidoCode.Workbench.{FixWorkflowKickoff, Inventory, IssueTriageWorkflowKickoff}
 
   @fallback_row_id_prefix "workbench-row-"
   @filter_validation_error_type "workbench_filter_values_invalid"
@@ -56,6 +56,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
       |> assign(:filter_validation_notice, nil)
       |> assign(:sort_validation_notice, nil)
       |> assign(:fix_workflow_kickoff_states, %{})
+      |> assign(:issue_triage_workflow_kickoff_states, %{})
       |> assign(:filter_values, initial_filter_values)
       |> assign(:filter_form, to_filter_form(initial_filter_values))
       |> assign(:filter_chips, filter_chips(initial_filter_values, []))
@@ -141,6 +142,40 @@ defmodule JidoCodeWeb.WorkbenchLive do
     socket =
       socket
       |> put_fix_workflow_kickoff_state(state_project_id, context_item_type, kickoff_result)
+      |> refresh_project_row(project_row)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "kickoff_issue_triage_workflow",
+        %{"project_id" => project_id, "context_item_type" => context_item_type},
+        socket
+      ) do
+    project_row = find_project_row(socket.assigns.inventory_rows_all, project_id)
+
+    kickoff_result =
+      IssueTriageWorkflowKickoff.kickoff(
+        project_row,
+        context_item_type,
+        initiating_actor(socket)
+      )
+
+    state_project_id =
+      case project_row do
+        %{} ->
+          project_row
+          |> map_get("id", :id)
+          |> normalize_optional_string()
+
+        _other ->
+          nil
+      end || normalize_optional_string(project_id) || "unknown-project"
+
+    socket =
+      socket
+      |> put_issue_triage_workflow_kickoff_state(state_project_id, :issue, kickoff_result)
       |> refresh_project_row(project_row)
 
     {:noreply, socket}
@@ -318,6 +353,7 @@ defmodule JidoCodeWeb.WorkbenchLive do
               <td id={"workbench-project-links-#{project.id}"} class="space-y-2 text-xs">
                 <div id={"workbench-project-issues-links-#{project.id}"}>
                   <p class="font-medium text-base-content/80">Issues</p>
+                  <% triage_policy_state = issue_triage_policy_state(project) %>
                   <div class="flex flex-col gap-0.5">
                     <.row_link
                       link_id={"workbench-project-issues-github-link-#{project.id}"}
@@ -335,6 +371,33 @@ defmodule JidoCodeWeb.WorkbenchLive do
                       label="Project detail"
                       target={project_detail_path(project, @filter_values)}
                       disabled_reason={project_detail_unavailable_reason()}
+                    />
+                    <%= if Map.get(triage_policy_state, :enabled, true) do %>
+                      <button
+                        id={"workbench-project-issues-triage-action-#{project.id}"}
+                        type="button"
+                        class="btn btn-xs btn-outline btn-accent w-fit mt-1"
+                        phx-click="kickoff_issue_triage_workflow"
+                        phx-value-project_id={project.id}
+                        phx-value-context_item_type="issue"
+                      >
+                        Kick off issue triage workflow
+                      </button>
+                    <% else %>
+                      <.issue_triage_policy_blocked_feedback
+                        policy_state={triage_policy_state}
+                        dom_prefix={"workbench-project-issues-triage-disabled-#{project.id}"}
+                      />
+                    <% end %>
+                    <.issue_triage_workflow_kickoff_feedback
+                      feedback={
+                        issue_triage_workflow_kickoff_feedback(
+                          @issue_triage_workflow_kickoff_states,
+                          project.id,
+                          :issue
+                        )
+                      }
+                      dom_prefix={"workbench-project-issues-triage-#{project.id}"}
                     />
                     <button
                       id={"workbench-project-issues-fix-action-#{project.id}"}
@@ -1004,6 +1067,26 @@ defmodule JidoCodeWeb.WorkbenchLive do
     update(socket, :fix_workflow_kickoff_states, &Map.put(&1, state_key, state_value))
   end
 
+  defp put_issue_triage_workflow_kickoff_state(
+         socket,
+         project_id,
+         context_item_type,
+         kickoff_result
+       ) do
+    state_key = issue_triage_workflow_kickoff_state_key(project_id, context_item_type)
+
+    state_value =
+      case kickoff_result do
+        {:ok, kickoff_run} ->
+          %{status: :ok, run: kickoff_run}
+
+        {:error, kickoff_error} ->
+          %{status: :error, error: kickoff_error}
+      end
+
+    update(socket, :issue_triage_workflow_kickoff_states, &Map.put(&1, state_key, state_value))
+  end
+
   defp refresh_project_row(socket, project_row) when is_map(project_row) do
     stream_insert(socket, :inventory_rows, project_row)
   end
@@ -1020,6 +1103,23 @@ defmodule JidoCodeWeb.WorkbenchLive do
     normalized_project_id = normalize_optional_string(project_id) || "unknown-project"
     normalized_context_item_type = normalize_context_item_type_for_state_key(context_item_type)
     "#{normalized_project_id}:#{normalized_context_item_type}"
+  end
+
+  defp issue_triage_workflow_kickoff_feedback(states, project_id, context_item_type)
+       when is_map(states) do
+    Map.get(states, issue_triage_workflow_kickoff_state_key(project_id, context_item_type))
+  end
+
+  defp issue_triage_workflow_kickoff_feedback(_states, _project_id, _context_item_type), do: nil
+
+  defp issue_triage_workflow_kickoff_state_key(project_id, context_item_type) do
+    normalized_project_id = normalize_optional_string(project_id) || "unknown-project"
+    normalized_context_item_type = normalize_context_item_type_for_state_key(context_item_type)
+    "#{normalized_project_id}:#{normalized_context_item_type}"
+  end
+
+  defp issue_triage_policy_state(project_row) do
+    IssueTriageWorkflowKickoff.policy_state(project_row)
   end
 
   defp normalize_context_item_type_for_state_key(:issue), do: :issue
@@ -1057,6 +1157,66 @@ defmodule JidoCodeWeb.WorkbenchLive do
             {@feedback.error.remediation}
           </p>
       <% end %>
+    </section>
+    """
+  end
+
+  attr(:feedback, :map, default: nil)
+  attr(:dom_prefix, :string, required: true)
+
+  defp issue_triage_workflow_kickoff_feedback(assigns) do
+    ~H"""
+    <section :if={@feedback} id={"#{@dom_prefix}-feedback"} class="space-y-1 pt-1">
+      <%= case @feedback.status do %>
+        <% :ok -> %>
+          <p id={"#{@dom_prefix}-run-id"} class="text-[11px] text-success">
+            Run: <span class="font-mono">{@feedback.run.run_id}</span>
+          </p>
+          <.link
+            id={"#{@dom_prefix}-run-link"}
+            class="link link-primary text-[11px]"
+            href={@feedback.run.detail_path}
+          >
+            Open run detail
+          </.link>
+        <% :error -> %>
+          <p id={"#{@dom_prefix}-error-type"} class="text-[11px] text-error">
+            Typed kickoff error: {@feedback.error.error_type}
+          </p>
+          <p id={"#{@dom_prefix}-error-detail"} class="text-[11px] text-error">
+            {@feedback.error.detail}
+          </p>
+          <p id={"#{@dom_prefix}-error-remediation"} class="text-[11px] text-base-content/60">
+            {@feedback.error.remediation}
+          </p>
+      <% end %>
+    </section>
+    """
+  end
+
+  attr(:policy_state, :map, required: true)
+  attr(:dom_prefix, :string, required: true)
+
+  defp issue_triage_policy_blocked_feedback(assigns) do
+    ~H"""
+    <section :if={!@policy_state.enabled} id={"#{@dom_prefix}-feedback"} class="space-y-1 pt-1">
+      <span
+        id={@dom_prefix}
+        class="btn btn-xs btn-outline w-fit mt-1 cursor-not-allowed border-base-300 text-base-content/60"
+        aria-disabled="true"
+        title={@policy_state.detail}
+      >
+        Kick off issue triage workflow
+      </span>
+      <p id={"#{@dom_prefix}-type"} class="text-[11px] text-warning">
+        Policy state: {@policy_state.error_type}
+      </p>
+      <p id={"#{@dom_prefix}-reason"} class="text-[11px] text-warning">
+        {@policy_state.detail}
+      </p>
+      <p id={"#{@dom_prefix}-remediation"} class="text-[11px] text-base-content/60">
+        {@policy_state.remediation}
+      </p>
     </section>
     """
   end
@@ -1159,6 +1319,27 @@ defmodule JidoCodeWeb.WorkbenchLive do
         else
           "#{base_path}?return_to=#{URI.encode_www_form(return_to)}"
         end
+    end
+  end
+
+  defp initiating_actor(socket) do
+    socket.assigns
+    |> Map.get(:current_user)
+    |> case do
+      %{} = user ->
+        %{
+          id:
+            user
+            |> Map.get(:id)
+            |> normalize_optional_string() || "unknown",
+          email:
+            user
+            |> Map.get(:email)
+            |> normalize_optional_string()
+        }
+
+      _other ->
+        %{id: "unknown", email: nil}
     end
   end
 

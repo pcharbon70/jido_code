@@ -3,6 +3,7 @@ defmodule JidoCode.Workbench.Inventory do
   Loads cross-project workbench inventory rows and stale-state warnings.
   """
 
+  alias JidoCode.Workbench.IssueTriageWorkflowKickoff
   alias JidoCode.Projects.Project
   alias JidoCode.Setup.SystemConfig
 
@@ -19,7 +20,8 @@ defmodule JidoCode.Workbench.Inventory do
           open_issue_count: non_neg_integer(),
           open_pr_count: non_neg_integer(),
           recent_activity_summary: String.t(),
-          recent_activity_at: DateTime.t() | nil
+          recent_activity_at: DateTime.t() | nil,
+          issue_triage_policy: map()
         }
 
   @type stale_warning :: %{
@@ -217,7 +219,8 @@ defmodule JidoCode.Workbench.Inventory do
           github_settings,
           recent_activity_at
         ),
-      recent_activity_at: recent_activity_at
+      recent_activity_at: recent_activity_at,
+      issue_triage_policy: IssueTriageWorkflowKickoff.policy_state(project)
     }
   end
 
@@ -316,7 +319,8 @@ defmodule JidoCode.Workbench.Inventory do
             nil -> "No recent activity metadata."
             datetime -> "Last activity: #{format_utc_datetime(datetime)}"
           end,
-      recent_activity_at: recent_activity_at
+      recent_activity_at: recent_activity_at,
+      issue_triage_policy: IssueTriageWorkflowKickoff.policy_state(row)
     }
   end
 
@@ -330,7 +334,8 @@ defmodule JidoCode.Workbench.Inventory do
       open_issue_count: 0,
       open_pr_count: 0,
       recent_activity_summary: "No recent activity metadata.",
-      recent_activity_at: nil
+      recent_activity_at: nil,
+      issue_triage_policy: IssueTriageWorkflowKickoff.policy_state(%{})
     }
   end
 
