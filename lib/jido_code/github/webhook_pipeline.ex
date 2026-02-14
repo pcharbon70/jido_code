@@ -14,7 +14,9 @@ defmodule JidoCode.GitHub.WebhookPipeline do
 
   @issue_triage_workflow_name "issue_triage"
   @issue_triage_workflow_version 1
-  @issue_triage_webhook_policy "issue_triage_webhook_opened"
+  @issue_triage_webhook_opened_policy "issue_triage_webhook_opened"
+  @issue_triage_webhook_retriage_policy "issue_triage_webhook_retriage"
+  @retriage_prior_issue_analysis_limit 25
   @issue_reference_input_name "issue_reference"
 
   @type verified_delivery :: %{
@@ -680,11 +682,13 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   defp project_issue_bot_enabled?(_project), do: true
 
   defp maybe_create_issue_triage_run(_delivery, issue_bot_event, _project)
-       when issue_bot_event != "issues.opened",
+       when issue_bot_event not in ["issues.opened", "issues.edited"],
        do: :ok
 
-  defp maybe_create_issue_triage_run(delivery, "issues.opened", %Project{} = project) do
-    with {:ok, run_attributes} <- build_issue_triage_run_attributes(delivery, project),
+  defp maybe_create_issue_triage_run(delivery, issue_bot_event, %Project{} = project)
+       when issue_bot_event in ["issues.opened", "issues.edited"] do
+    with {:ok, run_attributes} <-
+           build_issue_triage_run_attributes(delivery, project, issue_bot_event),
          {:ok, %WorkflowRun{} = workflow_run} <-
            WorkflowRun.create(run_attributes, authorize?: false) do
       Logger.info(
@@ -702,7 +706,12 @@ defmodule JidoCode.GitHub.WebhookPipeline do
     end
   end
 
-  defp build_issue_triage_run_attributes(%{} = delivery, %Project{} = project) do
+  defp build_issue_triage_run_attributes(
+         %{} = delivery,
+         %Project{} = project,
+         issue_bot_event
+       )
+       when is_binary(issue_bot_event) do
     with payload when is_map(payload) <- Map.get(delivery, :payload),
          {:ok, issue_payload} <- issue_payload(payload),
          {:ok, issue_identifiers} <- source_issue_identifiers(issue_payload),
@@ -715,6 +724,9 @@ defmodule JidoCode.GitHub.WebhookPipeline do
 
       project_github_full_name =
         project |> Map.get(:github_full_name) |> normalize_optional_string()
+
+      retriage_context =
+        retriage_context(issue_bot_event, project, issue_identifiers, issue_reference)
 
       trigger =
         %{
@@ -736,11 +748,13 @@ defmodule JidoCode.GitHub.WebhookPipeline do
               "action" => action
             }),
           "source_issue" => issue_identifiers,
+          "retriage" => retriage_context,
           "policy" => %{
-            "name" => @issue_triage_webhook_policy,
+            "name" => issue_triage_webhook_policy_name(issue_bot_event),
             "source" => "support_agent_config.github_issue_bot"
           }
         }
+        |> reject_nil_values()
 
       input_metadata = %{
         @issue_reference_input_name => %{
@@ -854,6 +868,167 @@ defmodule JidoCode.GitHub.WebhookPipeline do
   end
 
   defp issue_reference(_repo_full_name, _issue_identifiers), do: nil
+
+  defp issue_triage_webhook_policy_name("issues.edited"),
+    do: @issue_triage_webhook_retriage_policy
+
+  defp issue_triage_webhook_policy_name(_issue_bot_event),
+    do: @issue_triage_webhook_opened_policy
+
+  defp retriage_context(
+         "issues.edited",
+         %Project{} = project,
+         issue_identifiers,
+         issue_reference
+       )
+       when is_map(issue_identifiers) and is_binary(issue_reference) do
+    prior_issue_analysis_artifacts =
+      list_prior_issue_analysis_artifacts(project, issue_identifiers, issue_reference)
+
+    %{
+      "event" => "issues.edited",
+      "comparison_context" => %{
+        "issue_reference" => issue_reference,
+        "prior_issue_analysis_artifact_count" => length(prior_issue_analysis_artifacts),
+        "prior_issue_analysis_artifacts" => prior_issue_analysis_artifacts
+      }
+    }
+  end
+
+  defp retriage_context(_issue_bot_event, _project, _issue_identifiers, _issue_reference), do: nil
+
+  defp list_prior_issue_analysis_artifacts(
+         %Project{} = project,
+         issue_identifiers,
+         issue_reference
+       )
+       when is_map(issue_identifiers) and is_binary(issue_reference) do
+    project_id = project |> Map.get(:id) |> normalize_optional_string()
+
+    issue_number =
+      issue_identifiers
+      |> map_get(:number, "number")
+      |> normalize_optional_positive_integer()
+
+    issue_id =
+      issue_identifiers
+      |> map_get(:id, "id")
+      |> normalize_optional_positive_integer()
+
+    if is_binary(project_id) do
+      case WorkflowRun.read(
+             query: [
+               filter: [project_id: project_id, workflow_name: @issue_triage_workflow_name],
+               sort: [inserted_at: :desc],
+               limit: @retriage_prior_issue_analysis_limit
+             ],
+             authorize?: false
+           ) do
+        {:ok, prior_runs} when is_list(prior_runs) ->
+          prior_runs
+          |> Enum.filter(&matching_issue_triage_run?(&1, issue_reference, issue_number, issue_id))
+          |> Enum.map(&prior_issue_analysis_artifact_link/1)
+
+        {:ok, _other} ->
+          []
+
+        {:error, reason} ->
+          Logger.warning(
+            "github_webhook_retriage_history_lookup_failed reason=#{inspect(reason)} project_id=#{project_id} issue_reference=#{issue_reference}"
+          )
+
+          []
+      end
+    else
+      []
+    end
+  end
+
+  defp list_prior_issue_analysis_artifacts(_project, _issue_identifiers, _issue_reference), do: []
+
+  defp matching_issue_triage_run?(%WorkflowRun{} = run, issue_reference, issue_number, issue_id)
+       when is_binary(issue_reference) do
+    run_issue_reference =
+      run
+      |> Map.get(:inputs, %{})
+      |> map_get(:issue_reference, @issue_reference_input_name)
+      |> normalize_optional_string()
+
+    run_source_issue =
+      run
+      |> Map.get(:trigger, %{})
+      |> map_get(:source_issue, "source_issue", %{})
+
+    run_issue_number =
+      run_source_issue
+      |> map_get(:number, "number")
+      |> normalize_optional_positive_integer()
+
+    run_issue_id =
+      run_source_issue
+      |> map_get(:id, "id")
+      |> normalize_optional_positive_integer()
+
+    run_issue_reference == issue_reference or
+      (is_integer(issue_number) and run_issue_number == issue_number) or
+      (is_integer(issue_id) and run_issue_id == issue_id)
+  end
+
+  defp matching_issue_triage_run?(_run, _issue_reference, _issue_number, _issue_id), do: false
+
+  defp prior_issue_analysis_artifact_link(%WorkflowRun{} = run) do
+    trigger = Map.get(run, :trigger, %{})
+    source_row = map_get(trigger, :source_row, "source_row", %{})
+    source_issue = map_get(trigger, :source_issue, "source_issue", %{})
+
+    step_results =
+      case Map.get(run, :step_results) do
+        %{} = result_map -> result_map
+        _other -> %{}
+      end
+
+    %{
+      "run_id" => run |> Map.get(:run_id) |> normalize_optional_string(),
+      "status" => run |> Map.get(:status) |> normalize_optional_string(),
+      "delivery_id" => source_row |> map_get(:delivery_id, "delivery_id") |> normalize_optional_string(),
+      "issue_reference" =>
+        run
+        |> Map.get(:inputs, %{})
+        |> map_get(:issue_reference, @issue_reference_input_name)
+        |> normalize_optional_string(),
+      "artifact_keys" => step_results |> Map.keys() |> normalize_string_list(),
+      "source_issue" =>
+        reject_nil_values(%{
+          "number" => source_issue |> map_get(:number, "number") |> normalize_optional_positive_integer(),
+          "id" => source_issue |> map_get(:id, "id") |> normalize_optional_positive_integer()
+        }),
+      "started_at" => run |> Map.get(:started_at) |> normalize_datetime_string(),
+      "completed_at" => run |> Map.get(:completed_at) |> normalize_datetime_string()
+    }
+    |> reject_nil_values()
+  end
+
+  defp normalize_string_list(values) when is_list(values) do
+    values
+    |> Enum.map(&normalize_optional_string/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.sort()
+  end
+
+  defp normalize_string_list(_values), do: []
+
+  defp normalize_datetime_string(%DateTime{} = datetime), do: DateTime.to_iso8601(datetime)
+
+  defp normalize_datetime_string(%NaiveDateTime{} = datetime) do
+    datetime
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.to_iso8601()
+  end
+
+  defp normalize_datetime_string(datetime) when is_binary(datetime),
+    do: normalize_optional_string(datetime)
+
+  defp normalize_datetime_string(_datetime), do: nil
 
   defp log_issue_bot_disabled_noop(delivery, issue_bot_event, project) do
     Logger.info(

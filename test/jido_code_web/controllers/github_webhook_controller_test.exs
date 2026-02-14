@@ -328,6 +328,227 @@ defmodule JidoCodeWeb.GitHubWebhookControllerTest do
     assert map_get(run.inputs, :issue_reference, "issue_reference") == "#{repo_full_name}#77"
   end
 
+  test "creates retriage runs for issues.edited with prior issue analysis artifact linkage", %{
+    conn: conn
+  } do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "retriage-owner-#{unique_suffix}"
+    name = "retriage-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+    issue_reference = "#{repo_full_name}#78"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened", "issues.edited"]
+            }
+          }
+        }
+      })
+
+    {:ok, %WorkflowRun{} = prior_run} =
+      WorkflowRun.create(
+        %{
+          run_id: "run-prior-#{System.unique_integer([:positive])}",
+          project_id: project.id,
+          workflow_name: "issue_triage",
+          workflow_version: 1,
+          trigger: %{
+            "source" => "github_webhook",
+            "mode" => "webhook",
+            "source_row" => %{
+              "route" => "/api/github/webhooks",
+              "delivery_id" => "delivery-prior-#{System.unique_integer([:positive])}",
+              "event" => "issues",
+              "action" => "opened"
+            },
+            "source_issue" => %{
+              "id" => 90_003,
+              "number" => 78
+            }
+          },
+          inputs: %{"issue_reference" => issue_reference},
+          input_metadata: %{
+            "issue_reference" => %{"required" => true, "source" => "github_webhook"}
+          },
+          initiating_actor: %{"id" => "github_webhook", "email" => nil},
+          current_step: "run_issue_research",
+          step_results: %{
+            "run_issue_triage" => %{"classification" => "bug"},
+            "run_issue_research" => %{"summary" => "Prior issue analysis artifact"}
+          },
+          started_at: ~U[2026-02-14 20:00:00Z]
+        },
+        authorize?: false
+      )
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(
+        test_pid,
+        {:verified_delivery_handoff, delivery.delivery_id, delivery.event, delivery.payload["action"]}
+      )
+
+      :ok
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "edited",
+        "issue" => %{
+          "id" => 90_003,
+          "number" => 78,
+          "node_id" => "I_kwDOXYZ5678",
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/78",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/78"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-retriage-#{System.unique_integer([:positive])}"
+
+    response =
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("x-hub-signature-256", sign(payload, secret))
+      |> put_req_header("x-github-delivery", delivery_id)
+      |> put_req_header("x-github-event", "issues")
+      |> post(@webhook_path, payload)
+      |> json_response(202)
+
+    assert response["status"] == "accepted"
+    assert_receive {:verified_delivery_handoff, ^delivery_id, "issues", "edited"}
+
+    assert {:ok, [_prior_run, %WorkflowRun{} = retriage_run]} =
+             workflow_runs_for_project(project.id)
+
+    assert retriage_run.workflow_name == "issue_triage"
+
+    policy = map_get(retriage_run.trigger, :policy, "policy", %{})
+    retriage = map_get(retriage_run.trigger, :retriage, "retriage", %{})
+    comparison_context = map_get(retriage, :comparison_context, "comparison_context", %{})
+
+    prior_artifacts =
+      map_get(
+        comparison_context,
+        :prior_issue_analysis_artifacts,
+        "prior_issue_analysis_artifacts",
+        []
+      )
+
+    assert map_get(policy, :name, "name") == "issue_triage_webhook_retriage"
+    assert map_get(retriage, :event, "event") == "issues.edited"
+    assert map_get(comparison_context, :issue_reference, "issue_reference") == issue_reference
+
+    assert map_get(
+             comparison_context,
+             :prior_issue_analysis_artifact_count,
+             "prior_issue_analysis_artifact_count"
+           ) ==
+             1
+
+    assert [%{} = prior_artifact] = prior_artifacts
+    assert map_get(prior_artifact, :run_id, "run_id") == prior_run.run_id
+    assert map_get(prior_artifact, :issue_reference, "issue_reference") == issue_reference
+
+    assert Enum.sort(map_get(prior_artifact, :artifact_keys, "artifact_keys", [])) == [
+             "run_issue_research",
+             "run_issue_triage"
+           ]
+  end
+
+  test "records issues.edited deliveries as no-op when filtered by project Issue Bot webhook policy",
+       %{conn: conn} do
+    secret = "webhook-secret-#{System.unique_integer([:positive])}"
+    Application.put_env(:jido_code, :github_webhook_secret, secret)
+
+    unique_suffix = System.unique_integer([:positive])
+    owner = "edited-filter-owner-#{unique_suffix}"
+    name = "edited-filter-repo-#{unique_suffix}"
+    repo_full_name = "#{owner}/#{name}"
+
+    _repo = create_repo!(%{owner: owner, name: name})
+
+    {:ok, %Project{} = project} =
+      Project.create(%{
+        name: name,
+        github_full_name: repo_full_name,
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "webhook_events" => ["issues.opened"]
+            }
+          }
+        }
+      })
+
+    test_pid = self()
+
+    Application.put_env(:jido_code, :github_webhook_verified_dispatcher, fn delivery ->
+      send(
+        test_pid,
+        {:verified_delivery_handoff, delivery.delivery_id, delivery.event, delivery.payload["action"]}
+      )
+
+      :ok
+    end)
+
+    payload =
+      Jason.encode!(%{
+        "action" => "edited",
+        "issue" => %{
+          "id" => 90_004,
+          "number" => 79,
+          "url" => "https://api.github.com/repos/#{repo_full_name}/issues/79",
+          "html_url" => "https://github.com/#{repo_full_name}/issues/79"
+        },
+        "repository" => %{"full_name" => repo_full_name}
+      })
+
+    delivery_id = "delivery-edited-filtered-#{System.unique_integer([:positive])}"
+
+    log_output =
+      capture_log([level: :info], fn ->
+        response =
+          conn
+          |> put_req_header("content-type", "application/json")
+          |> put_req_header("x-hub-signature-256", sign(payload, secret))
+          |> put_req_header("x-github-delivery", delivery_id)
+          |> put_req_header("x-github-event", "issues")
+          |> post(@webhook_path, payload)
+          |> json_response(202)
+
+        assert response["status"] == "accepted"
+      end)
+
+    refute_receive {:verified_delivery_handoff, ^delivery_id, _, _}
+    assert log_output =~ "github_webhook_trigger_filtered outcome=noop"
+    assert log_output =~ "policy=support_agent_config.github_issue_bot.webhook_events"
+    assert log_output =~ "event=issues.edited"
+
+    assert {:ok, []} = workflow_runs_for_project(project.id)
+
+    assert {:ok, %WebhookDelivery{} = persisted_delivery} =
+             WebhookDelivery.get_by_github_delivery_id(delivery_id, authorize?: false)
+
+    assert persisted_delivery.event_type == "issues"
+    assert persisted_delivery.action == "edited"
+  end
+
   test "records issues.opened deliveries as no-op when project Issue Bot is disabled", %{
     conn: conn
   } do
