@@ -228,18 +228,24 @@ defmodule JidoCode.Setup.SystemConfig do
     do: config
 
   defp apply_config_updates(%__MODULE__{} = config, updates) do
+    onboarding_completed = Map.get(updates, :onboarding_completed, config.onboarding_completed)
     default_environment = Map.get(updates, :default_environment, config.default_environment)
     workspace_root = Map.get(updates, :workspace_root, config.workspace_root)
 
     %__MODULE__{
       config
-      | default_environment: default_environment,
+      | onboarding_completed: onboarding_completed,
+        default_environment: default_environment,
         workspace_root: normalize_workspace_root_for_environment(default_environment, workspace_root)
     }
   end
 
   defp normalize_config_updates(config_updates) when is_map(config_updates) do
-    with {:ok, default_environment} <-
+    with {:ok, onboarding_completed} <-
+           normalize_onboarding_completed_update(
+             map_get(config_updates, :onboarding_completed, "onboarding_completed", :__not_set__)
+           ),
+         {:ok, default_environment} <-
            normalize_default_environment_update(
              map_get(config_updates, :default_environment, "default_environment", :__not_set__)
            ),
@@ -247,12 +253,22 @@ defmodule JidoCode.Setup.SystemConfig do
            normalize_workspace_root_update(map_get(config_updates, :workspace_root, "workspace_root", :__not_set__)) do
       {:ok,
        %{}
+       |> maybe_put(:onboarding_completed, onboarding_completed)
        |> maybe_put(:default_environment, default_environment)
        |> maybe_put(:workspace_root, workspace_root)}
     end
   end
 
   defp normalize_config_updates(_config_updates), do: {:error, :invalid_config_updates}
+
+  defp normalize_onboarding_completed_update(:__not_set__), do: {:ok, :__not_set__}
+
+  defp normalize_onboarding_completed_update(onboarding_completed)
+       when is_boolean(onboarding_completed),
+       do: {:ok, onboarding_completed}
+
+  defp normalize_onboarding_completed_update(_onboarding_completed),
+    do: {:error, :invalid_onboarding_completed}
 
   defp normalize_default_environment_update(:__not_set__), do: {:ok, :__not_set__}
   defp normalize_default_environment_update(:sprite), do: {:ok, :sprite}

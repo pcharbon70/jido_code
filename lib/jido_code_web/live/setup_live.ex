@@ -6,6 +6,7 @@ defmodule JidoCodeWeb.SetupLive do
   alias JidoCode.Setup.EnvironmentDefaults
   alias JidoCode.Setup.GitHubCredentialChecks
   alias JidoCode.Setup.OwnerBootstrap
+  alias JidoCode.Setup.ProjectImport
   alias JidoCode.Setup.ProviderCredentialChecks
   alias JidoCode.Setup.PrerequisiteChecks
   alias JidoCode.Setup.RuntimeMode
@@ -60,6 +61,8 @@ defmodule JidoCodeWeb.SetupLive do
         workspace_root
       )
 
+    project_import_report = resolve_project_import_report(onboarding_step, onboarding_state)
+    available_repositories = ProjectImport.available_repositories(onboarding_state)
     owner_bootstrap = resolve_owner_bootstrap(onboarding_step)
 
     {:ok,
@@ -73,6 +76,8 @@ defmodule JidoCodeWeb.SetupLive do
      |> assign(:github_credential_report, github_credential_report)
      |> assign(:webhook_simulation_report, webhook_simulation_report)
      |> assign(:environment_defaults_report, environment_defaults_report)
+     |> assign(:project_import_report, project_import_report)
+     |> assign(:available_repositories, available_repositories)
      |> assign(:owner_bootstrap, owner_bootstrap)
      |> assign(:save_error, owner_bootstrap_error(owner_bootstrap))
      |> assign(:redirect_reason, params["reason"] || "onboarding_incomplete")
@@ -421,6 +426,85 @@ defmodule JidoCodeWeb.SetupLive do
           </div>
         </section>
 
+        <section :if={@onboarding_step == 7} id="setup-project-import" class="space-y-3">
+          <h2 class="text-lg font-semibold">First project import readiness</h2>
+          <p id="setup-project-import-step-note" class="text-sm text-base-content/80">
+            Select one repository and import baseline metadata before onboarding can complete.
+          </p>
+
+          <div
+            :if={!Enum.empty?(@available_repositories)}
+            id="setup-project-repository-options"
+            class="rounded-lg border border-base-300 bg-base-100 p-3"
+          >
+            <p class="font-medium">Validated repository access</p>
+            <ul class="mt-2 space-y-1 text-sm text-base-content/80">
+              <li
+                :for={repository <- @available_repositories}
+                id={"setup-project-repository-option-#{repository_dom_id(repository)}"}
+              >
+                {repository}
+              </li>
+            </ul>
+          </div>
+
+          <div
+            :if={@project_import_report}
+            id="setup-project-import-report"
+            class="rounded-lg border border-base-300 bg-base-100 p-3"
+          >
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <p class="font-medium">Project import status</p>
+              <span
+                id="setup-project-import-status"
+                class={["badge", project_import_status_class(@project_import_report.status)]}
+              >
+                {project_import_status_label(@project_import_report.status)}
+              </span>
+            </div>
+            <p id="setup-project-import-checked-at" class="text-sm text-base-content/70">
+              Last import attempt: {format_checked_at(@project_import_report.checked_at)}
+            </p>
+            <p
+              :if={@project_import_report.selected_repository}
+              id="setup-project-import-repository"
+              class="font-mono text-sm text-base-content/80"
+            >
+              Selected repository: {@project_import_report.selected_repository}
+            </p>
+            <p id="setup-project-import-detail" class="text-sm text-base-content/80">
+              {@project_import_report.detail}
+            </p>
+            <p
+              :if={@project_import_report.error_type}
+              id="setup-project-import-error-type"
+              class="text-sm text-error"
+            >
+              Import error type: {@project_import_report.error_type}
+            </p>
+            <p
+              :if={@project_import_report.status != :ready}
+              id="setup-project-import-remediation"
+              class="text-sm text-warning"
+            >
+              {@project_import_report.remediation}
+            </p>
+          </div>
+        </section>
+
+        <section
+          :if={@onboarding_step == 8}
+          id="setup-onboarding-complete-next-actions"
+          class="space-y-3 rounded-lg border border-base-300 bg-base-100 p-3"
+        >
+          <h2 class="text-lg font-semibold">Next actions after completion</h2>
+          <ul class="space-y-1 text-sm text-base-content/80">
+            <li id="setup-next-action-run-workflow">Run your first workflow</li>
+            <li id="setup-next-action-review-security">Review the security playbook</li>
+            <li id="setup-next-action-test-rpc">Test the RPC client</li>
+          </ul>
+        </section>
+
         <section :if={@onboarding_step == 2} id="setup-owner-bootstrap" class="space-y-3">
           <h2 class="text-lg font-semibold">Owner account bootstrap</h2>
           <p id="setup-owner-bootstrap-mode" class="text-sm text-base-content/80">
@@ -486,6 +570,24 @@ defmodule JidoCodeWeb.SetupLive do
             type="text"
             label="Local workspace root"
             placeholder="/absolute/path/to/workspaces"
+          />
+          <.input
+            :if={@onboarding_step == 7 and !Enum.empty?(@available_repositories)}
+            field={@step_form[:repository_full_name]}
+            id="setup-project-repository-select"
+            type="select"
+            label="Repository to import"
+            options={repository_select_options(@available_repositories)}
+            required
+          />
+          <.input
+            :if={@onboarding_step == 7 and Enum.empty?(@available_repositories)}
+            field={@step_form[:repository_full_name]}
+            id="setup-project-repository-input"
+            type="text"
+            label="Repository to import"
+            placeholder="owner/repository"
+            required
           />
           <.input
             field={@step_form[:validated_note]}
@@ -602,6 +704,7 @@ defmodule JidoCodeWeb.SetupLive do
          step_params \\ %{}
        ) do
     step_state = fetch_step_state(onboarding_state, onboarding_step)
+    available_repositories = ProjectImport.available_repositories(onboarding_state)
 
     persisted_note = Map.get(step_state, "validated_note", "")
 
@@ -609,6 +712,11 @@ defmodule JidoCodeWeb.SetupLive do
       step_state
       |> Map.get("environment_defaults", %{})
       |> normalize_environment_state()
+
+    persisted_project_import_report =
+      step_state
+      |> Map.get("project_import")
+      |> ProjectImport.from_state()
 
     default_mode = default_environment_mode(default_environment)
 
@@ -622,6 +730,15 @@ defmodule JidoCodeWeb.SetupLive do
       |> Map.get("workspace_root")
       |> normalize_workspace_root_input(Map.get(persisted_environment_state, :workspace_root, workspace_root || ""))
 
+    repository_full_name =
+      step_params
+      |> Map.get("repository_full_name")
+      |> normalize_repository_full_name_input(
+        ProjectImport.selected_repository(persisted_project_import_report) ||
+          List.first(available_repositories) ||
+          ""
+      )
+
     assign(
       socket,
       :step_form,
@@ -629,7 +746,8 @@ defmodule JidoCodeWeb.SetupLive do
         %{
           "validated_note" => persisted_note,
           "execution_mode" => execution_mode,
-          "workspace_root" => workspace_root_value
+          "workspace_root" => workspace_root_value,
+          "repository_full_name" => repository_full_name
         },
         as: :step
       )
@@ -773,6 +891,30 @@ defmodule JidoCodeWeb.SetupLive do
 
   defp normalize_optional_workspace_root(_workspace_root), do: nil
 
+  defp normalize_repository_full_name_input(repository_full_name, fallback)
+       when is_binary(repository_full_name) do
+    repository_full_name
+    |> String.trim()
+    |> case do
+      "" -> normalize_repository_fallback(fallback)
+      normalized_repository_full_name -> normalized_repository_full_name
+    end
+  end
+
+  defp normalize_repository_full_name_input(_repository_full_name, fallback),
+    do: normalize_repository_fallback(fallback)
+
+  defp normalize_repository_fallback(fallback) when is_binary(fallback) do
+    fallback
+    |> String.trim()
+    |> case do
+      "" -> ""
+      normalized_repository_full_name -> normalized_repository_full_name
+    end
+  end
+
+  defp normalize_repository_fallback(_fallback), do: ""
+
   defp maybe_put_environment_field(environment_state, _key, nil), do: environment_state
 
   defp maybe_put_environment_field(environment_state, key, value),
@@ -825,6 +967,17 @@ defmodule JidoCodeWeb.SetupLive do
       |> fetch_step_state(6)
       |> Map.get("webhook_simulation")
       |> WebhookSimulationChecks.run()
+    else
+      nil
+    end
+  end
+
+  defp resolve_project_import_report(onboarding_step, onboarding_state) do
+    if onboarding_step in [7, 8] do
+      onboarding_state
+      |> fetch_step_state(7)
+      |> Map.get("project_import")
+      |> ProjectImport.from_state()
     else
       nil
     end
@@ -994,8 +1147,80 @@ defmodule JidoCodeWeb.SetupLive do
           })
         end
 
+      7 ->
+        project_import_report =
+          socket.assigns.onboarding_state
+          |> fetch_step_state(7)
+          |> Map.get("project_import")
+          |> ProjectImport.run(
+            Map.get(step_params, "repository_full_name"),
+            socket.assigns.onboarding_state
+          )
+
+        selected_repository = ProjectImport.selected_repository(project_import_report) || ""
+
+        socket =
+          socket
+          |> assign(:project_import_report, project_import_report)
+          |> assign_step_form(
+            socket.assigns.onboarding_step,
+            socket.assigns.onboarding_state,
+            socket.assigns.default_environment,
+            socket.assigns.workspace_root,
+            %{
+              "validated_note" => validated_note,
+              "repository_full_name" => selected_repository
+            }
+          )
+
+        if ProjectImport.blocked?(project_import_report) do
+          {:noreply, assign(socket, :save_error, project_import_block_message(project_import_report))}
+        else
+          persist_step_progress(socket, %{
+            "validated_note" => validated_note,
+            "project_import" => ProjectImport.serialize_for_state(project_import_report)
+          })
+        end
+
+      8 ->
+        project_import_report =
+          socket.assigns.onboarding_state
+          |> fetch_step_state(7)
+          |> Map.get("project_import")
+          |> ProjectImport.from_state()
+
+        if ProjectImport.blocked?(project_import_report) do
+          {:noreply, assign(socket, :save_error, onboarding_completion_block_message(project_import_report))}
+        else
+          complete_onboarding(socket, validated_note, project_import_report)
+        end
+
       _step ->
         persist_step_progress(socket, %{"validated_note" => validated_note})
+    end
+  end
+
+  defp complete_onboarding(socket, validated_note, project_import_report) do
+    next_actions = onboarding_next_actions()
+
+    completion_step_state = %{
+      "validated_note" => validated_note,
+      "imported_repository" => ProjectImport.selected_repository(project_import_report),
+      "next_actions" => next_actions,
+      "completed_at" => DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+
+    case SystemConfig.save_step_progress(completion_step_state, %{onboarding_completed: true}) do
+      {:ok, %SystemConfig{} = config} ->
+        {:noreply,
+         socket
+         |> assign_config_state(config)
+         |> assign(:save_error, nil)
+         |> put_flash(:info, onboarding_completion_message(next_actions))
+         |> push_navigate(to: ~p"/dashboard?onboarding=completed")}
+
+      {:error, %{diagnostic: diagnostic}} ->
+        {:noreply, assign(socket, :save_error, diagnostic)}
     end
   end
 
@@ -1091,6 +1316,34 @@ defmodule JidoCodeWeb.SetupLive do
     )
   end
 
+  defp project_import_block_message(report) do
+    typed_error = report.error_type || "project_import_unknown_error"
+
+    String.trim(
+      "Project import failed with typed error #{typed_error}. Onboarding completion is blocked and no completion flag was persisted. #{report.detail} #{report.remediation}"
+    )
+  end
+
+  defp onboarding_completion_block_message(report) do
+    typed_error = (report && report.error_type) || "project_import_missing"
+
+    String.trim(
+      "Onboarding completion is blocked until Step 7 imports a project with ready baseline metadata. Last import status: #{typed_error}."
+    )
+  end
+
+  defp onboarding_next_actions do
+    [
+      "Run your first workflow",
+      "Review the security playbook",
+      "Test the RPC client"
+    ]
+  end
+
+  defp onboarding_completion_message(next_actions) do
+    "Onboarding complete. Next actions: #{Enum.join(next_actions, ", ")}."
+  end
+
   defp prerequisite_status_label(:pass), do: "Pass"
   defp prerequisite_status_label(:timeout), do: "Timeout"
   defp prerequisite_status_label(:fail), do: "Fail"
@@ -1140,6 +1393,14 @@ defmodule JidoCodeWeb.SetupLive do
 
   defp webhook_check_status_class(:ready), do: "badge-success"
   defp webhook_check_status_class(:failed), do: "badge-error"
+
+  defp project_import_status_label(:ready), do: "Ready"
+  defp project_import_status_label(:blocked), do: "Blocked"
+  defp project_import_status_label(_status), do: "Unknown"
+
+  defp project_import_status_class(:ready), do: "badge-success"
+  defp project_import_status_class(:blocked), do: "badge-error"
+  defp project_import_status_class(_status), do: "badge-warning"
 
   defp issue_bot_default_enabled(issue_bot_defaults) when is_map(issue_bot_defaults) do
     issue_bot_defaults
@@ -1223,6 +1484,14 @@ defmodule JidoCodeWeb.SetupLive do
         config.workspace_root
       )
     )
+    |> assign(
+      :project_import_report,
+      resolve_project_import_report(config.onboarding_step, config.onboarding_state)
+    )
+    |> assign(
+      :available_repositories,
+      ProjectImport.available_repositories(config.onboarding_state)
+    )
     |> assign(:owner_bootstrap, owner_bootstrap)
     |> assign_owner_form(config.onboarding_step, config.onboarding_state, owner_bootstrap)
   end
@@ -1297,11 +1566,30 @@ defmodule JidoCodeWeb.SetupLive do
     "#{path}?#{query}"
   end
 
+  defp repository_select_options(repositories) when is_list(repositories) do
+    Enum.map(repositories, fn repository -> {repository, repository} end)
+  end
+
+  defp repository_select_options(_repositories), do: []
+
   defp step_number(step_key), do: parse_step(step_key)
 
   defp provider_dom_id(provider) when is_atom(provider), do: Atom.to_string(provider)
   defp provider_dom_id(provider) when is_binary(provider), do: provider
   defp provider_dom_id(_provider), do: "unknown"
+
+  defp repository_dom_id(repository) when is_binary(repository) do
+    repository
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9]+/, "-")
+    |> String.trim("-")
+    |> case do
+      "" -> "unknown"
+      dom_id -> dom_id
+    end
+  end
+
+  defp repository_dom_id(_repository), do: "unknown"
 
   defp webhook_event_dom_id(event) when is_binary(event) do
     event

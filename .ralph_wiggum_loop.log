@@ -3386,3 +3386,731 @@ elements.
 .
 Finished in 2.4 seconds (0.3s async, 2.1s sync)
 51 tests, 0 failures, 2 skipped (4 excluded)
+1) changed files
+- `lib/jido_code/setup/project_import.ex` (new): Step 7 import service with repository selection validation, GitHub repo record create/update, baseline metadata initialization, serialization/state helpers.
+- `lib/jido_code_web/live/setup_live.ex`: wired Step 7 and Step 8 logic, Step 7 repository input + import status UI, Step 8 completion flow (`onboarding_completed=true` + dashboard redirect), completion guards/messages.
+- `lib/jido_code/setup/system_config.ex`: added `onboarding_completed` support in `config_updates` handling for persisted step updates.
+- `lib/jido_code_web/live/dashboard_live.ex`: added onboarding completion next-actions section shown when routed with `?onboarding=completed`.
+- `test/jido_code_web/live/setup_live_test.exs`: added ST-ONB-010 happy-path and failure-path coverage; added helpers for authenticated setup flow and step-7 state fixtures.
+
+2) tests/commands executed
+- `mix compile --warnings-as-errors` (pass)
+- `mix test test/jido_code_web/live/setup_live_test.exs` (pass, 20 tests, 0 failures)
+- `mix precommit` (failed in this environment: `Mix.Sync.PubSub.subscribe/1` TCP socket `:eperm`)
+- `elixir` syntax/compile checks were also run on changed modules (pass)
+
+3) acceptance criteria coverage
+- AC1: Step 7 now imports a selected repository and initializes baseline metadata.
+  - UI selection added on `/setup` Step 7.
+  - Import persists `project_import` state and writes baseline metadata into project record settings.
+  - Covered by new happy-path test in `test/jido_code_web/live/setup_live_test.exs`.
+- AC2: Step 8 now sets `onboarding_completed=true` and routes to `/dashboard` with next actions.
+  - Completion persists final step state + completion flag.
+  - Redirect uses `/dashboard?onboarding=completed`, and dashboard renders next-action items.
+  - Covered by new happy-path test.
+- AC3: Import failure blocks completion and does not persist completion flag.
+  - Step 7 blocked import does not persist step progression or completion.
+  - Step 8 also refuses completion if Step 7 import is not ready.
+  - Covered by new failure-path test.
+
+4) blockers/assumptions
+- Blocker: `mix precommit` cannot complete in this sandbox due TCP socket restrictions in Mix PubSub (`:eperm`) under the precommit execution path.
+- Assumption: the onboarding “project record” is represented by `JidoCode.GitHub.Repo`, with baseline metadata stored under `settings["baseline"]`.
+- No commit/push/PR was performed.
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 756714, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+.............**.....18:38:52.923 request_id=GJP1-hSlPhO-2CAAAAGD [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+.......18:38:53.258 [warning] Quality checks failed for test-fail-868 (attempt 1/3), retrying...
+18:38:53.263 [warning] Quality checks failed for test-fail-868 (attempt 2/3), retrying...
+18:38:53.268 [error] Quality checks failed for test-fail-868 after 3 attempts, giving up
+18:38:53.269 [warning] Pull request failed for test-fail-868 after 3 attempts
+..18:38:53.354 [warning] Quality checks failed for test-retry-10629 (attempt 1/3), retrying...
+18:38:53.359 [warning] Quality checks failed for test-retry-10629 (attempt 2/3), retrying...
+.....warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+    <div id="toast-group"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+warning: Duplicate id found while testing LiveView: toast-group
+
+    <div id="toast-group" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group"></div></div>
+    <div id="toast-group"></div>
+
+
+LiveView requires that all elements have unique ids, duplicate IDs will cause
+undefined behavior at runtime, as DOM patching will not be able to target the correct
+elements.
+
+
+.
+Finished in 2.6 seconds (0.4s async, 2.2s sync)
+53 tests, 0 failures, 2 skipped (4 excluded)

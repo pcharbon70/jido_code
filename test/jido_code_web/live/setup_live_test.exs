@@ -4,6 +4,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
   alias AshAuthentication.{Info, Strategy}
   alias JidoCode.Accounts
   alias JidoCode.Accounts.User
+  alias JidoCode.GitHub.Repo, as: GitHubRepo
   alias JidoCode.Repo
 
   import Phoenix.LiveViewTest
@@ -25,6 +26,9 @@ defmodule JidoCodeWeb.SetupLiveTest do
     original_webhook_simulation_checker =
       Application.get_env(:jido_code, :setup_webhook_simulation_checker, :__missing__)
 
+    original_project_importer =
+      Application.get_env(:jido_code, :setup_project_importer, :__missing__)
+
     original_runtime_mode = Application.get_env(:jido_code, :runtime_mode, :__missing__)
 
     original_timeout =
@@ -38,6 +42,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
       restore_env(:setup_provider_credential_checker, original_provider_checker)
       restore_env(:setup_github_credential_checker, original_github_checker)
       restore_env(:setup_webhook_simulation_checker, original_webhook_simulation_checker)
+      restore_env(:setup_project_importer, original_project_importer)
       restore_env(:setup_prerequisite_timeout_ms, original_timeout)
       restore_env(:runtime_mode, original_runtime_mode)
     end)
@@ -48,6 +53,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
     Application.delete_env(:jido_code, :setup_provider_credential_checker)
     Application.delete_env(:jido_code, :setup_github_credential_checker)
     Application.delete_env(:jido_code, :setup_webhook_simulation_checker)
+    Application.delete_env(:jido_code, :setup_project_importer)
     Application.put_env(:jido_code, :runtime_mode, :test)
 
     Application.put_env(:jido_code, :system_config, %{
@@ -916,6 +922,146 @@ defmodule JidoCodeWeb.SetupLiveTest do
     refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "6")
   end
 
+  test "step 7 imports the selected repository and step 8 completes onboarding with dashboard next actions",
+       %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+    authed_conn = authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 7,
+      onboarding_state: onboarding_state_through_step_6()
+    })
+
+    {:ok, view, _html} = live(authed_conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-project-repository-select")
+    assert has_element?(view, "#setup-project-repository-option-owner-repo-one", "owner/repo-one")
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{
+        "repository_full_name" => "owner/repo-one",
+        "validated_note" => "Imported first project"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 8")
+
+    post_import_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(post_import_config, :onboarding_step) == 8
+    assert Map.fetch!(post_import_config, :onboarding_completed) == false
+
+    project_import_state =
+      post_import_config
+      |> Map.fetch!(:onboarding_state)
+      |> Map.fetch!("7")
+      |> Map.fetch!("project_import")
+
+    assert project_import_state["status"] == "ready"
+    assert project_import_state["selected_repository"] == "owner/repo-one"
+    assert project_import_state["baseline_metadata"]["status"] == "ready"
+
+    {:ok, [imported_repo]} =
+      GitHubRepo.read(query: [filter: [full_name: "owner/repo-one"], limit: 1])
+
+    baseline_metadata = Map.fetch!(imported_repo.settings, "baseline")
+    assert baseline_metadata["status"] == "ready"
+    assert baseline_metadata["workspace_initialized"] == true
+    assert baseline_metadata["baseline_synced"] == true
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{"validated_note" => "Onboarding completed and ready for dashboard"}
+    })
+    |> render_submit()
+
+    redirect_to =
+      view
+      |> assert_redirect()
+      |> redirect_path()
+
+    uri = URI.parse(redirect_to)
+    assert uri.path == "/dashboard"
+    assert uri.query =~ "onboarding=completed"
+
+    {:ok, dashboard_view, _html} = live(recycle(authed_conn), redirect_to, on_error: :warn)
+    assert has_element?(dashboard_view, "#dashboard-onboarding-next-actions")
+    assert has_element?(dashboard_view, "#dashboard-next-action-1", "Run your first workflow")
+
+    assert has_element?(
+             dashboard_view,
+             "#dashboard-next-action-2",
+             "Review the security playbook"
+           )
+
+    assert has_element?(dashboard_view, "#dashboard-next-action-3", "Test the RPC client")
+
+    completed_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(completed_config, :onboarding_completed) == true
+    assert Map.fetch!(completed_config, :onboarding_step) == 9
+
+    completion_state =
+      completed_config
+      |> Map.fetch!(:onboarding_state)
+      |> Map.fetch!("8")
+
+    assert completion_state["imported_repository"] == "owner/repo-one"
+
+    assert completion_state["next_actions"] == [
+             "Run your first workflow",
+             "Review the security playbook",
+             "Test the RPC client"
+           ]
+  end
+
+  test "step 7 import failure blocks onboarding completion and leaves completion flag unset", %{
+    conn: conn
+  } do
+    test_pid = self()
+
+    Application.put_env(:jido_code, :setup_project_importer, fn _context ->
+      failing_project_import_report()
+    end)
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 7,
+      onboarding_state: onboarding_state_through_step_6()
+    })
+
+    Application.put_env(:jido_code, :system_config_saver, fn _config ->
+      send(test_pid, :unexpected_save)
+      {:ok, %{onboarding_completed: true, onboarding_step: 8, onboarding_state: %{}}}
+    end)
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{
+        "repository_full_name" => "owner/repo-one",
+        "validated_note" => "Attempting to bypass failing project import"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 7")
+    assert has_element?(view, "#setup-project-import-status", "Blocked")
+    assert has_element?(view, "#setup-project-import-error-type", "repository_import_failed")
+    assert has_element?(view, "#setup-save-error", "Onboarding completion is blocked")
+    refute_received :unexpected_save
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 7
+    assert Map.fetch!(persisted_config, :onboarding_completed) == false
+    refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "7")
+
+    {:ok, repos} = GitHubRepo.read(query: [filter: [full_name: "owner/repo-one"]])
+    assert repos == []
+  end
+
   test "save failure keeps the same step and shows a retry-safe error", %{conn: conn} do
     Application.put_env(:jido_code, :system_config, %{
       onboarding_completed: false,
@@ -969,9 +1115,75 @@ defmodule JidoCodeWeb.SetupLiveTest do
     owner
   end
 
+  defp authenticate_owner_conn(email, password) do
+    strategy = Info.strategy!(User, :password)
+
+    {:ok, owner} =
+      Strategy.action(
+        strategy,
+        :sign_in,
+        %{"email" => email, "password" => password},
+        context: %{token_type: :sign_in}
+      )
+
+    token =
+      owner
+      |> Map.get(:__metadata__, %{})
+      |> Map.fetch!(:token)
+
+    auth_response = build_conn() |> get(owner_sign_in_with_token_path(strategy, token))
+    assert redirected_to(auth_response, 302) == "/"
+    recycle(auth_response)
+  end
+
+  defp owner_sign_in_with_token_path(strategy, token) do
+    strategy_path =
+      strategy
+      |> Strategy.routes()
+      |> Enum.find_value(fn
+        {path, :sign_in_with_token} -> path
+        _other -> nil
+      end)
+
+    path =
+      Path.join(
+        "/auth",
+        String.trim_leading(strategy_path || "/user/password/sign_in_with_token", "/")
+      )
+
+    query = URI.encode_query(%{"token" => token})
+    "#{path}?#{query}"
+  end
+
   defp assert_owner_count(expected_count) do
     {:ok, owners} = Ash.read(User, domain: Accounts, authorize?: false)
     assert length(owners) == expected_count
+  end
+
+  defp onboarding_state_through_step_6 do
+    %{
+      "1" => %{"validated_note" => "Prerequisite checks passed"},
+      "2" => %{
+        "validated_note" => "Owner account confirmed",
+        "owner_email" => "owner@example.com"
+      },
+      "3" => %{"validated_note" => "Provider setup confirmed"},
+      "4" => %{
+        "validated_note" => "GitHub credentials validated",
+        "github_credentials" => %{
+          "status" => "ready",
+          "paths" => [
+            %{
+              "path" => "github_app",
+              "status" => "ready",
+              "repositories" => ["owner/repo-one"]
+            }
+          ]
+        }
+      },
+      "5" => %{"validated_note" => "Environment defaults confirmed"},
+      "6" => %{"validated_note" => "Webhook simulation confirmed"}
+    }
   end
 
   defp unique_workspace_root do
@@ -1361,6 +1573,17 @@ defmodule JidoCodeWeb.SetupLiveTest do
         }
       ],
       failure_reason: "Webhook secret is missing for signature verification."
+    }
+  end
+
+  defp failing_project_import_report do
+    %{
+      checked_at: @checked_at,
+      status: :blocked,
+      selected_repository: "owner/repo-one",
+      detail: "Repository import failed while initializing baseline metadata.",
+      remediation: "Fix repository import configuration and retry step 7.",
+      error_type: "repository_import_failed"
     }
   end
 
