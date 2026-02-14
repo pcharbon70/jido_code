@@ -1,6 +1,7 @@
 defmodule JidoCodeWeb.SettingsLive do
   use JidoCodeWeb, :live_view
 
+  alias JidoCode.Accounts.SecurityTokens
   alias JidoCode.GitHub.Repo
 
   @impl true
@@ -11,6 +12,11 @@ defmodule JidoCodeWeb.SettingsLive do
       socket
       |> assign(:show_add_modal, false)
       |> assign(:form, nil)
+      |> assign(:security_tokens, [])
+      |> assign(:security_api_keys, [])
+      |> assign(:security_audit_events, [])
+      |> assign(:security_revocation_error, nil)
+      |> assign(:security_status_error, nil)
       |> stream(:repos, repos)
 
     {:ok, socket}
@@ -19,7 +25,13 @@ defmodule JidoCodeWeb.SettingsLive do
   @impl true
   def handle_params(params, _uri, socket) do
     tab = Map.get(params, "tab", "github")
-    {:noreply, assign(socket, :active_tab, tab)}
+
+    socket =
+      socket
+      |> assign(:active_tab, tab)
+      |> maybe_load_security_tab(tab)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -68,6 +80,18 @@ defmodule JidoCodeWeb.SettingsLive do
                   <.icon name="hero-user-circle" class="w-5 h-5 inline-block mr-2" /> Account
                 </.link>
               </li>
+              <li>
+                <.link
+                  patch={~p"/settings/security"}
+                  class={[
+                    "block px-4 py-2 rounded-lg transition-colors text-base-content",
+                    @active_tab == "security" && "bg-primary text-primary-content font-medium",
+                    @active_tab != "security" && "hover:bg-base-200"
+                  ]}
+                >
+                  <.icon name="hero-shield-check" class="w-5 h-5 inline-block mr-2" /> Security
+                </.link>
+              </li>
             </ul>
           </nav>
 
@@ -79,6 +103,14 @@ defmodule JidoCodeWeb.SettingsLive do
                 <.agents_tab />
               <% "account" -> %>
                 <.account_tab />
+              <% "security" -> %>
+                <.security_tab
+                  security_tokens={@security_tokens}
+                  security_api_keys={@security_api_keys}
+                  security_audit_events={@security_audit_events}
+                  security_revocation_error={@security_revocation_error}
+                  security_status_error={@security_status_error}
+                />
               <% _ -> %>
                 <.github_tab repos={@streams.repos} show_add_modal={@show_add_modal} form={@form} />
             <% end %>
@@ -237,6 +269,191 @@ defmodule JidoCodeWeb.SettingsLive do
     """
   end
 
+  defp security_tab(assigns) do
+    ~H"""
+    <div class="space-y-6">
+      <div>
+        <h2 class="text-xl font-semibold">Security Controls</h2>
+        <p class="text-sm text-base-content/70 mt-1">
+          Review token/key expiry, revoke compromised credentials, and capture revocation audit timestamps.
+        </p>
+      </div>
+
+      <.card
+        :if={@security_status_error}
+        id="settings-security-status-error"
+        padding="medium"
+        rounded="large"
+        class="border border-warning/50 bg-warning/10"
+      >
+        <p id="settings-security-status-error-type" class="text-sm font-medium">
+          Typed error: {@security_status_error.error_type}
+        </p>
+        <p id="settings-security-status-error-message" class="text-sm mt-1">
+          {@security_status_error.message}
+        </p>
+        <p id="settings-security-status-error-recovery" class="text-sm mt-1">
+          {@security_status_error.recovery_instruction}
+        </p>
+      </.card>
+
+      <.card
+        :if={@security_revocation_error}
+        id="settings-security-revocation-error"
+        padding="medium"
+        rounded="large"
+        class="border border-warning/50 bg-warning/10"
+      >
+        <p id="settings-security-revocation-error-type" class="text-sm font-medium">
+          Typed error: {@security_revocation_error.error_type}
+        </p>
+        <p id="settings-security-revocation-error-message" class="text-sm mt-1">
+          {@security_revocation_error.message}
+        </p>
+        <p id="settings-security-revocation-recovery" class="text-sm mt-1">
+          {@security_revocation_error.recovery_instruction}
+        </p>
+      </.card>
+
+      <div id="settings-security-token-status" class="space-y-3">
+        <h3 class="text-lg font-semibold">Session Tokens</h3>
+
+        <.card
+          :if={Enum.empty?(@security_tokens)}
+          id="settings-security-token-empty"
+          padding="medium"
+          rounded="large"
+        >
+          No owner session tokens found.
+        </.card>
+
+        <.card
+          :for={token <- @security_tokens}
+          id={"settings-security-token-#{token.id}"}
+          padding="medium"
+          rounded="large"
+        >
+          <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Status</dt>
+                <dd id={"settings-security-token-status-#{token.id}"} class="font-medium">
+                  {security_status_label(token.status)}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Purpose</dt>
+                <dd id={"settings-security-token-purpose-#{token.id}"} class="font-medium">
+                  {token.purpose}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Expires At</dt>
+                <dd id={"settings-security-token-expires-at-#{token.id}"} class="font-medium">
+                  {format_security_datetime(token.expires_at)}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Revoked At</dt>
+                <dd id={"settings-security-token-revoked-at-#{token.id}"} class="font-medium">
+                  {format_security_datetime(token.revoked_at)}
+                </dd>
+              </div>
+            </dl>
+
+            <.button
+              id={"settings-security-revoke-token-#{token.id}"}
+              type="button"
+              variant="outline"
+              color="danger"
+              phx-click="revoke_security_token"
+              phx-value-jti={token.id}
+            >
+              Revoke token
+            </.button>
+          </div>
+        </.card>
+      </div>
+
+      <div id="settings-security-api-key-status" class="space-y-3">
+        <h3 class="text-lg font-semibold">API Keys</h3>
+
+        <.card
+          :if={Enum.empty?(@security_api_keys)}
+          id="settings-security-api-key-empty"
+          padding="medium"
+          rounded="large"
+        >
+          No owner API keys found.
+        </.card>
+
+        <.card
+          :for={api_key <- @security_api_keys}
+          id={"settings-security-api-key-#{api_key.id}"}
+          padding="medium"
+          rounded="large"
+        >
+          <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Status</dt>
+                <dd id={"settings-security-api-key-status-#{api_key.id}"} class="font-medium">
+                  {security_status_label(api_key.status)}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">ID</dt>
+                <dd id={"settings-security-api-key-id-#{api_key.id}"} class="font-medium">
+                  {api_key.id}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Expires At</dt>
+                <dd id={"settings-security-api-key-expires-at-#{api_key.id}"} class="font-medium">
+                  {format_security_datetime(api_key.expires_at)}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs uppercase text-base-content/60">Revoked At</dt>
+                <dd id={"settings-security-api-key-revoked-at-#{api_key.id}"} class="font-medium">
+                  {format_security_datetime(api_key.revoked_at)}
+                </dd>
+              </div>
+            </dl>
+
+            <.button
+              id={"settings-security-revoke-api-key-#{api_key.id}"}
+              type="button"
+              variant="outline"
+              color="danger"
+              phx-click="revoke_security_api_key"
+              phx-value-id={api_key.id}
+            >
+              Revoke API key
+            </.button>
+          </div>
+        </.card>
+      </div>
+
+      <.card id="settings-security-audit-log" padding="medium" rounded="large">
+        <h3 class="text-lg font-semibold mb-3">Revocation Audit</h3>
+        <ul class="space-y-2">
+          <li
+            :for={audit <- @security_audit_events}
+            id={"settings-security-audit-entry-#{audit.event_id}"}
+            class="text-sm"
+          >
+            {security_audit_message(audit)}
+          </li>
+        </ul>
+        <p :if={Enum.empty?(@security_audit_events)} class="text-sm text-base-content/60">
+          No revocation events recorded in this browser session.
+        </p>
+      </.card>
+    </div>
+    """
+  end
+
   @impl true
   def handle_event("toggle_repo", %{"id" => id}, socket) do
     repo = Repo.get_by_id!(id)
@@ -305,5 +522,99 @@ defmodule JidoCodeWeb.SettingsLive do
       {:error, form} ->
         {:noreply, assign(socket, form: to_form(form))}
     end
+  end
+
+  def handle_event("revoke_security_token", %{"jti" => jti}, socket) do
+    owner_id = current_owner_id(socket)
+
+    case SecurityTokens.revoke_owner_token(owner_id, jti) do
+      {:ok, audit_entry} ->
+        socket =
+          socket
+          |> assign(:security_revocation_error, nil)
+          |> prepend_security_audit_event(audit_entry)
+          |> load_security_status()
+          |> put_flash(:info, "Token revoked.")
+
+        {:noreply, socket}
+
+      {:error, typed_error} ->
+        {:noreply, assign(socket, :security_revocation_error, typed_error)}
+    end
+  end
+
+  def handle_event("revoke_security_api_key", %{"id" => api_key_id}, socket) do
+    owner_id = current_owner_id(socket)
+
+    case SecurityTokens.revoke_owner_api_key(owner_id, api_key_id) do
+      {:ok, audit_entry} ->
+        socket =
+          socket
+          |> assign(:security_revocation_error, nil)
+          |> prepend_security_audit_event(audit_entry)
+          |> load_security_status()
+          |> put_flash(:info, "API key revoked.")
+
+        {:noreply, socket}
+
+      {:error, typed_error} ->
+        {:noreply, assign(socket, :security_revocation_error, typed_error)}
+    end
+  end
+
+  defp maybe_load_security_tab(socket, "security"), do: load_security_status(socket)
+  defp maybe_load_security_tab(socket, _tab), do: socket
+
+  defp load_security_status(socket) do
+    owner_id = current_owner_id(socket)
+
+    case SecurityTokens.list_owner_credentials(owner_id) do
+      {:ok, %{tokens: tokens, api_keys: api_keys}} ->
+        socket
+        |> assign(:security_tokens, tokens)
+        |> assign(:security_api_keys, api_keys)
+        |> assign(:security_status_error, nil)
+
+      {:error, typed_error} ->
+        socket
+        |> assign(:security_tokens, [])
+        |> assign(:security_api_keys, [])
+        |> assign(:security_status_error, typed_error)
+    end
+  end
+
+  defp prepend_security_audit_event(socket, audit_entry) do
+    event =
+      audit_entry
+      |> Map.put(:event_id, System.unique_integer([:positive]))
+
+    assign(socket, :security_audit_events, [event | socket.assigns.security_audit_events])
+  end
+
+  defp current_owner_id(socket) do
+    socket.assigns
+    |> Map.get(:current_user)
+    |> case do
+      %{id: id} -> id
+      _ -> nil
+    end
+  end
+
+  defp security_status_label(:active), do: "Active"
+  defp security_status_label(:expired), do: "Expired"
+  defp security_status_label(:revoked), do: "Revoked"
+
+  defp format_security_datetime(%DateTime{} = datetime), do: DateTime.to_iso8601(datetime)
+  defp format_security_datetime(nil), do: "Not revoked"
+  defp format_security_datetime(_value), do: "Unavailable"
+
+  defp security_audit_message(audit) do
+    source_label =
+      case Map.get(audit, :source) do
+        :session_token -> "Session token"
+        :api_key -> "API key"
+      end
+
+    "#{source_label} #{Map.get(audit, :id)} revoked at #{format_security_datetime(Map.get(audit, :revoked_at))}."
   end
 end

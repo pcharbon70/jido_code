@@ -11,6 +11,12 @@ defmodule JidoCode.Accounts.Token do
     repo JidoCode.Repo
   end
 
+  code_interface do
+    define :read
+    define :get_by_jti, action: :read, get_by: [:jti]
+    define :revoke
+  end
+
   actions do
     defaults [:read]
 
@@ -72,6 +78,27 @@ defmodule JidoCode.Accounts.Token do
       argument :subject, :string, allow_nil?: false, sensitive?: true
       change AshAuthentication.TokenResource.RevokeAllStoredForSubjectChange
     end
+
+    update :revoke do
+      description "Revokes a stored token while preserving expiry metadata."
+      accept []
+      require_atomic? false
+
+      change fn changeset, _context ->
+        case Ash.Changeset.get_data(changeset, :purpose) do
+          "revocation" ->
+            Ash.Changeset.add_error(
+              changeset,
+              field: :purpose,
+              message: "token has already been revoked",
+              vars: [type: "token_already_revoked"]
+            )
+
+          _purpose ->
+            Ash.Changeset.force_change_attribute(changeset, :purpose, "revocation")
+        end
+      end
+    end
   end
 
   policies do
@@ -108,7 +135,12 @@ defmodule JidoCode.Accounts.Token do
       public? true
     end
 
-    create_timestamp :created_at
-    update_timestamp :updated_at
+    create_timestamp :created_at do
+      public? true
+    end
+
+    update_timestamp :updated_at do
+      public? true
+    end
   end
 end

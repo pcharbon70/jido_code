@@ -6711,3 +6711,275 @@ Excluding tags: [:sprite_integration]
 ...
 Finished in 2.8 seconds (0.9s async, 1.9s sync)
 68 tests, 0 failures, 2 skipped (4 excluded)
+1) changed files
+- `lib/jido_code/accounts/token.ex`
+- `lib/jido_code/accounts/api_key.ex`
+- `lib/jido_code/accounts/security_tokens.ex`
+- `lib/jido_code_web/live/settings_live.ex`
+- `priv/repo/migrations/20260214120000_add_revoked_at_to_api_keys.exs`
+- `test/jido_code_web/live/security_settings_live_test.exs`
+
+2) tests/commands executed
+- `elixir /tmp/run_mix_task.exs format` -> passed
+- `elixir /tmp/run_mix_task.exs compile --warnings-as-errors` -> passed
+- `elixir /tmp/run_mix_task.exs test test/jido_code_web/live/security_settings_live_test.exs` -> failed (sandbox blocks DB socket access: `:eperm`)
+- `elixir /tmp/run_mix_task.exs precommit` -> failed at `ash.setup` for same DB socket restriction (`tcp connect (localhost:5432): :eperm`)
+
+3) acceptance criteria coverage
+- AC1: Token resources now expose first-class revocation/expiry controls.
+  - Added `:revoke` update action + code interface on `Token`.
+  - Added `:revoke` update action + `revoked_at` attribute + `valid` calc update on `ApiKey`.
+  - Added `SecurityTokens` product action module and `/settings/security` UI tab with expiry and revocation metadata.
+- AC2: Revoked credentials invalidate auth immediately across API surfaces.
+  - Added LiveView test flow that revokes via `/settings/security` and verifies typed auth failure on:
+    - bearer auth to `POST /rpc/run`
+    - API key auth to `POST /rpc/validate`
+- AC3: Revocation failure returns typed recovery instruction and preserves state.
+  - `SecurityTokens` returns typed error payloads (`error_type`, `message`, `recovery_instruction`).
+  - Added test for double-revoke failure path asserting typed recovery UI + unchanged `revoked_at`.
+
+4) blockers/assumptions
+- Blocker: this sandbox disallows local socket connections to Postgres (`:eperm`), so DB-backed tests and `mix precommit` cannot complete here.
+- Assumption: in a normal dev environment with DB access, `mix precommit` should run through these new tests/migration paths.
+Compiling 6 files (.ex)
+Generated jido_code app
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 347565, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+....................19:52:48.399 request_id=GJP6Asodoh-XzaQAAAMH [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+.19:52:48.660 request_id=GJP6AtsP31CQXTIAAA3m [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+.19:52:48.698 request_id=GJP6At0nxzU0nvkAAAaD [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:52:48.718 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:52:48.728 request_id=GJP6At6r3SU0nvkAAAQH [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:52:48.736 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+...19:52:48.791 request_id=GJP6AuLjt4fTyJEAAApF [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+....19:52:49.042 request_id=GJP6AvG3EWSFuKQAAA8E [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:52:49.048 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+
+
+  1) test failed revocation keeps state unchanged and returns typed recovery instructions (JidoCodeWeb.SecuritySettingsLiveTest)
+     test/jido_code_web/live/security_settings_live_test.exs:65
+     ** (ArgumentError) expected selector "#settings-security-revoke-api-key-93183b50-710d-44b0-a024-69e2bd24f20a" to return a single element, but got none within: 
+
+     <header class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 lg:px-8"><div class="flex-1"><a href="/dashboard" data-phx-link="redirect" data-phx-link-state="push" class="text-xl font-bold hover:opacity-80">Agent Jido</a></div><div class="flex-none"><ul class="flex flex-row px-1 space-x-2 items-center"><li><a href="/dashboard" data-phx-link="redirect" data-phx-link-state="push" class="btn btn-ghost btn-sm">Dashboard</a></li><li><a href="/forge" data-phx-link="redirect" data-phx-link-state="push" class="btn btn-ghost btn-sm">Forge</a></li><li><a href="/settings" data-phx-link="redirect" data-phx-link-state="push" class="btn btn-ghost btn-sm">Settings</a></li><li><div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full"><div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&amp;]:left-1/3 [[data-theme=dark]_&amp;]:left-2/3 transition-[left]"></div><button class="flex p-2 cursor-pointer w-1/3" phx-click="[[&quot;dispatch&quot;,{&quot;event&quot;:&quot;phx:set-theme&quot;}]]" data-phx-theme="system"><span class="hero-computer-desktop-micro size-4 opacity-75 hover:opacity-100"></span></button><button class="flex p-2 cursor-pointer w-1/3" phx-click="[[&quot;dispatch&quot;,{&quot;event&quot;:&quot;phx:set-theme&quot;}]]" data-phx-theme="light"><span class="hero-sun-micro size-4 opacity-75 hover:opacity-100"></span></button><button class="flex p-2 cursor-pointer w-1/3" phx-click="[[&quot;dispatch&quot;,{&quot;event&quot;:&quot;phx:set-theme&quot;}]]" data-phx-theme="dark"><span class="hero-moon-micro size-4 opacity-75 hover:opacity-100"></span></button></div></li></ul></div></header><main class="px-4 py-8 sm:px-6 lg:px-8"><div class="mx-auto max-w-6xl space-y-4"><div class="max-w-6xl mx-auto py-8"><h1 class="text-2xl font-bold mb-6">Settings</h1><div class="flex gap-8"><nav class="w-48 shrink-0"><ul class="space-y-1"><li><a href="/settings/github" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content hover:bg-base-200"><span class="hero-code-bracket w-5 h-5 inline-block mr-2"></span> GitHub
+                 </a></li><li><a href="/settings/agents" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content hover:bg-base-200"><span class="hero-cpu-chip w-5 h-5 inline-block mr-2"></span> Agents
+                 </a></li><li><a href="/settings/account" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content hover:bg-base-200"><span class="hero-user-circle w-5 h-5 inline-block mr-2"></span> Account
+                 </a></li><li><a href="/settings/security" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content bg-primary text-primary-content font-medium"><span class="hero-shield-check w-5 h-5 inline-block mr-2"></span> Security
+                 </a></li></ul></nav><div class="flex-1"><div class="space-y-6"><div><h2 class="text-xl font-semibold">Security Controls</h2><p class="text-sm text-base-content/70 mt-1">
+           Review token/key expiry, revoke compromised credentials, and capture revocation audit timestamps.
+         </p></div><div id="settings-security-status-error" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal border border-warning/50 bg-warning/10"><p id="settings-security-status-error-type" class="text-sm font-medium">
+           Typed error: token_status_unavailable
+         </p><p id="settings-security-status-error-message" class="text-sm mt-1">
+           Unable to load token and API key status.
+         </p><p id="settings-security-status-error-recovery" class="text-sm mt-1">
+           Refresh this screen and retry. If status loading keeps failing, verify database health and continue containment from the security playbook.
+
+         </p></div><div id="settings-security-token-status" class="space-y-3"><h3 class="text-lg font-semibold">Session Tokens</h3><div id="settings-security-token-empty" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal">
+       
+           No owner session tokens found.
+         
+     </div></div><div id="settings-security-api-key-status" class="space-y-3"><h3 class="text-lg font-semibold">API Keys</h3><div id="settings-security-api-key-empty" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal">
+       
+           No owner API keys found.
+         
+     </div></div><div id="settings-security-audit-log" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal"><h3 class="text-lg font-semibold mb-3">Revocation Audit</h3><ul class="space-y-2"></ul><p class="text-sm text-base-content/60">
+           No revocation events recorded in this browser session.
+         </p></div></div></div></div></div></div></main><div id="toast-group-container" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group-disconnected"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+     code: |> render_click()
+     stacktrace:
+       (phoenix_live_view 1.1.22) lib/phoenix_live_view/test/live_view_test.ex:1169: Phoenix.LiveViewTest.call/2
+       test/jido_code_web/live/security_settings_live_test.exs:74: (test)
+
+19:52:49.081 request_id=GJP6AvO5JRElJ4wAAA_k [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:52:49.094 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+
+
+  2) test security tab exposes expiry metadata and revocation controls that invalidate bearer and api key auth (JidoCodeWeb.SecuritySettingsLiveTest)
+     test/jido_code_web/live/security_settings_live_test.exs:13
+     Expected truthy, got false
+     code: assert has_element?(view, "#settings-security-token-expires-at-#{session_jti}")
+     arguments:
+
+         # 1
+         #Phoenix.LiveViewTest.View<id: "phx-GJP6AvQu_IwnjBAE", module: JidoCodeWeb.SettingsLive, pid: #PID<0.3443.0>, endpoint: JidoCodeWeb.Endpoint, ...>
+
+         # 2
+         "#settings-security-token-expires-at-329vk0njbbmpk997hg0003u4"
+
+     stacktrace:
+       test/jido_code_web/live/security_settings_live_test.exs:23: (test)
+
+**......19:52:49.425 request_id=GJP6Awicyne7M9sAADNh [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:52:49.440 request_id=GJP6AwlurB67M9sAADQh [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:52:49.446 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.....19:52:49.524 [warning] Quality checks failed for test-retry-2500 (attempt 1/3), retrying...
+19:52:49.528 [warning] Quality checks failed for test-retry-2500 (attempt 2/3), retrying...
+....19:52:49.730 [warning] Quality checks failed for test-fail-5315 (attempt 1/3), retrying...
+19:52:49.735 [warning] Quality checks failed for test-fail-5315 (attempt 2/3), retrying...
+19:52:49.739 [error] Quality checks failed for test-fail-5315 after 3 attempts, giving up
+19:52:49.740 [warning] Pull request failed for test-fail-5315 after 3 attempts
+..19:52:49.873 request_id=GJP6AyNIRj2pY30AABdi [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:52:49.879 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+.....19:52:50.031 request_id=GJP6AyysFzG4_58AAA6D [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:52:50.033 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+..........19:52:50.252 request_id=GJP6AzmInRnd7-QAADmh [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:52:50.260 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+.....
+Finished in 2.8 seconds (0.9s async, 1.9s sync)
+70 tests, 2 failures, 2 skipped (4 excluded)
+Implemented fixes scoped to `ST-AUTH-006` and did not commit/push.
+
+Changes made:
+- `lib/jido_code/accounts/security_tokens.ex:76`
+  - Fixed owner identity handling so token queries/revocations use AshAuthentication subject format, not raw UUID.
+  - Added `owner_identity/1` + `normalize_owner_id/1` and used them in:
+    - `list_owner_credentials/1`
+    - `revoke_owner_token/2`
+    - `revoke_owner_api_key/2`
+- `lib/jido_code/accounts/token.ex:138`
+  - Made `created_at` and `updated_at` public so security status/audit can reliably expose timestamp metadata required by the story.
+
+Validation run:
+- `mix format --check-formatted` passed.
+- `mix compile --warnings-as-errors` passed.
+- `mix precommit` cannot complete in this sandbox because DB socket access is blocked:
+  - `tcp connect (localhost:5432): ... :eperm`
+  - So tests cannot run here even after code fixes.
+
+No commit was created, and nothing was pushed.
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 338241, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+....................**20:01:15.485 request_id=GJP6eNlG52JMZ2gAAAKF [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+...20:01:15.623 request_id=GJP6eORyq3vHJwcAAAEn [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+......20:01:16.036 request_id=GJP6ePzISwJP8XUAAAbm [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:01:16.041 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+
+
+  1) test failed revocation keeps state unchanged and returns typed recovery instructions (JidoCodeWeb.SecuritySettingsLiveTest)
+     test/jido_code_web/live/security_settings_live_test.exs:65
+     ** (ArgumentError) expected selector "#settings-security-revoke-api-key-5d59b8c2-97a0-4409-8480-bd7f2260f677" to return a single element, but got none within: 
+
+     <header class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 lg:px-8"><div class="flex-1"><a href="/dashboard" data-phx-link="redirect" data-phx-link-state="push" class="text-xl font-bold hover:opacity-80">Agent Jido</a></div><div class="flex-none"><ul class="flex flex-row px-1 space-x-2 items-center"><li><a href="/dashboard" data-phx-link="redirect" data-phx-link-state="push" class="btn btn-ghost btn-sm">Dashboard</a></li><li><a href="/forge" data-phx-link="redirect" data-phx-link-state="push" class="btn btn-ghost btn-sm">Forge</a></li><li><a href="/settings" data-phx-link="redirect" data-phx-link-state="push" class="btn btn-ghost btn-sm">Settings</a></li><li><div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full"><div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&amp;]:left-1/3 [[data-theme=dark]_&amp;]:left-2/3 transition-[left]"></div><button class="flex p-2 cursor-pointer w-1/3" phx-click="[[&quot;dispatch&quot;,{&quot;event&quot;:&quot;phx:set-theme&quot;}]]" data-phx-theme="system"><span class="hero-computer-desktop-micro size-4 opacity-75 hover:opacity-100"></span></button><button class="flex p-2 cursor-pointer w-1/3" phx-click="[[&quot;dispatch&quot;,{&quot;event&quot;:&quot;phx:set-theme&quot;}]]" data-phx-theme="light"><span class="hero-sun-micro size-4 opacity-75 hover:opacity-100"></span></button><button class="flex p-2 cursor-pointer w-1/3" phx-click="[[&quot;dispatch&quot;,{&quot;event&quot;:&quot;phx:set-theme&quot;}]]" data-phx-theme="dark"><span class="hero-moon-micro size-4 opacity-75 hover:opacity-100"></span></button></div></li></ul></div></header><main class="px-4 py-8 sm:px-6 lg:px-8"><div class="mx-auto max-w-6xl space-y-4"><div class="max-w-6xl mx-auto py-8"><h1 class="text-2xl font-bold mb-6">Settings</h1><div class="flex gap-8"><nav class="w-48 shrink-0"><ul class="space-y-1"><li><a href="/settings/github" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content hover:bg-base-200"><span class="hero-code-bracket w-5 h-5 inline-block mr-2"></span> GitHub
+                 </a></li><li><a href="/settings/agents" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content hover:bg-base-200"><span class="hero-cpu-chip w-5 h-5 inline-block mr-2"></span> Agents
+                 </a></li><li><a href="/settings/account" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content hover:bg-base-200"><span class="hero-user-circle w-5 h-5 inline-block mr-2"></span> Account
+                 </a></li><li><a href="/settings/security" data-phx-link="patch" data-phx-link-state="push" class="block px-4 py-2 rounded-lg transition-colors text-base-content bg-primary text-primary-content font-medium"><span class="hero-shield-check w-5 h-5 inline-block mr-2"></span> Security
+                 </a></li></ul></nav><div class="flex-1"><div class="space-y-6"><div><h2 class="text-xl font-semibold">Security Controls</h2><p class="text-sm text-base-content/70 mt-1">
+           Review token/key expiry, revoke compromised credentials, and capture revocation audit timestamps.
+         </p></div><div id="settings-security-status-error" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal border border-warning/50 bg-warning/10"><p id="settings-security-status-error-type" class="text-sm font-medium">
+           Typed error: token_status_unavailable
+         </p><p id="settings-security-status-error-message" class="text-sm mt-1">
+           Unable to load token and API key status.
+         </p><p id="settings-security-status-error-recovery" class="text-sm mt-1">
+           Refresh this screen and retry. If status loading keeps failing, verify database health and continue containment from the security playbook.
+
+         </p></div><div id="settings-security-token-status" class="space-y-3"><h3 class="text-lg font-semibold">Session Tokens</h3><div id="settings-security-token-empty" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal">
+       
+           No owner session tokens found.
+         
+     </div></div><div id="settings-security-api-key-status" class="space-y-3"><h3 class="text-lg font-semibold">API Keys</h3><div id="settings-security-api-key-empty" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal">
+       
+           No owner API keys found.
+         
+     </div></div><div id="settings-security-audit-log" role="region" class="overflow-hidden [&amp;:has(.overlay)]:relative  border [&amp;:not(:has(.overlay))]:bg-white text-base-text-light border-base-border-light shadow-sm dark:[&amp;:not(:has(.overlay))]:bg-base-bg-dark dark:text-base-text-dark dark:border-base-border-dark rounded-lg [&amp;:has(.card-section)&gt;.card-section]:p-3 [&amp;:not(:has(.card-section))]:p-3 font-normal"><h3 class="text-lg font-semibold mb-3">Revocation Audit</h3><ul class="space-y-2"></ul><p class="text-sm text-base-content/60">
+           No revocation events recorded in this browser session.
+         </p></div></div></div></div></div></div></main><div id="toast-group-container" class="fixed z-50 max-h-screen w-full p-4 md:max-w-[420px] pointer-events-none grid origin-center top-0 right-0 items-start flex-col sm:bottom-auto"><div id="toast-group-disconnected"><div class="group/toast z-100 pointer-events-auto relative w-full items-center justify-between origin-center overflow-hidden rounded-lg p-4 shadow-lg border col-start-1 col-end-1 row-start-1 row-end-2 flex "><p class="text-sm">You are now signed in</p></div></div></div>
+     code: |> render_click()
+     stacktrace:
+       (phoenix_live_view 1.1.22) lib/phoenix_live_view/test/live_view_test.ex:1169: Phoenix.LiveViewTest.call/2
+       test/jido_code_web/live/security_settings_live_test.exs:74: (test)
+
+20:01:16.105 request_id=GJP6eQDjeLwqPsEAAAUF [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:01:16.118 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+
+
+  2) test security tab exposes expiry metadata and revocation controls that invalidate bearer and api key auth (JidoCodeWeb.SecuritySettingsLiveTest)
+     test/jido_code_web/live/security_settings_live_test.exs:13
+     Expected truthy, got false
+     code: assert has_element?(view, "#settings-security-token-expires-at-#{session_jti}")
+     arguments:
+
+         # 1
+         #Phoenix.LiveViewTest.View<id: "phx-GJP6eQEpBRg-wQUl", module: JidoCodeWeb.SettingsLive, pid: #PID<0.3714.0>, endpoint: JidoCodeWeb.Endpoint, ...>
+
+         # 2
+         "#settings-security-token-expires-at-329vku80o9eicahuo4000175"
+
+     stacktrace:
+       test/jido_code_web/live/security_settings_live_test.exs:23: (test)
+
+...20:01:16.290 [warning] Quality checks failed for test-fail-6885 (attempt 1/3), retrying...
+20:01:16.299 [warning] Quality checks failed for test-fail-6885 (attempt 2/3), retrying...
+20:01:16.304 [error] Quality checks failed for test-fail-6885 after 3 attempts, giving up
+20:01:16.305 [warning] Pull request failed for test-fail-6885 after 3 attempts
+.20:01:16.337 [warning] Quality checks failed for test-retry-2247 (attempt 1/3), retrying...
+20:01:16.344 [warning] Quality checks failed for test-retry-2247 (attempt 2/3), retrying...
+..20:01:16.453 request_id=GJP6eRX2WZpJDqwAAATj [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+.20:01:16.480 request_id=GJP6eRdc-Q4bpFkAABuB [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:01:16.482 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:01:16.486 request_id=GJP6eRfH68wbpFkAABvB [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:01:16.497 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+..20:01:16.568 request_id=GJP6eRyqvzkvLSkAABzk [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:01:16.573 request_id=GJP6eRz7iQcvLSkAAB2k [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:01:16.577 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+........20:01:17.016 request_id=GJP6eTXuN-r6l4IAAB6B [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:01:17.030 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+...20:01:17.136 request_id=GJP6eT6GqrFtZkYAAAVn [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:01:17.141 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+..........20:01:17.347 request_id=GJP6eUsUb3edu0sAACAE [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:01:17.350 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+.......
+Finished in 3.0 seconds (0.9s async, 2.0s sync)
+70 tests, 2 failures, 2 skipped (4 excluded)
+Fixed the `ST-AUTH-006` failures by correcting Ash query usage in the new story code.
+
+1. Updated `lib/jido_code/accounts/security_tokens.ex:6` and `lib/jido_code/accounts/security_tokens.ex:195` to use `Ash.Query` pipelines instead of invalid `Ash.read(..., query: ...)` options.
+2. Updated `test/jido_code_web/live/security_settings_live_test.exs:4` and `test/jido_code_web/live/security_settings_live_test.exs:181` so the test helper uses a valid `Ash.Query` read.
+
+Root cause: `query:` is not a valid option for `Ash.read/2` in this Ash version, which caused the security status load to fail (`token_status_unavailable`) and made the UI selectors missing.
+
+Validation run:
+1. `mix test test/jido_code_web/live/security_settings_live_test.exs --max-cases 1` passed.
+2. `mix test --warnings-as-errors` passed (`70 tests, 0 failures`).
+3. `MIX_OS_CONCURRENCY_LOCK=0 mix deps.unlock --unused` passed.
+4. `mix format --check-formatted --dot-formatter /tmp/min_formatter.exs lib/jido_code/accounts/security_tokens.ex test/jido_code_web/live/security_settings_live_test.exs` passed.
+
+`mix precommit` itself is blocked in this sandbox by Mix TCP pubsub (`Mix.Sync.PubSub.subscribe/1` -> `:eperm`), so I ran the equivalent gates with sandbox-safe commands. No commit or push was done.
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 284043, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+....................**20:09:21.466 request_id=GJP66f_X8-n9G_AAAC2h [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+...20:09:21.720 request_id=GJP66hIZ5gbKYH4AAC4h [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+.20:09:21.821 request_id=GJP66heUh0SY0YAAAAQm [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:09:21.825 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:09:21.828 request_id=GJP66hhwYVSY0YAAAC6h [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:09:21.837 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.20:09:21.858 request_id=GJP66hpfe0LYAUEAAAOI [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+............20:09:22.415 [warning] Quality checks failed for test-retry-1093 (attempt 1/3), retrying...
+20:09:22.420 [warning] Quality checks failed for test-retry-1093 (attempt 2/3), retrying...
+.20:09:22.466 [warning] Quality checks failed for test-fail-2279 (attempt 1/3), retrying...
+20:09:22.470 [warning] Quality checks failed for test-fail-2279 (attempt 2/3), retrying...
+20:09:22.478 [error] Quality checks failed for test-fail-2279 after 3 attempts, giving up
+20:09:22.479 [warning] Pull request failed for test-fail-2279 after 3 attempts
+......20:09:22.801 request_id=GJP66lJggMSFNgsAADPB [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:09:22.807 request_id=GJP66lK77l2FNgsAADSB [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:09:22.815 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+..20:09:22.895 request_id=GJP66lf2Svh1b4gAAANC [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:09:22.908 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.20:09:22.944 request_id=GJP66lrsw5eO4ZIAAAVC [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+20:09:22.975 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.20:09:23.124 request_id=GJP66mWUQglmhOoAAAaC [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:09:23.140 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+...........20:09:23.392 request_id=GJP66nWkW01YnDYAADjh [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:09:23.402 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+..20:09:23.439 request_id=GJP66nhq8z9lHacAADnh [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+20:09:23.444 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+.......
+Finished in 3.2 seconds (1.0s async, 2.1s sync)
+70 tests, 0 failures, 2 skipped (4 excluded)
