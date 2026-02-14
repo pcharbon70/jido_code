@@ -39,6 +39,7 @@ defmodule JidoCodeWeb.Router do
     pipe_through(:rpc_run)
 
     post("/rpc/run", AshTypescriptRpcController, :run)
+    post("/rpc/validate", AshTypescriptRpcController, :validate)
   end
 
   scope "/", JidoCodeWeb do
@@ -59,7 +60,6 @@ defmodule JidoCodeWeb.Router do
       live("/demos/chat", Demos.ChatLive, :index)
     end
 
-    post("/rpc/validate", AshTypescriptRpcController, :validate)
     get("/ash-typescript", PageController, :index)
   end
 

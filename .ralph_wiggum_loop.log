@@ -6655,3 +6655,59 @@ Excluding tags: [:sprite_integration]
 .........
 Finished in 2.8 seconds (0.7s async, 2.1s sync)
 64 tests, 0 failures, 2 skipped (4 excluded)
+1) changed files
+- `lib/jido_code_web/controllers/ash_typescript_rpc_controller.ex:12`  
+  Added unified RPC auth resolution for `run` + `validate`, API key sign-in via `AshAuthentication` strategy, typed API key auth failures, actor auth mode metadata, and API key audit telemetry/log emission with usage timestamp + endpoint metadata.
+- `lib/jido_code_web/router.ex:38`  
+  Moved `POST /rpc/validate` into the RPC pipeline (same as `/rpc/run`) so API key/service-style calls are not gated by browser CSRF middleware.
+- `test/jido_code_web/controllers/ash_typescript_rpc_controller_test.exs:65`  
+  Added API key coverage for `/rpc/validate` and `/rpc/run` happy paths, revoked/expired API key failures, typed error assertions, no-action assertion (`no data` on revoked validate), and audit event assertions.
+
+2) tests/commands executed
+- `mix test test/jido_code_web/controllers/ash_typescript_rpc_controller_test.exs` (pass, 7 tests)
+- `mix compile --warnings-as-errors` (pass)
+- `MIX_OS_CONCURRENCY_LOCK=0 mix deps.unlock --unused` (pass)
+- `mix precommit` (fails in this sandbox with `Mix.PubSub` TCP socket `:eperm` in `MIX_ENV=test`)
+- `MIX_OS_CONCURRENCY_LOCK=0 mix precommit` (same `Mix.PubSub` `:eperm` failure)
+
+3) acceptance criteria coverage
+- AC1: API key credentials resolve actor context for policy checks.  
+  Covered by `resolve_api_key_auth/2` setting `current_user` + Ash actor (`lib/jido_code_web/controllers/ash_typescript_rpc_controller.ex:59`) and validated by API key success tests (`test/jido_code_web/controllers/ash_typescript_rpc_controller_test.exs:65`, `:89`).
+- AC2: Valid API key requests can validate and run permitted RPC actions.  
+  Covered by both endpoints using shared auth flow (`lib/jido_code_web/controllers/ash_typescript_rpc_controller.ex:12`, `:16`, `:20`) and passing tests for `/rpc/validate` and `/rpc/run` (`test/jido_code_web/controllers/ash_typescript_rpc_controller_test.exs:65`, `:89`).
+- AC3: Revoked/expired/unknown API keys return typed authorization errors and do nothing.  
+  Covered by typed response `authorization_failed` with reason `invalid_expired_or_revoked_api_key` (`lib/jido_code_web/controllers/ash_typescript_rpc_controller.ex:197`) and revoked/expired tests (`test/jido_code_web/controllers/ash_typescript_rpc_controller_test.exs:104`, `:126`), including `refute Map.has_key?(response, "data")` on revoked validate.
+
+4) blockers/assumptions
+- Blocker: `mix precommit` cannot complete in this environment because `Mix.PubSub` fails opening local TCP sockets (`:eperm`) when run in the alias’s test environment.
+- Assumption: API key detection from `Authorization: Bearer ...` relies on the configured prefix `agentjido_`; `x-api-key` and `Authorization: ApiKey ...` are also supported (`lib/jido_code_web/controllers/ash_typescript_rpc_controller.ex:116`, `:120`, `:124`).
+Getting extensions in current project...
+Running setup for AshPostgres.DataLayer...
+Running ExUnit with seed: 510611, max_cases: 20
+Excluding tags: [:sprite_integration]
+
+....................**..19:36:29.734 request_id=GJP5Hu2I5krP8pAAAARn [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:36:29.761 request_id=GJP5Hu_D877P8pAAAAOC [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:36:29.858 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+......19:36:30.196 request_id=GJP5HwoqCg73bmoAAAZH [warning] onboarding_redirect route=/ reason=onboarding_incomplete step=1 diagnostic="Setup is incomplete. Resume onboarding to continue."
+..19:36:30.248 request_id=GJP5Hw0_d6R1I1wAAAKD [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+..19:36:30.301 [warning] Quality checks failed for test-retry-773 (attempt 1/3), retrying...
+19:36:30.306 [warning] Quality checks failed for test-retry-773 (attempt 2/3), retrying...
+.19:36:30.356 [warning] Quality checks failed for test-fail-933 (attempt 1/3), retrying...
+19:36:30.360 [warning] Quality checks failed for test-fail-933 (attempt 2/3), retrying...
+19:36:30.364 [error] Quality checks failed for test-fail-933 after 3 attempts, giving up
+19:36:30.365 [warning] Pull request failed for test-fail-933 after 3 attempts
+...........19:36:30.926 request_id=GJP5HzWyLu_IPgIAAAVi [warning] auth_boundary_check outcome=deny live_view=JidoCodeWeb.DashboardLive reason=missing_or_expired_session
+.19:36:30.968 request_id=GJP5HzfUea_REswAADJh [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:36:30.970 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:36:30.973 request_id=GJP5HzhaHMjREswAAAAp [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+19:36:30.979 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.SettingsLive reason=owner_session_present
+.19:36:31.033 request_id=GJP5HzvbAMlhlqgAAAYi [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:36:31.036 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+.........19:36:31.309 request_id=GJP5H0vraSf8O_AAAAin [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:36:31.311 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+........19:36:31.459 request_id=GJP5H1UoNaq0q24AAAgj [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+19:36:31.464 [warning] auth_boundary_check outcome=allow live_view=JidoCodeWeb.DashboardLive reason=owner_session_present
+...
+Finished in 2.8 seconds (0.9s async, 1.9s sync)
+68 tests, 0 failures, 2 skipped (4 excluded)
