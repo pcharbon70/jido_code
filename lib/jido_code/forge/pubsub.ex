@@ -12,28 +12,31 @@ defmodule JidoCode.Forge.PubSub do
   alias JidoCode.Forge.ChannelRedaction
 
   @pubsub JidoCode.PubSub
+  @default_subscriber Phoenix.PubSub
+  @default_broadcaster Phoenix.PubSub
 
   def sessions_topic, do: "forge:sessions"
   def session_topic(id), do: "forge:session:#{id}"
 
   def subscribe_sessions do
-    Phoenix.PubSub.subscribe(@pubsub, sessions_topic())
+    subscriber().subscribe(@pubsub, sessions_topic())
   end
 
   def subscribe_session(id) do
-    Phoenix.PubSub.subscribe(@pubsub, session_topic(id))
+    subscriber().subscribe(@pubsub, session_topic(id))
   end
 
   def unsubscribe_session(id) do
-    Phoenix.PubSub.unsubscribe(@pubsub, session_topic(id))
+    subscriber().unsubscribe(@pubsub, session_topic(id))
   end
 
   @spec broadcast_sessions(term()) :: :ok | {:error, ChannelRedaction.typed_security_error()}
   def broadcast_sessions(msg) do
     topic = sessions_topic()
 
-    with {:ok, redacted_msg} <- ChannelRedaction.redact_pubsub_payload(msg, operation: :broadcast_sessions) do
-      Phoenix.PubSub.broadcast(@pubsub, topic, redacted_msg)
+    with {:ok, redacted_msg} <-
+           ChannelRedaction.redact_pubsub_payload(msg, operation: :broadcast_sessions) do
+      broadcaster().broadcast(@pubsub, topic, redacted_msg)
     else
       {:error, typed_error} = error ->
         emit_redaction_failure(topic, typed_error)
@@ -41,12 +44,14 @@ defmodule JidoCode.Forge.PubSub do
     end
   end
 
-  @spec broadcast_session(term(), term()) :: :ok | {:error, ChannelRedaction.typed_security_error()}
+  @spec broadcast_session(term(), term()) ::
+          :ok | {:error, ChannelRedaction.typed_security_error()}
   def broadcast_session(id, msg) do
     topic = session_topic(id)
 
-    with {:ok, redacted_msg} <- ChannelRedaction.redact_pubsub_payload(msg, operation: :broadcast_session) do
-      Phoenix.PubSub.broadcast(@pubsub, topic, redacted_msg)
+    with {:ok, redacted_msg} <-
+           ChannelRedaction.redact_pubsub_payload(msg, operation: :broadcast_session) do
+      broadcaster().broadcast(@pubsub, topic, redacted_msg)
     else
       {:error, typed_error} = error ->
         emit_redaction_failure(topic, typed_error)
@@ -58,5 +63,13 @@ defmodule JidoCode.Forge.PubSub do
     Logger.error(
       "security_audit=forge_pubsub_redaction_failed severity=high topic=#{topic} action=publication_blocked error_type=#{typed_error.error_type} reason_type=#{typed_error.reason_type}"
     )
+  end
+
+  defp subscriber do
+    Application.get_env(:jido_code, :forge_pubsub_subscriber, @default_subscriber)
+  end
+
+  defp broadcaster do
+    Application.get_env(:jido_code, :forge_pubsub_broadcaster, @default_broadcaster)
   end
 end

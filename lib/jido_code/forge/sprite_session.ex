@@ -17,7 +17,13 @@ defmodule JidoCode.Forge.SpriteSession do
 
   @type session_id :: String.t()
   @type state_name ::
-          :starting | :bootstrapping | :initializing | :ready | :running | :needs_input | :stopping
+          :starting
+          | :bootstrapping
+          | :initializing
+          | :ready
+          | :running
+          | :needs_input
+          | :stopping
 
   defstruct [
     :session_id,
@@ -28,6 +34,7 @@ defmodule JidoCode.Forge.SpriteSession do
     :runner_state,
     :state,
     :iteration,
+    :output_sequence,
     :started_at,
     :last_activity,
     :resume_checkpoint_id,
@@ -55,7 +62,8 @@ defmodule JidoCode.Forge.SpriteSession do
   @doc """
   Execute a command directly in the sprite.
   """
-  @spec exec(session_id(), String.t(), keyword()) :: {String.t(), non_neg_integer()} | {:error, term()}
+  @spec exec(session_id(), String.t(), keyword()) ::
+          {String.t(), non_neg_integer()} | {:error, term()}
   def exec(session_id, command, opts \\ []) do
     GenServer.call(via_tuple(session_id), {:exec, command, opts}, :infinity)
   end
@@ -110,6 +118,7 @@ defmodule JidoCode.Forge.SpriteSession do
       runner_state: runner_state,
       state: :starting,
       iteration: 0,
+      output_sequence: 0,
       started_at: DateTime.utc_now(),
       last_activity: DateTime.utc_now(),
       resume_checkpoint_id: resume_checkpoint_id,
@@ -165,6 +174,7 @@ defmodule JidoCode.Forge.SpriteSession do
 
       {:error, reason} ->
         Logger.error("Failed to provision sprite for session #{state.session_id}: #{inspect(reason)}")
+
         {:stop, {:provision_failed, reason}, state}
     end
   end
@@ -177,7 +187,10 @@ defmodule JidoCode.Forge.SpriteSession do
       :ok ->
         bootstrap_steps = Map.get(state.spec, :bootstrap, [])
 
-        case Bootstrap.execute(state.client, bootstrap_steps, sprite_client: sprite_client, sprite_id: state.sprite_id) do
+        case Bootstrap.execute(state.client, bootstrap_steps,
+               sprite_client: sprite_client,
+               sprite_id: state.sprite_id
+             ) do
           :ok ->
             Logger.debug("Bootstrap complete for session #{state.session_id}")
 
@@ -315,7 +328,7 @@ defmodule JidoCode.Forge.SpriteSession do
           %{state | state: :needs_input, last_activity: DateTime.utc_now()}
 
         {:ok, result_map} ->
-          if output = result_map[:output], do: notify_output(state, output)
+          state = notify_output(state, result_map[:output])
           Persistence.record_execution_complete(state.session_id, result_map)
           %{state | state: :ready, last_activity: DateTime.utc_now()}
 
@@ -386,8 +399,15 @@ defmodule JidoCode.Forge.SpriteSession do
   end
 
   defp notify_output(state, output) when is_binary(output) and output != "" do
-    ForgePubSub.broadcast_session(state.session_id, {:output, %{chunk: output, seq: state.iteration}})
+    next_sequence = state.output_sequence + 1
+
+    ForgePubSub.broadcast_session(
+      state.session_id,
+      {:output, %{chunk: output, seq: next_sequence}}
+    )
+
+    %{state | output_sequence: next_sequence}
   end
 
-  defp notify_output(_state, _output), do: :ok
+  defp notify_output(state, _output), do: state
 end

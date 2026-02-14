@@ -2,9 +2,13 @@ defmodule JidoCodeWeb.Forge.ShowLive do
   use JidoCodeWeb, :live_view
 
   alias JidoCode.Forge
+  alias JidoCode.Forge.Persistence
   alias JidoCode.Forge.PubSub, as: ForgePubSub
+  alias JidoCode.Forge.Resources.Session
   alias JidoCode.Security.LogRedactor
   alias JidoCodeWeb.Security.UiRedaction
+
+  @degraded_mode_message "Live stream unavailable. Showing persisted logs only."
 
   @impl true
   def mount(%{"session_id" => session_id}, _session, socket) do
@@ -20,38 +24,48 @@ defmodule JidoCodeWeb.Forge.ShowLive do
   end
 
   defp mount_with_session_id(session_id, socket) do
-    result =
-      try do
-        Forge.status(session_id)
-      catch
-        :exit, _ -> {:error, :not_found}
-        _, _ -> {:error, :not_found}
-      end
-
-    case result do
+    case load_session_status(session_id) do
       {:ok, status} ->
-        if connected?(socket) do
-          ForgePubSub.subscribe_session(session_id)
-          schedule_refresh()
-        end
+        persisted_output = load_persisted_output(session_id)
 
-        {:ok,
-         socket
-         |> assign(:page_title, "Session: #{session_id}")
-         |> assign(:session_id, session_id)
-         |> assign(:status, status)
-         |> assign(:input, "")
-         |> assign(:input_prompt, nil)
-         |> assign(:security_alert_message, nil)
-         |> assign(:suppressed_content_count, 0)
-         |> assign(:not_found, false)
-         |> stream(:output, [])}
+        socket =
+          socket
+          |> assign(:page_title, "Session: #{session_id}")
+          |> assign(:session_id, session_id)
+          |> assign(:status, status)
+          |> assign(:input, "")
+          |> assign(:input_prompt, nil)
+          |> assign(:security_alert_message, nil)
+          |> assign(:suppressed_content_count, 0)
+          |> assign(:last_output_seq, nil)
+          |> assign(:stream_discontinuity_count, 0)
+          |> assign(:stream_mode, :live)
+          |> assign(:stream_degraded_reason, nil)
+          |> assign(:degraded_mode_message, @degraded_mode_message)
+          |> assign(:not_found, false)
+          |> stream(:output, persisted_output_entries(persisted_output))
+
+        socket =
+          if connected?(socket) do
+            socket
+            |> subscribe_to_live_stream(session_id)
+            |> maybe_mark_reconnect()
+            |> then(fn connected_socket ->
+              schedule_refresh()
+              connected_socket
+            end)
+          else
+            socket
+          end
+
+        {:ok, socket}
 
       {:error, :not_found} ->
         {:ok,
          socket
          |> assign(:page_title, "Session Not Found")
          |> assign(:session_id, session_id)
+         |> assign(:degraded_mode_message, @degraded_mode_message)
          |> assign(:security_alert_message, nil)
          |> assign(:suppressed_content_count, 0)
          |> assign(:not_found, true)}
@@ -63,27 +77,25 @@ defmodule JidoCodeWeb.Forge.ShowLive do
     {:noreply, assign(socket, :status, status)}
   end
 
-  def handle_info({:output, %{chunk: chunk, seq: seq}}, socket) do
-    lines = String.split(chunk, "\n", trim: true)
+  def handle_info({:output, %{chunk: chunk, seq: seq}}, socket)
+      when is_binary(chunk) and is_integer(seq) and seq > 0 do
+    case maybe_accept_output_sequence(socket, seq) do
+      {:drop, socket} ->
+        {:noreply, socket}
 
-    socket =
-      Enum.with_index(lines)
-      |> Enum.reduce(socket, fn {line, idx}, acc ->
-        redaction = UiRedaction.sanitize_text(line)
+      {:accept, socket} ->
+        socket =
+          socket
+          |> maybe_mark_discontinuity(seq)
+          |> append_output_lines(chunk, seq)
+          |> assign(:last_output_seq, seq)
 
-        acc =
-          acc
-          |> maybe_raise_security_alert(redaction)
-          |> stream_insert(:output, %{
-            id: "line-#{seq}-#{idx}-#{System.unique_integer()}",
-            kind: :out,
-            text: redaction.text
-          })
+        {:noreply, socket}
+    end
+  end
 
-        acc
-      end)
-
-    {:noreply, socket}
+  def handle_info({:output, %{chunk: chunk}}, socket) when is_binary(chunk) do
+    {:noreply, append_output_lines(socket, chunk, "live")}
   end
 
   def handle_info({:needs_input, %{prompt: prompt}}, socket) do
@@ -109,15 +121,7 @@ defmodule JidoCodeWeb.Forge.ShowLive do
     if socket.assigns[:not_found] do
       {:noreply, socket}
     else
-      result =
-        try do
-          Forge.status(socket.assigns.session_id)
-        catch
-          :exit, _ -> {:error, :not_found}
-          _, _ -> {:error, :not_found}
-        end
-
-      case result do
+      case load_session_status(socket.assigns.session_id) do
         {:ok, status} ->
           schedule_refresh()
           {:noreply, assign(socket, :status, status)}
@@ -219,7 +223,10 @@ defmodule JidoCodeWeb.Forge.ShowLive do
     if command == "" do
       {:noreply, socket}
     else
-      redaction = UiRedaction.sanitize_text("$ " <> command, placeholder: "$ [SENSITIVE COMMAND SUPPRESSED]")
+      redaction =
+        UiRedaction.sanitize_text("$ " <> command,
+          placeholder: "$ [SENSITIVE COMMAND SUPPRESSED]"
+        )
 
       socket =
         socket
@@ -280,6 +287,18 @@ defmodule JidoCodeWeb.Forge.ShowLive do
             <p class="font-semibold">Security alert</p>
             <p class="text-sm mt-1">{@security_alert_message}</p>
             <p class="text-xs mt-1">Suppressed segments: {@suppressed_content_count}</p>
+          </div>
+
+          <div
+            :if={@stream_mode == :degraded}
+            id="forge-stream-degraded-alert"
+            class="mb-6 p-4 border border-error/50 rounded-lg bg-error/10"
+          >
+            <p class="font-semibold">Stream degraded mode</p>
+            <p class="text-sm mt-1">{@degraded_mode_message}</p>
+            <p :if={@stream_degraded_reason} class="text-xs mt-1">
+              Subscription failure: {@stream_degraded_reason}
+            </p>
           </div>
 
           <div class="flex justify-between items-center mb-6">
@@ -355,6 +374,21 @@ defmodule JidoCodeWeb.Forge.ShowLive do
                 <% end %>
               </span>
             </div>
+            <div class="px-4 py-1 bg-base-200/70 border-b border-base-100 flex justify-between items-center">
+              <span class="text-xs opacity-60">
+                Stream mode:
+                <span class="font-semibold">
+                  <%= if @stream_mode == :degraded do %>
+                    degraded
+                  <% else %>
+                    live
+                  <% end %>
+                </span>
+              </span>
+              <span id="forge-stream-discontinuity-count" class="text-xs opacity-60">
+                discontinuities: {@stream_discontinuity_count}
+              </span>
+            </div>
             <div
               id="terminal"
               phx-update="stream"
@@ -367,7 +401,8 @@ defmodule JidoCodeWeb.Forge.ShowLive do
                 class={[
                   "whitespace-pre-wrap",
                   line.kind == :cmd && "text-primary opacity-90",
-                  line.kind == :err && "text-error"
+                  line.kind == :err && "text-error",
+                  line.kind == :meta && "text-warning"
                 ]}
               >
                 {line.text}
@@ -454,12 +489,198 @@ defmodule JidoCodeWeb.Forge.ShowLive do
     """
   end
 
+  defp load_session_status(session_id) do
+    try do
+      Forge.status(session_id)
+    catch
+      :exit, _ -> {:error, :not_found}
+      _, _ -> {:error, :not_found}
+    end
+  end
+
+  defp subscribe_to_live_stream(socket, session_id) do
+    case ForgePubSub.subscribe_session(session_id) do
+      :ok ->
+        socket
+
+      {:error, reason} ->
+        mark_stream_degraded(socket, reason)
+
+      other ->
+        mark_stream_degraded(socket, other)
+    end
+  end
+
+  defp mark_stream_degraded(socket, reason) do
+    safe_reason = LogRedactor.safe_inspect(reason)
+
+    Persistence.log_event(
+      socket.assigns.session_id,
+      "session.output_stream_subscription_failed",
+      %{
+        reason: safe_reason
+      }
+    )
+
+    socket
+    |> assign(:stream_mode, :degraded)
+    |> assign(:stream_degraded_reason, safe_reason)
+    |> stream_insert(:output, %{
+      id: uniq_line_id("meta"),
+      kind: :meta,
+      text: @degraded_mode_message
+    })
+  end
+
+  defp maybe_mark_reconnect(socket) do
+    mount_count = reconnect_mount_count(socket)
+
+    if mount_count > 0 do
+      Persistence.log_event(socket.assigns.session_id, "session.output_stream_reconnected", %{
+        mounts: mount_count
+      })
+
+      socket
+      |> assign(:stream_discontinuity_count, socket.assigns.stream_discontinuity_count + 1)
+      |> stream_insert(:output, %{
+        id: uniq_line_id("meta"),
+        kind: :meta,
+        text: "[stream reconnected] continuity is re-established from the next output sequence."
+      })
+    else
+      socket
+    end
+  end
+
+  defp reconnect_mount_count(socket) do
+    socket
+    |> get_connect_params()
+    |> case do
+      %{"_mounts" => mount_count} ->
+        normalize_mount_count(mount_count)
+
+      _other ->
+        0
+    end
+  end
+
+  defp normalize_mount_count(mount_count) when is_integer(mount_count) and mount_count > 0,
+    do: mount_count
+
+  defp normalize_mount_count(mount_count) when is_binary(mount_count) do
+    case Integer.parse(mount_count) do
+      {count, ""} when count > 0 -> count
+      _other -> 0
+    end
+  end
+
+  defp normalize_mount_count(_mount_count), do: 0
+
+  defp maybe_accept_output_sequence(%{assigns: %{last_output_seq: nil}} = socket, _seq),
+    do: {:accept, socket}
+
+  defp maybe_accept_output_sequence(%{assigns: %{last_output_seq: last_seq}} = socket, seq)
+       when is_integer(last_seq) and seq > last_seq do
+    {:accept, socket}
+  end
+
+  defp maybe_accept_output_sequence(socket, _seq), do: {:drop, socket}
+
+  defp maybe_mark_discontinuity(%{assigns: %{last_output_seq: nil}} = socket, _seq), do: socket
+
+  defp maybe_mark_discontinuity(%{assigns: %{last_output_seq: last_seq}} = socket, seq)
+       when is_integer(last_seq) and seq == last_seq + 1 do
+    socket
+  end
+
+  defp maybe_mark_discontinuity(%{assigns: %{last_output_seq: last_seq}} = socket, seq)
+       when is_integer(last_seq) and seq > last_seq + 1 do
+    missing_from = last_seq + 1
+    missing_to = seq - 1
+
+    Persistence.log_event(socket.assigns.session_id, "session.output_stream_discontinuity", %{
+      missing_from: missing_from,
+      missing_to: missing_to,
+      resumed_at: seq
+    })
+
+    socket
+    |> assign(:stream_discontinuity_count, socket.assigns.stream_discontinuity_count + 1)
+    |> stream_insert(:output, %{
+      id: uniq_line_id("meta"),
+      kind: :meta,
+      text: continuity_gap_message(missing_from, missing_to, seq)
+    })
+  end
+
+  defp maybe_mark_discontinuity(socket, _seq), do: socket
+
+  defp continuity_gap_message(missing_from, missing_to, resumed_at) do
+    "[stream discontinuity] missing output sequence #{missing_from}..#{missing_to}; resumed at #{resumed_at}."
+  end
+
+  defp append_output_lines(socket, chunk, seq) do
+    chunk
+    |> String.split("\n", trim: true)
+    |> Enum.with_index()
+    |> Enum.reduce(socket, fn {line, idx}, acc ->
+      redaction = UiRedaction.sanitize_text(line)
+
+      acc
+      |> maybe_raise_security_alert(redaction)
+      |> stream_insert(:output, %{
+        id: "line-#{seq}-#{idx}-#{System.unique_integer([:positive])}",
+        kind: :out,
+        text: redaction.text
+      })
+    end)
+  end
+
+  defp load_persisted_output(session_id) do
+    require Ash.Query
+
+    Session
+    |> Ash.Query.filter(name == ^session_id)
+    |> Ash.read_one()
+    |> case do
+      {:ok, %Session{output_buffer: output_buffer}}
+      when is_binary(output_buffer) and output_buffer != "" ->
+        output_buffer
+
+      _other ->
+        nil
+    end
+  rescue
+    _exception ->
+      nil
+  catch
+    _kind, _reason ->
+      nil
+  end
+
+  defp persisted_output_entries(nil), do: []
+
+  defp persisted_output_entries(output) do
+    output
+    |> String.split("\n", trim: true)
+    |> Enum.with_index(1)
+    |> Enum.map(fn {line, index} ->
+      redaction = UiRedaction.sanitize_text(line)
+
+      %{
+        id: "persisted-#{index}",
+        kind: :out,
+        text: redaction.text
+      }
+    end)
+  end
+
   defp schedule_refresh do
     Process.send_after(self(), :refresh, 5_000)
   end
 
-  defp uniq_line_id do
-    "line-" <> Integer.to_string(System.unique_integer([:positive]))
+  defp uniq_line_id(prefix \\ "line") do
+    "#{prefix}-#{System.unique_integer([:positive])}"
   end
 
   defp format_time(nil), do: "—"
