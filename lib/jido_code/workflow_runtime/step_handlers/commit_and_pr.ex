@@ -67,6 +67,56 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
   @diff_size_check_id "diff_size_threshold"
   @diff_size_check_name "Diff size threshold policy check"
   @default_diff_max_changed_lines 800
+  @binary_file_policy_error_type "workflow_commit_and_pr_binary_file_policy_failed"
+  @binary_file_policy_operation "validate_binary_file_policy"
+  @binary_file_policy_stage "pre_ship_binary_file_policy"
+  @binary_file_policy_remediation """
+  Remove or replace binary artifacts, or request explicit approval override per policy, then retry CommitAndPR shipping.
+  """
+  @binary_file_check_id "binary_file_policy"
+  @binary_file_check_name "Binary file policy check"
+  @default_binary_policy_on_detect "block"
+  @binary_file_extensions ~w(
+    .7z
+    .a
+    .avi
+    .bin
+    .bmp
+    .class
+    .dat
+    .dll
+    .dmg
+    .doc
+    .docx
+    .eot
+    .exe
+    .gif
+    .gz
+    .ico
+    .iso
+    .jar
+    .jpeg
+    .jpg
+    .mov
+    .mp3
+    .mp4
+    .pdf
+    .png
+    .ppt
+    .pptx
+    .pyc
+    .so
+    .tar
+    .ttf
+    .wav
+    .webm
+    .webp
+    .woff
+    .woff2
+    .xls
+    .xlsx
+    .zip
+  )
   @blocked_shipping_actions ["commit", "push", "create_pr"]
 
   @impl true
@@ -79,7 +129,9 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
          {:ok, secret_scan_policy_check} <-
            validate_secret_scan(args, resolved_branch_context, opts),
          {:ok, diff_size_policy_check} <-
-           validate_diff_size_threshold(args, resolved_branch_context, opts) do
+           validate_diff_size_threshold(args, resolved_branch_context, opts),
+         {:ok, binary_file_policy_check} <-
+           validate_binary_file_policy(args, resolved_branch_context, opts) do
       maybe_probe_commit(resolved_branch_context, opts)
 
       {:ok,
@@ -91,17 +143,19 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
            policy_checks: %{
              workspace_cleanliness: workspace_policy_check,
              secret_scan: secret_scan_policy_check,
-             diff_size_threshold: diff_size_policy_check
+             diff_size_threshold: diff_size_policy_check,
+             binary_file_policy: binary_file_policy_check
            }
          },
          branch_setup: branch_setup,
          policy_checks: %{
            workspace_cleanliness: workspace_policy_check,
            secret_scan: secret_scan_policy_check,
-           diff_size_threshold: diff_size_policy_check
+           diff_size_threshold: diff_size_policy_check,
+           binary_file_policy: binary_file_policy_check
          },
          shipping_flow: %{
-           completed_stage: "diff_size_policy_check",
+           completed_stage: "binary_file_policy_check",
            next_stage: "commit_changes"
          }
        }}
@@ -1263,6 +1317,328 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     }
   end
 
+  @doc false
+  @spec default_binary_file_runner(map(), map()) :: {:ok, map()} | {:error, map()}
+  def default_binary_file_runner(args, _branch_context) when is_map(args) do
+    {:ok, binary_detection_from_sources(args, %{})}
+  end
+
+  def default_binary_file_runner(_args, _branch_context) do
+    {:error,
+     %{
+       reason_type: "binary_file_policy_input_invalid",
+       detail: "Binary file policy input payload is invalid and shipping is blocked by fail-closed policy.",
+       reason: :invalid_binary_policy_args
+     }}
+  end
+
+  defp validate_binary_file_policy(args, branch_context, opts)
+       when is_map(args) and is_map(branch_context) and is_list(opts) do
+    binary_file_runner =
+      Keyword.get(opts, :binary_file_runner, &__MODULE__.default_binary_file_runner/2)
+
+    case invoke_binary_file_runner(binary_file_runner, args, branch_context) do
+      {:ok, binary_file_result} ->
+        binary_file_policy_check =
+          build_binary_file_policy_check(args, branch_context, binary_file_result)
+
+        if binary_file_policy_check.status == "passed" do
+          {:ok, binary_file_policy_check}
+        else
+          {:error,
+           binary_file_policy_error(
+             binary_file_reason_type(binary_file_policy_check),
+             Map.get(
+               binary_file_policy_check,
+               :detail,
+               "Binary file policy blocked shipping."
+             ),
+             branch_context,
+             binary_file_policy_check,
+             map_get(binary_file_result, :reason, "reason")
+           )}
+        end
+
+      {:error, binary_file_runner_failure} ->
+        binary_file_policy_check =
+          build_binary_file_tooling_failure_policy_check(
+            args,
+            branch_context,
+            binary_file_runner_failure
+          )
+
+        {:error,
+         binary_file_policy_error(
+           "policy_violation",
+           Map.get(
+             binary_file_policy_check,
+             :detail,
+             "Binary file policy evaluation failed and shipping is blocked by fail-closed policy."
+           ),
+           branch_context,
+           binary_file_policy_check,
+           binary_file_runner_failure
+         )}
+    end
+  end
+
+  defp validate_binary_file_policy(_args, branch_context, _opts) do
+    binary_file_policy_check =
+      build_binary_file_tooling_failure_policy_check(
+        %{},
+        branch_context,
+        :invalid_binary_policy_args
+      )
+
+    {:error,
+     binary_file_policy_error(
+       "policy_violation",
+       Map.get(
+         binary_file_policy_check,
+         :detail,
+         "Binary file policy evaluation failed and shipping is blocked by fail-closed policy."
+       ),
+       branch_context,
+       binary_file_policy_check,
+       :invalid_binary_policy_args
+     )}
+  end
+
+  defp invoke_binary_file_runner(binary_file_runner, args, branch_context)
+       when is_function(binary_file_runner, 2) and is_map(args) and is_map(branch_context) do
+    safe_invoke_binary_file_runner(binary_file_runner, args, branch_context)
+  end
+
+  defp invoke_binary_file_runner(binary_file_runner, args, branch_context)
+       when is_function(binary_file_runner, 1) and is_map(args) and is_map(branch_context) do
+    safe_invoke_binary_file_runner(
+      fn _args, context -> binary_file_runner.(context) end,
+      args,
+      branch_context
+    )
+  end
+
+  defp invoke_binary_file_runner(_binary_file_runner, _args, _branch_context) do
+    {:error,
+     %{
+       reason_type: "binary_file_runner_invalid",
+       detail: "Binary file policy runner configuration is invalid."
+     }}
+  end
+
+  defp safe_invoke_binary_file_runner(binary_file_runner, args, branch_context)
+       when is_function(binary_file_runner, 2) and is_map(args) and is_map(branch_context) do
+    try do
+      case binary_file_runner.(args, branch_context) do
+        :ok ->
+          {:ok, binary_detection_from_sources(args, %{})}
+
+        {:ok, result} when is_map(result) ->
+          {:ok, result}
+
+        {:ok, result} when is_list(result) ->
+          {:ok, %{staged_files: result}}
+
+        {:ok, result} when is_binary(result) ->
+          {:ok, %{staged_files: [result]}}
+
+        {:ok, result} ->
+          {:error,
+           %{
+             reason_type: "binary_file_invalid_result",
+             detail: "Binary file runner returned an invalid result (#{inspect(result)}).",
+             reason: result
+           }}
+
+        {:error, reason} ->
+          {:error, reason}
+
+        other ->
+          {:error,
+           %{
+             reason_type: "binary_file_invalid_result",
+             detail: "Binary file runner returned an invalid result (#{inspect(other)}).",
+             reason: other
+           }}
+      end
+    rescue
+      exception ->
+        {:error,
+         %{
+           reason_type: "binary_file_runner_crashed",
+           detail: "Binary file runner crashed (#{Exception.message(exception)}).",
+           reason: exception
+         }}
+    catch
+      kind, reason ->
+        {:error,
+         %{
+           reason_type: "binary_file_runner_threw",
+           detail: "Binary file runner threw #{inspect({kind, reason})}.",
+           reason: {kind, reason}
+         }}
+    end
+  end
+
+  defp build_binary_file_policy_check(args, branch_context, binary_file_result)
+       when is_map(args) and is_map(branch_context) and is_map(binary_file_result) do
+    environment_mode = environment_mode_from_args(args)
+    detection = binary_detection_from_sources(args, binary_file_result)
+    binary_policy = binary_file_policy(args, binary_file_result)
+
+    binary_file_count = Map.get(detection, :binary_file_count, 0)
+    decision = binary_file_decision(binary_file_count, Map.get(binary_policy, :on_detect))
+    status = binary_file_status(binary_file_count, decision)
+    blocked_actions = binary_file_blocked_actions(status)
+
+    branch_derivation =
+      branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    %{
+      id: @binary_file_check_id,
+      name: @binary_file_check_name,
+      status: status,
+      decision: decision,
+      binary_detected: binary_file_count > 0,
+      binary_file_count: binary_file_count,
+      binary_files: Map.get(detection, :binary_files, []),
+      detection: detection,
+      binary_policy: binary_policy,
+      blocked_actions: blocked_actions,
+      blocked_action_details: binary_file_blocked_action_details(decision, blocked_actions),
+      detail:
+        binary_file_result
+        |> map_get(
+          :detail,
+          "detail",
+          binary_file_policy_detail(
+            status,
+            decision,
+            binary_file_count,
+            Map.get(binary_policy, :source)
+          )
+        )
+        |> normalize_optional_string() ||
+          binary_file_policy_detail(
+            status,
+            decision,
+            binary_file_count,
+            Map.get(binary_policy, :source)
+          ),
+      remediation:
+        binary_file_result
+        |> map_get(
+          :remediation,
+          "remediation",
+          binary_file_policy_remediation(status, decision)
+        )
+        |> normalize_optional_string() || binary_file_policy_remediation(status, decision),
+      run_metadata: %{
+        workflow_name:
+          branch_derivation
+          |> map_get(:workflow_name, "workflow_name")
+          |> normalize_optional_string(),
+        run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
+        branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+        environment_mode: environment_mode
+      },
+      step_metadata: binary_file_step_metadata(),
+      checked_at: timestamp_now()
+    }
+  end
+
+  defp build_binary_file_policy_check(_args, branch_context, _binary_file_result) do
+    build_binary_file_tooling_failure_policy_check(
+      %{},
+      branch_context,
+      :invalid_binary_file_result
+    )
+  end
+
+  defp build_binary_file_tooling_failure_policy_check(args, branch_context, reason)
+       when is_map(args) and is_map(branch_context) do
+    environment_mode = environment_mode_from_args(args)
+    detection = binary_detection_from_sources(args, %{})
+    binary_policy = binary_file_policy(args, %{})
+
+    branch_derivation =
+      branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    detail =
+      map_get(
+        reason,
+        :detail,
+        "detail",
+        "Binary file policy evaluation failed and shipping is blocked by fail-closed policy."
+      )
+
+    %{
+      id: @binary_file_check_id,
+      name: @binary_file_check_name,
+      status: "failed",
+      decision: "blocked",
+      binary_detected: Map.get(detection, :binary_detected, false),
+      binary_file_count: Map.get(detection, :binary_file_count, 0),
+      binary_files: Map.get(detection, :binary_files, []),
+      detection: detection,
+      binary_policy: binary_policy,
+      blocked_actions: @blocked_shipping_actions,
+      blocked_action_details: binary_file_blocked_action_details("tooling_error", @blocked_shipping_actions),
+      detail: detail,
+      remediation: @binary_file_policy_remediation,
+      run_metadata: %{
+        workflow_name:
+          branch_derivation
+          |> map_get(:workflow_name, "workflow_name")
+          |> normalize_optional_string(),
+        run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
+        branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+        environment_mode: environment_mode
+      },
+      step_metadata: binary_file_step_metadata(),
+      checked_at: timestamp_now()
+    }
+  end
+
+  defp build_binary_file_tooling_failure_policy_check(_args, branch_context, _reason) do
+    branch_derivation =
+      branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map()
+
+    %{
+      id: @binary_file_check_id,
+      name: @binary_file_check_name,
+      status: "failed",
+      decision: "blocked",
+      binary_detected: false,
+      binary_file_count: 0,
+      binary_files: [],
+      detection: %{
+        staged_files: [],
+        staged_file_count: 0,
+        binary_files: [],
+        binary_file_count: 0,
+        binary_detected: false,
+        detection_source: "none"
+      },
+      binary_policy: default_binary_file_policy(),
+      blocked_actions: @blocked_shipping_actions,
+      blocked_action_details: binary_file_blocked_action_details("tooling_error", @blocked_shipping_actions),
+      detail: "Binary file policy evaluation failed and shipping is blocked by fail-closed policy.",
+      remediation: @binary_file_policy_remediation,
+      run_metadata: %{
+        workflow_name:
+          branch_derivation
+          |> map_get(:workflow_name, "workflow_name")
+          |> normalize_optional_string(),
+        run_id: branch_derivation |> map_get(:run_id, "run_id") |> normalize_optional_string(),
+        branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+        environment_mode: "cloud"
+      },
+      step_metadata: binary_file_step_metadata(),
+      checked_at: timestamp_now()
+    }
+  end
+
   defp maybe_probe_commit(branch_context, opts) when is_map(branch_context) and is_list(opts) do
     case Keyword.get(opts, :commit_probe) do
       commit_probe when is_function(commit_probe, 1) ->
@@ -2123,6 +2499,572 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
     end
   end
 
+  defp binary_file_reason_type(%{decision: "approval_override_required"}),
+    do: "approval_override_required"
+
+  defp binary_file_reason_type(%{decision: "blocked"}), do: "binary_file_policy_blocked"
+  defp binary_file_reason_type(_binary_file_policy_check), do: "policy_violation"
+
+  defp binary_file_decision(0, _on_detect), do: "no_binary_changes"
+
+  defp binary_file_decision(binary_file_count, "require_approval_override")
+       when is_integer(binary_file_count) and binary_file_count > 0,
+       do: "approval_override_required"
+
+  defp binary_file_decision(binary_file_count, "allow")
+       when is_integer(binary_file_count) and binary_file_count > 0,
+       do: "allowed_with_binary_changes"
+
+  defp binary_file_decision(binary_file_count, _on_detect)
+       when is_integer(binary_file_count) and binary_file_count > 0,
+       do: "blocked"
+
+  defp binary_file_decision(_binary_file_count, _on_detect), do: "blocked"
+
+  defp binary_file_status(0, _decision), do: "passed"
+
+  defp binary_file_status(binary_file_count, "allowed_with_binary_changes")
+       when is_integer(binary_file_count) and binary_file_count > 0,
+       do: "passed"
+
+  defp binary_file_status(_binary_file_count, _decision), do: "failed"
+
+  defp binary_file_blocked_actions("failed"), do: @blocked_shipping_actions
+  defp binary_file_blocked_actions(_status), do: []
+
+  defp binary_file_blocked_action_details(_decision, blocked_actions)
+       when is_list(blocked_actions) and blocked_actions == [] do
+    []
+  end
+
+  defp binary_file_blocked_action_details(decision, blocked_actions)
+       when is_list(blocked_actions) do
+    Enum.map(blocked_actions, fn blocked_action ->
+      %{
+        action: blocked_action,
+        blocked: true,
+        reason: binary_file_block_reason(decision),
+        detail: "Binary file policy blocked #{blocked_action}."
+      }
+    end)
+  end
+
+  defp binary_file_blocked_action_details(_decision, _blocked_actions), do: []
+
+  defp binary_file_block_reason("approval_override_required"), do: "approval_override_required"
+  defp binary_file_block_reason("blocked"), do: "binary_file_policy_blocked"
+  defp binary_file_block_reason("tooling_error"), do: "binary_file_policy_tooling_error"
+  defp binary_file_block_reason(_decision), do: "policy_violation"
+
+  defp binary_file_policy_detail("passed", "no_binary_changes", _binary_file_count, _source) do
+    "No binary file additions or modifications were detected in staged changes."
+  end
+
+  defp binary_file_policy_detail(
+         "passed",
+         "allowed_with_binary_changes",
+         binary_file_count,
+         source
+       ) do
+    "Binary file policy allows #{binary_file_count} binary file change(s) from #{binary_policy_source_label(source)} policy scope."
+  end
+
+  defp binary_file_policy_detail(
+         "failed",
+         "approval_override_required",
+         binary_file_count,
+         source
+       ) do
+    "Binary file policy detected #{binary_file_count} binary file change(s) from #{binary_policy_source_label(source)} policy scope; explicit approval override is required before shipping."
+  end
+
+  defp binary_file_policy_detail("failed", "blocked", binary_file_count, source) do
+    "Binary file policy detected #{binary_file_count} binary file change(s) from #{binary_policy_source_label(source)} policy scope and blocked shipping."
+  end
+
+  defp binary_file_policy_detail(_status, _decision, binary_file_count, source) do
+    "Binary file policy detected #{binary_file_count} binary file change(s) from #{binary_policy_source_label(source)} policy scope and blocked shipping."
+  end
+
+  defp binary_file_policy_remediation("passed", "no_binary_changes"),
+    do: "Binary file policy satisfied."
+
+  defp binary_file_policy_remediation("passed", "allowed_with_binary_changes"),
+    do: "Binary file policy override allows shipping to continue."
+
+  defp binary_file_policy_remediation("failed", "approval_override_required") do
+    "Request explicit approval override for binary artifact changes before retrying CommitAndPR shipping."
+  end
+
+  defp binary_file_policy_remediation(_status, _decision), do: @binary_file_policy_remediation
+
+  defp binary_policy_source_label("workflow_policy"), do: "workflow"
+  defp binary_policy_source_label("project_policy"), do: "project"
+  defp binary_policy_source_label("shipping_policy"), do: "shipping"
+  defp binary_policy_source_label("runner_policy"), do: "runner"
+  defp binary_policy_source_label("args"), do: "input"
+  defp binary_policy_source_label(_source), do: "configured"
+
+  defp binary_file_step_metadata do
+    step_metadata(@binary_file_policy_stage, @binary_file_policy_operation)
+  end
+
+  defp binary_file_policy(args, binary_file_result)
+       when is_map(args) and is_map(binary_file_result) do
+    [
+      runner_binary_policy_candidate(binary_file_result),
+      {"workflow_policy", policy_binary_file_candidate(map_get(args, :workflow_policy, "workflow_policy"))},
+      {"project_policy", policy_binary_file_candidate(map_get(args, :project_policy, "project_policy"))},
+      {"shipping_policy", policy_binary_file_candidate(map_get(args, :shipping_policy, "shipping_policy"))},
+      {"args",
+       map_get(
+         args,
+         :binary_file_policy,
+         "binary_file_policy",
+         map_get(
+           args,
+           :binary_policy,
+           "binary_policy",
+           map_get(args, :on_binary_detect, "on_binary_detect")
+         )
+       )}
+    ]
+    |> Enum.find_value(&normalize_binary_policy_candidate/1)
+    |> case do
+      nil -> default_binary_file_policy()
+      binary_policy -> binary_policy
+    end
+  end
+
+  defp binary_file_policy(_args, _binary_file_result), do: default_binary_file_policy()
+
+  defp runner_binary_policy_candidate(binary_file_result) when is_map(binary_file_result) do
+    {"runner_policy",
+     map_get(
+       binary_file_result,
+       :binary_policy,
+       "binary_policy",
+       map_get(
+         binary_file_result,
+         :binary_file_policy,
+         "binary_file_policy",
+         map_get(binary_file_result, :policy, "policy")
+       )
+     )}
+  end
+
+  defp runner_binary_policy_candidate(_binary_file_result), do: {"runner_policy", nil}
+
+  defp policy_binary_file_candidate(policy_map) when is_map(policy_map) do
+    map_get(
+      policy_map,
+      :binary_file_policy,
+      "binary_file_policy",
+      map_get(
+        policy_map,
+        :binary_policy,
+        "binary_policy",
+        map_get(policy_map, :binary_files, "binary_files")
+      )
+    )
+  end
+
+  defp policy_binary_file_candidate(_policy_map), do: nil
+
+  defp normalize_binary_policy_candidate({source, candidate}) do
+    candidate
+    |> binary_policy_on_detect()
+    |> case do
+      nil ->
+        nil
+
+      on_detect ->
+        %{
+          source: source,
+          on_detect: on_detect
+        }
+    end
+  end
+
+  defp normalize_binary_policy_candidate(_candidate), do: nil
+
+  defp binary_policy_on_detect(%{} = candidate) do
+    candidate
+    |> map_get(
+      :on_detect,
+      "on_detect",
+      map_get(
+        candidate,
+        :on_binary_detect,
+        "on_binary_detect",
+        map_get(
+          candidate,
+          :on_binary_change,
+          "on_binary_change",
+          map_get(candidate, :decision, "decision", map_get(candidate, :outcome, "outcome"))
+        )
+      )
+    )
+    |> normalize_binary_policy_outcome()
+  end
+
+  defp binary_policy_on_detect(candidate), do: normalize_binary_policy_outcome(candidate)
+
+  defp normalize_binary_policy_outcome(true), do: @default_binary_policy_on_detect
+  defp normalize_binary_policy_outcome(false), do: "allow"
+
+  defp normalize_binary_policy_outcome(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        nil
+
+      normalized_value ->
+        case String.downcase(normalized_value) do
+          "block" -> "block"
+          "blocked" -> "block"
+          "deny" -> "block"
+          "disallow" -> "block"
+          "escalate" -> "require_approval_override"
+          "approval_override" -> "require_approval_override"
+          "require_approval_override" -> "require_approval_override"
+          "manual_override" -> "require_approval_override"
+          "allow" -> "allow"
+          "allowed" -> "allow"
+          "warn" -> "allow"
+          "continue" -> "allow"
+          "permit" -> "allow"
+          _other -> "block"
+        end
+    end
+  end
+
+  defp default_binary_file_policy do
+    %{
+      source: "default",
+      on_detect: @default_binary_policy_on_detect
+    }
+  end
+
+  defp binary_detection_from_sources(args, binary_file_result)
+       when is_map(args) and is_map(binary_file_result) do
+    staged_files = staged_files_from_sources(args, binary_file_result)
+
+    explicit_binary_files =
+      explicit_binary_files_from_sources(args, binary_file_result)
+
+    staged_binary_files =
+      staged_files
+      |> Enum.filter(&binary_file_change_entry?/1)
+      |> Enum.filter(&binary_file_change_relevant?/1)
+
+    binary_files =
+      (explicit_binary_files ++ staged_binary_files)
+      |> dedupe_binary_file_entries()
+
+    %{
+      staged_files: staged_files,
+      staged_file_count: length(staged_files),
+      binary_files: binary_files,
+      binary_file_count: length(binary_files),
+      binary_detected: binary_files != [],
+      detection_source: binary_detection_source(explicit_binary_files, staged_files)
+    }
+  end
+
+  defp binary_detection_from_sources(_args, _binary_file_result) do
+    %{
+      staged_files: [],
+      staged_file_count: 0,
+      binary_files: [],
+      binary_file_count: 0,
+      binary_detected: false,
+      detection_source: "none"
+    }
+  end
+
+  defp staged_files_from_sources(args, binary_file_result)
+       when is_map(args) and is_map(binary_file_result) do
+    binary_file_result
+    |> map_get(
+      :staged_files,
+      "staged_files",
+      map_get(
+        binary_file_result,
+        :staged_changes,
+        "staged_changes",
+        map_get(
+          binary_file_result,
+          :changed_files,
+          "changed_files",
+          map_get(
+            binary_file_result,
+            :files,
+            "files",
+            map_get(
+              args,
+              :staged_files,
+              "staged_files",
+              map_get(
+                args,
+                :staged_changes,
+                "staged_changes",
+                map_get(args, :changed_files, "changed_files", map_get(args, :files, "files"))
+              )
+            )
+          )
+        )
+      )
+    )
+    |> normalize_binary_file_entries("staged_changes", false)
+  end
+
+  defp staged_files_from_sources(_args, _binary_file_result), do: []
+
+  defp explicit_binary_files_from_sources(args, binary_file_result)
+       when is_map(args) and is_map(binary_file_result) do
+    binary_file_result
+    |> map_get(
+      :binary_files,
+      "binary_files",
+      map_get(
+        binary_file_result,
+        :binary_file_changes,
+        "binary_file_changes",
+        map_get(
+          binary_file_result,
+          :binary_paths,
+          "binary_paths",
+          map_get(
+            binary_file_result,
+            :staged_binary_files,
+            "staged_binary_files",
+            map_get(
+              args,
+              :binary_files,
+              "binary_files",
+              map_get(
+                args,
+                :binary_file_changes,
+                "binary_file_changes",
+                map_get(
+                  args,
+                  :binary_paths,
+                  "binary_paths",
+                  map_get(args, :staged_binary_files, "staged_binary_files")
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    |> normalize_binary_file_entries("explicit_binary_files", true)
+    |> Enum.filter(&binary_file_change_relevant?/1)
+  end
+
+  defp explicit_binary_files_from_sources(_args, _binary_file_result), do: []
+
+  defp normalize_binary_file_entries(entries, source, force_binary) when is_list(entries) do
+    entries
+    |> Enum.map(&normalize_binary_file_entry(&1, source, force_binary))
+    |> Enum.reject(fn normalized_entry -> normalized_entry == %{} end)
+  end
+
+  defp normalize_binary_file_entries(entry, source, force_binary) do
+    normalized_entry = normalize_binary_file_entry(entry, source, force_binary)
+
+    if normalized_entry == %{} do
+      []
+    else
+      [normalized_entry]
+    end
+  end
+
+  defp normalize_binary_file_entry(%{} = entry, source, force_binary) do
+    path =
+      entry
+      |> map_get(:path, "path", map_get(entry, :file, "file", map_get(entry, :name, "name")))
+      |> normalize_optional_string()
+
+    change_type =
+      entry
+      |> map_get(
+        :change_type,
+        "change_type",
+        map_get(
+          entry,
+          :status,
+          "status",
+          map_get(entry, :action, "action", map_get(entry, :mode, "mode"))
+        )
+      )
+      |> normalize_binary_change_type()
+      |> case do
+        nil when force_binary -> "modified"
+        nil -> "unknown"
+        normalized_change_type -> normalized_change_type
+      end
+
+    binary =
+      if force_binary do
+        true
+      else
+        entry
+        |> map_get(
+          :binary,
+          "binary",
+          map_get(
+            entry,
+            :is_binary,
+            "is_binary",
+            map_get(entry, :binary_file, "binary_file")
+          )
+        )
+        |> normalize_optional_boolean()
+        |> case do
+          nil -> binary_path_extension?(path)
+          binary_flag -> binary_flag
+        end
+      end
+
+    if is_nil(path) do
+      %{}
+    else
+      %{
+        path: path,
+        change_type: change_type,
+        binary: binary,
+        source: source
+      }
+    end
+  end
+
+  defp normalize_binary_file_entry(entry, source, force_binary) when is_binary(entry) do
+    path = normalize_optional_string(entry)
+
+    if is_nil(path) do
+      %{}
+    else
+      %{
+        path: path,
+        change_type: "modified",
+        binary: force_binary || binary_path_extension?(path),
+        source: source
+      }
+    end
+  end
+
+  defp normalize_binary_file_entry(_entry, _source, _force_binary), do: %{}
+
+  defp binary_file_change_entry?(%{} = entry) do
+    binary =
+      entry
+      |> map_get(:binary, "binary")
+      |> normalize_optional_boolean()
+      |> case do
+        nil -> binary_path_extension?(map_get(entry, :path, "path"))
+        binary_flag -> binary_flag
+      end
+
+    binary == true
+  end
+
+  defp binary_file_change_entry?(_entry), do: false
+
+  defp binary_file_change_relevant?(%{} = entry) do
+    entry
+    |> map_get(:change_type, "change_type")
+    |> normalize_binary_change_type()
+    |> case do
+      "deleted" -> false
+      _other -> true
+    end
+  end
+
+  defp binary_file_change_relevant?(_entry), do: false
+
+  defp normalize_binary_change_type(value) do
+    value
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        nil
+
+      normalized_value ->
+        case String.downcase(normalized_value) do
+          "a" -> "added"
+          "add" -> "added"
+          "added" -> "added"
+          "new" -> "added"
+          "m" -> "modified"
+          "mod" -> "modified"
+          "modify" -> "modified"
+          "modified" -> "modified"
+          "changed" -> "modified"
+          "update" -> "modified"
+          "updated" -> "modified"
+          "r" -> "renamed"
+          "rename" -> "renamed"
+          "renamed" -> "renamed"
+          "c" -> "copied"
+          "copy" -> "copied"
+          "copied" -> "copied"
+          "d" -> "deleted"
+          "delete" -> "deleted"
+          "deleted" -> "deleted"
+          "removed" -> "deleted"
+          _other -> "unknown"
+        end
+    end
+  end
+
+  defp binary_path_extension?(path) do
+    path
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        false
+
+      normalized_path ->
+        normalized_path
+        |> Path.extname()
+        |> String.downcase()
+        |> then(&(&1 in @binary_file_extensions))
+    end
+  end
+
+  defp dedupe_binary_file_entries(entries) when is_list(entries) do
+    entries
+    |> Enum.reduce({MapSet.new(), []}, fn entry, {seen, acc} ->
+      entry_path = entry |> map_get(:path, "path") |> normalize_optional_string()
+      change_type = entry |> map_get(:change_type, "change_type", "unknown")
+      key = {entry_path, change_type}
+
+      if is_nil(entry_path) or MapSet.member?(seen, key) do
+        {seen, acc}
+      else
+        {MapSet.put(seen, key), [entry | acc]}
+      end
+    end)
+    |> then(fn {_seen, deduped_entries} -> Enum.reverse(deduped_entries) end)
+  end
+
+  defp dedupe_binary_file_entries(_entries), do: []
+
+  defp binary_detection_source(explicit_binary_files, _staged_files)
+       when is_list(explicit_binary_files) and explicit_binary_files != [] do
+    "explicit_binary_files"
+  end
+
+  defp binary_detection_source(_explicit_binary_files, staged_files)
+       when is_list(staged_files) and staged_files != [] do
+    "staged_changes"
+  end
+
+  defp binary_detection_source(_explicit_binary_files, _staged_files), do: "none"
+
   defp environment_mode_from_args(args) when is_map(args) do
     args
     |> map_get(
@@ -2357,6 +3299,42 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR do
       branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
       branch_derivation: branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map(),
       policy_check: normalize_map(diff_size_policy_check),
+      timestamp: timestamp_now()
+    }
+  end
+
+  defp binary_file_policy_error(
+         reason_type,
+         detail,
+         branch_context,
+         binary_file_policy_check,
+         reason
+       ) do
+    blocked_actions =
+      binary_file_policy_check
+      |> map_get(:blocked_actions, "blocked_actions", @blocked_shipping_actions)
+      |> case do
+        actions when is_list(actions) -> actions
+        _other -> @blocked_shipping_actions
+      end
+
+    %{
+      error_type: @binary_file_policy_error_type,
+      operation: @binary_file_policy_operation,
+      reason_type: normalize_reason_type(reason_type),
+      detail: format_failure_detail(detail, reason),
+      remediation:
+        binary_file_policy_check
+        |> map_get(:remediation, "remediation", @binary_file_policy_remediation)
+        |> normalize_optional_string() || @binary_file_policy_remediation,
+      blocked_stage: "commit_changes",
+      blocked_actions: blocked_actions,
+      halted_before_commit: true,
+      halted_before_push: true,
+      halted_before_pr: true,
+      branch_name: branch_context |> map_get(:branch_name, "branch_name") |> normalize_optional_string(),
+      branch_derivation: branch_context |> map_get(:branch_derivation, "branch_derivation") |> normalize_map(),
+      policy_check: normalize_map(binary_file_policy_check),
       timestamp: timestamp_now()
     }
   end

@@ -3,7 +3,7 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
 
   alias JidoCode.WorkflowRuntime.StepHandlers.CommitAndPR
 
-  test "execute derives deterministic branch names and persists workspace secret scan and diff size policy checks" do
+  test "execute derives deterministic branch names and persists pre-ship policy checks including binary file policy" do
     branch_setup_calls = start_supervised!({Agent, fn -> [] end})
 
     branch_setup_runner = fn branch_context ->
@@ -122,7 +122,35 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
              operation: "validate_diff_size_threshold"
            } = first_result.run_artifacts.policy_checks.diff_size_threshold.step_metadata
 
-    assert first_result.shipping_flow.completed_stage == "diff_size_policy_check"
+    assert %{
+             id: "binary_file_policy",
+             name: "Binary file policy check",
+             status: "passed",
+             decision: "no_binary_changes",
+             binary_detected: false,
+             binary_file_count: 0,
+             blocked_actions: []
+           } = first_result.run_artifacts.policy_checks.binary_file_policy
+
+    assert %{
+             staged_file_count: 0,
+             binary_file_count: 0,
+             binary_detected: false,
+             detection_source: "none"
+           } = first_result.run_artifacts.policy_checks.binary_file_policy.detection
+
+    assert %{
+             source: "default",
+             on_detect: "block"
+           } = first_result.run_artifacts.policy_checks.binary_file_policy.binary_policy
+
+    assert %{
+             step: "CommitAndPR",
+             stage: "pre_ship_binary_file_policy",
+             operation: "validate_binary_file_policy"
+           } = first_result.run_artifacts.policy_checks.binary_file_policy.step_metadata
+
+    assert first_result.shipping_flow.completed_stage == "binary_file_policy_check"
     assert first_result.shipping_flow.next_stage == "commit_changes"
 
     recorded_calls = branch_setup_calls |> Agent.get(&Enum.reverse(&1))
@@ -199,9 +227,13 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
     assert alpha_result.run_artifacts.policy_checks.secret_scan.status == "passed"
     assert alpha_result.run_artifacts.policy_checks.secret_scan.scan_status == "clean"
     assert alpha_result.run_artifacts.policy_checks.diff_size_threshold.status == "passed"
+    assert alpha_result.run_artifacts.policy_checks.binary_file_policy.status == "passed"
 
     assert alpha_result.run_artifacts.policy_checks.diff_size_threshold.decision ==
              "within_threshold"
+
+    assert alpha_result.run_artifacts.policy_checks.binary_file_policy.decision ==
+             "no_binary_changes"
   end
 
   test "branch collision retries once with deterministic suffix and non-destructive behavior" do
@@ -421,7 +453,7 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
     assert Agent.get(commit_probe_calls, & &1) == 0
   end
 
-  test "secret scan and diff size checks execute before commit probe in shipping path" do
+  test "secret scan, diff size, and binary file checks execute before commit probe in shipping path" do
     ordered_calls = start_supervised!({Agent, fn -> [] end})
 
     secret_scan_runner = fn _args, _branch_context ->
@@ -438,6 +470,12 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
       {:ok, %{metrics: %{files_changed: 1, lines_added: 9, lines_deleted: 4}}}
     end
 
+    binary_file_runner = fn _args, _branch_context ->
+      Agent.update(ordered_calls, fn calls -> [:binary_policy | calls] end)
+
+      {:ok, %{staged_files: [%{path: "lib/commit_and_pr.ex", change_type: "modified", binary: false}]}}
+    end
+
     {:ok, result} =
       CommitAndPR.execute(
         nil,
@@ -445,6 +483,7 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
         branch_setup_runner: fn _branch_context -> :ok end,
         secret_scan_runner: secret_scan_runner,
         diff_size_runner: diff_size_runner,
+        binary_file_runner: binary_file_runner,
         commit_probe: commit_probe
       )
 
@@ -452,10 +491,12 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
     assert result.policy_checks.secret_scan.scan_status == "clean"
     assert result.policy_checks.diff_size_threshold.status == "passed"
     assert result.policy_checks.diff_size_threshold.decision == "within_threshold"
+    assert result.policy_checks.binary_file_policy.status == "passed"
+    assert result.policy_checks.binary_file_policy.decision == "no_binary_changes"
 
     assert ordered_calls
            |> Agent.get(&Enum.reverse(&1))
-           |> Enum.take(3) == [:secret_scan, :diff_size, :commit_probe]
+           |> Enum.take(4) == [:secret_scan, :diff_size, :binary_policy, :commit_probe]
   end
 
   test "diff size threshold exceed blocks shipping with explicit threshold details" do
@@ -557,6 +598,173 @@ defmodule JidoCode.WorkflowRuntime.StepHandlers.CommitAndPRTest do
              max_changed_lines: 120,
              on_exceed: "require_approval_override"
            } = typed_error.policy_check.threshold_policy
+
+    assert Agent.get(commit_probe_calls, & &1) == 0
+  end
+
+  test "binary file policy blocks shipping when staged binary additions are detected" do
+    commit_probe_calls = start_supervised!({Agent, fn -> 0 end})
+
+    commit_probe = fn _branch_context ->
+      Agent.update(commit_probe_calls, &(&1 + 1))
+    end
+
+    assert {:error, typed_error} =
+             CommitAndPR.execute(
+               nil,
+               %{
+                 workflow_name: "implement_task",
+                 run_id: "run-binary-block-01",
+                 workspace_clean: true,
+                 staged_changes: [
+                   %{
+                     path: "lib/jido_code/workflow_runtime/step_handlers/commit_and_pr.ex",
+                     status: "M"
+                   },
+                   %{path: "priv/static/logo.png", status: "A"}
+                 ],
+                 workflow_policy: %{
+                   binary_file_policy: %{on_detect: "block"}
+                 }
+               },
+               branch_setup_runner: fn _branch_context -> :ok end,
+               commit_probe: commit_probe
+             )
+
+    assert typed_error.error_type == "workflow_commit_and_pr_binary_file_policy_failed"
+    assert typed_error.operation == "validate_binary_file_policy"
+    assert typed_error.reason_type == "binary_file_policy_blocked"
+    assert typed_error.blocked_stage == "commit_changes"
+    assert typed_error.blocked_actions == ["commit", "push", "create_pr"]
+    assert typed_error.halted_before_commit == true
+    assert typed_error.halted_before_push == true
+    assert typed_error.halted_before_pr == true
+    assert typed_error.detail =~ "detected 1 binary file change"
+
+    assert %{
+             id: "binary_file_policy",
+             status: "failed",
+             decision: "blocked",
+             binary_detected: true,
+             binary_file_count: 1
+           } = typed_error.policy_check
+
+    assert [%{path: "priv/static/logo.png", change_type: "added", binary: true}] =
+             typed_error.policy_check.binary_files
+
+    assert %{
+             staged_file_count: 2,
+             binary_file_count: 1,
+             binary_detected: true
+           } = typed_error.policy_check.detection
+
+    assert Enum.any?(typed_error.policy_check.detection.staged_files, fn staged_file ->
+             staged_file.path == "priv/static/logo.png" and staged_file.binary == true
+           end)
+
+    assert %{
+             source: "workflow_policy",
+             on_detect: "block"
+           } = typed_error.policy_check.binary_policy
+
+    assert Enum.map(typed_error.policy_check.blocked_action_details, & &1.reason) ==
+             [
+               "binary_file_policy_blocked",
+               "binary_file_policy_blocked",
+               "binary_file_policy_blocked"
+             ]
+
+    assert Agent.get(commit_probe_calls, & &1) == 0
+  end
+
+  test "binary file policy can require explicit approval override escalation" do
+    commit_probe_calls = start_supervised!({Agent, fn -> 0 end})
+
+    commit_probe = fn _branch_context ->
+      Agent.update(commit_probe_calls, &(&1 + 1))
+    end
+
+    assert {:error, typed_error} =
+             CommitAndPR.execute(
+               nil,
+               %{
+                 workflow_name: "implement_task",
+                 run_id: "run-binary-escalate-01",
+                 workspace_clean: true,
+                 staged_changes: [
+                   %{path: "docs/architecture.md", status: "M"},
+                   %{path: "assets/images/wireframe.webp", status: "M"}
+                 ],
+                 project_policy: %{
+                   binary_file_policy: %{on_detect: "escalate"}
+                 }
+               },
+               branch_setup_runner: fn _branch_context -> :ok end,
+               commit_probe: commit_probe
+             )
+
+    assert typed_error.error_type == "workflow_commit_and_pr_binary_file_policy_failed"
+    assert typed_error.operation == "validate_binary_file_policy"
+    assert typed_error.reason_type == "approval_override_required"
+    assert typed_error.detail =~ "explicit approval override is required"
+
+    assert %{
+             status: "failed",
+             decision: "approval_override_required",
+             binary_detected: true,
+             binary_file_count: 1
+           } = typed_error.policy_check
+
+    assert %{
+             source: "project_policy",
+             on_detect: "require_approval_override"
+           } = typed_error.policy_check.binary_policy
+
+    assert Agent.get(commit_probe_calls, & &1) == 0
+  end
+
+  test "binary file policy evaluation failures fail closed with typed policy-check error" do
+    commit_probe_calls = start_supervised!({Agent, fn -> 0 end})
+
+    commit_probe = fn _branch_context ->
+      Agent.update(commit_probe_calls, &(&1 + 1))
+    end
+
+    assert {:error, typed_error} =
+             CommitAndPR.execute(
+               nil,
+               %{
+                 workflow_name: "implement_task",
+                 run_id: "run-binary-tooling-01",
+                 workspace_clean: true
+               },
+               branch_setup_runner: fn _branch_context -> :ok end,
+               binary_file_runner: fn _args, _branch_context ->
+                 {:error, %{reason_type: "binary_scan_timeout", detail: "binary scan timed out"}}
+               end,
+               commit_probe: commit_probe
+             )
+
+    assert typed_error.error_type == "workflow_commit_and_pr_binary_file_policy_failed"
+    assert typed_error.operation == "validate_binary_file_policy"
+    assert typed_error.reason_type == "policy_violation"
+    assert typed_error.blocked_actions == ["commit", "push", "create_pr"]
+    assert typed_error.halted_before_commit == true
+    assert typed_error.halted_before_push == true
+    assert typed_error.halted_before_pr == true
+
+    assert %{
+             id: "binary_file_policy",
+             status: "failed",
+             decision: "blocked"
+           } = typed_error.policy_check
+
+    assert Enum.map(typed_error.policy_check.blocked_action_details, & &1.reason) ==
+             [
+               "binary_file_policy_tooling_error",
+               "binary_file_policy_tooling_error",
+               "binary_file_policy_tooling_error"
+             ]
 
     assert Agent.get(commit_probe_calls, & &1) == 0
   end
