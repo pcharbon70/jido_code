@@ -9,6 +9,7 @@ defmodule JidoCodeWeb.SetupLive do
   alias JidoCode.Setup.PrerequisiteChecks
   alias JidoCode.Setup.RuntimeMode
   alias JidoCode.Setup.SystemConfig
+  alias JidoCode.Setup.WebhookSimulationChecks
 
   @wizard_steps %{
     1 => "Welcome and system check",
@@ -46,6 +47,9 @@ defmodule JidoCodeWeb.SetupLive do
     github_credential_report =
       resolve_github_credential_report(onboarding_step, onboarding_state)
 
+    webhook_simulation_report =
+      resolve_webhook_simulation_report(onboarding_step, onboarding_state)
+
     owner_bootstrap = resolve_owner_bootstrap(onboarding_step)
 
     {:ok,
@@ -55,6 +59,7 @@ defmodule JidoCodeWeb.SetupLive do
      |> assign(:prerequisite_report, prerequisite_report)
      |> assign(:provider_credential_report, provider_credential_report)
      |> assign(:github_credential_report, github_credential_report)
+     |> assign(:webhook_simulation_report, webhook_simulation_report)
      |> assign(:owner_bootstrap, owner_bootstrap)
      |> assign(:save_error, owner_bootstrap_error(owner_bootstrap))
      |> assign(:redirect_reason, params["reason"] || "onboarding_incomplete")
@@ -251,6 +256,104 @@ defmodule JidoCodeWeb.SetupLive do
               </p>
             </li>
           </ul>
+        </section>
+
+        <section :if={@webhook_simulation_report} id="setup-webhook-simulation" class="space-y-3">
+          <h2 class="text-lg font-semibold">Issue Bot webhook simulation readiness</h2>
+          <p id="setup-webhook-simulated-at" class="text-sm text-base-content/70">
+            Last simulated: {format_checked_at(@webhook_simulation_report.checked_at)}
+          </p>
+
+          <div class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <p class="font-medium">Simulation status</p>
+              <span
+                id="setup-webhook-simulation-status"
+                class={["badge", webhook_simulation_status_class(@webhook_simulation_report.status)]}
+              >
+                {webhook_simulation_status_label(@webhook_simulation_report.status)}
+              </span>
+            </div>
+            <p
+              :if={@webhook_simulation_report.failure_reason}
+              id="setup-webhook-failure-reason"
+              class="text-sm text-error"
+            >
+              {@webhook_simulation_report.failure_reason}
+            </p>
+          </div>
+
+          <div
+            id="setup-webhook-signature"
+            class="rounded-lg border border-base-300 bg-base-100 p-3"
+          >
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <p class="font-medium">Signature verification readiness</p>
+              <span
+                id="setup-webhook-signature-status"
+                class={[
+                  "badge",
+                  webhook_check_status_class(@webhook_simulation_report.signature.status)
+                ]}
+              >
+                {webhook_check_status_label(@webhook_simulation_report.signature.status)}
+              </span>
+            </div>
+            <p class="text-sm text-base-content/80">{@webhook_simulation_report.signature.detail}</p>
+            <p
+              :if={@webhook_simulation_report.signature.status != :ready}
+              id="setup-webhook-signature-remediation"
+              class="text-sm text-warning"
+            >
+              {@webhook_simulation_report.signature.remediation}
+            </p>
+          </div>
+
+          <ul class="space-y-2">
+            <li
+              :for={event <- @webhook_simulation_report.events}
+              id={"setup-webhook-event-#{webhook_event_dom_id(event.event)}"}
+              class="rounded-lg border border-base-300 bg-base-100 p-3"
+            >
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="font-medium">{event.event}</p>
+                <span
+                  id={"setup-webhook-event-#{webhook_event_dom_id(event.event)}-status"}
+                  class={["badge", webhook_check_status_class(event.status)]}
+                >
+                  {webhook_check_status_label(event.status)}
+                </span>
+              </div>
+              <p
+                id={"setup-webhook-event-#{webhook_event_dom_id(event.event)}-route"}
+                class="text-sm text-base-content/80"
+              >
+                Route readiness: {event.route}
+              </p>
+              <p class="text-sm text-base-content/80">{event.detail}</p>
+              <p
+                :if={event.status != :ready}
+                id={"setup-webhook-event-#{webhook_event_dom_id(event.event)}-remediation"}
+                class="text-sm text-warning"
+              >
+                {event.remediation}
+              </p>
+            </li>
+          </ul>
+
+          <div
+            :if={@webhook_simulation_report.status == :ready}
+            id="setup-issue-bot-defaults"
+            class="rounded-lg border border-base-300 bg-base-100 p-3"
+          >
+            <p class="font-medium">Issue Bot defaults ready for enablement</p>
+            <p id="setup-issue-bot-default-enabled" class="text-sm text-base-content/80">
+              Enabled: {issue_bot_default_enabled(@webhook_simulation_report.issue_bot_defaults)}
+            </p>
+            <p id="setup-issue-bot-default-approval-mode" class="text-sm text-base-content/80">
+              Approval mode: {issue_bot_default_approval_mode(@webhook_simulation_report.issue_bot_defaults)}
+            </p>
+          </div>
         </section>
 
         <section :if={@onboarding_step == 2} id="setup-owner-bootstrap" class="space-y-3">
@@ -509,6 +612,17 @@ defmodule JidoCodeWeb.SetupLive do
     end
   end
 
+  defp resolve_webhook_simulation_report(onboarding_step, onboarding_state) do
+    if onboarding_step == 6 do
+      onboarding_state
+      |> fetch_step_state(6)
+      |> Map.get("webhook_simulation")
+      |> WebhookSimulationChecks.run()
+    else
+      nil
+    end
+  end
+
   defp resolve_owner_context(onboarding_state) do
     onboarding_state
     |> fetch_step_state(2)
@@ -579,6 +693,25 @@ defmodule JidoCodeWeb.SetupLive do
           })
         end
 
+      6 ->
+        webhook_simulation_report =
+          socket.assigns.onboarding_state
+          |> fetch_step_state(6)
+          |> Map.get("webhook_simulation")
+          |> WebhookSimulationChecks.run()
+
+        socket = assign(socket, :webhook_simulation_report, webhook_simulation_report)
+
+        if WebhookSimulationChecks.blocked?(webhook_simulation_report) do
+          {:noreply, assign(socket, :save_error, webhook_simulation_block_message(webhook_simulation_report))}
+        else
+          persist_step_progress(socket, %{
+            "validated_note" => validated_note,
+            "webhook_simulation" => WebhookSimulationChecks.serialize_for_state(webhook_simulation_report),
+            "issue_bot_defaults" => WebhookSimulationChecks.issue_bot_defaults(webhook_simulation_report)
+          })
+        end
+
       _step ->
         persist_step_progress(socket, %{"validated_note" => validated_note})
     end
@@ -645,6 +778,20 @@ defmodule JidoCodeWeb.SetupLive do
     )
   end
 
+  defp webhook_simulation_block_message(report) do
+    failure_reason =
+      report
+      |> WebhookSimulationChecks.failure_reason()
+      |> case do
+        nil -> "Unknown simulation failure."
+        reason -> reason
+      end
+
+    String.trim(
+      "Webhook simulation failed. Issue Bot defaults remain blocked until signature and routing readiness checks pass. The last failure reason is retained for retry: #{failure_reason}"
+    )
+  end
+
   defp prerequisite_status_label(:pass), do: "Pass"
   defp prerequisite_status_label(:timeout), do: "Timeout"
   defp prerequisite_status_label(:fail), do: "Fail"
@@ -670,6 +817,41 @@ defmodule JidoCodeWeb.SetupLive do
   defp github_status_class(:ready), do: "badge-success"
   defp github_status_class(:invalid), do: "badge-error"
   defp github_status_class(:not_configured), do: "badge-warning"
+
+  defp webhook_simulation_status_label(:ready), do: "Ready"
+  defp webhook_simulation_status_label(:blocked), do: "Blocked"
+
+  defp webhook_simulation_status_class(:ready), do: "badge-success"
+  defp webhook_simulation_status_class(:blocked), do: "badge-error"
+
+  defp webhook_check_status_label(:ready), do: "Ready"
+  defp webhook_check_status_label(:failed), do: "Failed"
+
+  defp webhook_check_status_class(:ready), do: "badge-success"
+  defp webhook_check_status_class(:failed), do: "badge-error"
+
+  defp issue_bot_default_enabled(issue_bot_defaults) when is_map(issue_bot_defaults) do
+    issue_bot_defaults
+    |> Map.get("enabled")
+    |> case do
+      true -> "true"
+      false -> "false"
+      _other -> "unknown"
+    end
+  end
+
+  defp issue_bot_default_enabled(_issue_bot_defaults), do: "unknown"
+
+  defp issue_bot_default_approval_mode(issue_bot_defaults) when is_map(issue_bot_defaults) do
+    issue_bot_defaults
+    |> Map.get("approval_mode")
+    |> case do
+      value when is_binary(value) and value != "" -> value
+      _other -> "unknown"
+    end
+  end
+
+  defp issue_bot_default_approval_mode(_issue_bot_defaults), do: "unknown"
 
   defp github_repository_access_label(:confirmed), do: "Confirmed"
   defp github_repository_access_label(:unconfirmed), do: "Unconfirmed"
@@ -714,6 +896,10 @@ defmodule JidoCodeWeb.SetupLive do
     |> assign(
       :github_credential_report,
       resolve_github_credential_report(config.onboarding_step, config.onboarding_state)
+    )
+    |> assign(
+      :webhook_simulation_report,
+      resolve_webhook_simulation_report(config.onboarding_step, config.onboarding_state)
     )
     |> assign(:owner_bootstrap, owner_bootstrap)
     |> assign_owner_form(config.onboarding_step, config.onboarding_state, owner_bootstrap)
@@ -794,6 +980,25 @@ defmodule JidoCodeWeb.SetupLive do
   defp provider_dom_id(provider) when is_atom(provider), do: Atom.to_string(provider)
   defp provider_dom_id(provider) when is_binary(provider), do: provider
   defp provider_dom_id(_provider), do: "unknown"
+
+  defp webhook_event_dom_id(event) when is_binary(event) do
+    event
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9]+/, "-")
+    |> String.trim("-")
+    |> case do
+      "" -> "unknown"
+      dom_id -> dom_id
+    end
+  end
+
+  defp webhook_event_dom_id(event) when is_atom(event) do
+    event
+    |> Atom.to_string()
+    |> webhook_event_dom_id()
+  end
+
+  defp webhook_event_dom_id(_event), do: "unknown"
 
   defp github_path_dom_id(path) when is_atom(path), do: Atom.to_string(path)
   defp github_path_dom_id(path) when is_binary(path), do: path

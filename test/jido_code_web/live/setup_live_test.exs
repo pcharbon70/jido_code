@@ -22,6 +22,9 @@ defmodule JidoCodeWeb.SetupLiveTest do
     original_github_checker =
       Application.get_env(:jido_code, :setup_github_credential_checker, :__missing__)
 
+    original_webhook_simulation_checker =
+      Application.get_env(:jido_code, :setup_webhook_simulation_checker, :__missing__)
+
     original_runtime_mode = Application.get_env(:jido_code, :runtime_mode, :__missing__)
 
     original_timeout =
@@ -34,6 +37,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
       restore_env(:setup_prerequisite_checker, original_checker)
       restore_env(:setup_provider_credential_checker, original_provider_checker)
       restore_env(:setup_github_credential_checker, original_github_checker)
+      restore_env(:setup_webhook_simulation_checker, original_webhook_simulation_checker)
       restore_env(:setup_prerequisite_timeout_ms, original_timeout)
       restore_env(:runtime_mode, original_runtime_mode)
     end)
@@ -43,6 +47,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
     Application.delete_env(:jido_code, :setup_prerequisite_timeout_ms)
     Application.delete_env(:jido_code, :setup_provider_credential_checker)
     Application.delete_env(:jido_code, :setup_github_credential_checker)
+    Application.delete_env(:jido_code, :setup_webhook_simulation_checker)
     Application.put_env(:jido_code, :runtime_mode, :test)
 
     Application.put_env(:jido_code, :system_config, %{
@@ -61,6 +66,10 @@ defmodule JidoCodeWeb.SetupLiveTest do
 
     Application.put_env(:jido_code, :setup_github_credential_checker, fn _context ->
       passing_github_credential_report()
+    end)
+
+    Application.put_env(:jido_code, :setup_webhook_simulation_checker, fn _context ->
+      passing_webhook_simulation_report()
     end)
 
     reset_owner_state!()
@@ -599,6 +608,122 @@ defmodule JidoCodeWeb.SetupLiveTest do
     refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "4")
   end
 
+  test "step 6 runs webhook simulation before enabling Issue Bot defaults and persists readiness output",
+       %{conn: conn} do
+    Application.put_env(:jido_code, :setup_webhook_simulation_checker, fn _context ->
+      passing_webhook_simulation_report()
+    end)
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 6,
+      onboarding_state: %{
+        "1" => %{"validated_note" => "Prerequisite checks passed"},
+        "2" => %{
+          "validated_note" => "Owner account confirmed",
+          "owner_email" => "owner@example.com"
+        },
+        "3" => %{"validated_note" => "Provider setup confirmed"},
+        "4" => %{"validated_note" => "GitHub credentials validated"},
+        "5" => %{"validated_note" => "Environment defaults confirmed"}
+      }
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-webhook-simulated-at", "2026-02-13T12:34:56Z")
+    assert has_element?(view, "#setup-webhook-simulation-status", "Ready")
+    assert has_element?(view, "#setup-webhook-signature-status", "Ready")
+    assert has_element?(view, "#setup-webhook-event-issues-opened-status", "Ready")
+    assert has_element?(view, "#setup-webhook-event-issues-opened-route", "Issue Bot triage workflow")
+    assert has_element?(view, "#setup-webhook-event-issue-comment-created-status", "Ready")
+    assert has_element?(view, "#setup-issue-bot-default-enabled", "true")
+    assert has_element?(view, "#setup-issue-bot-default-approval-mode", "manual")
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{"validated_note" => "Webhook simulation confirmed"}
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 7")
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 7
+
+    step_state =
+      persisted_config
+      |> Map.fetch!(:onboarding_state)
+      |> Map.fetch!("6")
+
+    webhook_simulation_state = Map.fetch!(step_state, "webhook_simulation")
+    assert webhook_simulation_state["status"] == "ready"
+    assert webhook_simulation_state["signature"]["status"] == "ready"
+
+    events_by_name =
+      webhook_simulation_state["events"]
+      |> Enum.map(fn event_result -> {event_result["event"], event_result} end)
+      |> Map.new()
+
+    assert events_by_name["issues.opened"]["status"] == "ready"
+    assert events_by_name["issues.edited"]["status"] == "ready"
+    assert events_by_name["issue_comment.created"]["status"] == "ready"
+    assert Map.fetch!(step_state, "issue_bot_defaults") == %{"approval_mode" => "manual", "enabled" => true}
+  end
+
+  test "step 6 blocks Issue Bot enablement when webhook simulation fails and retains the failure reason for retry",
+       %{conn: conn} do
+    test_pid = self()
+
+    Application.put_env(:jido_code, :setup_webhook_simulation_checker, fn _context ->
+      failing_webhook_simulation_report()
+    end)
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 6,
+      onboarding_state: %{
+        "1" => %{"validated_note" => "Prerequisite checks passed"},
+        "2" => %{
+          "validated_note" => "Owner account confirmed",
+          "owner_email" => "owner@example.com"
+        },
+        "3" => %{"validated_note" => "Provider setup confirmed"},
+        "4" => %{"validated_note" => "GitHub credentials validated"},
+        "5" => %{"validated_note" => "Environment defaults confirmed"}
+      }
+    })
+
+    Application.put_env(:jido_code, :system_config_saver, fn _config ->
+      send(test_pid, :unexpected_save)
+      {:ok, %{onboarding_completed: false, onboarding_step: 7, onboarding_state: %{}}}
+    end)
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-webhook-simulation-status", "Blocked")
+    assert has_element?(view, "#setup-webhook-signature-status", "Failed")
+    assert has_element?(view, "#setup-webhook-event-issue-comment-created-status", "Failed")
+    assert has_element?(view, "#setup-webhook-failure-reason", "Webhook secret is missing")
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{"validated_note" => "Attempting to bypass webhook simulation failure"}
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 6")
+    assert has_element?(view, "#setup-save-error", "Webhook simulation failed")
+    assert has_element?(view, "#setup-save-error", "retained for retry")
+    assert has_element?(view, "#setup-save-error", "Webhook secret is missing")
+    assert has_element?(view, "#setup-webhook-failure-reason", "Webhook secret is missing")
+    refute_received :unexpected_save
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 6
+    refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "6")
+  end
+
   test "save failure keeps the same step and shows a retry-safe error", %{conn: conn} do
     Application.put_env(:jido_code, :system_config, %{
       onboarding_completed: false,
@@ -936,6 +1061,102 @@ defmodule JidoCodeWeb.SetupLiveTest do
           checked_at: @checked_at
         }
       ]
+    }
+  end
+
+  defp passing_webhook_simulation_report do
+    %{
+      checked_at: @checked_at,
+      status: :ready,
+      signature: %{
+        status: :ready,
+        previous_status: :failed,
+        transition: "Failed -> Ready",
+        detail: "Webhook signature verification is ready for simulated deliveries.",
+        remediation: "Signature readiness confirmed.",
+        checked_at: @checked_at
+      },
+      events: [
+        %{
+          event: "issues.opened",
+          route: "Issue Bot triage workflow",
+          status: :ready,
+          previous_status: :failed,
+          transition: "Failed -> Ready",
+          detail: "Webhook routing is ready for `issues.opened`.",
+          remediation: "Routing readiness confirmed.",
+          checked_at: @checked_at
+        },
+        %{
+          event: "issues.edited",
+          route: "Issue Bot re-triage workflow",
+          status: :ready,
+          previous_status: :failed,
+          transition: "Failed -> Ready",
+          detail: "Webhook routing is ready for `issues.edited`.",
+          remediation: "Routing readiness confirmed.",
+          checked_at: @checked_at
+        },
+        %{
+          event: "issue_comment.created",
+          route: "Issue Bot follow-up context workflow",
+          status: :ready,
+          previous_status: :failed,
+          transition: "Failed -> Ready",
+          detail: "Webhook routing is ready for `issue_comment.created`.",
+          remediation: "Routing readiness confirmed.",
+          checked_at: @checked_at
+        }
+      ],
+      issue_bot_defaults: %{"enabled" => true, "approval_mode" => "manual"}
+    }
+  end
+
+  defp failing_webhook_simulation_report do
+    %{
+      checked_at: @checked_at,
+      status: :blocked,
+      signature: %{
+        status: :failed,
+        previous_status: :failed,
+        transition: "Failed -> Failed",
+        detail: "Webhook secret is missing for signature verification.",
+        remediation: "Configure `GITHUB_WEBHOOK_SECRET` and retry webhook simulation.",
+        checked_at: @checked_at
+      },
+      events: [
+        %{
+          event: "issues.opened",
+          route: "Issue Bot triage workflow",
+          status: :ready,
+          previous_status: :failed,
+          transition: "Failed -> Ready",
+          detail: "Webhook routing is ready for `issues.opened`.",
+          remediation: "Routing readiness confirmed.",
+          checked_at: @checked_at
+        },
+        %{
+          event: "issues.edited",
+          route: "Issue Bot re-triage workflow",
+          status: :ready,
+          previous_status: :failed,
+          transition: "Failed -> Ready",
+          detail: "Webhook routing is ready for `issues.edited`.",
+          remediation: "Routing readiness confirmed.",
+          checked_at: @checked_at
+        },
+        %{
+          event: "issue_comment.created",
+          route: "Issue Bot follow-up context workflow",
+          status: :failed,
+          previous_status: :failed,
+          transition: "Failed -> Failed",
+          detail: "Webhook routing is not configured for `issue_comment.created`.",
+          remediation: "Configure Issue Bot webhook routing for this event and retry simulation.",
+          checked_at: @checked_at
+        }
+      ],
+      failure_reason: "Webhook secret is missing for signature verification."
     }
   end
 
