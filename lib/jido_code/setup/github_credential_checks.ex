@@ -3,6 +3,8 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
   Validates GitHub integration credentials before setup step 4 can advance.
   """
 
+  alias JidoCode.GitHub.HTTPClient
+
   @default_checker_remediation "Verify GitHub credential checker configuration and retry setup."
   @default_repo_access_remediation "Grant repository access for this owner context and retry validation."
   @default_installation_access_remediation "Grant GitHub App installation access to expected repositories and retry validation."
@@ -183,8 +185,7 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
           definition,
           checked_at,
           owner_context,
-          previous_status,
-          fetch_repositories(definition)
+          previous_status
         )
       end)
 
@@ -200,9 +201,10 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
          definition,
          checked_at,
          owner_context,
-         previous_status,
-         repositories
+         previous_status
        ) do
+    repository_result = fetch_repositories(definition, owner_context)
+    repositories = repository_names(repository_result)
     expected_repositories = fetch_expected_repositories(definition)
     missing_repositories = missing_expected_repositories(expected_repositories, repositories)
 
@@ -220,6 +222,26 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
           "Cannot verify repository access because owner context is missing.",
           @default_repo_access_remediation,
           definition.owner_context_error_type,
+          nil,
+          checked_at
+        )
+
+      credentials_present?(definition) and match?({:error, _failure}, repository_result) ->
+        %{detail: detail, remediation: remediation, error_type: error_type} =
+          normalize_repository_fetch_failure(repository_result)
+
+        path_result(
+          definition,
+          :invalid,
+          previous_status,
+          owner_context,
+          :unconfirmed,
+          repositories,
+          expected_repositories,
+          missing_repositories,
+          detail,
+          remediation,
+          error_type,
           nil,
           checked_at
         )
@@ -574,6 +596,8 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
         app_env: [:github_app_id, :github_app_private_key],
         repo_env: "GITHUB_APP_ACCESSIBLE_REPOS",
         repo_app_env: :github_app_accessible_repos,
+        api_token_env: "GITHUB_APP_INSTALLATION_TOKEN",
+        api_token_app_env: :github_app_installation_token,
         expected_repo_env: "GITHUB_APP_EXPECTED_REPOS",
         expected_repo_app_env: :github_app_expected_repos,
         tracks_expected_repositories: true,
@@ -594,6 +618,8 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
         app_env: [:github_pat],
         repo_env: "GITHUB_PAT_ACCESSIBLE_REPOS",
         repo_app_env: :github_pat_accessible_repos,
+        api_token_env: "GITHUB_PAT",
+        api_token_app_env: :github_pat,
         tracks_expected_repositories: false,
         not_configured_detail: "No GitHub personal access token fallback is configured (`GITHUB_PAT`).",
         not_configured_remediation: "Set `GITHUB_PAT` and retry validation.",
@@ -643,7 +669,25 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
     end
   end
 
-  defp fetch_repositories(definition) do
+  defp fetch_repositories(definition, owner_context) do
+    configured_repositories = configured_repositories(definition)
+
+    cond do
+      configured_repositories != [] ->
+        {:ok, configured_repositories}
+
+      not credentials_present?(definition) ->
+        {:ok, []}
+
+      owner_context == nil ->
+        {:ok, []}
+
+      true ->
+        fetch_repositories_from_http(definition, owner_context)
+    end
+  end
+
+  defp configured_repositories(definition) do
     repo_env = Map.fetch!(definition, :repo_env)
     repo_app_env = Map.fetch!(definition, :repo_app_env)
 
@@ -651,6 +695,129 @@ defmodule JidoCode.Setup.GitHubCredentialChecks do
       [] -> repository_values("GITHUB_ACCESSIBLE_REPOS", :github_accessible_repos)
       repositories -> repositories
     end
+  end
+
+  defp fetch_repositories_from_http(definition, owner_context) do
+    with token when is_binary(token) <- api_token(definition),
+         {:ok, repositories} <- invoke_github_http_client(definition.path, token, owner_context) do
+      {:ok, extract_repository_names(repositories)}
+    else
+      nil ->
+        {:ok, []}
+
+      {:error, _failure} = error ->
+        error
+    end
+  end
+
+  defp invoke_github_http_client(path, token, owner_context) do
+    client = Application.get_env(:jido_code, :setup_github_http_client, HTTPClient)
+    options = Application.get_env(:jido_code, :setup_github_http_client_options, [])
+    request_options = Keyword.merge(options, owner_context: owner_context)
+
+    case client do
+      module when is_atom(module) ->
+        if function_exported?(module, :list_accessible_repositories, 3) do
+          module.list_accessible_repositories(path, token, request_options)
+        else
+          {:error,
+           %{
+             error_type: "github_http_client_unavailable",
+             detail: "GitHub HTTP client module does not export list_accessible_repositories/3.",
+             remediation: @default_checker_remediation
+           }}
+        end
+
+      fun when is_function(fun, 3) ->
+        fun.(path, token, request_options)
+
+      _other ->
+        {:error,
+         %{
+           error_type: "github_http_client_invalid",
+           detail: "GitHub HTTP client configuration is invalid.",
+           remediation: @default_checker_remediation
+         }}
+    end
+  end
+
+  defp api_token(definition) do
+    token_env = Map.get(definition, :api_token_env)
+    token_app_env = Map.get(definition, :api_token_app_env)
+
+    if is_binary(token_env) and is_atom(token_app_env) do
+      credential_value(token_env, token_app_env)
+    else
+      nil
+    end
+  end
+
+  defp extract_repository_names(repositories) when is_list(repositories) do
+    repositories
+    |> Enum.map(&repository_name/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  defp extract_repository_names(_repositories), do: []
+
+  defp repository_name(repository) when is_binary(repository) do
+    repository
+    |> String.trim()
+    |> case do
+      "" -> nil
+      full_name -> full_name
+    end
+  end
+
+  defp repository_name(repository) when is_map(repository) do
+    repository
+    |> map_get(:full_name, "full_name")
+    |> case do
+      nil ->
+        owner =
+          repository
+          |> map_get(:owner, "owner", %{})
+          |> map_get(:login, "login")
+          |> normalize_owner_context(nil)
+
+        name =
+          repository
+          |> map_get(:name, "name")
+          |> normalize_owner_context(nil)
+
+        if owner && name, do: "#{owner}/#{name}", else: nil
+
+      full_name ->
+        normalize_owner_context(full_name, nil)
+    end
+  end
+
+  defp repository_name(_repository), do: nil
+
+  defp repository_names({:ok, repositories}) when is_list(repositories), do: repositories
+  defp repository_names({:error, _failure}), do: []
+  defp repository_names(_), do: []
+
+  defp normalize_repository_fetch_failure({:error, failure}) when is_map(failure) do
+    request_intent = failure |> map_get(:request_intent, "request_intent", "github_repository_listing")
+    detail = failure |> map_get(:detail, "detail", "GitHub API repository validation failed.")
+    remediation = failure |> map_get(:remediation, "remediation", @default_repo_access_remediation)
+    error_type = failure |> map_get(:error_type, "error_type", "github_api_request_failed")
+
+    %{
+      detail: "GitHub request intent `#{request_intent}` failed. #{normalize_text(detail, detail)}",
+      remediation: normalize_text(remediation, @default_repo_access_remediation),
+      error_type: normalize_error_type(error_type, "github_api_request_failed")
+    }
+  end
+
+  defp normalize_repository_fetch_failure(_failure) do
+    %{
+      detail: "GitHub API repository validation failed.",
+      remediation: @default_repo_access_remediation,
+      error_type: "github_api_request_failed"
+    }
   end
 
   defp repository_values(env_key, app_env_key) do

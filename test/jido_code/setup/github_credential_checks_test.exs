@@ -6,8 +6,11 @@ defmodule JidoCode.Setup.GitHubCredentialChecksTest do
   @checked_at ~U[2026-02-13 12:34:56Z]
   @managed_env_keys [
     :setup_github_credential_checker,
+    :setup_github_http_client,
+    :setup_github_http_client_options,
     :github_app_id,
     :github_app_private_key,
+    :github_app_installation_token,
     :github_app_accessible_repos,
     :github_app_expected_repos,
     :github_expected_repos,
@@ -248,6 +251,35 @@ defmodule JidoCode.Setup.GitHubCredentialChecksTest do
     assert report.integration_health.readiness_status == :blocked
     assert report.integration_health.github_app_status == :invalid
     assert report.integration_health.missing_repositories == ["owner/repo-two"]
+  end
+
+  test "run/2 maps GitHub HTTP retry exhaustion to typed path errors used by setup UI" do
+    Application.delete_env(:jido_code, :setup_github_credential_checker)
+    Application.put_env(:jido_code, :github_pat, "ghp_test_token")
+
+    Application.put_env(:jido_code, :setup_github_http_client, fn :pat, "ghp_test_token", _opts ->
+      {:error,
+       %{
+         error_type: "github_api_retry_exhausted",
+         reason_type: :retry_exhausted,
+         request_intent: "github_pat_repository_listing",
+         detail: "GitHub API request intent `github_pat_repository_listing` exhausted retries (last status 503).",
+         remediation: "Retry request intent `github_pat_repository_listing` after confirming network reachability.",
+         status: 503
+       }}
+    end)
+
+    report = GitHubCredentialChecks.run(nil, "owner@example.com")
+
+    assert GitHubCredentialChecks.blocked?(report)
+
+    pat_path =
+      Enum.find(report.paths, fn path_result -> path_result.path == :pat end)
+
+    assert pat_path.status == :invalid
+    assert pat_path.error_type == "github_api_retry_exhausted"
+    assert pat_path.detail =~ "github_pat_repository_listing"
+    assert pat_path.remediation =~ "Retry request intent `github_pat_repository_listing`"
   end
 
   test "serialize_for_state/1 preserves owner context and ready-path validation metadata" do
