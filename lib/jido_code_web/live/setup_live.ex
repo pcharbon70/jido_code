@@ -190,6 +190,13 @@ defmodule JidoCodeWeb.SetupLive do
               </p>
               <p class="text-sm text-base-content/80">{credential.detail}</p>
               <p
+                :if={credential.error_type}
+                id={"setup-provider-error-type-#{provider_dom_id(credential.provider)}"}
+                class="font-mono text-xs text-base-content/70"
+              >
+                Error type: {credential.error_type}
+              </p>
+              <p
                 :if={credential.verified_at}
                 id={"setup-provider-verified-at-#{provider_dom_id(credential.provider)}"}
                 class="text-xs text-base-content/70"
@@ -1465,7 +1472,10 @@ defmodule JidoCodeWeb.SetupLive do
     remediation =
       report
       |> ProviderCredentialChecks.blocked_credentials()
-      |> Enum.map(fn credential -> "#{credential.name}: #{credential.remediation}" end)
+      |> Enum.map(fn credential ->
+        typed_error = credential.error_type || "provider_credential_unknown_error"
+        "#{credential.name} [#{typed_error}]: #{credential.remediation}"
+      end)
       |> Enum.join(" ")
 
     String.trim(

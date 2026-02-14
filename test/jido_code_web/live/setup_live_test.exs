@@ -10,6 +10,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
   import Phoenix.LiveViewTest
 
   @checked_at ~U[2026-02-13 12:34:56Z]
+  @previous_checked_at ~U[2026-02-12 08:00:00Z]
   @owner_recovery_audit_event [:jido_code, :auth, :owner_recovery, :completed]
 
   setup do
@@ -667,6 +668,56 @@ defmodule JidoCodeWeb.SetupLiveTest do
     persisted_config = Application.get_env(:jido_code, :system_config)
     assert Map.fetch!(persisted_config, :onboarding_step) == 3
     refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "3")
+  end
+
+  test "step 3 preserves prior verification timestamp and exposes typed provider errors when checker fails",
+       %{conn: conn} do
+    test_pid = self()
+
+    Application.put_env(:jido_code, :setup_provider_credential_checker, fn _context ->
+      {:error, :provider_timeout}
+    end)
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 3,
+      onboarding_state: %{
+        "1" => %{"validated_note" => "Prerequisite checks passed"},
+        "2" => %{"validated_note" => "Owner account confirmed"},
+        "3" => %{
+          "validated_note" => "Provider setup previously confirmed",
+          "provider_credentials" => prior_active_provider_credential_state()
+        }
+      }
+    })
+
+    Application.put_env(:jido_code, :system_config_saver, fn _config ->
+      send(test_pid, :unexpected_save)
+      {:ok, %{onboarding_completed: false, onboarding_step: 4, onboarding_state: %{}}}
+    end)
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-provider-anthropic-status", "Invalid")
+    assert has_element?(view, "#setup-provider-transition-anthropic", "Active -> Invalid")
+
+    assert has_element?(
+             view,
+             "#setup-provider-error-type-anthropic",
+             "anthropic_provider_check_failed"
+           )
+
+    assert has_element?(view, "#setup-provider-verified-at-anthropic", "2026-02-12T08:00:00Z")
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{"validated_note" => "Retry after provider endpoint timeout"}
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 3")
+    assert has_element?(view, "#setup-save-error", "anthropic_provider_check_failed")
+    refute_received :unexpected_save
   end
 
   test "step 4 validates GitHub App or PAT fallback and persists owner-context repository access",
@@ -1544,6 +1595,27 @@ defmodule JidoCodeWeb.SetupLiveTest do
           detail: "Configured OPENAI_API_KEY failed verification checks.",
           remediation: "Set a valid `OPENAI_API_KEY` (typically prefixed with `sk-`) and retry verification.",
           checked_at: @checked_at
+        }
+      ]
+    }
+  end
+
+  defp prior_active_provider_credential_state do
+    %{
+      "checked_at" => DateTime.to_iso8601(@previous_checked_at),
+      "status" => "active",
+      "credentials" => [
+        %{
+          "provider" => "anthropic",
+          "status" => "active",
+          "verified_at" => DateTime.to_iso8601(@previous_checked_at),
+          "checked_at" => DateTime.to_iso8601(@previous_checked_at)
+        },
+        %{
+          "provider" => "openai",
+          "status" => "active",
+          "verified_at" => DateTime.to_iso8601(@previous_checked_at),
+          "checked_at" => DateTime.to_iso8601(@previous_checked_at)
         }
       ]
     }
