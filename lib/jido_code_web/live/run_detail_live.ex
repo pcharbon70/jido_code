@@ -152,6 +152,36 @@ defmodule JidoCodeWeb.RunDetailLive do
             </p>
           </section>
 
+          <%= if @failure_context do %>
+            <section id="run-detail-failure-context" class="space-y-2 rounded border border-error/40 bg-error/5 p-4">
+              <h2 class="text-lg font-semibold text-error">Failure context</h2>
+              <p id="run-detail-failure-error-type" class="text-sm">
+                Error type: <span class="font-mono">{@failure_context.error_type}</span>
+              </p>
+              <p id="run-detail-failure-reason-type" class="text-sm">
+                Typed reason: <span class="font-mono">{@failure_context.reason_type}</span>
+              </p>
+              <p id="run-detail-failure-last-successful-step" class="text-sm">
+                Last successful step: <span class="font-mono">{@failure_context.last_successful_step}</span>
+              </p>
+              <p id="run-detail-failure-failed-step" class="text-sm">
+                Failed step: <span class="font-mono">{@failure_context.failed_step}</span>
+              </p>
+              <p id="run-detail-failure-detail" class="text-sm text-base-content/80">
+                {@failure_context.detail}
+              </p>
+              <p id="run-detail-failure-remediation" class="text-sm text-base-content/80">
+                {@failure_context.remediation}
+              </p>
+
+              <%= if @failure_context.missing_fields != [] do %>
+                <p id="run-detail-failure-missing-fields" class="text-sm text-base-content/80">
+                  Missing failure context fields: {Enum.join(@failure_context.missing_fields, ", ")}
+                </p>
+              <% end %>
+            </section>
+          <% end %>
+
           <%= if awaiting_approval?(@run.status) do %>
             <section id="run-detail-approval-panel" class="space-y-3 rounded border border-base-300 bg-base-100 p-4">
               <h2 class="text-lg font-semibold">Approval request payload</h2>
@@ -390,6 +420,7 @@ defmodule JidoCodeWeb.RunDetailLive do
     |> assign(:run, nil)
     |> assign(:timeline_entries, [])
     |> assign(:retry_lineage_entries, [])
+    |> assign(:failure_context, nil)
     |> assign(:approval_context, nil)
     |> assign(:approval_context_blocker, nil)
     |> assign(:step_retry_state, step_retry_state(nil))
@@ -410,6 +441,7 @@ defmodule JidoCodeWeb.RunDetailLive do
     |> assign(:run, run)
     |> assign(:timeline_entries, timeline_entries(run))
     |> assign(:retry_lineage_entries, retry_lineage_entries(run))
+    |> assign(:failure_context, failure_context(run))
     |> assign(:approval_context, approval_context(run))
     |> assign(:approval_context_blocker, approval_context_blocker(run))
     |> assign(:step_retry_state, step_retry_state(run))
@@ -421,6 +453,61 @@ defmodule JidoCodeWeb.RunDetailLive do
       _other -> assign_missing_run(socket, project_id, run_id)
     end
   end
+
+  defp failure_context(%WorkflowRun{} = run) do
+    if failed_status?(Map.get(run, :status)) do
+      error =
+        run
+        |> Map.get(:error, %{})
+        |> normalize_map()
+
+      if map_size(error) == 0 do
+        nil
+      else
+        missing_fields =
+          error
+          |> map_get(:missing_failure_context_fields, "missing_failure_context_fields", [])
+          |> normalize_missing_failure_fields()
+
+        %{
+          error_type:
+            error
+            |> map_get(:error_type, "error_type")
+            |> normalize_optional_string() || "workflow_run_failed",
+          reason_type:
+            error
+            |> map_get(:reason_type, "reason_type")
+            |> normalize_optional_string() || "workflow_run_failed",
+          last_successful_step:
+            error
+            |> map_get(:last_successful_step, "last_successful_step")
+            |> normalize_optional_string() || "unknown",
+          failed_step:
+            error
+            |> map_get(:failed_step, "failed_step")
+            |> normalize_optional_string() ||
+              (run
+               |> Map.get(:current_step)
+               |> normalize_optional_string() || "unknown"),
+          detail:
+            error
+            |> map_get(:detail, "detail")
+            |> normalize_optional_string() ||
+              "Workflow run failed before full failure context was captured.",
+          remediation:
+            error
+            |> map_get(:remediation, "remediation")
+            |> normalize_optional_string() ||
+              "Inspect failure artifacts and retry from run detail after resolving the failing step.",
+          missing_fields: missing_fields
+        }
+      end
+    else
+      nil
+    end
+  end
+
+  defp failure_context(_run), do: nil
 
   defp approval_context(%WorkflowRun{} = run) do
     step_results =
@@ -570,6 +657,14 @@ defmodule JidoCodeWeb.RunDetailLive do
   end
 
   defp full_run_retry_available?(_status), do: false
+
+  defp failed_status?(status) when is_atom(status), do: status == :failed
+
+  defp failed_status?(status) when is_binary(status) do
+    String.trim(status) == "failed"
+  end
+
+  defp failed_status?(_status), do: false
 
   defp awaiting_approval?(status) when is_atom(status), do: status == :awaiting_approval
 
@@ -814,6 +909,23 @@ defmodule JidoCodeWeb.RunDetailLive do
       risk_note -> [risk_note]
     end
   end
+
+  defp normalize_missing_failure_fields(value) when is_list(value) do
+    value
+    |> Enum.map(&normalize_optional_string/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  defp normalize_missing_failure_fields(value) when is_binary(value) do
+    value
+    |> String.split(",")
+    |> Enum.map(&normalize_optional_string/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  defp normalize_missing_failure_fields(_value), do: []
 
   defp map_get(map, atom_key, string_key, default \\ nil)
 

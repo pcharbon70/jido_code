@@ -541,6 +541,139 @@ defmodule JidoCodeWeb.RunDetailLiveTest do
     assert persisted_run.current_step == "approval_gate"
   end
 
+  test "renders standardized failure context with remediation hints for failed runs", %{conn: _conn} do
+    register_owner("failure-context-owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("failure-context-owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-run-detail-failure-context",
+        github_full_name: "owner/repo-run-detail-failure-context",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    failed_run_id = "run-detail-failure-context-#{System.unique_integer([:positive])}"
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: failed_run_id,
+        workflow_name: "implement_task",
+        workflow_version: 2,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Render typed failure context"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 04:40:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-15 04:41:00Z]
+      })
+
+    {:ok, _run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :failed,
+        current_step: "run_tests",
+        transitioned_at: ~U[2026-02-15 04:42:00Z],
+        transition_metadata: %{
+          "failure_context" => %{
+            "error_type" => "workflow_step_failed",
+            "reason_type" => "verification_failed",
+            "detail" => "Verification failed while running test suite.",
+            "remediation" => "Inspect failing tests, patch, and retry from run detail.",
+            "last_successful_step" => "plan_changes"
+          }
+        }
+      })
+
+    {:ok, view, _html} =
+      live(
+        recycle(authed_conn),
+        ~p"/projects/#{project.id}/runs/#{failed_run_id}",
+        on_error: :warn
+      )
+
+    assert has_element?(view, "#run-detail-status", "failed")
+    assert has_element?(view, "#run-detail-failure-context")
+    assert has_element?(view, "#run-detail-failure-error-type", "workflow_step_failed")
+    assert has_element?(view, "#run-detail-failure-reason-type", "verification_failed")
+    assert has_element?(view, "#run-detail-failure-last-successful-step", "plan_changes")
+    assert has_element?(view, "#run-detail-failure-failed-step", "run_tests")
+    assert has_element?(view, "#run-detail-failure-remediation", "retry from run detail")
+    refute has_element?(view, "#run-detail-failure-missing-fields")
+  end
+
+  test "renders missing failure context fields when only minimal typed reason is available", %{
+    conn: _conn
+  } do
+    register_owner("failure-context-minimal-owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("failure-context-minimal-owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-run-detail-failure-context-minimal",
+        github_full_name: "owner/repo-run-detail-failure-context-minimal",
+        default_branch: "main",
+        settings: %{}
+      })
+
+    failed_run_id = "run-detail-failure-context-minimal-#{System.unique_integer([:positive])}"
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: failed_run_id,
+        workflow_name: "implement_task",
+        workflow_version: 2,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Render missing failure fields"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 04:50:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "run_tests",
+        transitioned_at: ~U[2026-02-15 04:51:00Z]
+      })
+
+    {:ok, _run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :failed,
+        current_step: "run_tests",
+        transitioned_at: ~U[2026-02-15 04:52:00Z]
+      })
+
+    {:ok, view, _html} =
+      live(
+        recycle(authed_conn),
+        ~p"/projects/#{project.id}/runs/#{failed_run_id}",
+        on_error: :warn
+      )
+
+    assert has_element?(view, "#run-detail-status", "failed")
+    assert has_element?(view, "#run-detail-failure-error-type", "workflow_run_failed")
+    assert has_element?(view, "#run-detail-failure-reason-type", "workflow_run_failed")
+    assert has_element?(view, "#run-detail-failure-last-successful-step", "unknown")
+    assert has_element?(view, "#run-detail-failure-remediation", "retry from run detail")
+    assert has_element?(view, "#run-detail-failure-missing-fields", "error_type")
+    assert has_element?(view, "#run-detail-failure-missing-fields", "remediation")
+    assert has_element?(view, "#run-detail-failure-missing-fields", "last_successful_step")
+  end
+
   test "retries a failed run from run detail and preserves prior failure lineage on the new attempt", %{
     conn: _conn
   } do

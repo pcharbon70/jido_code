@@ -18,6 +18,10 @@ defmodule JidoCode.Orchestration.WorkflowRun do
   @approval_resume_step "resume_execution"
   @full_run_retry_policy "full_run"
   @step_level_retry_policy "step_level"
+  @failed_status "failed"
+  @default_failure_error_type "workflow_run_failed"
+  @default_failure_detail "Workflow run failed before full failure context was captured."
+  @default_failure_remediation "Inspect failure artifacts and run timeline, then retry from run detail after resolving the failing step."
   @retry_initial_step "queued"
   @retryable_terminal_statuses [:failed, :cancelled]
   @rejection_policy_default "cancel"
@@ -551,6 +555,7 @@ defmodule JidoCode.Orchestration.WorkflowRun do
     |> Ash.Changeset.force_change_attribute(:status_transitions, status_transitions)
     |> maybe_capture_approval_context(to_status)
     |> maybe_capture_transition_audit(from_status, to_status, transition_metadata)
+    |> maybe_capture_failure_context(to_status, current_step, transitioned_at, transition_metadata)
     |> maybe_set_started_at(to_status, transitioned_at)
     |> maybe_set_completed_at(to_status, transitioned_at)
     |> publish_transition_events(from_status, to_status, current_step, transitioned_at, transition_metadata)
@@ -757,6 +762,300 @@ defmodule JidoCode.Orchestration.WorkflowRun do
 
   defp maybe_capture_transition_audit(changeset, _from_status, _to_status, _transition_metadata),
     do: changeset
+
+  defp maybe_capture_failure_context(
+         changeset,
+         :failed,
+         current_step,
+         transitioned_at,
+         transition_metadata
+       ) do
+    existing_error =
+      changeset
+      |> changeset_attribute(:error)
+      |> normalize_error_map()
+
+    step_results =
+      changeset
+      |> changeset_attribute(:step_results)
+      |> normalize_step_results()
+
+    status_transitions =
+      changeset
+      |> changeset_attribute(:status_transitions)
+      |> normalize_status_transitions()
+
+    failure_context =
+      build_failure_context(
+        existing_error,
+        step_results,
+        status_transitions,
+        current_step,
+        transitioned_at,
+        transition_metadata
+      )
+
+    Ash.Changeset.force_change_attribute(changeset, :error, failure_context)
+  end
+
+  defp maybe_capture_failure_context(
+         changeset,
+         _to_status,
+         _current_step,
+         _transitioned_at,
+         _transition_metadata
+       ),
+       do: changeset
+
+  defp build_failure_context(
+         existing_error,
+         step_results,
+         status_transitions,
+         current_step,
+         transitioned_at,
+         transition_metadata
+       ) do
+    sources = failure_context_sources(transition_metadata, step_results, existing_error)
+
+    error_type_source = failure_error_type_from_sources(sources)
+
+    error_type =
+      error_type_source
+      |> normalize_optional_string()
+      |> case do
+        nil -> @default_failure_error_type
+        failure_error_type -> failure_error_type
+      end
+
+    reason_type =
+      sources
+      |> failure_reason_type_from_sources()
+      |> normalize_optional_string()
+      |> case do
+        nil -> normalize_reason_type(error_type)
+        source_reason_type -> normalize_reason_type(source_reason_type)
+      end
+
+    failed_step =
+      sources
+      |> failure_failed_step_from_sources()
+      |> normalize_optional_string()
+      |> case do
+        nil -> normalize_current_step(current_step)
+        source_failed_step -> normalize_current_step(source_failed_step)
+      end
+
+    last_successful_step_source =
+      sources
+      |> failure_last_successful_step_from_sources()
+      |> normalize_optional_string()
+
+    last_successful_step =
+      last_successful_step_source ||
+        infer_last_successful_step(status_transitions, failed_step)
+
+    remediation_source =
+      sources
+      |> failure_remediation_from_sources()
+      |> normalize_optional_string()
+
+    detail =
+      sources
+      |> failure_detail_from_sources()
+      |> normalize_optional_string()
+      |> case do
+        nil -> default_failure_detail(failed_step)
+        failure_detail -> failure_detail
+      end
+
+    remediation =
+      case remediation_source do
+        nil -> default_failure_remediation()
+        failure_remediation -> failure_remediation
+      end
+
+    timestamp =
+      sources
+      |> failure_timestamp_from_sources()
+      |> normalize_optional_iso8601()
+      |> case do
+        nil ->
+          transitioned_at
+          |> normalize_datetime()
+          |> DateTime.to_iso8601()
+
+        failure_timestamp ->
+          failure_timestamp
+      end
+
+    missing_fields =
+      []
+      |> maybe_add_missing_field("error_type", error_type_source)
+      |> maybe_add_missing_field("remediation", remediation_source)
+      |> maybe_add_missing_field("last_successful_step", last_successful_step)
+
+    existing_error
+    |> Map.put("error_type", error_type)
+    |> Map.put("reason_type", reason_type)
+    |> Map.put("detail", detail)
+    |> Map.put("remediation", remediation)
+    |> Map.put("failed_step", failed_step)
+    |> Map.put("last_successful_step", normalize_current_step(last_successful_step, "unknown"))
+    |> Map.put("timestamp", timestamp)
+    |> maybe_put_missing_failure_fields(missing_fields)
+  end
+
+  defp failure_context_sources(transition_metadata, step_results, existing_error) do
+    transition_metadata = normalize_map(transition_metadata)
+    step_results = normalize_step_results(step_results)
+    existing_error = normalize_error_map(existing_error)
+
+    [
+      transition_metadata |> map_get(:failure_context, "failure_context", %{}) |> normalize_map(),
+      transition_metadata |> map_get(:typed_failure, "typed_failure", %{}) |> normalize_map(),
+      transition_metadata |> map_get(:error, "error", %{}) |> normalize_map(),
+      transition_metadata,
+      step_results |> map_get(:failure_context, "failure_context", %{}) |> normalize_map(),
+      step_results |> map_get(:failure_report, "failure_report", %{}) |> normalize_map(),
+      existing_error
+    ]
+  end
+
+  defp failure_error_type_from_sources(sources) when is_list(sources) do
+    first_optional_string_from_sources(sources, :error_type, "error_type")
+  end
+
+  defp failure_error_type_from_sources(_sources), do: nil
+
+  defp failure_reason_type_from_sources(sources) when is_list(sources) do
+    first_optional_string_from_sources(sources, :reason_type, "reason_type")
+  end
+
+  defp failure_reason_type_from_sources(_sources), do: nil
+
+  defp failure_detail_from_sources(sources) when is_list(sources) do
+    first_optional_string_from_sources(sources, :detail, "detail") ||
+      first_optional_string_from_sources(sources, :message, "message") ||
+      first_optional_string_from_sources(sources, :summary, "summary")
+  end
+
+  defp failure_detail_from_sources(_sources), do: nil
+
+  defp failure_remediation_from_sources(sources) when is_list(sources) do
+    first_optional_string_from_sources(sources, :remediation, "remediation") ||
+      first_optional_string_from_sources(sources, :remediation_hint, "remediation_hint") ||
+      first_optional_string_from_sources(sources, :safe_retry_recommendation, "safe_retry_recommendation")
+  end
+
+  defp failure_remediation_from_sources(_sources), do: nil
+
+  defp failure_failed_step_from_sources(sources) when is_list(sources) do
+    first_optional_string_from_sources(sources, :failed_step, "failed_step") ||
+      first_optional_string_from_sources(sources, :current_step, "current_step") ||
+      first_optional_string_from_sources(sources, :step, "step")
+  end
+
+  defp failure_failed_step_from_sources(_sources), do: nil
+
+  defp failure_last_successful_step_from_sources(sources) when is_list(sources) do
+    first_optional_string_from_sources(sources, :last_successful_step, "last_successful_step") ||
+      first_optional_string_from_sources(sources, :last_completed_step, "last_completed_step")
+  end
+
+  defp failure_last_successful_step_from_sources(_sources), do: nil
+
+  defp failure_timestamp_from_sources(sources) when is_list(sources) do
+    first_optional_string_from_sources(sources, :timestamp, "timestamp")
+  end
+
+  defp failure_timestamp_from_sources(_sources), do: nil
+
+  defp first_optional_string_from_sources(sources, atom_key, string_key) when is_list(sources) do
+    Enum.find_value(sources, fn source ->
+      source
+      |> map_get(atom_key, string_key)
+      |> normalize_optional_string()
+    end)
+  end
+
+  defp first_optional_string_from_sources(_sources, _atom_key, _string_key), do: nil
+
+  defp infer_last_successful_step(status_transitions, failed_step) do
+    failed_step = normalize_optional_string(failed_step)
+
+    status_transitions
+    |> normalize_status_transitions()
+    |> Enum.reverse()
+    |> Enum.find_value(fn transition ->
+      to_status =
+        transition
+        |> map_get(:to_status, "to_status")
+        |> normalize_optional_string()
+
+      current_step =
+        transition
+        |> map_get(:current_step, "current_step")
+        |> normalize_optional_string()
+
+      cond do
+        is_nil(current_step) ->
+          nil
+
+        to_status == @failed_status ->
+          nil
+
+        to_status not in ["running", "awaiting_approval", "completed"] ->
+          nil
+
+        not is_nil(failed_step) and current_step == failed_step ->
+          nil
+
+        true ->
+          current_step
+      end
+    end)
+  end
+
+  defp default_failure_detail(failed_step) do
+    failed_step
+    |> normalize_optional_string()
+    |> case do
+      nil -> @default_failure_detail
+      step -> "Workflow run failed while executing step #{step}."
+    end
+  end
+
+  defp default_failure_remediation do
+    @default_failure_remediation
+    |> normalize_optional_string()
+    |> case do
+      nil ->
+        "Inspect failure artifacts and run timeline, then retry from run detail after resolving the failing step."
+
+      remediation ->
+        remediation
+    end
+  end
+
+  defp maybe_add_missing_field(missing_fields, field_name, value) do
+    if is_nil(normalize_optional_string(value)) do
+      missing_fields ++ [field_name]
+    else
+      missing_fields
+    end
+  end
+
+  defp maybe_put_missing_failure_fields(error, []) do
+    error
+    |> Map.put("failure_context_complete", true)
+    |> Map.delete("missing_failure_context_fields")
+  end
+
+  defp maybe_put_missing_failure_fields(error, missing_fields) do
+    error
+    |> Map.put("failure_context_complete", false)
+    |> Map.put("missing_failure_context_fields", Enum.uniq(missing_fields))
+  end
 
   defp build_approval_context(step_results) when is_map(step_results) do
     context_source =
@@ -1979,6 +2278,20 @@ defmodule JidoCode.Orchestration.WorkflowRun do
   end
 
   defp format_optional_datetime(_datetime), do: nil
+
+  defp normalize_optional_iso8601(value) when is_binary(value) do
+    case DateTime.from_iso8601(String.trim(value)) do
+      {:ok, datetime, _offset} ->
+        datetime
+        |> DateTime.truncate(:second)
+        |> DateTime.to_iso8601()
+
+      _other ->
+        nil
+    end
+  end
+
+  defp normalize_optional_iso8601(_value), do: nil
 
   defp normalize_optional_boolean(value) when is_boolean(value), do: value
   defp normalize_optional_boolean(value) when is_integer(value), do: value != 0

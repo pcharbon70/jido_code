@@ -121,6 +121,114 @@ defmodule JidoCode.Orchestration.WorkflowRunTest do
            ] = persisted_run.status_transitions
   end
 
+  test "persists typed failure context and exposes remediation metadata for postmortem queries" do
+    {:ok, project} = create_project("owner/repo-failure-context")
+    run_id = "run-failure-context-#{System.unique_integer([:positive])}"
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: run_id,
+        workflow_name: "implement_task",
+        workflow_version: 1,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Persist typed failure context"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 01:10:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "plan_changes",
+        transitioned_at: ~U[2026-02-15 01:11:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :failed,
+        current_step: "run_tests",
+        transitioned_at: ~U[2026-02-15 01:12:00Z],
+        transition_metadata: %{
+          "failure_context" => %{
+            "error_type" => "workflow_step_failed",
+            "reason_type" => "verification_failed",
+            "detail" => "Verification failed while running test suite.",
+            "remediation" => "Inspect failing tests, patch, then retry from run detail.",
+            "last_successful_step" => "plan_changes"
+          }
+        }
+      })
+
+    assert run.status == :failed
+    assert get_in(run.error, ["error_type"]) == "workflow_step_failed"
+    assert get_in(run.error, ["reason_type"]) == "verification_failed"
+    assert get_in(run.error, ["last_successful_step"]) == "plan_changes"
+    assert get_in(run.error, ["failed_step"]) == "run_tests"
+    assert get_in(run.error, ["remediation"]) =~ "retry from run detail"
+    assert get_in(run.error, ["failure_context_complete"]) == true
+    assert Map.get(run.error, "missing_failure_context_fields", []) == []
+
+    {:ok, failed_runs} =
+      WorkflowRun.read(
+        query: [
+          filter: [project_id: project.id, status: :failed]
+        ]
+      )
+
+    assert [%WorkflowRun{run_id: ^run_id} = postmortem_run] = failed_runs
+    assert get_in(postmortem_run.error, ["error_type"]) == "workflow_step_failed"
+    assert get_in(postmortem_run.error, ["last_successful_step"]) == "plan_changes"
+    assert get_in(postmortem_run.error, ["remediation"]) =~ "retry from run detail"
+  end
+
+  test "captures minimal typed reason and indicates missing fields when failure context is incomplete" do
+    {:ok, project} = create_project("owner/repo-failure-context-minimal")
+
+    {:ok, run} =
+      WorkflowRun.create(%{
+        project_id: project.id,
+        run_id: "run-failure-context-minimal-#{System.unique_integer([:positive])}",
+        workflow_name: "implement_task",
+        workflow_version: 1,
+        trigger: %{source: "workflows", mode: "manual"},
+        inputs: %{"task_summary" => "Capture minimal failure context"},
+        input_metadata: %{"task_summary" => %{required: true, source: "manual_workflows_ui"}},
+        initiating_actor: %{id: "owner-1", email: "owner@example.com"},
+        current_step: "queued",
+        started_at: ~U[2026-02-15 01:20:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :running,
+        current_step: "run_tests",
+        transitioned_at: ~U[2026-02-15 01:21:00Z]
+      })
+
+    {:ok, run} =
+      WorkflowRun.transition_status(run, %{
+        to_status: :failed,
+        current_step: "run_tests",
+        transitioned_at: ~U[2026-02-15 01:22:00Z]
+      })
+
+    assert run.status == :failed
+    assert get_in(run.error, ["error_type"]) == "workflow_run_failed"
+    assert get_in(run.error, ["reason_type"]) == "workflow_run_failed"
+    assert get_in(run.error, ["last_successful_step"]) == "unknown"
+    assert get_in(run.error, ["remediation"]) =~ "retry from run detail"
+    assert get_in(run.error, ["failure_context_complete"]) == false
+
+    missing_fields = get_in(run.error, ["missing_failure_context_fields"])
+    assert "error_type" in missing_fields
+    assert "remediation" in missing_fields
+    assert "last_successful_step" in missing_fields
+    assert {:ok, _timestamp, 0} = DateTime.from_iso8601(get_in(run.error, ["timestamp"]))
+  end
+
   test "builds approval context payload with diff test and risk summaries when entering awaiting_approval" do
     {:ok, project} = create_project("owner/repo-approval-context")
 
