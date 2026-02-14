@@ -22,6 +22,10 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
   Select only supported webhook events and retry saving Issue Bot webhook event settings.
   """
 
+  @approval_mode_validation_remediation """
+  Select either Auto-post or Approval required and retry saving Issue Bot approval mode.
+  """
+
   @not_found_remediation """
   Refresh the Agents page and retry from an existing project row.
   """
@@ -36,6 +40,16 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
     "issue_comment.created"
   ]
 
+  @approval_mode_auto_post "auto_post"
+  @approval_mode_approval_required "approval_required"
+  @default_issue_bot_approval_mode @approval_mode_approval_required
+  @approval_mode_source "support_agent_config.github_issue_bot.approval_mode"
+
+  @supported_issue_bot_approval_modes [
+    @approval_mode_auto_post,
+    @approval_mode_approval_required
+  ]
+
   @type typed_error :: %{
           error_type: String.t(),
           detail: String.t(),
@@ -47,12 +61,19 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
           name: String.t(),
           github_full_name: String.t(),
           enabled: boolean(),
-          webhook_events: [String.t()]
+          webhook_events: [String.t()],
+          approval_policy: map(),
+          last_updated: map()
         }
 
   @spec supported_issue_bot_webhook_events() :: [String.t()]
   def supported_issue_bot_webhook_events do
     @supported_issue_bot_webhook_events
+  end
+
+  @spec supported_issue_bot_approval_modes() :: [String.t()]
+  def supported_issue_bot_approval_modes do
+    @supported_issue_bot_approval_modes
   end
 
   @spec list_issue_bot_configs() :: {:ok, [issue_bot_config()]} | {:error, typed_error()}
@@ -109,6 +130,30 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
          typed_error(
            @persistence_error_type,
            "Issue Bot webhook event configuration update returned an unexpected result (#{inspect(other)}).",
+           @persistence_remediation
+         )}
+    end
+  end
+
+  @spec set_issue_bot_approval_mode(term(), term()) ::
+          {:ok, issue_bot_config()} | {:error, typed_error()}
+  def set_issue_bot_approval_mode(project_id, approval_mode_value) do
+    with {:ok, normalized_project_id} <- normalize_project_id(project_id),
+         {:ok, approval_mode} <- normalize_issue_bot_approval_mode_input(approval_mode_value),
+         {:ok, project} <- fetch_project(normalized_project_id),
+         settings <- project |> map_get(:settings, "settings", %{}) |> normalize_map(),
+         updated_settings <- put_issue_bot_approval_mode(settings, approval_mode),
+         {:ok, updated_project} <- persist_project_settings(project, updated_settings) do
+      {:ok, to_issue_bot_config(updated_project)}
+    else
+      {:error, typed_error} ->
+        {:error, typed_error}
+
+      other ->
+        {:error,
+         typed_error(
+           @persistence_error_type,
+           "Issue Bot approval mode configuration update returned an unexpected result (#{inspect(other)}).",
            @persistence_remediation
          )}
     end
@@ -227,6 +272,21 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
     end
   end
 
+  defp normalize_issue_bot_approval_mode_input(approval_mode_value) do
+    case normalize_issue_bot_approval_mode(approval_mode_value) do
+      nil ->
+        {:error,
+         typed_error(
+           @validation_error_type,
+           "Issue Bot approval mode is invalid. Expected auto_post or approval_required.",
+           @approval_mode_validation_remediation
+         )}
+
+      approval_mode ->
+        {:ok, approval_mode}
+    end
+  end
+
   defp fetch_project(project_id) do
     case Project.read(query: [filter: [id: project_id], limit: 1]) do
       {:ok, [project | _rest]} ->
@@ -340,7 +400,9 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
           |> map_get(:name, "name")
           |> normalize_optional_string() || "unknown-project",
       enabled: issue_bot_enabled(settings),
-      webhook_events: issue_bot_webhook_events(settings)
+      webhook_events: issue_bot_webhook_events(settings),
+      approval_policy: issue_bot_approval_policy(settings),
+      last_updated: issue_bot_last_updated(project)
     }
   end
 
@@ -371,6 +433,28 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
 
   defp issue_bot_webhook_events(_settings), do: @supported_issue_bot_webhook_events
 
+  defp issue_bot_approval_policy(settings) when is_map(settings) do
+    approval_mode = issue_bot_approval_mode(settings)
+
+    %{
+      mode: approval_mode,
+      auto_post: approval_mode == @approval_mode_auto_post,
+      requires_approval: approval_mode == @approval_mode_approval_required,
+      source: @approval_mode_source
+    }
+  end
+
+  defp issue_bot_approval_policy(_settings), do: issue_bot_approval_policy(%{})
+
+  defp issue_bot_approval_mode(settings) when is_map(settings) do
+    settings
+    |> issue_bot_settings()
+    |> map_get(:approval_mode, "approval_mode", @default_issue_bot_approval_mode)
+    |> normalize_issue_bot_approval_mode() || @default_issue_bot_approval_mode
+  end
+
+  defp issue_bot_approval_mode(_settings), do: @default_issue_bot_approval_mode
+
   defp put_issue_bot_enabled(settings, enabled) when is_map(settings) do
     settings
     |> issue_bot_settings()
@@ -391,6 +475,17 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
 
   defp put_issue_bot_webhook_events(_settings, webhook_events) do
     put_issue_bot_webhook_events(%{}, webhook_events)
+  end
+
+  defp put_issue_bot_approval_mode(settings, approval_mode) when is_map(settings) do
+    settings
+    |> issue_bot_settings()
+    |> Map.put("approval_mode", approval_mode)
+    |> put_issue_bot_settings(settings)
+  end
+
+  defp put_issue_bot_approval_mode(_settings, approval_mode) do
+    put_issue_bot_approval_mode(%{}, approval_mode)
   end
 
   defp issue_bot_settings(settings) when is_map(settings) do
@@ -415,6 +510,35 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
 
   defp put_issue_bot_settings(issue_bot_config, _settings),
     do: put_issue_bot_settings(issue_bot_config, %{})
+
+  defp issue_bot_last_updated(project) do
+    updated_at =
+      project
+      |> map_get(:updated_at, "updated_at")
+      |> normalize_optional_datetime()
+
+    inserted_at =
+      project
+      |> map_get(:inserted_at, "inserted_at")
+      |> normalize_optional_datetime()
+
+    {updated_at_iso8601, source} =
+      cond do
+        is_struct(updated_at, DateTime) ->
+          {DateTime.to_iso8601(updated_at), "project.updated_at"}
+
+        is_struct(inserted_at, DateTime) ->
+          {DateTime.to_iso8601(inserted_at), "project.inserted_at"}
+
+        true ->
+          {nil, "unavailable"}
+      end
+
+    %{
+      updated_at: updated_at_iso8601,
+      source: source
+    }
+  end
 
   defp normalize_typed_error(error, fallback_error_type, fallback_remediation) do
     typed_error(
@@ -473,6 +597,56 @@ defmodule JidoCode.Agents.SupportAgentConfigs do
   end
 
   defp normalize_webhook_events(_webhook_events), do: []
+
+  defp normalize_issue_bot_approval_mode(approval_mode) when is_binary(approval_mode) do
+    case approval_mode |> String.trim() |> String.downcase() do
+      "auto_post" -> @approval_mode_auto_post
+      "auto-post" -> @approval_mode_auto_post
+      "auto" -> @approval_mode_auto_post
+      "approval_required" -> @approval_mode_approval_required
+      "approval-required" -> @approval_mode_approval_required
+      "manual" -> @approval_mode_approval_required
+      "manual_gate" -> @approval_mode_approval_required
+      "manual-gate" -> @approval_mode_approval_required
+      _other -> nil
+    end
+  end
+
+  defp normalize_issue_bot_approval_mode(approval_mode) when is_atom(approval_mode) do
+    approval_mode
+    |> Atom.to_string()
+    |> normalize_issue_bot_approval_mode()
+  end
+
+  defp normalize_issue_bot_approval_mode(_approval_mode), do: nil
+
+  defp normalize_optional_datetime(%DateTime{} = datetime),
+    do: DateTime.truncate(datetime, :second)
+
+  defp normalize_optional_datetime(%NaiveDateTime{} = datetime) do
+    case DateTime.from_naive(datetime, "Etc/UTC") do
+      {:ok, parsed_datetime} -> normalize_optional_datetime(parsed_datetime)
+      _other -> nil
+    end
+  end
+
+  defp normalize_optional_datetime(value) when is_binary(value) do
+    case DateTime.from_iso8601(value) do
+      {:ok, parsed_datetime, _offset} ->
+        normalize_optional_datetime(parsed_datetime)
+
+      _other ->
+        case NaiveDateTime.from_iso8601(value) do
+          {:ok, parsed_datetime} ->
+            normalize_optional_datetime(parsed_datetime)
+
+          _fallback ->
+            nil
+        end
+    end
+  end
+
+  defp normalize_optional_datetime(_value), do: nil
 
   defp normalize_optional_string(value) when is_binary(value) do
     case String.trim(value) do

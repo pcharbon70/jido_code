@@ -10,6 +10,10 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
   @default_error_type "workbench_issue_triage_workflow_kickoff_failed"
   @validation_error_type "workbench_issue_triage_workflow_validation_failed"
   @policy_error_type "workbench_issue_triage_policy_blocked"
+  @approval_mode_auto_post "auto_post"
+  @approval_mode_approval_required "approval_required"
+  @default_issue_bot_approval_mode @approval_mode_approval_required
+  @approval_policy_source "support_agent_config.github_issue_bot.approval_mode"
 
   @validation_remediation """
   Select a valid imported project issue row and retry triage kickoff from workbench.
@@ -35,6 +39,7 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
           status: :enabled | :disabled,
           enabled: boolean(),
           policy: String.t(),
+          approval_policy: map(),
           error_type: String.t() | nil,
           detail: String.t() | nil,
           remediation: String.t() | nil
@@ -54,7 +59,8 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
           started_at: DateTime.t()
         }
 
-  @spec kickoff(map() | nil, term(), map() | nil) :: {:ok, kickoff_run()} | {:error, kickoff_error()}
+  @spec kickoff(map() | nil, term(), map() | nil) ::
+          {:ok, kickoff_run()} | {:error, kickoff_error()}
   def kickoff(project_row, context_item_type, initiating_actor) do
     with {:ok, project_scope} <- normalize_project_scope(project_row),
          {:ok, normalized_context_item_type} <- normalize_context_item_type(context_item_type),
@@ -213,8 +219,14 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
 
   defp extract_run_id(_run_result), do: nil
 
-  defp build_kickoff_request(project_scope, :issue = context_item_type, initiating_actor, triage_policy_state) do
+  defp build_kickoff_request(
+         project_scope,
+         :issue = context_item_type,
+         initiating_actor,
+         triage_policy_state
+       ) do
     project_id = Map.fetch!(project_scope, :project_id)
+    approval_policy = Map.fetch!(triage_policy_state, :approval_policy)
 
     %{
       workflow_name: @workflow_name,
@@ -228,8 +240,10 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
           project_id: project_id,
           context_item_type: context_item_type
         },
+        approval_policy: approval_policy,
         policy: %{
-          name: Map.fetch!(triage_policy_state, :policy)
+          name: Map.fetch!(triage_policy_state, :policy),
+          approval_policy: approval_policy
         }
       },
       initiating_actor: initiating_actor,
@@ -333,6 +347,8 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
       |> map_get(:github_issue_bot, "github_issue_bot")
       |> normalize_map_or_nil()
 
+    approval_policy = issue_bot_approval_policy_from_settings(settings)
+
     cond do
       is_map(issue_triage_policy) ->
         normalize_policy_state(issue_triage_policy)
@@ -341,25 +357,28 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
         disabled_policy_state(
           "Issue triage workflow launches are disabled for this project.",
           issue_triage_settings,
-          "issue_triage.enabled"
+          "issue_triage.enabled",
+          approval_policy
         )
 
       policy_explicitly_disabled?(issue_bot_settings) ->
         disabled_policy_state(
           "Issue Bot is disabled for this project.",
           issue_bot_settings,
-          "issue_bot.enabled"
+          "issue_bot.enabled",
+          approval_policy
         )
 
       policy_explicitly_disabled?(support_agent_issue_bot_settings) ->
         disabled_policy_state(
           "Issue Bot support agent is disabled for this project.",
           support_agent_issue_bot_settings,
-          "support_agent_config.github_issue_bot.enabled"
+          "support_agent_config.github_issue_bot.enabled",
+          approval_policy
         )
 
       true ->
-        enabled_policy_state()
+        enabled_policy_state(@default_policy, approval_policy)
     end
   end
 
@@ -368,14 +387,18 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
   defp normalize_policy_state(policy) when is_map(policy) do
     policy_name = normalize_optional_string(map_get(policy, :policy, "policy")) || @default_policy
 
+    approval_policy =
+      policy |> map_get(:approval_policy, "approval_policy") |> normalize_approval_policy()
+
     if policy_explicitly_disabled?(policy) do
       disabled_policy_state(
         map_get(policy, :detail, "detail", nil),
         policy,
-        policy_name
+        policy_name,
+        approval_policy
       )
     else
-      enabled_policy_state(policy_name)
+      enabled_policy_state(policy_name, approval_policy)
     end
   end
 
@@ -400,23 +423,34 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
 
   defp policy_explicitly_disabled?(_policy), do: false
 
-  defp enabled_policy_state(policy_name \\ @default_policy) do
+  defp enabled_policy_state(
+         policy_name \\ @default_policy,
+         approval_policy \\ default_issue_bot_approval_policy()
+       ) do
     %{
       status: :enabled,
       enabled: true,
       policy: normalize_optional_string(policy_name) || @default_policy,
+      approval_policy: normalize_approval_policy(approval_policy),
       error_type: nil,
       detail: nil,
       remediation: nil
     }
   end
 
-  defp disabled_policy_state(detail, policy_source, fallback_policy_name) do
+  defp disabled_policy_state(
+         detail,
+         policy_source,
+         fallback_policy_name,
+         approval_policy
+       ) do
     %{
       status: :disabled,
       enabled: false,
       policy:
-        normalize_optional_string(map_get(policy_source, :policy, "policy", fallback_policy_name)) || @default_policy,
+        normalize_optional_string(map_get(policy_source, :policy, "policy", fallback_policy_name)) ||
+          @default_policy,
+      approval_policy: normalize_approval_policy(approval_policy),
       error_type:
         normalize_optional_string(map_get(policy_source, :error_type, "error_type", @policy_error_type)) ||
           @policy_error_type,
@@ -430,10 +464,117 @@ defmodule JidoCode.Workbench.IssueTriageWorkflowKickoff do
     }
   end
 
+  defp issue_bot_approval_policy_from_settings(settings) when is_map(settings) do
+    settings
+    |> map_get(:support_agent_config, "support_agent_config", %{})
+    |> normalize_map()
+    |> map_get(:github_issue_bot, "github_issue_bot", %{})
+    |> normalize_map()
+    |> map_get(:approval_mode, "approval_mode")
+    |> normalize_issue_bot_approval_mode()
+    |> approval_policy_from_mode()
+  end
+
+  defp issue_bot_approval_policy_from_settings(_settings), do: default_issue_bot_approval_policy()
+
+  defp default_issue_bot_approval_policy do
+    approval_policy_from_mode(@default_issue_bot_approval_mode)
+  end
+
+  defp normalize_approval_policy(approval_policy) when is_map(approval_policy) do
+    mode =
+      approval_policy
+      |> map_get(:mode, "mode")
+      |> normalize_issue_bot_approval_mode() ||
+        infer_issue_bot_approval_mode(approval_policy)
+
+    normalized_policy = approval_policy_from_mode(mode)
+
+    on_reject = map_get(approval_policy, :on_reject, "on_reject")
+
+    if is_map(on_reject) do
+      Map.put(normalized_policy, :on_reject, on_reject)
+    else
+      normalized_policy
+    end
+  end
+
+  defp normalize_approval_policy(_approval_policy), do: default_issue_bot_approval_policy()
+
+  defp infer_issue_bot_approval_mode(approval_policy) do
+    cond do
+      map_get(approval_policy, :auto_post, "auto_post") == true ->
+        @approval_mode_auto_post
+
+      map_get(approval_policy, :requires_approval, "requires_approval") == true ->
+        @approval_mode_approval_required
+
+      map_get(approval_policy, :post_behavior, "post_behavior") in ["auto_post", "auto-post"] ->
+        @approval_mode_auto_post
+
+      map_get(approval_policy, :post_behavior, "post_behavior") in [
+        "approval_required",
+        "approval-required",
+        "manual",
+        "manual_gate",
+        "manual-gate"
+      ] ->
+        @approval_mode_approval_required
+
+      true ->
+        @default_issue_bot_approval_mode
+    end
+  end
+
+  defp approval_policy_from_mode(mode) do
+    normalized_mode = normalize_issue_bot_approval_mode(mode)
+
+    if normalized_mode == @approval_mode_auto_post do
+      %{
+        mode: @approval_mode_auto_post,
+        post_behavior: @approval_mode_auto_post,
+        auto_post: true,
+        requires_approval: false,
+        source: @approval_policy_source
+      }
+    else
+      %{
+        mode: @approval_mode_approval_required,
+        post_behavior: @approval_mode_approval_required,
+        auto_post: false,
+        requires_approval: true,
+        source: @approval_policy_source
+      }
+    end
+  end
+
+  defp normalize_issue_bot_approval_mode(mode) when is_binary(mode) do
+    case mode |> String.trim() |> String.downcase() do
+      "auto_post" -> @approval_mode_auto_post
+      "auto-post" -> @approval_mode_auto_post
+      "auto" -> @approval_mode_auto_post
+      "approval_required" -> @approval_mode_approval_required
+      "approval-required" -> @approval_mode_approval_required
+      "manual" -> @approval_mode_approval_required
+      "manual_gate" -> @approval_mode_approval_required
+      "manual-gate" -> @approval_mode_approval_required
+      _other -> nil
+    end
+  end
+
+  defp normalize_issue_bot_approval_mode(mode) when is_atom(mode) do
+    mode
+    |> Atom.to_string()
+    |> normalize_issue_bot_approval_mode()
+  end
+
+  defp normalize_issue_bot_approval_mode(_mode), do: nil
+
   defp policy_blocked_error(triage_policy_state) do
     kickoff_error(
       Map.get(triage_policy_state, :error_type) || @policy_error_type,
-      Map.get(triage_policy_state, :detail) || "Issue triage workflow launch is blocked by policy.",
+      Map.get(triage_policy_state, :detail) ||
+        "Issue triage workflow launch is blocked by policy.",
       Map.get(triage_policy_state, :remediation) || @policy_remediation
     )
   end

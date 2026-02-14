@@ -12,6 +12,10 @@ defmodule JidoCodeWeb.AgentsLive do
         :issue_bot_supported_webhook_events,
         SupportAgentConfigs.supported_issue_bot_webhook_events()
       )
+      |> assign(
+        :issue_bot_supported_approval_modes,
+        SupportAgentConfigs.supported_issue_bot_approval_modes()
+      )
       |> assign(:project_count, 0)
       |> stream(:project_configs, [], reset: true)
       |> load_project_configs()
@@ -76,6 +80,33 @@ defmodule JidoCodeWeb.AgentsLive do
   end
 
   @impl true
+  def handle_event(
+        "set_issue_bot_approval_mode",
+        %{"project_id" => project_id, "approval_mode" => approval_mode},
+        socket
+      ) do
+    case SupportAgentConfigs.set_issue_bot_approval_mode(project_id, approval_mode) do
+      {:ok, project_config} ->
+        {:noreply,
+         socket
+         |> assign(:issue_bot_error, nil)
+         |> stream_insert(:project_configs, project_config)}
+
+      {:error, typed_error} ->
+        {:noreply, assign(socket, :issue_bot_error, typed_error)}
+    end
+  end
+
+  def handle_event("set_issue_bot_approval_mode", _params, socket) do
+    {:noreply,
+     assign(socket, :issue_bot_error, %{
+       error_type: "support_agent_config_validation_failed",
+       detail: "Issue Bot approval mode update is missing required parameters.",
+       remediation: "Select an approval mode from a valid project row and retry."
+     })}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={%{}}>
@@ -108,12 +139,13 @@ defmodule JidoCodeWeb.AgentsLive do
               <th>Project</th>
               <th>Issue Bot status</th>
               <th>Webhook events</th>
+              <th>Approval policy</th>
               <th>Controls</th>
             </tr>
           </thead>
           <tbody id="agents-project-rows" phx-update="stream">
             <tr :if={@project_count == 0} id="agents-project-empty">
-              <td colspan="4" class="text-center text-sm text-base-content/70 py-8">
+              <td colspan="5" class="text-center text-sm text-base-content/70 py-8">
                 No projects are available for Issue Bot configuration.
               </td>
             </tr>
@@ -168,6 +200,41 @@ defmodule JidoCodeWeb.AgentsLive do
                     Save events
                   </button>
                 </form>
+              </td>
+              <td>
+                <p id={"agents-issue-bot-approval-mode-#{project_config.id}"} class="text-xs text-base-content/70">
+                  {issue_bot_approval_mode_label(project_config.approval_policy)}
+                </p>
+                <form
+                  id={"agents-issue-bot-approval-form-#{project_config.id}"}
+                  phx-submit="set_issue_bot_approval_mode"
+                  class="space-y-2 mt-2"
+                >
+                  <input type="hidden" name="project_id" value={project_config.id} />
+                  <select
+                    id={"agents-issue-bot-approval-select-#{project_config.id}"}
+                    name="approval_mode"
+                    class="select select-xs select-bordered w-full max-w-[14rem]"
+                  >
+                    <option
+                      :for={approval_mode <- @issue_bot_supported_approval_modes}
+                      value={approval_mode}
+                      selected={issue_bot_approval_mode_selected?(project_config.approval_policy, approval_mode)}
+                    >
+                      {issue_bot_approval_mode_option_label(approval_mode)}
+                    </option>
+                  </select>
+                  <button
+                    id={"agents-issue-bot-approval-save-#{project_config.id}"}
+                    type="submit"
+                    class="btn btn-xs btn-outline"
+                  >
+                    Save policy
+                  </button>
+                </form>
+                <p id={"agents-issue-bot-last-updated-#{project_config.id}"} class="text-[11px] text-base-content/60">
+                  Last updated: {issue_bot_last_updated_label(project_config.last_updated)}
+                </p>
               </td>
               <td>
                 <div class="flex flex-wrap gap-2">
@@ -243,4 +310,47 @@ defmodule JidoCodeWeb.AgentsLive do
   end
 
   defp issue_bot_webhook_event_dom_id(_event), do: "unknown"
+
+  defp issue_bot_approval_mode_label(%{} = approval_policy) do
+    case map_get(approval_policy, :mode, "mode") do
+      "auto_post" -> "Auto-post"
+      "approval_required" -> "Approval required"
+      _other -> "Approval required"
+    end
+  end
+
+  defp issue_bot_approval_mode_label(_approval_policy), do: "Approval required"
+
+  defp issue_bot_approval_mode_option_label("auto_post"), do: "Auto-post"
+  defp issue_bot_approval_mode_option_label("approval_required"), do: "Approval required"
+  defp issue_bot_approval_mode_option_label(_approval_mode), do: "Approval required"
+
+  defp issue_bot_approval_mode_selected?(approval_policy, approval_mode)
+       when is_map(approval_policy) do
+    map_get(approval_policy, :mode, "mode", "approval_required") == approval_mode
+  end
+
+  defp issue_bot_approval_mode_selected?(_approval_policy, approval_mode),
+    do: approval_mode == "approval_required"
+
+  defp issue_bot_last_updated_label(last_updated) when is_map(last_updated) do
+    case map_get(last_updated, :updated_at, "updated_at") do
+      updated_at when is_binary(updated_at) -> updated_at
+      _other -> "unavailable"
+    end
+  end
+
+  defp issue_bot_last_updated_label(_last_updated), do: "unavailable"
+
+  defp map_get(map, atom_key, string_key, default \\ nil)
+
+  defp map_get(map, atom_key, string_key, default) when is_map(map) do
+    cond do
+      Map.has_key?(map, atom_key) -> Map.get(map, atom_key)
+      Map.has_key?(map, string_key) -> Map.get(map, string_key)
+      true -> default
+    end
+  end
+
+  defp map_get(_map, _atom_key, _string_key, default), do: default
 end

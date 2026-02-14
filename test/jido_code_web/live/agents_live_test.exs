@@ -243,6 +243,128 @@ defmodule JidoCodeWeb.AgentsLiveTest do
     assert issue_bot_webhook_events(refreshed_project.settings) == ["issues.opened"]
   end
 
+  test "agents page supports per-project approval mode selection and persists issue bot policy",
+       %{
+         conn: _conn
+       } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-approval-mode",
+        github_full_name: "owner/repo-approval-mode",
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "approval_mode" => "manual"
+            }
+          }
+        }
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/agents", on_error: :warn)
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-approval-select-#{project.id} option[value='auto_post']",
+             "Auto-post"
+           )
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-approval-select-#{project.id} option[value='approval_required']",
+             "Approval required"
+           )
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-approval-mode-#{project.id}",
+             "Approval required"
+           )
+
+    assert has_element?(view, "#agents-issue-bot-last-updated-#{project.id}", "Last updated:")
+
+    view
+    |> element("#agents-issue-bot-approval-form-#{project.id}")
+    |> render_submit(%{
+      "project_id" => project.id,
+      "approval_mode" => "auto_post"
+    })
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-approval-mode-#{project.id}",
+             "Auto-post"
+           )
+
+    refreshed_project = read_project!(project.id)
+    assert issue_bot_approval_mode(refreshed_project.settings) == "auto_post"
+  end
+
+  test "approval mode persistence failure keeps prior policy and renders typed failure context",
+       %{
+         conn: _conn
+       } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-approval-mode-failure",
+        github_full_name: "owner/repo-approval-mode-failure",
+        default_branch: "main",
+        settings: %{
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "approval_mode" => "approval_required"
+            }
+          }
+        }
+      })
+
+    Application.put_env(:jido_code, :support_agent_config_project_updater, fn _project, _update_attributes ->
+      {:error, :forced_support_agent_config_failure}
+    end)
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/agents", on_error: :warn)
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-approval-mode-#{project.id}",
+             "Approval required"
+           )
+
+    view
+    |> element("#agents-issue-bot-approval-form-#{project.id}")
+    |> render_submit(%{
+      "project_id" => project.id,
+      "approval_mode" => "auto_post"
+    })
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-error-type",
+             "support_agent_config_persistence_failed"
+           )
+
+    assert has_element?(
+             view,
+             "#agents-issue-bot-approval-mode-#{project.id}",
+             "Approval required"
+           )
+
+    refreshed_project = read_project!(project.id)
+    assert issue_bot_approval_mode(refreshed_project.settings) == "approval_required"
+  end
+
   defp register_owner(email, password) do
     strategy = Info.strategy!(User, :password)
 
@@ -321,6 +443,38 @@ defmodule JidoCodeWeb.AgentsLiveTest do
   end
 
   defp issue_bot_webhook_events(_settings), do: []
+
+  defp issue_bot_approval_mode(settings) when is_map(settings) do
+    settings
+    |> map_get(:support_agent_config, "support_agent_config", %{})
+    |> normalize_map()
+    |> map_get(:github_issue_bot, "github_issue_bot", %{})
+    |> normalize_map()
+    |> map_get(:approval_mode, "approval_mode", "approval_required")
+    |> case do
+      approval_mode when is_binary(approval_mode) ->
+        String.trim(approval_mode)
+
+      approval_mode when is_atom(approval_mode) ->
+        approval_mode |> Atom.to_string() |> String.trim()
+
+      _other ->
+        "approval_required"
+    end
+    |> case do
+      "auto_post" -> "auto_post"
+      "auto-post" -> "auto_post"
+      "auto" -> "auto_post"
+      "approval_required" -> "approval_required"
+      "approval-required" -> "approval_required"
+      "manual" -> "approval_required"
+      "manual_gate" -> "approval_required"
+      "manual-gate" -> "approval_required"
+      _other -> "approval_required"
+    end
+  end
+
+  defp issue_bot_approval_mode(_settings), do: "approval_required"
 
   defp owner_sign_in_with_token_path(strategy, token) do
     strategy_path =

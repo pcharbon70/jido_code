@@ -34,7 +34,12 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     on_exit(fn ->
       restore_env(:workbench_inventory_loader, original_workbench_loader)
       restore_env(:workbench_fix_workflow_launcher, original_fix_workflow_launcher)
-      restore_env(:workbench_issue_triage_workflow_launcher, original_issue_triage_workflow_launcher)
+
+      restore_env(
+        :workbench_issue_triage_workflow_launcher,
+        original_issue_triage_workflow_launcher
+      )
+
       restore_env(:system_config_loader, original_system_config_loader)
     end)
 
@@ -403,6 +408,12 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
             "open_issue_count" => 6,
             "open_pr_count" => 1,
             "recent_activity_summary" => "Issue queue needs triage."
+          },
+          "support_agent_config" => %{
+            "github_issue_bot" => %{
+              "enabled" => true,
+              "approval_mode" => "auto_post"
+            }
           }
         }
       })
@@ -410,10 +421,14 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
     project_id = project.id
     launcher_requests = start_supervised!({Agent, fn -> [] end})
 
-    Application.put_env(:jido_code, :workbench_issue_triage_workflow_launcher, fn kickoff_request ->
-      Agent.update(launcher_requests, fn requests -> [kickoff_request | requests] end)
-      {:ok, %{run_id: "run-triage-789"}}
-    end)
+    Application.put_env(
+      :jido_code,
+      :workbench_issue_triage_workflow_launcher,
+      fn kickoff_request ->
+        Agent.update(launcher_requests, fn requests -> [kickoff_request | requests] end)
+        {:ok, %{run_id: "run-triage-789"}}
+      end
+    )
 
     {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
 
@@ -450,6 +465,12 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
                    route: "/workbench",
                    project_id: ^project_id,
                    context_item_type: :issue
+                 },
+                 approval_policy: %{
+                   mode: "auto_post",
+                   post_behavior: "auto_post",
+                   auto_post: true,
+                   requires_approval: false
                  }
                },
                initiating_actor: %{id: actor_id}
@@ -492,10 +513,14 @@ defmodule JidoCodeWeb.WorkbenchLiveTest do
 
     launcher_invocations = start_supervised!({Agent, fn -> 0 end})
 
-    Application.put_env(:jido_code, :workbench_issue_triage_workflow_launcher, fn _kickoff_request ->
-      Agent.update(launcher_invocations, &(&1 + 1))
-      {:ok, %{run_id: "unexpected-run"}}
-    end)
+    Application.put_env(
+      :jido_code,
+      :workbench_issue_triage_workflow_launcher,
+      fn _kickoff_request ->
+        Agent.update(launcher_invocations, &(&1 + 1))
+        {:ok, %{run_id: "unexpected-run"}}
+      end
+    )
 
     {:ok, view, _html} = live(recycle(authed_conn), ~p"/workbench", on_error: :warn)
 
