@@ -95,6 +95,7 @@ defmodule JidoCodeWeb.Router do
 
     ash_authentication_live_session :public_routes,
       on_mount: [{JidoCodeWeb.LiveUserAuth, :live_user_optional}] do
+      live("/welcome", WelcomeLive, :index)
       live("/setup", SetupLive, :index)
       live("/", HomeLive, :index)
     end

@@ -44,7 +44,7 @@ defmodule JidoCodeWeb.HomeLiveTest do
     assert setup_html =~ "Setup is incomplete"
   end
 
-  test "redirects to setup with diagnostics when SystemConfig cannot be loaded", %{conn: conn} do
+  test "redirects to welcome with diagnostics when SystemConfig cannot be loaded", %{conn: conn} do
     Application.put_env(:jido_code, :system_config_loader, fn ->
       {:error, :database_unreachable}
     end)
@@ -52,24 +52,14 @@ defmodule JidoCodeWeb.HomeLiveTest do
     log =
       capture_log([level: :warning], fn ->
         assert {:error, {:redirect, %{to: redirect_to}}} = live(conn, ~p"/")
-        params = assert_setup_redirect(redirect_to, "1", "system_config_unavailable")
-        assert params["diagnostic"] =~ "Unable to load SystemConfig"
+        assert redirect_to == "/welcome"
 
         Logger.flush()
-        send(self(), {:redirect_to, redirect_to})
       end)
 
     assert log =~ "onboarding_redirect"
     assert log =~ "reason=system_config_unavailable"
     assert log =~ "database_unreachable"
-
-    assert_receive {:redirect_to, redirect_to}
-    setup_response = build_conn() |> get(redirect_to)
-    setup_html = html_response(setup_response, 200)
-
-    assert setup_html =~ "Step 1"
-    assert setup_html =~ "system_config_unavailable"
-    assert setup_html =~ "Unable to load SystemConfig"
   end
 
   defp assert_setup_redirect(redirect_to, expected_step, expected_reason) do

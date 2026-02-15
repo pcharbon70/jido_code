@@ -40,7 +40,7 @@ defmodule JidoCodeWeb.HomeLive do
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-200 to-base-300">
       <div class="w-full max-w-md px-6">
         <div class="text-center mb-8">
-          <h1 class="text-4xl font-bold text-base-content">Agent Jido</h1>
+          <h1 class="text-4xl font-bold text-base-content">Jido Code</h1>
           <p class="mt-2 text-base-content/70">AI Agent Platform</p>
         </div>
         <div class="card bg-base-100 shadow-xl">
@@ -64,8 +64,12 @@ defmodule JidoCodeWeb.HomeLive do
   defp redirect_to_setup(socket, onboarding_step, reason, diagnostic, detail \\ nil) do
     log_onboarding_redirect(reason, onboarding_step, diagnostic, detail)
 
-    path = ~p"/setup?diagnostic=#{diagnostic}&reason=#{reason}&step=#{onboarding_step}"
-    {:ok, Phoenix.LiveView.redirect(socket, to: path)}
+    if onboarding_step <= 2 do
+      {:ok, Phoenix.LiveView.redirect(socket, to: ~p"/welcome")}
+    else
+      path = ~p"/setup?diagnostic=#{diagnostic}&reason=#{reason}&step=#{onboarding_step}"
+      {:ok, Phoenix.LiveView.redirect(socket, to: path)}
+    end
   end
 
   defp log_onboarding_redirect(reason, onboarding_step, diagnostic, nil) do

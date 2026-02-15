@@ -38,7 +38,7 @@ defmodule JidoCodeWeb.Layouts do
     ~H"""
     <header class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 lg:px-8">
       <div class="flex-1">
-        <.link navigate={~p"/dashboard"} class="text-xl font-bold hover:opacity-80">Agent Jido</.link>
+        <.link navigate={~p"/dashboard"} class="text-xl font-bold hover:opacity-80">Jido Code</.link>
       </div>
       <div class="flex-none">
         <ul class="flex flex-row px-1 space-x-2 items-center">
@@ -66,6 +66,44 @@ defmodule JidoCodeWeb.Layouts do
         {render_slot(@inner_block)}
       </div>
     </main>
+
+    <.live_toast_group
+      flash={@flash}
+      connected={assigns[:socket] != nil}
+      corner={:top_right}
+      toasts_sync={assigns[:toasts_sync] || []}
+    />
+    """
+  end
+
+  @doc """
+  Renders a minimal onboarding layout with no navigation.
+
+  Used for welcome/registration flows where a clean, centered
+  experience is preferred.
+
+  ## Examples
+
+      <Layouts.onboarding flash={@flash}>
+        <h1>Welcome!</h1>
+      </Layouts.onboarding>
+
+  """
+  attr(:flash, :map, required: true, doc: "the map of flash messages")
+
+  slot(:inner_block, required: true)
+
+  def onboarding(assigns) do
+    ~H"""
+    <div class="min-h-screen bg-gradient-to-br from-base-200 to-base-300 flex flex-col items-center justify-center px-4">
+      <div class="mb-8 text-center">
+        <h1 class="text-2xl font-bold opacity-80">Jido Code</h1>
+      </div>
+
+      <div class="w-full max-w-lg">
+        {render_slot(@inner_block)}
+      </div>
+    </div>
 
     <.live_toast_group
       flash={@flash}

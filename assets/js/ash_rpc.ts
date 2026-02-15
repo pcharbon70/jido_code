@@ -6,6 +6,7 @@
 
 
 export type UUID = string;
+export type UtcDateTimeUsec = string;
 
 // GitHubRepo Schema
 export type GitHubRepoResourceSchema = {
@@ -36,6 +37,90 @@ export type GitHubRepoAttributesOnlySchema = {
   settings: Record<string, any> | null;
   githubAppInstallationId: number | null;
   userId: UUID | null;
+};
+
+
+// Project Schema
+export type ProjectResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "githubFullName" | "defaultBranch" | "settings";
+  id: UUID;
+  name: string;
+  githubFullName: string;
+  defaultBranch: string;
+  settings: Record<string, any>;
+};
+
+
+
+export type ProjectAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "name" | "githubFullName" | "defaultBranch" | "settings";
+  id: UUID;
+  name: string;
+  githubFullName: string;
+  defaultBranch: string;
+  settings: Record<string, any>;
+};
+
+
+// SecretRef Schema
+export type SecretRefResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "scope" | "name" | "keyVersion" | "source" | "lastRotatedAt" | "expiresAt";
+  id: UUID;
+  scope: "instance" | "project" | "integration";
+  name: string;
+  keyVersion: number;
+  source: "env" | "onboarding" | "rotation";
+  lastRotatedAt: UtcDateTimeUsec;
+  expiresAt: UtcDateTimeUsec | null;
+};
+
+
+
+export type SecretRefAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "scope" | "name" | "keyVersion" | "source" | "lastRotatedAt" | "expiresAt";
+  id: UUID;
+  scope: "instance" | "project" | "integration";
+  name: string;
+  keyVersion: number;
+  source: "env" | "onboarding" | "rotation";
+  lastRotatedAt: UtcDateTimeUsec;
+  expiresAt: UtcDateTimeUsec | null;
+};
+
+
+// SecretLifecycleAudit Schema
+export type SecretLifecycleAuditResourceSchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "secretRefId" | "scope" | "name" | "actionType" | "outcomeStatus" | "actorId" | "actorEmail" | "occurredAt";
+  id: UUID;
+  secretRefId: UUID;
+  scope: "instance" | "project" | "integration";
+  name: string;
+  actionType: "create" | "rotate" | "revoke";
+  outcomeStatus: "succeeded" | "failed";
+  actorId: string;
+  actorEmail: string | null;
+  occurredAt: UtcDateTimeUsec;
+};
+
+
+
+export type SecretLifecycleAuditAttributesOnlySchema = {
+  __type: "Resource";
+  __primitiveFields: "id" | "secretRefId" | "scope" | "name" | "actionType" | "outcomeStatus" | "actorId" | "actorEmail" | "occurredAt";
+  id: UUID;
+  secretRefId: UUID;
+  scope: "instance" | "project" | "integration";
+  name: string;
+  actionType: "create" | "rotate" | "revoke";
+  outcomeStatus: "succeeded" | "failed";
+  actorId: string;
+  actorEmail: string | null;
+  occurredAt: UtcDateTimeUsec;
 };
 
 
@@ -105,6 +190,172 @@ export type GitHubRepoFilterInput = {
     eq?: UUID;
     notEq?: UUID;
     in?: Array<UUID>;
+  };
+
+
+
+};
+export type ProjectFilterInput = {
+  and?: Array<ProjectFilterInput>;
+  or?: Array<ProjectFilterInput>;
+  not?: Array<ProjectFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  githubFullName?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  defaultBranch?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  settings?: {
+    eq?: Record<string, any>;
+    notEq?: Record<string, any>;
+    in?: Array<Record<string, any>>;
+  };
+
+
+
+};
+export type SecretRefFilterInput = {
+  and?: Array<SecretRefFilterInput>;
+  or?: Array<SecretRefFilterInput>;
+  not?: Array<SecretRefFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  scope?: {
+    eq?: "instance" | "project" | "integration";
+    notEq?: "instance" | "project" | "integration";
+    in?: Array<"instance" | "project" | "integration">;
+  };
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  keyVersion?: {
+    eq?: number;
+    notEq?: number;
+    greaterThan?: number;
+    greaterThanOrEqual?: number;
+    lessThan?: number;
+    lessThanOrEqual?: number;
+    in?: Array<number>;
+  };
+
+  source?: {
+    eq?: "env" | "onboarding" | "rotation";
+    notEq?: "env" | "onboarding" | "rotation";
+    in?: Array<"env" | "onboarding" | "rotation">;
+  };
+
+  lastRotatedAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+  expiresAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
+  };
+
+
+
+};
+export type SecretLifecycleAuditFilterInput = {
+  and?: Array<SecretLifecycleAuditFilterInput>;
+  or?: Array<SecretLifecycleAuditFilterInput>;
+  not?: Array<SecretLifecycleAuditFilterInput>;
+
+  id?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  secretRefId?: {
+    eq?: UUID;
+    notEq?: UUID;
+    in?: Array<UUID>;
+  };
+
+  scope?: {
+    eq?: "instance" | "project" | "integration";
+    notEq?: "instance" | "project" | "integration";
+    in?: Array<"instance" | "project" | "integration">;
+  };
+
+  name?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  actionType?: {
+    eq?: "create" | "rotate" | "revoke";
+    notEq?: "create" | "rotate" | "revoke";
+    in?: Array<"create" | "rotate" | "revoke">;
+  };
+
+  outcomeStatus?: {
+    eq?: "succeeded" | "failed";
+    notEq?: "succeeded" | "failed";
+    in?: Array<"succeeded" | "failed">;
+  };
+
+  actorId?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  actorEmail?: {
+    eq?: string;
+    notEq?: string;
+    in?: Array<string>;
+  };
+
+  occurredAt?: {
+    eq?: UtcDateTimeUsec;
+    notEq?: UtcDateTimeUsec;
+    greaterThan?: UtcDateTimeUsec;
+    greaterThanOrEqual?: UtcDateTimeUsec;
+    lessThan?: UtcDateTimeUsec;
+    lessThanOrEqual?: UtcDateTimeUsec;
+    in?: Array<UtcDateTimeUsec>;
   };
 
 

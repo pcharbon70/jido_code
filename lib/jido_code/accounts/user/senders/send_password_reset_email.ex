@@ -13,7 +13,7 @@ defmodule JidoCode.Accounts.User.Senders.SendPasswordResetEmail do
   @impl true
   def send(user, token, _) do
     new()
-    |> from({"Agent Jido", Mailer.from_email()})
+    |> from({"Jido Code", Mailer.from_email()})
     |> to(to_string(user.email))
     |> subject("Reset your password")
     |> html_body(body(token: token))
