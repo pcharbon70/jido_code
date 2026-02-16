@@ -13,6 +13,7 @@ defmodule JidoCode.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      releases: releases(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
       consolidate_protocols: Mix.env() != :dev,
@@ -33,6 +34,27 @@ defmodule JidoCode.MixProject do
   def cli do
     [
       preferred_envs: [precommit: :test]
+    ]
+  end
+
+  def releases do
+    [
+      jido_code: [
+        include_executables_for: [:unix],
+        include_erts: System.get_env("MIX_ERTS_PATH") || Mix.env() == :prod,
+        quiet: true
+      ],
+      jido_code_desktop: [
+        validate_compile_env: false,
+        steps: [:assemble, &Burrito.wrap/1],
+        burrito: [
+          targets: [
+            macos: [os: :darwin, cpu: :aarch64]
+            # linux: [os: :linux, cpu: :x86_64],
+            # windows: [os: :windows, cpu: :x86_64]
+          ]
+        ]
+      ]
     ]
   end
 
@@ -145,7 +167,10 @@ defmodule JidoCode.MixProject do
       {:git_ops, "~> 2.9", only: :dev, runtime: false},
 
       # Error handling
-      {:splode, "~> 0.3"}
+      {:splode, "~> 0.3"},
+
+      # Desktop packaging
+      {:burrito, "~> 1.5"}
     ]
   end
 
