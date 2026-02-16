@@ -43,3 +43,8 @@ config :phoenix_live_view,
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# Use in-memory SystemConfig for tests (no DB persistence)
+config :jido_code,
+  system_config_loader: &JidoCode.Setup.SystemConfig.default_loader/0,
+  system_config_saver: &JidoCode.Setup.SystemConfig.default_saver/1

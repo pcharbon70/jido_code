@@ -92,8 +92,11 @@ config :jido_code,
     JidoCode.Orchestration,
     JidoCode.Forge.Domain,
     JidoCode.Folio,
-    JidoCode.Security
+    JidoCode.Security,
+    JidoCode.Setup
   ],
+  system_config_loader: &JidoCode.Setup.SystemConfigPersistence.load/0,
+  system_config_saver: &JidoCode.Setup.SystemConfigPersistence.save/1,
   ash_authentication: [return_error_on_invalid_magic_link_token?: true],
   mailer: [from_name: "Jido Code"],
   runtime_mode: config_env()

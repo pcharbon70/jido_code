@@ -21,7 +21,19 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "owner",
+      "source": "secret_ref_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "scope",
       "type": "text"
     },
     {
@@ -45,19 +57,31 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "full_name",
+      "source": "action_type",
       "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "\"__managed_by_secret_ref__\"",
+      "default": "\"succeeded\"",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "webhook_secret",
+      "source": "outcome_status",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "actor_id",
       "type": "text"
     },
     {
@@ -69,35 +93,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "webhook_id",
-      "type": "bigint"
+      "source": "actor_email",
+      "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "true",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "enabled",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": true,
-      "default": "%{}",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "settings",
-      "type": "map"
-    },
-    {
-      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -105,8 +105,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "github_app_installation_id",
-      "type": "bigint"
+      "source": "occurred_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
@@ -131,37 +131,6 @@
       "size": null,
       "source": "updated_at",
       "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": null,
-          "global": null,
-          "strategy": null
-        },
-        "name": "github_repos_user_id_fkey",
-        "on_delete": null,
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "users"
-      },
-      "scale": null,
-      "size": null,
-      "source": "user_id",
-      "type": "uuid"
     }
   ],
   "base_filter": null,
@@ -170,23 +139,8 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "80CC8D3073FD59FE6BB1B50EF2EDCB1C9D11A7496B9F484E7720A054BA3304BA",
-  "identities": [
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "github_repos_unique_full_name_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "full_name"
-        }
-      ],
-      "name": "unique_full_name",
-      "nils_distinct?": true,
-      "where": null
-    }
-  ],
+  "hash": "1D2DA57FAC769D5A6A568A1175DDCF388FD47FEF4F954FBE58615070663C59D9",
+  "identities": [],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -194,5 +148,5 @@
   },
   "repo": "Elixir.JidoCode.Repo",
   "schema": null,
-  "table": "github_repos"
+  "table": "secret_lifecycle_audits"
 }
