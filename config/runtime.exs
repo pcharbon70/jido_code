@@ -38,7 +38,8 @@ if config_env() == :prod and System.get_env("BURRITO_TARGET") != nil do
 
   config :jido_code, JidoCodeWeb.Endpoint,
     url: [host: "localhost", port: port, scheme: "http"],
-    http: [ip: {0, 0, 0, 0}, port: port],
+    # Desktop sidecar only needs loopback access from the local webview.
+    http: [ip: {127, 0, 0, 1}, port: port],
     secret_key_base:
       System.get_env("SECRET_KEY_BASE") ||
         "j1d0_c0d3_d3skt0p_s3cr3t_k3y_b4s3_th4t_1s_l0ng_3n0ugh_f0r_c00k13_st0r3_v4l1d4t10n_64b",
@@ -50,8 +51,7 @@ if config_env() == :prod and System.get_env("BURRITO_TARGET") != nil do
     ]
 
   config :jido_code,
-    token_signing_secret:
-      System.get_env("TOKEN_SIGNING_SECRET") || "jido_code_desktop_token_signing_secret"
+    token_signing_secret: System.get_env("TOKEN_SIGNING_SECRET") || "jido_code_desktop_token_signing_secret"
 end
 
 if config_env() == :prod and System.get_env("BURRITO_TARGET") == nil do
