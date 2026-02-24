@@ -1,0 +1,382 @@
+defmodule JidoCode.CodeServer do
+  @moduledoc """
+  Internal facade for project-scoped conversation runtime operations.
+  """
+
+  alias Jido.Code.Server, as: Runtime
+  alias Jido.Code.Server.Engine
+  alias JidoCode.CodeServer.Error
+  alias JidoCode.CodeServer.ProjectScope
+
+  @runtime_start_remediation """
+  Retry runtime startup. If this persists, verify workspace readiness and runtime configuration.
+  """
+
+  @conversation_start_remediation """
+  Retry conversation startup after confirming the project runtime is healthy.
+  """
+
+  @message_send_remediation """
+  Retry message send after starting a conversation for this project.
+  """
+
+  @subscription_remediation """
+  Retry conversation subscription after confirming the conversation is active.
+  """
+
+  @conversation_control_remediation """
+  Retry the conversation control action. If this persists, restart the project runtime.
+  """
+
+  @type runtime_status :: :started | :reused
+
+  @type runtime_handle :: %{
+          project_id: String.t(),
+          root_path: String.t(),
+          project: map(),
+          runtime_status: runtime_status(),
+          runtime_pid: pid() | nil
+        }
+
+  @spec ensure_project_runtime(term()) :: {:ok, runtime_handle()} | {:error, Error.typed_error()}
+  def ensure_project_runtime(project_id) do
+    with {:ok, scope} <- ProjectScope.resolve(project_id) do
+      ensure_runtime(scope)
+    end
+  end
+
+  @spec start_conversation(term(), keyword()) :: {:ok, String.t()} | {:error, Error.typed_error()}
+  def start_conversation(project_id, opts \\ [])
+
+  def start_conversation(project_id, opts) when is_list(opts) do
+    with {:ok, runtime} <- ensure_project_runtime(project_id) do
+      case Runtime.start_conversation(runtime.project_id, opts) do
+        {:ok, conversation_id} ->
+          {:ok, conversation_id}
+
+        {:error, reason} ->
+          {:error,
+           Error.build(
+             "code_server_conversation_start_failed",
+             "Conversation startup failed (#{format_reason(reason)}).",
+             @conversation_start_remediation,
+             project_id: runtime.project_id,
+             conversation_id: Keyword.get(opts, :conversation_id)
+           )}
+      end
+    end
+  end
+
+  def start_conversation(project_id, _opts) do
+    {:error,
+     Error.build(
+       "code_server_conversation_start_failed",
+       "Conversation startup options must be a keyword list.",
+       @conversation_start_remediation,
+       project_id: normalize_optional_string(project_id)
+     )}
+  end
+
+  @spec send_user_message(term(), term(), term(), keyword()) :: :ok | {:error, Error.typed_error()}
+  def send_user_message(project_id, conversation_id, content, opts \\ [])
+
+  def send_user_message(project_id, conversation_id, content, opts) when is_list(opts) do
+    with {:ok, runtime} <- ensure_project_runtime(project_id),
+         {:ok, normalized_conversation_id} <-
+           normalize_conversation_id(
+             conversation_id,
+             runtime.project_id,
+             "code_server_message_send_failed",
+             @message_send_remediation
+           ),
+         {:ok, normalized_content} <-
+           normalize_message_content(content, runtime.project_id, normalized_conversation_id),
+         {:ok, event} <- build_user_message_event(normalized_content, opts),
+         :ok <- dispatch_user_message(runtime.project_id, normalized_conversation_id, event) do
+      :ok
+    end
+  end
+
+  def send_user_message(project_id, conversation_id, _content, _opts) do
+    {:error,
+     Error.build(
+       "code_server_message_send_failed",
+       "Message options must be a keyword list.",
+       @message_send_remediation,
+       project_id: normalize_optional_string(project_id),
+       conversation_id: normalize_optional_string(conversation_id)
+     )}
+  end
+
+  @spec subscribe(term(), term(), pid()) :: :ok | {:error, Error.typed_error()}
+  def subscribe(project_id, conversation_id, pid \\ self())
+
+  def subscribe(project_id, conversation_id, pid) when is_pid(pid) do
+    with {:ok, runtime} <- ensure_project_runtime(project_id),
+         {:ok, normalized_conversation_id} <-
+           normalize_conversation_id(
+             conversation_id,
+             runtime.project_id,
+             "code_server_subscription_failed",
+             @subscription_remediation
+           ),
+         :ok <- do_subscribe(runtime.project_id, normalized_conversation_id, pid) do
+      :ok
+    end
+  end
+
+  def subscribe(project_id, conversation_id, _pid) do
+    {:error,
+     Error.build(
+       "code_server_subscription_failed",
+       "Conversation subscriber must be a live process identifier.",
+       @subscription_remediation,
+       project_id: normalize_optional_string(project_id),
+       conversation_id: normalize_optional_string(conversation_id)
+     )}
+  end
+
+  @spec unsubscribe(term(), term(), pid()) :: :ok | {:error, Error.typed_error()}
+  def unsubscribe(project_id, conversation_id, pid \\ self())
+
+  def unsubscribe(project_id, conversation_id, pid) when is_pid(pid) do
+    with {:ok, runtime} <- ensure_project_runtime(project_id),
+         {:ok, normalized_conversation_id} <-
+           normalize_conversation_id(
+             conversation_id,
+             runtime.project_id,
+             "code_server_subscription_failed",
+             @subscription_remediation
+           ),
+         :ok <- do_unsubscribe(runtime.project_id, normalized_conversation_id, pid) do
+      :ok
+    end
+  end
+
+  def unsubscribe(project_id, conversation_id, _pid) do
+    {:error,
+     Error.build(
+       "code_server_subscription_failed",
+       "Conversation subscriber must be a live process identifier.",
+       @subscription_remediation,
+       project_id: normalize_optional_string(project_id),
+       conversation_id: normalize_optional_string(conversation_id)
+     )}
+  end
+
+  @spec stop_conversation(term(), term()) :: :ok | {:error, Error.typed_error()}
+  def stop_conversation(project_id, conversation_id) do
+    with {:ok, runtime} <- ensure_project_runtime(project_id),
+         {:ok, normalized_conversation_id} <-
+           normalize_conversation_id(
+             conversation_id,
+             runtime.project_id,
+             "code_server_unexpected_error",
+             @conversation_control_remediation
+           ),
+         :ok <- do_stop_conversation(runtime.project_id, normalized_conversation_id) do
+      :ok
+    end
+  end
+
+  defp ensure_runtime(%{project_id: project_id} = scope) do
+    case Engine.whereis_project(project_id) do
+      {:ok, project_pid} ->
+        {:ok, runtime_handle(scope, :reused, project_pid)}
+
+      {:error, {:project_not_found, ^project_id}} ->
+        start_runtime(scope)
+
+      {:error, reason} ->
+        {:error,
+         Error.build(
+           "code_server_runtime_start_failed",
+           "Project runtime lookup failed (#{format_reason(reason)}).",
+           @runtime_start_remediation,
+           project_id: project_id
+         )}
+    end
+  end
+
+  defp start_runtime(%{project_id: project_id, root_path: root_path} = scope) do
+    case Runtime.start_project(root_path, project_id: project_id) do
+      {:ok, _started_project_id} ->
+        {:ok, runtime_handle(scope, :started, lookup_runtime_pid(project_id))}
+
+      {:error, {:already_started, _already_started_project_id}} ->
+        {:ok, runtime_handle(scope, :reused, lookup_runtime_pid(project_id))}
+
+      {:error, reason} ->
+        {:error,
+         Error.build(
+           "code_server_runtime_start_failed",
+           "Project runtime startup failed (#{format_reason(reason)}).",
+           @runtime_start_remediation,
+           project_id: project_id
+         )}
+    end
+  end
+
+  defp dispatch_user_message(project_id, conversation_id, event) do
+    case Runtime.send_event(project_id, conversation_id, event) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        {:error,
+         Error.build(
+           "code_server_message_send_failed",
+           "Conversation message send failed (#{format_reason(reason)}).",
+           @message_send_remediation,
+           project_id: project_id,
+           conversation_id: conversation_id
+         )}
+    end
+  end
+
+  defp do_subscribe(project_id, conversation_id, pid) do
+    case Runtime.subscribe_conversation(project_id, conversation_id, pid) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        {:error,
+         Error.build(
+           "code_server_subscription_failed",
+           "Conversation subscription failed (#{format_reason(reason)}).",
+           @subscription_remediation,
+           project_id: project_id,
+           conversation_id: conversation_id
+         )}
+    end
+  end
+
+  defp do_unsubscribe(project_id, conversation_id, pid) do
+    case Runtime.unsubscribe_conversation(project_id, conversation_id, pid) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        {:error,
+         Error.build(
+           "code_server_subscription_failed",
+           "Conversation unsubscription failed (#{format_reason(reason)}).",
+           @subscription_remediation,
+           project_id: project_id,
+           conversation_id: conversation_id
+         )}
+    end
+  end
+
+  defp do_stop_conversation(project_id, conversation_id) do
+    case Runtime.stop_conversation(project_id, conversation_id) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        {:error,
+         Error.build(
+           "code_server_unexpected_error",
+           "Conversation stop failed (#{format_reason(reason)}).",
+           @conversation_control_remediation,
+           project_id: project_id,
+           conversation_id: conversation_id
+         )}
+    end
+  end
+
+  defp build_user_message_event(content, opts) do
+    metadata =
+      opts
+      |> Keyword.get(:meta, %{})
+      |> normalize_map()
+
+    event =
+      %{
+        "type" => "user.message",
+        "data" => %{"content" => content}
+      }
+      |> maybe_put_meta(metadata)
+
+    {:ok, event}
+  end
+
+  defp maybe_put_meta(event, metadata) when map_size(metadata) == 0, do: event
+  defp maybe_put_meta(event, metadata), do: Map.put(event, "meta", metadata)
+
+  defp normalize_conversation_id(conversation_id, project_id, error_type, remediation) do
+    case normalize_optional_string(conversation_id) do
+      nil ->
+        {:error,
+         Error.build(
+           error_type,
+           "Conversation identifier is missing.",
+           remediation,
+           project_id: project_id
+         )}
+
+      normalized_conversation_id ->
+        {:ok, normalized_conversation_id}
+    end
+  end
+
+  defp normalize_message_content(content, project_id, conversation_id) do
+    case normalize_optional_string(content) do
+      nil ->
+        {:error,
+         Error.build(
+           "code_server_message_send_failed",
+           "Message content is missing.",
+           @message_send_remediation,
+           project_id: project_id,
+           conversation_id: conversation_id
+         )}
+
+      normalized_content ->
+        {:ok, normalized_content}
+    end
+  end
+
+  defp lookup_runtime_pid(project_id) do
+    case Engine.whereis_project(project_id) do
+      {:ok, project_pid} -> project_pid
+      {:error, _reason} -> nil
+    end
+  end
+
+  defp runtime_handle(scope, runtime_status, runtime_pid) do
+    %{
+      project_id: scope.project_id,
+      root_path: scope.root_path,
+      project: scope.project,
+      runtime_status: runtime_status,
+      runtime_pid: runtime_pid
+    }
+  end
+
+  defp format_reason(reason) do
+    Exception.message(reason)
+  rescue
+    _exception -> inspect(reason)
+  end
+
+  defp normalize_optional_string(nil), do: nil
+  defp normalize_optional_string(value) when is_boolean(value), do: nil
+
+  defp normalize_optional_string(value) when is_binary(value) do
+    case String.trim(value) do
+      "" -> nil
+      normalized_value -> normalized_value
+    end
+  end
+
+  defp normalize_optional_string(value) when is_atom(value),
+    do: value |> Atom.to_string() |> normalize_optional_string()
+
+  defp normalize_optional_string(value) when is_integer(value), do: Integer.to_string(value)
+  defp normalize_optional_string(value) when is_float(value), do: :erlang.float_to_binary(value)
+  defp normalize_optional_string(_value), do: nil
+
+  defp normalize_map(value) when is_map(value), do: value
+  defp normalize_map(_value), do: %{}
+end
