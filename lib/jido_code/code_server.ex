@@ -3,6 +3,8 @@ defmodule JidoCode.CodeServer do
   Internal facade for project-scoped conversation runtime operations.
   """
 
+  require Logger
+
   alias Jido.Code.Server, as: Runtime
   alias Jido.Code.Server.Engine
   alias JidoCode.CodeServer.Error
@@ -69,8 +71,22 @@ defmodule JidoCode.CodeServer do
 
   @spec ensure_project_runtime(term()) :: {:ok, runtime_handle()} | {:error, Error.typed_error()}
   def ensure_project_runtime(project_id) do
-    with {:ok, scope} <- scope_module().resolve(project_id) do
-      ensure_runtime(scope)
+    normalized_project_id = normalize_optional_string(project_id)
+    log_info("code_server.runtime.ensure.start", project_id: normalized_project_id)
+
+    with {:ok, scope} <- scope_module().resolve(project_id),
+         {:ok, runtime_handle} <- ensure_runtime(scope) do
+      log_info("code_server.runtime.ensure.success",
+        project_id: runtime_handle.project_id,
+        runtime_status: runtime_handle.runtime_status
+      )
+
+      {:ok, runtime_handle}
+    else
+      {:error, typed_error} ->
+        log_typed_error("code_server.runtime.ensure.failure", typed_error, project_id: normalized_project_id)
+
+        {:error, typed_error}
     end
   end
 
@@ -78,32 +94,47 @@ defmodule JidoCode.CodeServer do
   def start_conversation(project_id, opts \\ [])
 
   def start_conversation(project_id, opts) when is_list(opts) do
+    requested_conversation_id = normalize_optional_string(Keyword.get(opts, :conversation_id))
+
     with {:ok, runtime} <- ensure_project_runtime(project_id) do
       case runtime_module().start_conversation(runtime.project_id, opts) do
         {:ok, conversation_id} ->
+          log_info("code_server.conversation.start.success",
+            project_id: runtime.project_id,
+            conversation_id: normalize_optional_string(conversation_id) || requested_conversation_id
+          )
+
           {:ok, conversation_id}
 
         {:error, reason} ->
-          {:error,
-           Error.build(
-             "code_server_conversation_start_failed",
-             "Conversation startup failed (#{format_reason(reason)}).",
-             @conversation_start_remediation,
-             project_id: runtime.project_id,
-             conversation_id: Keyword.get(opts, :conversation_id)
-           )}
+          typed_error =
+            Error.build(
+              "code_server_conversation_start_failed",
+              "Conversation startup failed (#{format_reason(reason)}).",
+              @conversation_start_remediation,
+              project_id: runtime.project_id,
+              conversation_id: requested_conversation_id
+            )
+
+          log_typed_error("code_server.conversation.start.failure", typed_error)
+
+          {:error, typed_error}
       end
     end
   end
 
   def start_conversation(project_id, _opts) do
-    {:error,
-     Error.build(
-       "code_server_conversation_start_failed",
-       "Conversation startup options must be a keyword list.",
-       @conversation_start_remediation,
-       project_id: normalize_optional_string(project_id)
-     )}
+    typed_error =
+      Error.build(
+        "code_server_conversation_start_failed",
+        "Conversation startup options must be a keyword list.",
+        @conversation_start_remediation,
+        project_id: normalize_optional_string(project_id)
+      )
+
+    log_typed_error("code_server.conversation.start.failure", typed_error)
+
+    {:error, typed_error}
   end
 
   @spec send_user_message(term(), term(), term(), keyword()) :: :ok | {:error, Error.typed_error()}
@@ -204,7 +235,20 @@ defmodule JidoCode.CodeServer do
              @conversation_control_remediation
            ),
          :ok <- do_stop_conversation(runtime.project_id, normalized_conversation_id) do
+      log_info("code_server.conversation.stop.success",
+        project_id: runtime.project_id,
+        conversation_id: normalized_conversation_id
+      )
+
       :ok
+    else
+      {:error, typed_error} ->
+        log_typed_error("code_server.conversation.stop.failure", typed_error,
+          project_id: normalize_optional_string(project_id),
+          conversation_id: normalize_optional_string(conversation_id)
+        )
+
+        {:error, typed_error}
     end
   end
 
@@ -252,14 +296,18 @@ defmodule JidoCode.CodeServer do
         :ok
 
       {:error, reason} ->
-        {:error,
-         Error.build(
-           "code_server_message_send_failed",
-           "Conversation message send failed (#{format_reason(reason)}).",
-           @message_send_remediation,
-           project_id: project_id,
-           conversation_id: conversation_id
-         )}
+        typed_error =
+          Error.build(
+            "code_server_message_send_failed",
+            "Conversation message send failed (#{format_reason(reason)}).",
+            @message_send_remediation,
+            project_id: project_id,
+            conversation_id: conversation_id
+          )
+
+        log_typed_error("code_server.message.send.failure", typed_error)
+
+        {:error, typed_error}
     end
   end
 
@@ -269,14 +317,18 @@ defmodule JidoCode.CodeServer do
         :ok
 
       {:error, reason} ->
-        {:error,
-         Error.build(
-           "code_server_subscription_failed",
-           "Conversation subscription failed (#{format_reason(reason)}).",
-           @subscription_remediation,
-           project_id: project_id,
-           conversation_id: conversation_id
-         )}
+        typed_error =
+          Error.build(
+            "code_server_subscription_failed",
+            "Conversation subscription failed (#{format_reason(reason)}).",
+            @subscription_remediation,
+            project_id: project_id,
+            conversation_id: conversation_id
+          )
+
+        log_typed_error("code_server.subscription.failure", typed_error)
+
+        {:error, typed_error}
     end
   end
 
@@ -286,14 +338,18 @@ defmodule JidoCode.CodeServer do
         :ok
 
       {:error, reason} ->
-        {:error,
-         Error.build(
-           "code_server_subscription_failed",
-           "Conversation unsubscription failed (#{format_reason(reason)}).",
-           @subscription_remediation,
-           project_id: project_id,
-           conversation_id: conversation_id
-         )}
+        typed_error =
+          Error.build(
+            "code_server_subscription_failed",
+            "Conversation unsubscription failed (#{format_reason(reason)}).",
+            @subscription_remediation,
+            project_id: project_id,
+            conversation_id: conversation_id
+          )
+
+        log_typed_error("code_server.subscription.failure", typed_error)
+
+        {:error, typed_error}
     end
   end
 
@@ -465,4 +521,49 @@ defmodule JidoCode.CodeServer do
 
   defp normalize_map(value) when is_map(value), do: value
   defp normalize_map(_value), do: %{}
+
+  defp log_info(event, metadata) do
+    normalized_metadata = normalize_log_metadata(metadata)
+    Logger.info(format_log_message(event, normalized_metadata), normalized_metadata)
+  end
+
+  defp log_error(event, metadata) do
+    normalized_metadata = normalize_log_metadata(metadata)
+    Logger.error(format_log_message(event, normalized_metadata), normalized_metadata)
+  end
+
+  defp log_typed_error(event, typed_error, fallback_metadata \\ []) do
+    base_metadata = [
+      project_id: map_get(typed_error, :project_id, "project_id", nil),
+      conversation_id: map_get(typed_error, :conversation_id, "conversation_id", nil),
+      error_type: map_get(typed_error, :error_type, "error_type", "code_server_unexpected_error")
+    ]
+
+    merged_metadata = Keyword.merge(base_metadata, normalize_log_metadata(fallback_metadata))
+    log_error(event, merged_metadata)
+  end
+
+  defp normalize_log_metadata(metadata) when is_list(metadata) do
+    metadata
+    |> Enum.reduce([], fn
+      {key, value}, acc when is_atom(key) and not is_nil(value) -> [{key, value} | acc]
+      _entry, acc -> acc
+    end)
+    |> Enum.reverse()
+  end
+
+  defp normalize_log_metadata(_metadata), do: []
+
+  defp format_log_message(event, metadata) do
+    case format_log_metadata(metadata) do
+      "" -> event
+      rendered_metadata -> event <> " " <> rendered_metadata
+    end
+  end
+
+  defp format_log_metadata(metadata) do
+    metadata
+    |> Enum.map(fn {key, value} -> "#{key}=#{inspect(value)}" end)
+    |> Enum.join(" ")
+  end
 end
