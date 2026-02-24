@@ -3,6 +3,8 @@ defmodule JidoCode.CodeServerTest do
 
   import ExUnit.CaptureLog
 
+  require Logger
+
   alias JidoCode.CodeServer
   alias JidoCode.TestSupport.CodeServer.EngineFake
   alias JidoCode.TestSupport.CodeServer.RuntimeFake
@@ -72,7 +74,7 @@ defmodule JidoCode.CodeServerTest do
     EngineFake.put_default_whereis_response({:ok, self()})
 
     log =
-      capture_log([level: :info], fn ->
+      capture_info_log(fn ->
         assert {:ok, runtime_handle} = CodeServer.ensure_project_runtime("project-log-runtime")
         assert runtime_handle.runtime_status == :reused
       end)
@@ -144,7 +146,7 @@ defmodule JidoCode.CodeServerTest do
     RuntimeFake.put_result(:start_conversation, {:ok, "conversation-log-1"})
 
     log =
-      capture_log([level: :info], fn ->
+      capture_info_log(fn ->
         assert {:ok, "conversation-log-1"} = CodeServer.start_conversation("project-log-conversation")
         assert :ok = CodeServer.stop_conversation("project-log-conversation", "conversation-log-1")
       end)
@@ -261,4 +263,16 @@ defmodule JidoCode.CodeServerTest do
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)
   defp restore_env(key, value), do: Application.put_env(:jido_code, key, value)
+
+  defp capture_info_log(fun) when is_function(fun, 0) do
+    original_level = Logger.level()
+
+    Logger.configure(level: :info)
+
+    try do
+      capture_log(fun)
+    after
+      Logger.configure(level: original_level)
+    end
+  end
 end
