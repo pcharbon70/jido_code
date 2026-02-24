@@ -65,23 +65,40 @@ defmodule JidoCodeWeb.ProjectDetailLive do
 
   @impl true
   def handle_event("start_conversation", _params, socket) do
-    case current_project_id(socket) do
-      {:ok, project_id} ->
-        case CodeServer.start_conversation(project_id) do
-          {:ok, conversation_id} ->
-            case CodeServer.subscribe(project_id, conversation_id, self()) do
-              :ok ->
-                {:noreply,
-                 socket
-                 |> assign(:conversation_ready?, true)
-                 |> assign(:conversation_id, conversation_id)
-                 |> assign(:conversation_messages, [])
-                 |> assign(:conversation_status, :active)
-                 |> assign(:conversation_error, nil)}
+    case conversation_start_block_reason(socket.assigns.project_detail) do
+      %{} = readiness_error ->
+        {:noreply,
+         socket
+         |> assign(:conversation_status, :error)
+         |> assign(:conversation_error, normalize_conversation_error(readiness_error))
+         |> assign(:conversation_ready?, false)
+         |> assign(:conversation_id, nil)}
+
+      nil ->
+        case current_project_id(socket) do
+          {:ok, project_id} ->
+            case CodeServer.start_conversation(project_id) do
+              {:ok, conversation_id} ->
+                case CodeServer.subscribe(project_id, conversation_id, self()) do
+                  :ok ->
+                    {:noreply,
+                     socket
+                     |> assign(:conversation_ready?, true)
+                     |> assign(:conversation_id, conversation_id)
+                     |> assign(:conversation_messages, [])
+                     |> assign(:conversation_status, :active)
+                     |> assign(:conversation_error, nil)}
+
+                  {:error, typed_error} ->
+                    _ = CodeServer.stop_conversation(project_id, conversation_id)
+
+                    {:noreply,
+                     socket
+                     |> assign(:conversation_status, :error)
+                     |> assign(:conversation_error, normalize_conversation_error(typed_error))}
+                end
 
               {:error, typed_error} ->
-                _ = CodeServer.stop_conversation(project_id, conversation_id)
-
                 {:noreply,
                  socket
                  |> assign(:conversation_status, :error)
@@ -94,12 +111,6 @@ defmodule JidoCodeWeb.ProjectDetailLive do
              |> assign(:conversation_status, :error)
              |> assign(:conversation_error, normalize_conversation_error(typed_error))}
         end
-
-      {:error, typed_error} ->
-        {:noreply,
-         socket
-         |> assign(:conversation_status, :error)
-         |> assign(:conversation_error, normalize_conversation_error(typed_error))}
     end
   end
 
@@ -296,6 +307,7 @@ defmodule JidoCodeWeb.ProjectDetailLive do
           id="project-detail-conversation-panel"
           class="space-y-3 rounded-lg border border-base-300 bg-base-200/30 p-4"
         >
+          <% conversation_start_block = conversation_start_block_reason(@project_detail) %>
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h2 id="project-detail-conversation-title" class="font-semibold">Project conversation</h2>
@@ -310,6 +322,25 @@ defmodule JidoCodeWeb.ProjectDetailLive do
               {conversation_status_label(@conversation_status)}
             </span>
           </div>
+
+          <section
+            :if={conversation_start_block}
+            id="project-detail-conversation-disabled-guidance"
+            class="rounded-lg border border-warning/60 bg-warning/10 p-3 space-y-1"
+          >
+            <p id="project-detail-conversation-disabled-label" class="font-semibold">
+              Conversation controls are disabled
+            </p>
+            <p id="project-detail-conversation-disabled-type" class="text-xs">
+              Typed readiness state: {conversation_start_block.error_type}
+            </p>
+            <p id="project-detail-conversation-disabled-detail" class="text-sm">
+              {conversation_start_block.detail}
+            </p>
+            <p id="project-detail-conversation-disabled-remediation" class="text-sm">
+              {conversation_start_block.remediation}
+            </p>
+          </section>
 
           <section
             :if={@conversation_error}
@@ -333,7 +364,7 @@ defmodule JidoCodeWeb.ProjectDetailLive do
               type="button"
               class="btn btn-sm btn-primary"
               phx-click="start_conversation"
-              disabled={@conversation_ready?}
+              disabled={@conversation_ready? or conversation_start_block != nil}
             >
               Start conversation
             </button>
@@ -465,7 +496,7 @@ defmodule JidoCodeWeb.ProjectDetailLive do
     |> assign(:conversation_error, nil)
   end
 
-  defp cleanup_conversation(socket, opts \\ []) do
+  defp cleanup_conversation(socket, opts) do
     stop? = Keyword.get(opts, :stop?, true)
 
     project_id =
@@ -737,6 +768,114 @@ defmodule JidoCodeWeb.ProjectDetailLive do
   defp conversation_message_id do
     "conversation-message-" <> Integer.to_string(System.unique_integer([:positive]))
   end
+
+  defp conversation_start_block_reason(project_detail) when is_map(project_detail) do
+    project_id =
+      project_detail
+      |> map_get(:id, "id")
+      |> normalize_optional_string()
+
+    cond do
+      not project_ready_for_launch?(project_detail) ->
+        readiness = project_readiness(project_detail)
+
+        conversation_error(
+          normalize_optional_string(map_get(readiness, :error_type, "error_type")) ||
+            "code_server_workspace_unavailable",
+          normalize_optional_string(map_get(readiness, :detail, "detail")) ||
+            "Project workspace prerequisites are incomplete for conversation runtime.",
+          normalize_optional_string(map_get(readiness, :remediation, "remediation")) ||
+            "Complete project import and baseline sync, then retry the conversation action.",
+          project_id: project_id
+        )
+
+      true ->
+        workspace_settings = conversation_workspace_settings(project_detail)
+
+        case normalize_workspace_environment(
+               map_get(workspace_settings, :workspace_environment, "workspace_environment")
+             ) do
+          :local ->
+            conversation_workspace_path_block_reason(workspace_settings, project_id)
+
+          :sprite ->
+            conversation_error(
+              "code_server_workspace_environment_unsupported",
+              "Project workspace environment is sprite/cloud and cannot run local conversations.",
+              "Switch the project workspace environment to local and rerun baseline sync before starting a conversation.",
+              project_id: project_id
+            )
+
+          :unknown ->
+            conversation_error(
+              "code_server_workspace_environment_unsupported",
+              "Project workspace environment is unavailable or unsupported.",
+              "Switch the project workspace environment to local and rerun baseline sync before starting a conversation.",
+              project_id: project_id
+            )
+        end
+    end
+  end
+
+  defp conversation_start_block_reason(_project_detail) do
+    conversation_error(
+      "code_server_project_not_found",
+      "Project context is unavailable.",
+      "Open an imported project and retry the conversation action."
+    )
+  end
+
+  defp conversation_workspace_settings(project_detail) do
+    project_detail
+    |> map_get(:settings, "settings", %{})
+    |> normalize_map()
+    |> map_get(:workspace, "workspace", %{})
+    |> normalize_map()
+  end
+
+  defp conversation_workspace_path_block_reason(workspace_settings, project_id) do
+    case workspace_settings
+         |> map_get(:workspace_path, "workspace_path")
+         |> normalize_optional_string() do
+      nil ->
+        conversation_error(
+          "code_server_workspace_unavailable",
+          "Local workspace path is missing from project settings.",
+          "Complete project import and baseline sync, then ensure a local absolute workspace path is available.",
+          project_id: project_id
+        )
+
+      workspace_path ->
+        cond do
+          Path.type(workspace_path) != :absolute ->
+            conversation_error(
+              "code_server_workspace_unavailable",
+              "Workspace path must be absolute: #{workspace_path}.",
+              "Update project workspace settings to use an absolute local path, then retry.",
+              project_id: project_id
+            )
+
+          not File.dir?(workspace_path) ->
+            conversation_error(
+              "code_server_workspace_unavailable",
+              "Workspace path does not exist on disk: #{workspace_path}.",
+              "Re-import the project workspace or correct the workspace path, then retry.",
+              project_id: project_id
+            )
+
+          true ->
+            nil
+        end
+    end
+  end
+
+  defp normalize_workspace_environment(:local), do: :local
+  defp normalize_workspace_environment("local"), do: :local
+  defp normalize_workspace_environment(:sprite), do: :sprite
+  defp normalize_workspace_environment("sprite"), do: :sprite
+  defp normalize_workspace_environment(:cloud), do: :sprite
+  defp normalize_workspace_environment("cloud"), do: :sprite
+  defp normalize_workspace_environment(_other), do: :unknown
 
   defp project_ready_for_launch?(project_detail) do
     ProjectDetail.ready_for_execution?(project_detail)

@@ -217,6 +217,10 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
            )
 
     assert has_element?(view, "#project-detail-launch-disabled-remediation", "Retry step 7")
+    assert has_element?(view, "#project-detail-conversation-disabled-guidance")
+    assert has_element?(view, "#project-detail-conversation-start[disabled]", "Start conversation")
+    assert has_element?(view, "#project-detail-conversation-disabled-type", "baseline_sync_unavailable")
+    assert has_element?(view, "#project-detail-conversation-disabled-remediation", "Retry step 7")
 
     refute has_element?(view, "#project-detail-launch-fix-failing-tests")
     refute has_element?(view, "#project-detail-launch-issue-triage")
@@ -230,6 +234,8 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
     {authed_conn, _session_token} =
       authenticate_owner_conn("owner@example.com", "owner-password-123")
 
+    workspace_path = create_workspace_path!()
+
     {:ok, project} =
       Project.create(%{
         name: "repo-conversation-ui",
@@ -237,6 +243,8 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
         default_branch: "main",
         settings: %{
           "workspace" => %{
+            "workspace_environment" => "local",
+            "workspace_path" => workspace_path,
             "clone_status" => "ready",
             "workspace_initialized" => true,
             "baseline_synced" => true
@@ -248,10 +256,12 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
 
     assert has_element?(view, "#project-detail-conversation-panel")
     assert has_element?(view, "#project-detail-conversation-start", "Start conversation")
+    refute has_element?(view, "#project-detail-conversation-start[disabled]")
     assert has_element?(view, "#project-detail-conversation-stop[disabled]", "Stop conversation")
     assert has_element?(view, "#project-detail-conversation-send[disabled]", "Send")
     assert has_element?(view, "#project-detail-conversation-status", "Idle")
     assert has_element?(view, "#project-detail-conversation-empty", "No conversation messages yet.")
+    refute has_element?(view, "#project-detail-conversation-disabled-guidance")
   end
 
   test "shows typed conversation error when project workspace environment is unsupported", %{conn: _conn} do
@@ -277,23 +287,49 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
 
     {:ok, view, _html} = live(recycle(authed_conn), ~p"/projects/#{project.id}", on_error: :warn)
 
-    view
-    |> element("#project-detail-conversation-start")
-    |> render_click()
-
-    assert has_element?(view, "#project-detail-conversation-status", "Error")
+    assert has_element?(view, "#project-detail-conversation-start[disabled]", "Start conversation")
+    assert has_element?(view, "#project-detail-conversation-disabled-guidance")
 
     assert has_element?(
              view,
-             "#project-detail-conversation-error-type",
+             "#project-detail-conversation-disabled-type",
              "code_server_workspace_environment_unsupported"
            )
 
     assert has_element?(
              view,
-             "#project-detail-conversation-error-remediation",
+             "#project-detail-conversation-disabled-remediation",
              "Switch the project workspace environment to local"
            )
+  end
+
+  test "disables conversation controls when local workspace path is missing", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-conversation-missing-workspace-path",
+        github_full_name: "owner/repo-conversation-missing-workspace-path",
+        default_branch: "main",
+        settings: %{
+          "workspace" => %{
+            "workspace_environment" => "local",
+            "clone_status" => "ready",
+            "workspace_initialized" => true,
+            "baseline_synced" => true
+          }
+        }
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/projects/#{project.id}", on_error: :warn)
+
+    assert has_element?(view, "#project-detail-conversation-start[disabled]", "Start conversation")
+    assert has_element?(view, "#project-detail-conversation-disabled-guidance")
+    assert has_element?(view, "#project-detail-conversation-disabled-type", "code_server_workspace_unavailable")
+    assert has_element?(view, "#project-detail-conversation-disabled-detail", "workspace path is missing")
   end
 
   defp register_owner(email, password) do
@@ -358,4 +394,16 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)
   defp restore_env(key, value), do: Application.put_env(:jido_code, key, value)
+
+  defp create_workspace_path! do
+    workspace_path =
+      Path.join(
+        System.tmp_dir!(),
+        "jido-code-project-workspace-#{System.unique_integer([:positive])}"
+      )
+
+    File.mkdir_p!(workspace_path)
+    on_exit(fn -> File.rm_rf(workspace_path) end)
+    workspace_path
+  end
 end
