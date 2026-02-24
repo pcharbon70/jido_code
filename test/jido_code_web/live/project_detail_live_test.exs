@@ -6,6 +6,8 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
   alias AshAuthentication.{Info, Strategy}
   alias JidoCode.Accounts.User
   alias JidoCode.Projects.Project
+  alias JidoCode.TestSupport.CodeServer.EngineFake
+  alias JidoCode.TestSupport.CodeServer.RuntimeFake
 
   setup do
     original_fix_workflow_launcher =
@@ -14,6 +16,12 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
     original_issue_triage_workflow_launcher =
       Application.get_env(:jido_code, :workbench_issue_triage_workflow_launcher, :__missing__)
 
+    original_code_server_runtime_module =
+      Application.get_env(:jido_code, :code_server_runtime_module, :__missing__)
+
+    original_code_server_engine_module =
+      Application.get_env(:jido_code, :code_server_engine_module, :__missing__)
+
     on_exit(fn ->
       restore_env(:workbench_fix_workflow_launcher, original_fix_workflow_launcher)
 
@@ -21,6 +29,9 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
         :workbench_issue_triage_workflow_launcher,
         original_issue_triage_workflow_launcher
       )
+
+      restore_env(:code_server_runtime_module, original_code_server_runtime_module)
+      restore_env(:code_server_engine_module, original_code_server_engine_module)
     end)
 
     :ok
@@ -262,6 +273,60 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
     assert has_element?(view, "#project-detail-conversation-status", "Idle")
     assert has_element?(view, "#project-detail-conversation-empty", "No conversation messages yet.")
     refute has_element?(view, "#project-detail-conversation-disabled-guidance")
+  end
+
+  test "supports conversation start send and stop lifecycle in project detail", %{conn: _conn} do
+    Application.put_env(:jido_code, :code_server_runtime_module, RuntimeFake)
+    Application.put_env(:jido_code, :code_server_engine_module, EngineFake)
+
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    workspace_path = create_workspace_path!()
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-conversation-lifecycle",
+        github_full_name: "owner/repo-conversation-lifecycle",
+        default_branch: "main",
+        settings: %{
+          "workspace" => %{
+            "workspace_environment" => "local",
+            "workspace_path" => workspace_path,
+            "clone_status" => "ready",
+            "workspace_initialized" => true,
+            "baseline_synced" => true
+          }
+        }
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/projects/#{project.id}", on_error: :warn)
+
+    view
+    |> element("#project-detail-conversation-start")
+    |> render_click()
+
+    assert has_element?(view, "#project-detail-conversation-status", "Active")
+    assert has_element?(view, "#project-detail-conversation-start[disabled]", "Start conversation")
+    refute has_element?(view, "#project-detail-conversation-stop[disabled]")
+    refute has_element?(view, "#project-detail-conversation-send[disabled]")
+
+    view
+    |> form("#project-detail-conversation-form", %{"conversation" => %{"input" => "hello"}})
+    |> render_submit()
+
+    assert has_element?(view, "#project-detail-conversation-messages", "hello")
+    assert has_element?(view, "#project-detail-conversation-messages", "Ack: hello")
+
+    view
+    |> element("#project-detail-conversation-stop")
+    |> render_click()
+
+    assert has_element?(view, "#project-detail-conversation-status", "Stopped")
+    assert has_element?(view, "#project-detail-conversation-send[disabled]", "Send")
+    assert has_element?(view, "#project-detail-conversation-empty", "No conversation messages yet.")
   end
 
   test "shows typed conversation error when project workspace environment is unsupported", %{conn: _conn} do

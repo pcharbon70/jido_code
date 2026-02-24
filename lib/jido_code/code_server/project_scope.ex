@@ -49,7 +49,7 @@ defmodule JidoCode.CodeServer.ProjectScope do
   end
 
   defp fetch_project(project_id) do
-    case Project.read(query: [filter: [id: project_id], limit: 1]) do
+    case project_reader_module().read(query: [filter: [id: project_id], limit: 1]) do
       {:ok, [project | _rest]} ->
         {:ok, project}
 
@@ -71,6 +71,10 @@ defmodule JidoCode.CodeServer.ProjectScope do
            project_id: project_id
          )}
     end
+  end
+
+  defp project_reader_module do
+    Application.get_env(:jido_code, :code_server_project_reader_module, Project)
   end
 
   defp resolve_workspace_root(project, project_id) when is_map(project) do
