@@ -135,6 +135,7 @@ defmodule JidoCode.MixProject do
       {:libgraph, github: "zblanco/libgraph", branch: "zw/multigraph-indexes", override: true},
       {:jido_studio, github: "agentjido/jido_studio", branch: "main"},
       {:jido_messaging, github: "agentjido/jido_messaging", branch: "main"},
+      {:jido_code_server, git: "https://github.com/pcharbon70/jido_code_server.git", branch: "main"},
       {:req_llm, "~> 1.4", override: true},
       {:timex, "~> 3.7", override: true},
       {:gettext, "~> 0.26", override: true},
