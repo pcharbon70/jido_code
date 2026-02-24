@@ -11,7 +11,7 @@ defmodule JidoCode.CodeServer.ProjectScope do
   """
 
   @workspace_unavailable_remediation """
-  Complete project import and local workspace setup so an absolute workspace path is available.
+  Complete project import and baseline sync, then ensure a local absolute workspace path is available.
   """
 
   @workspace_environment_unsupported_remediation """
@@ -84,31 +84,33 @@ defmodule JidoCode.CodeServer.ProjectScope do
       |> map_get(:workspace, "workspace", %{})
       |> normalize_map()
 
-    case normalize_workspace_environment(
-           map_get(workspace_settings, :workspace_environment, "workspace_environment", nil)
-         ) do
-      :local ->
-        workspace_settings
-        |> map_get(:workspace_path, "workspace_path", nil)
-        |> validate_workspace_path(project_id)
+    with :ok <- validate_workspace_readiness(workspace_settings, project_id) do
+      case normalize_workspace_environment(
+             map_get(workspace_settings, :workspace_environment, "workspace_environment", nil)
+           ) do
+        :local ->
+          workspace_settings
+          |> map_get(:workspace_path, "workspace_path", nil)
+          |> validate_workspace_path(project_id)
 
-      :sprite ->
-        {:error,
-         Error.build(
-           "code_server_workspace_environment_unsupported",
-           "Project workspace environment is sprite/cloud and cannot run local conversations.",
-           @workspace_environment_unsupported_remediation,
-           project_id: project_id
-         )}
+        :sprite ->
+          {:error,
+           Error.build(
+             "code_server_workspace_environment_unsupported",
+             "Project workspace environment is sprite/cloud and cannot run local conversations.",
+             @workspace_environment_unsupported_remediation,
+             project_id: project_id
+           )}
 
-      :unknown ->
-        {:error,
-         Error.build(
-           "code_server_workspace_environment_unsupported",
-           "Project workspace environment is unavailable or unsupported.",
-           @workspace_environment_unsupported_remediation,
-           project_id: project_id
-         )}
+        :unknown ->
+          {:error,
+           Error.build(
+             "code_server_workspace_environment_unsupported",
+             "Project workspace environment is unavailable or unsupported.",
+             @workspace_environment_unsupported_remediation,
+             project_id: project_id
+           )}
+      end
     end
   end
 
@@ -158,6 +160,85 @@ defmodule JidoCode.CodeServer.ProjectScope do
     end
   end
 
+  defp validate_workspace_readiness(workspace_settings, project_id) when is_map(workspace_settings) do
+    clone_status =
+      workspace_settings
+      |> map_get(:clone_status, "clone_status")
+      |> normalize_clone_status()
+
+    workspace_initialized? =
+      workspace_settings
+      |> map_get(:workspace_initialized, "workspace_initialized", false)
+      |> truthy?()
+
+    baseline_synced? =
+      workspace_settings
+      |> map_get(:baseline_synced, "baseline_synced", false)
+      |> truthy?()
+
+    if clone_status == :ready and workspace_initialized? and baseline_synced? do
+      :ok
+    else
+      retry_instructions =
+        workspace_settings
+        |> map_get(:retry_instructions, "retry_instructions")
+        |> normalize_optional_string()
+
+      workspace_error_type =
+        workspace_settings
+        |> map_get(:last_error_type, "last_error_type")
+        |> normalize_optional_string()
+
+      detail =
+        clone_status
+        |> blocked_readiness_detail(workspace_initialized?, baseline_synced?)
+        |> append_workspace_error_type(workspace_error_type)
+
+      {:error,
+       Error.build(
+         "code_server_workspace_unavailable",
+         detail,
+         retry_instructions || @workspace_unavailable_remediation,
+         project_id: project_id
+       )}
+    end
+  end
+
+  defp validate_workspace_readiness(_workspace_settings, project_id) do
+    {:error,
+     Error.build(
+       "code_server_workspace_unavailable",
+       "Project workspace metadata is unavailable.",
+       @workspace_unavailable_remediation,
+       project_id: project_id
+     )}
+  end
+
+  defp blocked_readiness_detail(:ready, _workspace_initialized?, _baseline_synced?) do
+    "Project workspace metadata is incomplete for conversations."
+  end
+
+  defp blocked_readiness_detail(:cloning, _workspace_initialized?, _baseline_synced?) do
+    "Project workspace clone is still running."
+  end
+
+  defp blocked_readiness_detail(:pending, _workspace_initialized?, _baseline_synced?) do
+    "Project workspace import has not completed yet."
+  end
+
+  defp blocked_readiness_detail(:error, _workspace_initialized?, _baseline_synced?) do
+    "Project workspace clone or baseline sync failed."
+  end
+
+  defp blocked_readiness_detail(_clone_status, _workspace_initialized?, _baseline_synced?) do
+    "Project workspace prerequisites are incomplete for conversation runtime."
+  end
+
+  defp append_workspace_error_type(detail, nil), do: detail
+
+  defp append_workspace_error_type(detail, workspace_error_type),
+    do: "#{detail} (workspace error: #{workspace_error_type})."
+
   defp normalize_workspace_environment(:local), do: :local
   defp normalize_workspace_environment("local"), do: :local
   defp normalize_workspace_environment(:sprite), do: :sprite
@@ -165,6 +246,23 @@ defmodule JidoCode.CodeServer.ProjectScope do
   defp normalize_workspace_environment(:cloud), do: :sprite
   defp normalize_workspace_environment("cloud"), do: :sprite
   defp normalize_workspace_environment(_other), do: :unknown
+
+  defp normalize_clone_status(:pending), do: :pending
+  defp normalize_clone_status(:cloning), do: :cloning
+  defp normalize_clone_status(:ready), do: :ready
+  defp normalize_clone_status(:error), do: :error
+  defp normalize_clone_status("pending"), do: :pending
+  defp normalize_clone_status("cloning"), do: :cloning
+  defp normalize_clone_status("ready"), do: :ready
+  defp normalize_clone_status("error"), do: :error
+  defp normalize_clone_status(_clone_status), do: nil
+
+  defp truthy?(true), do: true
+  defp truthy?("true"), do: true
+  defp truthy?("TRUE"), do: true
+  defp truthy?("1"), do: true
+  defp truthy?(1), do: true
+  defp truthy?(_value), do: false
 
   defp format_reason(reason) do
     Exception.message(reason)
@@ -192,7 +290,7 @@ defmodule JidoCode.CodeServer.ProjectScope do
   defp normalize_map(value) when is_map(value), do: value
   defp normalize_map(_value), do: %{}
 
-  defp map_get(map, atom_key, string_key, default)
+  defp map_get(map, atom_key, string_key, default \\ nil)
 
   defp map_get(map, atom_key, string_key, default) when is_map(map) do
     cond do
