@@ -69,7 +69,7 @@ defmodule JidoCode.CodeServer do
 
   @spec ensure_project_runtime(term()) :: {:ok, runtime_handle()} | {:error, Error.typed_error()}
   def ensure_project_runtime(project_id) do
-    with {:ok, scope} <- ProjectScope.resolve(project_id) do
+    with {:ok, scope} <- scope_module().resolve(project_id) do
       ensure_runtime(scope)
     end
   end
@@ -79,7 +79,7 @@ defmodule JidoCode.CodeServer do
 
   def start_conversation(project_id, opts) when is_list(opts) do
     with {:ok, runtime} <- ensure_project_runtime(project_id) do
-      case Runtime.start_conversation(runtime.project_id, opts) do
+      case runtime_module().start_conversation(runtime.project_id, opts) do
         {:ok, conversation_id} ->
           {:ok, conversation_id}
 
@@ -209,7 +209,7 @@ defmodule JidoCode.CodeServer do
   end
 
   defp ensure_runtime(%{project_id: project_id} = scope) do
-    case Engine.whereis_project(project_id) do
+    case engine_module().whereis_project(project_id) do
       {:ok, project_pid} ->
         {:ok, runtime_handle(scope, :reused, project_pid)}
 
@@ -228,7 +228,7 @@ defmodule JidoCode.CodeServer do
   end
 
   defp start_runtime(%{project_id: project_id, root_path: root_path} = scope) do
-    case Runtime.start_project(root_path, start_project_opts(project_id)) do
+    case runtime_module().start_project(root_path, start_project_opts(project_id)) do
       {:ok, _started_project_id} ->
         {:ok, runtime_handle(scope, :started, lookup_runtime_pid(project_id))}
 
@@ -247,7 +247,7 @@ defmodule JidoCode.CodeServer do
   end
 
   defp dispatch_user_message(project_id, conversation_id, event) do
-    case Runtime.send_event(project_id, conversation_id, event) do
+    case runtime_module().send_event(project_id, conversation_id, event) do
       :ok ->
         :ok
 
@@ -264,7 +264,7 @@ defmodule JidoCode.CodeServer do
   end
 
   defp do_subscribe(project_id, conversation_id, pid) do
-    case Runtime.subscribe_conversation(project_id, conversation_id, pid) do
+    case runtime_module().subscribe_conversation(project_id, conversation_id, pid) do
       :ok ->
         :ok
 
@@ -281,7 +281,7 @@ defmodule JidoCode.CodeServer do
   end
 
   defp do_unsubscribe(project_id, conversation_id, pid) do
-    case Runtime.unsubscribe_conversation(project_id, conversation_id, pid) do
+    case runtime_module().unsubscribe_conversation(project_id, conversation_id, pid) do
       :ok ->
         :ok
 
@@ -298,7 +298,7 @@ defmodule JidoCode.CodeServer do
   end
 
   defp do_stop_conversation(project_id, conversation_id) do
-    case Runtime.stop_conversation(project_id, conversation_id) do
+    case runtime_module().stop_conversation(project_id, conversation_id) do
       :ok ->
         :ok
 
@@ -402,10 +402,22 @@ defmodule JidoCode.CodeServer do
   end
 
   defp lookup_runtime_pid(project_id) do
-    case Engine.whereis_project(project_id) do
+    case engine_module().whereis_project(project_id) do
       {:ok, project_pid} -> project_pid
       {:error, _reason} -> nil
     end
+  end
+
+  defp scope_module do
+    Application.get_env(:jido_code, :code_server_project_scope_module, ProjectScope)
+  end
+
+  defp runtime_module do
+    Application.get_env(:jido_code, :code_server_runtime_module, Runtime)
+  end
+
+  defp engine_module do
+    Application.get_env(:jido_code, :code_server_engine_module, Engine)
   end
 
   defp runtime_handle(scope, runtime_status, runtime_pid) do
