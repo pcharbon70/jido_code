@@ -1,6 +1,8 @@
 defmodule JidoCode.CodeServerTest do
   use ExUnit.Case, async: false
 
+  import ExUnit.CaptureLog
+
   alias JidoCode.CodeServer
   alias JidoCode.TestSupport.CodeServer.EngineFake
   alias JidoCode.TestSupport.CodeServer.RuntimeFake
@@ -57,6 +59,30 @@ defmodule JidoCode.CodeServerTest do
     assert EngineFake.whereis_calls() == ["project-lazy-start", "project-lazy-start"]
   end
 
+  test "ensure_project_runtime logs start and success with project metadata" do
+    ScopeFake.put_resolve_result(
+      {:ok,
+       %{
+         project_id: "project-log-runtime",
+         root_path: "/tmp/project-log-runtime",
+         project: %{id: "project-log-runtime"}
+       }}
+    )
+
+    EngineFake.put_default_whereis_response({:ok, self()})
+
+    log =
+      capture_log([level: :info], fn ->
+        assert {:ok, runtime_handle} = CodeServer.ensure_project_runtime("project-log-runtime")
+        assert runtime_handle.runtime_status == :reused
+      end)
+
+    assert log =~ "code_server.runtime.ensure.start"
+    assert log =~ "project_id=\"project-log-runtime\""
+    assert log =~ "code_server.runtime.ensure.success"
+    assert log =~ "runtime_status=:reused"
+  end
+
   test "ensure_project_runtime reuses existing runtime when already registered" do
     ScopeFake.put_resolve_result(
       {:ok,
@@ -104,6 +130,31 @@ defmodule JidoCode.CodeServerTest do
     assert get_in(event, ["meta", "source"]) == "unit-test"
   end
 
+  test "start_conversation and stop_conversation emit observability logs" do
+    ScopeFake.put_resolve_result(
+      {:ok,
+       %{
+         project_id: "project-log-conversation",
+         root_path: "/tmp/project-log-conversation",
+         project: %{id: "project-log-conversation"}
+       }}
+    )
+
+    EngineFake.put_default_whereis_response({:ok, self()})
+    RuntimeFake.put_result(:start_conversation, {:ok, "conversation-log-1"})
+
+    log =
+      capture_log([level: :info], fn ->
+        assert {:ok, "conversation-log-1"} = CodeServer.start_conversation("project-log-conversation")
+        assert :ok = CodeServer.stop_conversation("project-log-conversation", "conversation-log-1")
+      end)
+
+    assert log =~ "code_server.conversation.start.success"
+    assert log =~ "code_server.conversation.stop.success"
+    assert log =~ "project_id=\"project-log-conversation\""
+    assert log =~ "conversation_id=\"conversation-log-1\""
+  end
+
   test "send_user_message returns typed error when content is empty" do
     ScopeFake.put_resolve_result(
       {:ok,
@@ -143,10 +194,69 @@ defmodule JidoCode.CodeServerTest do
     assert typed_error.detail =~ "boom"
   end
 
+  test "send_user_message logs failure with typed error metadata and no payload content" do
+    ScopeFake.put_resolve_result(
+      {:ok,
+       %{
+         project_id: "project-log-send-failure",
+         root_path: "/tmp/project-log-send-failure",
+         project: %{id: "project-log-send-failure"}
+       }}
+    )
+
+    EngineFake.put_default_whereis_response({:ok, self()})
+    RuntimeFake.put_result(:send_event, {:error, :boom})
+
+    log =
+      capture_log(fn ->
+        assert {:error, typed_error} =
+                 CodeServer.send_user_message(
+                   "project-log-send-failure",
+                   "conversation-log-2",
+                   "do not log this content"
+                 )
+
+        assert typed_error.error_type == "code_server_message_send_failed"
+      end)
+
+    assert log =~ "code_server.message.send.failure"
+    assert log =~ "project_id=\"project-log-send-failure\""
+    assert log =~ "conversation_id=\"conversation-log-2\""
+    assert log =~ "error_type=\"code_server_message_send_failed\""
+    refute log =~ "do not log this content"
+  end
+
   test "subscribe returns typed error when pid is invalid" do
     assert {:error, typed_error} = CodeServer.subscribe("project-invalid-pid", "conversation-1", :not_a_pid)
     assert typed_error.error_type == "code_server_subscription_failed"
     assert typed_error.detail =~ "subscriber must be a live process identifier"
+  end
+
+  test "subscribe logs failure with error_type metadata" do
+    ScopeFake.put_resolve_result(
+      {:ok,
+       %{
+         project_id: "project-log-subscribe",
+         root_path: "/tmp/project-log-subscribe",
+         project: %{id: "project-log-subscribe"}
+       }}
+    )
+
+    EngineFake.put_default_whereis_response({:ok, self()})
+    RuntimeFake.put_result(:subscribe_conversation, {:error, :boom})
+
+    log =
+      capture_log(fn ->
+        assert {:error, typed_error} =
+                 CodeServer.subscribe("project-log-subscribe", "conversation-log-3", self())
+
+        assert typed_error.error_type == "code_server_subscription_failed"
+      end)
+
+    assert log =~ "code_server.subscription.failure"
+    assert log =~ "project_id=\"project-log-subscribe\""
+    assert log =~ "conversation_id=\"conversation-log-3\""
+    assert log =~ "error_type=\"code_server_subscription_failed\""
   end
 
   defp restore_env(key, :__missing__), do: Application.delete_env(:jido_code, key)
