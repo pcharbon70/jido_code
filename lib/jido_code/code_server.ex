@@ -28,6 +28,35 @@ defmodule JidoCode.CodeServer do
   Retry the conversation control action. If this persists, restart the project runtime.
   """
 
+  @runtime_optional_config_keys [
+    :llm_adapter,
+    :llm_model,
+    :llm_system_prompt,
+    :llm_temperature,
+    :llm_max_tokens,
+    :tool_timeout_ms,
+    :tool_timeout_alert_threshold,
+    :tool_max_output_bytes,
+    :tool_max_artifact_bytes,
+    :tool_max_concurrency,
+    :tool_max_concurrency_per_conversation,
+    :llm_timeout_ms,
+    :watcher,
+    :watcher_debounce_ms,
+    :strict_asset_loading,
+    :allow_tools,
+    :deny_tools,
+    :network_egress_policy,
+    :network_allowlist,
+    :network_allowed_schemes,
+    :sensitive_path_denylist,
+    :sensitive_path_allowlist,
+    :outside_root_allowlist,
+    :tool_env_allowlist,
+    :protocol_allowlist,
+    :command_executor
+  ]
+
   @type runtime_status :: :started | :reused
 
   @type runtime_handle :: %{
@@ -199,7 +228,7 @@ defmodule JidoCode.CodeServer do
   end
 
   defp start_runtime(%{project_id: project_id, root_path: root_path} = scope) do
-    case Runtime.start_project(root_path, project_id: project_id) do
+    case Runtime.start_project(root_path, start_project_opts(project_id)) do
       {:ok, _started_project_id} ->
         {:ok, runtime_handle(scope, :started, lookup_runtime_pid(project_id))}
 
@@ -301,6 +330,41 @@ defmodule JidoCode.CodeServer do
     {:ok, event}
   end
 
+  defp start_project_opts(project_id) do
+    config = code_server_config()
+
+    base_opts = [
+      project_id: project_id,
+      data_dir: map_get(config, :data_dir, "data_dir", ".jido"),
+      conversation_orchestration: map_get(config, :conversation_orchestration, "conversation_orchestration", true)
+    ]
+
+    Enum.reduce(@runtime_optional_config_keys, base_opts, fn key, acc ->
+      case config_fetch(config, key) do
+        {:ok, value} -> Keyword.put(acc, key, value)
+        :error -> acc
+      end
+    end)
+  end
+
+  defp code_server_config do
+    :jido_code
+    |> Application.get_env(:code_server, %{})
+    |> normalize_map()
+  end
+
+  defp config_fetch(config, key) when is_map(config) and is_atom(key) do
+    string_key = Atom.to_string(key)
+
+    cond do
+      Map.has_key?(config, key) -> {:ok, Map.get(config, key)}
+      Map.has_key?(config, string_key) -> {:ok, Map.get(config, string_key)}
+      true -> :error
+    end
+  end
+
+  defp config_fetch(_config, _key), do: :error
+
   defp maybe_put_meta(event, metadata) when map_size(metadata) == 0, do: event
   defp maybe_put_meta(event, metadata), do: Map.put(event, "meta", metadata)
 
@@ -376,6 +440,16 @@ defmodule JidoCode.CodeServer do
   defp normalize_optional_string(value) when is_integer(value), do: Integer.to_string(value)
   defp normalize_optional_string(value) when is_float(value), do: :erlang.float_to_binary(value)
   defp normalize_optional_string(_value), do: nil
+
+  defp map_get(map, atom_key, string_key, default) when is_map(map) do
+    cond do
+      Map.has_key?(map, atom_key) -> Map.get(map, atom_key)
+      Map.has_key?(map, string_key) -> Map.get(map, string_key)
+      true -> default
+    end
+  end
+
+  defp map_get(_map, _atom_key, _string_key, default), do: default
 
   defp normalize_map(value) when is_map(value), do: value
   defp normalize_map(_value), do: %{}
