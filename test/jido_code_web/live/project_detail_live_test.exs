@@ -224,6 +224,78 @@ defmodule JidoCodeWeb.ProjectDetailLiveTest do
     assert %{fix: 0, triage: 0} = Agent.get(launcher_invocations, & &1)
   end
 
+  test "renders project conversation panel controls in project detail", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-conversation-ui",
+        github_full_name: "owner/repo-conversation-ui",
+        default_branch: "main",
+        settings: %{
+          "workspace" => %{
+            "clone_status" => "ready",
+            "workspace_initialized" => true,
+            "baseline_synced" => true
+          }
+        }
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/projects/#{project.id}", on_error: :warn)
+
+    assert has_element?(view, "#project-detail-conversation-panel")
+    assert has_element?(view, "#project-detail-conversation-start", "Start conversation")
+    assert has_element?(view, "#project-detail-conversation-stop[disabled]", "Stop conversation")
+    assert has_element?(view, "#project-detail-conversation-send[disabled]", "Send")
+    assert has_element?(view, "#project-detail-conversation-status", "Idle")
+    assert has_element?(view, "#project-detail-conversation-empty", "No conversation messages yet.")
+  end
+
+  test "shows typed conversation error when project workspace environment is unsupported", %{conn: _conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    {authed_conn, _session_token} =
+      authenticate_owner_conn("owner@example.com", "owner-password-123")
+
+    {:ok, project} =
+      Project.create(%{
+        name: "repo-conversation-blocked",
+        github_full_name: "owner/repo-conversation-blocked",
+        default_branch: "main",
+        settings: %{
+          "workspace" => %{
+            "workspace_environment" => "sprite",
+            "clone_status" => "ready",
+            "workspace_initialized" => true,
+            "baseline_synced" => true
+          }
+        }
+      })
+
+    {:ok, view, _html} = live(recycle(authed_conn), ~p"/projects/#{project.id}", on_error: :warn)
+
+    view
+    |> element("#project-detail-conversation-start")
+    |> render_click()
+
+    assert has_element?(view, "#project-detail-conversation-status", "Error")
+
+    assert has_element?(
+             view,
+             "#project-detail-conversation-error-type",
+             "code_server_workspace_environment_unsupported"
+           )
+
+    assert has_element?(
+             view,
+             "#project-detail-conversation-error-remediation",
+             "Switch the project workspace environment to local"
+           )
+  end
+
   defp register_owner(email, password) do
     strategy = Info.strategy!(User, :password)
 
