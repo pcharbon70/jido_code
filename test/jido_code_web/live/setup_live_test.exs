@@ -436,6 +436,68 @@ defmodule JidoCodeWeb.SetupLiveTest do
     refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "2")
   end
 
+  test "step 2 recovery requires a verification phrase before credential reset", %{conn: conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 2,
+      onboarding_state: %{"1" => %{"validated_note" => "Prerequisite checks passed"}}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#setup-owner-recovery-form", %{
+      "owner_recovery" => %{
+        "email" => "owner@example.com",
+        "password" => "owner-recovered-password-789",
+        "password_confirmation" => "owner-recovered-password-789",
+        "verification_phrase" => "",
+        "verification_ack" => "true"
+      }
+    })
+    |> render_submit()
+
+    html = render(view)
+    assert has_element?(view, "#setup-save-error", "verification phrase")
+    refute html =~ "Bread Crumbs"
+
+    assert_owner_count(1)
+    assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
+  end
+
+  test "step 2 recovery requires explicit acknowledgement before credential reset", %{conn: conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 2,
+      onboarding_state: %{"1" => %{"validated_note" => "Prerequisite checks passed"}}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#setup-owner-recovery-form", %{
+      "owner_recovery" => %{
+        "email" => "owner@example.com",
+        "password" => "owner-recovered-password-789",
+        "password_confirmation" => "owner-recovered-password-789",
+        "verification_phrase" => "RECOVER OWNER ACCESS",
+        "verification_ack" => "false"
+      }
+    })
+    |> render_submit()
+
+    html = render(view)
+    assert has_element?(view, "#setup-save-error", "explicit recovery acknowledgement")
+    refute html =~ "Bread Crumbs"
+
+    assert_owner_count(1)
+    assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
+  end
+
   test "step 2 blocks additional owner creation attempts with a single-user policy error", %{
     conn: conn
   } do
