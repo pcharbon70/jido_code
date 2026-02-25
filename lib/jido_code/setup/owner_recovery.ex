@@ -17,6 +17,7 @@ defmodule JidoCode.Setup.OwnerRecovery do
   @password_confirmation_error "Owner recovery requires matching password confirmation."
   @verification_phrase_required_error "Owner recovery requires the verification phrase."
   @verification_ack_required_error "Owner recovery requires explicit recovery acknowledgement."
+  @password_length_error "Owner recovery requires a password that is at least 8 characters."
   @recovery_unavailable_error "Owner recovery is unavailable because no owner account exists yet."
   @token_generation_error "Owner recovery could not generate a sign-in token."
 
@@ -143,6 +144,9 @@ defmodule JidoCode.Setup.OwnerRecovery do
     cond do
       email == "" or password == "" ->
         {:error, {:validation, @missing_recovery_fields_error}}
+
+      String.length(password) < 8 ->
+        {:error, {:validation, @password_length_error}}
 
       password_confirmation == "" or password != password_confirmation ->
         {:error, {:validation, @password_confirmation_error}}
