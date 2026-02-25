@@ -158,6 +158,7 @@ defmodule JidoCode.Setup.OwnerBootstrap do
 
       mode == :create and not valid_email?(email) ->
         {:error, {:validation, @email_format_error}}
+
       mode == :create and String.length(password) < 8 ->
         {:error, {:validation, @password_length_error}}
 
