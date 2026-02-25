@@ -11,6 +11,7 @@ defmodule JidoCode.Setup.OwnerBootstrap do
   @missing_credentials_error "Owner bootstrap requires email and password."
   @email_format_error "Owner bootstrap requires a valid email address."
   @password_confirmation_error "Owner bootstrap requires matching password confirmation."
+  @password_length_error "Owner bootstrap requires a password that is at least 8 characters."
   @token_generation_error "Owner bootstrap could not generate a sign-in token."
 
   @typedoc """
@@ -157,6 +158,8 @@ defmodule JidoCode.Setup.OwnerBootstrap do
 
       mode == :create and not valid_email?(email) ->
         {:error, {:validation, @email_format_error}}
+      mode == :create and String.length(password) < 8 ->
+        {:error, {:validation, @password_length_error}}
 
       mode == :create and password_confirmation == "" ->
         {:error, {:validation, @password_confirmation_error}}
