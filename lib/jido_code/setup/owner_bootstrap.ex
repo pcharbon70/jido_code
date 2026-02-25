@@ -10,6 +10,7 @@ defmodule JidoCode.Setup.OwnerBootstrap do
   @single_user_policy_error "Single-user policy error: an owner account already exists."
   @missing_credentials_error "Owner bootstrap requires email and password."
   @password_confirmation_error "Owner bootstrap requires matching password confirmation."
+  @password_length_error "Owner bootstrap requires a password that is at least 8 characters."
   @token_generation_error "Owner bootstrap could not generate a sign-in token."
 
   @typedoc """
@@ -153,6 +154,9 @@ defmodule JidoCode.Setup.OwnerBootstrap do
     cond do
       email == "" or password == "" ->
         {:error, {:validation, @missing_credentials_error}}
+
+      mode == :create and String.length(password) < 8 ->
+        {:error, {:validation, @password_length_error}}
 
       mode == :create and password_confirmation == "" ->
         {:error, {:validation, @password_confirmation_error}}

@@ -159,6 +159,7 @@ defmodule JidoCodeWeb.WelcomeLive do
                     field={@owner_form[:password]}
                     type="password"
                     label="Password"
+                    minlength={if @owner_mode == :create, do: 8, else: nil}
                     required
                     autocomplete="new-password"
                   />
@@ -169,6 +170,7 @@ defmodule JidoCodeWeb.WelcomeLive do
                   field={@owner_form[:password_confirmation]}
                   type="password"
                   label="Confirm password"
+                  minlength="8"
                   required
                   autocomplete="new-password"
                 />
