@@ -127,20 +127,21 @@ defmodule JidoCode.MixProject do
       {:dns_cluster, "~> 0.2.0"},
 
       # Jido AI framework
-      {:jido, "~> 2.0.0-rc"},
-      {:jido_action, "~> 2.0.0-rc", override: true},
-      {:jido_signal, "~> 2.0.0-rc"},
+      {:jido, github: "agentjido/jido", override: true},
+      {:jido_action, github: "agentjido/jido_action", branch: "main", override: true},
+      {:jido_signal, "~> 2.0.0-rc", override: true},
       {:jido_ai, github: "agentjido/jido_ai", branch: "main", override: true},
-      {:jido_runic, github: "agentjido/jido_runic", branch: "main"},
+      {:jido_runic, github: "agentjido/jido_runic", override: true},
       {:libgraph, github: "zblanco/libgraph", branch: "zw/multigraph-indexes", override: true},
       {:jido_studio, github: "agentjido/jido_studio", branch: "main"},
       {:jido_messaging, github: "agentjido/jido_messaging", branch: "main"},
+      {:jido_code_server, git: "https://github.com/pcharbon70/jido_code_server.git", branch: "main"},
       {:req_llm, "~> 1.4", override: true},
       {:timex, "~> 3.7", override: true},
       {:gettext, "~> 0.26", override: true},
 
       # Cloud Sandboxes
-      {:sprites, github: "superfly/sprites-ex"},
+      {:sprites, git: "https://github.com/mikehostetler/sprites-ex.git", override: true},
 
       # Utilities
       {:live_toast, "~> 0.8"},
