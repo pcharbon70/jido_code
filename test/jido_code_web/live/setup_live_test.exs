@@ -463,6 +463,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
     refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "2")
   end
 
+  test "step 2 recovery requires a verification phrase before credential reset", %{conn: conn} do
   test "step 2 recovery rejects short passwords with a friendly validation message", %{conn: conn} do
     register_owner("owner@example.com", "owner-password-123")
 
@@ -478,15 +479,16 @@ defmodule JidoCodeWeb.SetupLiveTest do
     |> form("#setup-owner-recovery-form", %{
       "owner_recovery" => %{
         "email" => "owner@example.com",
-        "password" => "short",
-        "password_confirmation" => "short",
-        "verification_phrase" => "RECOVER OWNER ACCESS",
+        "password" => "owner-recovered-password-789",
+        "password_confirmation" => "owner-recovered-password-789",
+        "verification_phrase" => "",
         "verification_ack" => "true"
       }
     })
     |> render_submit()
 
     html = render(view)
+    assert has_element?(view, "#setup-save-error", "verification phrase")
     assert has_element?(view, "#setup-save-error", "at least 8 characters")
     refute html =~ "Bread Crumbs"
 
@@ -494,6 +496,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
     assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
   end
 
+  test "step 2 recovery requires explicit acknowledgement before credential reset", %{conn: conn} do
   test "owner bootstrap and recovery events are rejected outside step 2", %{conn: conn} do
     register_owner("owner@example.com", "owner-password-123")
 
@@ -509,34 +512,23 @@ defmodule JidoCodeWeb.SetupLiveTest do
     {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
 
     view
-    |> render_submit("bootstrap_owner", %{
-      "owner" => %{
-        "email" => "owner@example.com",
-        "password" => "owner-password-123"
-      }
-    })
-
-    assert has_element?(view, "#setup-save-error", "Complete owner account bootstrap before continuing.")
-
-    view
-    |> render_submit("recover_owner", %{
+    |> form("#setup-owner-recovery-form", %{
       "owner_recovery" => %{
         "email" => "owner@example.com",
-        "password" => "owner-password-123",
-        "password_confirmation" => "owner-password-123",
+        "password" => "owner-recovered-password-789",
+        "password_confirmation" => "owner-recovered-password-789",
         "verification_phrase" => "RECOVER OWNER ACCESS",
-        "verification_ack" => "true"
+        "verification_ack" => "false"
       }
     })
+    |> render_submit()
 
-    assert has_element?(
-             view,
-             "#setup-save-error",
-             "Complete owner recovery verification before attempting credential reset."
-           )
+    html = render(view)
+    assert has_element?(view, "#setup-save-error", "explicit recovery acknowledgement")
+    refute html =~ "Bread Crumbs"
 
-    assert %{onboarding_step: 3} = Application.get_env(:jido_code, :system_config)
     assert_owner_count(1)
+    assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
   end
 
   test "step 2 blocks additional owner creation attempts with a single-user policy error", %{
