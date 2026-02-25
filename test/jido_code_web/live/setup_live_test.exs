@@ -221,6 +221,7 @@ defmodule JidoCodeWeb.SetupLiveTest do
            } = Application.get_env(:jido_code, :system_config)
   end
 
+  test "step 2 rejects malformed owner email addresses with a validation error", %{conn: conn} do
   test "step 2 rejects short owner passwords with a friendly validation message", %{conn: conn} do
     Application.put_env(:jido_code, :system_config, %{
       onboarding_completed: false,
@@ -233,17 +234,16 @@ defmodule JidoCodeWeb.SetupLiveTest do
     view
     |> form("#setup-owner-bootstrap-form", %{
       "owner" => %{
-        "email" => "owner@example.com",
-        "password" => "short",
-        "password_confirmation" => "short"
+        "email" => "not-an-email",
+        "password" => "owner-password-123",
+        "password_confirmation" => "owner-password-123"
       }
     })
     |> render_submit()
 
     html = render(view)
-    assert has_element?(view, "#setup-save-error", "at least 8 characters")
+    assert has_element?(view, "#setup-save-error", "valid email address")
     refute html =~ "Bread Crumbs"
-
     assert_owner_count(0)
     assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
   end
