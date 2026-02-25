@@ -207,6 +207,7 @@ specs/                          # PRD & design documents
 - [`specs/FORGE_OVERVIEW.md`](specs/FORGE_OVERVIEW.md) — Forge architecture deep dive
 - [`specs/`](specs/) — Product specs and PRD
 - [`specs/03_decisions_and_invariants.md`](specs/03_decisions_and_invariants.md) — Cross-spec source of truth
+- [`notes/planning/integration/jido_code_server_integration_plan.md`](notes/planning/integration/jido_code_server_integration_plan.md) — phased integration plan for adopting `jido_code_server` as the project conversation runtime
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — Contribution guidelines
 - [`CHANGELOG.md`](CHANGELOG.md) — Version history
 
