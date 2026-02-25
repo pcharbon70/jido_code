@@ -221,6 +221,32 @@ defmodule JidoCodeWeb.SetupLiveTest do
            } = Application.get_env(:jido_code, :system_config)
   end
 
+  test "step 2 rejects malformed owner email addresses with a validation error", %{conn: conn} do
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 2,
+      onboarding_state: %{"1" => %{"validated_note" => "Prerequisite checks passed"}}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#setup-owner-bootstrap-form", %{
+      "owner" => %{
+        "email" => "not-an-email",
+        "password" => "owner-password-123",
+        "password_confirmation" => "owner-password-123"
+      }
+    })
+    |> render_submit()
+
+    html = render(view)
+    assert has_element?(view, "#setup-save-error", "valid email address")
+    refute html =~ "Bread Crumbs"
+    assert_owner_count(0)
+    assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
+  end
+
   test "step 2 confirms existing owner and grants immediate protected-route session access", %{
     conn: conn
   } do

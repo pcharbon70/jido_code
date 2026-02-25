@@ -187,6 +187,24 @@ defmodule JidoCodeWeb.WelcomeLiveTest do
     assert has_element?(view, "#welcome-save-error")
   end
 
+  test "rejects malformed owner email addresses with a validation error", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/welcome")
+
+    view
+    |> form("#welcome-owner-form", %{
+      "owner" => %{
+        "email" => "not-an-email",
+        "password" => "secure-password-123",
+        "password_confirmation" => "secure-password-123"
+      }
+    })
+    |> render_submit()
+
+    html = render(view)
+    assert has_element?(view, "#welcome-save-error", "valid email address")
+    refute html =~ "Bread Crumbs"
+  end
+
   # -- Helpers --
 
   defp passing_prerequisite_report do
