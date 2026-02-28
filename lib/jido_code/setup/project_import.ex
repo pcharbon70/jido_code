@@ -229,6 +229,15 @@ defmodule JidoCode.Setup.ProjectImport do
       })
       when is_list(available_repositories) and is_map(onboarding_state) do
     cond do
+      available_repositories == [] ->
+        blocked_report(
+          checked_at,
+          selected_repository,
+          "repository_selection_unavailable",
+          "No validated repositories are available for import selection.",
+          @default_selection_remediation
+        )
+
       is_nil(selected_repository) ->
         blocked_report(
           checked_at,

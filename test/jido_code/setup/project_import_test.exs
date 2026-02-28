@@ -73,6 +73,26 @@ defmodule JidoCode.Setup.ProjectImportTest do
     assert is_binary(project.settings["workspace"]["last_synced_at"])
   end
 
+  test "run/3 blocks manual repository imports when validated repository access is unavailable" do
+    onboarding_state = %{
+      "4" => %{
+        "github_credentials" => %{
+          "paths" => []
+        }
+      }
+    }
+
+    report = ProjectImport.run(nil, "owner/repo-one", onboarding_state)
+
+    assert ProjectImport.blocked?(report)
+    assert report.status == :blocked
+    assert report.error_type == "repository_selection_unavailable"
+    assert report.detail =~ "No validated repositories"
+
+    {:ok, projects} = Project.read(query: [filter: [github_full_name: "owner/repo-one"]])
+    assert projects == []
+  end
+
   test "run/3 does not create duplicate project records for repeat imports" do
     onboarding_state = %{
       "4" => %{

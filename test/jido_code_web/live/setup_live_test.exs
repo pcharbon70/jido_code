@@ -1663,6 +1663,44 @@ defmodule JidoCodeWeb.SetupLiveTest do
     assert has_element?(view, "#setup-project-repository-option-owner-repo-one", "owner/repo-one")
   end
 
+  test "step 7 blocks manual repository imports when validated repository access is unavailable", %{
+    conn: conn
+  } do
+    onboarding_state =
+      onboarding_state_through_step_6()
+      |> put_in(["4", "github_credentials", "paths"], [])
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 7,
+      onboarding_state: onboarding_state
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    assert has_element?(view, "#setup-project-repository-listing-status", "Blocked")
+
+    view
+    |> form("#onboarding-step-form", %{
+      "step" => %{
+        "repository_full_name" => "owner/repo-one",
+        "validated_note" => "Attempting manual import without validated repositories"
+      }
+    })
+    |> render_submit()
+
+    assert has_element?(view, "#resolved-onboarding-step", "Step 7")
+    assert has_element?(view, "#setup-save-error", "repository_selection_unavailable")
+    assert has_element?(view, "#setup-save-error", "No validated repositories are available")
+
+    persisted_config = Application.get_env(:jido_code, :system_config)
+    assert Map.fetch!(persisted_config, :onboarding_step) == 7
+    refute Map.has_key?(Map.fetch!(persisted_config, :onboarding_state), "7")
+
+    {:ok, projects} = Project.read(query: [filter: [github_full_name: "owner/repo-one"]])
+    assert projects == []
+  end
+
   test "step 7 imports the selected repository and step 8 completes onboarding with dashboard next actions",
        %{conn: _conn} do
     register_owner("owner@example.com", "owner-password-123")
