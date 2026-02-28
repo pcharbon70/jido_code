@@ -324,6 +324,36 @@ defmodule JidoCodeWeb.SetupLiveTest do
            } = Application.get_env(:jido_code, :system_config)
   end
 
+  test "step 2 confirm mode rejects malformed owner email addresses with a validation error", %{
+    conn: conn
+  } do
+    register_owner("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 2,
+      onboarding_state: %{"1" => %{"validated_note" => "Prerequisite checks passed"}}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#setup-owner-bootstrap-form", %{
+      "owner" => %{
+        "email" => "not-an-email",
+        "password" => "owner-password-123"
+      }
+    })
+    |> render_submit()
+
+    html = render(view)
+    assert has_element?(view, "#setup-save-error", "valid email address")
+    refute html =~ "Bread Crumbs"
+
+    assert_owner_count(1)
+    assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
+  end
+
   test "step 2 recovery requires explicit verification, resets credentials, and records recovery audit metadata",
        %{conn: conn} do
     attach_owner_recovery_audit_handler()
@@ -514,6 +544,37 @@ defmodule JidoCodeWeb.SetupLiveTest do
 
     html = render(view)
     assert has_element?(view, "#setup-save-error", "at least 8 characters")
+    refute html =~ "Bread Crumbs"
+
+    assert_owner_count(1)
+    assert %{onboarding_step: 2} = Application.get_env(:jido_code, :system_config)
+  end
+
+  test "step 2 recovery rejects malformed owner email addresses with a validation error", %{conn: conn} do
+    register_owner("owner@example.com", "owner-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 2,
+      onboarding_state: %{"1" => %{"validated_note" => "Prerequisite checks passed"}}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/setup", on_error: :warn)
+
+    view
+    |> form("#setup-owner-recovery-form", %{
+      "owner_recovery" => %{
+        "email" => "not-an-email",
+        "password" => "owner-recovered-password-789",
+        "password_confirmation" => "owner-recovered-password-789",
+        "verification_phrase" => "RECOVER OWNER ACCESS",
+        "verification_ack" => "true"
+      }
+    })
+    |> render_submit()
+
+    html = render(view)
+    assert has_element?(view, "#setup-save-error", "valid email address")
     refute html =~ "Bread Crumbs"
 
     assert_owner_count(1)
