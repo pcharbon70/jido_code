@@ -14,6 +14,7 @@ defmodule JidoCode.Setup.OwnerRecovery do
   @verification_phrase "RECOVER OWNER ACCESS"
   @verification_denied_error "Owner recovery verification failed. Credential reset was denied and owner state is unchanged."
   @missing_recovery_fields_error "Owner recovery requires email and a new password."
+  @email_format_error "Owner recovery requires a valid email address."
   @password_confirmation_error "Owner recovery requires matching password confirmation."
   @verification_phrase_required_error "Owner recovery requires the verification phrase."
   @verification_ack_required_error "Owner recovery requires explicit recovery acknowledgement."
@@ -144,6 +145,9 @@ defmodule JidoCode.Setup.OwnerRecovery do
     cond do
       email == "" or password == "" ->
         {:error, {:validation, @missing_recovery_fields_error}}
+
+      not valid_email?(email) ->
+        {:error, {:validation, @email_format_error}}
 
       String.length(password) < 8 ->
         {:error, {:validation, @password_length_error}}
@@ -300,6 +304,10 @@ defmodule JidoCode.Setup.OwnerRecovery do
 
   defp normalize_value(value) when is_binary(value), do: String.trim(value)
   defp normalize_value(_value), do: ""
+
+  defp valid_email?(email) do
+    Regex.match?(~r/^[^\s]+@[^\s]+\.[^\s]+$/, email)
+  end
 
   defp same_email?(left, right) do
     left

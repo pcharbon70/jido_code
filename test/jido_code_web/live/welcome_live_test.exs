@@ -150,6 +150,31 @@ defmodule JidoCodeWeb.WelcomeLiveTest do
     assert html =~ "Sign In &amp; Continue"
   end
 
+  test "confirm mode rejects malformed owner email addresses with a validation error", %{conn: conn} do
+    create_owner!("existing@example.com", "existing-password-123")
+
+    Application.put_env(:jido_code, :system_config, %{
+      onboarding_completed: false,
+      onboarding_step: 1,
+      onboarding_state: %{}
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/welcome")
+
+    view
+    |> form("#welcome-owner-form", %{
+      "owner" => %{
+        "email" => "not-an-email",
+        "password" => "existing-password-123"
+      }
+    })
+    |> render_submit()
+
+    html = render(view)
+    assert has_element?(view, "#welcome-save-error", "valid email address")
+    refute html =~ "Bread Crumbs"
+  end
+
   test "redirects to dashboard when onboarding is completed", %{conn: conn} do
     Application.put_env(:jido_code, :system_config, %{
       onboarding_completed: true,
