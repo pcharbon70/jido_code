@@ -1,0 +1,10 @@
+{
+  "extends": "./assets/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["assets/*"]
+    }
+  },
+  "include": ["assets/**/*"]
+}

@@ -1,0 +1,333 @@
+/* See the Tailwind configuration guide for advanced usage
+   https://tailwindcss.com/docs/configuration */
+
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+@source "../css";
+@source "../js";
+@source "../vue";
+@source "../../deps/salad_ui";
+@source "../../lib/jido_code_web";
+
+/* A Tailwind plugin that makes "hero-#{ICON}" classes available.
+   The heroicons installation itself is managed by your mix.exs */
+@plugin "../vendor/heroicons";
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --background: oklch(0.99 0.002 247);
+  --foreground: oklch(0.19 0.014 260);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.19 0.014 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.19 0.014 260);
+  --primary: oklch(0.45 0.12 254);
+  --primary-foreground: oklch(0.99 0.002 247);
+  --secondary: oklch(0.95 0.006 260);
+  --secondary-foreground: oklch(0.25 0.016 260);
+  --muted: oklch(0.96 0.006 260);
+  --muted-foreground: oklch(0.49 0.02 260);
+  --accent: oklch(0.93 0.028 186);
+  --accent-foreground: oklch(0.24 0.034 190);
+  --destructive: oklch(0.57 0.2 28);
+  --destructive-foreground: oklch(0.99 0.002 247);
+  --shadcn-border: oklch(0.9 0.01 260);
+  --input: oklch(0.9 0.01 260);
+  --ring: oklch(0.56 0.12 254);
+  --frame-canvas: oklch(0.985 0.005 84);
+  --frame-chrome: oklch(0.997 0.002 247);
+  --frame-chrome-elevated: oklch(1 0 0);
+  --frame-border: oklch(0.89 0.009 260);
+  --frame-text: oklch(0.19 0.014 260);
+  --frame-text-muted: oklch(0.48 0.018 260);
+  --frame-focus: oklch(0.54 0.17 264);
+  --frame-selection: oklch(0.95 0.035 264);
+  --navigation-default: oklch(0.35 0.018 260);
+  --navigation-hover: oklch(0.96 0.008 260);
+  --navigation-current: oklch(0.95 0.035 264);
+  --status-healthy: oklch(0.55 0.12 184);
+  --status-informational: oklch(0.55 0.14 254);
+  --status-attention: oklch(0.66 0.17 68);
+  --status-failure: oklch(0.57 0.2 28);
+  --status-stale: oklch(0.54 0.055 260);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --background: oklch(0.16 0.014 260);
+    --foreground: oklch(0.96 0.004 247);
+    --card: oklch(0.2 0.016 260);
+    --card-foreground: oklch(0.96 0.004 247);
+    --popover: oklch(0.2 0.016 260);
+    --popover-foreground: oklch(0.96 0.004 247);
+    --primary: oklch(0.72 0.11 254);
+    --primary-foreground: oklch(0.16 0.014 260);
+    --secondary: oklch(0.27 0.018 260);
+    --secondary-foreground: oklch(0.96 0.004 247);
+    --muted: oklch(0.26 0.016 260);
+    --muted-foreground: oklch(0.72 0.016 260);
+    --accent: oklch(0.31 0.052 186);
+    --accent-foreground: oklch(0.92 0.035 184);
+    --destructive: oklch(0.64 0.19 28);
+    --destructive-foreground: oklch(0.99 0.002 247);
+    --shadcn-border: oklch(0.33 0.018 260);
+    --input: oklch(0.33 0.018 260);
+    --ring: oklch(0.72 0.11 254);
+    --frame-canvas: oklch(0.15 0.02 245);
+    --frame-chrome: oklch(0.13 0.022 245);
+    --frame-chrome-elevated: oklch(0.19 0.024 245);
+    --frame-border: oklch(0.31 0.022 245);
+    --frame-text: oklch(0.96 0.006 247);
+    --frame-text-muted: oklch(0.72 0.018 247);
+    --frame-focus: oklch(0.72 0.14 264);
+    --frame-selection: oklch(0.25 0.08 264);
+    --navigation-default: oklch(0.78 0.018 247);
+    --navigation-hover: oklch(0.22 0.028 245);
+    --navigation-current: oklch(0.24 0.07 264);
+    --status-healthy: oklch(0.72 0.13 184);
+    --status-informational: oklch(0.74 0.12 254);
+    --status-attention: oklch(0.78 0.16 74);
+    --status-failure: oklch(0.7 0.18 28);
+    --status-stale: oklch(0.68 0.05 247);
+  }
+}
+
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: oklch(0.16 0.014 260);
+  --foreground: oklch(0.96 0.004 247);
+  --card: oklch(0.2 0.016 260);
+  --card-foreground: oklch(0.96 0.004 247);
+  --popover: oklch(0.2 0.016 260);
+  --popover-foreground: oklch(0.96 0.004 247);
+  --primary: oklch(0.72 0.11 254);
+  --primary-foreground: oklch(0.16 0.014 260);
+  --secondary: oklch(0.27 0.018 260);
+  --secondary-foreground: oklch(0.96 0.004 247);
+  --muted: oklch(0.26 0.016 260);
+  --muted-foreground: oklch(0.72 0.016 260);
+  --accent: oklch(0.31 0.052 186);
+  --accent-foreground: oklch(0.92 0.035 184);
+  --destructive: oklch(0.64 0.19 28);
+  --destructive-foreground: oklch(0.99 0.002 247);
+  --shadcn-border: oklch(0.33 0.018 260);
+  --input: oklch(0.33 0.018 260);
+  --ring: oklch(0.72 0.11 254);
+  --frame-canvas: oklch(0.15 0.02 245);
+  --frame-chrome: oklch(0.13 0.022 245);
+  --frame-chrome-elevated: oklch(0.19 0.024 245);
+  --frame-border: oklch(0.31 0.022 245);
+  --frame-text: oklch(0.96 0.006 247);
+  --frame-text-muted: oklch(0.72 0.018 247);
+  --frame-focus: oklch(0.72 0.14 264);
+  --frame-selection: oklch(0.25 0.08 264);
+  --navigation-default: oklch(0.78 0.018 247);
+  --navigation-hover: oklch(0.22 0.028 245);
+  --navigation-current: oklch(0.24 0.07 264);
+  --status-healthy: oklch(0.72 0.13 184);
+  --status-informational: oklch(0.74 0.12 254);
+  --status-attention: oklch(0.78 0.16 74);
+  --status-failure: oklch(0.7 0.18 28);
+  --status-stale: oklch(0.68 0.05 247);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-content: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--shadcn-border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-base-100: var(--background);
+  --color-base-200: var(--muted);
+  --color-base-300: var(--shadcn-border);
+  --color-base-content: var(--foreground);
+  --color-info: var(--status-informational);
+  --color-success: var(--status-healthy);
+  --color-warning: var(--status-attention);
+  --color-error: var(--status-failure);
+  --color-frame-canvas: var(--frame-canvas);
+  --color-frame-chrome: var(--frame-chrome);
+  --color-frame-chrome-elevated: var(--frame-chrome-elevated);
+  --color-frame-border: var(--frame-border);
+  --color-frame-text: var(--frame-text);
+  --color-frame-text-muted: var(--frame-text-muted);
+  --color-frame-focus: var(--frame-focus);
+  --color-frame-selection: var(--frame-selection);
+  --color-navigation-default: var(--navigation-default);
+  --color-navigation-hover: var(--navigation-hover);
+  --color-navigation-current: var(--navigation-current);
+  --color-status-healthy: var(--status-healthy);
+  --color-status-informational: var(--status-informational);
+  --color-status-attention: var(--status-attention);
+  --color-status-failure: var(--status-failure);
+  --color-status-stale: var(--status-stale);
+  --radius-xs: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+[data-phx-theme][aria-pressed="true"] {
+  background: var(--navigation-current);
+  color: var(--frame-text);
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+
+/* Add variants based on LiveView classes */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Use the data attribute for dark mode. */
+@custom-variant dark (&:where(.dark, .dark *, [data-theme=dark], [data-theme=dark] *));
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
+
+.navbar {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+}
+
+.card {
+  border-radius: var(--radius);
+}
+
+.btn {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid transparent;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  border-color: color-mix(in oklab, var(--primary) 88%, black);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.btn-soft {
+  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  color: var(--foreground);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.btn-ghost:hover,
+.btn-soft:hover {
+  background: var(--navigation-hover);
+}
+
+.alert {
+  display: grid;
+  max-width: min(24rem, 100%);
+  grid-auto-flow: column;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--shadcn-border);
+  background: var(--card);
+  padding: 0.75rem 1rem;
+  color: var(--card-foreground);
+  box-shadow: 0 14px 40px color-mix(in oklab, black 12%, transparent);
+}
+
+.alert-info {
+  border-color: color-mix(in oklab, var(--status-informational) 55%, transparent);
+}
+
+.alert-error {
+  border-color: color-mix(in oklab, var(--status-failure) 55%, transparent);
+}
+
+.input,
+.select,
+.textarea {
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--input);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.input,
+.select {
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+}
+
+.textarea {
+  min-height: 5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 18%, transparent);
+  outline: none;
+}
+
+.input-error,
+.select-error,
+.textarea-error {
+  border-color: var(--destructive);
+}
