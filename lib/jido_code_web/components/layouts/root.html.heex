@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title default="JidoCode" suffix=" · Phoenix Framework">
+      {assigns[:page_title]}
+    </.live_title>
+    <link rel="icon" type="image/svg+xml" href={~p"/images/logo.svg"} />
+    <PhoenixVite.Components.assets
+      names={JidoCodeWeb.FrontendAssets.asset_names()}
+      manifest={JidoCodeWeb.FrontendAssets.vite_manifest()}
+      dev_server={PhoenixVite.Components.has_vite_watcher?(JidoCodeWeb.Endpoint)}
+      to_url={fn path -> static_url(@conn, path) end}
+    />
+  </head>
+  <body>
+    {@inner_content}
+  </body>
+</html>
