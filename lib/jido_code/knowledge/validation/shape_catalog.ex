@@ -11,7 +11,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       RepositoryFactory SoftwareRepository RepositoryLocator ManagementEnrollment Actor Agent Scope
     ],
     factory_policy: ~w[
-      DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Scope Decision
+      DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope Decision
     ],
     observation_batch: ~w[
       ObservationActivity ObservationBatch RepositorySnapshot SourceArtifact Claim Finding

@@ -11,6 +11,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Writer
 
   def execute(%CommandEnvelope{} = envelope, options \\ []), do: Writer.execute(envelope, options)
+  def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
 
   def health, do: Readiness.snapshot()
   def ready?, do: health() |> JidoCode.Knowledge.Health.ready?()

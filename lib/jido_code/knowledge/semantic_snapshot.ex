@@ -102,6 +102,9 @@ defmodule JidoCode.Knowledge.SemanticSnapshot do
         {:ok, revision} when is_integer(revision) and revision >= 0 ->
           {:cont, {:ok, Map.put(revisions, graph, revision)}}
 
+        {:ok, nil} ->
+          {:cont, {:ok, Map.put(revisions, graph, 0)}}
+
         {:error, %Error{} = error} ->
           {:halt, {:error, error}}
 

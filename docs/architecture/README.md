@@ -43,3 +43,4 @@ implementation plan was merged.
 - [Phase 3 semantic contract receipt](./phase-03-receipt.md)
 - [Semantic command contract](./semantic-command-contract.md)
 - [Governed command pipeline](./governed-command-pipeline.md)
+- [Authority, bootstrap, and audit](./authority-bootstrap-and-audit.md)

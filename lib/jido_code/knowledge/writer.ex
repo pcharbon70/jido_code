@@ -13,6 +13,7 @@ defmodule JidoCode.Knowledge.Writer do
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.CommandPipeline
   alias JidoCode.Knowledge.CommandReceipt
+  alias JidoCode.Knowledge.Bootstrap
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Telemetry
   alias JidoCode.Knowledge.WriteBatch
@@ -85,9 +86,43 @@ defmodule JidoCode.Knowledge.Writer do
     end
   end
 
+  @spec bootstrap(map(), keyword()) :: term()
+  def bootstrap(attributes, options \\ []) when is_map(attributes) and is_list(options) do
+    bootstrap(__MODULE__, attributes, options)
+  end
+
+  @spec bootstrap(GenServer.server(), map(), keyword()) :: term()
+  def bootstrap(server, attributes, options) when is_map(attributes) and is_list(options) do
+    token = Keyword.get(options, :operator_token)
+
+    with true <- is_binary(token),
+         {:ok, operation_timeout, caller_timeout} <- timeouts(options) do
+      deadline = System.monotonic_time(:millisecond) + operation_timeout
+
+      safe_call(
+        server,
+        {:bootstrap, attributes, token, deadline},
+        caller_timeout,
+        :bootstrap_response
+      )
+    else
+      _invalid -> {:error, Error.new(:unauthorized, :authority_bootstrap)}
+    end
+  end
+
   @impl true
   def init(options) do
-    {:ok, %{store_server: Keyword.get(options, :store_server, StoreServer)}}
+    {:ok,
+     %{
+       store_server: Keyword.get(options, :store_server, StoreServer),
+       bootstrap_config:
+         Keyword.get(
+           options,
+           :bootstrap_config,
+           Application.get_env(:jido_code, :authority_bootstrap, %{enabled?: false})
+         ),
+       clock: Keyword.get(options, :clock, &DateTime.utc_now/0)
+     }}
   end
 
   @impl true
@@ -121,6 +156,20 @@ defmodule JidoCode.Knowledge.Writer do
 
   def handle_call({:execute, %CommandEnvelope{} = envelope, deadline}, _from, state) do
     reply = CommandPipeline.execute(envelope, state.store_server, deadline)
+    {:reply, reply, state}
+  end
+
+  def handle_call({:bootstrap, attributes, token, deadline}, _from, state) do
+    reply =
+      Bootstrap.execute(
+        attributes,
+        token,
+        state.bootstrap_config,
+        state.clock,
+        state.store_server,
+        deadline
+      )
+
     {:reply, reply, state}
   end
 

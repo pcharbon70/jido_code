@@ -107,8 +107,7 @@ defmodule JidoCode.Knowledge.CommandProvenance do
     Enum.uniq(base ++ targets ++ delegation)
   end
 
-  defp command_class(name),
-    do: RDF.iri("https://jido.run/ontology/command/#{URI.encode(name, &URI.char_unreserved?/1)}")
+  defp command_class(name), do: RDF.iri(Authorization.command_class_iri(name))
 
   defp graph_family(family),
     do: RDF.iri("https://jido.run/ontology/graph-family/#{Atom.to_string(family)}")

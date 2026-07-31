@@ -8,6 +8,7 @@ defmodule JidoCode.Knowledge.CommandPipeline do
   """
 
   alias JidoCode.Knowledge.Authorization
+  alias JidoCode.Knowledge.AuditPolicy
   alias JidoCode.Knowledge.ChangeSet
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.CommandPrecommit
@@ -56,14 +57,15 @@ defmodule JidoCode.Knowledge.CommandPipeline do
   end
 
   defp commit_new(envelope, definition, change_set, identities, store_server, deadline) do
-    with {:ok, audit_graph} <- audit_graph(envelope.issued_at),
+    with {:ok, audit_graph} <- AuditPolicy.graph_iri(envelope.issued_at),
          {:ok, policy_graph} <- GraphRegistry.graph_iri(:factory_policy, %{}),
          snapshot_graphs = Enum.uniq(change_set.target_graphs ++ [audit_graph, policy_graph]),
          {:ok, snapshot} <-
            request(store_server, {:semantic_snapshot, snapshot_graphs}, deadline),
-         {:ok, authority} <- Authorization.authorize(envelope, definition, snapshot),
+         {:ok, authority} <- Authorization.authorize(envelope, definition, change_set, snapshot),
          audit_additions =
            CommandProvenance.quads(envelope, change_set, authority, identities, audit_graph),
+         :ok <- AuditPolicy.validate(audit_additions),
          {:ok, _reports} <-
            CommandPrecommit.validate(
              envelope,
@@ -115,11 +117,6 @@ defmodule JidoCode.Knowledge.CommandPipeline do
       actor_iri: envelope.actor_iri,
       committed_at: envelope.issued_at
     })
-  end
-
-  defp audit_graph(%DateTime{} = issued_at) do
-    period = issued_at |> DateTime.to_date() |> Date.to_iso8601() |> binary_part(0, 7)
-    GraphRegistry.graph_iri(:security_audit, %{period: period})
   end
 
   defp request(server, operation, deadline) do

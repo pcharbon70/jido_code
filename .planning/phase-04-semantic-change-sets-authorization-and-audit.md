@@ -119,42 +119,42 @@ Back to plan: [README](./README.md)
       - [x] 4.2.4.4 Subtask {#jcf-p04-4-2-4-4} - Resolve unknown-after-timeout outcomes by command IRI/idempotency identity before permitting a new command.
       - [x] 4.2.4.5 Subtask {#jcf-p04-4-2-4-5} - Define retention for idempotency receipts without permitting removal while referenced by durable domain history.
 
-  - [ ] 4.3 Section - Implement authorization, delegation, and audit policy.
+  - [x] 4.3 Section - Implement authorization, delegation, and audit policy.
 
     This section gives semantic writes an explicit accountable actor and
     least-privilege graph capability model without persisting credentials or
     moving route authorization into the graph writer.
 
-    - [ ] 4.3.1 Task {#jcf-p04-actor-authority} [repo: jido_code] [after: {#jcf-p04-idempotency-recovery}] - Implement actor, delegation, and capability context.
+    - [x] 4.3.1 Task {#jcf-p04-actor-authority} [repo: jido_code] [after: {#jcf-p04-idempotency-recovery}] - Implement actor, delegation, and capability context.
 
       This task distinguishes the authenticated caller, accountable actor,
       delegated software agent, and allowed semantic effects for each command.
 
-      - [ ] 4.3.1.1 Subtask {#jcf-p04-4-3-1-1} - Define opaque actor, principal, agent, delegation, authorization-grant, and capability IRIs with bounded context projections.
-      - [ ] 4.3.1.2 Subtask {#jcf-p04-4-3-1-2} - Separate observation, proposal, control, execution, evidence, decision, ontology, security, and administrative write capabilities.
-      - [ ] 4.3.1.3 Subtask {#jcf-p04-4-3-1-3} - Constrain delegation by actor, scope, capability, validity interval, command family, and optional resource/graph boundary.
-      - [ ] 4.3.1.4 Subtask {#jcf-p04-4-3-1-4} - Reject expired, revoked, cross-scope, self-expanded, or ambiguous delegation and preserve concealment behavior.
-      - [ ] 4.3.1.5 Subtask {#jcf-p04-4-3-1-5} - Keep authentication/session establishment and route admission in their owning web boundary.
+      - [x] 4.3.1.1 Subtask {#jcf-p04-4-3-1-1} - Define opaque actor, principal, agent, delegation, authorization-grant, and capability IRIs with bounded context projections.
+      - [x] 4.3.1.2 Subtask {#jcf-p04-4-3-1-2} - Separate observation, proposal, control, execution, evidence, decision, ontology, security, and administrative write capabilities.
+      - [x] 4.3.1.3 Subtask {#jcf-p04-4-3-1-3} - Constrain delegation by actor, scope, capability, validity interval, command family, and optional resource/graph boundary.
+      - [x] 4.3.1.4 Subtask {#jcf-p04-4-3-1-4} - Reject expired, revoked, cross-scope, self-expanded, or ambiguous delegation and preserve concealment behavior.
+      - [x] 4.3.1.5 Subtask {#jcf-p04-4-3-1-5} - Keep authentication/session establishment and route admission in their owning web boundary.
 
-    - [ ] 4.3.2 Task {#jcf-p04-bootstrap-authority} [repo: jido_code] [after: {#jcf-p04-actor-authority}] - Define secure bootstrap and authority initialization.
+    - [x] 4.3.2 Task {#jcf-p04-bootstrap-authority} [repo: jido_code] [after: {#jcf-p04-actor-authority}] - Define secure bootstrap and authority initialization.
 
       This task creates the first factory actor and policy graph without an
       ungoverned backdoor that survives initialization.
 
-      - [ ] 4.3.2.1 Subtask {#jcf-p04-4-3-2-1} - Define one explicit, local bootstrap procedure guarded by empty-dataset state and trusted operator configuration.
-      - [ ] 4.3.2.2 Subtask {#jcf-p04-4-3-2-2} - Atomically create factory identity, initial actor/grant, graph metadata, provenance, audit, and a bootstrap-complete assertion.
-      - [ ] 4.3.2.3 Subtask {#jcf-p04-4-3-2-3} - Disable bootstrap permanently for the dataset lineage after success and reject replay against restored initialized data.
-      - [ ] 4.3.2.4 Subtask {#jcf-p04-4-3-2-4} - Ensure no secret value or environment credential is copied into graph statements or receipts.
+      - [x] 4.3.2.1 Subtask {#jcf-p04-4-3-2-1} - Define one explicit, local bootstrap procedure guarded by empty-dataset state and trusted operator configuration.
+      - [x] 4.3.2.2 Subtask {#jcf-p04-4-3-2-2} - Atomically create factory identity, initial actor/grant, graph metadata, provenance, audit, and a bootstrap-complete assertion.
+      - [x] 4.3.2.3 Subtask {#jcf-p04-4-3-2-3} - Disable bootstrap permanently for the dataset lineage after success and reject replay against restored initialized data.
+      - [x] 4.3.2.4 Subtask {#jcf-p04-4-3-2-4} - Ensure no secret value or environment credential is copied into graph statements or receipts.
 
-    - [ ] 4.3.3 Task {#jcf-p04-audit-contract} [repo: jido_code] [after: {#jcf-p04-bootstrap-authority}] - Implement append-only semantic audit records.
+    - [x] 4.3.3 Task {#jcf-p04-audit-contract} [repo: jido_code] [after: {#jcf-p04-bootstrap-authority}] - Implement append-only semantic audit records.
 
       This task records accountable command activity without creating an
       alternate log authority or leaking command contents.
 
-      - [ ] 4.3.3.1 Subtask {#jcf-p04-4-3-3-1} - Record command/change-set, actor/delegation, scope, capability, causation, outcome, affected graph families, revisions, time, and safe issue codes.
-      - [ ] 4.3.3.2 Subtask {#jcf-p04-4-3-3-2} - Partition append-only audit graphs by bounded period and record closure/retention metadata.
-      - [ ] 4.3.3.3 Subtask {#jcf-p04-4-3-3-3} - Prohibit raw secrets, prompts, source bodies, arbitrary SPARQL, stack traces, and unbounded external payloads.
-      - [ ] 4.3.3.4 Subtask {#jcf-p04-4-3-3-4} - Authorize audit reads separately from ordinary product projections and preserve concealment across repository scopes.
+      - [x] 4.3.3.1 Subtask {#jcf-p04-4-3-3-1} - Record command/change-set, actor/delegation, scope, capability, causation, outcome, affected graph families, revisions, time, and safe issue codes.
+      - [x] 4.3.3.2 Subtask {#jcf-p04-4-3-3-2} - Partition append-only audit graphs by bounded period and record closure/retention metadata.
+      - [x] 4.3.3.3 Subtask {#jcf-p04-4-3-3-3} - Prohibit raw secrets, prompts, source bodies, arbitrary SPARQL, stack traces, and unbounded external payloads.
+      - [x] 4.3.3.4 Subtask {#jcf-p04-4-3-3-4} - Authorize audit reads separately from ordinary product projections and preserve concealment across repository scopes.
 
   - [ ] 4.4 Section - Implement post-commit change delivery and command recovery.
 
