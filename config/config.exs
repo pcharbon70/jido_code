@@ -9,7 +9,16 @@ import Config
 
 config :jido_code,
   runtime_mode: config_env(),
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  knowledge_store: [
+    enabled: true,
+    root: Path.expand("../var/knowledge/#{config_env()}", __DIR__),
+    backup_root: Path.expand("../var/backups/#{config_env()}", __DIR__),
+    schema: :quad,
+    schema_version: 1,
+    durability: :sync,
+    open_timeout: 15_000
+  ]
 
 config :live_vue, ssr: true
 

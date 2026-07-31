@@ -38,6 +38,15 @@ if config_env() == :prod do
 
   config :jido_code, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  config :jido_code, :knowledge_store,
+    enabled: true,
+    root: System.get_env("JIDO_CODE_STORE_ROOT") || "/var/lib/jido_code/knowledge",
+    backup_root: System.get_env("JIDO_CODE_BACKUP_ROOT") || "/var/lib/jido_code/backups",
+    schema: :quad,
+    schema_version: 1,
+    durability: :sync,
+    open_timeout: 15_000
+
   config :jido_code, JidoCodeWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [

@@ -25,3 +25,7 @@ planning:
 The Phase 1 baseline starts at commit
 `54cda0fd34cc687f0c1be6322513a790d3a9c37e`, immediately after the graph-native
 implementation plan was merged.
+
+## Phase 2 Substrate
+
+- [Authoritative store lifecycle](./store-lifecycle.md)

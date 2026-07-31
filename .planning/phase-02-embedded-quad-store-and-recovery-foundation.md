@@ -19,45 +19,45 @@ Back to plan: [README](./README.md)
   This phase makes the graph physically durable and operationally trustworthy
   before repository, work, execution, or UI concepts can persist in it.
 
-  - [ ] 2.1 Section - Implement store ownership, configuration, and lifecycle.
+  - [x] 2.1 Section - Implement store ownership, configuration, and lifecycle.
 
     This section creates the only process allowed to open and own the
     `TripleStore` handle and integrates readiness with the Phoenix supervision
     tree.
 
-    - [ ] 2.1.1 Task {#jcf-p02-store-configuration} [repo: jido_code] [after: {#jcf-p01-phase-receipt}] - Implement explicit knowledge-store configuration.
+    - [x] 2.1.1 Task {#jcf-p02-store-configuration} [repo: jido_code] [after: {#jcf-p01-phase-receipt}] - Implement explicit knowledge-store configuration.
 
       This task defines safe, environment-specific storage inputs without
       letting arbitrary request or user data choose database paths or
       durability behavior.
 
-      - [ ] 2.1.1.1 Subtask {#jcf-p02-2-1-1-1} - Add compile/runtime configuration for store root, quad schema, durability/sync mode, open timeout, backup root, and supported schema version.
-      - [ ] 2.1.1.2 Subtask {#jcf-p02-2-1-1-2} - Resolve development, test, and production paths from trusted configuration and reject root, home, workspace-root, relative traversal, symlink escape, or world-writable targets.
-      - [ ] 2.1.1.3 Subtask {#jcf-p02-2-1-1-3} - Require unique temporary paths in tests and prohibit production path reuse under Mix test.
-      - [ ] 2.1.1.4 Subtask {#jcf-p02-2-1-1-4} - Surface missing native libraries, invalid durability settings, and unsupported schema versions as typed startup errors.
-      - [ ] 2.1.1.5 Subtask {#jcf-p02-2-1-1-5} - Document filesystem ownership, permissions, volume durability, free-space expectations, and unsupported shared-filesystem deployments.
+      - [x] 2.1.1.1 Subtask {#jcf-p02-2-1-1-1} - Add compile/runtime configuration for store root, quad schema, durability/sync mode, open timeout, backup root, and supported schema version.
+      - [x] 2.1.1.2 Subtask {#jcf-p02-2-1-1-2} - Resolve development, test, and production paths from trusted configuration and reject root, home, workspace-root, relative traversal, symlink escape, or world-writable targets.
+      - [x] 2.1.1.3 Subtask {#jcf-p02-2-1-1-3} - Require unique temporary paths in tests and prohibit production path reuse under Mix test.
+      - [x] 2.1.1.4 Subtask {#jcf-p02-2-1-1-4} - Surface missing native libraries, invalid durability settings, and unsupported schema versions as typed startup errors.
+      - [x] 2.1.1.5 Subtask {#jcf-p02-2-1-1-5} - Document filesystem ownership, permissions, volume durability, free-space expectations, and unsupported shared-filesystem deployments.
 
-    - [ ] 2.1.2 Task {#jcf-p02-store-server} [repo: jido_code] [after: {#jcf-p02-store-configuration}] - Implement the supervised `JidoCode.Knowledge.StoreServer`.
+    - [x] 2.1.2 Task {#jcf-p02-store-server} [repo: jido_code] [after: {#jcf-p02-store-configuration}] - Implement the supervised `JidoCode.Knowledge.StoreServer`.
 
       This task provides exclusive store-handle ownership and a narrow
       internal execution boundary for validated read and write operations.
 
-      - [ ] 2.1.2.1 Subtask {#jcf-p02-2-1-2-1} - Open `TripleStore` in quad mode during initialization and retain the raw handle only in `StoreServer` state.
-      - [ ] 2.1.2.2 Subtask {#jcf-p02-2-1-2-2} - Verify schema and store metadata before declaring the process ready.
-      - [ ] 2.1.2.3 Subtask {#jcf-p02-2-1-2-3} - Expose private, typed callbacks for bounded read, atomic update, statistics, checkpoint, backup, export, and integrity operations.
-      - [ ] 2.1.2.4 Subtask {#jcf-p02-2-1-2-4} - Close the store deterministically on normal shutdown and preserve recoverable diagnostics on abnormal termination.
-      - [ ] 2.1.2.5 Subtask {#jcf-p02-2-1-2-5} - Reject direct callers outside approved knowledge modules and instrument operation type without logging query or data content.
+      - [x] 2.1.2.1 Subtask {#jcf-p02-2-1-2-1} - Open `TripleStore` in quad mode during initialization and retain the raw handle only in `StoreServer` state.
+      - [x] 2.1.2.2 Subtask {#jcf-p02-2-1-2-2} - Verify schema and store metadata before declaring the process ready.
+      - [x] 2.1.2.3 Subtask {#jcf-p02-2-1-2-3} - Expose private, typed callbacks for bounded read, atomic update, statistics, checkpoint, backup, export, and integrity operations.
+      - [x] 2.1.2.4 Subtask {#jcf-p02-2-1-2-4} - Close the store deterministically on normal shutdown and preserve recoverable diagnostics on abnormal termination.
+      - [x] 2.1.2.5 Subtask {#jcf-p02-2-1-2-5} - Reject direct callers outside approved knowledge modules and instrument operation type without logging query or data content.
 
-    - [ ] 2.1.3 Task {#jcf-p02-supervision-readiness} [repo: jido_code] [after: {#jcf-p02-store-server}] - Integrate store lifecycle and readiness into application supervision.
+    - [x] 2.1.3 Task {#jcf-p02-supervision-readiness} [repo: jido_code] [after: {#jcf-p02-store-server}] - Integrate store lifecycle and readiness into application supervision.
 
       This task ensures mutating surfaces cannot start or report healthy before
       the authoritative dataset is open, verified, and compatible.
 
-      - [ ] 2.1.3.1 Subtask {#jcf-p02-2-1-3-1} - Add a `JidoCode.Knowledge.Supervisor` before factory workers and the Phoenix endpoint dependencies that require durable state.
-      - [ ] 2.1.3.2 Subtask {#jcf-p02-2-1-3-2} - Keep endpoint health degraded and reject durable commands while the store is opening, verifying, recovering, backing up exclusively, or unavailable.
-      - [ ] 2.1.3.3 Subtask {#jcf-p02-2-1-3-3} - Define restart intensity and fail-stop behavior so repeated store-open failures do not create restart loops or fallback state.
-      - [ ] 2.1.3.4 Subtask {#jcf-p02-2-1-3-4} - Preserve independent static/error rendering where safe while preventing false application readiness.
-      - [ ] 2.1.3.5 Subtask {#jcf-p02-2-1-3-5} - Add controlled maintenance mode for restore, integrity repair, and schema migration.
+      - [x] 2.1.3.1 Subtask {#jcf-p02-2-1-3-1} - Add a `JidoCode.Knowledge.Supervisor` before factory workers and the Phoenix endpoint dependencies that require durable state.
+      - [x] 2.1.3.2 Subtask {#jcf-p02-2-1-3-2} - Keep endpoint health degraded and reject durable commands while the store is opening, verifying, recovering, backing up exclusively, or unavailable.
+      - [x] 2.1.3.3 Subtask {#jcf-p02-2-1-3-3} - Define restart intensity and fail-stop behavior so repeated store-open failures do not create restart loops or fallback state.
+      - [x] 2.1.3.4 Subtask {#jcf-p02-2-1-3-4} - Preserve independent static/error rendering where safe while preventing false application readiness.
+      - [x] 2.1.3.5 Subtask {#jcf-p02-2-1-3-5} - Add controlled maintenance mode for restore, integrity repair, and schema migration.
 
   - [ ] 2.2 Section - Implement atomic writes, revisions, and concurrency control.
 

@@ -27,4 +27,43 @@ defmodule JidoCode.Knowledge.TelemetryTest do
       Telemetry.metadata(%{operation: "dynamic-operation"})
     end
   end
+
+  test "spans expose only fixed operation classes and outcomes" do
+    handler = "knowledge-telemetry-test-#{System.unique_integer([:positive])}"
+    test_pid = self()
+
+    events = [
+      [:jido_code, :knowledge, :operation, :start],
+      [:jido_code, :knowledge, :operation, :stop]
+    ]
+
+    :ok =
+      :telemetry.attach_many(
+        handler,
+        events,
+        fn event, measurements, metadata, _config ->
+          send(test_pid, {:telemetry, event, measurements, metadata})
+        end,
+        nil
+      )
+
+    on_exit(fn -> :telemetry.detach(handler) end)
+
+    assert {:ok, :value} = Telemetry.span(:read, fn -> {:ok, :value} end)
+
+    assert_receive {:telemetry, [:jido_code, :knowledge, :operation, :start],
+                    %{system_time: system_time}, %{operation: :read}}
+
+    assert is_integer(system_time)
+
+    assert_receive {:telemetry, [:jido_code, :knowledge, :operation, :stop],
+                    %{duration: duration}, %{operation: :read, outcome: :ok}}
+
+    assert is_integer(duration)
+    assert duration >= 0
+
+    assert_raise FunctionClauseError, fn ->
+      Telemetry.span(:arbitrary_query, fn -> :ok end)
+    end
+  end
 end
