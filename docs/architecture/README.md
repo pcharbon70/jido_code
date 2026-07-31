@@ -32,3 +32,4 @@ implementation plan was merged.
 - [Atomic writes and revisions](./atomic-writes-and-revisions.md)
 - [Backup, restore, export, and integrity](./backup-restore-and-integrity.md)
 - [Knowledge store operations runbook](../operations/knowledge-store-runbook.md)
+- [Phase 2 durable substrate receipt](./phase-02-receipt.md)

@@ -219,7 +219,7 @@ defmodule JidoCode.Knowledge.StoreServer do
       {:store_open_result, ^token, ^opener, result} ->
         send(opener, {:adopt_store, token})
         await_opener(monitor, opener)
-        normalize_open_result(result)
+        adopt_open_result(result)
 
       {:DOWN, ^monitor, :process, ^opener, reason} ->
         {:error, BackendFailure.translate(reason, :open_store)}
@@ -472,6 +472,28 @@ defmodule JidoCode.Knowledge.StoreServer do
     do: {:error, BackendFailure.translate(reason, :open_store)}
 
   defp normalize_open_result(_result), do: {:error, Error.new(:unavailable, :open_store)}
+
+  defp adopt_open_result(result) do
+    with {:ok, store} <- normalize_open_result(result),
+         :ok <- link_store_processes(store) do
+      {:ok, store}
+    else
+      {:error, %Error{} = error} ->
+        close_open_result(result)
+        {:error, error}
+    end
+  end
+
+  defp link_store_processes(store) do
+    [store.db, store.dict_manager]
+    |> Enum.filter(&is_pid/1)
+    |> Enum.uniq()
+    |> Enum.each(&Process.link/1)
+
+    :ok
+  catch
+    :exit, reason -> {:error, BackendFailure.translate(reason, :open_store)}
+  end
 
   defp cancel_opener(opener, monitor, token) do
     send(opener, {:cancel_store_open, token})

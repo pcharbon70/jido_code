@@ -19,12 +19,19 @@ defmodule JidoCode.Knowledge.Supervisor do
   def init(options) do
     readiness = Keyword.get(options, :readiness, Readiness)
     store_server = Keyword.get(options, :store_server, StoreServer)
+    writer = Keyword.get(options, :writer, Writer)
+    maintenance = Keyword.get(options, :maintenance, Maintenance)
+
+    store_options =
+      options
+      |> Keyword.take([:authorized_callers, :config, :config_overrides, :native])
+      |> Keyword.merge(name: store_server, readiness: readiness)
 
     children = [
       {Readiness, name: readiness},
-      {StoreServer, name: store_server, readiness: readiness},
-      {Writer, store_server: store_server},
-      {Maintenance, store_server: store_server}
+      {StoreServer, store_options},
+      {Writer, name: writer, store_server: store_server},
+      {Maintenance, name: maintenance, store_server: store_server}
     ]
 
     Supervisor.init(children, strategy: :one_for_one, max_restarts: 3, max_seconds: 30)

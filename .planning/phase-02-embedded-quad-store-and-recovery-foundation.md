@@ -166,26 +166,26 @@ Back to plan: [README](./README.md)
     atomic, recoverable, and diagnosable across concurrency, process death,
     backup, restore, and operational failure.
 
-    - [ ] 2.5.1 Task {#jcf-p02-lifecycle-integration} [repo: jido_code] [after: {#jcf-p02-admin-boundary}] - Exercise production store lifecycle and supervision.
+    - [x] 2.5.1 Task {#jcf-p02-lifecycle-integration} [repo: jido_code] [after: {#jcf-p02-admin-boundary}] - Exercise production store lifecycle and supervision.
 
       This task verifies real application startup, readiness, shutdown, reopen,
       lock handling, and fail-closed behavior against isolated stores.
 
-      - [ ] 2.5.1.1 Subtask {#jcf-p02-2-5-1-1} - Start the application on an empty store, initialize only required substrate metadata, stop cleanly, reopen, and verify identical revisions and contents.
-      - [ ] 2.5.1.2 Subtask {#jcf-p02-2-5-1-2} - Attempt concurrent store ownership, invalid paths, permission failure, stale locks, incompatible schema, and missing native libraries.
-      - [ ] 2.5.1.3 Subtask {#jcf-p02-2-5-1-3} - Kill `StoreServer` and the BEAM during write stages and verify supervision never reports an ambiguous commit as absent or healthy prematurely.
-      - [ ] 2.5.1.4 Subtask {#jcf-p02-2-5-1-4} - Verify durable endpoints fail closed while static/error rendering and safe diagnostics follow the accepted readiness policy.
+      - [x] 2.5.1.1 Subtask {#jcf-p02-2-5-1-1} - Start the application on an empty store, initialize only required substrate metadata, stop cleanly, reopen, and verify identical revisions and contents.
+      - [x] 2.5.1.2 Subtask {#jcf-p02-2-5-1-2} - Attempt concurrent store ownership, invalid paths, permission failure, stale locks, incompatible schema, and missing native libraries.
+      - [x] 2.5.1.3 Subtask {#jcf-p02-2-5-1-3} - Kill `StoreServer` and the BEAM during write stages and verify supervision never reports an ambiguous commit as absent or healthy prematurely.
+      - [x] 2.5.1.4 Subtask {#jcf-p02-2-5-1-4} - Verify durable endpoints fail closed while static/error rendering and safe diagnostics follow the accepted readiness policy.
 
-    - [ ] 2.5.2 Task {#jcf-p02-atomicity-recovery-integration} [repo: jido_code] [after: {#jcf-p02-lifecycle-integration}] - Prove commit, revision, backup, and restore semantics under failure.
+    - [x] 2.5.2 Task {#jcf-p02-atomicity-recovery-integration} [repo: jido_code] [after: {#jcf-p02-lifecycle-integration}] - Prove commit, revision, backup, and restore semantics under failure.
 
       This task certifies that graph visibility and recovery remain coherent
       when clients race, responses are lost, and processes die.
 
-      - [ ] 2.5.2.1 Subtask {#jcf-p02-2-5-2-1} - Race conflicting expected-revision writes and prove one winner, deterministic stale receipts, and monotonic dataset/graph revisions.
-      - [ ] 2.5.2.2 Subtask {#jcf-p02-2-5-2-2} - Drop responses before and after commit, recover by commit identity, and prove retries do not create duplicate effects.
-      - [ ] 2.5.2.3 Subtask {#jcf-p02-2-5-2-3} - Backup under documented read/write conditions, restore to a fresh location, and compare canonical N-Quads plus metadata.
-      - [ ] 2.5.2.4 Subtask {#jcf-p02-2-5-2-4} - Corrupt or remove controlled fixture components and verify integrity checks, maintenance mode, and rollback remain safe.
-      - [ ] 2.5.2.5 Subtask {#jcf-p02-2-5-2-5} - Rerun Phase 1 architecture and compatibility gates plus `mix precommit`.
+      - [x] 2.5.2.1 Subtask {#jcf-p02-2-5-2-1} - Race conflicting expected-revision writes and prove one winner, deterministic stale receipts, and monotonic dataset/graph revisions.
+      - [x] 2.5.2.2 Subtask {#jcf-p02-2-5-2-2} - Drop responses before and after commit, recover by commit identity, and prove retries do not create duplicate effects.
+      - [x] 2.5.2.3 Subtask {#jcf-p02-2-5-2-3} - Backup under documented read/write conditions, restore to a fresh location, and compare canonical N-Quads plus metadata.
+      - [x] 2.5.2.4 Subtask {#jcf-p02-2-5-2-4} - Corrupt or remove controlled fixture components and verify integrity checks, maintenance mode, and rollback remain safe.
+      - [x] 2.5.2.5 Subtask {#jcf-p02-2-5-2-5} - Rerun Phase 1 architecture and compatibility gates plus `mix precommit`.
 
     - [ ] 2.5.3 Task {#jcf-p02-phase-receipt} [repo: jido_code] [after: {#jcf-p02-atomicity-recovery-integration}] - Publish the Phase 2 durable-substrate receipt.
 
@@ -193,7 +193,7 @@ Back to plan: [README](./README.md)
       revision, recovery, and operational evidence before ontology data is
       admitted.
 
-      - [ ] 2.5.3.1 Subtask {#jcf-p02-2-5-3-1} - Record dependency locks, store schema, configuration posture, commit strategy, test-store fixture digest, and candidate commit.
-      - [ ] 2.5.3.2 Subtask {#jcf-p02-2-5-3-2} - Attach lifecycle, race, crash, backup/restore, integrity, readiness, and architecture-scan results.
-      - [ ] 2.5.3.3 Subtask {#jcf-p02-2-5-3-3} - Keep G1 blocked if any operation can bypass `Writer`, any partial change can become visible, or restore cannot reproduce the dataset.
+      - [x] 2.5.3.1 Subtask {#jcf-p02-2-5-3-1} - Record dependency locks, store schema, configuration posture, commit strategy, test-store fixture digest, and candidate commit. (The immutable merged candidate remains pending.)
+      - [x] 2.5.3.2 Subtask {#jcf-p02-2-5-3-2} - Attach lifecycle, race, crash, backup/restore, integrity, readiness, and architecture-scan results.
+      - [x] 2.5.3.3 Subtask {#jcf-p02-2-5-3-3} - Keep G1 blocked if any operation can bypass `Writer`, any partial change can become visible, or restore cannot reproduce the dataset.
       - [ ] 2.5.3.4 Subtask {#jcf-p02-2-5-3-4} - Pin the merged candidate commit before authorizing Phase 3.
