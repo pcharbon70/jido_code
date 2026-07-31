@@ -70,6 +70,15 @@ This only acknowledges the minimum policy used by the dependency's older
 CMake files. It does not select system RocksDB. `WITH_SYSTEM_ROCKSDB=ON` and
 shared-filesystem database paths are outside the accepted matrix.
 
+erlang-rocksdb 1.9.0 also runs `git submodule update --init --recursive` as a
+compile pre-hook even though its Hex archive already contains the bundled
+RocksDB source and has no Git metadata of its own. Consequently, a custom
+`MIX_DEPS_PATH` outside every Git worktree fails with `not a git repository`.
+Keep clean dependency caches beneath the application checkout. The default
+`deps` path and the CI checkout layout satisfy this constraint. Treat changing
+that layout as a native-build contract change until the upstream hook is
+removed or patched.
+
 Typical failures are interpreted as follows:
 
 | Failure | Required response |
@@ -78,6 +87,7 @@ Typical failures are interpreted as follows:
 | Rust/Cargo missing or wrong version | Stop before application startup; install Rust 1.92.0 |
 | RocksDB or parser NIF cannot load | Mark the knowledge substrate unavailable; never fall back to another store |
 | TripleStore Git revision unavailable | Fail dependency resolution; do not float to a branch head |
+| Dependency cache outside a Git worktree | Move `MIX_DEPS_PATH` beneath the checkout; do not bypass native hooks |
 | Schema mismatch | Refuse to open or mutate the path |
 
 ## Security, License, And Persistence Review

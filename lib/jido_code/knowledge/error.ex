@@ -87,6 +87,11 @@ defmodule JidoCode.Knowledge.Error do
 
   def kinds, do: @kinds
 
+  @doc false
+  def from_backend(kind, operation, _backend_reason) do
+    new(kind, operation)
+  end
+
   def public(%__MODULE__{} = error) do
     %{kind: error.kind, operation: error.operation, retry: error.retry, message: error.message}
   end

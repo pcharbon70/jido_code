@@ -18,6 +18,7 @@ planning:
 - [Backend compatibility contract](./backend-compatibility.md)
 - [Failure, health, and telemetry contract](./failure-health-and-telemetry.md)
 - [Architecture guardrails](./architecture-guardrails.md)
+- [Phase 1 architecture and compatibility receipt](./phase-01-receipt.md)
 - [ADR 0001: Graph-only source of truth](../adr/0001-graph-only-source-of-truth.md)
 - [ADR 0002: TripleStore backend contract](../adr/0002-triple-store-backend-contract.md)
 

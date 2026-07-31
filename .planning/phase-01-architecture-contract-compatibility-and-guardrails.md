@@ -140,25 +140,25 @@ Back to plan: [README](./README.md)
     backend/toolchain and that the repository rejects alternate persistence or
     boundary leakage before Phase 2 creates the production store owner.
 
-    - [ ] 1.4.1 Task {#jcf-p01-compatibility-integration} [repo: jido_code] [after: {#jcf-p01-failure-vocabulary}] - Run the clean compatibility and backend capability suite.
+    - [x] 1.4.1 Task {#jcf-p01-compatibility-integration} [repo: jido_code] [after: {#jcf-p01-failure-vocabulary}] - Run the clean compatibility and backend capability suite.
 
       This task validates the candidate dependency set from a clean checkout
       and exercises every backend capability required by later phases.
 
-      - [ ] 1.4.1.1 Subtask {#jcf-p01-1-4-1-1} - Build native dependencies from a clean dependency cache on every supported CI environment.
-      - [ ] 1.4.1.2 Subtask {#jcf-p01-1-4-1-2} - Replay named-graph load/query/update/reasoning/export/restore fixtures and compare canonical results.
-      - [ ] 1.4.1.3 Subtask {#jcf-p01-1-4-1-3} - Kill and reopen the spike around pre-commit, commit, and post-commit boundaries and verify no ambiguous visible state.
-      - [ ] 1.4.1.4 Subtask {#jcf-p01-1-4-1-4} - Exercise lock contention, incompatible schema, invalid RDF/SPARQL, permission failure, and bounded error redaction.
+      - [x] 1.4.1.1 Subtask {#jcf-p01-1-4-1-1} - Build native dependencies from a clean dependency cache on every supported CI environment.
+      - [x] 1.4.1.2 Subtask {#jcf-p01-1-4-1-2} - Replay named-graph load/query/update/reasoning/export/restore fixtures and compare canonical results.
+      - [x] 1.4.1.3 Subtask {#jcf-p01-1-4-1-3} - Kill and reopen the spike around pre-commit, commit, and post-commit boundaries and verify no ambiguous visible state.
+      - [x] 1.4.1.4 Subtask {#jcf-p01-1-4-1-4} - Exercise lock contention, incompatible schema, invalid RDF/SPARQL, permission failure, and bounded error redaction.
 
-    - [ ] 1.4.2 Task {#jcf-p01-guardrail-integration} [repo: jido_code] [after: {#jcf-p01-compatibility-integration}] - Falsify the architecture guardrails with prohibited fixtures.
+    - [x] 1.4.2 Task {#jcf-p01-guardrail-integration} [repo: jido_code] [after: {#jcf-p01-compatibility-integration}] - Falsify the architecture guardrails with prohibited fixtures.
 
       This task proves CI catches realistic attempts to introduce a second
       source of truth or bypass the knowledge boundary.
 
-      - [ ] 1.4.2.1 Subtask {#jcf-p01-1-4-2-1} - Verify test fixtures containing Ecto, Ash, DETS, Mnesia, direct store-open, file snapshot, and raw UI SPARQL patterns are rejected.
-      - [ ] 1.4.2.2 Subtask {#jcf-p01-1-4-2-2} - Verify permitted temporary files, build artifacts, test directories, and external secret references do not create false positives.
-      - [ ] 1.4.2.3 Subtask {#jcf-p01-1-4-2-3} - Run dependency-boundary tests against intentional reverse imports and raw store-handle leakage.
-      - [ ] 1.4.2.4 Subtask {#jcf-p01-1-4-2-4} - Run `mix precommit` from the accepted dependency and guardrail candidate.
+      - [x] 1.4.2.1 Subtask {#jcf-p01-1-4-2-1} - Verify test fixtures containing Ecto, Ash, DETS, Mnesia, direct store-open, file snapshot, and raw UI SPARQL patterns are rejected.
+      - [x] 1.4.2.2 Subtask {#jcf-p01-1-4-2-2} - Verify permitted temporary files, build artifacts, test directories, and external secret references do not create false positives.
+      - [x] 1.4.2.3 Subtask {#jcf-p01-1-4-2-3} - Run dependency-boundary tests against intentional reverse imports and raw store-handle leakage.
+      - [x] 1.4.2.4 Subtask {#jcf-p01-1-4-2-4} - Run `mix precommit` from the accepted dependency and guardrail candidate.
 
     - [ ] 1.4.3 Task {#jcf-p01-phase-receipt} [repo: jido_code] [after: {#jcf-p01-guardrail-integration}] - Publish the Phase 1 architecture and compatibility receipt.
 
@@ -166,7 +166,7 @@ Back to plan: [README](./README.md)
       revisions, capability results, constraints, and guardrail proof required
       to authorize the production knowledge substrate.
 
-      - [ ] 1.4.3.1 Subtask {#jcf-p01-1-4-3-1} - Record accepted ADR/spec references, backend pins, toolchain matrix, fixture digests, commands, and test results.
-      - [ ] 1.4.3.2 Subtask {#jcf-p01-1-4-3-2} - Record transaction limitations and the selected atomicity strategy, including any commit-marker requirement.
-      - [ ] 1.4.3.3 Subtask {#jcf-p01-1-4-3-3} - Keep G0 blocked if any source-of-truth exception, backend capability, native prerequisite, or dependency direction remains ambiguous.
+      - [x] 1.4.3.1 Subtask {#jcf-p01-1-4-3-1} - Record accepted ADR/spec references, backend pins, toolchain matrix, fixture digests, commands, and test results.
+      - [x] 1.4.3.2 Subtask {#jcf-p01-1-4-3-2} - Record transaction limitations and the selected atomicity strategy, including any commit-marker requirement.
+      - [x] 1.4.3.3 Subtask {#jcf-p01-1-4-3-3} - Keep G0 blocked if any source-of-truth exception, backend capability, native prerequisite, or dependency direction remains ambiguous.
       - [ ] 1.4.3.4 Subtask {#jcf-p01-1-4-3-4} - Pin the merged candidate commit before authorizing Phase 2.

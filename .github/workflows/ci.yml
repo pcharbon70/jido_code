@@ -44,7 +44,14 @@ jobs:
       - name: Verify application
         run: mix precommit
 
+      - name: Audit dependencies
+        run: |
+          mix hex.audit
+          npm audit --omit=dev
+
       - name: Build Vite assets
         env:
           MIX_ENV: prod
+          # Asset compilation loads runtime config but never starts a server.
+          SECRET_KEY_BASE: "${{ github.sha }}${{ github.sha }}"
         run: mix assets.build
