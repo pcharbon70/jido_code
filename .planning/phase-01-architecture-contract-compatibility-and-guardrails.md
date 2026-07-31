@@ -99,40 +99,40 @@ Back to plan: [README](./README.md)
       - [x] 1.2.3.4 Subtask {#jcf-p01-1-2-3-4} - Define disk-full, permission, corruption, incompatible-schema, and NIF-load failure outcomes.
       - [x] 1.2.3.5 Subtask {#jcf-p01-1-2-3-5} - Record unsupported deployment topologies, especially concurrent BEAM writers against one local store path.
 
-  - [ ] 1.3 Section - Establish architecture enforcement and deterministic test support.
+  - [x] 1.3 Section - Establish architecture enforcement and deterministic test support.
 
     This section creates the static and dynamic guardrails that keep later work
     from introducing an accidental second model or persistence path.
 
-    - [ ] 1.3.1 Task {#jcf-p01-test-store-support} [repo: jido_code] [after: {#jcf-p01-operational-compatibility}] - Implement isolated graph-store test support.
+    - [x] 1.3.1 Task {#jcf-p01-test-store-support} [repo: jido_code] [after: {#jcf-p01-operational-compatibility}] - Implement isolated graph-store test support.
 
       This task gives every future storage test a deterministic, recoverable,
       non-shared database fixture with explicit cleanup and diagnostics.
 
-      - [ ] 1.3.1.1 Subtask {#jcf-p01-1-3-1-1} - Allocate unique temporary store directories without using broad or unresolved cleanup targets.
-      - [ ] 1.3.1.2 Subtask {#jcf-p01-1-3-1-2} - Supply fixed clocks, deterministic IRI/ID generation, immutable RDF fixtures, and seedable concurrency helpers.
-      - [ ] 1.3.1.3 Subtask {#jcf-p01-1-3-1-3} - Ensure tests close RocksDB handles before cleanup and retain bounded diagnostics on failure.
-      - [ ] 1.3.1.4 Subtask {#jcf-p01-1-3-1-4} - Mark real-store integration tests for safe async behavior and prohibit shared store paths across test cases.
+      - [x] 1.3.1.1 Subtask {#jcf-p01-1-3-1-1} - Allocate unique temporary store directories without using broad or unresolved cleanup targets.
+      - [x] 1.3.1.2 Subtask {#jcf-p01-1-3-1-2} - Supply fixed clocks, deterministic IRI/ID generation, immutable RDF fixtures, and seedable concurrency helpers.
+      - [x] 1.3.1.3 Subtask {#jcf-p01-1-3-1-3} - Ensure tests close RocksDB handles before cleanup and retain bounded diagnostics on failure.
+      - [x] 1.3.1.4 Subtask {#jcf-p01-1-3-1-4} - Mark real-store integration tests for safe async behavior and prohibit shared store paths across test cases.
 
-    - [ ] 1.3.2 Task {#jcf-p01-architecture-gates} [repo: jido_code] [after: {#jcf-p01-test-store-support}] - Add executable dependency and persistence guardrails.
+    - [x] 1.3.2 Task {#jcf-p01-architecture-gates} [repo: jido_code] [after: {#jcf-p01-test-store-support}] - Add executable dependency and persistence guardrails.
 
       This task makes prohibited dependencies and storage APIs fail CI as soon
       as they appear.
 
-      - [ ] 1.3.2.1 Subtask {#jcf-p01-1-3-2-1} - Add source scans for Ecto repositories, Ash resources, DETS, Mnesia, ad hoc file persistence, direct RocksDB access, and store opens outside the knowledge owner.
-      - [ ] 1.3.2.2 Subtask {#jcf-p01-1-3-2-2} - Add dependency-direction tests preventing web, runtime, factory, and integration modules from reaching knowledge internals.
-      - [ ] 1.3.2.3 Subtask {#jcf-p01-1-3-2-3} - Add forbidden-pattern checks for record codecs, generic entity stores, foreign-key-shaped relationship persistence, and raw UI SPARQL.
-      - [ ] 1.3.2.4 Subtask {#jcf-p01-1-3-2-4} - Integrate the architecture checks into `mix precommit` with actionable, bounded errors.
+      - [x] 1.3.2.1 Subtask {#jcf-p01-1-3-2-1} - Add source scans for Ecto repositories, Ash resources, DETS, Mnesia, ad hoc file persistence, direct RocksDB access, and store opens outside the knowledge owner.
+      - [x] 1.3.2.2 Subtask {#jcf-p01-1-3-2-2} - Add dependency-direction tests preventing web, runtime, factory, and integration modules from reaching knowledge internals.
+      - [x] 1.3.2.3 Subtask {#jcf-p01-1-3-2-3} - Add forbidden-pattern checks for record codecs, generic entity stores, foreign-key-shaped relationship persistence, and raw UI SPARQL.
+      - [x] 1.3.2.4 Subtask {#jcf-p01-1-3-2-4} - Integrate the architecture checks into `mix precommit` with actionable, bounded errors.
 
-    - [ ] 1.3.3 Task {#jcf-p01-failure-vocabulary} [repo: jido_code] [after: {#jcf-p01-architecture-gates}] - Define baseline errors, health states, and safe telemetry.
+    - [x] 1.3.3 Task {#jcf-p01-failure-vocabulary} [repo: jido_code] [after: {#jcf-p01-architecture-gates}] - Define baseline errors, health states, and safe telemetry.
 
       This task gives backend and boundary failures stable meanings before
       higher-level commands depend on them.
 
-      - [ ] 1.3.3.1 Subtask {#jcf-p01-1-3-3-1} - Distinguish unavailable, incompatible, locked, corrupt, invalid input, unauthorized, conflict, stale precondition, timeout, and persistence failure.
-      - [ ] 1.3.3.2 Subtask {#jcf-p01-1-3-3-2} - Define health states that never report ready before store verification and required ontology compatibility pass.
-      - [ ] 1.3.3.3 Subtask {#jcf-p01-1-3-3-3} - Define low-cardinality telemetry fields that exclude raw SPARQL, graph contents, credentials, filesystem details, and arbitrary IRIs.
-      - [ ] 1.3.3.4 Subtask {#jcf-p01-1-3-3-4} - Define startup and request behavior when the knowledge substrate cannot accept durable operations.
+      - [x] 1.3.3.1 Subtask {#jcf-p01-1-3-3-1} - Distinguish unavailable, incompatible, locked, corrupt, invalid input, unauthorized, conflict, stale precondition, timeout, and persistence failure.
+      - [x] 1.3.3.2 Subtask {#jcf-p01-1-3-3-2} - Define health states that never report ready before store verification and required ontology compatibility pass.
+      - [x] 1.3.3.3 Subtask {#jcf-p01-1-3-3-3} - Define low-cardinality telemetry fields that exclude raw SPARQL, graph contents, credentials, filesystem details, and arbitrary IRIs.
+      - [x] 1.3.3.4 Subtask {#jcf-p01-1-3-3-4} - Define startup and request behavior when the knowledge substrate cannot accept durable operations.
 
   - [ ] 1.4 Section - Phase 1 Integration Tests.
 

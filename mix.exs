@@ -93,7 +93,13 @@ defmodule JidoCode.MixProject do
         "assets.build",
         "phx.digest"
       ],
-      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warnings-as-errors",
+        "architecture.check",
+        "deps.unlock --unused",
+        "format",
+        "test"
+      ]
     ]
   end
 end

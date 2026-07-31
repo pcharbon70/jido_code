@@ -1,5 +1,5 @@
 defmodule JidoCode.Knowledge.TripleStoreCompatibilityTest do
-  use ExUnit.Case, async: false
+  use JidoCode.GraphStoreCase
 
   alias TripleStore.Dictionary.Manager
   alias TripleStore.Dictionary.SequenceCounter
@@ -8,6 +8,7 @@ defmodule JidoCode.Knowledge.TripleStoreCompatibilityTest do
   alias TripleStore.QuadOperations
   alias TripleStore.Reasoner.{ReasoningProfile, SemiNaive}
   alias TripleStore.SPARQL.Authorization
+  alias JidoCode.TestSupport.GraphFixtures
 
   @moduletag :triple_store
 
@@ -17,34 +18,6 @@ defmodule JidoCode.Knowledge.TripleStoreCompatibilityTest do
   @derived_graph @ex <> "graphs/derived"
   @change_graph @ex <> "graphs/change"
   @receipt_graph @ex <> "graphs/receipt"
-
-  @dataset """
-  @prefix ex: <https://jido.code/compatibility/> .
-
-  <https://jido.code/compatibility/graphs/observed> {
-    ex:repo ex:hasName "jido_code" .
-    ex:repo ex:hasRevision "abc123" .
-  }
-
-  <https://jido.code/compatibility/graphs/policy> {
-    ex:policy ex:appliesTo ex:repo .
-  }
-  """
-
-  setup do
-    root =
-      Path.join(
-        System.tmp_dir!(),
-        "jido_code_triple_store_#{System.unique_integer([:positive, :monotonic])}"
-      )
-
-    File.mkdir_p!(root)
-    on_exit(fn -> File.rm_rf!(root) end)
-
-    store = open_store!(Path.join(root, "store"))
-
-    %{root: root, store: store}
-  end
 
   test "loads named graphs and executes bounded SELECT, ASK, and CONSTRUCT queries", %{
     store: store
@@ -277,27 +250,6 @@ defmodule JidoCode.Knowledge.TripleStoreCompatibilityTest do
     assert {:ok, 0} = graph_count(reopened, :default)
   end
 
-  defp open_store!(path) do
-    {:ok, store} = TripleStore.open(path, schema: :quad)
-    register_store(store)
-    store
-  end
-
-  defp register_store(store) do
-    on_exit(fn -> close_store(store) end)
-    store
-  end
-
-  defp close_store(store) do
-    if Process.alive?(store.dict_manager) do
-      TripleStore.close(store)
-    else
-      :ok
-    end
-  catch
-    :exit, _reason -> :ok
-  end
-
   defp checkpoint_store(store, checkpoint_path) do
     with {:ok, counter} <- Manager.get_counter(store.dict_manager),
          :ok <- SequenceCounter.flush(counter) do
@@ -307,7 +259,7 @@ defmodule JidoCode.Knowledge.TripleStoreCompatibilityTest do
   end
 
   defp load_dataset(store) do
-    Loader.load_trig_string(store.db, store.dict_manager, @dataset,
+    Loader.load_trig_string(store.db, store.dict_manager, GraphFixtures.compatibility_trig!(),
       parallel: false,
       bulk_mode: false
     )

@@ -16,6 +16,8 @@ planning:
 - [Current-state inventory](./current-state-inventory.md)
 - [Module and plane boundaries](./module-boundaries.md)
 - [Backend compatibility contract](./backend-compatibility.md)
+- [Failure, health, and telemetry contract](./failure-health-and-telemetry.md)
+- [Architecture guardrails](./architecture-guardrails.md)
 - [ADR 0001: Graph-only source of truth](../adr/0001-graph-only-source-of-truth.md)
 - [ADR 0002: TripleStore backend contract](../adr/0002-triple-store-backend-contract.md)
 
