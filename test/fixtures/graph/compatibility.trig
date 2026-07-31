@@ -1,0 +1,10 @@
+@prefix ex: <https://jido.code/compatibility/> .
+
+<https://jido.code/compatibility/graphs/observed> {
+  ex:repo ex:hasName "jido_code" .
+  ex:repo ex:hasRevision "abc123" .
+}
+
+<https://jido.code/compatibility/graphs/policy> {
+  ex:policy ex:appliesTo ex:repo .
+}

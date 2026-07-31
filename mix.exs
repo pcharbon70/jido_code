@@ -5,7 +5,7 @@ defmodule JidoCode.MixProject do
     [
       app: :jido_code,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -49,6 +49,13 @@ defmodule JidoCode.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:salad_ui, "~> 1.0.0-beta.3"},
+      # RDF 2.1 still declares Decimal 2.x, whose exponent parser is vulnerable
+      # to unbounded allocation. Decimal 3 retains the API RDF uses.
+      {:decimal, "~> 3.1", override: true},
+      {:rdf, "~> 2.1"},
+      {:triple_store,
+       git: "https://github.com/pcharbon70/triple_store.git",
+       ref: "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.2.0",
@@ -86,7 +93,13 @@ defmodule JidoCode.MixProject do
         "assets.build",
         "phx.digest"
       ],
-      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warnings-as-errors",
+        "architecture.check",
+        "deps.unlock --unused",
+        "format",
+        "test"
+      ]
     ]
   end
 end
