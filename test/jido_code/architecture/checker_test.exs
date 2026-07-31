@@ -20,7 +20,9 @@ defmodule JidoCode.Architecture.CheckerTest do
       {"lib/jido_code_web/raw.ex",
        "defmodule JidoCodeWeb.Raw do\n  def open, do: TripleStore.open(\"state\")\nend"},
       {"lib/jido_code/factory/raw.ex",
-       "defmodule JidoCode.Factory.Raw do\n  def open, do: :rocksdb.open(~c\"state\", [])\nend"}
+       "defmodule JidoCode.Factory.Raw do\n  def open, do: :rocksdb.open(~c\"state\", [])\nend"},
+      {"lib/jido_code/knowledge/raw_update.ex",
+       "defmodule JidoCode.Knowledge.RawUpdate do\n  def write(store), do: TripleStore.update(store, \"INSERT DATA {}\")\nend"}
     ]
 
     assert {:error, violations} = Checker.check_sources(sources)
@@ -31,6 +33,7 @@ defmodule JidoCode.Architecture.CheckerTest do
                :parallel_persistence,
                :file_persistence,
                :store_ownership,
+               :write_coordinator,
                :raw_store_access,
                :raw_rocksdb
              ]),

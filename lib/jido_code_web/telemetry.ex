@@ -52,6 +52,19 @@ defmodule JidoCodeWeb.Telemetry do
         unit: {:native, :millisecond}
       ),
 
+      # Knowledge substrate metrics use only fixed operation and outcome tags.
+      summary("jido_code.knowledge.operation.stop.duration",
+        tags: [:operation, :outcome],
+        unit: {:native, :millisecond}
+      ),
+      summary("jido_code.knowledge.operation.stop.queue_duration",
+        tags: [:operation, :outcome],
+        unit: {:native, :millisecond}
+      ),
+      sum("jido_code.knowledge.operation.stop.result_count",
+        tags: [:operation, :outcome]
+      ),
+
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),

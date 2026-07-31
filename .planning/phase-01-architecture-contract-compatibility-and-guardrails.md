@@ -14,7 +14,7 @@ support the required quad-store semantics before product code depends on it.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Ratify the graph-native factory boundary and establish a reproducible compatibility baseline.
+- [x] 1 Phase - Ratify the graph-native factory boundary and establish a reproducible compatibility baseline.
 
   This phase removes foundational ambiguity about source-of-truth scope,
   external-system boundaries, backend capabilities, dependency versions, and
@@ -134,7 +134,7 @@ Back to plan: [README](./README.md)
       - [x] 1.3.3.3 Subtask {#jcf-p01-1-3-3-3} - Define low-cardinality telemetry fields that exclude raw SPARQL, graph contents, credentials, filesystem details, and arbitrary IRIs.
       - [x] 1.3.3.4 Subtask {#jcf-p01-1-3-3-4} - Define startup and request behavior when the knowledge substrate cannot accept durable operations.
 
-  - [ ] 1.4 Section - Phase 1 Integration Tests.
+  - [x] 1.4 Section - Phase 1 Integration Tests.
 
     This final section proves the architecture can be built on the selected
     backend/toolchain and that the repository rejects alternate persistence or
@@ -160,7 +160,7 @@ Back to plan: [README](./README.md)
       - [x] 1.4.2.3 Subtask {#jcf-p01-1-4-2-3} - Run dependency-boundary tests against intentional reverse imports and raw store-handle leakage.
       - [x] 1.4.2.4 Subtask {#jcf-p01-1-4-2-4} - Run `mix precommit` from the accepted dependency and guardrail candidate.
 
-    - [ ] 1.4.3 Task {#jcf-p01-phase-receipt} [repo: jido_code] [after: {#jcf-p01-guardrail-integration}] - Publish the Phase 1 architecture and compatibility receipt.
+    - [x] 1.4.3 Task {#jcf-p01-phase-receipt} [repo: jido_code] [after: {#jcf-p01-guardrail-integration}] - Publish the Phase 1 architecture and compatibility receipt.
 
       This task records the accepted decision, exact toolchain and dependency
       revisions, capability results, constraints, and guardrail proof required
@@ -169,4 +169,4 @@ Back to plan: [README](./README.md)
       - [x] 1.4.3.1 Subtask {#jcf-p01-1-4-3-1} - Record accepted ADR/spec references, backend pins, toolchain matrix, fixture digests, commands, and test results.
       - [x] 1.4.3.2 Subtask {#jcf-p01-1-4-3-2} - Record transaction limitations and the selected atomicity strategy, including any commit-marker requirement.
       - [x] 1.4.3.3 Subtask {#jcf-p01-1-4-3-3} - Keep G0 blocked if any source-of-truth exception, backend capability, native prerequisite, or dependency direction remains ambiguous.
-      - [ ] 1.4.3.4 Subtask {#jcf-p01-1-4-3-4} - Pin the merged candidate commit before authorizing Phase 2.
+      - [x] 1.4.3.4 Subtask {#jcf-p01-1-4-3-4} - Pin the merged candidate commit before authorizing Phase 2. (`e3d2b2cdd26cee36fdfc464f2d75154e8206ac53`)

@@ -23,6 +23,8 @@ The checker rejects:
 - direct RocksDB calls outside `JidoCode.Knowledge.Backend`;
 - `TripleStore.open/2` outside `JidoCode.Knowledge.StoreServer` and any
   TripleStore access outside `JidoCode.Knowledge`;
+- direct `TripleStore.update/2` outside the empty-store metadata bootstrap and
+  the `Writer`-owned atomic compiler;
 - unclassified filesystem write/copy/rename APIs;
 - browser persistence other than the digest-pinned `phx:theme` implementation
   in `assets/js/theme.js`;

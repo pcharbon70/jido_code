@@ -3,14 +3,12 @@
 ## Status
 
 This receipt records the Phase 1 candidate verified on 2026-07-31. The
-architecture decisions, backend capability proof, guardrails, and local
-integration gates are accepted. Phase 2 is not yet authorized: the Phase 1 PR
-must pass its clean-checkout CI run, be merged, and have its merged commit
-pinned in subtask 1.4.3.4.
+architecture decisions, backend capability proof, guardrails, and integration
+gates are accepted. Pull request 3 passed its clean-checkout CI run and was
+merged as `e3d2b2cdd26cee36fdfc464f2d75154e8206ac53`. Phase 2 is authorized.
 
-There is no unresolved source-of-truth exception, backend capability,
-native prerequisite, or dependency-direction question in this candidate. G0
-is held only by the explicit merged-commit gate.
+There is no unresolved source-of-truth exception, backend capability, native
+prerequisite, dependency-direction question, or remaining G0 gate.
 
 ## Accepted Inputs
 
@@ -37,7 +35,8 @@ tracked implementation plan are the repository-local specifications.
 | Section 1.1 | `e729eb1` - ratify graph-native architecture boundaries |
 | Section 1.2 | `1cae9da` - prove TripleStore backend compatibility |
 | Section 1.3 | `c9e3706` - enforce graph-native architecture guardrails |
-| Section 1.4 | This receipt's PR candidate; merged commit intentionally pending |
+| Section 1.4 | `f08826f` - complete Phase 1 integration gates |
+| Merged candidate | `e3d2b2cdd26cee36fdfc464f2d75154e8206ac53` |
 
 ## Accepted Dependency And Toolchain Pins
 
@@ -152,7 +151,6 @@ both dependency audits, and the production asset build from a clean checkout.
 
 ## Gate G0
 
-The candidate satisfies the technical G0 boundary. Promotion remains blocked
-until the pull request is merged and the immutable merged commit is recorded
-in this receipt and plan subtask 1.4.3.4. Phase 2 must not begin before that
-pin exists.
+G0 is complete. Pull request 3 passed the required clean-checkout gates, was
+merged, and its immutable merge commit is pinned above and in plan subtask
+1.4.3.4. Phase 2 work is authorized from that baseline.

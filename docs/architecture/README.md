@@ -25,3 +25,11 @@ planning:
 The Phase 1 baseline starts at commit
 `54cda0fd34cc687f0c1be6322513a790d3a9c37e`, immediately after the graph-native
 implementation plan was merged.
+
+## Phase 2 Substrate
+
+- [Authoritative store lifecycle](./store-lifecycle.md)
+- [Atomic writes and revisions](./atomic-writes-and-revisions.md)
+- [Backup, restore, export, and integrity](./backup-restore-and-integrity.md)
+- [Knowledge store operations runbook](../operations/knowledge-store-runbook.md)
+- [Phase 2 durable substrate receipt](./phase-02-receipt.md)

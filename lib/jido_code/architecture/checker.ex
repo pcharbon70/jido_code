@@ -23,6 +23,11 @@ defmodule JidoCode.Architecture.Checker do
   @generic_store ~r/(?:^|\.)(?:EntityStore|GenericEntityStore|RecordStore|CrudStore)$/
   @record_codec_functions [:encode_record, :decode_record, :dump_entity, :load_entity]
   @store_handle_fields [:store, :db, :dict_manager, :transaction]
+  @direct_update_owners [
+    "JidoCode.Knowledge.AtomicCommit",
+    "JidoCode.Knowledge.Metadata",
+    "JidoCode.Knowledge.RestoreLog"
+  ]
   @theme_path "assets/js/theme.js"
   @theme_sha256 "b5c950f5dfe08d10ad0eb9e72144a7440452d628f1ce330101341dc45a74eba2"
   @file_roles %{
@@ -206,6 +211,16 @@ defmodule JidoCode.Architecture.Checker do
           path,
           call.line,
           "only JidoCode.Knowledge.StoreServer may open TripleStore"
+        )
+      )
+      |> maybe_add(
+        call.module == "TripleStore" and call.function in [:update, :update!] and
+          caller not in @direct_update_owners,
+        violation(
+          :write_coordinator,
+          path,
+          call.line,
+          "persistent graph updates must run through an approved knowledge write coordinator"
         )
       )
       |> maybe_add(

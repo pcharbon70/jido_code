@@ -21,6 +21,7 @@ defmodule JidoCode.Architecture.GuardrailIntegrationTest do
              MapSet.new([
                :parallel_persistence,
                :store_ownership,
+               :write_coordinator,
                :raw_store_access,
                :raw_rocksdb,
                :file_persistence,

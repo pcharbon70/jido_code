@@ -11,6 +11,7 @@ defmodule JidoCode.Application do
       JidoCodeWeb.Telemetry,
       TwMerge.Cache,
       {DNSCluster, query: Application.get_env(:jido_code, :dns_cluster_query) || :ignore},
+      JidoCode.Knowledge.Supervisor,
       {Phoenix.PubSub, name: JidoCode.PubSub},
       # Start a worker by calling: JidoCode.Worker.start_link(arg)
       # {JidoCode.Worker, arg},
