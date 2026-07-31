@@ -1,0 +1,27 @@
+{
+  "canonical_nquads_sha256": "7f23ed6ba222a904422d54765c60094d82253be551e9d101dbf3314020a58409",
+  "compatibility": "semantic-baseline",
+  "graph_iri": "https://jido.run/graph/ontology/1.0.0",
+  "imports": [
+    "http://purl.org/dc/terms/",
+    "http://spdx.org/rdf/terms",
+    "http://www.w3.org/2004/02/skos/core",
+    "http://www.w3.org/ns/prov-o"
+  ],
+  "ontology_iri": "https://jido.run/ontology/factory/1.0.0",
+  "package_sha256": "75c1392635ad1d4f567685111f74833bb4afb35f7f3293ddc5241f9137be827a",
+  "released_on": "2026-07-31",
+  "resource_namespace": "https://jido.run/id/",
+  "shape_version": "1.0.0",
+  "shapes_iri": "https://jido.run/ontology/shapes/1.0.0",
+  "sources": {
+    "RELEASE.md": "a244a83246b1a40aacd398c0570e9ef9848b10b6d09c3bf0629c99f0df77c6c3",
+    "factory.ttl": "34f6c248d8bba649b0a378088ffd8cc707012ad1a41777162f009e3ab6bc215b",
+    "policy-terms.ttl": "9fdc1f6089b326aa02a9c6a1a1285704ac71c0e042ec9f6a54aa0cdac5ca9d16",
+    "release.ttl": "b10af6cea337b6796e4611d9a1063c61a45c1b0cd44b2500d9ccf5bb2f07095b",
+    "shapes.ttl": "ed4677c0cbb16b49bcc736e64c2dc4821a932b2b6a42dcc45158a2b80ac34637",
+    "work-states.ttl": "03be63bf02edaf2bf827f556200c9a98aefe0e1f3e7fb3c97c5bbbd1d6d13c95"
+  },
+  "term_namespace": "https://jido.run/ontology/factory#",
+  "version": "1.0.0"
+}

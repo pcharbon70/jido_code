@@ -33,3 +33,7 @@ implementation plan was merged.
 - [Backup, restore, export, and integrity](./backup-restore-and-integrity.md)
 - [Knowledge store operations runbook](../operations/knowledge-store-runbook.md)
 - [Phase 2 durable substrate receipt](./phase-02-receipt.md)
+
+## Phase 3 Semantic Contract
+
+- [Factory ontology contract](./factory-ontology.md)

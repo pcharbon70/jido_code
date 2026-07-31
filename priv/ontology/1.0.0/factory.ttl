@@ -1,0 +1,153 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/factory/1.0.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://jido.run/ontology/factory/1.0.0> ;
+  owl:versionInfo "1.0.0" ;
+  owl:imports <http://www.w3.org/ns/prov-o> ,
+    <http://www.w3.org/2004/02/skos/core> ,
+    <http://purl.org/dc/terms/> ,
+    <http://spdx.org/rdf/terms> ;
+  rdfs:label "Jido Factory ontology" ;
+  rdfs:comment "Graph-native vocabulary for managed repository factory knowledge and control." .
+
+# Identity and scope
+jf:RepositoryFactory a owl:Class ; rdfs:subClassOf prov:Organization ; rdfs:label "repository factory" .
+jf:SoftwareRepository a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "software repository" .
+jf:RepositoryLocator a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "repository locator" .
+jf:ManagementEnrollment a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "management enrollment" .
+jf:RepositorySnapshot a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "repository snapshot" .
+jf:SourceArtifact a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "source artifact" .
+jf:CodeSymbol a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "code symbol" .
+jf:Scope a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "scope" .
+
+# Knowledge and epistemic resources
+jf:ObservationActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "observation activity" .
+jf:ObservationBatch a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "observation batch" .
+jf:Claim a owl:Class ; rdfs:subClassOf rdf:Statement, prov:Entity ; rdfs:label "claim" .
+jf:AssessmentActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "assessment activity" .
+jf:Finding a owl:Class ; rdfs:subClassOf jf:Claim ; rdfs:label "finding" .
+jf:Contradiction a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "contradiction" .
+jf:KnowledgeAssertion a owl:Class ; rdfs:subClassOf jf:Claim ; rdfs:label "knowledge assertion" .
+jf:AdoptionActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "adoption activity" .
+
+# Intent and control
+jf:DesiredOutcome a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "desired outcome" .
+jf:Goal a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "goal" .
+jf:Constraint a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "constraint" .
+jf:Policy a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "policy" .
+jf:Obligation a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "obligation" .
+jf:Task a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "task" .
+jf:Plan a owl:Class ; rdfs:subClassOf prov:Plan ; rdfs:label "plan" .
+jf:Capability a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "capability" .
+jf:Lease a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "lease" .
+jf:StateTransition a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "state transition" .
+
+# Execution and evidence
+jf:ExecutionAttempt a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "execution attempt" .
+jf:ToolInvocation a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "tool invocation" .
+jf:Patch a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "patch" .
+jf:VerificationActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "verification activity" .
+jf:Artifact a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "artifact" .
+jf:EvidenceBundle a owl:Class ; rdfs:subClassOf prov:Collection ; rdfs:label "evidence bundle" .
+jf:Decision a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "decision" .
+
+# Actors and interactions
+jf:Actor a owl:Class ; rdfs:subClassOf prov:Agent ; rdfs:label "actor" .
+jf:Agent a owl:Class ; rdfs:subClassOf jf:Actor, prov:SoftwareAgent ; rdfs:label "agent" .
+jf:InteractionSession a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "interaction session" .
+jf:Message a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "message" .
+jf:AuthorizationGrant a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "authorization grant" .
+jf:CredentialReference a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "credential reference" .
+
+# Graph and release resources
+jf:NamedGraph a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "named graph" .
+jf:OntologyRelease a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "ontology release" .
+jf:ValidationReport a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "validation report" .
+jf:ValidationResult a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "validation result" .
+jf:MigrationActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "migration activity" .
+
+# Direct object relationships
+jf:enrolls a owl:ObjectProperty ; rdfs:domain jf:RepositoryFactory ; rdfs:range jf:ManagementEnrollment ; rdfs:label "enrolls" .
+jf:manages a owl:ObjectProperty ; rdfs:domain jf:ManagementEnrollment ; rdfs:range jf:SoftwareRepository ; rdfs:label "manages" .
+jf:locatedBy a owl:ObjectProperty ; rdfs:domain jf:SoftwareRepository ; rdfs:range jf:RepositoryLocator ; rdfs:label "located by" .
+jf:inScope a owl:ObjectProperty ; rdfs:range jf:Scope ; rdfs:label "in scope" .
+jf:about a owl:ObjectProperty ; rdfs:label "about" .
+jf:derivedFrom a owl:ObjectProperty ; rdfs:subPropertyOf prov:wasDerivedFrom ; rdfs:label "derived from" .
+jf:supports a owl:ObjectProperty ; rdfs:label "supports" .
+jf:contradicts a owl:ObjectProperty ; rdfs:label "contradicts" .
+jf:addresses a owl:ObjectProperty ; rdfs:label "addresses" .
+jf:decomposesInto a owl:ObjectProperty ; rdfs:domain jf:Goal ; rdfs:range jf:Goal ; rdfs:label "decomposes into" .
+jf:dependsOn a owl:ObjectProperty ; rdfs:label "depends on" .
+jf:blocks a owl:ObjectProperty ; rdfs:label "blocks" .
+jf:requiresCapability a owl:ObjectProperty ; rdfs:range jf:Capability ; rdfs:label "requires capability" .
+jf:governedBy a owl:ObjectProperty ; rdfs:range jf:Policy ; rdfs:label "governed by" .
+jf:executes a owl:ObjectProperty ; rdfs:range jf:Task ; rdfs:label "executes" .
+jf:evaluates a owl:ObjectProperty ; rdfs:domain jf:VerificationActivity ; rdfs:label "evaluates" .
+jf:accepts a owl:ObjectProperty ; rdfs:domain jf:Decision ; rdfs:label "accepts" .
+jf:rejects a owl:ObjectProperty ; rdfs:domain jf:Decision ; rdfs:label "rejects" .
+jf:waives a owl:ObjectProperty ; rdfs:domain jf:Decision ; rdfs:label "waives" .
+jf:satisfies a owl:ObjectProperty ; rdfs:label "satisfies" .
+jf:supersedes a owl:ObjectProperty ; rdfs:label "supersedes" .
+jf:claimedBy a owl:ObjectProperty ; rdfs:domain jf:Lease ; rdfs:range jf:Actor ; rdfs:label "claimed by" .
+jf:validFor a owl:ObjectProperty ; rdfs:range jf:Scope ; rdfs:label "valid for" .
+jf:sourceActivity a owl:ObjectProperty ; rdfs:range prov:Activity ; rdfs:subPropertyOf prov:wasGeneratedBy ; rdfs:label "source activity" .
+jf:graphScope a owl:ObjectProperty ; rdfs:domain jf:Claim ; rdfs:range jf:NamedGraph ; rdfs:label "graph scope" .
+jf:epistemicState a owl:ObjectProperty ; rdfs:domain jf:Claim ; rdfs:range skos:Concept ; rdfs:label "epistemic state" .
+jf:confidenceBand a owl:ObjectProperty ; rdfs:domain jf:Claim ; rdfs:range skos:Concept ; rdfs:label "confidence band" .
+jf:priorState a owl:ObjectProperty ; rdfs:domain jf:StateTransition ; rdfs:range skos:Concept ; rdfs:label "prior state" .
+jf:nextState a owl:ObjectProperty ; rdfs:domain jf:StateTransition ; rdfs:range skos:Concept ; rdfs:label "next state" .
+jf:transitionSubject a owl:ObjectProperty ; rdfs:domain jf:StateTransition ; rdfs:label "transition subject" .
+jf:expectedPredecessor a owl:ObjectProperty ; rdfs:domain jf:StateTransition ; rdfs:range jf:StateTransition ; rdfs:label "expected predecessor" .
+jf:cause a owl:ObjectProperty ; rdfs:domain jf:StateTransition ; rdfs:label "cause" .
+jf:decisionAuthority a owl:ObjectProperty ; rdfs:domain jf:Decision ; rdfs:range jf:Actor ; rdfs:label "decision authority" .
+jf:ontologyVersion a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:OntologyRelease ; rdfs:label "ontology version" .
+jf:creationActivity a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range prov:Activity ; rdfs:label "creation activity" .
+jf:ownerScope a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:Scope ; rdfs:label "owner scope" .
+jf:graphKind a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range skos:Concept ; rdfs:label "graph kind" .
+jf:lifecycleState a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range skos:Concept ; rdfs:label "lifecycle state" .
+jf:completenessState a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range skos:Concept ; rdfs:label "completeness state" .
+jf:sourceRevision a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:label "source revision" .
+jf:parentGraph a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:NamedGraph ; rdfs:label "parent graph" .
+jf:sourceGraph a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:NamedGraph ; rdfs:label "source graph" .
+jf:targetGraph a owl:ObjectProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range jf:NamedGraph ; rdfs:label "target graph" .
+jf:validationReport a owl:ObjectProperty ; rdfs:range jf:ValidationReport ; rdfs:label "validation report" .
+jf:focusNode a owl:ObjectProperty ; rdfs:domain jf:ValidationResult ; rdfs:label "focus node" .
+jf:resultShape a owl:ObjectProperty ; rdfs:domain jf:ValidationResult ; rdfs:label "result shape" .
+jf:resultPath a owl:ObjectProperty ; rdfs:domain jf:ValidationResult ; rdfs:label "result path" .
+jf:severity a owl:ObjectProperty ; rdfs:domain jf:ValidationResult ; rdfs:range skos:Concept ; rdfs:label "severity" .
+jf:ruleSet a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:label "rule set" .
+jf:invalidationState a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range skos:Concept ; rdfs:label "invalidation state" .
+
+# Bounded literal properties
+jf:canonicalLocator a owl:DatatypeProperty ; rdfs:domain jf:RepositoryLocator ; rdfs:range xsd:string ; rdfs:label "canonical locator" .
+jf:displayId a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "display identifier" .
+jf:contentDigest a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "content digest" .
+jf:confidenceValue a owl:DatatypeProperty ; rdfs:domain jf:Claim ; rdfs:range xsd:decimal ; rdfs:label "confidence value" .
+jf:recordedAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime ; rdfs:label "recorded at" .
+jf:validFrom a owl:DatatypeProperty ; rdfs:range xsd:dateTime ; rdfs:label "valid from" .
+jf:validTo a owl:DatatypeProperty ; rdfs:range xsd:dateTime ; rdfs:label "valid to" .
+jf:sourceObservedAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime ; rdfs:label "source observed at" .
+jf:subjectRevision a owl:DatatypeProperty ; rdfs:domain jf:StateTransition ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "subject revision" .
+jf:fencingToken a owl:DatatypeProperty ; rdfs:domain jf:Lease ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "fencing token" .
+jf:reason a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "reason" .
+jf:graphRevision a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "graph revision" .
+jf:createdAt a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:dateTime ; rdfs:label "created at" .
+jf:closedAt a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:dateTime ; rdfs:label "closed at" .
+jf:retentionClass a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:string ; rdfs:label "retention class" .
+jf:sourceGraphRevision a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:string ; rdfs:label "source graph revision" .
+jf:issueCode a owl:DatatypeProperty ; rdfs:domain jf:ValidationResult ; rdfs:range xsd:string ; rdfs:label "issue code" .
+jf:safeMessage a owl:DatatypeProperty ; rdfs:domain jf:ValidationResult ; rdfs:range xsd:string ; rdfs:label "safe message" .
+jf:shapeVersion a owl:DatatypeProperty ; rdfs:domain jf:ValidationReport ; rdfs:range xsd:string ; rdfs:label "shape version" .
+jf:transformerVersion a owl:DatatypeProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range xsd:string ; rdfs:label "transformer version" .
+jf:rollbackPosture a owl:DatatypeProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range xsd:string ; rdfs:label "rollback posture" .
+jf:sourceCount a owl:DatatypeProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "source count" .
+jf:targetCount a owl:DatatypeProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "target count" .
+jf:credentialProvider a owl:DatatypeProperty ; rdfs:domain jf:CredentialReference ; rdfs:range xsd:string ; rdfs:label "credential provider" .
+jf:credentialKey a owl:DatatypeProperty ; rdfs:domain jf:CredentialReference ; rdfs:range xsd:string ; rdfs:label "credential key" .

@@ -21,45 +21,45 @@ Back to plan: [README](./README.md)
   vocabulary, identity, provenance, graph placement, temporal meaning, and
   evolution rules are explicit and testable.
 
-  - [ ] 3.1 Section - Define the versioned ontology and controlled vocabularies.
+  - [x] 3.1 Section - Define the versioned ontology and controlled vocabularies.
 
     This section creates a small project-owned ontology that reuses standard
     RDF vocabularies and models relationships directly instead of reproducing
     object fields and foreign keys.
 
-    - [ ] 3.1.1 Task {#jcf-p03-ontology-package} [repo: jido_code] [after: {#jcf-p02-phase-receipt}] - Create the ontology source and release layout.
+    - [x] 3.1.1 Task {#jcf-p03-ontology-package} [repo: jido_code] [after: {#jcf-p02-phase-receipt}] - Create the ontology source and release layout.
 
       This task establishes immutable, reviewable ontology artifacts and a
       deterministic way to load and identify them.
 
-      - [ ] 3.1.1.1 Subtask {#jcf-p03-3-1-1-1} - Add `priv/ontology` sources for the factory ontology, validation shapes, controlled work states, policy terms, and ontology metadata.
-      - [ ] 3.1.1.2 Subtask {#jcf-p03-3-1-1-2} - Choose canonical ontology and term IRI namespaces separately from resource and named-graph IRI namespaces.
-      - [ ] 3.1.1.3 Subtask {#jcf-p03-3-1-1-3} - Define immutable ontology version IRIs, semantic versions, source digests, imports, compatibility posture, and release notes.
-      - [ ] 3.1.1.4 Subtask {#jcf-p03-3-1-1-4} - Load ontology schema only into `ontology/{version}` graphs and keep the default and repository instance graphs free of schema copies.
-      - [ ] 3.1.1.5 Subtask {#jcf-p03-3-1-1-5} - Add deterministic parse, canonical serialization, and checksum tasks for ontology artifacts.
+      - [x] 3.1.1.1 Subtask {#jcf-p03-3-1-1-1} - Add `priv/ontology` sources for the factory ontology, validation shapes, controlled work states, policy terms, and ontology metadata.
+      - [x] 3.1.1.2 Subtask {#jcf-p03-3-1-1-2} - Choose canonical ontology and term IRI namespaces separately from resource and named-graph IRI namespaces.
+      - [x] 3.1.1.3 Subtask {#jcf-p03-3-1-1-3} - Define immutable ontology version IRIs, semantic versions, source digests, imports, compatibility posture, and release notes.
+      - [x] 3.1.1.4 Subtask {#jcf-p03-3-1-1-4} - Load ontology schema only into `ontology/{version}` graphs and keep the default and repository instance graphs free of schema copies.
+      - [x] 3.1.1.5 Subtask {#jcf-p03-3-1-1-5} - Add deterministic parse, canonical serialization, and checksum tasks for ontology artifacts.
 
-    - [ ] 3.1.2 Task {#jcf-p03-core-vocabulary} [repo: jido_code] [after: {#jcf-p03-ontology-package}] - Define the initial factory resources and relationships.
+    - [x] 3.1.2 Task {#jcf-p03-core-vocabulary} [repo: jido_code] [after: {#jcf-p03-ontology-package}] - Define the initial factory resources and relationships.
 
       This task expresses repository identity, knowledge, intent, execution,
       governance, interaction, and actor semantics as connected graph terms.
 
-      - [ ] 3.1.2.1 Subtask {#jcf-p03-3-1-2-1} - Define `RepositoryFactory`, `SoftwareRepository`, `RepositoryLocator`, `ManagementEnrollment`, `RepositorySnapshot`, `SourceArtifact`, `CodeSymbol`, and `Scope`.
-      - [ ] 3.1.2.2 Subtask {#jcf-p03-3-1-2-2} - Define `ObservationActivity`, `ObservationBatch`, `Claim`, `AssessmentActivity`, `Finding`, `Contradiction`, `KnowledgeAssertion`, and `AdoptionActivity`.
-      - [ ] 3.1.2.3 Subtask {#jcf-p03-3-1-2-3} - Define `DesiredOutcome`, `Goal`, `Constraint`, `Policy`, `Obligation`, `Task`, `Plan`, `Capability`, and `Lease`.
-      - [ ] 3.1.2.4 Subtask {#jcf-p03-3-1-2-4} - Define `ExecutionAttempt`, `ToolInvocation`, `Patch`, `VerificationActivity`, `Artifact`, `EvidenceBundle`, and `Decision` using PROV-O activities/entities where applicable.
-      - [ ] 3.1.2.5 Subtask {#jcf-p03-3-1-2-5} - Define `Actor`, `Agent`, `InteractionSession`, `Message`, `AuthorizationGrant`, and `CredentialReference` without credential-value predicates.
-      - [ ] 3.1.2.6 Subtask {#jcf-p03-3-1-2-6} - Define direct relationships for enrollment, management, location, scope, derivation, support, contradiction, goal decomposition, dependency, blocking, capability, policy, execution, evaluation, acceptance, satisfaction, supersession, lease ownership, and validity.
+      - [x] 3.1.2.1 Subtask {#jcf-p03-3-1-2-1} - Define `RepositoryFactory`, `SoftwareRepository`, `RepositoryLocator`, `ManagementEnrollment`, `RepositorySnapshot`, `SourceArtifact`, `CodeSymbol`, and `Scope`.
+      - [x] 3.1.2.2 Subtask {#jcf-p03-3-1-2-2} - Define `ObservationActivity`, `ObservationBatch`, `Claim`, `AssessmentActivity`, `Finding`, `Contradiction`, `KnowledgeAssertion`, and `AdoptionActivity`.
+      - [x] 3.1.2.3 Subtask {#jcf-p03-3-1-2-3} - Define `DesiredOutcome`, `Goal`, `Constraint`, `Policy`, `Obligation`, `Task`, `Plan`, `Capability`, and `Lease`.
+      - [x] 3.1.2.4 Subtask {#jcf-p03-3-1-2-4} - Define `ExecutionAttempt`, `ToolInvocation`, `Patch`, `VerificationActivity`, `Artifact`, `EvidenceBundle`, and `Decision` using PROV-O activities/entities where applicable.
+      - [x] 3.1.2.5 Subtask {#jcf-p03-3-1-2-5} - Define `Actor`, `Agent`, `InteractionSession`, `Message`, `AuthorizationGrant`, and `CredentialReference` without credential-value predicates.
+      - [x] 3.1.2.6 Subtask {#jcf-p03-3-1-2-6} - Define direct relationships for enrollment, management, location, scope, derivation, support, contradiction, goal decomposition, dependency, blocking, capability, policy, execution, evaluation, acceptance, satisfaction, supersession, lease ownership, and validity.
 
-    - [ ] 3.1.3 Task {#jcf-p03-standard-vocabulary-alignment} [repo: jido_code] [after: {#jcf-p03-core-vocabulary}] - Align project terms with established semantic vocabularies.
+    - [x] 3.1.3 Task {#jcf-p03-standard-vocabulary-alignment} [repo: jido_code] [after: {#jcf-p03-core-vocabulary}] - Align project terms with established semantic vocabularies.
 
       This task avoids project-specific reinvention while constraining external
       vocabulary use to semantics the application can validate and query.
 
-      - [ ] 3.1.3.1 Subtask {#jcf-p03-3-1-3-1} - Map entity/activity/agent, generation, use, derivation, association, invalidation, and time to PROV-O.
-      - [ ] 3.1.3.2 Subtask {#jcf-p03-3-1-3-2} - Use SKOS concepts and schemes for controlled state, outcome, priority, confidence band, artifact kind, and decision disposition.
-      - [ ] 3.1.3.3 Subtask {#jcf-p03-3-1-3-3} - Use Dublin Core Terms and SPDX only where their documented semantics fit repository and software artifacts.
-      - [ ] 3.1.3.4 Subtask {#jcf-p03-3-1-3-4} - Document domain/range guidance, expected cardinality, provenance policy, graph ownership, and query use for every project predicate.
-      - [ ] 3.1.3.5 Subtask {#jcf-p03-3-1-3-5} - Reject ontology terms that exist only to mirror an Elixir module, struct field, enum atom, or storage codec.
+      - [x] 3.1.3.1 Subtask {#jcf-p03-3-1-3-1} - Map entity/activity/agent, generation, use, derivation, association, invalidation, and time to PROV-O.
+      - [x] 3.1.3.2 Subtask {#jcf-p03-3-1-3-2} - Use SKOS concepts and schemes for controlled state, outcome, priority, confidence band, artifact kind, and decision disposition.
+      - [x] 3.1.3.3 Subtask {#jcf-p03-3-1-3-3} - Use Dublin Core Terms and SPDX only where their documented semantics fit repository and software artifacts.
+      - [x] 3.1.3.4 Subtask {#jcf-p03-3-1-3-4} - Document domain/range guidance, expected cardinality, provenance policy, graph ownership, and query use for every project predicate.
+      - [x] 3.1.3.5 Subtask {#jcf-p03-3-1-3-5} - Reject ontology terms that exist only to mirror an Elixir module, struct field, enum atom, or storage codec.
 
   - [ ] 3.2 Section - Implement canonical identity and named graph topology.
 

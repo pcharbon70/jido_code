@@ -1,0 +1,72 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/shapes/1.0.0>
+  a sh:ShapesGraph ;
+  jf:shapeVersion "1.0.0" .
+
+jfs:NamedGraphShape
+  a sh:NodeShape ;
+  sh:targetClass jf:NamedGraph ;
+  sh:closed true ;
+  sh:property jfs:GraphKindProperty,
+    jfs:OwnerScopeProperty,
+    jfs:OntologyVersionProperty,
+    jfs:CreationActivityProperty,
+    jfs:CreatedAtProperty,
+    jfs:LifecycleStateProperty,
+    jfs:CompletenessStateProperty,
+    jfs:GraphRevisionProperty .
+
+jfs:GraphKindProperty a sh:PropertyShape ; sh:path jf:graphKind ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:OwnerScopeProperty a sh:PropertyShape ; sh:path jf:ownerScope ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:OntologyVersionProperty a sh:PropertyShape ; sh:path jf:ontologyVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CreationActivityProperty a sh:PropertyShape ; sh:path jf:creationActivity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CreatedAtProperty a sh:PropertyShape ; sh:path jf:createdAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:LifecycleStateProperty a sh:PropertyShape ; sh:path jf:lifecycleState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CompletenessStateProperty a sh:PropertyShape ; sh:path jf:completenessState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:GraphRevisionProperty a sh:PropertyShape ; sh:path jf:graphRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+
+jfs:ClaimShape
+  a sh:NodeShape ;
+  sh:targetClass jf:Claim ;
+  sh:property jfs:ClaimSubjectProperty,
+    jfs:ClaimPredicateProperty,
+    jfs:ClaimObjectProperty,
+    jfs:ClaimSourceProperty,
+    jfs:ClaimScopeProperty,
+    jfs:EpistemicStateProperty .
+
+jfs:ClaimSubjectProperty a sh:PropertyShape ; sh:path rdf:subject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ClaimPredicateProperty a sh:PropertyShape ; sh:path rdf:predicate ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ClaimObjectProperty a sh:PropertyShape ; sh:path rdf:object ; sh:minCount 1 ; sh:maxCount 1 .
+jfs:ClaimSourceProperty a sh:PropertyShape ; sh:path jf:sourceActivity ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Activity .
+jfs:ClaimScopeProperty a sh:PropertyShape ; sh:path jf:graphScope ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:EpistemicStateProperty a sh:PropertyShape ; sh:path jf:epistemicState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+
+jfs:TransitionShape
+  a sh:NodeShape ;
+  sh:targetClass jf:StateTransition ;
+  sh:property jfs:TransitionSubjectProperty,
+    jfs:NextStateProperty,
+    jfs:SubjectRevisionProperty,
+    jfs:TransitionActorProperty,
+    jfs:TransitionTimeProperty .
+
+jfs:TransitionSubjectProperty a sh:PropertyShape ; sh:path jf:transitionSubject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:NextStateProperty a sh:PropertyShape ; sh:path jf:nextState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SubjectRevisionProperty a sh:PropertyShape ; sh:path jf:subjectRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:TransitionActorProperty a sh:PropertyShape ; sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:TransitionTimeProperty a sh:PropertyShape ; sh:path prov:generatedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+
+jfs:CredentialReferenceShape
+  a sh:NodeShape ;
+  sh:targetClass jf:CredentialReference ;
+  sh:property jfs:CredentialProviderProperty, jfs:CredentialKeyProperty .
+
+jfs:CredentialProviderProperty a sh:PropertyShape ; sh:path jf:credentialProvider ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:CredentialKeyProperty a sh:PropertyShape ; sh:path jf:credentialKey ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
