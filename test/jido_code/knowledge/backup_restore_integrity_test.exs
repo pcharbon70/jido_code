@@ -303,6 +303,7 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
              Maintenance.integrity(reopened.maintenance, [])
 
     assert Enum.map(repeated_issues, & &1.code) == Enum.map(issues, & &1.code)
+    stop_substrate(reopened)
   end
 
   defp start_substrate!(config) do
@@ -439,7 +440,8 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
 
   defp unique_root(context) do
     suffix = System.unique_integer([:positive, :monotonic])
-    Path.join(System.tmp_dir!(), "jido-code-backup-#{context.test}-#{suffix}")
+    timestamp = System.system_time(:nanosecond)
+    Path.join(System.tmp_dir!(), "jido-code-backup-#{context.test}-#{timestamp}-#{suffix}")
   end
 
   defp stop_process(pid) when is_pid(pid) do

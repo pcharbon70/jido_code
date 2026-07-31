@@ -187,34 +187,34 @@ Back to plan: [README](./README.md)
     atomic, idempotent, attributable, and recoverable under races, retries,
     response loss, and process death.
 
-    - [ ] 4.5.1 Task {#jcf-p04-command-integration} [repo: jido_code] [after: {#jcf-p04-command-status}] - Execute the command pipeline against real graph fixtures.
+    - [x] 4.5.1 Task {#jcf-p04-command-integration} [repo: jido_code] [after: {#jcf-p04-command-status}] - Execute the command pipeline against real graph fixtures.
 
       This task exercises representative transitions, supersession, immutable
       graph creation, and cross-graph provenance through the production writer.
 
-      - [ ] 4.5.1.1 Subtask {#jcf-p04-4-5-1-1} - Bootstrap a fresh dataset and execute representative valid command/change-set fixtures across catalog, policy, control, audit, and immutable batch graphs.
-      - [ ] 4.5.1.2 Subtask {#jcf-p04-4-5-1-2} - Verify each visible assertion traces to command, change set, actor/delegation, cause, validation versions, audit outcome, and revisions.
-      - [ ] 4.5.1.3 Subtask {#jcf-p04-4-5-1-3} - Reject unauthorized graphs, invalid shapes, stale revisions, illegal transitions, immutable rewrites, and generic CRUD requests with no partial visibility.
-      - [ ] 4.5.1.4 Subtask {#jcf-p04-4-5-1-4} - Verify backup/export/restore preserves command receipts, audit relationships, and idempotency outcomes.
+      - [x] 4.5.1.1 Subtask {#jcf-p04-4-5-1-1} - Bootstrap a fresh dataset and execute representative valid command/change-set fixtures across catalog, policy, control, audit, and immutable batch graphs.
+      - [x] 4.5.1.2 Subtask {#jcf-p04-4-5-1-2} - Verify each visible assertion traces to command, change set, actor/delegation, cause, validation versions, audit outcome, and revisions.
+      - [x] 4.5.1.3 Subtask {#jcf-p04-4-5-1-3} - Reject unauthorized graphs, invalid shapes, stale revisions, illegal transitions, immutable rewrites, and generic CRUD requests with no partial visibility.
+      - [x] 4.5.1.4 Subtask {#jcf-p04-4-5-1-4} - Verify backup/export/restore preserves command receipts, audit relationships, and idempotency outcomes.
 
-    - [ ] 4.5.2 Task {#jcf-p04-concurrency-security-integration} [repo: jido_code] [after: {#jcf-p04-command-integration}] - Exercise races, retries, delegation, concealment, and notification loss.
+    - [x] 4.5.2 Task {#jcf-p04-concurrency-security-integration} [repo: jido_code] [after: {#jcf-p04-command-integration}] - Exercise races, retries, delegation, concealment, and notification loss.
 
       This task falsifies the mutation boundary under realistic concurrent and
       adversarial client behavior.
 
-      - [ ] 4.5.2.1 Subtask {#jcf-p04-4-5-2-1} - Race equivalent and divergent idempotency replays plus stale expected-revision commands and prove deterministic outcomes.
-      - [ ] 4.5.2.2 Subtask {#jcf-p04-4-5-2-2} - Kill writer/store/client processes before, during, and after commit and recover authoritative outcomes without duplicate effects.
-      - [ ] 4.5.2.3 Subtask {#jcf-p04-4-5-2-3} - Test expired/revoked delegation, capability widening, cross-repository references, guessed command IRIs, and audit enumeration.
-      - [ ] 4.5.2.4 Subtask {#jcf-p04-4-5-2-4} - Drop, duplicate, delay, and reorder PubSub notifications and prove subscribers recover by graph revision.
-      - [ ] 4.5.2.5 Subtask {#jcf-p04-4-5-2-5} - Scan logs, telemetry, errors, receipts, events, and graph literals for fixture secrets and forbidden raw payloads.
-      - [ ] 4.5.2.6 Subtask {#jcf-p04-4-5-2-6} - Rerun Phases 1-3 suites and `mix precommit`.
+      - [x] 4.5.2.1 Subtask {#jcf-p04-4-5-2-1} - Race equivalent and divergent idempotency replays plus stale expected-revision commands and prove deterministic outcomes.
+      - [x] 4.5.2.2 Subtask {#jcf-p04-4-5-2-2} - Kill writer/store/client processes before, during, and after commit and recover authoritative outcomes without duplicate effects.
+      - [x] 4.5.2.3 Subtask {#jcf-p04-4-5-2-3} - Test expired/revoked delegation, capability widening, cross-repository references, guessed command IRIs, and audit enumeration.
+      - [x] 4.5.2.4 Subtask {#jcf-p04-4-5-2-4} - Drop, duplicate, delay, and reorder PubSub notifications and prove subscribers recover by graph revision.
+      - [x] 4.5.2.5 Subtask {#jcf-p04-4-5-2-5} - Scan logs, telemetry, errors, receipts, events, and graph literals for fixture secrets and forbidden raw payloads.
+      - [x] 4.5.2.6 Subtask {#jcf-p04-4-5-2-6} - Rerun Phases 1-3 suites and `mix precommit`.
 
     - [ ] 4.5.3 Task {#jcf-p04-phase-receipt} [repo: jido_code] [after: {#jcf-p04-concurrency-security-integration}] - Publish the Phase 4 controlled-mutation receipt.
 
       This task binds G3 to exact command, authorization, validation,
       transaction, audit, idempotency, recovery, and notification evidence.
 
-      - [ ] 4.5.3.1 Subtask {#jcf-p04-4-5-3-1} - Record command registry/version, ontology/shape versions, capability model, transaction strategy, fixture digests, and candidate commit.
-      - [ ] 4.5.3.2 Subtask {#jcf-p04-4-5-3-2} - Attach valid/invalid command traces, race and crash results, delegation/concealment tests, audit checks, and event-loss recovery proof.
-      - [ ] 4.5.3.3 Subtask {#jcf-p04-4-5-3-3} - Keep G3 blocked if any visible statement lacks atomic provenance/audit, any adapter can issue raw mutations, or retries can duplicate semantic effects.
+      - [x] 4.5.3.1 Subtask {#jcf-p04-4-5-3-1} - Record command registry/version, ontology/shape versions, capability model, transaction strategy, fixture digests, and candidate commit.
+      - [x] 4.5.3.2 Subtask {#jcf-p04-4-5-3-2} - Attach valid/invalid command traces, race and crash results, delegation/concealment tests, audit checks, and event-loss recovery proof.
+      - [x] 4.5.3.3 Subtask {#jcf-p04-4-5-3-3} - Keep G3 blocked if any visible statement lacks atomic provenance/audit, any adapter can issue raw mutations, or retries can duplicate semantic effects.
       - [ ] 4.5.3.4 Subtask {#jcf-p04-4-5-3-4} - Pin the merged candidate commit before authorizing Phase 5.

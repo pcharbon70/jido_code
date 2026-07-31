@@ -43,3 +43,11 @@ request fingerprint, affected graph families, and outcome are RDF in the
 period audit graph. These statements are additions in the same batch as the
 domain effect. Rejected commands never receive a success audit. The pipeline
 requires an initialized audit graph; secure creation is owned by Section 4.3.
+
+Every effective addition is also bound to the change set by the SHA-256 digest
+of its canonical N-Quad, including its named graph. This permits deterministic
+assertion-level provenance checks without copying source bodies or sensitive
+literal values into the audit graph. Semantic command payloads are capped at
+1,000 effective additions so domain assertions, digest evidence, audit data,
+and the substrate receipt remain inside the pinned backend atomic-update
+limit.

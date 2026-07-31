@@ -50,7 +50,7 @@ defmodule JidoCode.Knowledge.ChangeSet do
 
   @jf "https://jido.run/ontology/factory#"
   @prov_invalidated "http://www.w3.org/ns/prov#invalidatedAtTime"
-  @max_additions 5_000
+  @max_additions 1_000
   @max_targets 16
 
   @type t :: %__MODULE__{}

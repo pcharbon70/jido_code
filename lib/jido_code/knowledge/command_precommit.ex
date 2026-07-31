@@ -180,7 +180,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
   end
 
   defp graph_quads(dataset, graph) do
-    dataset |> RDF.Dataset.graph(RDF.iri(graph)) |> RDF.Graph.quads()
+    case RDF.Dataset.graph(dataset, RDF.iri(graph)) do
+      nil -> []
+      graph_data -> RDF.Graph.quads(graph_data)
+    end
   end
 
   defp term_equal?(stored, expected) do

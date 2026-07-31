@@ -72,6 +72,7 @@ defmodule JidoCode.Knowledge.CommandProvenance do
       quad(change, @jf <> "shapeVersion", envelope.shape_version, audit_graph),
       quad(change, @jf <> "validatorVersion", "1.0.0", audit_graph),
       quad(change, @jf <> "assertionCount", change_set.assertion_count, audit_graph),
+      quad(change, @jf <> "assertionDigestAlgorithm", "sha256", audit_graph),
       quad(change, @jf <> "supersessionCount", change_set.supersession_count, audit_graph),
       quad(receipt, @rdf_type, RDF.iri(@prov_entity), audit_graph),
       quad(receipt, @jf <> "commitIdentity", RDF.iri(identities.commit_id), audit_graph),
@@ -104,7 +105,23 @@ defmodule JidoCode.Knowledge.CommandProvenance do
         []
       end
 
-    Enum.uniq(base ++ targets ++ delegation)
+    assertion_digests =
+      Enum.map(change_set.additions, fn assertion ->
+        quad(change, @jf <> "assertionDigest", assertion_digest(assertion), audit_graph)
+      end)
+
+    Enum.uniq(base ++ targets ++ delegation ++ assertion_digests)
+  end
+
+  @doc false
+  @spec assertion_digest(RDF.Quad.coercible()) :: String.t()
+  def assertion_digest(assertion) do
+    assertion
+    |> RDF.Quad.new()
+    |> then(&RDF.Dataset.new([&1]))
+    |> RDF.NQuads.write_string!(sort: true)
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
   end
 
   defp command_class(name), do: RDF.iri(Authorization.command_class_iri(name))
