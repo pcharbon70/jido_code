@@ -20,45 +20,45 @@ Back to plan: [README](./README.md)
   external-system boundaries, backend capabilities, dependency versions, and
   enforcement so later phases do not build against an assumed store contract.
 
-  - [ ] 1.1 Section - Ratify architecture, scope, and ownership.
+  - [x] 1.1 Section - Ratify architecture, scope, and ownership.
 
     This section converts the research recommendations into repository-owned
     decisions and records the exact responsibilities of the knowledge, data,
     control, reconciliation, execution, projection, and presentation planes.
 
-    - [ ] 1.1.1 Task {#jcf-p01-current-state-inventory} [repo: jido_code] - Inventory the current application and every potential persistence path.
+    - [x] 1.1.1 Task {#jcf-p01-current-state-inventory} [repo: jido_code] - Inventory the current application and every potential persistence path.
 
       This task establishes a verifiable starting point for a minimal Phoenix
       application before graph, runtime, provider, or authentication state is
       introduced.
 
-      - [ ] 1.1.1.1 Subtask {#jcf-p01-1-1-1-1} - Record the current supervisor tree, routes, LiveView assigns, LiveVue browser state, local-storage use, filesystem outputs, Mix aliases, dependencies, configuration, and test support.
-      - [ ] 1.1.1.2 Subtask {#jcf-p01-1-1-1-2} - Classify each current state holder as ephemeral runtime state, device-local presentation preference, external-system state, build artifact, secret material, telemetry, or proposed durable product knowledge.
-      - [ ] 1.1.1.3 Subtask {#jcf-p01-1-1-1-3} - Verify that no Ecto repository, Ash resource, DETS table, Mnesia table, JSON snapshot, durable queue, or hidden product-state file already exists.
-      - [ ] 1.1.1.4 Subtask {#jcf-p01-1-1-1-4} - Record the exact starting commit, Elixir/OTP versions, Rust toolchain, RocksDB availability, and supported development/test operating systems.
+      - [x] 1.1.1.1 Subtask {#jcf-p01-1-1-1-1} - Record the current supervisor tree, routes, LiveView assigns, LiveVue browser state, local-storage use, filesystem outputs, Mix aliases, dependencies, configuration, and test support.
+      - [x] 1.1.1.2 Subtask {#jcf-p01-1-1-1-2} - Classify each current state holder as ephemeral runtime state, device-local presentation preference, external-system state, build artifact, secret material, telemetry, or proposed durable product knowledge.
+      - [x] 1.1.1.3 Subtask {#jcf-p01-1-1-1-3} - Verify that no Ecto repository, Ash resource, DETS table, Mnesia table, JSON snapshot, durable queue, or hidden product-state file already exists.
+      - [x] 1.1.1.4 Subtask {#jcf-p01-1-1-1-4} - Record the exact starting commit, Elixir/OTP versions, Rust toolchain, RocksDB availability, and supported development/test operating systems.
 
-    - [ ] 1.1.2 Task {#jcf-p01-architecture-decision} [repo: jido_code] [after: {#jcf-p01-current-state-inventory}] - Ratify the graph-only source-of-truth and plane boundaries.
+    - [x] 1.1.2 Task {#jcf-p01-architecture-decision} [repo: jido_code] [after: {#jcf-p01-current-state-inventory}] - Ratify the graph-only source-of-truth and plane boundaries.
 
       This task creates the accepted repository-local decision that permits
       implementation and resolves any research questions that cannot remain
       optional once code is written.
 
-      - [ ] 1.1.2.1 Subtask {#jcf-p01-1-1-2-1} - Accept or amend the invariant that all application-owned durable knowledge, control state, workflow state, user-authored state, and factory history lives in one `TripleStore` quad dataset.
-      - [ ] 1.1.2.2 Subtask {#jcf-p01-1-1-2-2} - Ratify Git/provider systems as observed external authorities, local clones and sandboxes as disposable work material, and secret providers as the only holders of credential values.
-      - [ ] 1.1.2.3 Subtask {#jcf-p01-1-1-2-3} - Ratify named graphs as authority/provenance/lifecycle boundaries, append-first evolution, graph-native relationships, explicit epistemic state, and decision-gated acceptance.
-      - [ ] 1.1.2.4 Subtask {#jcf-p01-1-1-2-4} - Record that the current repository owns its route contract and that no route or object-shaped record model is inherited from the older implementation.
-      - [ ] 1.1.2.5 Subtask {#jcf-p01-1-1-2-5} - Resolve whether any device-local preference, large binary artifact, or operational history needs an explicit exception or must become graph-backed.
+      - [x] 1.1.2.1 Subtask {#jcf-p01-1-1-2-1} - Accept or amend the invariant that all application-owned durable knowledge, control state, workflow state, user-authored state, and factory history lives in one `TripleStore` quad dataset.
+      - [x] 1.1.2.2 Subtask {#jcf-p01-1-1-2-2} - Ratify Git/provider systems as observed external authorities, local clones and sandboxes as disposable work material, and secret providers as the only holders of credential values.
+      - [x] 1.1.2.3 Subtask {#jcf-p01-1-1-2-3} - Ratify named graphs as authority/provenance/lifecycle boundaries, append-first evolution, graph-native relationships, explicit epistemic state, and decision-gated acceptance.
+      - [x] 1.1.2.4 Subtask {#jcf-p01-1-1-2-4} - Record that the current repository owns its route contract and that no route or object-shaped record model is inherited from the older implementation.
+      - [x] 1.1.2.5 Subtask {#jcf-p01-1-1-2-5} - Resolve whether any device-local preference, large binary artifact, or operational history needs an explicit exception or must become graph-backed.
 
-    - [ ] 1.1.3 Task {#jcf-p01-boundary-map} [repo: jido_code] [after: {#jcf-p01-architecture-decision}] - Define module ownership and allowed dependency directions.
+    - [x] 1.1.3 Task {#jcf-p01-boundary-map} [repo: jido_code] [after: {#jcf-p01-architecture-decision}] - Define module ownership and allowed dependency directions.
 
       This task makes the architectural planes enforceable in the Elixir
       namespace and supervisor topology rather than leaving them as prose.
 
-      - [ ] 1.1.3.1 Subtask {#jcf-p01-1-1-3-1} - Assign store lifecycle, writes, queries, ontology, validation, reasoning, backup, and change delivery to `JidoCode.Knowledge`.
-      - [ ] 1.1.3.2 Subtask {#jcf-p01-1-1-3-2} - Assign enrollment, observation, reconciliation, scheduling, execution, evaluation, and learning coordination to capability-oriented `JidoCode.Factory` services.
-      - [ ] 1.1.3.3 Subtask {#jcf-p01-1-1-3-3} - Define ports for providers, Git, source analysis, Jido/runtime, tools, sandboxes, secrets, clocks, and identifiers without granting adapters semantic authority.
-      - [ ] 1.1.3.4 Subtask {#jcf-p01-1-1-3-4} - Prohibit web modules, integration adapters, runtime workers, and projections from opening the store or issuing raw write-capable SPARQL.
-      - [ ] 1.1.3.5 Subtask {#jcf-p01-1-1-3-5} - Define which structs are permitted as temporary command/projection values and prohibit persisted aggregate-root semantics.
+      - [x] 1.1.3.1 Subtask {#jcf-p01-1-1-3-1} - Assign store lifecycle, writes, queries, ontology, validation, reasoning, backup, and change delivery to `JidoCode.Knowledge`.
+      - [x] 1.1.3.2 Subtask {#jcf-p01-1-1-3-2} - Assign enrollment, observation, reconciliation, scheduling, execution, evaluation, and learning coordination to capability-oriented `JidoCode.Factory` services.
+      - [x] 1.1.3.3 Subtask {#jcf-p01-1-1-3-3} - Define ports for providers, Git, source analysis, Jido/runtime, tools, sandboxes, secrets, clocks, and identifiers without granting adapters semantic authority.
+      - [x] 1.1.3.4 Subtask {#jcf-p01-1-1-3-4} - Prohibit web modules, integration adapters, runtime workers, and projections from opening the store or issuing raw write-capable SPARQL.
+      - [x] 1.1.3.5 Subtask {#jcf-p01-1-1-3-5} - Define which structs are permitted as temporary command/projection values and prohibit persisted aggregate-root semantics.
 
   - [ ] 1.2 Section - Prove backend and toolchain compatibility.
 

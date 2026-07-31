@@ -1,0 +1,22 @@
+# Architecture
+
+This directory contains the accepted implementation boundaries for JidoCode.
+The documents distinguish architectural authority from research and delivery
+planning:
+
+1. Accepted ADRs under [`docs/adr`](../adr/) define binding decisions.
+2. Architecture documents in this directory define the current evidence and
+   module boundaries that implement those decisions.
+3. [`docs/research`](../research/) records analysis and recommendations.
+4. [`.planning`](../../.planning/) sequences implementation work but does not
+   override an accepted ADR or tested backend constraint.
+
+## Phase 1 Baseline
+
+- [Current-state inventory](./current-state-inventory.md)
+- [Module and plane boundaries](./module-boundaries.md)
+- [ADR 0001: Graph-only source of truth](../adr/0001-graph-only-source-of-truth.md)
+
+The Phase 1 baseline starts at commit
+`54cda0fd34cc687f0c1be6322513a790d3a9c37e`, immediately after the graph-native
+implementation plan was merged.

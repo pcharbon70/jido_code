@@ -6,6 +6,14 @@ The root route (`/`) renders `JidoCodeWeb.HomeLive`, a small server console that
 keeps state over a LiveView socket and verifies that server-rendered events are
 working.
 
+## Architecture
+
+The managed repository factory uses an embedded knowledge graph as its only
+application-owned durable source of truth. See the
+[architecture index](docs/architecture/README.md),
+[accepted ADRs](docs/adr/README.md), and
+[implementation plan](.planning/README.md).
+
 ## Requirements
 
 - Elixir 1.15 or newer
