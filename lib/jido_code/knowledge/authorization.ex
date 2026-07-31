@@ -47,11 +47,33 @@ defmodule JidoCode.Knowledge.Authorization do
           {:ok, map()} | {:error, Error.t()}
   def authorize(%CommandEnvelope{} = envelope, definition, %ChangeSet{} = change_set, snapshot)
       when is_map(definition) and is_map(snapshot) do
-    grants = matching_grants(envelope, definition, snapshot.dataset)
+    authorize_at(envelope, definition, change_set, snapshot, envelope.issued_at)
+  end
+
+  def authorize(_envelope, _definition, _change_set, _snapshot),
+    do: {:error, Error.new(:unauthorized, :semantic_authorization)}
+
+  @spec authorize_at(CommandEnvelope.t(), map(), ChangeSet.t(), map(), DateTime.t()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def authorize_at(
+        %CommandEnvelope{} = envelope,
+        definition,
+        %ChangeSet{} = change_set,
+        snapshot,
+        %DateTime{} = authority_time
+      )
+      when is_map(definition) and is_map(snapshot) do
+    grants = matching_grants(envelope, definition, snapshot.dataset, authority_time)
 
     with true <- length(grants) == 1,
          {:ok, delegation} <-
-           delegated_authority(envelope, definition, change_set, snapshot.dataset) do
+           delegated_authority(
+             envelope,
+             definition,
+             change_set,
+             snapshot.dataset,
+             authority_time
+           ) do
       [grant] = grants
 
       {:ok,
@@ -71,7 +93,7 @@ defmodule JidoCode.Knowledge.Authorization do
     _error -> {:error, Error.new(:unauthorized, :semantic_authorization)}
   end
 
-  def authorize(_envelope, _definition, _change_set, _snapshot),
+  def authorize_at(_envelope, _definition, _change_set, _snapshot, _authority_time),
     do: {:error, Error.new(:unauthorized, :semantic_authorization)}
 
   @spec capabilities() :: [atom()]
@@ -85,41 +107,51 @@ defmodule JidoCode.Knowledge.Authorization do
   def command_class_iri(name) when is_binary(name),
     do: "https://jido.run/ontology/command/#{URI.encode(name, &URI.char_unreserved?/1)}"
 
-  defp matching_grants(envelope, definition, dataset) do
+  defp matching_grants(envelope, definition, dataset, authority_time) do
     grants = authority_subjects(dataset, @grant)
 
     if length(grants) <= @max_authority_resources do
-      Enum.filter(grants, &authorized_grant?(&1, envelope, definition, dataset))
+      Enum.filter(
+        grants,
+        &authorized_grant?(&1, envelope, definition, dataset, authority_time)
+      )
     else
       []
     end
   end
 
-  defp authorized_grant?(grant, envelope, definition, dataset) do
+  defp authorized_grant?(grant, envelope, definition, dataset, authority_time) do
     values = subject_values(dataset, grant)
 
     single_iri?(values, @grantee, envelope.actor_iri) and
       single_iri?(values, @capability, capability_iri(definition.capability)) and
       scope_allowed?(values, envelope.scope_iri) and
-      time_allowed?(values, envelope.issued_at) and
+      time_allowed?(values, authority_time) and
       Map.get(values, @prov_invalidated, []) == []
   end
 
-  defp delegated_authority(envelope, _definition, _change_set, _dataset)
+  defp delegated_authority(envelope, _definition, _change_set, _dataset, _authority_time)
        when is_nil(envelope.delegated_agent_iri) and is_nil(envelope.delegation_iri) do
     if envelope.principal_iri == envelope.actor_iri,
       do: {:ok, nil},
       else: {:error, Error.new(:unauthorized, :semantic_authorization)}
   end
 
-  defp delegated_authority(envelope, definition, change_set, dataset) do
+  defp delegated_authority(envelope, definition, change_set, dataset, authority_time) do
     delegations = authority_subjects(dataset, @delegation)
 
     matching =
       if length(delegations) <= @max_authority_resources do
         Enum.filter(
           delegations,
-          &authorized_delegation?(&1, envelope, definition, change_set, dataset)
+          &authorized_delegation?(
+            &1,
+            envelope,
+            definition,
+            change_set,
+            dataset,
+            authority_time
+          )
         )
       else
         []
@@ -131,7 +163,14 @@ defmodule JidoCode.Knowledge.Authorization do
     end
   end
 
-  defp authorized_delegation?(delegation, envelope, definition, change_set, dataset) do
+  defp authorized_delegation?(
+         delegation,
+         envelope,
+         definition,
+         change_set,
+         dataset,
+         authority_time
+       ) do
     values = subject_values(dataset, delegation)
     boundaries = iri_values(values, @graph_boundary)
 
@@ -142,7 +181,7 @@ defmodule JidoCode.Knowledge.Authorization do
       single_iri?(values, @capability, capability_iri(definition.capability)) and
       single_iri?(values, @command_class, command_class_iri(envelope.command_type)) and
       scope_allowed?(values, envelope.scope_iri) and
-      time_allowed?(values, envelope.issued_at) and
+      time_allowed?(values, authority_time) and
       boundaries_allowed?(boundaries, change_set.target_graphs) and
       Map.get(values, @prov_invalidated, []) == []
   end

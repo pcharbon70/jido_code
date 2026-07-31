@@ -156,30 +156,30 @@ Back to plan: [README](./README.md)
       - [x] 4.3.3.3 Subtask {#jcf-p04-4-3-3-3} - Prohibit raw secrets, prompts, source bodies, arbitrary SPARQL, stack traces, and unbounded external payloads.
       - [x] 4.3.3.4 Subtask {#jcf-p04-4-3-3-4} - Authorize audit reads separately from ordinary product projections and preserve concealment across repository scopes.
 
-  - [ ] 4.4 Section - Implement post-commit change delivery and command recovery.
+  - [x] 4.4 Section - Implement post-commit change delivery and command recovery.
 
     This section lets runtime and presentation processes react efficiently
     while keeping the graph, not the notification channel, authoritative.
 
-    - [ ] 4.4.1 Task {#jcf-p04-change-feed} [repo: jido_code] [after: {#jcf-p04-audit-contract}] - Implement disposable post-commit change notifications.
+    - [x] 4.4.1 Task {#jcf-p04-change-feed} [repo: jido_code] [after: {#jcf-p04-audit-contract}] - Implement disposable post-commit change notifications.
 
       This task publishes low-cardinality wake-up hints only after a durable
       receipt exists.
 
-      - [ ] 4.4.1.1 Subtask {#jcf-p04-4-4-1-1} - Publish dataset revision, affected graph family/scope, command class, and receipt IRI after commit.
-      - [ ] 4.4.1.2 Subtask {#jcf-p04-4-4-1-2} - Use bounded PubSub topics derived from authorized scope rather than arbitrary resource or user input.
-      - [ ] 4.4.1.3 Subtask {#jcf-p04-4-4-1-3} - Exclude statement bodies, secrets, raw failures, prompts, source text, and authority-bearing context from events.
-      - [ ] 4.4.1.4 Subtask {#jcf-p04-4-4-1-4} - Require subscribers to re-query from their known revision and tolerate duplicate, delayed, reordered, or missed events.
+      - [x] 4.4.1.1 Subtask {#jcf-p04-4-4-1-1} - Publish dataset revision, affected graph family/scope, command class, and receipt IRI after commit.
+      - [x] 4.4.1.2 Subtask {#jcf-p04-4-4-1-2} - Use bounded PubSub topics derived from authorized scope rather than arbitrary resource or user input.
+      - [x] 4.4.1.3 Subtask {#jcf-p04-4-4-1-3} - Exclude statement bodies, secrets, raw failures, prompts, source text, and authority-bearing context from events.
+      - [x] 4.4.1.4 Subtask {#jcf-p04-4-4-1-4} - Require subscribers to re-query from their known revision and tolerate duplicate, delayed, reordered, or missed events.
 
-    - [ ] 4.4.2 Task {#jcf-p04-command-status} [repo: jido_code] [after: {#jcf-p04-change-feed}] - Implement bounded command outcome lookup.
+    - [x] 4.4.2 Task {#jcf-p04-command-status} [repo: jido_code] [after: {#jcf-p04-change-feed}] - Implement bounded command outcome lookup.
 
       This task gives clients and recovery workers a reliable way to resolve
       timed-out requests without replaying side effects blindly.
 
-      - [ ] 4.4.2.1 Subtask {#jcf-p04-4-4-2-1} - Query a command by authorized command IRI or idempotency identity and return its current outcome/receipt projection.
-      - [ ] 4.4.2.2 Subtask {#jcf-p04-4-4-2-2} - Distinguish unknown, staged/uncommitted, committed, rejected, superseded, and inaccessible outcomes.
-      - [ ] 4.4.2.3 Subtask {#jcf-p04-4-4-2-3} - Reconcile uncommitted staging graphs according to the Phase 2 recovery protocol before reporting final status.
-      - [ ] 4.4.2.4 Subtask {#jcf-p04-4-4-2-4} - Preserve authorization and concealment on lookup; possession of an idempotency key alone grants no read authority.
+      - [x] 4.4.2.1 Subtask {#jcf-p04-4-4-2-1} - Query a command by authorized command IRI or idempotency identity and return its current outcome/receipt projection.
+      - [x] 4.4.2.2 Subtask {#jcf-p04-4-4-2-2} - Distinguish unknown, staged/uncommitted, committed, rejected, superseded, and inaccessible outcomes.
+      - [x] 4.4.2.3 Subtask {#jcf-p04-4-4-2-3} - Reconcile uncommitted staging graphs according to the Phase 2 recovery protocol before reporting final status.
+      - [x] 4.4.2.4 Subtask {#jcf-p04-4-4-2-4} - Preserve authorization and concealment on lookup; possession of an idempotency key alone grants no read authority.
 
   - [ ] 4.5 Section - Phase 4 Integration Tests.
 

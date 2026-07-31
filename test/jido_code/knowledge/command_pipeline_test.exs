@@ -2,7 +2,10 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
   use ExUnit.Case, async: false
 
   alias JidoCode.Knowledge.Authorization
+  alias JidoCode.Knowledge.ChangeEvent
+  alias JidoCode.Knowledge.ChangeFeed
   alias JidoCode.Knowledge.CommandEnvelope
+  alias JidoCode.Knowledge.CommandStatus
   alias JidoCode.Knowledge.Commands.Graphs
   alias JidoCode.Knowledge.Config
   alias JidoCode.Knowledge.GraphRegistry
@@ -37,12 +40,27 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
     fixture = bootstrap_fixture!(substrate)
     envelope = envelope!(fixture, fixture.actor, 4, 1, "delivery-1", 20)
 
+    assert :ok = ChangeFeed.subscribe(fixture.owner_scope)
+
+    assert {:ok, %CommandStatus{outcome: :unknown}} =
+             Writer.command_status(substrate.writer, envelope)
+
     assert {:ok, committed} = Writer.execute(substrate.writer, envelope)
     assert committed.outcome == :committed
     assert committed.dataset_revision == 5
     assert committed.assertion_count == 2
+    assert committed.receipt_iri == envelope.command_iri <> "/receipt"
     assert fixture.audit_graph in committed.affected_graphs
     assert fixture.control_graph in committed.affected_graphs
+
+    assert_receive {:jido_code_change, %ChangeEvent{} = event}
+    assert event.dataset_revision == 5
+    assert event.scope_iri == fixture.owner_scope
+    assert event.command_class == "ProposeGoal"
+    assert event.receipt_iri == committed.receipt_iri
+    assert %{family: :repository_control, revision: 2} in event.affected_graphs
+
+    assert {:refresh, %{hinted_dataset_revision: 5}} = ChangeFeed.requery(event, 4)
 
     assert {:ok, control_metadata} =
              StoreServer.request(substrate.server, {:graph_metadata, fixture.control_graph})
@@ -52,14 +70,34 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
     assert {:ok, replayed} = Writer.execute(substrate.writer, envelope)
     assert replayed.outcome == :already_committed
     assert replayed.dataset_revision == 5
+    refute_receive {:jido_code_change, _event}, 25
     assert StoreServer.summary(substrate.server).dataset_revision == 5
+
+    assert {:ok, status} = Writer.command_status(substrate.writer, envelope)
+    assert status.outcome == :committed
+    assert status.command_iri == envelope.command_iri
+    assert status.receipt_iri == committed.receipt_iri
+    assert status.dataset_revision == 5
 
     divergent =
       envelope!(fixture, fixture.actor, 4, 1, "delivery-1", 21, command_iri: envelope.command_iri)
 
     assert {:ok, conflict} = Writer.execute(substrate.writer, divergent)
     assert conflict.outcome == :conflicted
+
+    assert {:ok, %CommandStatus{outcome: :inaccessible}} =
+             Writer.command_status(substrate.writer, divergent)
+
     assert StoreServer.summary(substrate.server).dataset_revision == 5
+
+    revoke_grant!(substrate, fixture)
+
+    assert {:ok, %CommandStatus{outcome: :inaccessible}} =
+             Writer.command_status(substrate.writer, envelope)
+
+    assert {:ok, revoked_replay} = Writer.execute(substrate.writer, envelope)
+    assert revoked_replay.outcome == :unauthorized
+    refute_receive {:jido_code_change, _event}, 25
   end
 
   test "fails closed for unauthorized, invalid, stale, and revoked commands", %{
@@ -69,6 +107,10 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
 
     unauthorized_actor = resource!("pipeline-unauthorized-actor")
     unauthorized = envelope!(fixture, unauthorized_actor, 4, 1, "unauthorized", 30)
+
+    assert {:ok, %CommandStatus{outcome: :inaccessible}} =
+             Writer.command_status(substrate.writer, unauthorized)
+
     assert {:ok, denied} = Writer.execute(substrate.writer, unauthorized)
     assert denied.outcome == :unauthorized
     assert denied.command_iri == nil
@@ -175,16 +217,18 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
         fixture.policy_graph
       )
 
+    dataset_revision = StoreServer.summary(substrate.server).dataset_revision
+
     {:ok, batch} =
       JidoCode.Knowledge.WriteBatch.new([quad],
-        expected_dataset_revision: 4,
+        expected_dataset_revision: dataset_revision,
         expected_graph_revisions: %{fixture.policy_graph => metadata.graph_revision},
         operation_metadata: %{class: :test_grant_revocation},
         commit_id: "urn:jido-code:commit:test_grant_revocation"
       )
 
     assert {:ok, receipt} = Writer.commit(substrate.writer, batch, [])
-    assert receipt.dataset_revision == 5
+    assert receipt.dataset_revision == dataset_revision + 1
     fixture
   end
 

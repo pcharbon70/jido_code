@@ -46,9 +46,40 @@ defmodule JidoCode.Knowledge.CommandPipeline do
         nil ->
           commit_new(envelope, definition, change_set, identities, store_server, deadline)
 
-        %WriteReceipt{request_fingerprint: fingerprint, command_iri: command_iri} = receipt
-        when fingerprint == change_set.request_fingerprint and command_iri == envelope.command_iri ->
-          {:ok, semantic_receipt(:already_committed, envelope, change_set, receipt)}
+        %WriteReceipt{} = receipt ->
+          recover_existing(
+            envelope,
+            definition,
+            change_set,
+            identities,
+            receipt,
+            store_server,
+            deadline
+          )
+      end
+    end
+  end
+
+  defp recover_existing(
+         envelope,
+         definition,
+         change_set,
+         identities,
+         receipt,
+         store_server,
+         deadline
+       ) do
+    with {:ok, policy_graph} <- GraphRegistry.graph_iri(:factory_policy, %{}),
+         snapshot_graphs = Enum.uniq(change_set.target_graphs ++ [policy_graph]),
+         {:ok, snapshot} <-
+           request(store_server, {:semantic_snapshot, snapshot_graphs}, deadline),
+         {:ok, _authority} <-
+           Authorization.authorize(envelope, definition, change_set, snapshot) do
+      case receipt do
+        %WriteReceipt{request_fingerprint: fingerprint, command_iri: command_iri}
+        when fingerprint == change_set.request_fingerprint and
+               command_iri == envelope.command_iri ->
+          {:ok, semantic_receipt(:already_committed, envelope, change_set, identities, receipt)}
 
         %WriteReceipt{} ->
           {:error, Error.new(:conflict, :command_idempotency_reuse)}
@@ -78,7 +109,7 @@ defmodule JidoCode.Knowledge.CommandPipeline do
          {:ok, batch} <-
            build_batch(envelope, change_set, identities, snapshot, audit_additions, audit_graph),
          {:ok, receipt} <- request(store_server, {:atomic_update, batch}, deadline) do
-      {:ok, semantic_receipt(:committed, envelope, change_set, receipt)}
+      {:ok, semantic_receipt(:committed, envelope, change_set, identities, receipt)}
     end
   end
 
@@ -105,9 +136,10 @@ defmodule JidoCode.Knowledge.CommandPipeline do
     )
   end
 
-  defp semantic_receipt(outcome, envelope, change_set, receipt) do
+  defp semantic_receipt(outcome, envelope, change_set, identities, receipt) do
     CommandReceipt.success(outcome, %{
       command_iri: envelope.command_iri,
+      receipt_iri: identities.receipt_iri,
       change_set_iri: change_set.change_set_iri,
       dataset_revision: receipt.dataset_revision,
       graph_revisions: receipt.graph_revisions,

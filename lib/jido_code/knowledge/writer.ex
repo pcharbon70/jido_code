@@ -9,11 +9,13 @@ defmodule JidoCode.Knowledge.Writer do
 
   use GenServer
 
-  alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.Bootstrap
+  alias JidoCode.Knowledge.ChangeFeed
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.CommandPipeline
   alias JidoCode.Knowledge.CommandReceipt
-  alias JidoCode.Knowledge.Bootstrap
+  alias JidoCode.Knowledge.CommandStatus
+  alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Telemetry
   alias JidoCode.Knowledge.WriteBatch
@@ -86,6 +88,32 @@ defmodule JidoCode.Knowledge.Writer do
     end
   end
 
+  @spec command_status(CommandEnvelope.t(), keyword()) ::
+          {:ok, CommandStatus.t()} | {:error, Error.t()}
+  def command_status(envelope_or_server, options_or_envelope \\ [])
+
+  def command_status(%CommandEnvelope{} = envelope, options) do
+    command_status(__MODULE__, envelope, options)
+  end
+
+  def command_status(server, %CommandEnvelope{} = envelope),
+    do: command_status(server, envelope, [])
+
+  @spec command_status(GenServer.server(), CommandEnvelope.t(), keyword()) ::
+          {:ok, CommandStatus.t()} | {:error, Error.t()}
+  def command_status(server, %CommandEnvelope{} = envelope, options) when is_list(options) do
+    with {:ok, operation_timeout, caller_timeout} <- timeouts(options) do
+      deadline = System.monotonic_time(:millisecond) + operation_timeout
+
+      safe_call(
+        server,
+        {:command_status, envelope, deadline},
+        caller_timeout,
+        :command_status
+      )
+    end
+  end
+
   @spec bootstrap(map(), keyword()) :: term()
   def bootstrap(attributes, options \\ []) when is_map(attributes) and is_list(options) do
     bootstrap(__MODULE__, attributes, options)
@@ -121,7 +149,8 @@ defmodule JidoCode.Knowledge.Writer do
            :bootstrap_config,
            Application.get_env(:jido_code, :authority_bootstrap, %{enabled?: false})
          ),
-       clock: Keyword.get(options, :clock, &DateTime.utc_now/0)
+       clock: Keyword.get(options, :clock, &DateTime.utc_now/0),
+       pubsub: Keyword.get(options, :pubsub, JidoCode.PubSub)
      }}
   end
 
@@ -156,6 +185,12 @@ defmodule JidoCode.Knowledge.Writer do
 
   def handle_call({:execute, %CommandEnvelope{} = envelope, deadline}, _from, state) do
     reply = CommandPipeline.execute(envelope, state.store_server, deadline)
+    publish_change(reply, envelope, state.pubsub)
+    {:reply, reply, state}
+  end
+
+  def handle_call({:command_status, %CommandEnvelope{} = envelope, deadline}, _from, state) do
+    reply = CommandStatus.lookup(envelope, state.store_server, deadline, safe_clock(state.clock))
     {:reply, reply, state}
   end
 
@@ -202,5 +237,19 @@ defmodule JidoCode.Knowledge.Writer do
   catch
     :exit, {:timeout, _details} -> {:error, Error.new(:timeout, operation)}
     :exit, _reason -> {:error, Error.new(:unavailable, operation)}
+  end
+
+  defp publish_change({:ok, %CommandReceipt{outcome: :committed} = receipt}, envelope, pubsub) do
+    ChangeFeed.publish(envelope, receipt, pubsub)
+  end
+
+  defp publish_change(_reply, _envelope, _pubsub), do: :dropped
+
+  defp safe_clock(clock) do
+    clock.()
+  rescue
+    _error -> nil
+  catch
+    _kind, _reason -> nil
   end
 end

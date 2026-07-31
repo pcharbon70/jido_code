@@ -44,3 +44,4 @@ implementation plan was merged.
 - [Semantic command contract](./semantic-command-contract.md)
 - [Governed command pipeline](./governed-command-pipeline.md)
 - [Authority, bootstrap, and audit](./authority-bootstrap-and-audit.md)
+- [Change delivery and command recovery](./change-delivery-and-command-recovery.md)

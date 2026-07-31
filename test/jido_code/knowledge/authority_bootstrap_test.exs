@@ -37,6 +37,15 @@ defmodule JidoCode.Knowledge.AuthorityBootstrapTest do
     assert authority.delegated_agent_iri == fixture.agent
     assert authority.delegation_iri == fixture.delegation
 
+    assert {:error, _error} =
+             Authorization.authorize_at(
+               envelope,
+               definition,
+               change_set,
+               snapshot,
+               ~U[2028-01-01 00:00:00Z]
+             )
+
     duplicate = resource!("duplicate-delegation")
 
     ambiguous =

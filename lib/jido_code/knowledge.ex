@@ -5,12 +5,18 @@ defmodule JidoCode.Knowledge do
   It never exposes raw backend handles, write batches, or arbitrary SPARQL.
   """
 
+  alias JidoCode.Knowledge.ChangeFeed
+  alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
-  alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Writer
 
   def execute(%CommandEnvelope{} = envelope, options \\ []), do: Writer.execute(envelope, options)
+
+  def command_status(%CommandEnvelope{} = envelope, options \\ []),
+    do: Writer.command_status(envelope, options)
+
+  def subscribe_changes(scope_iri), do: ChangeFeed.subscribe(scope_iri)
   def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
 
   def health, do: Readiness.snapshot()
