@@ -29,6 +29,7 @@ defmodule JidoCode.Architecture.Checker do
     "JidoCode.Knowledge.RestoreLog"
   ]
   @semantic_write_owners [
+    "JidoCode.Knowledge.CommandPipeline",
     "JidoCode.Knowledge.Commands.Graphs",
     "JidoCode.Knowledge.Ontology.Release"
   ]

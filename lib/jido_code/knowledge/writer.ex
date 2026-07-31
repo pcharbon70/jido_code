@@ -10,6 +10,9 @@ defmodule JidoCode.Knowledge.Writer do
   use GenServer
 
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.CommandEnvelope
+  alias JidoCode.Knowledge.CommandPipeline
+  alias JidoCode.Knowledge.CommandReceipt
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Telemetry
   alias JidoCode.Knowledge.WriteBatch
@@ -54,6 +57,34 @@ defmodule JidoCode.Knowledge.Writer do
     end
   end
 
+  @spec execute(CommandEnvelope.t(), keyword()) :: {:ok, CommandReceipt.t()} | {:error, Error.t()}
+  def execute(envelope_or_server, options_or_envelope \\ [])
+
+  def execute(%CommandEnvelope{} = envelope, options) do
+    execute(__MODULE__, envelope, options)
+  end
+
+  def execute(server, %CommandEnvelope{} = envelope), do: execute(server, envelope, [])
+
+  @spec execute(GenServer.server(), CommandEnvelope.t(), keyword()) ::
+          {:ok, CommandReceipt.t()} | {:error, Error.t()}
+  def execute(server, %CommandEnvelope{} = envelope, options) when is_list(options) do
+    with {:ok, operation_timeout, caller_timeout} <- timeouts(options) do
+      deadline = System.monotonic_time(:millisecond) + operation_timeout
+
+      case safe_call(server, {:execute, envelope, deadline}, caller_timeout, :command_response) do
+        {:error, %Error{kind: :timeout}} ->
+          {:ok, CommandReceipt.failure(:unknown_after_timeout, command_iri: envelope.command_iri)}
+
+        {:error, %Error{kind: :unavailable}} ->
+          {:ok, CommandReceipt.failure(:unavailable, command_iri: envelope.command_iri)}
+
+        result ->
+          result
+      end
+    end
+  end
+
   @impl true
   def init(options) do
     {:ok, %{store_server: Keyword.get(options, :store_server, StoreServer)}}
@@ -85,6 +116,11 @@ defmodule JidoCode.Knowledge.Writer do
     reply =
       safe_store_request(state.store_server, {:receipt, commit_id}, timeout, :receipt_lookup)
 
+    {:reply, reply, state}
+  end
+
+  def handle_call({:execute, %CommandEnvelope{} = envelope, deadline}, _from, state) do
+    reply = CommandPipeline.execute(envelope, state.store_server, deadline)
     {:reply, reply, state}
   end
 

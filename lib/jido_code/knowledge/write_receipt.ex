@@ -23,7 +23,9 @@ defmodule JidoCode.Knowledge.WriteReceipt do
     :additions_count,
     :removals_count,
     :durability,
-    :replayed?
+    :replayed?,
+    :request_fingerprint,
+    :command_iri
   ]
 
   @type graph_revision :: %{prior: non_neg_integer(), new: non_neg_integer()}
@@ -37,7 +39,9 @@ defmodule JidoCode.Knowledge.WriteReceipt do
           additions_count: non_neg_integer(),
           removals_count: non_neg_integer(),
           durability: :sync,
-          replayed?: boolean()
+          replayed?: boolean(),
+          request_fingerprint: String.t() | nil,
+          command_iri: String.t() | nil
         }
 
   def replayed(%__MODULE__{} = receipt), do: %{receipt | replayed?: true}

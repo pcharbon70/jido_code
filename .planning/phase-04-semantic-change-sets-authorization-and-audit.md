@@ -69,55 +69,55 @@ Back to plan: [README](./README.md)
       - [x] 4.1.4.3 Subtask {#jcf-p04-4-1-4-3} - Define command ownership, writer capability, graph families, expected preconditions, and version negotiation without implementing future business rules early.
       - [x] 4.1.4.4 Subtask {#jcf-p04-4-1-4-4} - Reject a generic create/update/delete entity command from the public knowledge boundary.
 
-  - [ ] 4.2 Section - Implement the governed atomic write pipeline.
+  - [x] 4.2 Section - Implement the governed atomic write pipeline.
 
     This section composes normalization, authorization, validation,
     preconditions, provenance, audit, commit, and outcome recovery into one
     deterministic mutation path.
 
-    - [ ] 4.2.1 Task {#jcf-p04-command-normalization} [repo: jido_code] [after: {#jcf-p04-initial-command-vocabulary}] - Implement command normalization and change-set construction.
+    - [x] 4.2.1 Task {#jcf-p04-command-normalization} [repo: jido_code] [after: {#jcf-p04-initial-command-vocabulary}] - Implement command normalization and change-set construction.
 
       This task converts accepted command versions into canonical RDF deltas
       without querying or mutating the backend from command codecs.
 
-      - [ ] 4.2.1.1 Subtask {#jcf-p04-4-2-1-1} - Resolve command/version definitions from a fixed registry and reject user-controlled module/atom dispatch.
-      - [ ] 4.2.1.2 Subtask {#jcf-p04-4-2-1-2} - Normalize IRIs, literals, datatypes, language tags, controlled concepts, timestamps, and graph references.
-      - [ ] 4.2.1.3 Subtask {#jcf-p04-4-2-1-3} - Construct explicit provenance resources for command, actor association, inputs used, outputs generated, and causation.
-      - [ ] 4.2.1.4 Subtask {#jcf-p04-4-2-1-4} - Produce a deterministic logical fingerprint before accessing mutable graph state.
+      - [x] 4.2.1.1 Subtask {#jcf-p04-4-2-1-1} - Resolve command/version definitions from a fixed registry and reject user-controlled module/atom dispatch.
+      - [x] 4.2.1.2 Subtask {#jcf-p04-4-2-1-2} - Normalize IRIs, literals, datatypes, language tags, controlled concepts, timestamps, and graph references.
+      - [x] 4.2.1.3 Subtask {#jcf-p04-4-2-1-3} - Construct explicit provenance resources for command, actor association, inputs used, outputs generated, and causation.
+      - [x] 4.2.1.4 Subtask {#jcf-p04-4-2-1-4} - Produce a deterministic logical fingerprint before accessing mutable graph state.
 
-    - [ ] 4.2.2 Task {#jcf-p04-precommit-pipeline} [repo: jido_code] [after: {#jcf-p04-command-normalization}] - Implement authorization, validation, and precondition evaluation.
+    - [x] 4.2.2 Task {#jcf-p04-precommit-pipeline} [repo: jido_code] [after: {#jcf-p04-command-normalization}] - Implement authorization, validation, and precondition evaluation.
 
       This task evaluates all policy and semantic guards against one consistent
       committed snapshot plus the proposed change before anything is visible.
 
-      - [ ] 4.2.2.1 Subtask {#jcf-p04-4-2-2-1} - Resolve actor, delegation, capabilities, enrollment/repository scope, and graph-family write authority.
-      - [ ] 4.2.2.2 Subtask {#jcf-p04-4-2-2-2} - Run RDF/shape/graph-topology validation against the effective post-change dataset.
-      - [ ] 4.2.2.3 Subtask {#jcf-p04-4-2-2-3} - Evaluate expected revisions, subject transition predecessor, uniqueness, immutable graph closure, and command-specific ASK preconditions.
-      - [ ] 4.2.2.4 Subtask {#jcf-p04-4-2-2-4} - Bound query count, rows, execution time, and diagnostic output for pre-commit checks.
-      - [ ] 4.2.2.5 Subtask {#jcf-p04-4-2-2-5} - Ensure a timeout or unavailable authorization/validation dependency fails closed.
+      - [x] 4.2.2.1 Subtask {#jcf-p04-4-2-2-1} - Resolve actor, delegation, capabilities, enrollment/repository scope, and graph-family write authority.
+      - [x] 4.2.2.2 Subtask {#jcf-p04-4-2-2-2} - Run RDF/shape/graph-topology validation against the effective post-change dataset.
+      - [x] 4.2.2.3 Subtask {#jcf-p04-4-2-2-3} - Evaluate expected revisions, subject transition predecessor, uniqueness, immutable graph closure, and command-specific ASK preconditions.
+      - [x] 4.2.2.4 Subtask {#jcf-p04-4-2-2-4} - Bound query count, rows, execution time, and diagnostic output for pre-commit checks.
+      - [x] 4.2.2.5 Subtask {#jcf-p04-4-2-2-5} - Ensure a timeout or unavailable authorization/validation dependency fails closed.
 
-    - [ ] 4.2.3 Task {#jcf-p04-atomic-semantic-commit} [repo: jido_code] [after: {#jcf-p04-precommit-pipeline}] - Commit domain statements, provenance, audit, and revisions atomically.
+    - [x] 4.2.3 Task {#jcf-p04-atomic-semantic-commit} [repo: jido_code] [after: {#jcf-p04-precommit-pipeline}] - Commit domain statements, provenance, audit, and revisions atomically.
 
       This task guarantees a successful product mutation can never appear
       without its responsible actor, cause, validation context, and audit
       outcome.
 
-      - [ ] 4.2.3.1 Subtask {#jcf-p04-4-2-3-1} - Assemble domain additions, transition/supersession statements, graph metadata, command/change-set provenance, audit resource, and revision updates into one commit.
-      - [ ] 4.2.3.2 Subtask {#jcf-p04-4-2-3-2} - Use the Phase 2 atomicity strategy and preserve all-or-nothing reader visibility across affected graphs.
-      - [ ] 4.2.3.3 Subtask {#jcf-p04-4-2-3-3} - Persist the logical request fingerprint and authoritative receipt in the same commit.
-      - [ ] 4.2.3.4 Subtask {#jcf-p04-4-2-3-4} - Return the committed receipt only after durability succeeds and classify response-loss ambiguity separately.
-      - [ ] 4.2.3.5 Subtask {#jcf-p04-4-2-3-5} - Never write an audit success for a rejected or failed domain change; record bounded rejection audits through their own authorized path where required.
+      - [x] 4.2.3.1 Subtask {#jcf-p04-4-2-3-1} - Assemble domain additions, transition/supersession statements, graph metadata, command/change-set provenance, audit resource, and revision updates into one commit.
+      - [x] 4.2.3.2 Subtask {#jcf-p04-4-2-3-2} - Use the Phase 2 atomicity strategy and preserve all-or-nothing reader visibility across affected graphs.
+      - [x] 4.2.3.3 Subtask {#jcf-p04-4-2-3-3} - Persist the logical request fingerprint and authoritative receipt in the same commit.
+      - [x] 4.2.3.4 Subtask {#jcf-p04-4-2-3-4} - Return the committed receipt only after durability succeeds and classify response-loss ambiguity separately.
+      - [x] 4.2.3.5 Subtask {#jcf-p04-4-2-3-5} - Never write an audit success for a rejected or failed domain change; record bounded rejection audits through their own authorized path where required.
 
-    - [ ] 4.2.4 Task {#jcf-p04-idempotency-recovery} [repo: jido_code] [after: {#jcf-p04-atomic-semantic-commit}] - Implement idempotent replay and outcome recovery.
+    - [x] 4.2.4 Task {#jcf-p04-idempotency-recovery} [repo: jido_code] [after: {#jcf-p04-atomic-semantic-commit}] - Implement idempotent replay and outcome recovery.
 
       This task makes command retries safe when clients cannot know whether a
       response was lost before or after authoritative commit.
 
-      - [ ] 4.2.4.1 Subtask {#jcf-p04-4-2-4-1} - Map actor/scope/command idempotency keys to stable request resources and fingerprints.
-      - [ ] 4.2.4.2 Subtask {#jcf-p04-4-2-4-2} - Return the original receipt for equivalent replay without advancing revisions or duplicating statements.
-      - [ ] 4.2.4.3 Subtask {#jcf-p04-4-2-4-3} - Reject divergent reuse with a deterministic conflict and conceal prior payload details.
-      - [ ] 4.2.4.4 Subtask {#jcf-p04-4-2-4-4} - Resolve unknown-after-timeout outcomes by command IRI/idempotency identity before permitting a new command.
-      - [ ] 4.2.4.5 Subtask {#jcf-p04-4-2-4-5} - Define retention for idempotency receipts without permitting removal while referenced by durable domain history.
+      - [x] 4.2.4.1 Subtask {#jcf-p04-4-2-4-1} - Map actor/scope/command idempotency keys to stable request resources and fingerprints.
+      - [x] 4.2.4.2 Subtask {#jcf-p04-4-2-4-2} - Return the original receipt for equivalent replay without advancing revisions or duplicating statements.
+      - [x] 4.2.4.3 Subtask {#jcf-p04-4-2-4-3} - Reject divergent reuse with a deterministic conflict and conceal prior payload details.
+      - [x] 4.2.4.4 Subtask {#jcf-p04-4-2-4-4} - Resolve unknown-after-timeout outcomes by command IRI/idempotency identity before permitting a new command.
+      - [x] 4.2.4.5 Subtask {#jcf-p04-4-2-4-5} - Define retention for idempotency receipts without permitting removal while referenced by durable domain history.
 
   - [ ] 4.3 Section - Implement authorization, delegation, and audit policy.
 

@@ -23,6 +23,7 @@ defmodule JidoCode.Knowledge.StoreServer do
   alias JidoCode.Knowledge.Ontology.StartupGate
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.RestoreLog
+  alias JidoCode.Knowledge.SemanticSnapshot
   alias JidoCode.Knowledge.Telemetry
   alias TripleStore.Backend.RocksDB.ErlangAdapter
   alias TripleStore.QuadOperations
@@ -38,6 +39,7 @@ defmodule JidoCode.Knowledge.StoreServer do
     statistics: :read,
     graph_counts: :read,
     graph_metadata: :read,
+    semantic_snapshot: :write,
     atomic_update: :write,
     receipt: :write,
     checkpoint: :maintenance,
@@ -353,6 +355,13 @@ defmodule JidoCode.Knowledge.StoreServer do
   defp dispatch({:graph_metadata, graph_iri}, state) do
     case GraphMetadata.read(state.store, graph_iri) do
       {:ok, metadata} -> {:ok, metadata, state}
+      {:error, %Error{} = error} -> {:error, error}
+    end
+  end
+
+  defp dispatch({:semantic_snapshot, graph_iris}, state) do
+    case SemanticSnapshot.read(state.store, state.metadata, graph_iris) do
+      {:ok, snapshot} -> {:ok, snapshot, state}
       {:error, %Error{} = error} -> {:error, error}
     end
   end

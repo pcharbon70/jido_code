@@ -42,3 +42,4 @@ implementation plan was merged.
 - [Claims, time, transitions, and inference](./claims-time-transitions-and-inference.md)
 - [Phase 3 semantic contract receipt](./phase-03-receipt.md)
 - [Semantic command contract](./semantic-command-contract.md)
+- [Governed command pipeline](./governed-command-pipeline.md)
