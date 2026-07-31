@@ -134,10 +134,11 @@ defmodule JidoCode.Knowledge.Phase02IntegrationTest do
     readiness = {:global, {__MODULE__, :readiness, identity}}
     store_server = {:global, {__MODULE__, :store, identity}}
     writer = {:global, {__MODULE__, :writer, identity}}
+    query_runner = {:global, {__MODULE__, :query_runner, identity}}
     maintenance = {:global, {__MODULE__, :maintenance, identity}}
 
     authorized_callers = %{
-      read: [self()],
+      read: [self(), query_runner],
       write: [writer],
       maintenance: [maintenance]
     }
@@ -148,6 +149,7 @@ defmodule JidoCode.Knowledge.Phase02IntegrationTest do
         readiness: readiness,
         store_server: store_server,
         writer: writer,
+        query_runner: query_runner,
         maintenance: maintenance,
         config: config,
         authorized_callers: authorized_callers
@@ -167,6 +169,7 @@ defmodule JidoCode.Knowledge.Phase02IntegrationTest do
       readiness: readiness,
       store_server: store_server,
       writer: writer,
+      query_runner: query_runner,
       maintenance: maintenance
     }
   end

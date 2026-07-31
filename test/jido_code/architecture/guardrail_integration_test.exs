@@ -22,6 +22,7 @@ defmodule JidoCode.Architecture.GuardrailIntegrationTest do
                :parallel_persistence,
                :store_ownership,
                :write_coordinator,
+               :graph_topology,
                :raw_store_access,
                :raw_rocksdb,
                :file_persistence,

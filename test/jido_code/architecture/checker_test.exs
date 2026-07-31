@@ -22,7 +22,9 @@ defmodule JidoCode.Architecture.CheckerTest do
       {"lib/jido_code/factory/raw.ex",
        "defmodule JidoCode.Factory.Raw do\n  def open, do: :rocksdb.open(~c\"state\", [])\nend"},
       {"lib/jido_code/knowledge/raw_update.ex",
-       "defmodule JidoCode.Knowledge.RawUpdate do\n  def write(store), do: TripleStore.update(store, \"INSERT DATA {}\")\nend"}
+       "defmodule JidoCode.Knowledge.RawUpdate do\n  def write(store), do: TripleStore.update(store, \"INSERT DATA {}\")\nend"},
+      {"lib/jido_code/knowledge/unregistered.ex",
+       "defmodule JidoCode.Knowledge.Unregistered do\n  alias JidoCode.Knowledge.WriteBatch\n  def write(quads, options), do: WriteBatch.new(quads, options)\nend"}
     ]
 
     assert {:error, violations} = Checker.check_sources(sources)
@@ -34,6 +36,7 @@ defmodule JidoCode.Architecture.CheckerTest do
                :file_persistence,
                :store_ownership,
                :write_coordinator,
+               :graph_topology,
                :raw_store_access,
                :raw_rocksdb
              ]),

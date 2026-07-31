@@ -15,6 +15,7 @@ defmodule JidoCode.Knowledge.StoreServer do
   alias JidoCode.Knowledge.Config
   alias JidoCode.Knowledge.DatasetSelector
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.GraphMetadata
   alias JidoCode.Knowledge.Identity
   alias JidoCode.Knowledge.Integrity
   alias JidoCode.Knowledge.IntegrityReport
@@ -35,6 +36,7 @@ defmodule JidoCode.Knowledge.StoreServer do
     metadata: :read,
     statistics: :read,
     graph_counts: :read,
+    graph_metadata: :read,
     atomic_update: :write,
     receipt: :write,
     checkpoint: :maintenance,
@@ -343,6 +345,13 @@ defmodule JidoCode.Knowledge.StoreServer do
       end
     else
       {:error, Error.new(:invalid_input, :read_graph_counts)}
+    end
+  end
+
+  defp dispatch({:graph_metadata, graph_iri}, state) do
+    case GraphMetadata.read(state.store, graph_iri) do
+      {:ok, metadata} -> {:ok, metadata, state}
+      {:error, %Error{} = error} -> {:error, error}
     end
   end
 

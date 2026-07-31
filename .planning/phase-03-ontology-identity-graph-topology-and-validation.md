@@ -61,43 +61,43 @@ Back to plan: [README](./README.md)
       - [x] 3.1.3.4 Subtask {#jcf-p03-3-1-3-4} - Document domain/range guidance, expected cardinality, provenance policy, graph ownership, and query use for every project predicate.
       - [x] 3.1.3.5 Subtask {#jcf-p03-3-1-3-5} - Reject ontology terms that exist only to mirror an Elixir module, struct field, enum atom, or storage codec.
 
-  - [ ] 3.2 Section - Implement canonical identity and named graph topology.
+  - [x] 3.2 Section - Implement canonical identity and named graph topology.
 
     This section gives every resource and graph a deterministic, validated
     identity and enforces lifecycle boundaries independently from Elixir
     record types.
 
-    - [ ] 3.2.1 Task {#jcf-p03-resource-identity} [repo: jido_code] [after: {#jcf-p03-standard-vocabulary-alignment}] - Implement canonical resource IRI construction and validation.
+    - [x] 3.2.1 Task {#jcf-p03-resource-identity} [repo: jido_code] [after: {#jcf-p03-standard-vocabulary-alignment}] - Implement canonical resource IRI construction and validation.
 
       This task prevents ad hoc strings, foreign-key literals, user-created
       atoms, and ambiguous provider identities from becoming graph identity.
 
-      - [ ] 3.2.1.1 Subtask {#jcf-p03-3-2-1-1} - Define deterministic IRIs for natural external identities and opaque time-sortable IRIs for local activities, claims, goals, attempts, and decisions.
-      - [ ] 3.2.1.2 Subtask {#jcf-p03-3-2-1-2} - Canonicalize provider host, repository locator, Git object, and content-digest inputs without conflating a locator with the conceptual repository.
-      - [ ] 3.2.1.3 Subtask {#jcf-p03-3-2-1-3} - Validate namespace, segment encoding, maximum size, control characters, normalization, and scope before constructing an RDF IRI.
-      - [ ] 3.2.1.4 Subtask {#jcf-p03-3-2-1-4} - Make identity functions pure and inject clock/random/ID sources through deterministic ports.
-      - [ ] 3.2.1.5 Subtask {#jcf-p03-3-2-1-5} - Permit interoperability/display IDs only as literals and require graph relationships to join by IRI.
+      - [x] 3.2.1.1 Subtask {#jcf-p03-3-2-1-1} - Define deterministic IRIs for natural external identities and opaque time-sortable IRIs for local activities, claims, goals, attempts, and decisions.
+      - [x] 3.2.1.2 Subtask {#jcf-p03-3-2-1-2} - Canonicalize provider host, repository locator, Git object, and content-digest inputs without conflating a locator with the conceptual repository.
+      - [x] 3.2.1.3 Subtask {#jcf-p03-3-2-1-3} - Validate namespace, segment encoding, maximum size, control characters, normalization, and scope before constructing an RDF IRI.
+      - [x] 3.2.1.4 Subtask {#jcf-p03-3-2-1-4} - Make identity functions pure and inject clock/random/ID sources through deterministic ports.
+      - [x] 3.2.1.5 Subtask {#jcf-p03-3-2-1-5} - Permit interoperability/display IDs only as literals and require graph relationships to join by IRI.
 
-    - [ ] 3.2.2 Task {#jcf-p03-graph-registry} [repo: jido_code] [after: {#jcf-p03-resource-identity}] - Implement the named graph family registry.
+    - [x] 3.2.2 Task {#jcf-p03-graph-registry} [repo: jido_code] [after: {#jcf-p03-resource-identity}] - Implement the named graph family registry.
 
       This task centralizes graph placement, ownership, lifecycle, and link
       rules so callers cannot invent storage topology in application code.
 
-      - [ ] 3.2.2.1 Subtask {#jcf-p03-3-2-2-1} - Register ontology, factory catalog, factory policy, observation batch, source revision, repository control, run attempt, evidence, memory, security audit, and derived graph families.
-      - [ ] 3.2.2.2 Subtask {#jcf-p03-3-2-2-2} - Define required scope inputs, canonical graph IRI template, writer capability, mutability, completeness, retention class, and allowed cross-graph links for each family.
-      - [ ] 3.2.2.3 Subtask {#jcf-p03-3-2-2-3} - Enforce immutable/write-once behavior for ontology releases, observation batches, source revisions, and closed run graphs.
-      - [ ] 3.2.2.4 Subtask {#jcf-p03-3-2-2-4} - Reserve the default graph for no application data and reject unregistered named graph writes.
-      - [ ] 3.2.2.5 Subtask {#jcf-p03-3-2-2-5} - Avoid one graph per ordinary entity while preserving batch, snapshot, attempt, authority, and retention boundaries.
+      - [x] 3.2.2.1 Subtask {#jcf-p03-3-2-2-1} - Register ontology, factory catalog, factory policy, observation batch, source revision, repository control, run attempt, evidence, memory, security audit, and derived graph families.
+      - [x] 3.2.2.2 Subtask {#jcf-p03-3-2-2-2} - Define required scope inputs, canonical graph IRI template, writer capability, mutability, completeness, retention class, and allowed cross-graph links for each family.
+      - [x] 3.2.2.3 Subtask {#jcf-p03-3-2-2-3} - Enforce immutable/write-once behavior for ontology releases, observation batches, source revisions, and closed run graphs.
+      - [x] 3.2.2.4 Subtask {#jcf-p03-3-2-2-4} - Reserve the default graph for no application data and reject unregistered named graph writes.
+      - [x] 3.2.2.5 Subtask {#jcf-p03-3-2-2-5} - Avoid one graph per ordinary entity while preserving batch, snapshot, attempt, authority, and retention boundaries.
 
-    - [ ] 3.2.3 Task {#jcf-p03-graph-metadata} [repo: jido_code] [after: {#jcf-p03-graph-registry}] - Define and validate named graph metadata.
+    - [x] 3.2.3 Task {#jcf-p03-graph-metadata} [repo: jido_code] [after: {#jcf-p03-graph-registry}] - Define and validate named graph metadata.
 
       This task makes every graph self-describing enough for bounded queries,
       migration, reasoning, integrity, backup, and retention.
 
-      - [ ] 3.2.3.1 Subtask {#jcf-p03-3-2-3-1} - Require graph kind, owner scope, ontology version, creation activity, creation time, lifecycle state, completeness state, and current graph revision.
-      - [ ] 3.2.3.2 Subtask {#jcf-p03-3-2-3-2} - Add source revision, parent lineage, closure time, rule-set version, or retention metadata where required by graph family.
-      - [ ] 3.2.3.3 Subtask {#jcf-p03-3-2-3-3} - Store metadata through the same atomic write boundary as graph creation and closure.
-      - [ ] 3.2.3.4 Subtask {#jcf-p03-3-2-3-4} - Make metadata queryable without exposing graph contents or granting mutation authority.
+      - [x] 3.2.3.1 Subtask {#jcf-p03-3-2-3-1} - Require graph kind, owner scope, ontology version, creation activity, creation time, lifecycle state, completeness state, and current graph revision.
+      - [x] 3.2.3.2 Subtask {#jcf-p03-3-2-3-2} - Add source revision, parent lineage, closure time, rule-set version, or retention metadata where required by graph family.
+      - [x] 3.2.3.3 Subtask {#jcf-p03-3-2-3-3} - Store metadata through the same atomic write boundary as graph creation and closure.
+      - [x] 3.2.3.4 Subtask {#jcf-p03-3-2-3-4} - Make metadata queryable without exposing graph contents or granting mutation authority.
 
   - [ ] 3.3 Section - Implement shape validation and ontology evolution.
 

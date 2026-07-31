@@ -37,3 +37,4 @@ implementation plan was merged.
 ## Phase 3 Semantic Contract
 
 - [Factory ontology contract](./factory-ontology.md)
+- [Graph identity and topology](./graph-identity-and-topology.md)
