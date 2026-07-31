@@ -20,54 +20,54 @@ Back to plan: [README](./README.md)
   contracts while preserving the knowledge substrate's one-writer and
   graph-only truth invariants.
 
-  - [ ] 4.1 Section - Define semantic command, change-set, and receipt contracts.
+  - [x] 4.1 Section - Define semantic command, change-set, and receipt contracts.
 
     This section gives all future factory operations one bounded, versioned,
     provenance-bearing mutation vocabulary without coupling callers to SPARQL
     or backend details.
 
-    - [ ] 4.1.1 Task {#jcf-p04-command-envelope} [repo: jido_code] [after: {#jcf-p03-phase-receipt}] - Implement the common semantic command envelope.
+    - [x] 4.1.1 Task {#jcf-p04-command-envelope} [repo: jido_code] [after: {#jcf-p03-phase-receipt}] - Implement the common semantic command envelope.
 
       This task captures authority, identity, causation, consistency, and
       version requirements shared by every domain-specific command.
 
-      - [ ] 4.1.1.1 Subtask {#jcf-p04-4-1-1-1} - Require command type/version, command IRI, authenticated actor/delegation, scope, idempotency key, correlation/causation IRIs, ontology/shape version, expected revisions, reason, and issued time.
-      - [ ] 4.1.1.2 Subtask {#jcf-p04-4-1-1-2} - Define bounded command payloads using RDF terms and canonical resource references rather than persisted entity structs.
-      - [ ] 4.1.1.3 Subtask {#jcf-p04-4-1-1-3} - Reject unknown versions, missing scope/authority, malformed identities, oversized payloads, unsupported graph families, and untrusted timestamps.
-      - [ ] 4.1.1.4 Subtask {#jcf-p04-4-1-1-4} - Keep clocks, ID generation, and actor resolution explicit and deterministic in tests.
-      - [ ] 4.1.1.5 Subtask {#jcf-p04-4-1-1-5} - Define safe inspect/serialization behavior that redacts sensitive metadata and never logs statement bodies by default.
+      - [x] 4.1.1.1 Subtask {#jcf-p04-4-1-1-1} - Require command type/version, command IRI, authenticated actor/delegation, scope, idempotency key, correlation/causation IRIs, ontology/shape version, expected revisions, reason, and issued time.
+      - [x] 4.1.1.2 Subtask {#jcf-p04-4-1-1-2} - Define bounded command payloads using RDF terms and canonical resource references rather than persisted entity structs.
+      - [x] 4.1.1.3 Subtask {#jcf-p04-4-1-1-3} - Reject unknown versions, missing scope/authority, malformed identities, oversized payloads, unsupported graph families, and untrusted timestamps.
+      - [x] 4.1.1.4 Subtask {#jcf-p04-4-1-1-4} - Keep clocks, ID generation, and actor resolution explicit and deterministic in tests.
+      - [x] 4.1.1.5 Subtask {#jcf-p04-4-1-1-5} - Define safe inspect/serialization behavior that redacts sensitive metadata and never logs statement bodies by default.
 
-    - [ ] 4.1.2 Task {#jcf-p04-change-set} [repo: jido_code] [after: {#jcf-p04-command-envelope}] - Implement the semantic change-set representation.
+    - [x] 4.1.2 Task {#jcf-p04-change-set} [repo: jido_code] [after: {#jcf-p04-command-envelope}] - Implement the semantic change-set representation.
 
       This task translates command intent into an atomic graph delta while
       preserving assertions, transitions, supersession, invalidation, and
       provenance as distinct operations.
 
-      - [ ] 4.1.2.1 Subtask {#jcf-p04-4-1-2-1} - Define target graph additions, explicit supersession/invalidation relationships, maintenance-only removals, graph metadata changes, and expected revisions.
-      - [ ] 4.1.2.2 Subtask {#jcf-p04-4-1-2-2} - Include change-set IRI, command IRI, actor, cause, ontology/shape versions, validation context, request fingerprint, and commit metadata.
-      - [ ] 4.1.2.3 Subtask {#jcf-p04-4-1-2-3} - Ensure ordinary commands cannot delete immutable graph contents, replace a subject wholesale, or write unregistered graphs.
-      - [ ] 4.1.2.4 Subtask {#jcf-p04-4-1-2-4} - Canonically order and fingerprint logical changes so semantically identical retries compare deterministically.
-      - [ ] 4.1.2.5 Subtask {#jcf-p04-4-1-2-5} - Separate command construction from authorization, validation, and backend execution.
+      - [x] 4.1.2.1 Subtask {#jcf-p04-4-1-2-1} - Define target graph additions, explicit supersession/invalidation relationships, maintenance-only removals, graph metadata changes, and expected revisions.
+      - [x] 4.1.2.2 Subtask {#jcf-p04-4-1-2-2} - Include change-set IRI, command IRI, actor, cause, ontology/shape versions, validation context, request fingerprint, and commit metadata.
+      - [x] 4.1.2.3 Subtask {#jcf-p04-4-1-2-3} - Ensure ordinary commands cannot delete immutable graph contents, replace a subject wholesale, or write unregistered graphs.
+      - [x] 4.1.2.4 Subtask {#jcf-p04-4-1-2-4} - Canonically order and fingerprint logical changes so semantically identical retries compare deterministically.
+      - [x] 4.1.2.5 Subtask {#jcf-p04-4-1-2-5} - Separate command construction from authorization, validation, and backend execution.
 
-    - [ ] 4.1.3 Task {#jcf-p04-receipt-error-contract} [repo: jido_code] [after: {#jcf-p04-change-set}] - Implement command receipts and failure outcomes.
+    - [x] 4.1.3 Task {#jcf-p04-receipt-error-contract} [repo: jido_code] [after: {#jcf-p04-change-set}] - Implement command receipts and failure outcomes.
 
       This task makes authoritative outcomes recoverable and useful without
       returning raw triples, backend handles, or unbounded diagnostics.
 
-      - [ ] 4.1.3.1 Subtask {#jcf-p04-4-1-3-1} - Return committed, already-committed, rejected, conflicted, unauthorized, invalid, unavailable, and unknown-after-timeout outcome classes.
-      - [ ] 4.1.3.2 Subtask {#jcf-p04-4-1-3-2} - Bind successful receipts to command/change-set IRI, dataset and graph revisions, affected graph IRIs, assertion/supersession counts, actor, and committed time.
-      - [ ] 4.1.3.3 Subtask {#jcf-p04-4-1-3-3} - Return current revisions, failed precondition or shape references, stable issue codes, and bounded retry guidance where disclosure is authorized.
-      - [ ] 4.1.3.4 Subtask {#jcf-p04-4-1-3-4} - Conceal resource existence and policy details on unauthorized or cross-scope requests.
+      - [x] 4.1.3.1 Subtask {#jcf-p04-4-1-3-1} - Return committed, already-committed, rejected, conflicted, unauthorized, invalid, unavailable, and unknown-after-timeout outcome classes.
+      - [x] 4.1.3.2 Subtask {#jcf-p04-4-1-3-2} - Bind successful receipts to command/change-set IRI, dataset and graph revisions, affected graph IRIs, assertion/supersession counts, actor, and committed time.
+      - [x] 4.1.3.3 Subtask {#jcf-p04-4-1-3-3} - Return current revisions, failed precondition or shape references, stable issue codes, and bounded retry guidance where disclosure is authorized.
+      - [x] 4.1.3.4 Subtask {#jcf-p04-4-1-3-4} - Conceal resource existence and policy details on unauthorized or cross-scope requests.
 
-    - [ ] 4.1.4 Task {#jcf-p04-initial-command-vocabulary} [repo: jido_code] [after: {#jcf-p04-receipt-error-contract}] - Define the initial intent-named command registry.
+    - [x] 4.1.4 Task {#jcf-p04-initial-command-vocabulary} [repo: jido_code] [after: {#jcf-p04-receipt-error-contract}] - Define the initial intent-named command registry.
 
       This task establishes stable semantic operation names while deferring
       domain-specific payload details to the phases that introduce them.
 
-      - [ ] 4.1.4.1 Subtask {#jcf-p04-4-1-4-1} - Register `EnrollRepository`, `RecordObservationBatch`, `AssertDesiredOutcome`, `ProposeGoal`, `AdoptPlan`, and `AcquireExecutionLease` command identities.
-      - [ ] 4.1.4.2 Subtask {#jcf-p04-4-1-4-2} - Register `RecordExecutionAttempt`, `RecordVerificationEvidence`, `DecideGoalOutcome`, `AdoptKnowledge`, `SupersedeClaim`, and `RetireEnrollment` command identities.
-      - [ ] 4.1.4.3 Subtask {#jcf-p04-4-1-4-3} - Define command ownership, writer capability, graph families, expected preconditions, and version negotiation without implementing future business rules early.
-      - [ ] 4.1.4.4 Subtask {#jcf-p04-4-1-4-4} - Reject a generic create/update/delete entity command from the public knowledge boundary.
+      - [x] 4.1.4.1 Subtask {#jcf-p04-4-1-4-1} - Register `EnrollRepository`, `RecordObservationBatch`, `AssertDesiredOutcome`, `ProposeGoal`, `AdoptPlan`, and `AcquireExecutionLease` command identities.
+      - [x] 4.1.4.2 Subtask {#jcf-p04-4-1-4-2} - Register `RecordExecutionAttempt`, `RecordVerificationEvidence`, `DecideGoalOutcome`, `AdoptKnowledge`, `SupersedeClaim`, and `RetireEnrollment` command identities.
+      - [x] 4.1.4.3 Subtask {#jcf-p04-4-1-4-3} - Define command ownership, writer capability, graph families, expected preconditions, and version negotiation without implementing future business rules early.
+      - [x] 4.1.4.4 Subtask {#jcf-p04-4-1-4-4} - Reject a generic create/update/delete entity command from the public knowledge boundary.
 
   - [ ] 4.2 Section - Implement the governed atomic write pipeline.
 

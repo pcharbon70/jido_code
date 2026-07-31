@@ -41,3 +41,4 @@ implementation plan was merged.
 - [Semantic validation and evolution](./semantic-validation-and-evolution.md)
 - [Claims, time, transitions, and inference](./claims-time-transitions-and-inference.md)
 - [Phase 3 semantic contract receipt](./phase-03-receipt.md)
+- [Semantic command contract](./semantic-command-contract.md)

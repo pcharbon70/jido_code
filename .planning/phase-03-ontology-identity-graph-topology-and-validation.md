@@ -15,7 +15,7 @@ format for Elixir records.
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Establish the graph-native semantic contract and executable validation boundary.
+- [x] 3 Phase - Establish the graph-native semantic contract and executable validation boundary.
 
   This phase admits the first domain-bearing statements only after their
   vocabulary, identity, provenance, graph placement, temporal meaning, and
@@ -185,7 +185,7 @@ Back to plan: [README](./README.md)
       - [x] 3.4.4.3 Subtask {#jcf-p03-3-4-4-3} - Make every derived graph disposable and rebuildable from asserted source graphs.
       - [x] 3.4.4.4 Subtask {#jcf-p03-3-4-4-4} - Define stale and incompatible derived-graph behavior before implementing domain reasoning rules.
 
-  - [ ] 3.5 Section - Phase 3 Integration Tests.
+  - [x] 3.5 Section - Phase 3 Integration Tests.
 
     This final section proves ontology, identity, graph placement, validation,
     temporal claims, transition chains, and evolution rules round-trip through
@@ -213,7 +213,7 @@ Back to plan: [README](./README.md)
       - [x] 3.5.2.5 Subtask {#jcf-p03-3-5-2-5} - Delete/rebuild a derived fixture graph and prove asserted truth and graph revisions remain coherent.
       - [x] 3.5.2.6 Subtask {#jcf-p03-3-5-2-6} - Rerun Phases 1-2 invariant suites and `mix precommit`.
 
-    - [ ] 3.5.3 Task {#jcf-p03-phase-receipt} [repo: jido_code] [after: {#jcf-p03-validation-integration}] - Publish the Phase 3 semantic-contract receipt.
+    - [x] 3.5.3 Task {#jcf-p03-phase-receipt} [repo: jido_code] [after: {#jcf-p03-validation-integration}] - Publish the Phase 3 semantic-contract receipt.
 
       This task binds G2 to exact ontology, shape, identity, graph registry,
       validation, temporal, transition, and migration evidence.
@@ -221,4 +221,4 @@ Back to plan: [README](./README.md)
       - [x] 3.5.3.1 Subtask {#jcf-p03-3-5-3-1} - Record ontology/shape versions and digests, graph registry revision, fixture digests, validator version, and candidate commit.
       - [x] 3.5.3.2 Subtask {#jcf-p03-3-5-3-2} - Attach round-trip, invalid-data, race, temporal, migration, restore, and derived-graph results.
       - [x] 3.5.3.3 Subtask {#jcf-p03-3-5-3-3} - Keep G2 blocked if any resource requires an object-record codec, any graph lacks ownership metadata, or invalid RDF can become visible.
-      - [ ] 3.5.3.4 Subtask {#jcf-p03-3-5-3-4} - Pin the merged candidate commit before authorizing Phase 4.
+      - [x] 3.5.3.4 Subtask {#jcf-p03-3-5-3-4} - Pin the merged candidate commit before authorizing Phase 4.
