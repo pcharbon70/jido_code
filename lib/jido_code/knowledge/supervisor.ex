@@ -4,6 +4,7 @@ defmodule JidoCode.Knowledge.Supervisor do
   use Supervisor
 
   alias JidoCode.Knowledge.Readiness
+  alias JidoCode.Knowledge.Maintenance
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Writer
 
@@ -22,7 +23,8 @@ defmodule JidoCode.Knowledge.Supervisor do
     children = [
       {Readiness, name: readiness},
       {StoreServer, name: store_server, readiness: readiness},
-      Writer
+      {Writer, store_server: store_server},
+      {Maintenance, store_server: store_server}
     ]
 
     Supervisor.init(children, strategy: :one_for_one, max_restarts: 3, max_seconds: 30)

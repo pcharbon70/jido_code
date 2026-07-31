@@ -30,3 +30,4 @@ implementation plan was merged.
 
 - [Authoritative store lifecycle](./store-lifecycle.md)
 - [Atomic writes and revisions](./atomic-writes-and-revisions.md)
+- [Backup, restore, export, and integrity](./backup-restore-and-integrity.md)

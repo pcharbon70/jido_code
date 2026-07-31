@@ -25,7 +25,8 @@ defmodule JidoCode.Architecture.Checker do
   @store_handle_fields [:store, :db, :dict_manager, :transaction]
   @direct_update_owners [
     "JidoCode.Knowledge.AtomicCommit",
-    "JidoCode.Knowledge.Metadata"
+    "JidoCode.Knowledge.Metadata",
+    "JidoCode.Knowledge.RestoreLog"
   ]
   @theme_path "assets/js/theme.js"
   @theme_sha256 "b5c950f5dfe08d10ad0eb9e72144a7440452d628f1ce330101341dc45a74eba2"
@@ -219,7 +220,7 @@ defmodule JidoCode.Architecture.Checker do
           :write_coordinator,
           path,
           call.line,
-          "persistent graph updates must run through Writer and AtomicCommit"
+          "persistent graph updates must run through an approved knowledge write coordinator"
         )
       )
       |> maybe_add(

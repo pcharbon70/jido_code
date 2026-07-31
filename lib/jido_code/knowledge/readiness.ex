@@ -82,6 +82,10 @@ defmodule JidoCode.Knowledge.Readiness do
     Health.enter_maintenance(health, reason)
   end
 
+  defp apply_transition(health, :begin_backup), do: Health.begin_backup(health)
+  defp apply_transition(health, :finish_backup), do: Health.finish_backup(health)
+  defp apply_transition(health, :begin_recovery), do: Health.begin_recovery(health)
+  defp apply_transition(health, :finish_recovery), do: Health.finish_recovery(health)
   defp apply_transition(health, :leave_maintenance), do: Health.leave_maintenance(health)
   defp apply_transition(health, {:fail, %Error{} = error}), do: {:ok, Health.fail(health, error)}
 

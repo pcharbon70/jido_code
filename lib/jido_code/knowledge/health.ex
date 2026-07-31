@@ -128,6 +128,36 @@ defmodule JidoCode.Knowledge.Health do
 
   def enter_maintenance(%__MODULE__{}, _reason), do: invalid_transition()
 
+  def begin_backup(%__MODULE__{state: :ready} = health) do
+    {:ok, %{health | state: :backing_up}}
+  end
+
+  def begin_backup(%__MODULE__{}), do: invalid_transition()
+
+  def finish_backup(
+        %__MODULE__{
+          state: :backing_up,
+          store_verified?: true,
+          ontology_verified?: true
+        } = health
+      ) do
+    {:ok, %{health | state: :ready}}
+  end
+
+  def finish_backup(%__MODULE__{}), do: invalid_transition()
+
+  def begin_recovery(%__MODULE__{state: :maintenance, maintenance_reason: :restore} = health) do
+    {:ok, %{health | state: :recovering}}
+  end
+
+  def begin_recovery(%__MODULE__{}), do: invalid_transition()
+
+  def finish_recovery(%__MODULE__{state: :recovering} = health) do
+    {:ok, %{health | state: :maintenance}}
+  end
+
+  def finish_recovery(%__MODULE__{}), do: invalid_transition()
+
   def leave_maintenance(
         %__MODULE__{
           state: :maintenance,

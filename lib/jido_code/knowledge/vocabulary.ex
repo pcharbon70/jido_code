@@ -8,7 +8,9 @@ defmodule JidoCode.Knowledge.Vocabulary do
   @dataset_class "urn:jido-code:vocab:SystemDataset"
   @commit_class "urn:jido-code:vocab:Commit"
   @graph_change_class "urn:jido-code:vocab:GraphChange"
+  @restore_activity_class "urn:jido-code:vocab:RestoreActivity"
   @committed "urn:jido-code:vocab:Committed"
+  @restored "urn:jido-code:vocab:Restored"
   @sync_durability "urn:jido-code:vocab:SyncDurability"
   @base "urn:jido-code:vocab:"
 
@@ -23,7 +25,9 @@ defmodule JidoCode.Knowledge.Vocabulary do
 
   def commit_class, do: @commit_class
   def graph_change_class, do: @graph_change_class
+  def restore_activity_class, do: @restore_activity_class
   def committed, do: @committed
+  def restored, do: @restored
   def sync_durability, do: @sync_durability
 
   @spec predicate(atom()) :: String.t()
@@ -41,4 +45,5 @@ defmodule JidoCode.Knowledge.Vocabulary do
   def predicate(:graph_change), do: @base <> "graphChange"
   def predicate(:changed_graph), do: @base <> "changedGraph"
   def predicate(:prior_graph_revision), do: @base <> "priorGraphRevision"
+  def predicate(:source_digest), do: @base <> "sourceDigest"
 end

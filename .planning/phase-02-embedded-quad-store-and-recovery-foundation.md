@@ -97,42 +97,42 @@ Back to plan: [README](./README.md)
       - [x] 2.2.3.4 Subtask {#jcf-p02-2-2-3-4} - Define overflow, restore, migration, and clone semantics without allowing revision regression inside one dataset lineage.
       - [x] 2.2.3.5 Subtask {#jcf-p02-2-2-3-5} - Add race tests proving one winner for conflicting expected-revision writes.
 
-  - [ ] 2.3 Section - Implement backup, restore, export, and integrity operations.
+  - [x] 2.3 Section - Implement backup, restore, export, and integrity operations.
 
     This section makes the graph-only source of truth operable and recoverable
     without relying on hidden process snapshots or secondary stores.
 
-    - [ ] 2.3.1 Task {#jcf-p02-backup-export} [repo: jido_code] [after: {#jcf-p02-graph-revisions}] - Implement consistent backup and dataset export.
+    - [x] 2.3.1 Task {#jcf-p02-backup-export} [repo: jido_code] [after: {#jcf-p02-graph-revisions}] - Implement consistent backup and dataset export.
 
       This task creates verifiable recovery artifacts while preserving named
       graph identity, dataset lineage, and schema metadata.
 
-      - [ ] 2.3.1.1 Subtask {#jcf-p02-2-3-1-1} - Create backups from a documented consistency boundary and record dataset revision, schema version, backend version, checksum, size, and creation time.
-      - [ ] 2.3.1.2 Subtask {#jcf-p02-2-3-1-2} - Export complete datasets as N-Quads or TriG and preserve graph IRIs, datatypes, language tags, and ontology metadata.
-      - [ ] 2.3.1.3 Subtask {#jcf-p02-2-3-1-3} - Write backup/export files only to trusted configured destinations with restrictive permissions and collision-safe names.
-      - [ ] 2.3.1.4 Subtask {#jcf-p02-2-3-1-4} - Reject concurrent destructive maintenance and report whether ordinary reads/writes are paused or snapshot-isolated during backup.
-      - [ ] 2.3.1.5 Subtask {#jcf-p02-2-3-1-5} - Add retention hooks without deleting any backup until a later explicit policy owns retention.
+      - [x] 2.3.1.1 Subtask {#jcf-p02-2-3-1-1} - Create backups from a documented consistency boundary and record dataset revision, schema version, backend version, checksum, size, and creation time.
+      - [x] 2.3.1.2 Subtask {#jcf-p02-2-3-1-2} - Export complete datasets as N-Quads or TriG and preserve graph IRIs, datatypes, language tags, and ontology metadata.
+      - [x] 2.3.1.3 Subtask {#jcf-p02-2-3-1-3} - Write backup/export files only to trusted configured destinations with restrictive permissions and collision-safe names.
+      - [x] 2.3.1.4 Subtask {#jcf-p02-2-3-1-4} - Reject concurrent destructive maintenance and report whether ordinary reads/writes are paused or snapshot-isolated during backup.
+      - [x] 2.3.1.5 Subtask {#jcf-p02-2-3-1-5} - Add retention hooks without deleting any backup until a later explicit policy owns retention.
 
-    - [ ] 2.3.2 Task {#jcf-p02-restore-recovery} [repo: jido_code] [after: {#jcf-p02-backup-export}] - Implement fail-safe restore and reopen workflows.
+    - [x] 2.3.2 Task {#jcf-p02-restore-recovery} [repo: jido_code] [after: {#jcf-p02-backup-export}] - Implement fail-safe restore and reopen workflows.
 
       This task restores authority only after a candidate dataset proves
       compatible and complete, while keeping the prior dataset recoverable.
 
-      - [ ] 2.3.2.1 Subtask {#jcf-p02-2-3-2-1} - Require maintenance mode, closed active handles, verified source checksums, compatible backend/schema metadata, and explicit target selection.
-      - [ ] 2.3.2.2 Subtask {#jcf-p02-2-3-2-2} - Restore into a separate validated location before atomically selecting it as the active dataset.
-      - [ ] 2.3.2.3 Subtask {#jcf-p02-2-3-2-3} - Preserve the previous active dataset until post-restore verification succeeds and document recoverable rollback.
-      - [ ] 2.3.2.4 Subtask {#jcf-p02-2-3-2-4} - Reopen, run integrity checks, verify revisions and graph counts, and only then clear maintenance mode.
-      - [ ] 2.3.2.5 Subtask {#jcf-p02-2-3-2-5} - Record restore activity inside the restored dataset without rewriting its asserted domain history.
+      - [x] 2.3.2.1 Subtask {#jcf-p02-2-3-2-1} - Require maintenance mode, closed active handles, verified source checksums, compatible backend/schema metadata, and explicit target selection.
+      - [x] 2.3.2.2 Subtask {#jcf-p02-2-3-2-2} - Restore into a separate validated location before atomically selecting it as the active dataset.
+      - [x] 2.3.2.3 Subtask {#jcf-p02-2-3-2-3} - Preserve the previous active dataset until post-restore verification succeeds and document recoverable rollback.
+      - [x] 2.3.2.4 Subtask {#jcf-p02-2-3-2-4} - Reopen, run integrity checks, verify revisions and graph counts, and only then clear maintenance mode.
+      - [x] 2.3.2.5 Subtask {#jcf-p02-2-3-2-5} - Record restore activity inside the restored dataset without rewriting its asserted domain history.
 
-    - [ ] 2.3.3 Task {#jcf-p02-integrity-service} [repo: jido_code] [after: {#jcf-p02-restore-recovery}] - Implement bounded store and graph integrity checks.
+    - [x] 2.3.3 Task {#jcf-p02-integrity-service} [repo: jido_code] [after: {#jcf-p02-restore-recovery}] - Implement bounded store and graph integrity checks.
 
       This task distinguishes backend health from semantic validity and
       produces actionable, non-sensitive diagnostics for both.
 
-      - [ ] 2.3.3.1 Subtask {#jcf-p02-2-3-3-1} - Verify RocksDB/backend consistency, dictionary/index readability, required store metadata, dataset lineage, revision monotonicity, and committed-change-set closure.
-      - [ ] 2.3.3.2 Subtask {#jcf-p02-2-3-3-2} - Verify the default graph is empty and every named graph has bounded metadata once graph topology is introduced.
-      - [ ] 2.3.3.3 Subtask {#jcf-p02-2-3-3-3} - Return stable issue codes, affected graph/commit references, severity, and safe remediation guidance without dumping triples.
-      - [ ] 2.3.3.4 Subtask {#jcf-p02-2-3-3-4} - Keep repair separate from detection and require explicit maintenance commands for any destructive action.
+      - [x] 2.3.3.1 Subtask {#jcf-p02-2-3-3-1} - Verify RocksDB/backend consistency, dictionary/index readability, required store metadata, dataset lineage, revision monotonicity, and committed-change-set closure.
+      - [x] 2.3.3.2 Subtask {#jcf-p02-2-3-3-2} - Verify the default graph is empty and every named graph has bounded metadata once graph topology is introduced.
+      - [x] 2.3.3.3 Subtask {#jcf-p02-2-3-3-3} - Return stable issue codes, affected graph/commit references, severity, and safe remediation guidance without dumping triples.
+      - [x] 2.3.3.4 Subtask {#jcf-p02-2-3-3-4} - Keep repair separate from detection and require explicit maintenance commands for any destructive action.
 
   - [ ] 2.4 Section - Harden operational lifecycle and observability.
 
