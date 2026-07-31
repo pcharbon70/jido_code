@@ -124,6 +124,61 @@ defmodule JidoCode.Knowledge.Validation.ValidatorTest do
              )
   end
 
+  test "rejects inverted temporal intervals and acceptance without a decision", context do
+    inverted =
+      claim_quads(context) ++
+        [
+          quad(context, context.claim, @jf <> "validFrom", RDF.literal(~U[2026-08-02 00:00:00Z])),
+          quad(context, context.claim, @jf <> "validTo", RDF.literal(~U[2026-08-01 00:00:00Z]))
+        ]
+
+    assert {:error, %Error{}, temporal_report} =
+             Validator.validate(change(context, context.metadata_quads ++ inverted))
+
+    assert Enum.any?(temporal_report.issues, &(&1.issue_code == "invalid_temporal_order"))
+
+    accepted =
+      claim_quads(context)
+      |> Enum.reject(fn {_subject, %RDF.IRI{value: predicate}, _object, _graph} ->
+        predicate == @jf <> "epistemicState"
+      end)
+      |> Kernel.++([
+        quad(
+          context,
+          context.claim,
+          @jf <> "epistemicState",
+          RDF.iri("https://jido.run/ontology/concept/Accepted")
+        )
+      ])
+
+    assert {:error, %Error{}, decision_report} =
+             Validator.validate(change(context, context.metadata_quads ++ accepted))
+
+    assert Enum.any?(decision_report.issues, &(&1.issue_code == "missing_governed_decision"))
+
+    untyped_decision =
+      accepted ++
+        [quad(context, context.activity, @jf <> "accepts", RDF.iri(context.claim))]
+
+    assert {:error, %Error{}, untyped_report} =
+             Validator.validate(change(context, context.metadata_quads ++ untyped_decision))
+
+    assert Enum.any?(untyped_report.issues, &(&1.issue_code == "missing_governed_decision"))
+
+    {:ok, decision} = ResourceIdentity.local(:decision, 103, <<4::80>>)
+
+    governed_decision =
+      accepted ++
+        [
+          quad(context, decision, @rdf_type, iri("Decision")),
+          quad(context, decision, @jf <> "decisionAuthority", RDF.iri(context.activity)),
+          quad(context, decision, @jf <> "accepts", RDF.iri(context.claim))
+        ]
+
+    assert {:ok, %{conforms?: true}} =
+             Validator.validate(change(context, context.metadata_quads ++ governed_decision))
+  end
+
   defp claim_quads(context) do
     [
       quad(context, context.claim, @rdf_type, iri("Claim")),
@@ -138,6 +193,7 @@ defmodule JidoCode.Knowledge.Validation.ValidatorTest do
         @jf <> "epistemicState",
         RDF.iri("https://jido.run/ontology/concept/Observed")
       ),
+      quad(context, context.claim, @jf <> "recordedAt", RDF.literal(~U[2026-07-31 12:00:00Z])),
       quad(context, context.claim, @jf <> "confidenceValue", RDF.XSD.Decimal.new("0.8"))
     ]
   end

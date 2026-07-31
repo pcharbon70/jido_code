@@ -23,8 +23,8 @@ defmodule JidoCode.Knowledge.Commands.Graphs do
     epistemicState confidenceBand priorState nextState transitionSubject expectedPredecessor
     cause decisionAuthority ontologyVersion creationActivity ownerScope graphKind lifecycleState
     completenessState sourceRevision parentGraph sourceGraph targetGraph validationReport
-    sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath severity ruleSet
-    invalidationState
+    sourceGraphRevision sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath
+    severity ruleSet invalidationState
   ])
 
   @spec prepare_create(atom(), map(), [RDF.Statement.coercible()], map(), keyword()) ::

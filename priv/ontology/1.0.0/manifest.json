@@ -1,5 +1,5 @@
 {
-  "canonical_nquads_sha256": "8e7b46bdf978a3f9010d210468511c61045ae469b0478194677b2de84ddc97f9",
+  "canonical_nquads_sha256": "fe260c98204872ace7369728c4db13696f76c724cc5f06b4bfe7bf5b18569e41",
   "compatibility": "semantic-baseline",
   "graph_iri": "https://jido.run/graph/ontology/1.0.0",
   "imports": [
@@ -9,18 +9,18 @@
     "http://www.w3.org/ns/prov-o"
   ],
   "ontology_iri": "https://jido.run/ontology/factory/1.0.0",
-  "package_sha256": "c871d8350fffeb06b3afb7037a543f29c711ecc1db9b1dbd7b7bfc7a2b58c7ce",
+  "package_sha256": "5ce8be304d026d5eeaaf3693caceee6dc675e4325089f33e1e3f8b73535c5903",
   "released_on": "2026-07-31",
   "resource_namespace": "https://jido.run/id/",
   "shape_version": "1.0.0",
   "shapes_iri": "https://jido.run/ontology/shapes/1.0.0",
   "sources": {
-    "RELEASE.md": "a244a83246b1a40aacd398c0570e9ef9848b10b6d09c3bf0629c99f0df77c6c3",
-    "factory.ttl": "5a01aeeb343628c0b27dc900e5cf4aec86d09b6ea6d7239be4c38b0ce40a14c0",
+    "RELEASE.md": "798d805c01842c09c8eaa914f76c26034515818fb87047b3a304d3eaac25abf1",
+    "factory.ttl": "6fb15848eb27f204e19a44cbbc8b9247a68e2d340505bcad3b16610db24f0de2",
     "policy-terms.ttl": "9fdc1f6089b326aa02a9c6a1a1285704ac71c0e042ec9f6a54aa0cdac5ca9d16",
     "release.ttl": "b10af6cea337b6796e4611d9a1063c61a45c1b0cd44b2500d9ccf5bb2f07095b",
-    "shapes.ttl": "16f22c464a0b078970d3a1b2b00d36c39f04ea6f2f300f63652d832988cfc84e",
-    "work-states.ttl": "65313d56192695e1d7f2c4098b50eef68b8efe2ed4e77f910544b84863b371ff"
+    "shapes.ttl": "b0e97195ab27c2637bb4efca666c49a60812414d3263afc2f3d07242080696ae",
+    "work-states.ttl": "43f41de49b855a837b4e68ca80a449495988474de2c6a86fd09813be27689d64"
   },
   "term_namespace": "https://jido.run/ontology/factory#",
   "version": "1.0.0"

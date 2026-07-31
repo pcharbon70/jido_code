@@ -4,6 +4,12 @@ This immutable release establishes the first project vocabulary, graph
 metadata vocabulary, controlled concepts, and SHACL-compatible operational
 shapes. It is additive relative to the substrate-only store schema.
 
+The operational contract includes first-class claims, separate transaction and
+valid time, decision-backed causal transitions, derived-graph authority states,
+and first-class source graph revision references. Confidence cannot imply
+acceptance, transition timestamps cannot break causal ties, and derived
+statements cannot grant themselves operational authority.
+
 ## Namespaces
 
 - Ontology terms: `https://jido.run/ontology/factory#`

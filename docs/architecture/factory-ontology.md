@@ -88,6 +88,7 @@ open-world semantic guidance. `1` means exactly one for an admitted resource,
 | `sourceRevision` | source graph to immutable Git identity | `0..1` | source graph metadata | snapshot lookup |
 | `parentGraph` | named graph to predecessor graph | `0..1` | graph-local metadata | lineage |
 | `sourceGraph` | derived/migration resource to source graph | `1..*` | derived/control metadata | reproducibility |
+| `sourceGraphRevision` | derived graph to graph-revision reference | `1..*` | derived graph metadata | reproducibility |
 | `targetGraph` | migration to target graph | `1..*` | migration activity graph | migration status |
 | `sourceOntologyVersion` | migration to source ontology release | `1` | migration activity graph | migration audit |
 | `targetOntologyVersion` | migration to target ontology release | `1` | migration activity graph | migration audit |
@@ -113,7 +114,7 @@ open-world semantic guidance. `1` means exactly one for an admitted resource,
 | `createdAt` | named graph to `xsd:dateTime` | `1` | graph-local metadata | lifecycle query |
 | `closedAt` | named graph to `xsd:dateTime` | `0..1` | graph-local metadata | immutable closure |
 | `retentionClass` | named graph to controlled string | `0..1` | graph-local metadata | retention selection |
-| `sourceGraphRevision` | derived graph to encoded graph/revision pair | `1..*` | derived graph metadata | staleness check |
+| `sourceRevisionNumber` | graph-revision reference to non-negative integer | `1` | derived graph metadata | staleness check |
 | `issueCode` | validation result to stable code | `1` | quarantine/audit graph | bounded diagnostics |
 | `safeMessage` | validation result to bounded redacted text | `1` | quarantine/audit graph | operator diagnostics |
 | `shapeVersion` | report/release to semantic version | `1` | ontology/audit graph | validator selection |
@@ -127,6 +128,15 @@ open-world semantic guidance. `1` means exactly one for an admitted resource,
 There is intentionally no credential-value predicate. Graph relationships join
 by canonical IRI; `displayId` and `canonicalLocator` literals are not identity
 keys.
+
+Direct statements are reserved for closed immutable graphs whose graph-level
+provenance is sufficient. Consequential, disputable, temporal, assessed,
+supported, contradicted, or superseded propositions are first-class claims.
+Numeric confidence never implies acceptance; an accepted or rejected claim is
+backed by an explicit decision relationship.
+
+Derived source revisions use `GraphRevisionReference` resources linking a
+source graph IRI to `sourceRevisionNumber`. They are not encoded tuple literals.
 
 ## Deterministic Operations
 

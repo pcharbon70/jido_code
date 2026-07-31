@@ -17,10 +17,11 @@ provenance, and protected literal rules.
 ## Pre-Commit Validation
 
 `JidoCode.Knowledge.Commands.Graphs` validates metadata and payload before it
-constructs a `WriteBatch`. Validation runs over existing committed statements
-supplied by the internal command adapter plus proposed additions, so a shape
-can be satisfied across the effective transaction snapshot. A batch is never
-submitted when the report does not conform.
+constructs a `WriteBatch`. The validator accepts existing committed statements
+plus proposed additions as one effective transaction snapshot. Graph creation
+supplies an empty existing set; future append and supersession commands must
+supply their bounded snapshot. A batch is never submitted when the report does
+not conform.
 
 The validator fails closed for:
 

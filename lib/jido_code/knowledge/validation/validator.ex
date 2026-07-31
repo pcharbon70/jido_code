@@ -25,6 +25,7 @@ defmodule JidoCode.Knowledge.Validation.Validator do
   @prov_generated_at "http://www.w3.org/ns/prov#generatedAtTime"
   @prov_started_at "http://www.w3.org/ns/prov#startedAtTime"
   @prov_ended_at "http://www.w3.org/ns/prov#endedAtTime"
+  @prov_invalidated_at "http://www.w3.org/ns/prov#invalidatedAtTime"
   @allowed_epistemic MapSet.new(~w[
     Observed Asserted Inferred ClaimProposed Accepted Rejected Contradicted ClaimSuperseded Invalidated
   ])
@@ -35,8 +36,8 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     epistemicState confidenceBand priorState nextState transitionSubject expectedPredecessor
     cause decisionAuthority ontologyVersion creationActivity ownerScope graphKind lifecycleState
     completenessState sourceRevision parentGraph sourceGraph targetGraph validationReport
-    sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath severity ruleSet
-    invalidationState
+    sourceGraphRevision sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath
+    severity ruleSet invalidationState
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i
@@ -281,39 +282,56 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     |> Kernel.++(node_kind(index, subject, @jf <> "graphScope", :iri, "ClaimShape", graph))
     |> Kernel.++(epistemic_issues(index, subject, graph))
     |> Kernel.++(confidence_issues(index, subject, graph))
+    |> Kernel.++(temporal_issues(index, subject, "ClaimShape", graph))
+    |> Kernel.++(decision_backing_issues(index, subject, graph))
   end
 
   defp shape_issues(@jf <> "StateTransition", subject, index, graph) do
-    []
-    |> Kernel.++(
-      cardinality(index, subject, @jf <> "transitionSubject", 1, 1, "TransitionShape", graph)
-    )
-    |> Kernel.++(cardinality(index, subject, @jf <> "nextState", 1, 1, "TransitionShape", graph))
-    |> Kernel.++(
-      cardinality(index, subject, @jf <> "subjectRevision", 1, 1, "TransitionShape", graph)
-    )
-    |> Kernel.++(cardinality(index, subject, @prov_associated, 1, 1, "TransitionShape", graph))
-    |> Kernel.++(cardinality(index, subject, @prov_generated_at, 1, 1, "TransitionShape", graph))
-    |> Kernel.++(
-      datatype(
-        index,
-        subject,
-        @jf <> "subjectRevision",
-        RDF.XSD.NonNegativeInteger,
-        "TransitionShape",
-        graph
+    issues =
+      []
+      |> Kernel.++(
+        cardinality(index, subject, @jf <> "transitionSubject", 1, 1, "TransitionShape", graph)
       )
-    )
-    |> Kernel.++(
-      datatype(
-        index,
-        subject,
-        @prov_generated_at,
-        RDF.XSD.DateTime,
-        "TransitionShape",
-        graph
+      |> Kernel.++(
+        cardinality(index, subject, @jf <> "nextState", 1, 1, "TransitionShape", graph)
       )
-    )
+      |> Kernel.++(
+        cardinality(index, subject, @jf <> "subjectRevision", 1, 1, "TransitionShape", graph)
+      )
+      |> Kernel.++(cardinality(index, subject, @prov_associated, 1, 1, "TransitionShape", graph))
+      |> Kernel.++(
+        cardinality(index, subject, @prov_generated_at, 1, 1, "TransitionShape", graph)
+      )
+      |> Kernel.++(cardinality(index, subject, @jf <> "cause", 1, 1, "TransitionShape", graph))
+      |> Kernel.++(cardinality(index, subject, @jf <> "reason", 1, 1, "TransitionShape", graph))
+      |> Kernel.++(
+        cardinality(index, subject, @jf <> "recordedAt", 1, 1, "TransitionShape", graph)
+      )
+      |> Kernel.++(
+        datatype(
+          index,
+          subject,
+          @jf <> "subjectRevision",
+          RDF.XSD.NonNegativeInteger,
+          "TransitionShape",
+          graph
+        )
+      )
+      |> Kernel.++(
+        datatype(
+          index,
+          subject,
+          @prov_generated_at,
+          RDF.XSD.DateTime,
+          "TransitionShape",
+          graph
+        )
+      )
+      |> Kernel.++(
+        datatype(index, subject, @jf <> "recordedAt", RDF.XSD.DateTime, "TransitionShape", graph)
+      )
+
+    issues ++ transition_predecessor_issues(index, subject, graph)
   end
 
   defp shape_issues(@jf <> "Lease", subject, index, graph) do
@@ -472,6 +490,43 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     end)
   end
 
+  defp shape_issues(@jf <> "GraphRevisionReference", subject, index, graph) do
+    cardinality(
+      index,
+      subject,
+      @jf <> "sourceGraph",
+      1,
+      1,
+      "GraphRevisionReferenceShape",
+      graph
+    ) ++
+      node_kind(
+        index,
+        subject,
+        @jf <> "sourceGraph",
+        :iri,
+        "GraphRevisionReferenceShape",
+        graph
+      ) ++
+      cardinality(
+        index,
+        subject,
+        @jf <> "sourceRevisionNumber",
+        1,
+        1,
+        "GraphRevisionReferenceShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "sourceRevisionNumber",
+        RDF.XSD.NonNegativeInteger,
+        "GraphRevisionReferenceShape",
+        graph
+      )
+  end
+
   defp shape_issues(_class, _subject, _index, _graph), do: []
 
   defp epistemic_issues(index, subject, graph) do
@@ -531,6 +586,180 @@ defmodule JidoCode.Knowledge.Validation.Validator do
             graph
           )
         ]
+    end
+  end
+
+  defp temporal_issues(index, subject, shape, graph) do
+    required =
+      cardinality(index, subject, @jf <> "recordedAt", 1, 1, shape, graph) ++
+        datatype(index, subject, @jf <> "recordedAt", RDF.XSD.DateTime, shape, graph)
+
+    optional_predicates = [
+      @prov_generated_at,
+      @jf <> "validFrom",
+      @jf <> "validTo",
+      @jf <> "sourceObservedAt",
+      @prov_invalidated_at
+    ]
+
+    Enum.reduce(optional_predicates, required, fn predicate, issues ->
+      issues ++
+        cardinality(index, subject, predicate, 0, 1, shape, graph) ++
+        datatype(index, subject, predicate, RDF.XSD.DateTime, shape, graph)
+    end) ++ temporal_order_issues(index, subject, shape, graph)
+  end
+
+  defp temporal_order_issues(index, subject, shape, graph) do
+    recorded_at = time_value(index, subject, @jf <> "recordedAt")
+    generated_at = time_value(index, subject, @prov_generated_at)
+    observed_at = time_value(index, subject, @jf <> "sourceObservedAt")
+    invalidated_at = time_value(index, subject, @prov_invalidated_at)
+    valid_from = time_value(index, subject, @jf <> "validFrom")
+    valid_to = time_value(index, subject, @jf <> "validTo")
+
+    []
+    |> maybe_add_temporal_order_issue(
+      later?(generated_at, recorded_at),
+      subject,
+      shape,
+      @prov_generated_at,
+      graph
+    )
+    |> maybe_add_temporal_order_issue(
+      later?(observed_at, recorded_at),
+      subject,
+      shape,
+      @jf <> "sourceObservedAt",
+      graph
+    )
+    |> maybe_add_temporal_order_issue(
+      not is_nil(valid_from) and not is_nil(valid_to) and
+        DateTime.compare(valid_from, valid_to) != :lt,
+      subject,
+      shape,
+      @jf <> "validTo",
+      graph
+    )
+    |> maybe_add_temporal_order_issue(
+      earlier?(invalidated_at, recorded_at),
+      subject,
+      shape,
+      @prov_invalidated_at,
+      graph
+    )
+  end
+
+  defp maybe_add_temporal_order_issue(issues, false, _subject, _shape, _path, _graph),
+    do: issues
+
+  defp maybe_add_temporal_order_issue(issues, true, subject, shape, path, graph) do
+    [
+      issue(
+        subject,
+        shape,
+        path,
+        "invalid_temporal_order",
+        "temporal values violate transaction-time or valid-time ordering",
+        graph
+      )
+      | issues
+    ]
+  end
+
+  defp time_value(index, subject, predicate) do
+    case values(index, subject, predicate) do
+      [%RDF.Literal{} = literal] ->
+        case RDF.Literal.value(literal) do
+          %DateTime{} = value -> value
+          _invalid -> nil
+        end
+
+      _missing_or_many ->
+        nil
+    end
+  end
+
+  defp later?(%DateTime{} = first, %DateTime{} = second),
+    do: DateTime.compare(first, second) == :gt
+
+  defp later?(_first, _second), do: false
+
+  defp earlier?(%DateTime{} = first, %DateTime{} = second),
+    do: DateTime.compare(first, second) == :lt
+
+  defp earlier?(_first, _second), do: false
+
+  defp decision_backing_issues(index, subject, graph) do
+    state = values(index, subject, @jf <> "epistemicState")
+
+    required_predicate =
+      case state do
+        [%RDF.IRI{value: "https://jido.run/ontology/concept/Accepted"}] -> @jf <> "accepts"
+        [%RDF.IRI{value: "https://jido.run/ontology/concept/Rejected"}] -> @jf <> "rejects"
+        _other -> nil
+      end
+
+    if is_nil(required_predicate) or incoming_decision?(index, required_predicate, subject) do
+      []
+    else
+      [
+        issue(
+          subject,
+          "ClaimShape",
+          required_predicate,
+          "missing_governed_decision",
+          "accepted or rejected claim requires an explicit decision",
+          graph
+        )
+      ]
+    end
+  end
+
+  defp incoming_decision?(index, predicate, object) do
+    Enum.any?(index, fn {_subject, predicates} ->
+      types = Map.get(predicates, RDF.iri(@rdf_type), [])
+      authorities = Map.get(predicates, RDF.iri(@jf <> "decisionAuthority"), [])
+
+      RDF.iri(object) in Map.get(predicates, RDF.iri(predicate), []) and
+        RDF.iri(@jf <> "Decision") in types and length(authorities) == 1 and
+        Enum.all?(authorities, &iri?/1)
+    end)
+  end
+
+  defp transition_predecessor_issues(index, subject, graph) do
+    case values(index, subject, @jf <> "subjectRevision") do
+      [%RDF.Literal{} = literal] ->
+        case RDF.Literal.value(literal) do
+          0 ->
+            cardinality(index, subject, @jf <> "priorState", 0, 0, "TransitionShape", graph) ++
+              cardinality(
+                index,
+                subject,
+                @jf <> "expectedPredecessor",
+                0,
+                0,
+                "TransitionShape",
+                graph
+              )
+
+          revision when is_integer(revision) and revision > 0 ->
+            cardinality(index, subject, @jf <> "priorState", 1, 1, "TransitionShape", graph) ++
+              cardinality(
+                index,
+                subject,
+                @jf <> "expectedPredecessor",
+                1,
+                1,
+                "TransitionShape",
+                graph
+              )
+
+          _invalid ->
+            []
+        end
+
+      _invalid ->
+        []
     end
   end
 

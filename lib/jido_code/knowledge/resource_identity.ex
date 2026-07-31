@@ -13,7 +13,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   @max_iri_bytes 512
   @max_segment_bytes 160
   @local_kinds ~w[activity claim goal attempt decision transition migration validation-report validation-result]
-  @deterministic_kinds ~w[validation-report validation-result]
+  @deterministic_kinds ~w[graph-revision-reference validation-report validation-result]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
 

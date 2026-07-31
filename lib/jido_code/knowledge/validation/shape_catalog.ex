@@ -31,7 +31,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     security_audit: ~w[
       AuthorizationGrant CredentialReference ValidationReport ValidationResult MigrationActivity
     ],
-    derived: ~w[Claim Finding Contradiction ValidationReport ValidationResult]
+    derived:
+      ~w[Claim Finding Contradiction GraphRevisionReference ValidationReport ValidationResult]
   }
 
   @spec version() :: String.t()

@@ -138,52 +138,52 @@ Back to plan: [README](./README.md)
       - [x] 3.3.3.4 Subtask {#jcf-p03-3-3-3-4} - Record source/target graphs, versions, transformer version, actor, counts, validation report, and rollback posture.
       - [x] 3.3.3.5 Subtask {#jcf-p03-3-3-3-5} - Block application startup or affected writes when a required migration is missing or partially committed.
 
-  - [ ] 3.4 Section - Define claims, time, state transitions, and inference authority.
+  - [x] 3.4 Section - Define claims, time, state transitions, and inference authority.
 
     This section gives changing knowledge and operational state explicit
     provenance, validity, disagreement, and causal ordering instead of mutable
     status fields or last-write-wins updates.
 
-    - [ ] 3.4.1 Task {#jcf-p03-claim-model} [repo: jido_code] [after: {#jcf-p03-schema-evolution}] - Implement statement and claim representation rules.
+    - [x] 3.4.1 Task {#jcf-p03-claim-model} [repo: jido_code] [after: {#jcf-p03-schema-evolution}] - Implement statement and claim representation rules.
 
       This task distinguishes graph-level provenance from claims that require
       statement-level confidence, validity, contradiction, or acceptance.
 
-      - [ ] 3.4.1.1 Subtask {#jcf-p03-3-4-1-1} - Permit direct statements in immutable graphs when one graph-level provenance envelope is sufficient.
-      - [ ] 3.4.1.2 Subtask {#jcf-p03-3-4-1-2} - Represent consequential or disputable propositions as first-class `Claim` resources with RDF subject, predicate, object, source activity, and graph scope.
-      - [ ] 3.4.1.3 Subtask {#jcf-p03-3-4-1-3} - Define observed, asserted, inferred, proposed, accepted, rejected, contradicted, superseded, and invalidated epistemic concepts.
-      - [ ] 3.4.1.4 Subtask {#jcf-p03-3-4-1-4} - Model confidence, uncertainty, contradiction, support, and supersession without allowing numeric confidence to imply acceptance.
-      - [ ] 3.4.1.5 Subtask {#jcf-p03-3-4-1-5} - Preserve incompatible claims and require explicit evaluation or decision rather than last-write-wins deletion.
+      - [x] 3.4.1.1 Subtask {#jcf-p03-3-4-1-1} - Permit direct statements in immutable graphs when one graph-level provenance envelope is sufficient.
+      - [x] 3.4.1.2 Subtask {#jcf-p03-3-4-1-2} - Represent consequential or disputable propositions as first-class `Claim` resources with RDF subject, predicate, object, source activity, and graph scope.
+      - [x] 3.4.1.3 Subtask {#jcf-p03-3-4-1-3} - Define observed, asserted, inferred, proposed, accepted, rejected, contradicted, superseded, and invalidated epistemic concepts.
+      - [x] 3.4.1.4 Subtask {#jcf-p03-3-4-1-4} - Model confidence, uncertainty, contradiction, support, and supersession without allowing numeric confidence to imply acceptance.
+      - [x] 3.4.1.5 Subtask {#jcf-p03-3-4-1-5} - Preserve incompatible claims and require explicit evaluation or decision rather than last-write-wins deletion.
 
-    - [ ] 3.4.2 Task {#jcf-p03-temporal-model} [repo: jido_code] [after: {#jcf-p03-claim-model}] - Implement transaction-time and valid-time semantics.
+    - [x] 3.4.2 Task {#jcf-p03-temporal-model} [repo: jido_code] [after: {#jcf-p03-claim-model}] - Implement transaction-time and valid-time semantics.
 
       This task keeps when JidoCode learned a fact separate from when the fact
       applied in the external repository world.
 
-      - [ ] 3.4.2.1 Subtask {#jcf-p03-3-4-2-1} - Define recorded/committed time, generated time, valid-from/to, invalidated time, and source-observed time predicates and datatype rules.
-      - [ ] 3.4.2.2 Subtask {#jcf-p03-3-4-2-2} - Require clocks to enter through the command boundary and never derive causal order solely from wall time.
-      - [ ] 3.4.2.3 Subtask {#jcf-p03-3-4-2-3} - Define delayed observation, retroactive correction, force-push, and policy-effective-time behavior.
-      - [ ] 3.4.2.4 Subtask {#jcf-p03-3-4-2-4} - Add bounded temporal query fixtures for facts valid, recorded, superseded, or unknown at a requested point.
+      - [x] 3.4.2.1 Subtask {#jcf-p03-3-4-2-1} - Define recorded/committed time, generated time, valid-from/to, invalidated time, and source-observed time predicates and datatype rules.
+      - [x] 3.4.2.2 Subtask {#jcf-p03-3-4-2-2} - Require clocks to enter through the command boundary and never derive causal order solely from wall time.
+      - [x] 3.4.2.3 Subtask {#jcf-p03-3-4-2-3} - Define delayed observation, retroactive correction, force-push, and policy-effective-time behavior.
+      - [x] 3.4.2.4 Subtask {#jcf-p03-3-4-2-4} - Add bounded temporal query fixtures for facts valid, recorded, superseded, or unknown at a requested point.
 
-    - [ ] 3.4.3 Task {#jcf-p03-transition-model} [repo: jido_code] [after: {#jcf-p03-temporal-model}] - Implement causal state-transition semantics.
+    - [x] 3.4.3 Task {#jcf-p03-transition-model} [repo: jido_code] [after: {#jcf-p03-temporal-model}] - Implement causal state-transition semantics.
 
       This task defines current operational state as a validated transition
       chain rather than a mutable enum literal.
 
-      - [ ] 3.4.3.1 Subtask {#jcf-p03-3-4-3-1} - Define transition subject, prior/next state concepts, expected predecessor, monotonic subject revision or fencing token, actor, cause, reason, and time.
-      - [ ] 3.4.3.2 Subtask {#jcf-p03-3-4-3-2} - Require one genesis and one accepted successor at each revision, preserving rejected or superseded concurrent proposals as history.
-      - [ ] 3.4.3.3 Subtask {#jcf-p03-3-4-3-3} - Reject missing predecessors, illegal edges, revision regression, cross-subject chains, and wall-clock tie breaking.
-      - [ ] 3.4.3.4 Subtask {#jcf-p03-3-4-3-4} - Define current state as the endpoint of the unique valid, non-superseded chain.
+      - [x] 3.4.3.1 Subtask {#jcf-p03-3-4-3-1} - Define transition subject, prior/next state concepts, expected predecessor, monotonic subject revision or fencing token, actor, cause, reason, and time.
+      - [x] 3.4.3.2 Subtask {#jcf-p03-3-4-3-2} - Require one genesis and one accepted successor at each revision, preserving rejected or superseded concurrent proposals as history.
+      - [x] 3.4.3.3 Subtask {#jcf-p03-3-4-3-3} - Reject missing predecessors, illegal edges, revision regression, cross-subject chains, and wall-clock tie breaking.
+      - [x] 3.4.3.4 Subtask {#jcf-p03-3-4-3-4} - Define current state as the endpoint of the unique valid, non-superseded chain.
 
-    - [ ] 3.4.4 Task {#jcf-p03-inference-contract} [repo: jido_code] [after: {#jcf-p03-transition-model}] - Define asserted and derived graph authority rules.
+    - [x] 3.4.4 Task {#jcf-p03-inference-contract} [repo: jido_code] [after: {#jcf-p03-transition-model}] - Define asserted and derived graph authority rules.
 
       This task reserves a safe place for later OWL/rule materialization
       without granting derived statements mutation or acceptance authority.
 
-      - [ ] 3.4.4.1 Subtask {#jcf-p03-3-4-4-1} - Require derived graph metadata to identify rule set, ontology version, source graph revisions, generation activity, and invalidation state.
-      - [ ] 3.4.4.2 Subtask {#jcf-p03-3-4-4-2} - Prohibit inferred statements from satisfying goals, authorizing commands, or accepting claims unless an explicit policy consumes them through a governed decision.
-      - [ ] 3.4.4.3 Subtask {#jcf-p03-3-4-4-3} - Make every derived graph disposable and rebuildable from asserted source graphs.
-      - [ ] 3.4.4.4 Subtask {#jcf-p03-3-4-4-4} - Define stale and incompatible derived-graph behavior before implementing domain reasoning rules.
+      - [x] 3.4.4.1 Subtask {#jcf-p03-3-4-4-1} - Require derived graph metadata to identify rule set, ontology version, source graph revisions, generation activity, and invalidation state.
+      - [x] 3.4.4.2 Subtask {#jcf-p03-3-4-4-2} - Prohibit inferred statements from satisfying goals, authorizing commands, or accepting claims unless an explicit policy consumes them through a governed decision.
+      - [x] 3.4.4.3 Subtask {#jcf-p03-3-4-4-3} - Make every derived graph disposable and rebuildable from asserted source graphs.
+      - [x] 3.4.4.4 Subtask {#jcf-p03-3-4-4-4} - Define stale and incompatible derived-graph behavior before implementing domain reasoning rules.
 
   - [ ] 3.5 Section - Phase 3 Integration Tests.
 

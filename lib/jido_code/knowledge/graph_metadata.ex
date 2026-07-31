@@ -23,6 +23,7 @@ defmodule JidoCode.Knowledge.GraphMetadata do
   @xsd_date_time "http://www.w3.org/2001/XMLSchema#dateTime"
   @xsd_string "http://www.w3.org/2001/XMLSchema#string"
   @max_metadata_statements 50
+  @max_source_revision_refs 8
 
   @predicate_keys %{
     @rdf_type => :type,
@@ -38,9 +39,15 @@ defmodule JidoCode.Knowledge.GraphMetadata do
     (@base <> "parentGraph") => :parent_graph,
     (@base <> "closedAt") => :closed_at,
     (@base <> "ruleSet") => :rule_set,
+    (@base <> "invalidationState") => :invalidation_state,
     (@base <> "retentionClass") => :retention_class,
-    (@base <> "sourceGraph") => :source_graphs,
-    (@base <> "sourceGraphRevision") => :source_graph_revisions
+    (@base <> "sourceGraphRevision") => :source_revision_refs
+  }
+
+  @revision_predicate_keys %{
+    @rdf_type => :type,
+    (@base <> "sourceGraph") => :graph,
+    (@base <> "sourceRevisionNumber") => :revision
   }
 
   @required_keys [
@@ -78,6 +85,7 @@ defmodule JidoCode.Knowledge.GraphMetadata do
         parent_graph: Map.get(attributes, :parent_graph),
         closed_at: Map.get(attributes, :closed_at),
         rule_set: Map.get(attributes, :rule_set),
+        invalidation_state: Map.get(attributes, :invalidation_state),
         source_graph_revisions: Map.get(attributes, :source_graph_revisions, [])
       }
 
@@ -132,6 +140,7 @@ defmodule JidoCode.Knowledge.GraphMetadata do
 
         {:ok, rows} when length(rows) < @max_metadata_statements ->
           with {:ok, metadata} <- decode_rows(graph_iri, rows),
+               {:ok, metadata} <- load_family_metadata(context, metadata),
                {:ok, revision} when is_integer(revision) <-
                  SubstrateMetadata.graph_revision(store, graph_iri) do
             {:ok, %{metadata | graph_revision: revision}}
@@ -196,6 +205,7 @@ defmodule JidoCode.Knowledge.GraphMetadata do
 
       metadata.family == :derived and
           (not valid_rule_set?(metadata.rule_set) or
+             metadata.invalidation_state not in [:current, :stale, :incompatible, :invalidated] or
              not valid_source_revisions?(metadata.source_graph_revisions)) ->
         invalid(:derived_graph_metadata)
 
@@ -230,13 +240,17 @@ defmodule JidoCode.Knowledge.GraphMetadata do
   defp valid_rule_set?(_value), do: false
 
   defp valid_source_revisions?(values) when is_list(values) and values != [] do
-    Enum.all?(values, fn
-      %{graph: graph, revision: revision} when is_integer(revision) and revision >= 0 ->
-        match?({:ok, _family}, GraphRegistry.identify(graph))
+    valid? =
+      Enum.all?(values, fn
+        %{graph: graph, revision: revision} when is_integer(revision) and revision >= 0 ->
+          match?({:ok, _family}, GraphRegistry.identify(graph))
 
-      _invalid ->
-        false
-    end)
+        _invalid ->
+          false
+      end)
+
+    valid? and length(values) <= @max_source_revision_refs and
+      length(Enum.uniq_by(values, & &1.graph)) == length(values)
   end
 
   defp valid_source_revisions?(_values), do: false
@@ -246,6 +260,7 @@ defmodule JidoCode.Knowledge.GraphMetadata do
     |> maybe_add_iri(metadata, :source_revision, "sourceRevision")
     |> maybe_add_iri(metadata, :parent_graph, "parentGraph")
     |> maybe_add_iri(metadata, :rule_set, "ruleSet")
+    |> maybe_add_concept(metadata, :invalidation_state, "invalidationState")
     |> maybe_add_literal(metadata, :closed_at, "closedAt")
     |> add_source_revisions(metadata)
   end
@@ -264,13 +279,34 @@ defmodule JidoCode.Knowledge.GraphMetadata do
     end
   end
 
+  defp maybe_add_concept(quads, metadata, key, predicate) do
+    case Map.get(metadata, key) do
+      nil ->
+        quads
+
+      state ->
+        [quad(metadata, @base <> predicate, RDF.iri(invalidation_state_iri(state))) | quads]
+    end
+  end
+
   defp add_source_revisions(quads, metadata) do
     Enum.reduce(metadata.source_graph_revisions, quads, fn source, acc ->
-      encoded = "#{source.graph}|#{source.revision}"
+      {:ok, reference} =
+        ResourceIdentity.deterministic(
+          :graph_revision_reference,
+          "#{source.graph}|#{source.revision}"
+        )
 
       [
-        quad(metadata, @base <> "sourceGraph", RDF.iri(source.graph)),
-        quad(metadata, @base <> "sourceGraphRevision", RDF.literal(encoded))
+        quad(metadata, @base <> "sourceGraphRevision", RDF.iri(reference)),
+        resource_quad(metadata, reference, @rdf_type, RDF.iri(@base <> "GraphRevisionReference")),
+        resource_quad(metadata, reference, @base <> "sourceGraph", RDF.iri(source.graph)),
+        resource_quad(
+          metadata,
+          reference,
+          @base <> "sourceRevisionNumber",
+          RDF.XSD.NonNegativeInteger.new(source.revision)
+        )
         | acc
       ]
     end)
@@ -278,6 +314,10 @@ defmodule JidoCode.Knowledge.GraphMetadata do
 
   defp quad(metadata, predicate, object) do
     RDF.quad(metadata.graph_iri, predicate, object, metadata.graph_iri)
+  end
+
+  defp resource_quad(metadata, subject, predicate, object) do
+    RDF.quad(subject, predicate, object, metadata.graph_iri)
   end
 
   defp lifecycle_iri(:open), do: {:ok, "https://jido.run/ontology/concept/Open"}
@@ -331,8 +371,8 @@ defmodule JidoCode.Knowledge.GraphMetadata do
     end
   end
 
-  defp put_decoded(metadata, key, value) when key in [:source_graphs, :source_graph_revisions] do
-    Map.update(metadata, key, [value], &[value | &1])
+  defp put_decoded(metadata, :source_revision_refs, value) do
+    Map.update(metadata, :source_revision_refs, [value], &[value | &1])
   end
 
   defp put_decoded(metadata, key, value) do
@@ -362,6 +402,24 @@ defmodule JidoCode.Knowledge.GraphMetadata do
 
   defp normalize_decoded(:completeness_state, "https://jido.run/ontology/concept/Incomplete"),
     do: :incomplete
+
+  defp normalize_decoded(:invalidation_state, "https://jido.run/ontology/concept/Current"),
+    do: :current
+
+  defp normalize_decoded(:invalidation_state, "https://jido.run/ontology/concept/Stale"),
+    do: :stale
+
+  defp normalize_decoded(
+         :invalidation_state,
+         "https://jido.run/ontology/concept/Incompatible"
+       ),
+       do: :incompatible
+
+  defp normalize_decoded(
+         :invalidation_state,
+         "https://jido.run/ontology/concept/DerivedInvalidated"
+       ),
+       do: :invalidated
 
   defp normalize_decoded(_key, value), do: value
 
@@ -402,5 +460,100 @@ defmodule JidoCode.Knowledge.GraphMetadata do
   end
 
   defp decode_object(_object), do: :error
+
+  defp load_family_metadata(context, %{family: :derived} = metadata) do
+    references = Map.get(metadata, :source_revision_refs, []) |> Enum.sort()
+
+    if references == [] or length(references) > @max_source_revision_refs do
+      {:error, Error.new(:corrupt, :read_graph_metadata)}
+    else
+      with {:ok, resources} <- load_revision_resources(context, metadata.graph_iri, references),
+           {:ok, revisions} <- normalize_revision_resources(resources) do
+        {:ok,
+         metadata
+         |> Map.delete(:source_revision_refs)
+         |> Map.put(:source_graph_revisions, revisions)}
+      end
+    end
+  end
+
+  defp load_family_metadata(_context, metadata), do: {:ok, metadata}
+
+  defp revision_query(graph_iri, reference_iri) do
+    graph = graph_iri |> RDF.iri() |> RDF.NTriples.Encoder.term()
+    reference = reference_iri |> RDF.iri() |> RDF.NTriples.Encoder.term()
+
+    """
+    SELECT ?predicate ?object
+    WHERE {
+      GRAPH #{graph} {
+        #{reference} ?predicate ?object .
+      }
+    }
+    LIMIT #{@max_metadata_statements}
+    """
+  end
+
+  defp load_revision_resources(context, graph_iri, references) do
+    Enum.reduce_while(references, {:ok, %{}}, fn reference, {:ok, resources} ->
+      case Query.query(context, revision_query(graph_iri, reference),
+             timeout: 5_000,
+             use_cache: false
+           ) do
+        {:ok, rows} when length(rows) < @max_metadata_statements ->
+          case decode_revision_resource(rows) do
+            {:ok, resource} ->
+              {:cont, {:ok, Map.put(resources, reference, resource)}}
+
+            :error ->
+              {:halt, {:error, Error.new(:corrupt, :read_graph_metadata)}}
+          end
+
+        _too_many_or_failed ->
+          {:halt, {:error, Error.new(:corrupt, :read_graph_metadata)}}
+      end
+    end)
+  end
+
+  defp decode_revision_resource(rows) do
+    Enum.reduce_while(rows, {:ok, %{}}, fn row, {:ok, resource} ->
+      with {:named_node, predicate} <- Map.get(row, "predicate"),
+           {:ok, key} <- Map.fetch(@revision_predicate_keys, predicate),
+           false <- Map.has_key?(resource, key),
+           {:ok, value} <- decode_object(Map.get(row, "object")) do
+        {:cont, {:ok, Map.put(resource, key, value)}}
+      else
+        _invalid -> {:halt, :error}
+      end
+    end)
+  end
+
+  defp normalize_revision_resources(resources) do
+    Enum.reduce_while(resources, {:ok, []}, fn {_reference, resource}, {:ok, revisions} ->
+      with true <- resource.type == @base <> "GraphRevisionReference",
+           {:ok, _family} <- GraphRegistry.identify(resource.graph),
+           true <- is_integer(resource.revision) and resource.revision >= 0 do
+        {:cont, {:ok, [%{graph: resource.graph, revision: resource.revision} | revisions]}}
+      else
+        _invalid -> {:halt, :error}
+      end
+    end)
+    |> case do
+      {:ok, revisions} -> {:ok, Enum.sort_by(revisions, &{&1.graph, &1.revision})}
+      :error -> :error
+    end
+  rescue
+    _error -> :error
+  end
+
+  defp invalidation_state_iri(:current), do: "https://jido.run/ontology/concept/Current"
+  defp invalidation_state_iri(:stale), do: "https://jido.run/ontology/concept/Stale"
+
+  defp invalidation_state_iri(:incompatible),
+    do: "https://jido.run/ontology/concept/Incompatible"
+
+  defp invalidation_state_iri(:invalidated),
+    do: "https://jido.run/ontology/concept/DerivedInvalidated"
+
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}
 end

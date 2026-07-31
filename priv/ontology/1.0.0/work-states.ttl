@@ -43,4 +43,10 @@ jfc:ValidationSeverityScheme a skos:ConceptScheme ; skos:prefLabel "validation s
 jfc:Violation a skos:Concept ; skos:inScheme jfc:ValidationSeverityScheme ; skos:prefLabel "violation" .
 jfc:Warning a skos:Concept ; skos:inScheme jfc:ValidationSeverityScheme ; skos:prefLabel "warning" .
 
+jfc:DerivedStateScheme a skos:ConceptScheme ; skos:prefLabel "derived graph state" .
+jfc:Current a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "current" .
+jfc:Stale a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "stale" .
+jfc:Incompatible a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "incompatible" .
+jfc:DerivedInvalidated a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "invalidated" .
+
 jf:epistemicState skos:scopeNote "Confidence does not imply acceptance; acceptance requires a governed decision." .

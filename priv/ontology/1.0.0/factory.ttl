@@ -72,6 +72,7 @@ jf:OntologyRelease a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "ontol
 jf:ValidationReport a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "validation report" .
 jf:ValidationResult a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "validation result" .
 jf:MigrationActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "migration activity" .
+jf:GraphRevisionReference a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "graph revision reference" .
 
 # Direct object relationships
 jf:enrolls a owl:ObjectProperty ; rdfs:domain jf:RepositoryFactory ; rdfs:range jf:ManagementEnrollment ; rdfs:label "enrolls" .
@@ -115,7 +116,8 @@ jf:lifecycleState a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range 
 jf:completenessState a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range skos:Concept ; rdfs:label "completeness state" .
 jf:sourceRevision a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:label "source revision" .
 jf:parentGraph a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:NamedGraph ; rdfs:label "parent graph" .
-jf:sourceGraph a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:NamedGraph ; rdfs:label "source graph" .
+jf:sourceGraph a owl:ObjectProperty ; rdfs:range jf:NamedGraph ; rdfs:label "source graph" .
+jf:sourceGraphRevision a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:GraphRevisionReference ; rdfs:label "source graph revision" .
 jf:targetGraph a owl:ObjectProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range jf:NamedGraph ; rdfs:label "target graph" .
 jf:sourceOntologyVersion a owl:ObjectProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range jf:OntologyRelease ; rdfs:label "source ontology version" .
 jf:targetOntologyVersion a owl:ObjectProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range jf:OntologyRelease ; rdfs:label "target ontology version" .
@@ -143,7 +145,7 @@ jf:graphRevision a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range
 jf:createdAt a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:dateTime ; rdfs:label "created at" .
 jf:closedAt a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:dateTime ; rdfs:label "closed at" .
 jf:retentionClass a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:string ; rdfs:label "retention class" .
-jf:sourceGraphRevision a owl:DatatypeProperty ; rdfs:domain jf:NamedGraph ; rdfs:range xsd:string ; rdfs:label "source graph revision" .
+jf:sourceRevisionNumber a owl:DatatypeProperty ; rdfs:domain jf:GraphRevisionReference ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "source revision number" .
 jf:issueCode a owl:DatatypeProperty ; rdfs:domain jf:ValidationResult ; rdfs:range xsd:string ; rdfs:label "issue code" .
 jf:safeMessage a owl:DatatypeProperty ; rdfs:domain jf:ValidationResult ; rdfs:range xsd:string ; rdfs:label "safe message" .
 jf:shapeVersion a owl:DatatypeProperty ; rdfs:domain jf:ValidationReport ; rdfs:range xsd:string ; rdfs:label "shape version" .
