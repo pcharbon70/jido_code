@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      MIX_ENV: test
+      ERLANG_ROCKSDB_OPTS: -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native build prerequisites
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.3"
+          elixir-version: "1.18.4"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.92.0"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.3.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          mix deps.get
+          npm ci
+
+      - name: Verify application
+        run: mix precommit
+
+      - name: Build Vite assets
+        env:
+          MIX_ENV: prod
+        run: mix assets.build

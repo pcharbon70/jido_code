@@ -15,7 +15,9 @@ planning:
 
 - [Current-state inventory](./current-state-inventory.md)
 - [Module and plane boundaries](./module-boundaries.md)
+- [Backend compatibility contract](./backend-compatibility.md)
 - [ADR 0001: Graph-only source of truth](../adr/0001-graph-only-source-of-truth.md)
+- [ADR 0002: TripleStore backend contract](../adr/0002-triple-store-backend-contract.md)
 
 The Phase 1 baseline starts at commit
 `54cda0fd34cc687f0c1be6322513a790d3a9c37e`, immediately after the graph-native

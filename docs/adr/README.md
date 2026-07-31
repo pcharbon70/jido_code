@@ -10,3 +10,4 @@ consequences.
 ## Index
 
 - [ADR 0001: Graph-only source of truth](./0001-graph-only-source-of-truth.md)
+- [ADR 0002: TripleStore backend contract](./0002-triple-store-backend-contract.md)

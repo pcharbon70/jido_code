@@ -16,8 +16,14 @@ application-owned durable source of truth. See the
 
 ## Requirements
 
-- Elixir 1.15 or newer
-- Erlang/OTP 26 or newer
+- Elixir 1.18 or newer
+- Erlang/OTP 27 or newer
+- Rust 1.92 or newer
+- CMake, a C/C++ build toolchain, Git, and `pkg-config`; the accepted build uses
+  the bundled RocksDB source, so system RocksDB libraries are not required
+
+See the [backend compatibility record](docs/architecture/backend-compatibility.md)
+for exact versions and native-build troubleshooting.
 
 ## Setup
 

@@ -60,44 +60,44 @@ Back to plan: [README](./README.md)
       - [x] 1.1.3.4 Subtask {#jcf-p01-1-1-3-4} - Prohibit web modules, integration adapters, runtime workers, and projections from opening the store or issuing raw write-capable SPARQL.
       - [x] 1.1.3.5 Subtask {#jcf-p01-1-1-3-5} - Define which structs are permitted as temporary command/projection values and prohibit persisted aggregate-root semantics.
 
-  - [ ] 1.2 Section - Prove backend and toolchain compatibility.
+  - [x] 1.2 Section - Prove backend and toolchain compatibility.
 
     This section tests the actual backend features and build prerequisites that
     the architecture depends on before production modules or graph data exist.
 
-    - [ ] 1.2.1 Task {#jcf-p01-dependency-candidate} [repo: jido_code] [after: {#jcf-p01-boundary-map}] - Select and pin a compatible graph dependency set.
+    - [x] 1.2.1 Task {#jcf-p01-dependency-candidate} [repo: jido_code] [after: {#jcf-p01-boundary-map}] - Select and pin a compatible graph dependency set.
 
       This task chooses reproducible dependency revisions based on tested
       behavior rather than copying the older project's lockfile blindly.
 
-      - [ ] 1.2.1.1 Subtask {#jcf-p01-1-2-1-1} - Evaluate the maintained `TripleStore`, SPARQL, RDF, RocksDB, and parser dependencies against the project's supported Elixir and OTP range.
-      - [ ] 1.2.1.2 Subtask {#jcf-p01-1-2-1-2} - Decide whether the application toolchain must move from its current Elixir constraint and record the upgrade/rollback implications.
-      - [ ] 1.2.1.3 Subtask {#jcf-p01-1-2-1-3} - Pin exact Git revisions or released versions where reproducibility or unpublished fixes require them.
-      - [ ] 1.2.1.4 Subtask {#jcf-p01-1-2-1-4} - Document native requirements, supported RocksDB versions, Rust/NIF compilation, CI packages, and developer setup failure messages.
-      - [ ] 1.2.1.5 Subtask {#jcf-p01-1-2-1-5} - Run dependency security, license, and transitive-persistence review before accepting the candidate.
+      - [x] 1.2.1.1 Subtask {#jcf-p01-1-2-1-1} - Evaluate the maintained `TripleStore`, SPARQL, RDF, RocksDB, and parser dependencies against the project's supported Elixir and OTP range.
+      - [x] 1.2.1.2 Subtask {#jcf-p01-1-2-1-2} - Decide whether the application toolchain must move from its current Elixir constraint and record the upgrade/rollback implications.
+      - [x] 1.2.1.3 Subtask {#jcf-p01-1-2-1-3} - Pin exact Git revisions or released versions where reproducibility or unpublished fixes require them.
+      - [x] 1.2.1.4 Subtask {#jcf-p01-1-2-1-4} - Document native requirements, supported RocksDB versions, Rust/NIF compilation, CI packages, and developer setup failure messages.
+      - [x] 1.2.1.5 Subtask {#jcf-p01-1-2-1-5} - Run dependency security, license, and transitive-persistence review before accepting the candidate.
 
-    - [ ] 1.2.2 Task {#jcf-p01-store-capability-spike} [repo: jido_code] [after: {#jcf-p01-dependency-candidate}] - Exercise the required `TripleStore` capabilities in an isolated spike.
+    - [x] 1.2.2 Task {#jcf-p01-store-capability-spike} [repo: jido_code] [after: {#jcf-p01-dependency-candidate}] - Exercise the required `TripleStore` capabilities in an isolated spike.
 
       This task proves named-graph, query, update, transaction, reasoning, and
       export behavior using executable fixtures instead of relying on README
       claims.
 
-      - [ ] 1.2.2.1 Subtask {#jcf-p01-1-2-2-1} - Open a quad-schema store, load an RDF dataset into multiple named graphs, and verify the default graph remains empty.
-      - [ ] 1.2.2.2 Subtask {#jcf-p01-1-2-2-2} - Execute bounded `SELECT`, `ASK`, and `CONSTRUCT` queries plus an atomic multi-graph SPARQL Update.
-      - [ ] 1.2.2.3 Subtask {#jcf-p01-1-2-2-3} - Verify rollback and process-crash visibility at transaction boundaries, including whether a commit-marker fallback is required.
-      - [ ] 1.2.2.4 Subtask {#jcf-p01-1-2-2-4} - Materialize a minimal OWL 2 RL fixture into an isolated derived graph and prove asserted inputs remain distinguishable.
-      - [ ] 1.2.2.5 Subtask {#jcf-p01-1-2-2-5} - Backup, close, restore, export to N-Quads/TriG, reopen, and compare named-graph contents and dictionary identity behavior.
+      - [x] 1.2.2.1 Subtask {#jcf-p01-1-2-2-1} - Open a quad-schema store, load an RDF dataset into multiple named graphs, and verify the default graph remains empty.
+      - [x] 1.2.2.2 Subtask {#jcf-p01-1-2-2-2} - Execute bounded `SELECT`, `ASK`, and `CONSTRUCT` queries plus an atomic multi-graph SPARQL Update.
+      - [x] 1.2.2.3 Subtask {#jcf-p01-1-2-2-3} - Verify rollback and process-crash visibility at transaction boundaries, including whether a commit-marker fallback is required.
+      - [x] 1.2.2.4 Subtask {#jcf-p01-1-2-2-4} - Materialize a minimal OWL 2 RL fixture into an isolated derived graph and prove asserted inputs remain distinguishable.
+      - [x] 1.2.2.5 Subtask {#jcf-p01-1-2-2-5} - Backup, close, restore, export to N-Quads/TriG, reopen, and compare named-graph contents and dictionary identity behavior.
 
-    - [ ] 1.2.3 Task {#jcf-p01-operational-compatibility} [repo: jido_code] [after: {#jcf-p01-store-capability-spike}] - Define supported storage and runtime operating constraints.
+    - [x] 1.2.3 Task {#jcf-p01-operational-compatibility} [repo: jido_code] [after: {#jcf-p01-store-capability-spike}] - Define supported storage and runtime operating constraints.
 
       This task records the practical limits within which the embedded database
       can be treated as authoritative and fail safely.
 
-      - [ ] 1.2.3.1 Subtask {#jcf-p01-1-2-3-1} - Verify single-process ownership, filesystem locking, read concurrency, shutdown, reopen, and stale-lock behavior.
-      - [ ] 1.2.3.2 Subtask {#jcf-p01-1-2-3-2} - Establish durability and sync settings for development, test, and production without weakening accepted-write semantics.
-      - [ ] 1.2.3.3 Subtask {#jcf-p01-1-2-3-3} - Measure baseline startup, write, query, backup, and restore behavior on a representative small dataset.
-      - [ ] 1.2.3.4 Subtask {#jcf-p01-1-2-3-4} - Define disk-full, permission, corruption, incompatible-schema, and NIF-load failure outcomes.
-      - [ ] 1.2.3.5 Subtask {#jcf-p01-1-2-3-5} - Record unsupported deployment topologies, especially concurrent BEAM writers against one local store path.
+      - [x] 1.2.3.1 Subtask {#jcf-p01-1-2-3-1} - Verify single-process ownership, filesystem locking, read concurrency, shutdown, reopen, and stale-lock behavior.
+      - [x] 1.2.3.2 Subtask {#jcf-p01-1-2-3-2} - Establish durability and sync settings for development, test, and production without weakening accepted-write semantics.
+      - [x] 1.2.3.3 Subtask {#jcf-p01-1-2-3-3} - Measure baseline startup, write, query, backup, and restore behavior on a representative small dataset.
+      - [x] 1.2.3.4 Subtask {#jcf-p01-1-2-3-4} - Define disk-full, permission, corruption, incompatible-schema, and NIF-load failure outcomes.
+      - [x] 1.2.3.5 Subtask {#jcf-p01-1-2-3-5} - Record unsupported deployment topologies, especially concurrent BEAM writers against one local store path.
 
   - [ ] 1.3 Section - Establish architecture enforcement and deterministic test support.
 
