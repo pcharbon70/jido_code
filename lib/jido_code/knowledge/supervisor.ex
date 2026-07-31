@@ -5,6 +5,7 @@ defmodule JidoCode.Knowledge.Supervisor do
 
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
+  alias JidoCode.Knowledge.Writer
 
   def start_link(options \\ []) do
     case Keyword.get(options, :name, __MODULE__) do
@@ -20,7 +21,8 @@ defmodule JidoCode.Knowledge.Supervisor do
 
     children = [
       {Readiness, name: readiness},
-      {StoreServer, name: store_server, readiness: readiness}
+      {StoreServer, name: store_server, readiness: readiness},
+      Writer
     ]
 
     Supervisor.init(children, strategy: :one_for_one, max_restarts: 3, max_seconds: 30)

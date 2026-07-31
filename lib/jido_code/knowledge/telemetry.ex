@@ -86,6 +86,15 @@ defmodule JidoCode.Knowledge.Telemetry do
     })
   end
 
+  defp result_metadata(operation, {:error, %Error{} = error, _details}) do
+    metadata(%{
+      operation: operation,
+      outcome: :error,
+      error_kind: error.kind,
+      retry: error.retry
+    })
+  end
+
   defp result_metadata(operation, {:error, _reason}) do
     metadata(%{operation: operation, outcome: :error})
   end

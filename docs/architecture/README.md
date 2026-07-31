@@ -29,3 +29,4 @@ implementation plan was merged.
 ## Phase 2 Substrate
 
 - [Authoritative store lifecycle](./store-lifecycle.md)
+- [Atomic writes and revisions](./atomic-writes-and-revisions.md)

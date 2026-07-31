@@ -8,6 +8,7 @@ defmodule JidoCode.Knowledge.ApplicationLifecycleTest do
     assert Process.alive?(Process.whereis(JidoCode.Knowledge.Supervisor))
     assert Process.alive?(Process.whereis(JidoCode.Knowledge.Readiness))
     assert Process.alive?(Process.whereis(JidoCode.Knowledge.StoreServer))
+    assert Process.alive?(Process.whereis(JidoCode.Knowledge.Writer))
     assert Process.alive?(Process.whereis(JidoCodeWeb.Endpoint))
 
     refute Knowledge.ready?()

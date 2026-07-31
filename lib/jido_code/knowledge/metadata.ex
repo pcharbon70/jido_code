@@ -33,18 +33,26 @@ defmodule JidoCode.Knowledge.Metadata do
   def read(store) do
     context = %{db: store.db, dict_manager: store.dict_manager, permit_all: true}
 
-    case Query.query(context, metadata_query(), timeout: 5_000, use_cache: false) do
-      {:ok, []} ->
-        {:ok, nil}
+    with {:ok, base} <- read_base(context),
+         {:ok, metadata} <- read_revisions(context, base) do
+      {:ok, metadata}
+    end
+  end
 
-      {:ok, [row]} ->
-        decode(row)
+  @spec graph_revision(TripleStore.store(), String.t()) ::
+          {:ok, non_neg_integer() | nil} | {:error, Error.t()}
+  def graph_revision(store, graph_iri) when is_binary(graph_iri) do
+    if RDF.IRI.valid?(graph_iri) do
+      context = %{db: store.db, dict_manager: store.dict_manager, permit_all: true}
 
-      {:ok, _rows} ->
-        {:error, Error.new(:corrupt, :verify_store_metadata)}
-
-      {:error, reason} ->
-        {:error, BackendFailure.translate(reason, :verify_store_metadata)}
+      latest_revision(
+        context,
+        graph_iri,
+        Vocabulary.predicate(:graph_revision),
+        :read_graph_revision
+      )
+    else
+      {:error, Error.new(:invalid_input, :read_graph_revision)}
     end
   end
 
@@ -106,22 +114,78 @@ defmodule JidoCode.Knowledge.Metadata do
     end
   end
 
-  defp decode(row) do
+  defp read_base(context) do
+    case Query.query(context, metadata_query(), timeout: 5_000, use_cache: false) do
+      {:ok, []} -> {:ok, nil}
+      {:ok, [row]} -> decode_base(row)
+      {:ok, _rows} -> {:error, Error.new(:corrupt, :verify_store_metadata)}
+      {:error, reason} -> {:error, BackendFailure.translate(reason, :verify_store_metadata)}
+    end
+  end
+
+  defp read_revisions(_context, nil), do: {:ok, nil}
+
+  defp read_revisions(context, base) do
+    with {:ok, dataset_revision} <-
+           latest_revision(
+             context,
+             Vocabulary.dataset(),
+             Vocabulary.predicate(:dataset_revision),
+             :read_dataset_revision
+           ),
+         {:ok, system_graph_revision} <-
+           latest_revision(
+             context,
+             Vocabulary.system_graph(),
+             Vocabulary.predicate(:graph_revision),
+             :read_system_graph_revision
+           ),
+         true <- is_integer(dataset_revision) and is_integer(system_graph_revision) do
+      {:ok,
+       Map.merge(base, %{
+         dataset_revision: dataset_revision,
+         system_graph_revision: system_graph_revision
+       })}
+    else
+      _error -> {:error, Error.new(:corrupt, :verify_store_metadata)}
+    end
+  end
+
+  defp decode_base(row) do
     with {:ok, store_schema_version} <- integer_binding(row, "store_schema"),
          {:ok, backend_schema_version} <- integer_binding(row, "backend_schema"),
-         {:ok, lineage} <- iri_binding(row, "lineage"),
-         {:ok, dataset_revision} <- integer_binding(row, "dataset_revision"),
-         {:ok, system_graph_revision} <- integer_binding(row, "system_graph_revision") do
+         {:ok, lineage} <- iri_binding(row, "lineage") do
       {:ok,
        %{
          store_schema_version: store_schema_version,
          backend_schema_version: backend_schema_version,
-         lineage: lineage,
-         dataset_revision: dataset_revision,
-         system_graph_revision: system_graph_revision
+         lineage: lineage
        }}
     else
       _error -> {:error, Error.new(:corrupt, :verify_store_metadata)}
+    end
+  end
+
+  defp latest_revision(context, subject, predicate, operation) do
+    subject_term = subject |> RDF.iri() |> RDF.NTriples.Encoder.term()
+    predicate_term = predicate |> RDF.iri() |> RDF.NTriples.Encoder.term()
+
+    query = """
+    SELECT ?revision
+    WHERE {
+      GRAPH <#{Vocabulary.system_graph()}> {
+        #{subject_term} #{predicate_term} ?revision .
+      }
+    }
+    ORDER BY DESC(?revision)
+    LIMIT 1
+    """
+
+    case Query.query(context, query, timeout: 5_000, use_cache: false) do
+      {:ok, []} -> {:ok, nil}
+      {:ok, [row]} -> integer_binding(row, "revision")
+      {:ok, _rows} -> {:error, Error.new(:corrupt, operation)}
+      {:error, reason} -> {:error, BackendFailure.translate(reason, operation)}
     end
   end
 
@@ -170,17 +234,13 @@ defmodule JidoCode.Knowledge.Metadata do
 
   defp metadata_query do
     """
-    SELECT ?store_schema ?backend_schema ?lineage ?dataset_revision ?system_graph_revision
+    SELECT ?store_schema ?backend_schema ?lineage
     WHERE {
       GRAPH <#{Vocabulary.system_graph()}> {
         <#{Vocabulary.dataset()}>
           <#{Vocabulary.predicate(:store_schema_version)}> ?store_schema ;
           <#{Vocabulary.predicate(:backend_schema_version)}> ?backend_schema ;
-          <#{Vocabulary.predicate(:lineage)}> ?lineage ;
-          <#{Vocabulary.predicate(:dataset_revision)}> ?dataset_revision .
-
-        <#{Vocabulary.system_graph()}>
-          <#{Vocabulary.predicate(:graph_revision)}> ?system_graph_revision .
+          <#{Vocabulary.predicate(:lineage)}> ?lineage .
       }
     }
     """

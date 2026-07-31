@@ -59,43 +59,43 @@ Back to plan: [README](./README.md)
       - [x] 2.1.3.4 Subtask {#jcf-p02-2-1-3-4} - Preserve independent static/error rendering where safe while preventing false application readiness.
       - [x] 2.1.3.5 Subtask {#jcf-p02-2-1-3-5} - Add controlled maintenance mode for restore, integrity repair, and schema migration.
 
-  - [ ] 2.2 Section - Implement atomic writes, revisions, and concurrency control.
+  - [x] 2.2 Section - Implement atomic writes, revisions, and concurrency control.
 
     This section establishes one durable commit boundary and graph revision
     vocabulary without yet attaching factory-domain semantics.
 
-    - [ ] 2.2.1 Task {#jcf-p02-write-coordinator} [repo: jido_code] [after: {#jcf-p02-supervision-readiness}] - Implement the serialized knowledge write coordinator.
+    - [x] 2.2.1 Task {#jcf-p02-write-coordinator} [repo: jido_code] [after: {#jcf-p02-supervision-readiness}] - Implement the serialized knowledge write coordinator.
 
       This task gives all future semantic commands one ordering, timeout,
       transaction, and outcome boundary over the embedded store.
 
-      - [ ] 2.2.1.1 Subtask {#jcf-p02-2-2-1-1} - Add `JidoCode.Knowledge.Writer` as the only public-internal route to persistent mutation.
-      - [ ] 2.2.1.2 Subtask {#jcf-p02-2-2-1-2} - Define a backend-neutral write batch containing target graphs, additions, removals allowed by maintenance policy, expected revisions, and opaque operation metadata.
-      - [ ] 2.2.1.3 Subtask {#jcf-p02-2-2-1-3} - Serialize commits, enforce operation deadlines, and separate caller timeout from authoritative commit outcome.
-      - [ ] 2.2.1.4 Subtask {#jcf-p02-2-2-1-4} - Return typed receipts with commit identity, affected graphs, prior/new revisions, counts, durability result, and no raw data.
-      - [ ] 2.2.1.5 Subtask {#jcf-p02-2-2-1-5} - Reject mutation through `StoreServer` read callbacks, SPARQL query APIs, or arbitrary adapter functions.
+      - [x] 2.2.1.1 Subtask {#jcf-p02-2-2-1-1} - Add `JidoCode.Knowledge.Writer` as the only public-internal route to persistent mutation.
+      - [x] 2.2.1.2 Subtask {#jcf-p02-2-2-1-2} - Define a backend-neutral write batch containing target graphs, additions, removals allowed by maintenance policy, expected revisions, and opaque operation metadata.
+      - [x] 2.2.1.3 Subtask {#jcf-p02-2-2-1-3} - Serialize commits, enforce operation deadlines, and separate caller timeout from authoritative commit outcome.
+      - [x] 2.2.1.4 Subtask {#jcf-p02-2-2-1-4} - Return typed receipts with commit identity, affected graphs, prior/new revisions, counts, durability result, and no raw data.
+      - [x] 2.2.1.5 Subtask {#jcf-p02-2-2-1-5} - Reject mutation through `StoreServer` read callbacks, SPARQL query APIs, or arbitrary adapter functions.
 
-    - [ ] 2.2.2 Task {#jcf-p02-atomic-commit} [repo: jido_code] [after: {#jcf-p02-write-coordinator}] - Implement the selected atomic commit strategy.
+    - [x] 2.2.2 Task {#jcf-p02-atomic-commit} [repo: jido_code] [after: {#jcf-p02-write-coordinator}] - Implement the selected atomic commit strategy.
 
       This task guarantees that readers never observe a partially visible
       multi-graph change or a domain mutation detached from its commit status.
 
-      - [ ] 2.2.2.1 Subtask {#jcf-p02-2-2-2-1} - Use one backend transaction or atomic SPARQL Update when the Phase 1 proof establishes complete required semantics.
-      - [ ] 2.2.2.2 Subtask {#jcf-p02-2-2-2-2} - If required, stage changes in a unique change-set graph and expose them only through an atomic committed marker.
-      - [ ] 2.2.2.3 Subtask {#jcf-p02-2-2-2-3} - Ensure failed validation, precondition, backend, or sync outcomes leave no reader-visible partial state.
-      - [ ] 2.2.2.4 Subtask {#jcf-p02-2-2-2-4} - Recover or discard staged, uncommitted change sets deterministically on boot.
-      - [ ] 2.2.2.5 Subtask {#jcf-p02-2-2-2-5} - Define the point after which a lost caller response must be recovered by commit identity rather than retried as a new write.
+      - [x] 2.2.2.1 Subtask {#jcf-p02-2-2-2-1} - Use one backend transaction or atomic SPARQL Update when the Phase 1 proof establishes complete required semantics.
+      - [x] 2.2.2.2 Subtask {#jcf-p02-2-2-2-2} - If required, stage changes in a unique change-set graph and expose them only through an atomic committed marker. (Not required: the accepted ground update is one synchronous batch.)
+      - [x] 2.2.2.3 Subtask {#jcf-p02-2-2-2-3} - Ensure failed validation, precondition, backend, or sync outcomes leave no reader-visible partial state.
+      - [x] 2.2.2.4 Subtask {#jcf-p02-2-2-2-4} - Recover or discard staged, uncommitted change sets deterministically on boot. (No staged state exists under the accepted strategy.)
+      - [x] 2.2.2.5 Subtask {#jcf-p02-2-2-2-5} - Define the point after which a lost caller response must be recovered by commit identity rather than retried as a new write.
 
-    - [ ] 2.2.3 Task {#jcf-p02-graph-revisions} [repo: jido_code] [after: {#jcf-p02-atomic-commit}] - Implement dataset and named-graph revision control.
+    - [x] 2.2.3 Task {#jcf-p02-graph-revisions} [repo: jido_code] [after: {#jcf-p02-atomic-commit}] - Implement dataset and named-graph revision control.
 
       This task supplies monotonic concurrency tokens used by every later
       semantic command, query, cache, lease, and projection.
 
-      - [ ] 2.2.3.1 Subtask {#jcf-p02-2-2-3-1} - Define a monotonic dataset commit revision and per-graph revision updated in the same atomic boundary as graph contents.
-      - [ ] 2.2.3.2 Subtask {#jcf-p02-2-2-3-2} - Accept exact expected revisions and reject stale writes with the current bounded revision receipt.
-      - [ ] 2.2.3.3 Subtask {#jcf-p02-2-2-3-3} - Prevent wall-clock timestamps, process counters, or PubSub sequence from serving as authoritative revisions.
-      - [ ] 2.2.3.4 Subtask {#jcf-p02-2-2-3-4} - Define overflow, restore, migration, and clone semantics without allowing revision regression inside one dataset lineage.
-      - [ ] 2.2.3.5 Subtask {#jcf-p02-2-2-3-5} - Add race tests proving one winner for conflicting expected-revision writes.
+      - [x] 2.2.3.1 Subtask {#jcf-p02-2-2-3-1} - Define a monotonic dataset commit revision and per-graph revision updated in the same atomic boundary as graph contents.
+      - [x] 2.2.3.2 Subtask {#jcf-p02-2-2-3-2} - Accept exact expected revisions and reject stale writes with the current bounded revision receipt.
+      - [x] 2.2.3.3 Subtask {#jcf-p02-2-2-3-3} - Prevent wall-clock timestamps, process counters, or PubSub sequence from serving as authoritative revisions.
+      - [x] 2.2.3.4 Subtask {#jcf-p02-2-2-3-4} - Define overflow, restore, migration, and clone semantics without allowing revision regression inside one dataset lineage.
+      - [x] 2.2.3.5 Subtask {#jcf-p02-2-2-3-5} - Add race tests proving one winner for conflicting expected-revision writes.
 
   - [ ] 2.3 Section - Implement backup, restore, export, and integrity operations.
 

@@ -6,6 +6,10 @@ defmodule JidoCode.Knowledge.Vocabulary do
   @system_graph "urn:jido-code:graph:system"
   @dataset "urn:jido-code:dataset"
   @dataset_class "urn:jido-code:vocab:SystemDataset"
+  @commit_class "urn:jido-code:vocab:Commit"
+  @graph_change_class "urn:jido-code:vocab:GraphChange"
+  @committed "urn:jido-code:vocab:Committed"
+  @sync_durability "urn:jido-code:vocab:SyncDurability"
   @base "urn:jido-code:vocab:"
 
   @spec system_graph() :: String.t()
@@ -17,10 +21,24 @@ defmodule JidoCode.Knowledge.Vocabulary do
   @spec dataset_class() :: String.t()
   def dataset_class, do: @dataset_class
 
+  def commit_class, do: @commit_class
+  def graph_change_class, do: @graph_change_class
+  def committed, do: @committed
+  def sync_durability, do: @sync_durability
+
   @spec predicate(atom()) :: String.t()
   def predicate(:store_schema_version), do: @base <> "storeSchemaVersion"
   def predicate(:backend_schema_version), do: @base <> "backendSchemaVersion"
   def predicate(:lineage), do: @base <> "lineage"
   def predicate(:dataset_revision), do: @base <> "datasetRevision"
   def predicate(:graph_revision), do: @base <> "graphRevision"
+  def predicate(:status), do: @base <> "status"
+  def predicate(:batch_digest), do: @base <> "batchDigest"
+  def predicate(:prior_dataset_revision), do: @base <> "priorDatasetRevision"
+  def predicate(:additions_count), do: @base <> "additionsCount"
+  def predicate(:removals_count), do: @base <> "removalsCount"
+  def predicate(:durability), do: @base <> "durability"
+  def predicate(:graph_change), do: @base <> "graphChange"
+  def predicate(:changed_graph), do: @base <> "changedGraph"
+  def predicate(:prior_graph_revision), do: @base <> "priorGraphRevision"
 end

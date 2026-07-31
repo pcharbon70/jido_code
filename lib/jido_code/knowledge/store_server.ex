@@ -9,6 +9,8 @@ defmodule JidoCode.Knowledge.StoreServer do
   use GenServer
 
   alias JidoCode.Knowledge.BackendFailure
+  alias JidoCode.Knowledge.AtomicCommit
+  alias JidoCode.Knowledge.CommitLog
   alias JidoCode.Knowledge.Config
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Identity
@@ -27,7 +29,9 @@ defmodule JidoCode.Knowledge.StoreServer do
   @operation_roles %{
     metadata: :read,
     statistics: :read,
+    graph_counts: :read,
     atomic_update: :write,
+    receipt: :write,
     checkpoint: :maintenance,
     backup: :maintenance,
     export: :maintenance,
@@ -99,6 +103,7 @@ defmodule JidoCode.Knowledge.StoreServer do
       {:reply, {:ok, reply}, next_state}
     else
       {:error, %Error{} = error} -> {:reply, {:error, error}, state}
+      {:error, %Error{} = error, details} -> {:reply, {:error, error, details}, state}
     end
   end
 
@@ -283,6 +288,48 @@ defmodule JidoCode.Knowledge.StoreServer do
     end
   end
 
+  defp dispatch({:graph_counts, graphs}, state) when is_list(graphs) and length(graphs) <= 100 do
+    if Enum.all?(graphs, &(is_binary(&1) and RDF.IRI.valid?(&1))) do
+      counts =
+        Map.new(graphs, fn graph ->
+          count =
+            case QuadOperations.graph_quad_count(
+                   state.store.db,
+                   state.store.dict_manager,
+                   RDF.iri(graph)
+                 ) do
+              {:ok, value} -> value
+              {:error, _reason} -> :unavailable
+            end
+
+          {graph, count}
+        end)
+
+      if Enum.any?(counts, fn {_graph, count} -> count == :unavailable end) do
+        {:error, Error.new(:unavailable, :read_graph_counts)}
+      else
+        {:ok, counts, state}
+      end
+    else
+      {:error, Error.new(:invalid_input, :read_graph_counts)}
+    end
+  end
+
+  defp dispatch({:atomic_update, batch}, state) do
+    case AtomicCommit.apply(state.store, state.metadata, batch) do
+      {:ok, receipt, metadata} -> {:ok, receipt, %{state | metadata: metadata}}
+      {:error, %Error{} = error} -> {:error, error}
+      {:error, %Error{} = error, details} -> {:error, error, details}
+    end
+  end
+
+  defp dispatch({:receipt, commit_id}, state) do
+    case CommitLog.lookup(state.store, commit_id) do
+      {:ok, receipt} -> {:ok, receipt, state}
+      {:error, %Error{} = error} -> {:error, error}
+    end
+  end
+
   defp dispatch({:enter_maintenance, reason}, state) do
     case Readiness.transition(state.readiness, {:enter_maintenance, reason}) do
       {:ok, health} ->
@@ -341,6 +388,10 @@ defmodule JidoCode.Knowledge.StoreServer do
 
   defp caller_matches?(name, caller) when is_atom(name) do
     Process.whereis(name) == caller
+  end
+
+  defp caller_matches?({:global, name}, caller) do
+    :global.whereis_name(name) == caller
   end
 
   defp caller_matches?(_identity, _caller), do: false
