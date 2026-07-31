@@ -191,34 +191,34 @@ Back to plan: [README](./README.md)
     temporal claims, transition chains, and evolution rules round-trip through
     the real quad store without record-shaped shortcuts.
 
-    - [ ] 3.5.1 Task {#jcf-p03-ontology-integration} [repo: jido_code] [after: {#jcf-p03-inference-contract}] - Load and validate the complete ontology release.
+    - [x] 3.5.1 Task {#jcf-p03-ontology-integration} [repo: jido_code] [after: {#jcf-p03-inference-contract}] - Load and validate the complete ontology release.
 
       This task verifies deterministic ontology artifacts and representative
       valid datasets against real storage and query behavior.
 
-      - [ ] 3.5.1.1 Subtask {#jcf-p03-3-5-1-1} - Parse, canonicalize, checksum, load, export, restore, and byte/term-compare the ontology and shapes.
-      - [ ] 3.5.1.2 Subtask {#jcf-p03-3-5-1-2} - Load the illustrative repository-enrollment, observation, goal, attempt, evidence, and decision slice across registered graph families.
-      - [ ] 3.5.1.3 Subtask {#jcf-p03-3-5-1-3} - Query every required cross-graph relationship and verify no join depends on foreign-key literals.
-      - [ ] 3.5.1.4 Subtask {#jcf-p03-3-5-1-4} - Verify schema and instance graphs remain separated and the default graph remains empty after backup/restore.
+      - [x] 3.5.1.1 Subtask {#jcf-p03-3-5-1-1} - Parse, canonicalize, checksum, load, export, restore, and byte/term-compare the ontology and shapes.
+      - [x] 3.5.1.2 Subtask {#jcf-p03-3-5-1-2} - Load the illustrative repository-enrollment, observation, goal, attempt, evidence, and decision slice across registered graph families.
+      - [x] 3.5.1.3 Subtask {#jcf-p03-3-5-1-3} - Query every required cross-graph relationship and verify no join depends on foreign-key literals.
+      - [x] 3.5.1.4 Subtask {#jcf-p03-3-5-1-4} - Verify schema and instance graphs remain separated and the default graph remains empty after backup/restore.
 
-    - [ ] 3.5.2 Task {#jcf-p03-validation-integration} [repo: jido_code] [after: {#jcf-p03-ontology-integration}] - Falsify identity, shape, temporal, and transition constraints.
+    - [x] 3.5.2 Task {#jcf-p03-validation-integration} [repo: jido_code] [after: {#jcf-p03-ontology-integration}] - Falsify identity, shape, temporal, and transition constraints.
 
       This task proves invalid semantic data cannot become visible even when it
       is well-formed RDF.
 
-      - [ ] 3.5.2.1 Subtask {#jcf-p03-3-5-2-1} - Reject malformed/cross-scope IRIs, unknown graphs, missing graph metadata, wrong graph-family classes, invalid datatypes, and secret-like protected literals.
-      - [ ] 3.5.2.2 Subtask {#jcf-p03-3-5-2-2} - Reject incomplete claims, invalid epistemic changes, unsupported confidence forms, and contradictory cardinality constraints.
-      - [ ] 3.5.2.3 Subtask {#jcf-p03-3-5-2-3} - Race transition successors and prove one valid chain endpoint without timestamp-based resolution.
-      - [ ] 3.5.2.4 Subtask {#jcf-p03-3-5-2-4} - Exercise additive and transform-required ontology migrations, interrupted migration recovery, validation reports, and rollback posture.
-      - [ ] 3.5.2.5 Subtask {#jcf-p03-3-5-2-5} - Delete/rebuild a derived fixture graph and prove asserted truth and graph revisions remain coherent.
-      - [ ] 3.5.2.6 Subtask {#jcf-p03-3-5-2-6} - Rerun Phases 1-2 invariant suites and `mix precommit`.
+      - [x] 3.5.2.1 Subtask {#jcf-p03-3-5-2-1} - Reject malformed/cross-scope IRIs, unknown graphs, missing graph metadata, wrong graph-family classes, invalid datatypes, and secret-like protected literals.
+      - [x] 3.5.2.2 Subtask {#jcf-p03-3-5-2-2} - Reject incomplete claims, invalid epistemic changes, unsupported confidence forms, and contradictory cardinality constraints.
+      - [x] 3.5.2.3 Subtask {#jcf-p03-3-5-2-3} - Race transition successors and prove one valid chain endpoint without timestamp-based resolution.
+      - [x] 3.5.2.4 Subtask {#jcf-p03-3-5-2-4} - Exercise additive and transform-required ontology migrations, interrupted migration recovery, validation reports, and rollback posture.
+      - [x] 3.5.2.5 Subtask {#jcf-p03-3-5-2-5} - Delete/rebuild a derived fixture graph and prove asserted truth and graph revisions remain coherent.
+      - [x] 3.5.2.6 Subtask {#jcf-p03-3-5-2-6} - Rerun Phases 1-2 invariant suites and `mix precommit`.
 
     - [ ] 3.5.3 Task {#jcf-p03-phase-receipt} [repo: jido_code] [after: {#jcf-p03-validation-integration}] - Publish the Phase 3 semantic-contract receipt.
 
       This task binds G2 to exact ontology, shape, identity, graph registry,
       validation, temporal, transition, and migration evidence.
 
-      - [ ] 3.5.3.1 Subtask {#jcf-p03-3-5-3-1} - Record ontology/shape versions and digests, graph registry revision, fixture digests, validator version, and candidate commit.
-      - [ ] 3.5.3.2 Subtask {#jcf-p03-3-5-3-2} - Attach round-trip, invalid-data, race, temporal, migration, restore, and derived-graph results.
-      - [ ] 3.5.3.3 Subtask {#jcf-p03-3-5-3-3} - Keep G2 blocked if any resource requires an object-record codec, any graph lacks ownership metadata, or invalid RDF can become visible.
+      - [x] 3.5.3.1 Subtask {#jcf-p03-3-5-3-1} - Record ontology/shape versions and digests, graph registry revision, fixture digests, validator version, and candidate commit.
+      - [x] 3.5.3.2 Subtask {#jcf-p03-3-5-3-2} - Attach round-trip, invalid-data, race, temporal, migration, restore, and derived-graph results.
+      - [x] 3.5.3.3 Subtask {#jcf-p03-3-5-3-3} - Keep G2 blocked if any resource requires an object-record codec, any graph lacks ownership metadata, or invalid RDF can become visible.
       - [ ] 3.5.3.4 Subtask {#jcf-p03-3-5-3-4} - Pin the merged candidate commit before authorizing Phase 4.

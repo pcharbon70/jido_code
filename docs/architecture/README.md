@@ -40,3 +40,4 @@ implementation plan was merged.
 - [Graph identity and topology](./graph-identity-and-topology.md)
 - [Semantic validation and evolution](./semantic-validation-and-evolution.md)
 - [Claims, time, transitions, and inference](./claims-time-transitions-and-inference.md)
+- [Phase 3 semantic contract receipt](./phase-03-receipt.md)

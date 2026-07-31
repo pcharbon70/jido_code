@@ -45,9 +45,14 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
 
   test "loads and replays the release only in its immutable ontology graph", context do
     root = unique_root(context)
-    on_exit(fn -> File.rm_rf!(root) end)
     {:ok, config} = Config.for_test(Path.join(root, "store"))
     %{server: server, writer: writer} = start_substrate!(config)
+
+    on_exit(fn ->
+      stop_process(writer)
+      stop_process(server)
+      File.rm_rf!(root)
+    end)
 
     assert {:ok, loaded} = Release.load(store_server: server, writer: writer)
     refute loaded.receipt.replayed?
@@ -89,6 +94,12 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
     child
     |> Supervisor.child_spec(id: make_ref(), restart: :temporary)
     |> start_supervised!()
+  end
+
+  defp stop_process(pid) do
+    if Process.alive?(pid), do: GenServer.stop(pid)
+  catch
+    :exit, _reason -> :ok
   end
 
   defp await_health(server, expected, attempts \\ 500)
