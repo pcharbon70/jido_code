@@ -11,6 +11,7 @@ defmodule JidoCode.Knowledge.Writer do
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.StoreServer
+  alias JidoCode.Knowledge.Telemetry
   alias JidoCode.Knowledge.WriteBatch
 
   @default_operation_timeout 5_000
@@ -32,7 +33,8 @@ defmodule JidoCode.Knowledge.Writer do
   def commit(server, %WriteBatch{} = batch, options) when is_list(options) do
     with {:ok, operation_timeout, caller_timeout} <- timeouts(options) do
       deadline = System.monotonic_time(:millisecond) + operation_timeout
-      safe_call(server, {:commit, batch, deadline}, caller_timeout, :commit_response)
+      enqueued_at = System.monotonic_time()
+      safe_call(server, {:commit, batch, deadline, enqueued_at}, caller_timeout, :commit_response)
     end
   end
 
@@ -58,20 +60,23 @@ defmodule JidoCode.Knowledge.Writer do
   end
 
   @impl true
-  def handle_call({:commit, %WriteBatch{} = batch, deadline}, _from, state) do
+  def handle_call({:commit, %WriteBatch{} = batch, deadline, enqueued_at}, _from, state) do
     remaining = deadline - System.monotonic_time(:millisecond)
+    queue_duration = max(System.monotonic_time() - enqueued_at, 0)
 
     reply =
-      if remaining > 0 do
-        safe_store_request(
-          state.store_server,
-          {:atomic_update, batch},
-          remaining,
-          :atomic_commit
-        )
-      else
-        {:error, Error.new(:timeout, :atomic_commit)}
-      end
+      Telemetry.span(:commit, %{queue_duration: queue_duration}, fn ->
+        if remaining > 0 do
+          safe_store_request(
+            state.store_server,
+            {:atomic_update, batch},
+            remaining,
+            :atomic_commit
+          )
+        else
+          {:error, Error.new(:timeout, :atomic_commit)}
+        end
+      end)
 
     {:reply, reply, state}
   end

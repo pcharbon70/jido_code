@@ -10,19 +10,45 @@ defmodule JidoCode.Knowledge.Telemetry do
   alias JidoCode.Knowledge.Health
 
   @allowed_keys [:operation, :outcome, :error_kind, :health_state, :retry]
+  @allowed_measurements [
+    :duration,
+    :system_time,
+    :queue_duration,
+    :result_count,
+    :graph_count,
+    :issue_count
+  ]
   @outcomes [:ok, :error, :rejected]
   @retry_modes [:retry, :verify_receipt, :refresh, :never]
-  @operation_classes [:open, :verify, :read, :write, :maintenance]
+  @operation_classes [
+    :open,
+    :verify,
+    :read,
+    :write,
+    :maintenance,
+    :commit,
+    :backup,
+    :restore,
+    :export,
+    :integrity
+  ]
   @event_prefix [:jido_code, :knowledge, :operation]
 
   @spec span(atom(), (-> result)) :: result when result: term()
   def span(operation, callback)
       when operation in @operation_classes and is_function(callback, 0) do
+    span(operation, %{}, callback)
+  end
+
+  @spec span(atom(), map(), (-> result)) :: result when result: term()
+  def span(operation, measurements, callback)
+      when operation in @operation_classes and is_map(measurements) and is_function(callback, 0) do
+    measurements = validate_measurements!(measurements)
     started_at = System.monotonic_time()
 
     :telemetry.execute(
       @event_prefix ++ [:start],
-      %{system_time: System.system_time()},
+      Map.put(measurements, :system_time, System.system_time()),
       metadata(%{operation: operation})
     )
 
@@ -31,7 +57,9 @@ defmodule JidoCode.Knowledge.Telemetry do
 
       :telemetry.execute(
         @event_prefix ++ [:stop],
-        %{duration: System.monotonic_time() - started_at},
+        measurements
+        |> Map.put(:duration, System.monotonic_time() - started_at)
+        |> Map.merge(result_measurements(result)),
         result_metadata(operation, result)
       )
 
@@ -77,6 +105,8 @@ defmodule JidoCode.Knowledge.Telemetry do
 
   def operation_classes, do: @operation_classes
 
+  def allowed_measurements, do: @allowed_measurements
+
   defp result_metadata(operation, {:error, %Error{} = error}) do
     metadata(%{
       operation: operation,
@@ -110,6 +140,51 @@ defmodule JidoCode.Knowledge.Telemetry do
 
   defp result_metadata(operation, _result) do
     metadata(%{operation: operation, outcome: :ok})
+  end
+
+  defp result_measurements({:ok, %JidoCode.Knowledge.WriteReceipt{} = receipt}) do
+    %{
+      result_count: receipt.additions_count + receipt.removals_count,
+      graph_count: map_size(receipt.graph_revisions)
+    }
+  end
+
+  defp result_measurements({:ok, %JidoCode.Knowledge.BackupReceipt{} = receipt}) do
+    %{result_count: receipt.quad_count, graph_count: receipt.graph_count}
+  end
+
+  defp result_measurements({:ok, %JidoCode.Knowledge.IntegrityReport{} = report}) do
+    %{
+      result_count: report.quad_count,
+      graph_count: report.graph_count,
+      issue_count: length(report.issues)
+    }
+  end
+
+  defp result_measurements({:ok, %JidoCode.Knowledge.IntegrityReport{} = report, _state}) do
+    result_measurements({:ok, report})
+  end
+
+  defp result_measurements({:ok, %{integrity_status: _status}, _state}) do
+    %{result_count: 1}
+  end
+
+  defp result_measurements(_result), do: %{}
+
+  defp validate_measurements!(measurements) do
+    unknown_keys = Map.keys(measurements) -- @allowed_measurements
+
+    if unknown_keys != [] do
+      raise ArgumentError,
+            "unsafe knowledge telemetry measurements: #{inspect(Enum.sort(unknown_keys))}"
+    end
+
+    Enum.each(measurements, fn
+      {_key, value} when is_integer(value) and value >= 0 -> :ok
+      {key, value} -> raise ArgumentError, "invalid knowledge telemetry #{key}: #{inspect(value)}"
+    end)
+
+    measurements
   end
 
   defp validate_attribute!({:operation, value}) when is_atom(value), do: :ok

@@ -134,31 +134,31 @@ Back to plan: [README](./README.md)
       - [x] 2.3.3.3 Subtask {#jcf-p02-2-3-3-3} - Return stable issue codes, affected graph/commit references, severity, and safe remediation guidance without dumping triples.
       - [x] 2.3.3.4 Subtask {#jcf-p02-2-3-3-4} - Keep repair separate from detection and require explicit maintenance commands for any destructive action.
 
-  - [ ] 2.4 Section - Harden operational lifecycle and observability.
+  - [x] 2.4 Section - Harden operational lifecycle and observability.
 
     This section makes the store boundary diagnosable under load and failure
     without turning telemetry, health, or admin utilities into alternate
     authorities.
 
-    - [ ] 2.4.1 Task {#jcf-p02-health-telemetry} [repo: jido_code] [after: {#jcf-p02-integrity-service}] - Implement store health and low-cardinality telemetry.
+    - [x] 2.4.1 Task {#jcf-p02-health-telemetry} [repo: jido_code] [after: {#jcf-p02-integrity-service}] - Implement store health and low-cardinality telemetry.
 
       This task exposes enough operational context to distinguish healthy,
       degraded, recovering, maintenance, and unavailable states safely.
 
-      - [ ] 2.4.1.1 Subtask {#jcf-p02-2-4-1-1} - Report open state, schema compatibility, last integrity result, dataset revision, backup age, and bounded failure class.
-      - [ ] 2.4.1.2 Subtask {#jcf-p02-2-4-1-2} - Emit spans for open, verify, read class, write class, commit, backup, restore, export, and integrity operations.
-      - [ ] 2.4.1.3 Subtask {#jcf-p02-2-4-1-3} - Bound queue time, execution time, result counts, and error labels without graph contents or arbitrary cardinality.
-      - [ ] 2.4.1.4 Subtask {#jcf-p02-2-4-1-4} - Ensure health and metrics reads cannot acquire a write path or bypass maintenance restrictions.
+      - [x] 2.4.1.1 Subtask {#jcf-p02-2-4-1-1} - Report open state, schema compatibility, last integrity result, dataset revision, backup age, and bounded failure class.
+      - [x] 2.4.1.2 Subtask {#jcf-p02-2-4-1-2} - Emit spans for open, verify, read class, write class, commit, backup, restore, export, and integrity operations.
+      - [x] 2.4.1.3 Subtask {#jcf-p02-2-4-1-3} - Bound queue time, execution time, result counts, and error labels without graph contents or arbitrary cardinality.
+      - [x] 2.4.1.4 Subtask {#jcf-p02-2-4-1-4} - Ensure health and metrics reads cannot acquire a write path or bypass maintenance restrictions.
 
-    - [ ] 2.4.2 Task {#jcf-p02-admin-boundary} [repo: jido_code] [after: {#jcf-p02-health-telemetry}] - Implement internal maintenance and diagnostic entry points.
+    - [x] 2.4.2 Task {#jcf-p02-admin-boundary} [repo: jido_code] [after: {#jcf-p02-health-telemetry}] - Implement internal maintenance and diagnostic entry points.
 
       This task provides intentional operational commands without exposing raw
       backend handles or unsafe defaults to ordinary application code.
 
-      - [ ] 2.4.2.1 Subtask {#jcf-p02-2-4-2-1} - Add bounded Mix tasks or internal service calls for health, integrity, backup, export, and verified restore.
-      - [ ] 2.4.2.2 Subtask {#jcf-p02-2-4-2-2} - Require explicit paths and confirmations for restore or repair and reject broad, unresolved, or active-store destructive targets.
-      - [ ] 2.4.2.3 Subtask {#jcf-p02-2-4-2-3} - Keep ad hoc SPARQL and raw quad operations out of ordinary admin commands.
-      - [ ] 2.4.2.4 Subtask {#jcf-p02-2-4-2-4} - Document startup, shutdown, maintenance, backup, restore, and first-response troubleshooting.
+      - [x] 2.4.2.1 Subtask {#jcf-p02-2-4-2-1} - Add bounded Mix tasks or internal service calls for health, integrity, backup, export, and verified restore.
+      - [x] 2.4.2.2 Subtask {#jcf-p02-2-4-2-2} - Require explicit paths and confirmations for restore or repair and reject broad, unresolved, or active-store destructive targets. (Restore accepts only an exact configured-root artifact identity plus matching confirmation; raw paths and repair are unsupported.)
+      - [x] 2.4.2.3 Subtask {#jcf-p02-2-4-2-3} - Keep ad hoc SPARQL and raw quad operations out of ordinary admin commands.
+      - [x] 2.4.2.4 Subtask {#jcf-p02-2-4-2-4} - Document startup, shutdown, maintenance, backup, restore, and first-response troubleshooting.
 
   - [ ] 2.5 Section - Phase 2 Integration Tests.
 

@@ -2,6 +2,7 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
   use ExUnit.Case, async: false
 
   alias JidoCode.Knowledge.BackupReceipt
+  alias JidoCode.Knowledge.Admin
   alias JidoCode.Knowledge.Config
   alias JidoCode.Knowledge.DatasetSelector
   alias JidoCode.Knowledge.Error
@@ -30,6 +31,17 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
     substrate = start_substrate!(config)
     commit_localized_data!(substrate.writer)
 
+    assert {:ok, initial_health} =
+             Admin.execute(:health, store_server: substrate.server)
+
+    assert initial_health.schema_compatible?
+    assert initial_health.dataset_revision == 1
+    assert initial_health.last_integrity == nil
+    assert initial_health.backup_age_seconds == nil
+
+    assert {:error, %Error{kind: :invalid_input}} =
+             Admin.execute(:backup, path: config.backup_root)
+
     assert {:ok, %BackupReceipt{artifact_kind: :checkpoint} = checkpoint} =
              Maintenance.backup(substrate.maintenance, [])
 
@@ -37,6 +49,12 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
     assert checkpoint.graph_count == 2
     assert checkpoint.quad_count > 2
     assert checkpoint.consistency == "exclusive_store_owner"
+
+    assert {:ok, after_backup} =
+             Admin.execute(:health, store_server: substrate.server)
+
+    assert is_integer(after_backup.backup_age_seconds)
+    assert after_backup.backup_age_seconds >= 0
 
     artifact_root = Path.join(config.backup_root, checkpoint.artifact_id)
     assert private_mode?(artifact_root, 0o700)
@@ -68,7 +86,14 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
     assert nquads =~ "http://www.w3.org/2001/XMLSchema#integer"
 
     assert {:ok, %IntegrityReport{status: :ok, issues: []}} =
-             Maintenance.integrity(substrate.maintenance, [])
+             Admin.execute(:integrity, maintenance: substrate.maintenance)
+
+    assert {:ok, after_integrity} =
+             Admin.execute(:health, store_server: substrate.server)
+
+    assert after_integrity.last_integrity.status == :ok
+    assert after_integrity.last_integrity.dataset_revision == 1
+    assert after_integrity.last_integrity.issue_count == 0
 
     assert {:ok, candidates} =
              Maintenance.retention_candidates(substrate.maintenance, 1, [])
@@ -115,12 +140,72 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
     reopened = start_substrate!(config)
 
     assert StoreServer.summary(reopened.server).dataset_revision == 2
+    assert is_integer(StoreServer.summary(reopened.server).backup_age_seconds)
 
     assert {:ok, %{@graph => 1}} =
              StoreServer.request(reopened.server, {:graph_counts, [@graph]})
 
     commit!(reopened.writer, [quad("after-restore", "new")], 2, 1)
     assert StoreServer.summary(reopened.server).dataset_revision == 3
+  end
+
+  test "emits fixed spans for lifecycle, read, write, and maintenance operations", %{
+    config: config
+  } do
+    handler = "knowledge-operation-coverage-#{System.unique_integer([:positive])}"
+    test_pid = self()
+    event = [:jido_code, :knowledge, :operation, :stop]
+
+    :ok =
+      :telemetry.attach(
+        handler,
+        event,
+        fn _event, measurements, metadata, _config ->
+          send(test_pid, {:knowledge_operation, measurements, metadata})
+        end,
+        nil
+      )
+
+    on_exit(fn -> :telemetry.detach(handler) end)
+
+    substrate = start_substrate!(config)
+    commit!(substrate.writer, [quad("telemetry", "bounded")], 0, 0)
+
+    assert {:ok, %{@graph => 1}} =
+             StoreServer.request(substrate.server, {:graph_counts, [@graph]})
+
+    assert {:ok, backup} = Maintenance.backup(substrate.maintenance, [])
+    assert {:ok, _export} = Maintenance.export(substrate.maintenance, :nquads, [])
+    assert {:ok, _report} = Maintenance.integrity(substrate.maintenance, [])
+
+    assert {:ok, _receipt} =
+             Maintenance.restore(substrate.maintenance, backup.artifact_id,
+               confirm: backup.artifact_id
+             )
+
+    events = collect_operation_events([])
+    operations = MapSet.new(events, fn {_measurements, metadata} -> metadata.operation end)
+
+    expected =
+      MapSet.new([
+        :open,
+        :verify,
+        :read,
+        :write,
+        :maintenance,
+        :commit,
+        :backup,
+        :restore,
+        :export,
+        :integrity
+      ])
+
+    assert MapSet.subset?(expected, operations)
+
+    assert Enum.all?(events, fn {measurements, metadata} ->
+             Map.keys(measurements) -- JidoCode.Knowledge.Telemetry.allowed_measurements() == [] and
+               Map.keys(metadata) -- JidoCode.Knowledge.Telemetry.allowed_keys() == []
+           end)
   end
 
   test "rejects a corrupted artifact and keeps the prior dataset active", %{config: config} do
@@ -361,5 +446,14 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
     if Process.alive?(pid), do: GenServer.stop(pid, :normal, 5_000)
   catch
     :exit, _reason -> :ok
+  end
+
+  defp collect_operation_events(events) do
+    receive do
+      {:knowledge_operation, measurements, metadata} ->
+        collect_operation_events([{measurements, metadata} | events])
+    after
+      100 -> events
+    end
   end
 end

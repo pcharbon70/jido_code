@@ -27,10 +27,13 @@ defmodule JidoCode.Knowledge.StoreServerTest do
              dataset_revision: 0,
              durability: :sync,
              failure: nil,
+             backup_age_seconds: nil,
              health_state: :ready,
+             last_integrity: nil,
              lineage_present?: true,
              ready?: true,
              schema: :quad,
+             schema_compatible?: true,
              schema_version: 1,
              store_open?: true
            }

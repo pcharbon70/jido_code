@@ -120,6 +120,24 @@ defmodule JidoCode.Knowledge.Backup do
     {:error, Error.new(:invalid_input, :backup_retention)}
   end
 
+  @spec latest_checkpoint(JidoCode.Knowledge.Config.t()) ::
+          {:ok, BackupReceipt.t() | nil} | {:error, Error.t()}
+  def latest_checkpoint(config) do
+    case File.ls(config.backup_root) do
+      {:ok, entries} ->
+        receipt =
+          entries
+          |> Enum.filter(&Regex.match?(@artifact_pattern, &1))
+          |> Enum.sort(:desc)
+          |> Enum.find_value(&checkpoint_receipt(config, &1))
+
+        {:ok, receipt}
+
+      {:error, reason} ->
+        {:error, BackendFailure.translate(reason, :list_backup_artifacts)}
+    end
+  end
+
   @spec remove_staged(Path.t()) :: :ok
   def remove_staged(path), do: remove_tree(path)
 
@@ -193,6 +211,20 @@ defmodule JidoCode.Knowledge.Backup do
       payload_bytes: manifest.payload_bytes,
       consistency: manifest.consistency
     }
+  end
+
+  defp checkpoint_receipt(config, artifact_id) do
+    manifest_path = Path.join([config.backup_root, artifact_id, @manifest_file])
+
+    with {:ok, encoded} <- read_file(manifest_path),
+         {:ok, manifest} <- BackupManifest.decode(encoded),
+         :ok <- verify_manifest_identity(manifest, artifact_id),
+         true <- manifest.artifact_kind == :checkpoint,
+         :ok <- verify_manifest_compatibility(manifest, config.schema_version) do
+      receipt(manifest)
+    else
+      _invalid -> nil
+    end
   end
 
   defp export_contract(:nquads) do

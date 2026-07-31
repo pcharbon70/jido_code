@@ -55,6 +55,8 @@ defmodule JidoCode.Knowledge.StoreServer do
     :readiness,
     :native,
     :authorized_callers,
+    :last_integrity,
+    :last_backup,
     monitors: %{}
   ]
 
@@ -157,10 +159,18 @@ defmodule JidoCode.Knowledge.StoreServer do
     with :ok <- ensure_enabled(config),
          :ok <- state.native.verify(),
          :ok <- Config.prepare_directories(config),
+         {:ok, last_backup} <- Backup.latest_checkpoint(config),
          {:ok, store} <- bounded_open(config),
          {:ok, metadata} <- verify_store(state.readiness, store, config) do
       monitors = monitor_store_processes(store)
-      %{state | store: store, metadata: metadata, monitors: monitors}
+
+      %{
+        state
+        | store: store,
+          metadata: metadata,
+          monitors: monitors,
+          last_backup: last_backup
+      }
     else
       {:error, %Error{} = error} -> fail_startup(state, error)
       {:error, reason} -> fail_startup(state, BackendFailure.translate(reason, :open_store))
@@ -275,6 +285,9 @@ defmodule JidoCode.Knowledge.StoreServer do
       durability: config_value(state.config, :durability),
       dataset_revision: metadata_value(state.metadata, :dataset_revision),
       lineage_present?: is_map(state.metadata) and is_binary(state.metadata.lineage),
+      schema_compatible?: schema_compatible?(state),
+      last_integrity: state.last_integrity,
+      backup_age_seconds: backup_age_seconds(state.last_backup),
       failure: public_error(state.last_error)
     }
   end
@@ -349,7 +362,7 @@ defmodule JidoCode.Knowledge.StoreServer do
   end
 
   defp dispatch(:backup, state) do
-    run_backup(state, fn ->
+    run_backup(state, :backup, fn ->
       Backup.create_checkpoint(state.store, state.metadata, state.config)
     end)
   end
@@ -357,14 +370,14 @@ defmodule JidoCode.Knowledge.StoreServer do
   defp dispatch(:checkpoint, state), do: dispatch(:backup, state)
 
   defp dispatch({:export, format}, state) do
-    run_backup(state, fn ->
+    run_backup(state, :export, fn ->
       Backup.create_export(state.store, state.metadata, state.config, format)
     end)
   end
 
   defp dispatch(:integrity, state) do
-    case Integrity.check(state.store, state.metadata) do
-      {:ok, report} -> {:ok, report, state}
+    case Telemetry.span(:integrity, fn -> Integrity.check(state.store, state.metadata) end) do
+      {:ok, report} -> {:ok, report, record_integrity(state, report)}
       {:error, %Error{} = error} -> {:error, error}
     end
   end
@@ -393,7 +406,9 @@ defmodule JidoCode.Knowledge.StoreServer do
     end
   end
 
-  defp dispatch({:restore, artifact_id}, state), do: perform_restore(state, artifact_id)
+  defp dispatch({:restore, artifact_id}, state) do
+    Telemetry.span(:restore, fn -> perform_restore(state, artifact_id) end)
+  end
 
   defp dispatch(_request, _state), do: {:error, Error.new(:invalid_input, :store_request)}
 
@@ -498,21 +513,26 @@ defmodule JidoCode.Knowledge.StoreServer do
   defp public_error(nil), do: nil
   defp public_error(%Error{} = error), do: Error.public(error)
 
-  defp run_backup(state, callback) do
+  defp run_backup(state, operation, callback) do
     with {:ok, _health} <- Readiness.transition(state.readiness, :begin_backup) do
-      result = safe_backup_callback(callback)
+      result = safe_backup_callback(operation, callback)
       finish_result = Readiness.transition(state.readiness, :finish_backup)
 
       case {result, finish_result} do
-        {{:ok, receipt}, {:ok, _health}} -> {:ok, receipt, state}
-        {{:error, %Error{} = error}, {:ok, _health}} -> {:error, error}
-        {_result, {:error, %Error{} = error}} -> {:error, error}
+        {{:ok, receipt}, {:ok, _health}} ->
+          {:ok, receipt, record_backup(state, operation, receipt)}
+
+        {{:error, %Error{} = error}, {:ok, _health}} ->
+          {:error, error}
+
+        {_result, {:error, %Error{} = error}} ->
+          {:error, error}
       end
     end
   end
 
-  defp safe_backup_callback(callback) do
-    callback.()
+  defp safe_backup_callback(operation, callback) do
+    Telemetry.span(operation, callback)
   rescue
     _error -> {:error, Error.new(:persistence_failure, :create_backup_artifact)}
   catch
@@ -648,7 +668,8 @@ defmodule JidoCode.Knowledge.StoreServer do
          | store: active_store,
            metadata: actual_metadata,
            monitors: monitors,
-           last_error: nil
+           last_error: nil,
+           last_integrity: integrity_observation(report)
        }}
     else
       false ->
@@ -793,6 +814,39 @@ defmodule JidoCode.Knowledge.StoreServer do
 
       true ->
         :ok
+    end
+  end
+
+  defp record_backup(state, :backup, receipt), do: %{state | last_backup: receipt}
+  defp record_backup(state, _operation, _receipt), do: state
+
+  defp record_integrity(state, report) do
+    %{state | last_integrity: integrity_observation(report)}
+  end
+
+  defp integrity_observation(report) do
+    %{
+      status: report.status,
+      dataset_revision: report.dataset_revision,
+      issue_count: length(report.issues),
+      checked_at: DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    }
+  end
+
+  defp schema_compatible?(%{config: %Config{} = config, metadata: metadata})
+       when is_map(metadata) do
+    metadata.store_schema_version == config.schema_version and
+      metadata.backend_schema_version == Metadata.backend_schema_version()
+  end
+
+  defp schema_compatible?(_state), do: false
+
+  defp backup_age_seconds(nil), do: nil
+
+  defp backup_age_seconds(%{created_at: created_at}) do
+    case DateTime.from_iso8601(created_at) do
+      {:ok, created, _offset} -> max(DateTime.diff(DateTime.utc_now(), created, :second), 0)
+      _invalid -> nil
     end
   end
 end
