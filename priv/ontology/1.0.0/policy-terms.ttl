@@ -1,0 +1,39 @@
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+jfc:PriorityScheme a skos:ConceptScheme ; skos:prefLabel "priority" .
+jfc:PriorityLow a skos:Concept ; skos:inScheme jfc:PriorityScheme ; skos:prefLabel "low" .
+jfc:PriorityNormal a skos:Concept ; skos:inScheme jfc:PriorityScheme ; skos:prefLabel "normal" .
+jfc:PriorityHigh a skos:Concept ; skos:inScheme jfc:PriorityScheme ; skos:prefLabel "high" .
+jfc:PriorityCritical a skos:Concept ; skos:inScheme jfc:PriorityScheme ; skos:prefLabel "critical" .
+
+jfc:OutcomeScheme a skos:ConceptScheme ; skos:prefLabel "outcome" .
+jfc:OutcomeUnknown a skos:Concept ; skos:inScheme jfc:OutcomeScheme ; skos:prefLabel "unknown" .
+jfc:OutcomePassed a skos:Concept ; skos:inScheme jfc:OutcomeScheme ; skos:prefLabel "passed" .
+jfc:OutcomeFailed a skos:Concept ; skos:inScheme jfc:OutcomeScheme ; skos:prefLabel "failed" .
+jfc:OutcomeWaived a skos:Concept ; skos:inScheme jfc:OutcomeScheme ; skos:prefLabel "waived" .
+
+jfc:ArtifactKindScheme a skos:ConceptScheme ; skos:prefLabel "artifact kind" .
+jfc:SourceFile a skos:Concept ; skos:inScheme jfc:ArtifactKindScheme ; skos:prefLabel "source file" .
+jfc:PatchArtifact a skos:Concept ; skos:inScheme jfc:ArtifactKindScheme ; skos:prefLabel "patch" .
+jfc:BuildArtifact a skos:Concept ; skos:inScheme jfc:ArtifactKindScheme ; skos:prefLabel "build artifact" .
+jfc:VerificationArtifact a skos:Concept ; skos:inScheme jfc:ArtifactKindScheme ; skos:prefLabel "verification artifact" .
+
+jfc:DecisionDispositionScheme a skos:ConceptScheme ; skos:prefLabel "decision disposition" .
+jfc:DecisionAccept a skos:Concept ; skos:inScheme jfc:DecisionDispositionScheme ; skos:prefLabel "accept" .
+jfc:DecisionReject a skos:Concept ; skos:inScheme jfc:DecisionDispositionScheme ; skos:prefLabel "reject" .
+jfc:DecisionWaive a skos:Concept ; skos:inScheme jfc:DecisionDispositionScheme ; skos:prefLabel "waive" .
+jfc:DecisionDefer a skos:Concept ; skos:inScheme jfc:DecisionDispositionScheme ; skos:prefLabel "defer" .
+
+jfc:GraphKindScheme a skos:ConceptScheme ; skos:prefLabel "graph kind" .
+jfc:OntologyGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "ontology" .
+jfc:FactoryCatalogGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "factory catalog" .
+jfc:FactoryPolicyGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "factory policy" .
+jfc:ObservationGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "observation batch" .
+jfc:SourceGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "source revision" .
+jfc:ControlGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "repository control" .
+jfc:RunGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "run attempt" .
+jfc:EvidenceGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "evidence" .
+jfc:MemoryGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "memory" .
+jfc:SecurityAuditGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "security audit" .
+jfc:DerivedGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "derived" .

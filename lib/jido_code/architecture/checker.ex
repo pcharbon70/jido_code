@@ -28,6 +28,10 @@ defmodule JidoCode.Architecture.Checker do
     "JidoCode.Knowledge.Metadata",
     "JidoCode.Knowledge.RestoreLog"
   ]
+  @semantic_write_owners [
+    "JidoCode.Knowledge.Commands.Graphs",
+    "JidoCode.Knowledge.Ontology.Release"
+  ]
   @theme_path "assets/js/theme.js"
   @theme_sha256 "b5c950f5dfe08d10ad0eb9e72144a7440452d628f1ce330101341dc45a74eba2"
   @file_roles %{
@@ -221,6 +225,26 @@ defmodule JidoCode.Architecture.Checker do
           path,
           call.line,
           "persistent graph updates must run through an approved knowledge write coordinator"
+        )
+      )
+      |> maybe_add(
+        call.module in ["WriteBatch", "JidoCode.Knowledge.WriteBatch"] and
+          call.function == :new and caller not in @semantic_write_owners,
+        violation(
+          :graph_topology,
+          path,
+          call.line,
+          "production writes must use a semantic command that enforces registered graph topology"
+        )
+      )
+      |> maybe_add(
+        call.module in ["Writer", "JidoCode.Knowledge.Writer"] and
+          call.function == :commit and caller not in @semantic_write_owners,
+        violation(
+          :graph_topology,
+          path,
+          call.line,
+          "only approved semantic commands may submit substrate write batches"
         )
       )
       |> maybe_add(

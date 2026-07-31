@@ -1,0 +1,167 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/shapes/1.0.0>
+  a sh:ShapesGraph ;
+  jf:shapeVersion "1.0.0" ;
+  rdfs:comment "OWL and RDFS remain open-world guidance; these shapes are the closed-world write-admission contract." .
+
+jfs:NamedGraphShape
+  a sh:NodeShape ;
+  sh:targetClass jf:NamedGraph ;
+  sh:closed true ;
+  sh:property jfs:GraphKindProperty,
+    jfs:OwnerScopeProperty,
+    jfs:OntologyVersionProperty,
+    jfs:CreationActivityProperty,
+    jfs:CreatedAtProperty,
+    jfs:LifecycleStateProperty,
+    jfs:CompletenessStateProperty,
+    jfs:GraphRevisionProperty,
+    jfs:RetentionClassProperty .
+
+jfs:GraphKindProperty a sh:PropertyShape ; sh:path jf:graphKind ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:OwnerScopeProperty a sh:PropertyShape ; sh:path jf:ownerScope ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:OntologyVersionProperty a sh:PropertyShape ; sh:path jf:ontologyVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CreationActivityProperty a sh:PropertyShape ; sh:path jf:creationActivity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CreatedAtProperty a sh:PropertyShape ; sh:path jf:createdAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:LifecycleStateProperty a sh:PropertyShape ; sh:path jf:lifecycleState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CompletenessStateProperty a sh:PropertyShape ; sh:path jf:completenessState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:GraphRevisionProperty a sh:PropertyShape ; sh:path jf:graphRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:RetentionClassProperty a sh:PropertyShape ; sh:path jf:retentionClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+
+jfs:RepositoryLocatorShape
+  a sh:NodeShape ;
+  sh:targetClass jf:RepositoryLocator ;
+  sh:property jfs:CanonicalLocatorProperty .
+
+jfs:CanonicalLocatorProperty a sh:PropertyShape ; sh:path jf:canonicalLocator ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+
+jfs:ClaimShape
+  a sh:NodeShape ;
+  sh:targetClass jf:Claim ;
+  sh:property jfs:ClaimSubjectProperty,
+    jfs:ClaimPredicateProperty,
+    jfs:ClaimObjectProperty,
+    jfs:ClaimSourceProperty,
+    jfs:ClaimScopeProperty,
+    jfs:EpistemicStateProperty,
+    jfs:RecordedAtProperty,
+    jfs:GeneratedAtProperty,
+    jfs:ValidFromOptionalProperty,
+    jfs:ValidToOptionalProperty,
+    jfs:SourceObservedAtProperty,
+    jfs:InvalidatedAtProperty .
+
+jfs:ClaimSubjectProperty a sh:PropertyShape ; sh:path rdf:subject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ClaimPredicateProperty a sh:PropertyShape ; sh:path rdf:predicate ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ClaimObjectProperty a sh:PropertyShape ; sh:path rdf:object ; sh:minCount 1 ; sh:maxCount 1 .
+jfs:ClaimSourceProperty a sh:PropertyShape ; sh:path jf:sourceActivity ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Activity .
+jfs:ClaimScopeProperty a sh:PropertyShape ; sh:path jf:graphScope ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:EpistemicStateProperty a sh:PropertyShape ; sh:path jf:epistemicState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:RecordedAtProperty a sh:PropertyShape ; sh:path jf:recordedAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:GeneratedAtProperty a sh:PropertyShape ; sh:path prov:generatedAtTime ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:ValidFromOptionalProperty a sh:PropertyShape ; sh:path jf:validFrom ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:ValidToOptionalProperty a sh:PropertyShape ; sh:path jf:validTo ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:SourceObservedAtProperty a sh:PropertyShape ; sh:path jf:sourceObservedAt ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:InvalidatedAtProperty a sh:PropertyShape ; sh:path prov:invalidatedAtTime ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+
+jfs:TransitionShape
+  a sh:NodeShape ;
+  sh:targetClass jf:StateTransition ;
+  sh:property jfs:TransitionSubjectProperty,
+    jfs:NextStateProperty,
+    jfs:SubjectRevisionProperty,
+    jfs:TransitionActorProperty,
+    jfs:TransitionTimeProperty,
+    jfs:TransitionCauseProperty,
+    jfs:TransitionReasonProperty,
+    jfs:RecordedAtProperty .
+
+jfs:TransitionSubjectProperty a sh:PropertyShape ; sh:path jf:transitionSubject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:NextStateProperty a sh:PropertyShape ; sh:path jf:nextState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SubjectRevisionProperty a sh:PropertyShape ; sh:path jf:subjectRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:TransitionActorProperty a sh:PropertyShape ; sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:TransitionTimeProperty a sh:PropertyShape ; sh:path prov:generatedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:TransitionCauseProperty a sh:PropertyShape ; sh:path jf:cause ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:TransitionReasonProperty a sh:PropertyShape ; sh:path jf:reason ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+
+jfs:DerivedGraphShape
+  a sh:NodeShape ;
+  sh:targetSubjectsOf jf:ruleSet ;
+  sh:property jfs:RuleSetProperty, jfs:InvalidationStateProperty, jfs:SourceGraphRevisionProperty ;
+  rdfs:comment "Application validation targets this shape only when graphKind is DerivedGraph." .
+
+jfs:RuleSetProperty a sh:PropertyShape ; sh:path jf:ruleSet ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:InvalidationStateProperty a sh:PropertyShape ; sh:path jf:invalidationState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SourceGraphRevisionProperty a sh:PropertyShape ; sh:path jf:sourceGraphRevision ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+
+jfs:GraphRevisionReferenceShape
+  a sh:NodeShape ;
+  sh:targetClass jf:GraphRevisionReference ;
+  sh:property jfs:SourceGraphProperty, jfs:SourceRevisionNumberProperty .
+
+jfs:SourceGraphProperty a sh:PropertyShape ; sh:path jf:sourceGraph ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SourceRevisionNumberProperty a sh:PropertyShape ; sh:path jf:sourceRevisionNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+
+jfs:LeaseShape
+  a sh:NodeShape ;
+  sh:targetClass jf:Lease ;
+  sh:property jfs:LeaseActorProperty, jfs:FencingTokenProperty, jfs:ValidFromProperty, jfs:ValidToProperty .
+
+jfs:LeaseActorProperty a sh:PropertyShape ; sh:path jf:claimedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:FencingTokenProperty a sh:PropertyShape ; sh:path jf:fencingToken ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ValidFromProperty a sh:PropertyShape ; sh:path jf:validFrom ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:ValidToProperty a sh:PropertyShape ; sh:path jf:validTo ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+
+jfs:EvidenceShape
+  a sh:NodeShape ;
+  sh:targetClass jf:EvidenceBundle ;
+  rdfs:comment "Operational validation requires at least one jf:supports or jf:contradicts relationship." .
+
+jfs:DecisionShape
+  a sh:NodeShape ;
+  sh:targetClass jf:Decision ;
+  sh:property jfs:DecisionAuthorityProperty ;
+  rdfs:comment "Operational validation requires at least one accepts, rejects, or waives disposition." .
+
+jfs:DecisionAuthorityProperty a sh:PropertyShape ; sh:path jf:decisionAuthority ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+
+jfs:MigrationShape
+  a sh:NodeShape ;
+  sh:targetClass jf:MigrationActivity ;
+  sh:property jfs:MigrationSourceGraphProperty,
+    jfs:MigrationTargetGraphProperty,
+    jfs:MigrationSourceVersionProperty,
+    jfs:MigrationTargetVersionProperty,
+    jfs:TransformerVersionProperty,
+    jfs:MigrationReportProperty,
+    jfs:RollbackPostureProperty,
+    jfs:SourceCountProperty,
+    jfs:TargetCountProperty .
+
+jfs:MigrationSourceGraphProperty a sh:PropertyShape ; sh:path jf:sourceGraph ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:MigrationTargetGraphProperty a sh:PropertyShape ; sh:path jf:targetGraph ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:MigrationSourceVersionProperty a sh:PropertyShape ; sh:path jf:sourceOntologyVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:MigrationTargetVersionProperty a sh:PropertyShape ; sh:path jf:targetOntologyVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:TransformerVersionProperty a sh:PropertyShape ; sh:path jf:transformerVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:MigrationReportProperty a sh:PropertyShape ; sh:path jf:validationReport ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:RollbackPostureProperty a sh:PropertyShape ; sh:path jf:rollbackPosture ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:SourceCountProperty a sh:PropertyShape ; sh:path jf:sourceCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:TargetCountProperty a sh:PropertyShape ; sh:path jf:targetCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+
+jfs:CredentialReferenceShape
+  a sh:NodeShape ;
+  sh:targetClass jf:CredentialReference ;
+  sh:closed true ;
+  sh:ignoredProperties jfs:CredentialIgnoredProperties ;
+  sh:property jfs:CredentialProviderProperty, jfs:CredentialKeyProperty .
+
+jfs:CredentialProviderProperty a sh:PropertyShape ; sh:path jf:credentialProvider ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:CredentialKeyProperty a sh:PropertyShape ; sh:path jf:credentialKey ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:CredentialIgnoredProperties rdf:first rdf:type ; rdf:rest rdf:nil .

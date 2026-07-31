@@ -1,0 +1,52 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+jfc:WorkStateScheme a skos:ConceptScheme ; skos:prefLabel "work state" .
+jfc:Proposed a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "proposed" .
+jfc:Eligible a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "eligible" .
+jfc:Leased a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "leased" .
+jfc:Running a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "running" .
+jfc:Verifying a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "verifying" .
+jfc:Satisfied a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "satisfied" .
+jfc:Failed a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "failed" .
+jfc:Cancelled a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "cancelled" .
+jfc:Superseded a skos:Concept ; skos:inScheme jfc:WorkStateScheme ; skos:prefLabel "superseded" .
+
+jfc:EpistemicStateScheme a skos:ConceptScheme ; skos:prefLabel "epistemic state" .
+jfc:Observed a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "observed" .
+jfc:Asserted a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "asserted" .
+jfc:Inferred a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "inferred" .
+jfc:ClaimProposed a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "proposed" .
+jfc:Accepted a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "accepted" .
+jfc:Rejected a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "rejected" .
+jfc:Contradicted a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "contradicted" .
+jfc:ClaimSuperseded a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "superseded" .
+jfc:Invalidated a skos:Concept ; skos:inScheme jfc:EpistemicStateScheme ; skos:prefLabel "invalidated" .
+
+jfc:GraphLifecycleScheme a skos:ConceptScheme ; skos:prefLabel "graph lifecycle" .
+jfc:Open a skos:Concept ; skos:inScheme jfc:GraphLifecycleScheme ; skos:prefLabel "open" .
+jfc:Closed a skos:Concept ; skos:inScheme jfc:GraphLifecycleScheme ; skos:prefLabel "closed" .
+jfc:GraphInvalidated a skos:Concept ; skos:inScheme jfc:GraphLifecycleScheme ; skos:prefLabel "invalidated" .
+
+jfc:CompletenessScheme a skos:ConceptScheme ; skos:prefLabel "graph completeness" .
+jfc:Building a skos:Concept ; skos:inScheme jfc:CompletenessScheme ; skos:prefLabel "building" .
+jfc:Complete a skos:Concept ; skos:inScheme jfc:CompletenessScheme ; skos:prefLabel "complete" .
+jfc:Incomplete a skos:Concept ; skos:inScheme jfc:CompletenessScheme ; skos:prefLabel "incomplete" .
+
+jfc:ConfidenceBandScheme a skos:ConceptScheme ; skos:prefLabel "confidence band" .
+jfc:LowConfidence a skos:Concept ; skos:inScheme jfc:ConfidenceBandScheme ; skos:prefLabel "low" .
+jfc:MediumConfidence a skos:Concept ; skos:inScheme jfc:ConfidenceBandScheme ; skos:prefLabel "medium" .
+jfc:HighConfidence a skos:Concept ; skos:inScheme jfc:ConfidenceBandScheme ; skos:prefLabel "high" .
+
+jfc:ValidationSeverityScheme a skos:ConceptScheme ; skos:prefLabel "validation severity" .
+jfc:Violation a skos:Concept ; skos:inScheme jfc:ValidationSeverityScheme ; skos:prefLabel "violation" .
+jfc:Warning a skos:Concept ; skos:inScheme jfc:ValidationSeverityScheme ; skos:prefLabel "warning" .
+
+jfc:DerivedStateScheme a skos:ConceptScheme ; skos:prefLabel "derived graph state" .
+jfc:Current a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "current" .
+jfc:Stale a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "stale" .
+jfc:Incompatible a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "incompatible" .
+jfc:DerivedInvalidated a skos:Concept ; skos:inScheme jfc:DerivedStateScheme ; skos:prefLabel "invalidated" .
+
+jf:epistemicState skos:scopeNote "Confidence does not imply acceptance; acceptance requires a governed decision." .

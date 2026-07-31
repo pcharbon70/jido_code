@@ -2,15 +2,15 @@
 
 ## Status
 
-This receipt records the Phase 2 pull-request candidate verified locally on
-2026-07-31. Store ownership, synchronous atomic commits, immutable receipts,
+This receipt records the Phase 2 candidate verified locally on 2026-07-31.
+Store ownership, synchronous atomic commits, immutable receipts,
 dataset and graph revisions, checkpoint backup, RDF export, verified restore,
 rollback, integrity diagnostics, health, telemetry, and operator commands are
-implemented and pass the repository gates.
+implemented and pass the repository gates. Pull request 4 passed clean-checkout
+CI and was merged as `cd49d7799cfa7c726d38ff699aaf758e0ff245d4`.
 
-G1 remains pending until this pull request passes clean-checkout CI, is merged,
-and its immutable merge commit is pinned here. Phase 3 is not authorized by a
-branch-head receipt.
+G1 is complete and Phase 3 is authorized. There is no unresolved mutation,
+atomicity, recovery, integrity, or operational substrate exception.
 
 ## Candidate Provenance
 
@@ -22,7 +22,7 @@ branch-head receipt.
 | Section 2.3 | `b2d33a8` - implement graph store backup, restore, and integrity |
 | Section 2.4 | `e89cd58` - harden knowledge store operations and telemetry |
 | Section 2.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `cd49d7799cfa7c726d38ff699aaf758e0ff245d4` |
 
 ## Accepted Substrate Contract
 
@@ -128,8 +128,8 @@ The suite proves:
 
 `mix precommit` includes application compilation with warnings as errors,
 architecture enforcement, unused dependency lock checking, formatting, and the
-complete ExUnit suite. GitHub CI must repeat the clean-checkout gates before
-merge.
+complete ExUnit suite. GitHub CI repeated the clean-checkout gates before the
+accepted merge.
 
 ## Operational Limits
 
@@ -145,10 +145,7 @@ merge.
 
 ## Gate G1
 
-The local G1 candidate satisfies the implementation and recovery criteria. No
-test or architecture scan found a mutation bypass, visible partial commit,
-fallback persistence path, raw handle leak, or restore reproduction failure.
-
-G1 is nevertheless **pending**, not complete. Completion requires clean CI,
-pull-request merge, and replacement of the pending provenance entry with the
-immutable merge commit. Until then, Phase 3 remains blocked.
+G1 is **complete**. No test or architecture scan found a mutation bypass,
+visible partial commit, fallback persistence path, raw handle leak, or restore
+reproduction failure. The accepted implementation is pinned to the immutable
+merge commit above.

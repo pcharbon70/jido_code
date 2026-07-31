@@ -15,10 +15,12 @@ defmodule JidoCode.Knowledge.StoreServer do
   alias JidoCode.Knowledge.Config
   alias JidoCode.Knowledge.DatasetSelector
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.GraphMetadata
   alias JidoCode.Knowledge.Identity
   alias JidoCode.Knowledge.Integrity
   alias JidoCode.Knowledge.IntegrityReport
   alias JidoCode.Knowledge.Metadata
+  alias JidoCode.Knowledge.Ontology.StartupGate
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.RestoreLog
   alias JidoCode.Knowledge.Telemetry
@@ -35,6 +37,7 @@ defmodule JidoCode.Knowledge.StoreServer do
     metadata: :read,
     statistics: :read,
     graph_counts: :read,
+    graph_metadata: :read,
     atomic_update: :write,
     receipt: :write,
     checkpoint: :maintenance,
@@ -240,6 +243,7 @@ defmodule JidoCode.Knowledge.StoreServer do
          {:ok, _health} <- Readiness.transition(readiness, :store_verified),
          lineage <- config.lineage_iri || Identity.lineage_iri(),
          {:ok, metadata} <- Metadata.ensure(store, config.schema_version, lineage),
+         :ok <- StartupGate.verify(store),
          {:ok, _health} <- Readiness.transition(readiness, :ready) do
       {:ok, metadata}
     else
@@ -343,6 +347,13 @@ defmodule JidoCode.Knowledge.StoreServer do
       end
     else
       {:error, Error.new(:invalid_input, :read_graph_counts)}
+    end
+  end
+
+  defp dispatch({:graph_metadata, graph_iri}, state) do
+    case GraphMetadata.read(state.store, graph_iri) do
+      {:ok, metadata} -> {:ok, metadata, state}
+      {:error, %Error{} = error} -> {:error, error}
     end
   end
 

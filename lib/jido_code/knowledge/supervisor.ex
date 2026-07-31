@@ -5,6 +5,7 @@ defmodule JidoCode.Knowledge.Supervisor do
 
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.Maintenance
+  alias JidoCode.Knowledge.QueryRunner
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Writer
 
@@ -20,6 +21,7 @@ defmodule JidoCode.Knowledge.Supervisor do
     readiness = Keyword.get(options, :readiness, Readiness)
     store_server = Keyword.get(options, :store_server, StoreServer)
     writer = Keyword.get(options, :writer, Writer)
+    query_runner = Keyword.get(options, :query_runner, QueryRunner)
     maintenance = Keyword.get(options, :maintenance, Maintenance)
 
     store_options =
@@ -30,6 +32,7 @@ defmodule JidoCode.Knowledge.Supervisor do
     children = [
       {Readiness, name: readiness},
       {StoreServer, store_options},
+      {QueryRunner, name: query_runner, store_server: store_server},
       {Writer, name: writer, store_server: store_server},
       {Maintenance, name: maintenance, store_server: store_server}
     ]

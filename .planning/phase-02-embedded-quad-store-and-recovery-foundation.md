@@ -14,7 +14,7 @@ failure recovery without introducing ontology-specific product behavior.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Build the authoritative embedded quad-store lifecycle and recovery boundary.
+- [x] 2 Phase - Build the authoritative embedded quad-store lifecycle and recovery boundary.
 
   This phase makes the graph physically durable and operationally trustworthy
   before repository, work, execution, or UI concepts can persist in it.
@@ -160,7 +160,7 @@ Back to plan: [README](./README.md)
       - [x] 2.4.2.3 Subtask {#jcf-p02-2-4-2-3} - Keep ad hoc SPARQL and raw quad operations out of ordinary admin commands.
       - [x] 2.4.2.4 Subtask {#jcf-p02-2-4-2-4} - Document startup, shutdown, maintenance, backup, restore, and first-response troubleshooting.
 
-  - [ ] 2.5 Section - Phase 2 Integration Tests.
+  - [x] 2.5 Section - Phase 2 Integration Tests.
 
     This final section proves one authoritative embedded dataset remains
     atomic, recoverable, and diagnosable across concurrency, process death,
@@ -187,13 +187,13 @@ Back to plan: [README](./README.md)
       - [x] 2.5.2.4 Subtask {#jcf-p02-2-5-2-4} - Corrupt or remove controlled fixture components and verify integrity checks, maintenance mode, and rollback remain safe.
       - [x] 2.5.2.5 Subtask {#jcf-p02-2-5-2-5} - Rerun Phase 1 architecture and compatibility gates plus `mix precommit`.
 
-    - [ ] 2.5.3 Task {#jcf-p02-phase-receipt} [repo: jido_code] [after: {#jcf-p02-atomicity-recovery-integration}] - Publish the Phase 2 durable-substrate receipt.
+    - [x] 2.5.3 Task {#jcf-p02-phase-receipt} [repo: jido_code] [after: {#jcf-p02-atomicity-recovery-integration}] - Publish the Phase 2 durable-substrate receipt.
 
       This task binds G1 to exact backend, schema, durability, commit,
       revision, recovery, and operational evidence before ontology data is
       admitted.
 
-      - [x] 2.5.3.1 Subtask {#jcf-p02-2-5-3-1} - Record dependency locks, store schema, configuration posture, commit strategy, test-store fixture digest, and candidate commit. (The immutable merged candidate remains pending.)
+      - [x] 2.5.3.1 Subtask {#jcf-p02-2-5-3-1} - Record dependency locks, store schema, configuration posture, commit strategy, test-store fixture digest, and candidate commit.
       - [x] 2.5.3.2 Subtask {#jcf-p02-2-5-3-2} - Attach lifecycle, race, crash, backup/restore, integrity, readiness, and architecture-scan results.
       - [x] 2.5.3.3 Subtask {#jcf-p02-2-5-3-3} - Keep G1 blocked if any operation can bypass `Writer`, any partial change can become visible, or restore cannot reproduce the dataset.
-      - [ ] 2.5.3.4 Subtask {#jcf-p02-2-5-3-4} - Pin the merged candidate commit before authorizing Phase 3.
+      - [x] 2.5.3.4 Subtask {#jcf-p02-2-5-3-4} - Pin the merged candidate commit before authorizing Phase 3.
