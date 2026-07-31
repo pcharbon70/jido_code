@@ -10,6 +10,7 @@ defmodule JidoCode.Knowledge.GraphMetadata do
   alias JidoCode.Knowledge.BackendFailure
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.GraphRegistry
+  alias JidoCode.Knowledge.Metadata, as: SubstrateMetadata
   alias JidoCode.Knowledge.ResourceIdentity
   alias TripleStore.SPARQL.Query
 
@@ -126,10 +127,23 @@ defmodule JidoCode.Knowledge.GraphMetadata do
       context = %{db: store.db, dict_manager: store.dict_manager, permit_all: true}
 
       case Query.query(context, metadata_query(graph_iri), timeout: 5_000, use_cache: false) do
-        {:ok, []} -> {:ok, nil}
-        {:ok, rows} when length(rows) < @max_metadata_statements -> decode_rows(graph_iri, rows)
-        {:ok, _too_many} -> {:error, Error.new(:corrupt, :read_graph_metadata)}
-        {:error, reason} -> {:error, BackendFailure.translate(reason, :read_graph_metadata)}
+        {:ok, []} ->
+          {:ok, nil}
+
+        {:ok, rows} when length(rows) < @max_metadata_statements ->
+          with {:ok, metadata} <- decode_rows(graph_iri, rows),
+               {:ok, revision} when is_integer(revision) <-
+                 SubstrateMetadata.graph_revision(store, graph_iri) do
+            {:ok, %{metadata | graph_revision: revision}}
+          else
+            _invalid -> {:error, Error.new(:corrupt, :read_graph_metadata)}
+          end
+
+        {:ok, _too_many} ->
+          {:error, Error.new(:corrupt, :read_graph_metadata)}
+
+        {:error, reason} ->
+          {:error, BackendFailure.translate(reason, :read_graph_metadata)}
       end
     end
   end

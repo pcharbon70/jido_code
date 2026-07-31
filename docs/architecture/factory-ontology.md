@@ -89,6 +89,8 @@ open-world semantic guidance. `1` means exactly one for an admitted resource,
 | `parentGraph` | named graph to predecessor graph | `0..1` | graph-local metadata | lineage |
 | `sourceGraph` | derived/migration resource to source graph | `1..*` | derived/control metadata | reproducibility |
 | `targetGraph` | migration to target graph | `1..*` | migration activity graph | migration status |
+| `sourceOntologyVersion` | migration to source ontology release | `1` | migration activity graph | migration audit |
+| `targetOntologyVersion` | migration to target ontology release | `1` | migration activity graph | migration audit |
 | `validationReport` | command/migration to report | `1` | audit/control metadata | admission evidence |
 | `focusNode` | validation result to RDF node | `1` | quarantine/audit graph | issue location |
 | `resultShape` | validation result to shape | `1` | quarantine/audit graph | constraint identity |

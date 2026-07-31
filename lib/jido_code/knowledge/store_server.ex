@@ -20,6 +20,7 @@ defmodule JidoCode.Knowledge.StoreServer do
   alias JidoCode.Knowledge.Integrity
   alias JidoCode.Knowledge.IntegrityReport
   alias JidoCode.Knowledge.Metadata
+  alias JidoCode.Knowledge.Ontology.StartupGate
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.RestoreLog
   alias JidoCode.Knowledge.Telemetry
@@ -242,6 +243,7 @@ defmodule JidoCode.Knowledge.StoreServer do
          {:ok, _health} <- Readiness.transition(readiness, :store_verified),
          lineage <- config.lineage_iri || Identity.lineage_iri(),
          {:ok, metadata} <- Metadata.ensure(store, config.schema_version, lineage),
+         :ok <- StartupGate.verify(store),
          {:ok, _health} <- Readiness.transition(readiness, :ready) do
       {:ok, metadata}
     else

@@ -13,6 +13,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   @max_iri_bytes 512
   @max_segment_bytes 160
   @local_kinds ~w[activity claim goal attempt decision transition migration validation-report validation-result]
+  @deterministic_kinds ~w[validation-report validation-result]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
 
@@ -114,6 +115,16 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   catch
     _kind, _reason -> invalid(:local_identity)
   end
+
+  @spec deterministic(String.t() | atom(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def deterministic(kind, material) when is_binary(material) do
+    with {:ok, kind_segment} <- known_kind(kind, @deterministic_kinds) do
+      build(kind_segment, [digest_token(kind_segment, material)])
+    end
+  end
+
+  def deterministic(_kind, _material), do: invalid(:deterministic_identity)
 
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%RDF.IRI{value: value}), do: validate(value)
@@ -234,7 +245,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   end
 
   defp known_kind(kind, allowed) do
-    value = if is_atom(kind), do: Atom.to_string(kind), else: kind
+    value = if is_atom(kind), do: kind |> Atom.to_string() |> String.replace("_", "-"), else: kind
 
     if value in allowed, do: {:ok, value}, else: invalid(:identity_kind)
   end

@@ -38,3 +38,4 @@ implementation plan was merged.
 
 - [Factory ontology contract](./factory-ontology.md)
 - [Graph identity and topology](./graph-identity-and-topology.md)
+- [Semantic validation and evolution](./semantic-validation-and-evolution.md)

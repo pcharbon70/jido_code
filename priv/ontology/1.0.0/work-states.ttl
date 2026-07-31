@@ -39,4 +39,8 @@ jfc:LowConfidence a skos:Concept ; skos:inScheme jfc:ConfidenceBandScheme ; skos
 jfc:MediumConfidence a skos:Concept ; skos:inScheme jfc:ConfidenceBandScheme ; skos:prefLabel "medium" .
 jfc:HighConfidence a skos:Concept ; skos:inScheme jfc:ConfidenceBandScheme ; skos:prefLabel "high" .
 
+jfc:ValidationSeverityScheme a skos:ConceptScheme ; skos:prefLabel "validation severity" .
+jfc:Violation a skos:Concept ; skos:inScheme jfc:ValidationSeverityScheme ; skos:prefLabel "violation" .
+jfc:Warning a skos:Concept ; skos:inScheme jfc:ValidationSeverityScheme ; skos:prefLabel "warning" .
+
 jf:epistemicState skos:scopeNote "Confidence does not imply acceptance; acceptance requires a governed decision." .

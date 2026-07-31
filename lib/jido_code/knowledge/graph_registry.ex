@@ -106,7 +106,19 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       mutability: :append_only,
       completeness: :complete,
       retention: :security_audit,
-      allowed_links: [:factory_catalog, :factory_policy, :repository_control, :security_audit]
+      allowed_links: [
+        :ontology,
+        :factory_catalog,
+        :factory_policy,
+        :observation_batch,
+        :source_revision,
+        :repository_control,
+        :run_attempt,
+        :evidence,
+        :memory,
+        :security_audit,
+        :derived
+      ]
     },
     derived: %{
       required_scopes: [:rule_set, :revision],

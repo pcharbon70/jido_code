@@ -12,6 +12,7 @@ defmodule JidoCode.Knowledge.Commands.Graphs do
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.WriteBatch
   alias JidoCode.Knowledge.Writer
+  alias JidoCode.Knowledge.Validation.Validator
 
   @metadata_namespace "https://jido.run/ontology/factory#"
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -22,7 +23,8 @@ defmodule JidoCode.Knowledge.Commands.Graphs do
     epistemicState confidenceBand priorState nextState transitionSubject expectedPredecessor
     cause decisionAuthority ontologyVersion creationActivity ownerScope graphKind lifecycleState
     completenessState sourceRevision parentGraph sourceGraph targetGraph validationReport
-    focusNode resultShape resultPath severity ruleSet invalidationState
+    sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath severity ruleSet
+    invalidationState
   ])
 
   @spec prepare_create(atom(), map(), [RDF.Statement.coercible()], map(), keyword()) ::
@@ -40,15 +42,36 @@ defmodule JidoCode.Knowledge.Commands.Graphs do
            GraphMetadata.new(graph_iri, metadata_attributes(attributes, contract)),
          {:ok, metadata_quads} <- GraphMetadata.quads(metadata),
          {:ok, payload_quads} <- normalize_payload(payload, graph_iri, family),
+         additions = metadata_quads ++ payload_quads,
+         {:ok, validation_report} <-
+           Validator.validate(
+             %{
+               operation: :create,
+               family: family,
+               graph_iri: graph_iri,
+               metadata: metadata,
+               additions: additions,
+               existing: [],
+               shape_version: Keyword.get(options, :shape_version, "1.0.0")
+             },
+             validation_options(options)
+           ),
          {:ok, expected_dataset_revision} <- expected_dataset_revision(options),
          {:ok, batch} <-
            WriteBatch.new(
-             metadata_quads ++ payload_quads,
+             additions,
              batch_options(options, expected_dataset_revision, graph_iri)
            ) do
-      {:ok, %{batch: batch, graph_iri: graph_iri, metadata: metadata}}
+      {:ok,
+       %{
+         batch: batch,
+         graph_iri: graph_iri,
+         metadata: metadata,
+         validation_report: validation_report
+       }}
     else
       false -> {:error, Error.new(:conflict, :graph_lifecycle)}
+      {:error, %Error{} = error, report} -> {:error, error, report}
       {:error, %Error{} = error} -> {:error, error}
     end
   end
@@ -88,6 +111,14 @@ defmodule JidoCode.Knowledge.Commands.Graphs do
 
   defp writer_options(options) do
     Keyword.take(options, [:operation_timeout, :caller_timeout])
+  end
+
+  defp validation_options(options) do
+    Keyword.take(options, [:validation_timeout, :deadline_monotonic_ms])
+    |> Enum.map(fn
+      {:validation_timeout, timeout} -> {:timeout, timeout}
+      option -> option
+    end)
   end
 
   defp batch_options(options, expected_dataset_revision, graph_iri) do

@@ -117,6 +117,8 @@ jf:sourceRevision a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:label 
 jf:parentGraph a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:NamedGraph ; rdfs:label "parent graph" .
 jf:sourceGraph a owl:ObjectProperty ; rdfs:domain jf:NamedGraph ; rdfs:range jf:NamedGraph ; rdfs:label "source graph" .
 jf:targetGraph a owl:ObjectProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range jf:NamedGraph ; rdfs:label "target graph" .
+jf:sourceOntologyVersion a owl:ObjectProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range jf:OntologyRelease ; rdfs:label "source ontology version" .
+jf:targetOntologyVersion a owl:ObjectProperty ; rdfs:domain jf:MigrationActivity ; rdfs:range jf:OntologyRelease ; rdfs:label "target ontology version" .
 jf:validationReport a owl:ObjectProperty ; rdfs:range jf:ValidationReport ; rdfs:label "validation report" .
 jf:focusNode a owl:ObjectProperty ; rdfs:domain jf:ValidationResult ; rdfs:label "focus node" .
 jf:resultShape a owl:ObjectProperty ; rdfs:domain jf:ValidationResult ; rdfs:label "result shape" .

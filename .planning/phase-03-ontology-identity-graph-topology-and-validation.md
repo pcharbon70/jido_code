@@ -99,44 +99,44 @@ Back to plan: [README](./README.md)
       - [x] 3.2.3.3 Subtask {#jcf-p03-3-2-3-3} - Store metadata through the same atomic write boundary as graph creation and closure.
       - [x] 3.2.3.4 Subtask {#jcf-p03-3-2-3-4} - Make metadata queryable without exposing graph contents or granting mutation authority.
 
-  - [ ] 3.3 Section - Implement shape validation and ontology evolution.
+  - [x] 3.3 Section - Implement shape validation and ontology evolution.
 
     This section turns ontology rules into a fail-closed write contract and
     establishes explicit migration behavior before durable product graphs
     accumulate.
 
-    - [ ] 3.3.1 Task {#jcf-p03-shape-contracts} [repo: jido_code] [after: {#jcf-p03-graph-metadata}] - Define SHACL-compatible operational shapes.
+    - [x] 3.3.1 Task {#jcf-p03-shape-contracts} [repo: jido_code] [after: {#jcf-p03-graph-metadata}] - Define SHACL-compatible operational shapes.
 
       This task captures command-critical structural and graph-placement
       invariants in versioned ontology artifacts.
 
-      - [ ] 3.3.1.1 Subtask {#jcf-p03-3-3-1-1} - Define required types, predicates, datatypes, cardinalities, controlled concept schemes, and IRI scope for each admitted resource form.
-      - [ ] 3.3.1.2 Subtask {#jcf-p03-3-3-1-2} - Define graph-family shapes for metadata, allowed resource classes, required provenance, immutable closure, and cross-scope references.
-      - [ ] 3.3.1.3 Subtask {#jcf-p03-3-3-1-3} - Define transition predecessor/revision, lease fencing, claim proposition, evidence linkage, decision authority, and secret-reference constraints.
-      - [ ] 3.3.1.4 Subtask {#jcf-p03-3-3-1-4} - Distinguish open-world semantic guidance from closed-world operational requirements explicitly.
-      - [ ] 3.3.1.5 Subtask {#jcf-p03-3-3-1-5} - Version shapes independently where compatible ontology vocabulary can support stricter operational validation.
+      - [x] 3.3.1.1 Subtask {#jcf-p03-3-3-1-1} - Define required types, predicates, datatypes, cardinalities, controlled concept schemes, and IRI scope for each admitted resource form.
+      - [x] 3.3.1.2 Subtask {#jcf-p03-3-3-1-2} - Define graph-family shapes for metadata, allowed resource classes, required provenance, immutable closure, and cross-scope references.
+      - [x] 3.3.1.3 Subtask {#jcf-p03-3-3-1-3} - Define transition predecessor/revision, lease fencing, claim proposition, evidence linkage, decision authority, and secret-reference constraints.
+      - [x] 3.3.1.4 Subtask {#jcf-p03-3-3-1-4} - Distinguish open-world semantic guidance from closed-world operational requirements explicitly.
+      - [x] 3.3.1.5 Subtask {#jcf-p03-3-3-1-5} - Version shapes independently where compatible ontology vocabulary can support stricter operational validation.
 
-    - [ ] 3.3.2 Task {#jcf-p03-validator} [repo: jido_code] [after: {#jcf-p03-shape-contracts}] - Implement ontology-aware pre-commit validation.
+    - [x] 3.3.2 Task {#jcf-p03-validator} [repo: jido_code] [after: {#jcf-p03-shape-contracts}] - Implement ontology-aware pre-commit validation.
 
       This task validates a proposed change against its effective dataset and
       graph metadata without requiring every caller to understand RDF rules.
 
-      - [ ] 3.3.2.1 Subtask {#jcf-p03-3-3-2-1} - Validate RDF term forms, required shape constraints, graph-family rules, cross-reference scope, and effective ontology/shape version.
-      - [ ] 3.3.2.2 Subtask {#jcf-p03-3-3-2-2} - Evaluate constraints against existing committed statements plus proposed additions/supersessions within the transaction snapshot.
-      - [ ] 3.3.2.3 Subtask {#jcf-p03-3-3-2-3} - Return stable validation result resources with focus node, shape, path, issue code, severity, and bounded safe message.
-      - [ ] 3.3.2.4 Subtask {#jcf-p03-3-3-2-4} - Reject unknown ontology/shape versions, ambiguous graph completeness, secret-like literals in protected positions, and validation timeouts.
-      - [ ] 3.3.2.5 Subtask {#jcf-p03-3-3-2-5} - Permit failed import validation reports to be recorded only through a bounded quarantine/audit path that cannot make invalid domain statements visible.
+      - [x] 3.3.2.1 Subtask {#jcf-p03-3-3-2-1} - Validate RDF term forms, required shape constraints, graph-family rules, cross-reference scope, and effective ontology/shape version.
+      - [x] 3.3.2.2 Subtask {#jcf-p03-3-3-2-2} - Evaluate constraints against existing committed statements plus proposed additions/supersessions within the transaction snapshot.
+      - [x] 3.3.2.3 Subtask {#jcf-p03-3-3-2-3} - Return stable validation result resources with focus node, shape, path, issue code, severity, and bounded safe message.
+      - [x] 3.3.2.4 Subtask {#jcf-p03-3-3-2-4} - Reject unknown ontology/shape versions, ambiguous graph completeness, secret-like literals in protected positions, and validation timeouts.
+      - [x] 3.3.2.5 Subtask {#jcf-p03-3-3-2-5} - Permit failed import validation reports to be recorded only through a bounded quarantine/audit path that cannot make invalid domain statements visible.
 
-    - [ ] 3.3.3 Task {#jcf-p03-schema-evolution} [repo: jido_code] [after: {#jcf-p03-validator}] - Implement ontology compatibility and graph migration contracts.
+    - [x] 3.3.3 Task {#jcf-p03-schema-evolution} [repo: jido_code] [after: {#jcf-p03-validator}] - Implement ontology compatibility and graph migration contracts.
 
       This task prevents in-place vocabulary reinterpretation and makes every
       durable transformation attributable and recoverable.
 
-      - [ ] 3.3.3.1 Subtask {#jcf-p03-3-3-3-1} - Classify ontology changes as additive compatible, validation-only, behaviorally stricter, transform-required, or breaking.
-      - [ ] 3.3.3.2 Subtask {#jcf-p03-3-3-3-2} - Require a new immutable ontology version and migration activity for changed term meaning or graph shape.
-      - [ ] 3.3.3.3 Subtask {#jcf-p03-3-3-3-3} - Transform source graphs into new target graphs or append explicit supersession without silently rewriting immutable history.
-      - [ ] 3.3.3.4 Subtask {#jcf-p03-3-3-3-4} - Record source/target graphs, versions, transformer version, actor, counts, validation report, and rollback posture.
-      - [ ] 3.3.3.5 Subtask {#jcf-p03-3-3-3-5} - Block application startup or affected writes when a required migration is missing or partially committed.
+      - [x] 3.3.3.1 Subtask {#jcf-p03-3-3-3-1} - Classify ontology changes as additive compatible, validation-only, behaviorally stricter, transform-required, or breaking.
+      - [x] 3.3.3.2 Subtask {#jcf-p03-3-3-3-2} - Require a new immutable ontology version and migration activity for changed term meaning or graph shape.
+      - [x] 3.3.3.3 Subtask {#jcf-p03-3-3-3-3} - Transform source graphs into new target graphs or append explicit supersession without silently rewriting immutable history.
+      - [x] 3.3.3.4 Subtask {#jcf-p03-3-3-3-4} - Record source/target graphs, versions, transformer version, actor, counts, validation report, and rollback posture.
+      - [x] 3.3.3.5 Subtask {#jcf-p03-3-3-3-5} - Block application startup or affected writes when a required migration is missing or partially committed.
 
   - [ ] 3.4 Section - Define claims, time, state transitions, and inference authority.
 
