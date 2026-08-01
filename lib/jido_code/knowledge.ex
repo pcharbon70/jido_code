@@ -12,6 +12,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
   alias JidoCode.Knowledge.Projection
+  alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Knowledge.DerivedGraphManager
   alias JidoCode.Knowledge.Writer
 
@@ -31,6 +32,15 @@ defmodule JidoCode.Knowledge do
 
   def publish_derived(attributes, options \\ []),
     do: DerivedGraphManager.publish(attributes, options)
+
+  def repository_locator_identity(provider, external_id),
+    do: ResourceIdentity.repository_locator(provider, external_id)
+
+  def repository_address(provider, owner, name),
+    do: ResourceIdentity.repository_locator(provider, owner, name)
+
+  def provider_identity(provider), do: ResourceIdentity.provider_host(provider)
+  def validate_resource_identity(iri), do: ResourceIdentity.validate(iri)
 
   def health, do: Readiness.snapshot()
   def ready?, do: health() |> JidoCode.Knowledge.Health.ready?()

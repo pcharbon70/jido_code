@@ -59,56 +59,56 @@ Back to plan: [README](./README.md)
       - [x] 6.1.3.3 Subtask {#jcf-p06-6-1-3-3} - Preserve multiple locators and contradictory provider observations rather than flattening them into one record.
       - [x] 6.1.3.4 Subtask {#jcf-p06-6-1-3-4} - Add actor/enrollment subscriptions that re-query on catalog, policy, or observation graph revisions.
 
-  - [ ] 6.2 Section - Implement provider, Git, and observation adapter boundaries.
+  - [x] 6.2 Section - Implement provider, Git, and observation adapter boundaries.
 
     This section normalizes external systems into bounded observations while
     keeping network clients, credentials, webhooks, and local worktrees outside
     semantic authority.
 
-    - [ ] 6.2.1 Task {#jcf-p06-observation-ports} [repo: jido_code] [after: {#jcf-p06-enrollment-projections}] - Define provider, Git, clock, secret-reference, and observation ports.
+    - [x] 6.2.1 Task {#jcf-p06-observation-ports} [repo: jido_code] [after: {#jcf-p06-enrollment-projections}] - Define provider, Git, clock, secret-reference, and observation ports.
 
       This task gives integrations explicit inputs and outputs without letting
       adapters write graphs or claim acceptance.
 
-      - [ ] 6.2.1.1 Subtask {#jcf-p06-6-2-1-1} - Define provider repository, issue/pull request, branch, webhook, CI, and capability observation values with external IDs, source time, retrieval time, ETag/revision, and bounded raw-reference metadata.
-      - [ ] 6.2.1.2 Subtask {#jcf-p06-6-2-1-2} - Define Git remote resolution, commit/tree identity, branch/ref state, diff scope, worktree materialization, and cleanup contracts.
-      - [ ] 6.2.1.3 Subtask {#jcf-p06-6-2-1-3} - Define secret lookup by `CredentialReference` with values confined to adapter call scope and never returned in observation values.
-      - [ ] 6.2.1.4 Subtask {#jcf-p06-6-2-1-4} - Require adapters to return evidence and limitations, never graph IRIs chosen outside identity policy, control transitions, or accepted claims.
-      - [ ] 6.2.1.5 Subtask {#jcf-p06-6-2-1-5} - Supply deterministic fake adapters for pagination, rate limits, stale ETags, force pushes, missing refs, redirects, and provider failures.
+      - [x] 6.2.1.1 Subtask {#jcf-p06-6-2-1-1} - Define provider repository, issue/pull request, branch, webhook, CI, and capability observation values with external IDs, source time, retrieval time, ETag/revision, and bounded raw-reference metadata.
+      - [x] 6.2.1.2 Subtask {#jcf-p06-6-2-1-2} - Define Git remote resolution, commit/tree identity, branch/ref state, diff scope, worktree materialization, and cleanup contracts.
+      - [x] 6.2.1.3 Subtask {#jcf-p06-6-2-1-3} - Define secret lookup by `CredentialReference` with values confined to adapter call scope and never returned in observation values.
+      - [x] 6.2.1.4 Subtask {#jcf-p06-6-2-1-4} - Require adapters to return evidence and limitations, never graph IRIs chosen outside identity policy, control transitions, or accepted claims.
+      - [x] 6.2.1.5 Subtask {#jcf-p06-6-2-1-5} - Supply deterministic fake adapters for pagination, rate limits, stale ETags, force pushes, missing refs, redirects, and provider failures.
 
-    - [ ] 6.2.2 Task {#jcf-p06-provider-adapter} [repo: jido_code] [after: {#jcf-p06-observation-ports}] - Implement the first HTTP repository provider adapter.
+    - [x] 6.2.2 Task {#jcf-p06-provider-adapter} [repo: jido_code] [after: {#jcf-p06-observation-ports}] - Implement the first HTTP repository provider adapter.
 
       This task uses the repository's supported HTTP boundary to obtain
       authenticated, bounded provider observations without persisting API
       responses as hidden state.
 
-      - [ ] 6.2.2.1 Subtask {#jcf-p06-6-2-2-1} - Use `Req` for HTTP calls with explicit base URL, authentication injection, timeouts, retry policy, pagination bounds, response size limits, and safe telemetry.
-      - [ ] 6.2.2.2 Subtask {#jcf-p06-6-2-2-2} - Normalize repository identity, default branch, refs, visibility, archive/fork state, issues/pull requests, CI checks, permissions, and provider capability revisions needed by accepted observations.
-      - [ ] 6.2.2.3 Subtask {#jcf-p06-6-2-2-3} - Preserve external object IDs, delivery IDs, ETags, source timestamps, and response digests for idempotency/provenance without retaining unbounded response bodies.
-      - [ ] 6.2.2.4 Subtask {#jcf-p06-6-2-2-4} - Handle rate limits, partial pagination, permissions, deletion, transfer, stale credentials, transient failures, and unknown fields with explicit completeness/warnings.
-      - [ ] 6.2.2.5 Subtask {#jcf-p06-6-2-2-5} - Redact tokens, authorization headers, private URLs, and confidential provider content from logs, telemetry, errors, graph literals, and fixtures.
+      - [x] 6.2.2.1 Subtask {#jcf-p06-6-2-2-1} - Use `Req` for HTTP calls with explicit base URL, authentication injection, timeouts, retry policy, pagination bounds, response size limits, and safe telemetry.
+      - [x] 6.2.2.2 Subtask {#jcf-p06-6-2-2-2} - Normalize repository identity, default branch, refs, visibility, archive/fork state, issues/pull requests, CI checks, permissions, and provider capability revisions needed by accepted observations.
+      - [x] 6.2.2.3 Subtask {#jcf-p06-6-2-2-3} - Preserve external object IDs, delivery IDs, ETags, source timestamps, and response digests for idempotency/provenance without retaining unbounded response bodies.
+      - [x] 6.2.2.4 Subtask {#jcf-p06-6-2-2-4} - Handle rate limits, partial pagination, permissions, deletion, transfer, stale credentials, transient failures, and unknown fields with explicit completeness/warnings.
+      - [x] 6.2.2.5 Subtask {#jcf-p06-6-2-2-5} - Redact tokens, authorization headers, private URLs, and confidential provider content from logs, telemetry, errors, graph literals, and fixtures.
 
-    - [ ] 6.2.3 Task {#jcf-p06-git-adapter} [repo: jido_code] [after: {#jcf-p06-provider-adapter}] - Implement disposable local Git materialization and snapshot inspection.
+    - [x] 6.2.3 Task {#jcf-p06-git-adapter} [repo: jido_code] [after: {#jcf-p06-provider-adapter}] - Implement disposable local Git materialization and snapshot inspection.
 
       This task obtains exact source revisions for analysis and execution while
       ensuring local clones are caches, not persistent product truth.
 
-      - [ ] 6.2.3.1 Subtask {#jcf-p06-6-2-3-1} - Materialize into explicit per-operation directories with bounded clone/fetch depth, ref allowlists, credential redaction, timeout, disk limit, and cleanup.
-      - [ ] 6.2.3.2 Subtask {#jcf-p06-6-2-3-2} - Resolve commit SHA, tree SHA, parents, branch/ref identity, submodule/LFS presence, repository format, and worktree cleanliness.
-      - [ ] 6.2.3.3 Subtask {#jcf-p06-6-2-3-3} - Verify provider-advertised and Git-resolved revisions agree or record an explicit contradiction/stale observation.
-      - [ ] 6.2.3.4 Subtask {#jcf-p06-6-2-3-4} - Treat clone/fetch/worktree paths as ephemeral adapter state and prove deletion/recreation does not affect graph identity.
-      - [ ] 6.2.3.5 Subtask {#jcf-p06-6-2-3-5} - Reject unsafe repository paths, local protocol abuse, hostile Git config, credential helpers, hooks, and oversized/unsupported repositories according to policy.
+      - [x] 6.2.3.1 Subtask {#jcf-p06-6-2-3-1} - Materialize into explicit per-operation directories with bounded clone/fetch depth, ref allowlists, credential redaction, timeout, disk limit, and cleanup.
+      - [x] 6.2.3.2 Subtask {#jcf-p06-6-2-3-2} - Resolve commit SHA, tree SHA, parents, branch/ref identity, submodule/LFS presence, repository format, and worktree cleanliness.
+      - [x] 6.2.3.3 Subtask {#jcf-p06-6-2-3-3} - Verify provider-advertised and Git-resolved revisions agree or record an explicit contradiction/stale observation.
+      - [x] 6.2.3.4 Subtask {#jcf-p06-6-2-3-4} - Treat clone/fetch/worktree paths as ephemeral adapter state and prove deletion/recreation does not affect graph identity.
+      - [x] 6.2.3.5 Subtask {#jcf-p06-6-2-3-5} - Reject unsafe repository paths, local protocol abuse, hostile Git config, credential helpers, hooks, and oversized/unsupported repositories according to policy.
 
-    - [ ] 6.2.4 Task {#jcf-p06-observation-ingress} [repo: jido_code] [after: {#jcf-p06-git-adapter}] - Implement polling and webhook observation ingress.
+    - [x] 6.2.4 Task {#jcf-p06-observation-ingress} [repo: jido_code] [after: {#jcf-p06-git-adapter}] - Implement polling and webhook observation ingress.
 
       This task converts external delivery into one normalized observation
       command path with stable idempotency and no direct provider mutation of
       graph state.
 
-      - [ ] 6.2.4.1 Subtask {#jcf-p06-6-2-4-1} - Authenticate webhook deliveries, bind them to an enrolled locator, validate content type/size/signature/time window, and derive stable delivery identity.
-      - [ ] 6.2.4.2 Subtask {#jcf-p06-6-2-4-2} - Normalize polling and webhook results into the same observation envelope and command semantics.
-      - [ ] 6.2.4.3 Subtask {#jcf-p06-6-2-4-3} - Handle duplicate, delayed, reordered, replayed, partial, and unknown delivery types without mutating desired state.
-      - [ ] 6.2.4.4 Subtask {#jcf-p06-6-2-4-4} - Queue only ephemeral wake-up work; durable pending/retry/last-observed state belongs in graph transitions and observation resources.
+      - [x] 6.2.4.1 Subtask {#jcf-p06-6-2-4-1} - Authenticate webhook deliveries, bind them to an enrolled locator, validate content type/size/signature/time window, and derive stable delivery identity.
+      - [x] 6.2.4.2 Subtask {#jcf-p06-6-2-4-2} - Normalize polling and webhook results into the same observation envelope and command semantics.
+      - [x] 6.2.4.3 Subtask {#jcf-p06-6-2-4-3} - Handle duplicate, delayed, reordered, replayed, partial, and unknown delivery types without mutating desired state.
+      - [x] 6.2.4.4 Subtask {#jcf-p06-6-2-4-4} - Queue only ephemeral wake-up work; durable pending/retry/last-observed state belongs in graph transitions and observation resources.
 
   - [ ] 6.3 Section - Persist observation batches, claims, and repository snapshots.
 
