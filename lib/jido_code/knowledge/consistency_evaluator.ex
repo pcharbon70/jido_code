@@ -2,6 +2,7 @@ defmodule JidoCode.Knowledge.ConsistencyEvaluator do
   @moduledoc false
 
   alias JidoCode.Knowledge.ConsistencyReceipt
+  alias JidoCode.Knowledge.DerivedAuthority
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.QueryConsistency
 
@@ -15,6 +16,7 @@ defmodule JidoCode.Knowledge.ConsistencyEvaluator do
       |> ontology_gaps(consistency, snapshot.graph_metadata)
       |> completeness_gaps(consistency, snapshot.graph_metadata)
       |> derived_rule_set_gaps(consistency, snapshot.graph_metadata)
+      |> derived_freshness_gaps(snapshot.graph_metadata, snapshot.graph_revisions)
       |> historical_gaps(consistency, queried_graphs)
       |> Enum.reverse()
 
@@ -90,6 +92,23 @@ defmodule JidoCode.Knowledge.ConsistencyEvaluator do
         end)
 
     maybe_gap(gaps, not matches?, :derived_rule_set_revision_mismatch)
+  end
+
+  defp derived_freshness_gaps(gaps, metadata, revisions) do
+    stale? =
+      metadata
+      |> Map.values()
+      |> Enum.filter(&(&1.family == :derived))
+      |> Enum.any?(fn graph_metadata ->
+        current_sources =
+          Enum.map(graph_metadata.source_graph_revisions, fn source ->
+            %{graph: source.graph, revision: Map.get(revisions, source.graph, -1)}
+          end)
+
+        not match?({:ok, :current}, DerivedAuthority.status(graph_metadata, current_sources))
+      end)
+
+    maybe_gap(gaps, stale?, :derived_graph_stale)
   end
 
   defp historical_gaps(gaps, %{mode: :historical} = consistency, queried_graphs) do

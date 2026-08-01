@@ -437,7 +437,8 @@ defmodule JidoCode.Knowledge.GraphMetadata do
       :retention_class
     ]
 
-    metadata.type == @named_graph and Enum.all?(required, &Map.has_key?(metadata, &1))
+    Enum.all?(required, &Map.has_key?(metadata, &1)) and
+      Map.get(metadata, :type) == @named_graph
   end
 
   defp decode_object({:named_node, value}) when is_binary(value), do: {:ok, value}

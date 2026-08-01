@@ -149,30 +149,30 @@ Back to plan: [README](./README.md)
       - [x] 5.3.3.3 Subtask {#jcf-p05-5-3-3-3} - Coalesce bursts without skipping the newest revision and recover on reconnect or mailbox loss with a fresh query.
       - [x] 5.3.3.4 Subtask {#jcf-p05-5-3-3-4} - Reauthorize subscriptions and projections when grants, actor scope, or session authority changes.
 
-  - [ ] 5.4 Section - Establish derived graph and diagnostic query infrastructure.
+  - [x] 5.4 Section - Establish derived graph and diagnostic query infrastructure.
 
     This section prepares safe inference/materialization and operator diagnosis
     without implementing repository policy or learning rules prematurely.
 
-    - [ ] 5.4.1 Task {#jcf-p05-derived-graph-manager} [repo: jido_code] [after: {#jcf-p05-subscription-boundary}] - Implement rebuildable derived graph lifecycle.
+    - [x] 5.4.1 Task {#jcf-p05-derived-graph-manager} [repo: jido_code] [after: {#jcf-p05-subscription-boundary}] - Implement rebuildable derived graph lifecycle.
 
       This task creates, validates, publishes, invalidates, and replaces
       materialized views or inferences under exact source revisions.
 
-      - [ ] 5.4.1.1 Subtask {#jcf-p05-5-4-1-1} - Define derivation requests with rule/query version, ontology version, source graph revisions, target derived graph, and expected prior derivation.
-      - [ ] 5.4.1.2 Subtask {#jcf-p05-5-4-1-2} - Build into an isolated target, validate metadata and shape, then atomically publish the complete derived graph.
-      - [ ] 5.4.1.3 Subtask {#jcf-p05-5-4-1-3} - Mark derived graphs stale on relevant source commits and prohibit strict consumers from treating stale output as current.
-      - [ ] 5.4.1.4 Subtask {#jcf-p05-5-4-1-4} - Delete and rebuild derived graphs without changing asserted graph revisions or command history.
+      - [x] 5.4.1.1 Subtask {#jcf-p05-5-4-1-1} - Define derivation requests with rule/query version, ontology version, source graph revisions, target derived graph, and expected prior derivation.
+      - [x] 5.4.1.2 Subtask {#jcf-p05-5-4-1-2} - Build into an isolated target, validate metadata and shape, then atomically publish the complete derived graph.
+      - [x] 5.4.1.3 Subtask {#jcf-p05-5-4-1-3} - Mark derived graphs stale on relevant source commits and prohibit strict consumers from treating stale output as current.
+      - [x] 5.4.1.4 Subtask {#jcf-p05-5-4-1-4} - Delete and rebuild derived graphs without changing asserted graph revisions or command history.
 
-    - [ ] 5.4.2 Task {#jcf-p05-read-diagnostics} [repo: jido_code] [after: {#jcf-p05-derived-graph-manager}] - Implement bounded query and projection diagnostics.
+    - [x] 5.4.2 Task {#jcf-p05-read-diagnostics} [repo: jido_code] [after: {#jcf-p05-derived-graph-manager}] - Implement bounded query and projection diagnostics.
 
       This task helps operators explain stale, incomplete, truncated, invalid,
       or unauthorized results without exposing raw store internals.
 
-      - [ ] 5.4.2.1 Subtask {#jcf-p05-5-4-2-1} - Report catalog/query/projection versions, evaluated graph revisions, consistency result, completeness gaps, truncation, cache disposition, and safe error code.
-      - [ ] 5.4.2.2 Subtask {#jcf-p05-5-4-2-2} - Add privileged read-only diagnostic queries with strict graph allowlists and limits.
-      - [ ] 5.4.2.3 Subtask {#jcf-p05-5-4-2-3} - Prohibit diagnostic query text, backend IDs, source bodies, secrets, unauthorized graph names, and arbitrary exception details from ordinary users.
-      - [ ] 5.4.2.4 Subtask {#jcf-p05-5-4-2-4} - Document when to re-query, rebuild a derived graph, restore completeness, or escalate integrity failure.
+      - [x] 5.4.2.1 Subtask {#jcf-p05-5-4-2-1} - Report catalog/query/projection versions, evaluated graph revisions, consistency result, completeness gaps, truncation, cache disposition, and safe error code.
+      - [x] 5.4.2.2 Subtask {#jcf-p05-5-4-2-2} - Add privileged read-only diagnostic queries with strict graph allowlists and limits.
+      - [x] 5.4.2.3 Subtask {#jcf-p05-5-4-2-3} - Prohibit diagnostic query text, backend IDs, source bodies, secrets, unauthorized graph names, and arbitrary exception details from ordinary users.
+      - [x] 5.4.2.4 Subtask {#jcf-p05-5-4-2-4} - Document when to re-query, rebuild a derived graph, restore completeness, or escalate integrity failure.
 
   - [ ] 5.5 Section - Phase 5 Integration Tests.
 

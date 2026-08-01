@@ -179,9 +179,9 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:derived_graph_freshness) do
     """
-    SELECT ?derivation ?predicate ?value WHERE {
+    SELECT ?predicate ?value WHERE {
       GRAPH {{graph}} {
-        ?derivation a <#{@jf}Derivation> ; ?predicate ?value .
+        {{graph}} ?predicate ?value .
       }
     }
     LIMIT {{row_limit}}

@@ -55,3 +55,4 @@ implementation plan was merged.
 - [Reviewed query catalog and execution boundary](./reviewed-query-catalog.md)
 - [Query consistency and temporal state](./query-consistency-and-temporal-state.md)
 - [Bounded projections, cache, and subscriptions](./bounded-projections-cache-and-subscriptions.md)
+- [Derived graphs and read diagnostics](./derived-graphs-and-read-diagnostics.md)

@@ -11,6 +11,7 @@ defmodule JidoCode.Knowledge.QueryExecution do
   alias JidoCode.Knowledge.QueryParameters
   alias JidoCode.Knowledge.QueryResult
   alias JidoCode.Knowledge.SemanticSnapshot
+  alias JidoCode.Knowledge.DerivedAuthority
   alias TripleStore.SPARQL.Query
 
   @policy_graph "https://jido.run/graph/factory/policy"
@@ -72,9 +73,13 @@ defmodule JidoCode.Knowledge.QueryExecution do
   defp read_snapshot(store, substrate_metadata, request) do
     graphs = Enum.uniq([@policy_graph | request.graph_iris])
 
-    with {:ok, snapshot} <- SemanticSnapshot.read(store, substrate_metadata, graphs) do
-      graph_revisions = Map.take(snapshot.graph_revisions, request.graph_iris)
-      graph_metadata = Map.take(snapshot.graph_metadata, request.graph_iris)
+    with {:ok, initial} <- SemanticSnapshot.read(store, substrate_metadata, graphs),
+         sources <- derived_sources(initial.graph_metadata, request.graph_iris),
+         {:ok, snapshot} <-
+           maybe_expand_snapshot(store, substrate_metadata, graphs, sources, initial) do
+      evaluated_graphs = Enum.uniq(request.graph_iris ++ sources)
+      graph_revisions = Map.take(snapshot.graph_revisions, evaluated_graphs)
+      graph_metadata = Map.take(snapshot.graph_metadata, evaluated_graphs)
 
       {:ok,
        %{
@@ -172,7 +177,7 @@ defmodule JidoCode.Knowledge.QueryExecution do
       graph_revisions: snapshot.graph_revisions,
       ontology_version: single_or_unknown(ontology_versions),
       completeness: completeness,
-      freshness: :current,
+      freshness: freshness(snapshot.graph_metadata, snapshot.graph_revisions),
       truncated?: truncated?,
       cursor: cursor,
       warnings: warnings,
@@ -225,4 +230,47 @@ defmodule JidoCode.Knowledge.QueryExecution do
   defp single_or_unknown([value]), do: value
   defp single_or_unknown([]), do: nil
   defp single_or_unknown(_multiple), do: :mixed
+
+  defp derived_sources(metadata, queried_graphs) do
+    queried_graphs
+    |> Enum.flat_map(fn graph ->
+      case Map.get(metadata, graph) do
+        %{family: :derived, source_graph_revisions: sources} -> Enum.map(sources, & &1.graph)
+        _other -> []
+      end
+    end)
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
+  defp maybe_expand_snapshot(_store, _metadata, _graphs, [], initial),
+    do: {:ok, initial}
+
+  defp maybe_expand_snapshot(store, metadata, graphs, sources, _initial),
+    do: SemanticSnapshot.read(store, metadata, Enum.uniq(graphs ++ sources))
+
+  defp freshness(metadata, revisions) do
+    derived = metadata |> Map.values() |> Enum.filter(&(&1.family == :derived))
+
+    statuses =
+      Enum.map(derived, fn graph_metadata ->
+        current =
+          Enum.map(graph_metadata.source_graph_revisions, fn source ->
+            %{graph: source.graph, revision: Map.get(revisions, source.graph, -1)}
+          end)
+
+        case DerivedAuthority.status(graph_metadata, current) do
+          {:ok, status} -> status
+          {:error, _error} -> :incompatible
+        end
+      end)
+
+    cond do
+      statuses == [] -> :current
+      :invalidated in statuses -> :invalidated
+      :incompatible in statuses -> :incompatible
+      :stale in statuses -> :stale
+      true -> :current
+    end
+  end
 end

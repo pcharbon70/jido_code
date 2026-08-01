@@ -123,6 +123,8 @@ defmodule JidoCode.Knowledge.CommandPipeline do
 
     WriteBatch.new(change_set.additions ++ audit_additions,
       commit_id: identities.commit_id,
+      removals: change_set.removals,
+      removal_policy: if(change_set.removals == [], do: :forbid, else: :maintenance),
       expected_dataset_revision: envelope.expected_dataset_revision,
       expected_graph_revisions: graph_revisions,
       operation_metadata: %{
@@ -131,7 +133,7 @@ defmodule JidoCode.Knowledge.CommandPipeline do
         command_type: envelope.command_type,
         command_version: envelope.command_version,
         request_fingerprint: change_set.request_fingerprint,
-        registry_version: CommandRegistry.version()
+        registry_version: envelope.command_version
       }
     )
   end

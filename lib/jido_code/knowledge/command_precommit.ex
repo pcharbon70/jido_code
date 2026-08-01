@@ -59,6 +59,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
           :append ->
             not is_nil(existing) and
               GraphRegistry.write_allowed?(target.family, :append, existing)
+
+          :replace ->
+            not is_nil(existing) and
+              GraphRegistry.write_allowed?(target.family, :replace, existing)
         end
 
       if valid?, do: {:cont, :ok}, else: {:halt, {:error, Error.new(:conflict, :graph_lifecycle)}}
@@ -127,8 +131,18 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
   defp validate_targets(change_set, snapshot, deadline) do
     Enum.reduce_while(change_set.targets, {:ok, []}, fn target, {:ok, reports} ->
       existing_metadata = Map.get(snapshot.graph_metadata, target.graph_iri)
-      metadata = existing_metadata || target.metadata
+
+      metadata =
+        if target.operation == :replace,
+          do: target.metadata,
+          else: existing_metadata || target.metadata
+
       operation = if target.operation == :maintenance, do: :append, else: target.operation
+
+      existing =
+        if target.operation == :replace,
+          do: [],
+          else: graph_quads(snapshot.dataset, target.graph_iri)
 
       result =
         Validator.validate(
@@ -139,7 +153,7 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
             metadata: metadata,
             existing_metadata: existing_metadata,
             additions: target.additions,
-            existing: graph_quads(snapshot.dataset, target.graph_iri),
+            existing: existing,
             shape_version: change_set.shape_version
           },
           deadline_monotonic_ms: deadline

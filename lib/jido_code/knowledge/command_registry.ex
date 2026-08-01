@@ -10,6 +10,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   alias JidoCode.Knowledge.Error
 
   @version "1.0.0"
+  @derived_version "1.1.0"
   @commands %{
     "EnrollRepository" => %{
       owner: :factory,
@@ -85,6 +86,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
 
+  @derived_commands %{
+    "PublishDerivedGraph" => %{
+      owner: :reasoning,
+      capability: :reasoner,
+      graph_families: [:derived],
+      preconditions: [:source_revisions_exact, :expected_prior_derivation],
+      allow_replacement?: true
+    }
+  }
+
   @spec version() :: String.t()
   def version, do: @version
 
@@ -96,6 +107,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@commands, name) do
       {:ok, definition} -> {:ok, Map.merge(definition, %{name: name, version: @version})}
       :error -> invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @derived_version) when is_binary(name) do
+    case Map.fetch(@derived_commands, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @derived_version})}
+
+      :error ->
+        invalid(:command_type)
     end
   end
 

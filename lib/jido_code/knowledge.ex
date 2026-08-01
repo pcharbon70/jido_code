@@ -12,6 +12,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
   alias JidoCode.Knowledge.Projection
+  alias JidoCode.Knowledge.DerivedGraphManager
   alias JidoCode.Knowledge.Writer
 
   def execute(%CommandEnvelope{} = envelope, options \\ []), do: Writer.execute(envelope, options)
@@ -27,6 +28,9 @@ defmodule JidoCode.Knowledge do
 
   def project(result, %AuthorityContext{} = authority, scope_iri, options \\ []),
     do: Projection.build(result, authority, scope_iri, options)
+
+  def publish_derived(attributes, options \\ []),
+    do: DerivedGraphManager.publish(attributes, options)
 
   def health, do: Readiness.snapshot()
   def ready?, do: health() |> JidoCode.Knowledge.Health.ready?()
