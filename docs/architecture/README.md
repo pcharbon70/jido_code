@@ -41,3 +41,11 @@ implementation plan was merged.
 - [Semantic validation and evolution](./semantic-validation-and-evolution.md)
 - [Claims, time, transitions, and inference](./claims-time-transitions-and-inference.md)
 - [Phase 3 semantic contract receipt](./phase-03-receipt.md)
+
+## Phase 4 Controlled Mutation
+
+- [Semantic command contract](./semantic-command-contract.md)
+- [Governed command pipeline](./governed-command-pipeline.md)
+- [Authority, bootstrap, and audit](./authority-bootstrap-and-audit.md)
+- [Change delivery and command recovery](./change-delivery-and-command-recovery.md)
+- [Phase 4 controlled mutation receipt](./phase-04-receipt.md)

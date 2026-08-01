@@ -6,13 +6,12 @@ This receipt records the Phase 3 candidate verified locally on 2026-07-31.
 Versioned ontology and shapes, canonical identities, closed named-graph
 topology, pre-commit validation, bitemporal claims, causal transitions,
 ontology evolution, and derived authority are implemented and pass the local
-repository gates.
+repository gates. Pull request 5 passed clean-checkout CI and was merged as
+`3b59f8e659f5bcc9453897236b70893351157b81`.
 
-G2 is a merge-pending candidate. It remains blocked until the pull request
-passes clean-checkout CI and the merged candidate commit is pinned here. No
-local evidence found an object-record codec, ownerless application graph,
-invalid visible assertion, literal foreign-key join, or derived authority
-escalation.
+G2 is complete and Phase 4 is authorized. No evidence found an object-record
+codec, ownerless application graph, invalid visible assertion, literal
+foreign-key join, or derived authority escalation.
 
 ## Candidate Provenance
 
@@ -24,7 +23,7 @@ escalation.
 | Section 3.3 | `74ed8b0` - implement semantic validation and evolution |
 | Section 3.4 | `7f2896b` - define temporal claims and inference authority |
 | Section 3.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `3b59f8e659f5bcc9453897236b70893351157b81` |
 
 ## Semantic Pins
 
@@ -137,10 +136,9 @@ runs the complete ExUnit suite.
 - Ordinary writes do not delete assertions. Immutable history is superseded,
   migrations create target graphs, and derived disposal uses verified dataset
   recovery until a dedicated bounded derived-maintenance command is accepted.
-- G2 does not authorize Phase 4 until clean CI and the merge commit are pinned.
+- G2 authorizes Phase 4 from the pinned clean-CI merge commit.
 
 ## Gate G2
 
-G2 is **blocked only on candidate merge evidence**. The local semantic contract
-and integration evidence pass, but Phase 4 is not authorized by this candidate
-receipt alone.
+G2 is **complete**. The semantic contract, local integration evidence,
+clean-checkout CI, and merged candidate are pinned.

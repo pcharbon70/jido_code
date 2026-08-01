@@ -1,13 +1,23 @@
 defmodule JidoCode.Knowledge do
   @moduledoc """
-  Public health boundary for the authoritative knowledge substrate.
+  Public command and health boundary for the authoritative knowledge substrate.
 
-  Semantic command and query contracts will be added behind this facade in
-  later phases. It never exposes raw backend handles or arbitrary SPARQL.
+  It never exposes raw backend handles, write batches, or arbitrary SPARQL.
   """
 
+  alias JidoCode.Knowledge.ChangeFeed
+  alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
+  alias JidoCode.Knowledge.Writer
+
+  def execute(%CommandEnvelope{} = envelope, options \\ []), do: Writer.execute(envelope, options)
+
+  def command_status(%CommandEnvelope{} = envelope, options \\ []),
+    do: Writer.command_status(envelope, options)
+
+  def subscribe_changes(scope_iri), do: ChangeFeed.subscribe(scope_iri)
+  def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
 
   def health, do: Readiness.snapshot()
   def ready?, do: health() |> JidoCode.Knowledge.Health.ready?()

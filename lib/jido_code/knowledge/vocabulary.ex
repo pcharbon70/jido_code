@@ -46,4 +46,6 @@ defmodule JidoCode.Knowledge.Vocabulary do
   def predicate(:changed_graph), do: @base <> "changedGraph"
   def predicate(:prior_graph_revision), do: @base <> "priorGraphRevision"
   def predicate(:source_digest), do: @base <> "sourceDigest"
+  def predicate(:request_fingerprint), do: @base <> "requestFingerprint"
+  def predicate(:command_iri), do: @base <> "commandIri"
 end

@@ -12,8 +12,14 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   @base "https://jido.run/id/"
   @max_iri_bytes 512
   @max_segment_bytes 160
-  @local_kinds ~w[activity claim goal attempt decision transition migration validation-report validation-result]
-  @deterministic_kinds ~w[graph-revision-reference validation-report validation-result]
+  @local_kinds ~w[
+    activity audit claim command decision delegation goal attempt migration transition
+    validation-report validation-result
+  ]
+  @deterministic_kinds ~w[
+    authorization-grant change-set command-request graph-revision-reference validation-report
+    validation-result
+  ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
 

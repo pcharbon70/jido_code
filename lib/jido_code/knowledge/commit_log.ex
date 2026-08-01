@@ -35,7 +35,9 @@ defmodule JidoCode.Knowledge.CommitLog do
       additions_count: length(batch.additions),
       removals_count: length(batch.removals),
       durability: :sync,
-      replayed?: false
+      replayed?: false,
+      request_fingerprint: Map.get(batch.operation_metadata, :request_fingerprint),
+      command_iri: Map.get(batch.operation_metadata, :command_iri)
     }
 
     {receipt_quads(receipt, next.system_graph_revision), receipt}
@@ -124,8 +126,33 @@ defmodule JidoCode.Knowledge.CommitLog do
         ]
       end)
 
-    commit_quads ++ revision_quads
+    commit_quads ++ optional_command_quads(receipt, graph) ++ revision_quads
   end
+
+  defp optional_command_quads(receipt, graph) do
+    []
+    |> maybe_add_command_quad(
+      receipt.request_fingerprint,
+      RDF.quad(
+        receipt.commit_id,
+        Vocabulary.predicate(:request_fingerprint),
+        receipt.request_fingerprint || "",
+        graph
+      )
+    )
+    |> maybe_add_command_quad(
+      receipt.command_iri,
+      RDF.quad(
+        receipt.commit_id,
+        Vocabulary.predicate(:command_iri),
+        RDF.iri(receipt.command_iri || "urn:jido-code:absent"),
+        graph
+      )
+    )
+  end
+
+  defp maybe_add_command_quad(quads, nil, _quad), do: quads
+  defp maybe_add_command_quad(quads, _value, quad), do: [quad | quads]
 
   defp graph_change_iri(commit, graph) do
     suffix = graph |> then(&:crypto.hash(:sha256, &1)) |> Base.url_encode64(padding: false)
@@ -148,7 +175,9 @@ defmodule JidoCode.Knowledge.CommitLog do
          additions_count: common.additions_count,
          removals_count: common.removals_count,
          durability: :sync,
-         replayed?: false
+         replayed?: false,
+         request_fingerprint: common.request_fingerprint,
+         command_iri: common.command_iri
        }}
     else
       _invalid -> {:error, Error.new(:corrupt, :read_commit_receipt)}
@@ -163,15 +192,20 @@ defmodule JidoCode.Knowledge.CommitLog do
              {:ok, dataset_revision} <- integer_binding(row, "dataset_revision"),
              {:ok, additions_count} <- integer_binding(row, "additions"),
              {:ok, removals_count} <- integer_binding(row, "removals"),
+             {:ok, request_fingerprint} <- optional_string_binding(row, "request_fingerprint"),
+             {:ok, command_iri} <- optional_iri_binding(row, "command_iri"),
              {:ok, durability} <- iri_binding(row, "durability"),
-             true <- durability == Vocabulary.sync_durability() do
+             true <- durability == Vocabulary.sync_durability(),
+             true <- valid_optional_digest?(request_fingerprint) do
           {:ok,
            %{
              batch_digest: batch_digest,
              prior_dataset_revision: prior_dataset_revision,
              dataset_revision: dataset_revision,
              additions_count: additions_count,
-             removals_count: removals_count
+             removals_count: removals_count,
+             request_fingerprint: request_fingerprint,
+             command_iri: command_iri
            }}
         end
       end)
@@ -217,6 +251,9 @@ defmodule JidoCode.Knowledge.CommitLog do
     byte_size(digest) == 64 and Regex.match?(~r/^[0-9a-f]{64}$/, digest)
   end
 
+  defp valid_optional_digest?(nil), do: true
+  defp valid_optional_digest?(digest), do: valid_digest?(digest)
+
   defp integer_binding(row, key) do
     case Map.get(row, key) do
       {:literal, :typed, lexical, datatype}
@@ -239,6 +276,20 @@ defmodule JidoCode.Knowledge.CommitLog do
     end
   end
 
+  defp optional_string_binding(row, key) do
+    case Map.get(row, key) do
+      nil -> {:ok, nil}
+      _value -> string_binding(row, key)
+    end
+  end
+
+  defp optional_iri_binding(row, key) do
+    case Map.get(row, key) do
+      nil -> {:ok, nil}
+      _value -> iri_binding(row, key)
+    end
+  end
+
   defp iri_binding(row, key) do
     case Map.get(row, key) do
       {:named_node, iri} when is_binary(iri) -> {:ok, iri}
@@ -249,7 +300,8 @@ defmodule JidoCode.Knowledge.CommitLog do
   defp receipt_query(commit_id) do
     """
     SELECT ?digest ?prior_dataset_revision ?dataset_revision ?additions ?removals
-           ?durability ?graph ?prior_graph_revision ?graph_revision
+           ?request_fingerprint ?command_iri ?durability ?graph
+           ?prior_graph_revision ?graph_revision
     WHERE {
       GRAPH <#{Vocabulary.system_graph()}> {
         <#{commit_id}>
@@ -267,6 +319,14 @@ defmodule JidoCode.Knowledge.CommitLog do
           <#{Vocabulary.predicate(:changed_graph)}> ?graph ;
           <#{Vocabulary.predicate(:prior_graph_revision)}> ?prior_graph_revision ;
           <#{Vocabulary.predicate(:graph_revision)}> ?graph_revision .
+
+        OPTIONAL {
+          <#{commit_id}>
+            <#{Vocabulary.predicate(:request_fingerprint)}> ?request_fingerprint .
+        }
+        OPTIONAL {
+          <#{commit_id}> <#{Vocabulary.predicate(:command_iri)}> ?command_iri .
+        }
       }
     }
     LIMIT #{@max_receipt_rows + 1}
