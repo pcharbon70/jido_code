@@ -21,43 +21,43 @@ Back to plan: [README](./README.md)
   reconciliation code without treating provider payloads, local clones, or a
   mutable global source graph as product truth.
 
-  - [ ] 6.1 Section - Implement repository identity, locators, and management enrollment.
+  - [x] 6.1 Section - Implement repository identity, locators, and management enrollment.
 
     This section models one conceptual software repository independently from
     provider locations and expresses factory management as an explicit,
     governed relationship with lifecycle and policy.
 
-    - [ ] 6.1.1 Task {#jcf-p06-repository-identity} [repo: jido_code] [after: {#jcf-p05-phase-receipt}] - Implement repository and locator semantic commands.
+    - [x] 6.1.1 Task {#jcf-p06-repository-identity} [repo: jido_code] [after: {#jcf-p05-phase-receipt}] - Implement repository and locator semantic commands.
 
       This task creates and relates repository identities without duplicating
       `SourceRepo` and `ManagedRepo` object records.
 
-      - [ ] 6.1.1.1 Subtask {#jcf-p06-6-1-1-1} - Define command payloads and shapes for `SoftwareRepository` and one or more provider, remote, or local-discovery `RepositoryLocator` resources.
-      - [ ] 6.1.1.2 Subtask {#jcf-p06-6-1-1-2} - Derive stable locator IRIs from normalized provider/host/external identity and keep aliases, mirrors, forks, and migrated owners as explicit relationships.
-      - [ ] 6.1.1.3 Subtask {#jcf-p06-6-1-1-3} - Reconcile an observed locator to an existing conceptual repository only through explicit identity evidence and guarded commands.
-      - [ ] 6.1.1.4 Subtask {#jcf-p06-6-1-1-4} - Preserve stale, redirected, inaccessible, archived, transferred, or deleted locator observations without deleting repository identity.
-      - [ ] 6.1.1.5 Subtask {#jcf-p06-6-1-1-5} - Reject provider payload structs, URL strings, or local filesystem paths as canonical repository identity.
+      - [x] 6.1.1.1 Subtask {#jcf-p06-6-1-1-1} - Define command payloads and shapes for `SoftwareRepository` and one or more provider, remote, or local-discovery `RepositoryLocator` resources.
+      - [x] 6.1.1.2 Subtask {#jcf-p06-6-1-1-2} - Derive stable locator IRIs from normalized provider/host/external identity and keep aliases, mirrors, forks, and migrated owners as explicit relationships.
+      - [x] 6.1.1.3 Subtask {#jcf-p06-6-1-1-3} - Reconcile an observed locator to an existing conceptual repository only through explicit identity evidence and guarded commands.
+      - [x] 6.1.1.4 Subtask {#jcf-p06-6-1-1-4} - Preserve stale, redirected, inaccessible, archived, transferred, or deleted locator observations without deleting repository identity.
+      - [x] 6.1.1.5 Subtask {#jcf-p06-6-1-1-5} - Reject provider payload structs, URL strings, or local filesystem paths as canonical repository identity.
 
-    - [ ] 6.1.2 Task {#jcf-p06-enrollment-lifecycle} [repo: jido_code] [after: {#jcf-p06-repository-identity}] - Implement management enrollment and retirement commands.
+    - [x] 6.1.2 Task {#jcf-p06-enrollment-lifecycle} [repo: jido_code] [after: {#jcf-p06-repository-identity}] - Implement management enrollment and retirement commands.
 
       This task records when and under which authority, scope, and policy the
       factory manages a repository.
 
-      - [ ] 6.1.2.1 Subtask {#jcf-p06-6-1-2-1} - Implement `EnrollRepository` with factory, repository, initial locator, actor, policy references, validity, and expected catalog revision.
-      - [ ] 6.1.2.2 Subtask {#jcf-p06-6-1-2-2} - Create an enrollment transition chain covering proposed, active, suspended, retiring, retired, and invalidated concepts.
-      - [ ] 6.1.2.3 Subtask {#jcf-p06-6-1-2-3} - Enforce one active enrollment per factory/repository policy boundary unless an accepted use case explicitly permits overlap.
-      - [ ] 6.1.2.4 Subtask {#jcf-p06-6-1-2-4} - Implement suspension, resume, policy reassignment, locator change, and `RetireEnrollment` as governed transitions/supersession.
-      - [ ] 6.1.2.5 Subtask {#jcf-p06-6-1-2-5} - Stop new observation/reconciliation/execution admission when an enrollment is suspended or retired without erasing prior history.
+      - [x] 6.1.2.1 Subtask {#jcf-p06-6-1-2-1} - Implement `EnrollRepository` with factory, repository, initial locator, actor, policy references, validity, and expected catalog revision.
+      - [x] 6.1.2.2 Subtask {#jcf-p06-6-1-2-2} - Create an enrollment transition chain covering proposed, active, suspended, retiring, retired, and invalidated concepts.
+      - [x] 6.1.2.3 Subtask {#jcf-p06-6-1-2-3} - Enforce one active enrollment per factory/repository policy boundary unless an accepted use case explicitly permits overlap.
+      - [x] 6.1.2.4 Subtask {#jcf-p06-6-1-2-4} - Implement suspension, resume, policy reassignment, locator change, and `RetireEnrollment` as governed transitions/supersession.
+      - [x] 6.1.2.5 Subtask {#jcf-p06-6-1-2-5} - Stop new observation/reconciliation/execution admission when an enrollment is suspended or retired without erasing prior history.
 
-    - [ ] 6.1.3 Task {#jcf-p06-enrollment-projections} [repo: jido_code] [after: {#jcf-p06-enrollment-lifecycle}] - Implement repository catalog and enrollment projections.
+    - [x] 6.1.3 Task {#jcf-p06-enrollment-projections} [repo: jido_code] [after: {#jcf-p06-enrollment-lifecycle}] - Implement repository catalog and enrollment projections.
 
       This task gives product and factory services bounded views over identity,
       management state, locators, policy references, and observed freshness.
 
-      - [ ] 6.1.3.1 Subtask {#jcf-p06-6-1-3-1} - Add queries for repository by canonical IRI, locator resolution, active enrollment, enrollment transition history, and factory repository cohort.
-      - [ ] 6.1.3.2 Subtask {#jcf-p06-6-1-3-2} - Project locator/provider state, current enrollment state, applicable policy refs, latest observed snapshot refs, and safe warnings.
-      - [ ] 6.1.3.3 Subtask {#jcf-p06-6-1-3-3} - Preserve multiple locators and contradictory provider observations rather than flattening them into one record.
-      - [ ] 6.1.3.4 Subtask {#jcf-p06-6-1-3-4} - Add actor/enrollment subscriptions that re-query on catalog, policy, or observation graph revisions.
+      - [x] 6.1.3.1 Subtask {#jcf-p06-6-1-3-1} - Add queries for repository by canonical IRI, locator resolution, active enrollment, enrollment transition history, and factory repository cohort.
+      - [x] 6.1.3.2 Subtask {#jcf-p06-6-1-3-2} - Project locator/provider state, current enrollment state, applicable policy refs, latest observed snapshot refs, and safe warnings.
+      - [x] 6.1.3.3 Subtask {#jcf-p06-6-1-3-3} - Preserve multiple locators and contradictory provider observations rather than flattening them into one record.
+      - [x] 6.1.3.4 Subtask {#jcf-p06-6-1-3-4} - Add actor/enrollment subscriptions that re-query on catalog, policy, or observation graph revisions.
 
   - [ ] 6.2 Section - Implement provider, Git, and observation adapter boundaries.
 

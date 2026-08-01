@@ -18,7 +18,8 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   ]
   @deterministic_kinds ~w[
     authorization-grant change-set command-request graph-revision-reference validation-report
-    validation-result
+    validation-result management-enrollment enrollment-transition enrollment-decision
+    repository-reconciliation
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
@@ -45,6 +46,55 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
 
   def repository(_external_identity), do: invalid(:repository_identity)
 
+  @doc """
+  Builds a conceptual repository identity from an internal opaque seed.
+
+  Provider URLs, clone paths, and provider payload values are deliberately not
+  admitted as conceptual identity material. Provider identity belongs on a
+  `RepositoryLocator` and can be reconciled to this resource only with
+  explicit evidence.
+  """
+  @spec conceptual_repository(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
+  def conceptual_repository(seed) when is_binary(seed) do
+    with {:ok, normalized} <- normalize_text(seed, @max_segment_bytes),
+         false <- locator_material?(normalized) do
+      repository("conceptual:" <> normalized)
+    else
+      _invalid -> invalid(:conceptual_repository_identity)
+    end
+  end
+
+  def conceptual_repository(_seed), do: invalid(:conceptual_repository_identity)
+
+  @doc """
+  Builds a locator identity from provider host and provider-stable external ID.
+
+  The returned locator IRI does not change when a repository owner or display
+  name changes at the provider.
+  """
+  @spec repository_locator(String.t(), String.t()) ::
+          {:ok, %{canonical: String.t(), iri: String.t()}} | {:error, Error.t()}
+  def repository_locator(provider, external_id)
+      when is_binary(provider) and is_binary(external_id) do
+    with {:ok, host} <- normalize_host(provider),
+         {:ok, normalized_id} <- normalize_text(external_id, @max_segment_bytes),
+         {:ok, host_segment} <- encode_segment(host),
+         iri <-
+           @base <>
+             Enum.join(
+               ["repository-locator", host_segment, digest_token("external-id", normalized_id)],
+               "/"
+             ),
+         :ok <- validate(iri) do
+      {:ok, %{iri: iri, canonical: "#{host}/id/#{normalized_id}"}}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _invalid -> invalid(:repository_locator)
+    end
+  end
+
+  def repository_locator(_provider, _external_id), do: invalid(:repository_locator)
+
   @spec repository_locator(String.t(), String.t(), String.t()) ::
           {:ok, %{canonical: String.t(), iri: String.t()}} | {:error, Error.t()}
   def repository_locator(provider, owner, name)
@@ -61,6 +111,37 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   end
 
   def repository_locator(_provider, _owner, _name), do: invalid(:repository_locator)
+
+  @spec management_enrollment(String.t(), String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def management_enrollment(factory_iri, repository_iri, policy_boundary_iri) do
+    with :ok <- validate(factory_iri),
+         :ok <- validate(repository_iri),
+         :ok <- validate(policy_boundary_iri) do
+      deterministic(
+        :management_enrollment,
+        Enum.join([factory_iri, repository_iri, policy_boundary_iri], "\n")
+      )
+    end
+  end
+
+  @spec enrollment_transition(String.t(), non_neg_integer(), atom() | String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def enrollment_transition(enrollment_iri, revision, state)
+      when is_integer(revision) and revision >= 0 do
+    state = if is_atom(state), do: Atom.to_string(state), else: state
+
+    with :ok <- validate(enrollment_iri),
+         {:ok, normalized_state} <- normalize_text(state, 32) do
+      deterministic(
+        :enrollment_transition,
+        Enum.join([enrollment_iri, Integer.to_string(revision), normalized_state], "\n")
+      )
+    end
+  end
+
+  def enrollment_transition(_enrollment_iri, _revision, _state),
+    do: invalid(:enrollment_transition_identity)
 
   @spec git_object(String.t() | atom(), String.t()) :: {:ok, String.t()} | {:error, Error.t()}
   def git_object(algorithm, hex) when is_binary(hex) do
@@ -283,6 +364,11 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
 
   defp traversal_segment?(value),
     do: value |> String.split(["/", "\\"]) |> Enum.any?(&(&1 in [".", ".."]))
+
+  defp locator_material?(value) do
+    String.contains?(value, ["://", "/", "\\"]) or
+      String.starts_with?(String.downcase(value), ["git@", "file:"])
+  end
 
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}
 end

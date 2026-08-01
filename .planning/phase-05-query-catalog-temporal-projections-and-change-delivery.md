@@ -14,7 +14,7 @@ caches, revision-aware subscriptions, and rebuildable derived graph support.
 
 Back to plan: [README](./README.md)
 
-- [ ] 5 Phase - Make graph interpretation bounded, consistent, explainable, and safe for product and runtime consumers.
+- [x] 5 Phase - Make graph interpretation bounded, consistent, explainable, and safe for product and runtime consumers.
 
   This phase prevents raw SPARQL and full-dataset mirroring from spreading
   through the application while preserving the expressive joins that justify
@@ -174,7 +174,7 @@ Back to plan: [README](./README.md)
       - [x] 5.4.2.3 Subtask {#jcf-p05-5-4-2-3} - Prohibit diagnostic query text, backend IDs, source bodies, secrets, unauthorized graph names, and arbitrary exception details from ordinary users.
       - [x] 5.4.2.4 Subtask {#jcf-p05-5-4-2-4} - Document when to re-query, rebuild a derived graph, restore completeness, or escalate integrity failure.
 
-  - [ ] 5.5 Section - Phase 5 Integration Tests.
+  - [x] 5.5 Section - Phase 5 Integration Tests.
 
     This final section proves reviewed reads remain bounded, revision-correct,
     authorization-scoped, temporally explicit, and recoverable despite cache
@@ -202,7 +202,7 @@ Back to plan: [README](./README.md)
       - [x] 5.5.2.5 Subtask {#jcf-p05-5-5-2-5} - Run query performance baselines at configured bounds and verify telemetry cardinality/redaction.
       - [x] 5.5.2.6 Subtask {#jcf-p05-5-5-2-6} - Rerun Phases 1-4 suites and `mix precommit`.
 
-    - [ ] 5.5.3 Task {#jcf-p05-phase-receipt} [repo: jido_code] [after: {#jcf-p05-projection-delivery-integration}] - Publish the Phase 5 bounded-read receipt.
+    - [x] 5.5.3 Task {#jcf-p05-phase-receipt} [repo: jido_code] [after: {#jcf-p05-projection-delivery-integration}] - Publish the Phase 5 bounded-read receipt.
 
       This task binds G4 to exact query, projection, consistency, cache,
       derived-graph, authorization, and notification evidence before external
@@ -211,4 +211,4 @@ Back to plan: [README](./README.md)
       - [x] 5.5.3.1 Subtask {#jcf-p05-5-5-3-1} - Record query/projection catalog versions and digests, ontology/shape versions, consistency modes, fixture digests, limits, and candidate commit.
       - [x] 5.5.3.2 Subtask {#jcf-p05-5-5-3-2} - Attach temporal, completeness, injection, concurrency, cache-loss, event-loss, derived-graph, authorization, and performance results.
       - [x] 5.5.3.3 Subtask {#jcf-p05-5-5-3-3} - Keep G4 blocked if callers can submit raw SPARQL, results can lose source revisions, or cache/notifications can become authoritative.
-      - [ ] 5.5.3.4 Subtask {#jcf-p05-5-5-3-4} - Pin the merged candidate commit before authorizing Phase 6.
+      - [x] 5.5.3.4 Subtask {#jcf-p05-5-5-3-4} - Pin the merged candidate commit before authorizing Phase 6.

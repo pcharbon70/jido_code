@@ -95,12 +95,32 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       allow_replacement?: true
     }
   }
+  @phase_06_commands %{
+    "ChangeEnrollment" => %{
+      owner: :factory,
+      capability: :administrative,
+      graph_families: [:factory_catalog],
+      preconditions: [:enrollment_known, :unique_transition_successor]
+    },
+    "ReconcileRepositoryIdentity" => %{
+      owner: :factory,
+      capability: :administrative,
+      graph_families: [:factory_catalog],
+      preconditions: [:repository_known, :explicit_identity_evidence]
+    }
+  }
+  @version_1_1 @commands |> Map.merge(@derived_commands) |> Map.merge(@phase_06_commands)
 
   @spec version() :: String.t()
   def version, do: @version
 
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
+
+  @spec names(String.t()) :: [String.t()]
+  def names(@version), do: names()
+  def names(@derived_version), do: @version_1_1 |> Map.keys() |> Enum.sort()
+  def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
   def resolve(name, @version) when is_binary(name) do
@@ -111,7 +131,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   end
 
   def resolve(name, @derived_version) when is_binary(name) do
-    case Map.fetch(@derived_commands, name) do
+    case Map.fetch(@version_1_1, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @derived_version})}
 

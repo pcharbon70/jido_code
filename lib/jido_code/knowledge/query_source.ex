@@ -178,6 +178,67 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:repository_description), do: fetch(:resource_description)
+
+  def fetch(:locator_resolution) do
+    """
+    SELECT ?repository WHERE {
+      GRAPH {{graph}} {
+        ?repository <#{@jf}locatedBy> {{resource}} .
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:active_enrollment) do
+    """
+    SELECT ?enrollment ?policy ?locator ?validFrom ?validTo WHERE {
+      GRAPH {{graph}} {
+        ?enrollment <#{@jf}manages> {{resource}} .
+        OPTIONAL { ?enrollment <#{@jf}governedBy> ?policy }
+        OPTIONAL { ?enrollment <#{@jf}locatedBy> ?locator }
+        OPTIONAL { ?enrollment <#{@jf}validFrom> ?validFrom }
+        OPTIONAL { ?enrollment <#{@jf}validTo> ?validTo }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:enrollment_history) do
+    """
+    SELECT ?enrollment ?transition ?state ?revision ?predecessor ?actor ?cause ?policy ?locator WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> ?enrollment ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ;
+                    <#{@prov}wasAssociatedWith> ?actor ;
+                    <#{@jf}cause> ?cause .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+        OPTIONAL { ?transition <#{@jf}governedBy> ?policy }
+        OPTIONAL { ?transition <#{@jf}locatedBy> ?locator }
+        FILTER(?enrollment = {{resource}})
+      }
+    }
+    ORDER BY ?revision
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:factory_repository_cohort) do
+    """
+    SELECT ?enrollment ?repository WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}enrolls> ?enrollment .
+        ?enrollment <#{@jf}manages> ?repository .
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
