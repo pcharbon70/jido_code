@@ -20,53 +20,53 @@ Back to plan: [README](./README.md)
   through the application while preserving the expressive joins that justify
   a knowledge-graph architecture.
 
-  - [ ] 5.1 Section - Implement the reviewed query catalog and execution boundary.
+  - [x] 5.1 Section - Implement the reviewed query catalog and execution boundary.
 
     This section gives each supported graph question a stable identity,
     version, parameter contract, graph scope, authorization rule, and bounded
     decoder.
 
-    - [ ] 5.1.1 Task {#jcf-p05-query-definition} [repo: jido_code] [after: {#jcf-p04-phase-receipt}] - Define the versioned query-catalog contract.
+    - [x] 5.1.1 Task {#jcf-p05-query-definition} [repo: jido_code] [after: {#jcf-p04-phase-receipt}] - Define the versioned query-catalog contract.
 
       This task turns SPARQL into reviewed application code with explicit
       semantics rather than accepting arbitrary strings from callers.
 
-      - [ ] 5.1.1.1 Subtask {#jcf-p05-5-1-1-1} - Define query name/version, purpose, query form, parameter schema, required actor capability, allowed graph families, completeness assumptions, timeout, row/triple/byte limits, and decoder.
-      - [ ] 5.1.1.2 Subtask {#jcf-p05-5-1-1-2} - Store query text in knowledge-owned modules or resources and bind source digests to the catalog version.
-      - [ ] 5.1.1.3 Subtask {#jcf-p05-5-1-1-3} - Distinguish scalar/tabular `SELECT` or `ASK`, bounded semantic-neighborhood `CONSTRUCT`, and privileged internal diagnostics.
-      - [ ] 5.1.1.4 Subtask {#jcf-p05-5-1-1-4} - Reject unknown versions, undeclared parameters, unbounded forms, mutation statements, service/federation clauses, and graph variables outside catalog policy.
-      - [ ] 5.1.1.5 Subtask {#jcf-p05-5-1-1-5} - Require compatibility notes and fixture updates for every query behavior or decoder change.
+      - [x] 5.1.1.1 Subtask {#jcf-p05-5-1-1-1} - Define query name/version, purpose, query form, parameter schema, required actor capability, allowed graph families, completeness assumptions, timeout, row/triple/byte limits, and decoder.
+      - [x] 5.1.1.2 Subtask {#jcf-p05-5-1-1-2} - Store query text in knowledge-owned modules or resources and bind source digests to the catalog version.
+      - [x] 5.1.1.3 Subtask {#jcf-p05-5-1-1-3} - Distinguish scalar/tabular `SELECT` or `ASK`, bounded semantic-neighborhood `CONSTRUCT`, and privileged internal diagnostics.
+      - [x] 5.1.1.4 Subtask {#jcf-p05-5-1-1-4} - Reject unknown versions, undeclared parameters, unbounded forms, mutation statements, service/federation clauses, and graph variables outside catalog policy.
+      - [x] 5.1.1.5 Subtask {#jcf-p05-5-1-1-5} - Require compatibility notes and fixture updates for every query behavior or decoder change.
 
-    - [ ] 5.1.2 Task {#jcf-p05-query-parameters} [repo: jido_code] [after: {#jcf-p05-query-definition}] - Implement typed SPARQL parameter binding and graph selection.
+    - [x] 5.1.2 Task {#jcf-p05-query-parameters} [repo: jido_code] [after: {#jcf-p05-query-definition}] - Implement typed SPARQL parameter binding and graph selection.
 
       This task prevents string concatenation, injection, scope widening, and
       user-selected graph authority at every query call site.
 
-      - [ ] 5.1.2.1 Subtask {#jcf-p05-5-1-2-1} - Convert validated resource/graph IRIs, literals, controlled concepts, times, limits, and cursors into RDF/SPARQL terms through one binder.
-      - [ ] 5.1.2.2 Subtask {#jcf-p05-5-1-2-2} - Resolve allowed graph IRIs from authorized actor scope and graph registry rather than caller-supplied `GRAPH` text.
-      - [ ] 5.1.2.3 Subtask {#jcf-p05-5-1-2-3} - Reject control characters, malformed datatypes, unauthorized historical graphs, over-limit collections, and terms outside declared namespaces.
-      - [ ] 5.1.2.4 Subtask {#jcf-p05-5-1-2-4} - Add injection fixtures for quotes, braces, comments, prefixes, subqueries, graph clauses, update verbs, and encoded IRI escapes.
+      - [x] 5.1.2.1 Subtask {#jcf-p05-5-1-2-1} - Convert validated resource/graph IRIs, literals, controlled concepts, times, limits, and cursors into RDF/SPARQL terms through one binder.
+      - [x] 5.1.2.2 Subtask {#jcf-p05-5-1-2-2} - Resolve allowed graph IRIs from authorized actor scope and graph registry rather than caller-supplied `GRAPH` text.
+      - [x] 5.1.2.3 Subtask {#jcf-p05-5-1-2-3} - Reject control characters, malformed datatypes, unauthorized historical graphs, over-limit collections, and terms outside declared namespaces.
+      - [x] 5.1.2.4 Subtask {#jcf-p05-5-1-2-4} - Add injection fixtures for quotes, braces, comments, prefixes, subqueries, graph clauses, update verbs, and encoded IRI escapes.
 
-    - [ ] 5.1.3 Task {#jcf-p05-query-executor} [repo: jido_code] [after: {#jcf-p05-query-parameters}] - Implement bounded catalog query execution.
+    - [x] 5.1.3 Task {#jcf-p05-query-executor} [repo: jido_code] [after: {#jcf-p05-query-parameters}] - Implement bounded catalog query execution.
 
       This task executes one reviewed query against one consistent dataset
       revision and returns normalized results plus provenance and limits.
 
-      - [ ] 5.1.3.1 Subtask {#jcf-p05-5-1-3-1} - Acquire an appropriate read snapshot or revision boundary through `StoreServer` and record evaluated dataset/graph revisions.
-      - [ ] 5.1.3.2 Subtask {#jcf-p05-5-1-3-2} - Enforce timeout, row, triple, byte, traversal-depth, and pagination bounds before decoding.
-      - [ ] 5.1.3.3 Subtask {#jcf-p05-5-1-3-3} - Return query/version, source graph revisions, ontology version, completeness, freshness, truncation, cursor, warnings, and execution class.
-      - [ ] 5.1.3.4 Subtask {#jcf-p05-5-1-3-4} - Redact raw query text and unauthorized resource identities from errors and telemetry.
-      - [ ] 5.1.3.5 Subtask {#jcf-p05-5-1-3-5} - Fail closed when authorization, graph metadata, ontology compatibility, or required completeness cannot be established.
+      - [x] 5.1.3.1 Subtask {#jcf-p05-5-1-3-1} - Acquire an appropriate read snapshot or revision boundary through `StoreServer` and record evaluated dataset/graph revisions.
+      - [x] 5.1.3.2 Subtask {#jcf-p05-5-1-3-2} - Enforce timeout, row, triple, byte, traversal-depth, and pagination bounds before decoding.
+      - [x] 5.1.3.3 Subtask {#jcf-p05-5-1-3-3} - Return query/version, source graph revisions, ontology version, completeness, freshness, truncation, cursor, warnings, and execution class.
+      - [x] 5.1.3.4 Subtask {#jcf-p05-5-1-3-4} - Redact raw query text and unauthorized resource identities from errors and telemetry.
+      - [x] 5.1.3.5 Subtask {#jcf-p05-5-1-3-5} - Fail closed when authorization, graph metadata, ontology compatibility, or required completeness cannot be established.
 
-    - [ ] 5.1.4 Task {#jcf-p05-initial-query-set} [repo: jido_code] [after: {#jcf-p05-query-executor}] - Implement substrate and semantic-contract queries.
+    - [x] 5.1.4 Task {#jcf-p05-initial-query-set} [repo: jido_code] [after: {#jcf-p05-query-executor}] - Implement substrate and semantic-contract queries.
 
       This task supplies the minimal queries needed to test and operate later
       domain slices without predefining the product route surface.
 
-      - [ ] 5.1.4.1 Subtask {#jcf-p05-5-1-4-1} - Add graph metadata, dataset revision, ontology compatibility, command receipt, audit reference, and graph health queries.
-      - [ ] 5.1.4.2 Subtask {#jcf-p05-5-1-4-2} - Add resource description, bounded incoming/outgoing neighborhood, provenance chain, supporting/contradicting claim, and supersession queries.
-      - [ ] 5.1.4.3 Subtask {#jcf-p05-5-1-4-3} - Add transition-chain endpoint, transition history, temporal-as-of, graph completeness, and derived-graph freshness queries.
-      - [ ] 5.1.4.4 Subtask {#jcf-p05-5-1-4-4} - Keep repository, goal, execution, and UI-specific queries in their owning later phases.
+      - [x] 5.1.4.1 Subtask {#jcf-p05-5-1-4-1} - Add graph metadata, dataset revision, ontology compatibility, command receipt, audit reference, and graph health queries.
+      - [x] 5.1.4.2 Subtask {#jcf-p05-5-1-4-2} - Add resource description, bounded incoming/outgoing neighborhood, provenance chain, supporting/contradicting claim, and supersession queries.
+      - [x] 5.1.4.3 Subtask {#jcf-p05-5-1-4-3} - Add transition-chain endpoint, transition history, temporal-as-of, graph completeness, and derived-graph freshness queries.
+      - [x] 5.1.4.4 Subtask {#jcf-p05-5-1-4-4} - Keep repository, goal, execution, and UI-specific queries in their owning later phases.
 
   - [ ] 5.2 Section - Implement temporal, current-state, and closed-world consistency.
 

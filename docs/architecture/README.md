@@ -49,3 +49,7 @@ implementation plan was merged.
 - [Authority, bootstrap, and audit](./authority-bootstrap-and-audit.md)
 - [Change delivery and command recovery](./change-delivery-and-command-recovery.md)
 - [Phase 4 controlled mutation receipt](./phase-04-receipt.md)
+
+## Phase 5 Bounded Reads
+
+- [Reviewed query catalog and execution boundary](./reviewed-query-catalog.md)
