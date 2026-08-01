@@ -68,51 +68,51 @@ Back to plan: [README](./README.md)
       - [x] 5.1.4.3 Subtask {#jcf-p05-5-1-4-3} - Add transition-chain endpoint, transition history, temporal-as-of, graph completeness, and derived-graph freshness queries.
       - [x] 5.1.4.4 Subtask {#jcf-p05-5-1-4-4} - Keep repository, goal, execution, and UI-specific queries in their owning later phases.
 
-  - [ ] 5.2 Section - Implement temporal, current-state, and closed-world consistency.
+  - [x] 5.2 Section - Implement temporal, current-state, and closed-world consistency.
 
     This section makes every operational answer explicit about time,
     completeness, revision, and unknown state instead of treating missing
     triples or wall-clock recency as truth.
 
-    - [ ] 5.2.1 Task {#jcf-p05-consistency-contract} [repo: jido_code] [after: {#jcf-p05-initial-query-set}] - Define query consistency and freshness modes.
+    - [x] 5.2.1 Task {#jcf-p05-consistency-contract} [repo: jido_code] [after: {#jcf-p05-initial-query-set}] - Define query consistency and freshness modes.
 
       This task lets callers request exact, minimum, historical, or best-effort
       graph state without hidden waiting or silent stale fallback.
 
-      - [ ] 5.2.1.1 Subtask {#jcf-p05-5-2-1-1} - Accept exact dataset/graph revisions, minimum revisions, ontology version, required complete graphs, valid-time instant/interval, and derived-rule-set revision.
-      - [ ] 5.2.1.2 Subtask {#jcf-p05-5-2-1-2} - Define strict mode as fail-with-state, warn mode as bounded results with explicit degradation, and historical mode as an authorized exact graph set.
-      - [ ] 5.2.1.3 Subtask {#jcf-p05-5-2-1-3} - Reject ambiguous constraint combinations, unavailable history, stale derived graphs where prohibited, and unauthorized revision discovery.
-      - [ ] 5.2.1.4 Subtask {#jcf-p05-5-2-1-4} - Preserve the evaluated consistency receipt across pagination and projection decoding.
+      - [x] 5.2.1.1 Subtask {#jcf-p05-5-2-1-1} - Accept exact dataset/graph revisions, minimum revisions, ontology version, required complete graphs, valid-time instant/interval, and derived-rule-set revision.
+      - [x] 5.2.1.2 Subtask {#jcf-p05-5-2-1-2} - Define strict mode as fail-with-state, warn mode as bounded results with explicit degradation, and historical mode as an authorized exact graph set.
+      - [x] 5.2.1.3 Subtask {#jcf-p05-5-2-1-3} - Reject ambiguous constraint combinations, unavailable history, stale derived graphs where prohibited, and unauthorized revision discovery.
+      - [x] 5.2.1.4 Subtask {#jcf-p05-5-2-1-4} - Preserve the evaluated consistency receipt across pagination and projection decoding.
 
-    - [ ] 5.2.2 Task {#jcf-p05-current-state} [repo: jido_code] [after: {#jcf-p05-consistency-contract}] - Implement current-state resolution from transition chains.
+    - [x] 5.2.2 Task {#jcf-p05-current-state} [repo: jido_code] [after: {#jcf-p05-consistency-contract}] - Implement current-state resolution from transition chains.
 
       This task derives operational state causally and reports contradictions
       rather than reading a mutable status property.
 
-      - [ ] 5.2.2.1 Subtask {#jcf-p05-5-2-2-1} - Traverse from genesis through expected-predecessor and monotonic revision links to the unique valid, non-superseded endpoint.
-      - [ ] 5.2.2.2 Subtask {#jcf-p05-5-2-2-2} - Detect missing links, forks, cycles, illegal concepts, supersession ambiguity, and revision regression as integrity failures.
-      - [ ] 5.2.2.3 Subtask {#jcf-p05-5-2-2-3} - Return current state plus endpoint transition, chain revision, actor/cause references, and evaluated graph revision.
-      - [ ] 5.2.2.4 Subtask {#jcf-p05-5-2-2-4} - Add optional disposable current-state materialization keyed by exact source revision and prove it is never authoritative.
+      - [x] 5.2.2.1 Subtask {#jcf-p05-5-2-2-1} - Traverse from genesis through expected-predecessor and monotonic revision links to the unique valid, non-superseded endpoint.
+      - [x] 5.2.2.2 Subtask {#jcf-p05-5-2-2-2} - Detect missing links, forks, cycles, illegal concepts, supersession ambiguity, and revision regression as integrity failures.
+      - [x] 5.2.2.3 Subtask {#jcf-p05-5-2-2-3} - Return current state plus endpoint transition, chain revision, actor/cause references, and evaluated graph revision.
+      - [x] 5.2.2.4 Subtask {#jcf-p05-5-2-2-4} - Add optional disposable current-state materialization keyed by exact source revision and prove it is never authoritative.
 
-    - [ ] 5.2.3 Task {#jcf-p05-completeness-boundary} [repo: jido_code] [after: {#jcf-p05-current-state}] - Implement declared closed-world query boundaries.
+    - [x] 5.2.3 Task {#jcf-p05-completeness-boundary} [repo: jido_code] [after: {#jcf-p05-current-state}] - Implement declared closed-world query boundaries.
 
       This task permits safe operational negation only over explicitly complete
       graph families and revisions.
 
-      - [ ] 5.2.3.1 Subtask {#jcf-p05-5-2-3-1} - Define completeness assertions by subject/scope, graph family, source snapshot, predicate/class coverage, producer, and validity interval.
-      - [ ] 5.2.3.2 Subtask {#jcf-p05-5-2-3-2} - Require closed-world eligibility, authorization, and acceptance queries to name their complete input set.
-      - [ ] 5.2.3.3 Subtask {#jcf-p05-5-2-3-3} - Return unknown or incomplete rather than false when required coverage is absent, stale, contradictory, or invalidated.
-      - [ ] 5.2.3.4 Subtask {#jcf-p05-5-2-3-4} - Add negative fixtures proving a missing triple outside a complete boundary never satisfies a policy or precondition.
+      - [x] 5.2.3.1 Subtask {#jcf-p05-5-2-3-1} - Define completeness assertions by subject/scope, graph family, source snapshot, predicate/class coverage, producer, and validity interval.
+      - [x] 5.2.3.2 Subtask {#jcf-p05-5-2-3-2} - Require closed-world eligibility, authorization, and acceptance queries to name their complete input set.
+      - [x] 5.2.3.3 Subtask {#jcf-p05-5-2-3-3} - Return unknown or incomplete rather than false when required coverage is absent, stale, contradictory, or invalidated.
+      - [x] 5.2.3.4 Subtask {#jcf-p05-5-2-3-4} - Add negative fixtures proving a missing triple outside a complete boundary never satisfies a policy or precondition.
 
-    - [ ] 5.2.4 Task {#jcf-p05-temporal-querying} [repo: jido_code] [after: {#jcf-p05-completeness-boundary}] - Implement transaction-time and valid-time query helpers.
+    - [x] 5.2.4 Task {#jcf-p05-temporal-querying} [repo: jido_code] [after: {#jcf-p05-completeness-boundary}] - Implement transaction-time and valid-time query helpers.
 
       This task lets product and control code ask what was known and what was
       externally valid without conflating the two timelines.
 
-      - [ ] 5.2.4.1 Subtask {#jcf-p05-5-2-4-1} - Select assertions by recorded/commit revision, source-observed time, valid interval, invalidation, and supersession.
-      - [ ] 5.2.4.2 Subtask {#jcf-p05-5-2-4-2} - Return concurrent incompatible claims with epistemic/provenance context rather than choosing the newest literal.
-      - [ ] 5.2.4.3 Subtask {#jcf-p05-5-2-4-3} - Support exact historical source snapshot and decision-context reconstruction where retained graphs exist.
-      - [ ] 5.2.4.4 Subtask {#jcf-p05-5-2-4-4} - Bound historical graph count, time range, result size, and authorization separately from current reads.
+      - [x] 5.2.4.1 Subtask {#jcf-p05-5-2-4-1} - Select assertions by recorded/commit revision, source-observed time, valid interval, invalidation, and supersession.
+      - [x] 5.2.4.2 Subtask {#jcf-p05-5-2-4-2} - Return concurrent incompatible claims with epistemic/provenance context rather than choosing the newest literal.
+      - [x] 5.2.4.3 Subtask {#jcf-p05-5-2-4-3} - Support exact historical source snapshot and decision-context reconstruction where retained graphs exist.
+      - [x] 5.2.4.4 Subtask {#jcf-p05-5-2-4-4} - Bound historical graph count, time range, result size, and authorization separately from current reads.
 
   - [ ] 5.3 Section - Implement bounded projections, caching, and subscriptions.
 

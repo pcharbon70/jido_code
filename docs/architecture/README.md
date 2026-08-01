@@ -53,3 +53,4 @@ implementation plan was merged.
 ## Phase 5 Bounded Reads
 
 - [Reviewed query catalog and execution boundary](./reviewed-query-catalog.md)
+- [Query consistency and temporal state](./query-consistency-and-temporal-state.md)

@@ -4,6 +4,7 @@ defmodule JidoCode.Knowledge.CatalogQueryRequest do
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.QueryCatalog
+  alias JidoCode.Knowledge.QueryConsistency
   alias JidoCode.Knowledge.QueryParameters
   alias JidoCode.Knowledge.ResourceIdentity
 
@@ -33,7 +34,8 @@ defmodule JidoCode.Knowledge.CatalogQueryRequest do
     with {:ok, definition} <- QueryCatalog.fetch(name, version),
          :ok <- ResourceIdentity.validate(scope_iri),
          true <- match?(%DateTime{}, evaluated_at),
-         {:ok, binding} <- QueryParameters.bind(definition, parameters) do
+         {:ok, binding} <- QueryParameters.bind(definition, parameters),
+         {:ok, consistency} <- QueryConsistency.new(Keyword.get(options, :consistency)) do
       {:ok,
        %__MODULE__{
          query_name: name,
@@ -45,7 +47,7 @@ defmodule JidoCode.Knowledge.CatalogQueryRequest do
          authority: authority,
          scope_iri: scope_iri,
          evaluated_at: evaluated_at,
-         consistency: Keyword.get(options, :consistency)
+         consistency: consistency
        }}
     else
       {:error, %Error{} = error} -> {:error, error}

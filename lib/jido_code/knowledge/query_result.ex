@@ -16,6 +16,7 @@ defmodule JidoCode.Knowledge.QueryResult do
              :cursor,
              :warnings,
              :execution_class,
+             :consistency,
              :data
            ]}
   @enforce_keys [
@@ -30,6 +31,7 @@ defmodule JidoCode.Knowledge.QueryResult do
     :cursor,
     :warnings,
     :execution_class,
+    :consistency,
     :evaluated_at,
     :data
   ]

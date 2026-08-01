@@ -3,6 +3,7 @@ defmodule JidoCode.Knowledge.QueryExecution do
 
   alias JidoCode.Knowledge.BackendFailure
   alias JidoCode.Knowledge.CatalogQueryRequest
+  alias JidoCode.Knowledge.ConsistencyEvaluator
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.QueryAuthorization
   alias JidoCode.Knowledge.QueryCatalog
@@ -15,16 +16,35 @@ defmodule JidoCode.Knowledge.QueryExecution do
   @policy_graph "https://jido.run/graph/factory/policy"
 
   @spec execute(TripleStore.store(), map(), CatalogQueryRequest.t()) ::
-          {:ok, QueryResult.t()} | {:error, Error.t()}
+          {:ok, QueryResult.t()}
+          | {:error, Error.t()}
+          | {:error, Error.t(), JidoCode.Knowledge.ConsistencyReceipt.t()}
   def execute(store, substrate_metadata, %CatalogQueryRequest{} = request) do
     with :ok <- verify_definition(request),
          {:ok, snapshot} <- read_snapshot(store, substrate_metadata, request),
          {:ok, _authorization} <- QueryAuthorization.authorize(request, snapshot),
+         {:ok, consistency} <-
+           ConsistencyEvaluator.evaluate(
+             request.consistency,
+             substrate_metadata,
+             snapshot,
+             request.graph_iris
+           ),
          {:ok, raw} <- run(store, request),
-         {:ok, data, truncated?, cursor} <- decode(raw, request, substrate_metadata),
+         {:ok, data, truncated?, cursor} <- decode(raw, request, consistency),
          :ok <- enforce_bytes(data, request.definition.limits.byte_limit) do
-      {:ok, result(request, snapshot, substrate_metadata, data, truncated?, cursor)}
+      {:ok,
+       result(
+         request,
+         snapshot,
+         substrate_metadata,
+         consistency,
+         data,
+         truncated?,
+         cursor
+       )}
     else
+      {:error, %Error{} = error, consistency} -> {:error, error, consistency}
       {:error, %Error{} = error} -> {:error, error}
       {:error, reason} -> {:error, BackendFailure.translate(reason, :catalog_query)}
       _invalid -> {:error, Error.new(:unavailable, :catalog_query)}
@@ -79,7 +99,8 @@ defmodule JidoCode.Knowledge.QueryExecution do
     end
   end
 
-  defp decode(rows, %{definition: %{form: :select}} = request, metadata) when is_list(rows) do
+  defp decode(rows, %{definition: %{form: :select}} = request, consistency)
+       when is_list(rows) do
     limit = request.definition.limits.row_limit
     truncated? = length(rows) > limit
 
@@ -93,7 +114,9 @@ defmodule JidoCode.Knowledge.QueryExecution do
         QueryParameters.encode_cursor(%{
           query: request.query_name,
           version: request.query_version,
-          dataset_revision: metadata.dataset_revision,
+          dataset_revision: consistency.dataset_revision,
+          graph_revisions: consistency.graph_revisions,
+          consistency_digest: consistency.constraint_digest,
           offset: limit
         })
       end
@@ -127,7 +150,7 @@ defmodule JidoCode.Knowledge.QueryExecution do
   defp decode(_raw, _request, _metadata),
     do: {:error, Error.new(:corrupt, :decode_catalog_query)}
 
-  defp result(request, snapshot, substrate, data, truncated?, cursor) do
+  defp result(request, snapshot, substrate, consistency, data, truncated?, cursor) do
     metadata = Map.values(snapshot.graph_metadata)
     ontology_versions = metadata |> Enum.map(& &1.ontology_version) |> Enum.uniq()
     completeness_states = metadata |> Enum.map(& &1.completeness_state) |> Enum.uniq()
@@ -138,7 +161,9 @@ defmodule JidoCode.Knowledge.QueryExecution do
       complete?: completeness_states != [] and Enum.all?(completeness_states, &(&1 == :complete))
     }
 
-    warnings = if truncated?, do: [:result_truncated], else: []
+    warnings =
+      if(truncated?, do: [:result_truncated], else: []) ++
+        Enum.map(consistency.gaps, &{:consistency, &1})
 
     %QueryResult{
       query_name: request.query_name,
@@ -152,6 +177,7 @@ defmodule JidoCode.Knowledge.QueryExecution do
       cursor: cursor,
       warnings: warnings,
       execution_class: request.definition.execution_class,
+      consistency: consistency,
       evaluated_at: request.evaluated_at,
       data: data
     }

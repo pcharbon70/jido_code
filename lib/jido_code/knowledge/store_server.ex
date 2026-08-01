@@ -367,6 +367,7 @@ defmodule JidoCode.Knowledge.StoreServer do
     case QueryExecution.execute(state.store, state.metadata, request) do
       {:ok, result} -> {:ok, result, state}
       {:error, %Error{} = error} -> {:error, error}
+      {:error, %Error{} = error, receipt} -> {:error, error, receipt}
     end
   end
 
