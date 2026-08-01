@@ -114,40 +114,40 @@ Back to plan: [README](./README.md)
       - [x] 5.2.4.3 Subtask {#jcf-p05-5-2-4-3} - Support exact historical source snapshot and decision-context reconstruction where retained graphs exist.
       - [x] 5.2.4.4 Subtask {#jcf-p05-5-2-4-4} - Bound historical graph count, time range, result size, and authorization separately from current reads.
 
-  - [ ] 5.3 Section - Implement bounded projections, caching, and subscriptions.
+  - [x] 5.3 Section - Implement bounded projections, caching, and subscriptions.
 
     This section converts query products into consumer-specific read models
     while ensuring every cache and notification can be discarded safely.
 
-    - [ ] 5.3.1 Task {#jcf-p05-projection-contract} [repo: jido_code] [after: {#jcf-p05-temporal-querying}] - Define bounded graph projection envelopes.
+    - [x] 5.3.1 Task {#jcf-p05-projection-contract} [repo: jido_code] [after: {#jcf-p05-temporal-querying}] - Define bounded graph projection envelopes.
 
       This task permits temporary structs and JSON-safe maps only as
       attributable views over exact graph revisions.
 
-      - [ ] 5.3.1.1 Subtask {#jcf-p05-5-3-1-1} - Include projection name/version, actor scope, source graphs/revisions, ontology/query versions, generated time, completeness, freshness, truncation, warnings, and cursor.
-      - [ ] 5.3.1.2 Subtask {#jcf-p05-5-3-1-2} - Define scalar, table, timeline, tree, and bounded-subgraph result shapes without exposing RDF/backend structs to web or runtime consumers.
-      - [ ] 5.3.1.3 Subtask {#jcf-p05-5-3-1-3} - Preserve canonical resource IRIs for semantic actions while supplying separately escaped display labels.
-      - [ ] 5.3.1.4 Subtask {#jcf-p05-5-3-1-4} - Reject projections whose decoder drops provenance, widens scope, invents status, or silently resolves contradictions.
+      - [x] 5.3.1.1 Subtask {#jcf-p05-5-3-1-1} - Include projection name/version, actor scope, source graphs/revisions, ontology/query versions, generated time, completeness, freshness, truncation, warnings, and cursor.
+      - [x] 5.3.1.2 Subtask {#jcf-p05-5-3-1-2} - Define scalar, table, timeline, tree, and bounded-subgraph result shapes without exposing RDF/backend structs to web or runtime consumers.
+      - [x] 5.3.1.3 Subtask {#jcf-p05-5-3-1-3} - Preserve canonical resource IRIs for semantic actions while supplying separately escaped display labels.
+      - [x] 5.3.1.4 Subtask {#jcf-p05-5-3-1-4} - Reject projections whose decoder drops provenance, widens scope, invents status, or silently resolves contradictions.
 
-    - [ ] 5.3.2 Task {#jcf-p05-projection-cache} [repo: jido_code] [after: {#jcf-p05-projection-contract}] - Implement optional disposable projection caching.
+    - [x] 5.3.2 Task {#jcf-p05-projection-cache} [repo: jido_code] [after: {#jcf-p05-projection-contract}] - Implement optional disposable projection caching.
 
       This task improves repeated reads without creating a second source of
       truth or serving results under mismatched authority and revision.
 
-      - [ ] 5.3.2.1 Subtask {#jcf-p05-5-3-2-1} - Key caches by projection/query version, normalized parameters, actor authorization scope, graph revisions, ontology version, and consistency mode.
-      - [ ] 5.3.2.2 Subtask {#jcf-p05-5-3-2-2} - Keep cache values in memory or a graph-tagged rebuildable derived graph only; do not add a durable cache database.
-      - [ ] 5.3.2.3 Subtask {#jcf-p05-5-3-2-3} - Invalidate or bypass entries when any source revision, grant, ontology/query version, completeness assertion, or derived rule set changes.
-      - [ ] 5.3.2.4 Subtask {#jcf-p05-5-3-2-4} - Prove cache eviction, process restart, and complete cache deletion do not change product behavior.
+      - [x] 5.3.2.1 Subtask {#jcf-p05-5-3-2-1} - Key caches by projection/query version, normalized parameters, actor authorization scope, graph revisions, ontology version, and consistency mode.
+      - [x] 5.3.2.2 Subtask {#jcf-p05-5-3-2-2} - Keep cache values in memory or a graph-tagged rebuildable derived graph only; do not add a durable cache database.
+      - [x] 5.3.2.3 Subtask {#jcf-p05-5-3-2-3} - Invalidate or bypass entries when any source revision, grant, ontology/query version, completeness assertion, or derived rule set changes.
+      - [x] 5.3.2.4 Subtask {#jcf-p05-5-3-2-4} - Prove cache eviction, process restart, and complete cache deletion do not change product behavior.
 
-    - [ ] 5.3.3 Task {#jcf-p05-subscription-boundary} [repo: jido_code] [after: {#jcf-p05-projection-cache}] - Implement revision-aware projection subscriptions.
+    - [x] 5.3.3 Task {#jcf-p05-subscription-boundary} [repo: jido_code] [after: {#jcf-p05-projection-cache}] - Implement revision-aware projection subscriptions.
 
       This task lets LiveViews and workers react to relevant commits while
       treating PubSub as a lossy optimization.
 
-      - [ ] 5.3.3.1 Subtask {#jcf-p05-5-3-3-1} - Subscribe by authorized low-cardinality factory, enrollment, repository, goal, or attempt scope as those resources become available.
-      - [ ] 5.3.3.2 Subtask {#jcf-p05-5-3-3-2} - Track the consumer's last evaluated revision and re-query when a notification indicates a newer relevant commit.
-      - [ ] 5.3.3.3 Subtask {#jcf-p05-5-3-3-3} - Coalesce bursts without skipping the newest revision and recover on reconnect or mailbox loss with a fresh query.
-      - [ ] 5.3.3.4 Subtask {#jcf-p05-5-3-3-4} - Reauthorize subscriptions and projections when grants, actor scope, or session authority changes.
+      - [x] 5.3.3.1 Subtask {#jcf-p05-5-3-3-1} - Subscribe by authorized low-cardinality factory, enrollment, repository, goal, or attempt scope as those resources become available.
+      - [x] 5.3.3.2 Subtask {#jcf-p05-5-3-3-2} - Track the consumer's last evaluated revision and re-query when a notification indicates a newer relevant commit.
+      - [x] 5.3.3.3 Subtask {#jcf-p05-5-3-3-3} - Coalesce bursts without skipping the newest revision and recover on reconnect or mailbox loss with a fresh query.
+      - [x] 5.3.3.4 Subtask {#jcf-p05-5-3-3-4} - Reauthorize subscriptions and projections when grants, actor scope, or session authority changes.
 
   - [ ] 5.4 Section - Establish derived graph and diagnostic query infrastructure.
 

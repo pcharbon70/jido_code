@@ -11,6 +11,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
+  alias JidoCode.Knowledge.Projection
   alias JidoCode.Knowledge.Writer
 
   def execute(%CommandEnvelope{} = envelope, options \\ []), do: Writer.execute(envelope, options)
@@ -23,6 +24,9 @@ defmodule JidoCode.Knowledge do
 
   def query(name, version, parameters, %AuthorityContext{} = authority, scope_iri, options \\ []),
     do: QueryRunner.execute(name, version, parameters, authority, scope_iri, options)
+
+  def project(result, %AuthorityContext{} = authority, scope_iri, options \\ []),
+    do: Projection.build(result, authority, scope_iri, options)
 
   def health, do: Readiness.snapshot()
   def ready?, do: health() |> JidoCode.Knowledge.Health.ready?()
