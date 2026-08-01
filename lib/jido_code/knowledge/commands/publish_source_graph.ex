@@ -21,12 +21,15 @@ defmodule JidoCode.Knowledge.Commands.PublishSourceGraph do
   @max_literal_bytes 512
   @allowed_warnings MapSet.new([
                       "file_limit_reached",
+                      "git_snapshot_limited",
+                      "lfs_objects_not_analyzed",
                       "parse_error",
                       "source_expression_limit",
                       "source_file_size",
                       "source_statement_limit",
                       "source_symbol_limit",
                       "source_total_bytes",
+                      "submodules_not_analyzed",
                       "symlink_skipped",
                       "unsupported_file_type_skipped"
                     ])
@@ -153,7 +156,7 @@ defmodule JidoCode.Knowledge.Commands.PublishSourceGraph do
              tree_iri,
              metadata,
              additions,
-             analysis[:configuration_digest],
+             identity_digest(activity_iri),
              options
            ) do
       {:ok,
@@ -611,6 +614,10 @@ defmodule JidoCode.Knowledge.Commands.PublishSourceGraph do
     |> RDF.NQuads.write_string!(sort: true)
     |> then(&:crypto.hash(:sha256, &1))
     |> Base.encode16(case: :lower)
+  end
+
+  defp identity_digest(value) do
+    value |> then(&:crypto.hash(:sha256, &1)) |> Base.encode16(case: :lower)
   end
 
   defp tree_identity(digest) do

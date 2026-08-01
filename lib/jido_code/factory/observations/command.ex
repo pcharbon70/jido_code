@@ -21,7 +21,8 @@ defmodule JidoCode.Factory.Observations.Command do
 
   def build(%ObservationEnvelope{} = envelope, context, options)
       when is_map(context) and is_list(options) do
-    with {:ok, assertions} <- assertions(envelope, context.repository_iri),
+    with true <- context_bound?(envelope, context),
+         {:ok, assertions} <- assertions(envelope, context.repository_iri),
          {:ok, snapshot} <- snapshot(Map.get(context, :git_snapshot)) do
       RecordObservationBatch.build(
         %{
@@ -64,6 +65,17 @@ defmodule JidoCode.Factory.Observations.Command do
 
   def build(_envelope, _context, _options),
     do: {:error, Error.new(:invalid_input, :observation_command)}
+
+  defp context_bound?(envelope, context) do
+    case context[:enrollment] do
+      %{enrollment_iri: enrollment_iri} ->
+        enrollment_iri == envelope.enrollment_iri and
+          context[:locator_iri] == envelope.locator_iri
+
+      _invalid ->
+        false
+    end
+  end
 
   defp assertions(envelope, repository_iri) do
     Enum.reduce_while(envelope.observations, {:ok, []}, fn observation, {:ok, acc} ->

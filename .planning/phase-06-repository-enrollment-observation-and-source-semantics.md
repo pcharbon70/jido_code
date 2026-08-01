@@ -185,42 +185,42 @@ Back to plan: [README](./README.md)
       - [x] 6.4.3.3 Subtask {#jcf-p06-6-4-3-3} - Add bounded impact projection around a source entity while preserving incoming/outgoing predicate identity and graph provenance.
       - [x] 6.4.3.4 Subtask {#jcf-p06-6-4-3-4} - Reject an explicit source query that omits repository/snapshot scope or attempts unauthorized historical graph access.
 
-  - [ ] 6.5 Section - Phase 6 Integration Tests.
+  - [x] 6.5 Section - Phase 6 Integration Tests.
 
     This final section proves enrollment and observation survive duplicates,
     reordering, provider drift, force pushes, clone loss, analysis failure, and
     restart while remaining reproducible from graph and external revisions.
 
-    - [ ] 6.5.1 Task {#jcf-p06-enrollment-observation-integration} [repo: jido_code] [after: {#jcf-p06-source-projections}] - Execute repository enrollment through immutable observation batches.
+    - [x] 6.5.1 Task {#jcf-p06-enrollment-observation-integration} [repo: jido_code] [after: {#jcf-p06-source-projections}] - Execute repository enrollment through immutable observation batches.
 
       This task validates the first real external-to-graph product flow using
       fakes plus a controlled provider/Git fixture.
 
-      - [ ] 6.5.1.1 Subtask {#jcf-p06-6-5-1-1} - Bootstrap, enroll a repository with multiple locators, observe provider/Git state, and project the active enrollment and latest complete observation.
-      - [ ] 6.5.1.2 Subtask {#jcf-p06-6-5-1-2} - Replay duplicate polling/webhook deliveries, reorder delayed events, transfer/redirect a locator, suspend/resume enrollment, and retire without duplicate effects or history loss.
-      - [ ] 6.5.1.3 Subtask {#jcf-p06-6-5-1-3} - Exercise invalid signatures, stale credentials, partial pagination, rate limits, provider deletion, locator ambiguity, and cross-enrollment attempts.
-      - [ ] 6.5.1.4 Subtask {#jcf-p06-6-5-1-4} - Scan graph/export/log/telemetry/event/fixture outputs for credentials, raw provider bodies, private paths, and unapproved source text.
+      - [x] 6.5.1.1 Subtask {#jcf-p06-6-5-1-1} - Bootstrap, enroll a repository with multiple locators, observe provider/Git state, and project the active enrollment and latest complete observation.
+      - [x] 6.5.1.2 Subtask {#jcf-p06-6-5-1-2} - Replay duplicate polling/webhook deliveries, reorder delayed events, transfer/redirect a locator, suspend/resume enrollment, and retire without duplicate effects or history loss.
+      - [x] 6.5.1.3 Subtask {#jcf-p06-6-5-1-3} - Exercise invalid signatures, stale credentials, partial pagination, rate limits, provider deletion, locator ambiguity, and cross-enrollment attempts.
+      - [x] 6.5.1.4 Subtask {#jcf-p06-6-5-1-4} - Scan graph/export/log/telemetry/event/fixture outputs for credentials, raw provider bodies, private paths, and unapproved source text.
 
-    - [ ] 6.5.2 Task {#jcf-p06-source-semantics-integration} [repo: jido_code] [after: {#jcf-p06-enrollment-observation-integration}] - Prove snapshot and source-graph reproducibility.
+    - [x] 6.5.2 Task {#jcf-p06-source-semantics-integration} [repo: jido_code] [after: {#jcf-p06-enrollment-observation-integration}] - Prove snapshot and source-graph reproducibility.
 
       This task verifies exact Git identity and semantic extraction remain
       coherent across changed refs, repeated analysis, process death, and local
       cache deletion.
 
-      - [ ] 6.5.2.1 Subtask {#jcf-p06-6-5-2-1} - Resolve and analyze a fixture commit, delete its checkout, recreate it, rerun analysis, and compare canonical source graph output and provenance.
-      - [ ] 6.5.2.2 Subtask {#jcf-p06-6-5-2-2} - Move/force-push a branch and prove old/new immutable snapshots and source graphs remain distinguishable and queryable by authorization.
-      - [ ] 6.5.2.3 Subtask {#jcf-p06-6-5-2-3} - Kill analysis/publication before and after commit and prove no partial graph is current and replay is deterministic.
-      - [ ] 6.5.2.4 Subtask {#jcf-p06-6-5-2-4} - Exercise oversized, unsupported, hostile-config, missing-ref, submodule/LFS, malformed analyzer output, and incomplete coverage cases.
-      - [ ] 6.5.2.5 Subtask {#jcf-p06-6-5-2-5} - Backup/restore and verify enrollment, observation, snapshot, source graph, and query revisions remain equivalent.
-      - [ ] 6.5.2.6 Subtask {#jcf-p06-6-5-2-6} - Rerun Phases 1-5 suites and `mix precommit`.
+      - [x] 6.5.2.1 Subtask {#jcf-p06-6-5-2-1} - Resolve and analyze a fixture commit, delete its checkout, recreate it, rerun analysis, and compare canonical source graph output and provenance.
+      - [x] 6.5.2.2 Subtask {#jcf-p06-6-5-2-2} - Move/force-push a branch and prove old/new immutable snapshots and source graphs remain distinguishable and queryable by authorization.
+      - [x] 6.5.2.3 Subtask {#jcf-p06-6-5-2-3} - Kill analysis/publication before and after commit and prove no partial graph is current and replay is deterministic.
+      - [x] 6.5.2.4 Subtask {#jcf-p06-6-5-2-4} - Exercise oversized, unsupported, hostile-config, missing-ref, submodule/LFS, malformed analyzer output, and incomplete coverage cases.
+      - [x] 6.5.2.5 Subtask {#jcf-p06-6-5-2-5} - Backup/restore and verify enrollment, observation, snapshot, source graph, and query revisions remain equivalent.
+      - [x] 6.5.2.6 Subtask {#jcf-p06-6-5-2-6} - Rerun Phases 1-5 suites and `mix precommit`.
 
-    - [ ] 6.5.3 Task {#jcf-p06-phase-receipt} [repo: jido_code] [after: {#jcf-p06-source-semantics-integration}] - Publish the Phase 6 repository-knowledge receipt.
+    - [x] 6.5.3 Task {#jcf-p06-phase-receipt} [repo: jido_code] [after: {#jcf-p06-source-semantics-integration}] - Publish the Phase 6 repository-knowledge receipt.
 
       This task binds G5 to exact enrollment, adapter, observation, Git,
       snapshot, analyzer, ontology, query, security, and reproducibility
       evidence.
 
-      - [ ] 6.5.3.1 Subtask {#jcf-p06-6-5-3-1} - Record provider/Git/analyzer versions, ontology/query versions, fixture repository commits, observation/source graph digests, and candidate commit.
-      - [ ] 6.5.3.2 Subtask {#jcf-p06-6-5-3-2} - Attach duplicate/reorder, lifecycle, provider failure, force-push, cache deletion, crash, restore, redaction, and bounded-query results.
-      - [ ] 6.5.3.3 Subtask {#jcf-p06-6-5-3-3} - Keep G5 blocked if a local clone is required for durable identity, source graphs mix schema, or provider output can directly become accepted/control truth.
+      - [x] 6.5.3.1 Subtask {#jcf-p06-6-5-3-1} - Record provider/Git/analyzer versions, ontology/query versions, fixture repository commits, observation/source graph digests, and candidate commit.
+      - [x] 6.5.3.2 Subtask {#jcf-p06-6-5-3-2} - Attach duplicate/reorder, lifecycle, provider failure, force-push, cache deletion, crash, restore, redaction, and bounded-query results.
+      - [x] 6.5.3.3 Subtask {#jcf-p06-6-5-3-3} - Keep G5 blocked if a local clone is required for durable identity, source graphs mix schema, or provider output can directly become accepted/control truth.
       - [ ] 6.5.3.4 Subtask {#jcf-p06-6-5-3-4} - Pin the merged candidate commit before authorizing Phase 7.

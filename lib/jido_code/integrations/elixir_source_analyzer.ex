@@ -65,6 +65,7 @@ defmodule JidoCode.Integrations.ElixirSourceAnalyzer do
          {:ok, activity_iri} <-
            Identity.activity(request.snapshot_iri, analyzer.version, configuration_digest),
          {:ok, files, discovery_warnings} <- discover_files(request),
+         snapshot_warnings <- snapshot_warnings(request),
          {:ok, analyzed} <-
            analyze_files(
              files,
@@ -84,13 +85,14 @@ defmodule JidoCode.Integrations.ElixirSourceAnalyzer do
              configuration_digest: configuration_digest,
              input_tree_digest: request.input_tree_digest,
              coverage: %{
-               status: coverage_status(discovery_warnings ++ analyzed.warnings),
+               status:
+                 coverage_status(snapshot_warnings ++ discovery_warnings ++ analyzed.warnings),
                discovered_files: length(files),
                analyzed_files: analyzed.file_count,
                analyzed_bytes: analyzed.byte_count,
                expressions: analyzed.expression_count
              },
-             warnings: Enum.uniq(discovery_warnings ++ analyzed.warnings),
+             warnings: Enum.uniq(snapshot_warnings ++ discovery_warnings ++ analyzed.warnings),
              resource_counts: %{
                files: analyzed.file_count,
                modules: analyzed.module_count,
@@ -666,6 +668,16 @@ defmodule JidoCode.Integrations.ElixirSourceAnalyzer do
 
   defp coverage_status([]), do: :complete
   defp coverage_status(_warnings), do: :partial
+
+  defp snapshot_warnings(request) do
+    []
+    |> maybe_add_warning(request.git_snapshot.submodules?, "submodules_not_analyzed")
+    |> maybe_add_warning(request.git_snapshot.lfs?, "lfs_objects_not_analyzed")
+    |> maybe_add_warning(request.git_snapshot.limitations != [], "git_snapshot_limited")
+  end
+
+  defp maybe_add_warning(warnings, true, warning), do: [warning | warnings]
+  defp maybe_add_warning(warnings, false, _warning), do: warnings
 
   defp before_deadline(deadline) do
     if System.monotonic_time(:millisecond) < deadline,

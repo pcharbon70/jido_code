@@ -358,6 +358,7 @@ defmodule JidoCode.Knowledge.Phase06ObservationBatchTest do
     %{
       repository_iri: fixture.repository,
       repository_scope_iri: fixture.repository_scope,
+      locator_iri: fixture.locator.iri,
       enrollment: %{
         enrollment_iri: fixture.enrollment.iri,
         current_transition: active.current_transition,

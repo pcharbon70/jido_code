@@ -57,3 +57,8 @@ implementation plan was merged.
 - [Bounded projections, cache, and subscriptions](./bounded-projections-cache-and-subscriptions.md)
 - [Derived graphs and read diagnostics](./derived-graphs-and-read-diagnostics.md)
 - [Phase 5 bounded interpretation receipt](./phase-05-receipt.md)
+
+## Phase 6 Repository Knowledge
+
+- [Source analysis boundary](./source-analysis.md)
+- [Phase 6 repository knowledge receipt](./phase-06-receipt.md)
