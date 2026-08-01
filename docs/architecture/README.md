@@ -56,3 +56,4 @@ implementation plan was merged.
 - [Query consistency and temporal state](./query-consistency-and-temporal-state.md)
 - [Bounded projections, cache, and subscriptions](./bounded-projections-cache-and-subscriptions.md)
 - [Derived graphs and read diagnostics](./derived-graphs-and-read-diagnostics.md)
+- [Phase 5 bounded interpretation receipt](./phase-05-receipt.md)

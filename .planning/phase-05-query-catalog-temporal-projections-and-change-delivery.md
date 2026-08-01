@@ -180,27 +180,27 @@ Back to plan: [README](./README.md)
     authorization-scoped, temporally explicit, and recoverable despite cache
     loss, notification loss, concurrent commits, and incomplete knowledge.
 
-    - [ ] 5.5.1 Task {#jcf-p05-query-integration} [repo: jido_code] [after: {#jcf-p05-read-diagnostics}] - Exercise catalog queries over real multi-graph datasets.
+    - [x] 5.5.1 Task {#jcf-p05-query-integration} [repo: jido_code] [after: {#jcf-p05-read-diagnostics}] - Exercise catalog queries over real multi-graph datasets.
 
       This task validates query parameterization, source-revision attribution,
       temporal behavior, completeness, and projection decoding end to end.
 
-      - [ ] 5.5.1.1 Subtask {#jcf-p05-5-5-1-1} - Execute every initial catalog query against valid, empty, contradictory, superseded, historical, incomplete, and unauthorized fixtures.
-      - [ ] 5.5.1.2 Subtask {#jcf-p05-5-5-1-2} - Attempt SPARQL injection, graph-scope widening, update statements, service clauses, excessive limits, expensive traversals, and malformed cursors.
-      - [ ] 5.5.1.3 Subtask {#jcf-p05-5-5-1-3} - Advance source graphs during reads and verify each result is labeled with one coherent evaluated revision.
-      - [ ] 5.5.1.4 Subtask {#jcf-p05-5-5-1-4} - Prove missing statements outside declared complete boundaries remain unknown and cannot satisfy closed-world checks.
+      - [x] 5.5.1.1 Subtask {#jcf-p05-5-5-1-1} - Execute every initial catalog query against valid, empty, contradictory, superseded, historical, incomplete, and unauthorized fixtures.
+      - [x] 5.5.1.2 Subtask {#jcf-p05-5-5-1-2} - Attempt SPARQL injection, graph-scope widening, update statements, service clauses, excessive limits, expensive traversals, and malformed cursors.
+      - [x] 5.5.1.3 Subtask {#jcf-p05-5-5-1-3} - Advance source graphs during reads and verify each result is labeled with one coherent evaluated revision.
+      - [x] 5.5.1.4 Subtask {#jcf-p05-5-5-1-4} - Prove missing statements outside declared complete boundaries remain unknown and cannot satisfy closed-world checks.
 
-    - [ ] 5.5.2 Task {#jcf-p05-projection-delivery-integration} [repo: jido_code] [after: {#jcf-p05-query-integration}] - Exercise projection caches, derived graphs, and lossy subscriptions.
+    - [x] 5.5.2 Task {#jcf-p05-projection-delivery-integration} [repo: jido_code] [after: {#jcf-p05-query-integration}] - Exercise projection caches, derived graphs, and lossy subscriptions.
 
       This task proves projection optimizations can disappear or fail without
       changing authoritative answers.
 
-      - [ ] 5.5.2.1 Subtask {#jcf-p05-5-5-2-1} - Warm, hit, invalidate, evict, restart, and delete caches while comparing canonical uncached projection results.
-      - [ ] 5.5.2.2 Subtask {#jcf-p05-5-5-2-2} - Drop, duplicate, reorder, and coalesce notifications and prove consumers converge to the latest authorized graph revision.
-      - [ ] 5.5.2.3 Subtask {#jcf-p05-5-5-2-3} - Build, stale, invalidate, delete, and rebuild a derived graph while strict/warn readers report correct state.
-      - [ ] 5.5.2.4 Subtask {#jcf-p05-5-5-2-4} - Revoke actor authority during a subscription and verify subsequent re-query and projection fail closed.
-      - [ ] 5.5.2.5 Subtask {#jcf-p05-5-5-2-5} - Run query performance baselines at configured bounds and verify telemetry cardinality/redaction.
-      - [ ] 5.5.2.6 Subtask {#jcf-p05-5-5-2-6} - Rerun Phases 1-4 suites and `mix precommit`.
+      - [x] 5.5.2.1 Subtask {#jcf-p05-5-5-2-1} - Warm, hit, invalidate, evict, restart, and delete caches while comparing canonical uncached projection results.
+      - [x] 5.5.2.2 Subtask {#jcf-p05-5-5-2-2} - Drop, duplicate, reorder, and coalesce notifications and prove consumers converge to the latest authorized graph revision.
+      - [x] 5.5.2.3 Subtask {#jcf-p05-5-5-2-3} - Build, stale, invalidate, delete, and rebuild a derived graph while strict/warn readers report correct state.
+      - [x] 5.5.2.4 Subtask {#jcf-p05-5-5-2-4} - Revoke actor authority during a subscription and verify subsequent re-query and projection fail closed.
+      - [x] 5.5.2.5 Subtask {#jcf-p05-5-5-2-5} - Run query performance baselines at configured bounds and verify telemetry cardinality/redaction.
+      - [x] 5.5.2.6 Subtask {#jcf-p05-5-5-2-6} - Rerun Phases 1-4 suites and `mix precommit`.
 
     - [ ] 5.5.3 Task {#jcf-p05-phase-receipt} [repo: jido_code] [after: {#jcf-p05-projection-delivery-integration}] - Publish the Phase 5 bounded-read receipt.
 
@@ -208,7 +208,7 @@ Back to plan: [README](./README.md)
       derived-graph, authorization, and notification evidence before external
       repository facts enter the dataset.
 
-      - [ ] 5.5.3.1 Subtask {#jcf-p05-5-5-3-1} - Record query/projection catalog versions and digests, ontology/shape versions, consistency modes, fixture digests, limits, and candidate commit.
-      - [ ] 5.5.3.2 Subtask {#jcf-p05-5-5-3-2} - Attach temporal, completeness, injection, concurrency, cache-loss, event-loss, derived-graph, authorization, and performance results.
-      - [ ] 5.5.3.3 Subtask {#jcf-p05-5-5-3-3} - Keep G4 blocked if callers can submit raw SPARQL, results can lose source revisions, or cache/notifications can become authoritative.
+      - [x] 5.5.3.1 Subtask {#jcf-p05-5-5-3-1} - Record query/projection catalog versions and digests, ontology/shape versions, consistency modes, fixture digests, limits, and candidate commit.
+      - [x] 5.5.3.2 Subtask {#jcf-p05-5-5-3-2} - Attach temporal, completeness, injection, concurrency, cache-loss, event-loss, derived-graph, authorization, and performance results.
+      - [x] 5.5.3.3 Subtask {#jcf-p05-5-5-3-3} - Keep G4 blocked if callers can submit raw SPARQL, results can lose source revisions, or cache/notifications can become authoritative.
       - [ ] 5.5.3.4 Subtask {#jcf-p05-5-5-3-4} - Pin the merged candidate commit before authorizing Phase 6.

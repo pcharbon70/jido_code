@@ -206,12 +206,13 @@ defmodule JidoCode.Knowledge.StoreServer do
   defp bounded_open_path(path, timeout) do
     parent = self()
     token = make_ref()
+    lock_release_deadline = System.monotonic_time(:millisecond) + min(timeout, 250)
 
     {opener, monitor} =
       spawn_monitor(fn ->
         result =
           Telemetry.span(:open, fn ->
-            TripleStore.open(path, schema: :quad)
+            open_store(path, lock_release_deadline)
           end)
 
         send(parent, {:store_open_result, token, self(), result})
@@ -564,6 +565,29 @@ defmodule JidoCode.Knowledge.StoreServer do
 
   defp close_open_result({:ok, store}), do: safe_close(store)
   defp close_open_result(_result), do: :ok
+
+  defp open_store(path, deadline) do
+    case TripleStore.open(path, schema: :quad) do
+      {:error, {:db_open, reason}} = error ->
+        if transient_lock?(reason) and System.monotonic_time(:millisecond) < deadline do
+          Process.sleep(20)
+          open_store(path, deadline)
+        else
+          error
+        end
+
+      result ->
+        result
+    end
+  end
+
+  defp transient_lock?(reason) do
+    reason
+    |> to_string()
+    |> String.contains?(["/LOCK", "lock hold", "No locks available"])
+  rescue
+    _error -> false
+  end
 
   defp safe_close(nil), do: :ok
 

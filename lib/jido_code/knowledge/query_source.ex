@@ -32,9 +32,9 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:ontology_compatibility) do
     """
-    SELECT ?release ?predicate ?value WHERE {
+    SELECT ?predicate ?object WHERE {
       GRAPH {{graph}} {
-        ?release a <#{@jf}OntologyRelease> ; ?predicate ?value .
+        <https://jido.run/ontology/release/1.0.0> ?predicate ?object .
       }
     }
     LIMIT {{row_limit}}
@@ -43,9 +43,9 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:command_receipt) do
     """
-    SELECT ?receipt ?predicate ?value WHERE {
+    SELECT ?receipt WHERE {
       GRAPH {{graph}} {
-        ?receipt <#{@jf}forCommand> {{resource}} ; ?predicate ?value .
+        {{resource}} <#{@prov}generated> ?receipt .
       }
     }
     LIMIT {{row_limit}}
@@ -54,9 +54,9 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:audit_reference) do
     """
-    SELECT ?audit ?predicate ?value WHERE {
+    SELECT ?audit WHERE {
       GRAPH {{graph}} {
-        ?audit <#{@jf}command> {{resource}} ; ?predicate ?value .
+        ?audit <#{@jf}auditsCommand> {{resource}} .
       }
     }
     LIMIT {{row_limit}}
@@ -102,17 +102,10 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:provenance_chain) do
     """
-    CONSTRUCT {
-      {{resource}} ?predicate ?value .
-      ?source ?sourcePredicate ?sourceValue .
-    }
+    CONSTRUCT { {{resource}} <#{@prov}wasDerivedFrom> ?source }
     WHERE {
       GRAPH {{graph}} {
-        {{resource}} ?predicate ?value .
-        OPTIONAL {
-          {{resource}} <#{@prov}wasDerivedFrom> ?source .
-          ?source ?sourcePredicate ?sourceValue .
-        }
+        {{resource}} <#{@prov}wasDerivedFrom> ?source .
       }
     }
     LIMIT {{triple_limit}}
@@ -150,13 +143,10 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:temporal_as_of) do
     """
-    SELECT ?assertion ?predicate ?value ?recorded ?validFrom ?validTo WHERE {
+    SELECT ?assertion ?recorded WHERE {
       GRAPH {{graph}} {
-        ?assertion <#{@jf}about> {{resource}} ;
-                   ?predicate ?value ;
-                   <#{@jf}recordedAt> ?recorded .
-        OPTIONAL { ?assertion <#{@jf}validFrom> ?validFrom }
-        OPTIONAL { ?assertion <#{@jf}validTo> ?validTo }
+        ?assertion <#{@jf}about> {{resource}} .
+        ?assertion <#{@jf}recordedAt> ?recorded .
         FILTER(?recorded <= {{instant}})
       }
     }
@@ -190,9 +180,9 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   defp claim_query(predicate) do
     """
-    SELECT ?claim ?predicate ?value WHERE {
+    SELECT ?claim WHERE {
       GRAPH {{graph}} {
-        ?claim <#{@jf}#{predicate}> {{resource}} ; ?predicate ?value .
+        ?claim <#{@jf}#{predicate}> {{resource}} .
       }
     }
     LIMIT {{row_limit}}
