@@ -70,7 +70,11 @@ defmodule JidoCode.Knowledge.CommandPipeline do
          deadline
        ) do
     with {:ok, policy_graph} <- GraphRegistry.graph_iri(:factory_policy, %{}),
-         snapshot_graphs = Enum.uniq(change_set.target_graphs ++ [policy_graph]),
+         snapshot_graphs =
+           Enum.uniq(
+             change_set.target_graphs ++
+               Map.keys(envelope.expected_graph_revisions) ++ [policy_graph]
+           ),
          {:ok, snapshot} <-
            request(store_server, {:semantic_snapshot, snapshot_graphs}, deadline),
          {:ok, _authority} <-
@@ -90,7 +94,11 @@ defmodule JidoCode.Knowledge.CommandPipeline do
   defp commit_new(envelope, definition, change_set, identities, store_server, deadline) do
     with {:ok, audit_graph} <- AuditPolicy.graph_iri(envelope.issued_at),
          {:ok, policy_graph} <- GraphRegistry.graph_iri(:factory_policy, %{}),
-         snapshot_graphs = Enum.uniq(change_set.target_graphs ++ [audit_graph, policy_graph]),
+         snapshot_graphs =
+           Enum.uniq(
+             change_set.target_graphs ++
+               Map.keys(envelope.expected_graph_revisions) ++ [audit_graph, policy_graph]
+           ),
          {:ok, snapshot} <-
            request(store_server, {:semantic_snapshot, snapshot_graphs}, deadline),
          {:ok, authority} <- Authorization.authorize(envelope, definition, change_set, snapshot),
@@ -115,11 +123,9 @@ defmodule JidoCode.Knowledge.CommandPipeline do
 
   defp build_batch(envelope, change_set, identities, snapshot, audit_additions, audit_graph) do
     graph_revisions =
-      Map.put(
-        change_set.expected_graph_revisions,
-        audit_graph,
-        Map.fetch!(snapshot.graph_revisions, audit_graph)
-      )
+      change_set.expected_graph_revisions
+      |> Map.take(change_set.target_graphs)
+      |> Map.put(audit_graph, Map.fetch!(snapshot.graph_revisions, audit_graph))
 
     WriteBatch.new(change_set.additions ++ audit_additions,
       commit_id: identities.commit_id,

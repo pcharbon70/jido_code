@@ -40,6 +40,11 @@ defmodule JidoCode.Knowledge do
     do: ResourceIdentity.repository_locator(provider, owner, name)
 
   def provider_identity(provider), do: ResourceIdentity.provider_host(provider)
+
+  def provider_object_identity(locator_iri, kind, external_id),
+    do: ResourceIdentity.provider_object(locator_iri, kind, external_id)
+
+  def git_object_identity(algorithm, value), do: ResourceIdentity.git_object(algorithm, value)
   def validate_resource_identity(iri), do: ResourceIdentity.validate(iri)
 
   def health, do: Readiness.snapshot()

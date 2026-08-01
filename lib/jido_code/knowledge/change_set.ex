@@ -70,7 +70,11 @@ defmodule JidoCode.Knowledge.ChangeSet do
          removals = targets |> Enum.flat_map(& &1.removals) |> canonical_quads(),
          true <- length(additions) <= @max_additions,
          target_graphs = targets |> Enum.map(& &1.graph_iri) |> Enum.uniq() |> Enum.sort(),
-         true <- Map.keys(envelope.expected_graph_revisions) |> Enum.sort() == target_graphs,
+         true <-
+           MapSet.subset?(
+             MapSet.new(target_graphs),
+             MapSet.new(Map.keys(envelope.expected_graph_revisions))
+           ),
          fingerprint <- fingerprint(envelope, targets, additions, removals),
          {:ok, change_set_iri} <- ResourceIdentity.deterministic(:change_set, fingerprint) do
       {:ok,

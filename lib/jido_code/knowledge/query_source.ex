@@ -239,6 +239,71 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:latest_complete_observation) do
+    """
+    SELECT ?batch ?recorded ?observed WHERE {
+      GRAPH {{graph}} {
+        ?batch a <#{@jf}ObservationBatch> ;
+               <#{@jf}validFor> {{resource}} ;
+               <#{@jf}recordedAt> ?recorded ;
+               <#{@jf}completenessState> <https://jido.run/ontology/concept/Complete> .
+        OPTIONAL { ?batch <#{@jf}sourceObservedAt> ?observed }
+      }
+    }
+    ORDER BY DESC(?recorded)
+    LIMIT 1
+    """
+  end
+
+  def fetch(:observation_claim_history) do
+    """
+    SELECT ?claim ?predicate ?object ?state ?recorded ?observed WHERE {
+      GRAPH {{graph}} {
+        ?claim a <#{@jf}Claim> ;
+               <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> {{resource}} ;
+               <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> ?predicate ;
+               <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ?object ;
+               <#{@jf}epistemicState> ?state ;
+               <#{@jf}recordedAt> ?recorded .
+        OPTIONAL { ?claim <#{@jf}sourceObservedAt> ?observed }
+      }
+    }
+    ORDER BY ?recorded
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:observation_contradictions) do
+    """
+    SELECT ?claim ?contradiction WHERE {
+      GRAPH {{graph}} {
+        { {{resource}} <#{@jf}contradicts> ?contradiction }
+        UNION
+        { ?claim <#{@jf}contradicts> {{resource}} }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:provider_freshness) do
+    """
+    SELECT ?batch ?recorded ?observed ?state WHERE {
+      GRAPH {{graph}} {
+        ?batch a <#{@jf}ObservationBatch> ;
+               <#{@jf}validFor> {{resource}} ;
+               <#{@jf}recordedAt> ?recorded ;
+               <#{@jf}completenessState> ?state .
+        OPTIONAL { ?batch <#{@jf}sourceObservedAt> ?observed }
+      }
+    }
+    ORDER BY DESC(?recorded)
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_snapshot_description), do: fetch(:resource_description)
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {

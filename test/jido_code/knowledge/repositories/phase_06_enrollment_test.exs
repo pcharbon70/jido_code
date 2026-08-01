@@ -66,7 +66,7 @@ defmodule JidoCode.Knowledge.Repositories.Phase06EnrollmentTest do
     assert QueryCatalog.version() == "1.0.0"
     assert QueryCatalog.repository_version() == "1.1.0"
     assert length(QueryCatalog.names("1.0.0")) == 17
-    assert length(QueryCatalog.names("1.1.0")) == 22
+    assert length(QueryCatalog.names("1.1.0")) == 27
     assert :ok = QueryCatalog.verify()
 
     for name <- [

@@ -110,42 +110,42 @@ Back to plan: [README](./README.md)
       - [x] 6.2.4.3 Subtask {#jcf-p06-6-2-4-3} - Handle duplicate, delayed, reordered, replayed, partial, and unknown delivery types without mutating desired state.
       - [x] 6.2.4.4 Subtask {#jcf-p06-6-2-4-4} - Queue only ephemeral wake-up work; durable pending/retry/last-observed state belongs in graph transitions and observation resources.
 
-  - [ ] 6.3 Section - Persist observation batches, claims, and repository snapshots.
+  - [x] 6.3 Section - Persist observation batches, claims, and repository snapshots.
 
     This section records external reality as immutable, provenance-bearing
     graphs with explicit completeness and temporal semantics.
 
-    - [ ] 6.3.1 Task {#jcf-p06-observation-batch} [repo: jido_code] [after: {#jcf-p06-observation-ingress}] - Implement `RecordObservationBatch` semantics.
+    - [x] 6.3.1 Task {#jcf-p06-observation-batch} [repo: jido_code] [after: {#jcf-p06-observation-ingress}] - Implement `RecordObservationBatch` semantics.
 
       This task commits normalized observations under one immutable batch
       graph and retains enough source identity to explain and replay them.
 
-      - [ ] 6.3.1.1 Subtask {#jcf-p06-6-3-1-1} - Create observation activity/batch IRIs from provider/delivery or poll identity, enrollment, retrieval revision, and idempotency policy.
-      - [ ] 6.3.1.2 Subtask {#jcf-p06-6-3-1-2} - Record actor/adapter version, locator, external source refs, retrieval/source times, prior batch relation, request/response digests, coverage, completeness, limitations, and generated claims.
-      - [ ] 6.3.1.3 Subtask {#jcf-p06-6-3-1-3} - Close the batch graph atomically and reject later mutation; corrections become new batches and superseding claims.
-      - [ ] 6.3.1.4 Subtask {#jcf-p06-6-3-1-4} - Return the original receipt for duplicate delivery/poll identity and conflict on divergent logical content.
-      - [ ] 6.3.1.5 Subtask {#jcf-p06-6-3-1-5} - Apply payload retention and redaction before RDF construction; do not persist unneeded raw provider bodies.
+      - [x] 6.3.1.1 Subtask {#jcf-p06-6-3-1-1} - Create observation activity/batch IRIs from provider/delivery or poll identity, enrollment, retrieval revision, and idempotency policy.
+      - [x] 6.3.1.2 Subtask {#jcf-p06-6-3-1-2} - Record actor/adapter version, locator, external source refs, retrieval/source times, prior batch relation, request/response digests, coverage, completeness, limitations, and generated claims.
+      - [x] 6.3.1.3 Subtask {#jcf-p06-6-3-1-3} - Close the batch graph atomically and reject later mutation; corrections become new batches and superseding claims.
+      - [x] 6.3.1.4 Subtask {#jcf-p06-6-3-1-4} - Return the original receipt for duplicate delivery/poll identity and conflict on divergent logical content.
+      - [x] 6.3.1.5 Subtask {#jcf-p06-6-3-1-5} - Apply payload retention and redaction before RDF construction; do not persist unneeded raw provider bodies.
 
-    - [ ] 6.3.2 Task {#jcf-p06-observed-claims} [repo: jido_code] [after: {#jcf-p06-observation-batch}] - Map observations into sourced repository claims.
+    - [x] 6.3.2 Task {#jcf-p06-observed-claims} [repo: jido_code] [after: {#jcf-p06-observation-batch}] - Map observations into sourced repository claims.
 
       This task preserves what an adapter observed without upgrading it into
       accepted repository knowledge or control intent.
 
-      - [ ] 6.3.2.1 Subtask {#jcf-p06-6-3-2-1} - Emit direct immutable statements where batch-level provenance suffices and first-class claims where confidence, validity, contradiction, or later acceptance matters.
-      - [ ] 6.3.2.2 Subtask {#jcf-p06-6-3-2-2} - Link claims to repository, locator, branch/ref, external object, check, dependency, policy dimension, or source artifact subjects directly by IRI.
-      - [ ] 6.3.2.3 Subtask {#jcf-p06-6-3-2-3} - Record observed/asserted epistemic state, source/valid time, confidence/limitations, and producer version without acceptance.
-      - [ ] 6.3.2.4 Subtask {#jcf-p06-6-3-2-4} - Detect incompatible claims across batches and add contradiction relationships without deleting either source.
-      - [ ] 6.3.2.5 Subtask {#jcf-p06-6-3-2-5} - Add queries for latest complete observation, claim history, contradictions, and provider freshness at an enrollment scope.
+      - [x] 6.3.2.1 Subtask {#jcf-p06-6-3-2-1} - Emit direct immutable statements where batch-level provenance suffices and first-class claims where confidence, validity, contradiction, or later acceptance matters.
+      - [x] 6.3.2.2 Subtask {#jcf-p06-6-3-2-2} - Link claims to repository, locator, branch/ref, external object, check, dependency, policy dimension, or source artifact subjects directly by IRI.
+      - [x] 6.3.2.3 Subtask {#jcf-p06-6-3-2-3} - Record observed/asserted epistemic state, source/valid time, confidence/limitations, and producer version without acceptance.
+      - [x] 6.3.2.4 Subtask {#jcf-p06-6-3-2-4} - Detect incompatible claims across batches and add contradiction relationships without deleting either source.
+      - [x] 6.3.2.5 Subtask {#jcf-p06-6-3-2-5} - Add queries for latest complete observation, claim history, contradictions, and provider freshness at an enrollment scope.
 
-    - [ ] 6.3.3 Task {#jcf-p06-repository-snapshot} [repo: jido_code] [after: {#jcf-p06-observed-claims}] - Implement immutable repository snapshot identity and metadata.
+    - [x] 6.3.3 Task {#jcf-p06-repository-snapshot} [repo: jido_code] [after: {#jcf-p06-observed-claims}] - Implement immutable repository snapshot identity and metadata.
 
       This task creates the exact source-state anchor used by semantic analysis,
       planning, execution, evidence, and reproducibility.
 
-      - [ ] 6.3.3.1 Subtask {#jcf-p06-6-3-3-1} - Identify snapshots by conceptual repository plus verified commit/tree identity, not branch name or local checkout path.
-      - [ ] 6.3.3.2 Subtask {#jcf-p06-6-3-3-2} - Record parent lineage, observed refs, source observation batch, analyzer readiness, manifest/language summary, and validity/freshness metadata.
-      - [ ] 6.3.3.3 Subtask {#jcf-p06-6-3-3-3} - Reuse the same snapshot resource for identical repository/tree identity while preserving each observation activity that encountered it.
-      - [ ] 6.3.3.4 Subtask {#jcf-p06-6-3-3-4} - Mark force-push/ref movement as new observations rather than changing immutable snapshot identity.
+      - [x] 6.3.3.1 Subtask {#jcf-p06-6-3-3-1} - Identify snapshots by conceptual repository plus verified commit/tree identity, not branch name or local checkout path.
+      - [x] 6.3.3.2 Subtask {#jcf-p06-6-3-3-2} - Record parent lineage, observed refs, source observation batch, analyzer readiness, manifest/language summary, and validity/freshness metadata.
+      - [x] 6.3.3.3 Subtask {#jcf-p06-6-3-3-3} - Reuse the same snapshot resource for identical repository/tree identity while preserving each observation activity that encountered it.
+      - [x] 6.3.3.4 Subtask {#jcf-p06-6-3-3-4} - Mark force-push/ref movement as new observations rather than changing immutable snapshot identity.
 
   - [ ] 6.4 Section - Analyze and publish revision-scoped source semantics.
 

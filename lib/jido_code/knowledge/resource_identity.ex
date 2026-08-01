@@ -19,7 +19,8 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   @deterministic_kinds ~w[
     authorization-grant change-set command-request graph-revision-reference validation-report
     validation-result management-enrollment enrollment-transition enrollment-decision
-    repository-reconciliation
+    repository-reconciliation observation-activity observation-batch repository-snapshot
+    observed-claim provider-object
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
@@ -142,6 +143,75 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
 
   def enrollment_transition(_enrollment_iri, _revision, _state),
     do: invalid(:enrollment_transition_identity)
+
+  @spec observation_batch(String.t(), String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def observation_batch(enrollment_iri, source, delivery_identity)
+      when source in ["poll", "webhook"] and is_binary(delivery_identity) do
+    with :ok <- validate(enrollment_iri),
+         true <- Regex.match?(~r/^[a-f0-9]{64}$/, delivery_identity) do
+      deterministic(
+        :observation_batch,
+        Enum.join([enrollment_iri, source, delivery_identity], "\n")
+      )
+    else
+      _invalid -> invalid(:observation_batch_identity)
+    end
+  end
+
+  def observation_batch(_enrollment_iri, _source, _delivery_identity),
+    do: invalid(:observation_batch_identity)
+
+  @spec observation_activity(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
+  def observation_activity(batch_iri) do
+    with :ok <- validate(batch_iri), do: deterministic(:observation_activity, batch_iri)
+  end
+
+  @spec repository_snapshot(String.t(), atom() | String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def repository_snapshot(repository_iri, algorithm, tree_hex) do
+    with :ok <- validate(repository_iri),
+         {:ok, tree_iri} <- git_object(algorithm, tree_hex) do
+      deterministic(:repository_snapshot, repository_iri <> "\n" <> tree_iri)
+    end
+  end
+
+  @spec provider_object(String.t(), atom() | String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def provider_object(locator_iri, kind, external_id) when is_binary(external_id) do
+    kind = if is_atom(kind), do: Atom.to_string(kind), else: kind
+
+    with :ok <- validate(locator_iri),
+         {:ok, normalized_kind} <- normalize_text(kind, 64),
+         {:ok, normalized_id} <- normalize_text(external_id, @max_segment_bytes) do
+      deterministic(
+        :provider_object,
+        Enum.join([locator_iri, normalized_kind, normalized_id], "\n")
+      )
+    end
+  end
+
+  def provider_object(_locator_iri, _kind, _external_id),
+    do: invalid(:provider_object_identity)
+
+  @spec observed_claim(String.t(), RDF.Triple.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def observed_claim(batch_iri, statement) do
+    with :ok <- validate(batch_iri),
+         {_, _, _} = triple <- RDF.Triple.new(statement),
+         true <- RDF.Triple.valid?(triple) and not RDF.Triple.has_bnode?(triple) do
+      material =
+        [triple]
+        |> RDF.Graph.new()
+        |> RDF.NTriples.write_string!(sort: true)
+
+      deterministic(:observed_claim, batch_iri <> "\n" <> material)
+    else
+      _invalid -> invalid(:observed_claim_identity)
+    end
+  rescue
+    _error -> invalid(:observed_claim_identity)
+  end
 
   @spec git_object(String.t() | atom(), String.t()) :: {:ok, String.t()} | {:error, Error.t()}
   def git_object(algorithm, hex) when is_binary(hex) do

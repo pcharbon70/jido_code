@@ -355,6 +355,61 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         "Read bounded enrollment and repository members for one factory.",
         :product,
         :declared
+      ),
+      spec(
+        :latest_complete_observation,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read a complete observation candidate at an enrollment scope.",
+        :product,
+        :declared
+      ),
+      spec(
+        :observation_claim_history,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read sourced claim history about one repository resource.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :observation_contradictions,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :table,
+        "Read explicit contradiction relationships for one claim.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :provider_freshness,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read provider source and retrieval times at an enrollment scope.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_snapshot_description,
+        :construct,
+        resource,
+        :observation,
+        [:observation_batch],
+        :subgraph,
+        "Describe one exact repository snapshot anchor.",
+        :product,
+        :declared
       )
     ]
   end

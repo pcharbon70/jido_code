@@ -126,6 +126,28 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     _error -> false
   end
 
+  defp guard_satisfied?({:transition_endpoint, graph, subject, transition}, dataset) do
+    quads = graph_quads(dataset, graph)
+
+    current? =
+      triple_present?(quads, transition, @jf <> "transitionSubject", subject) and
+        Enum.any?(quads, fn {_decision, predicate, object, _graph} ->
+          term_equal?(predicate, @jf <> "accepts") and term_equal?(object, transition)
+        end)
+
+    accepted_successor? =
+      Enum.any?(quads, fn {successor, predicate, object, _graph} ->
+        term_equal?(predicate, @jf <> "expectedPredecessor") and term_equal?(object, transition) and
+          Enum.any?(quads, fn {_decision, accepts, accepted, _graph} ->
+            term_equal?(accepts, @jf <> "accepts") and RDF.Term.equal_value?(accepted, successor)
+          end)
+      end)
+
+    current? and not accepted_successor?
+  rescue
+    _error -> false
+  end
+
   defp guard_satisfied?(_guard, _dataset), do: false
 
   defp validate_targets(change_set, snapshot, deadline) do
@@ -204,6 +226,13 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     RDF.Term.equal_value?(stored, RDF.iri(expected))
   rescue
     _error -> false
+  end
+
+  defp triple_present?(quads, subject, predicate, object) do
+    Enum.any?(quads, fn {stored_subject, stored_predicate, stored_object, _graph} ->
+      term_equal?(stored_subject, subject) and term_equal?(stored_predicate, predicate) and
+        term_equal?(stored_object, object)
+    end)
   end
 
   defp before_deadline(deadline) when is_integer(deadline) do

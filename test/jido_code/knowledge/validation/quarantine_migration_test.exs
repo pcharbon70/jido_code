@@ -18,7 +18,7 @@ defmodule JidoCode.Knowledge.Validation.QuarantineMigrationTest do
 
   setup context do
     root = unique_root(context)
-    on_exit(fn -> File.rm_rf!(root) end)
+    on_exit(fn -> JidoCode.TestSupport.Filesystem.remove_root!(root) end)
     {:ok, config} = Config.for_test(Path.join(root, "store"))
     %{substrate: start_substrate!(config)}
   end
