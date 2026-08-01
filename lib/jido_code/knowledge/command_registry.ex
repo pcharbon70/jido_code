@@ -107,6 +107,12 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       capability: :administrative,
       graph_families: [:factory_catalog],
       preconditions: [:repository_known, :explicit_identity_evidence]
+    },
+    "PublishSourceGraph" => %{
+      owner: :reasoning,
+      capability: :source,
+      graph_families: [:source_revision],
+      preconditions: [:source_snapshot_exact, :immutable_target_absent]
     }
   }
   @version_1_1 @commands |> Map.merge(@derived_commands) |> Map.merge(@phase_06_commands)

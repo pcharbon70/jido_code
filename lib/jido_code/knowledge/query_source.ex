@@ -304,6 +304,124 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:repository_snapshot_description), do: fetch(:resource_description)
 
+  def fetch(:snapshot_readiness_freshness) do
+    """
+    SELECT ?readiness ?observed ?batch ?recorded WHERE {
+      GRAPH {{graph}} {
+        {{snapshot}} a <#{@jf}RepositorySnapshot> ;
+                     <#{@jf}analyzerReadiness> ?readiness ;
+                     <#{@jf}sourceObservedAt> ?observed .
+        ?batch <#{@prov}generated> {{snapshot}} ;
+               <#{@jf}recordedAt> ?recorded .
+      }
+    }
+    ORDER BY DESC(?recorded)
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:source_modules) do
+    """
+    SELECT ?entity ?name ?analyzer ?configuration ?tree ?coverage ?analysisWarning WHERE {
+      GRAPH {{graph}} {
+        {{graph}} <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}analyzerVersion> ?analyzer ;
+                  <#{@jf}configurationDigest> ?configuration ;
+                  <#{@jf}inputTreeDigest> ?tree ;
+                  <#{@jf}coverageStatus> ?coverage .
+        OPTIONAL { {{graph}} <#{@jf}analysisWarning> ?analysisWarning }
+        OPTIONAL {
+          ?entity a <#{@jf}CodeSymbol> ;
+                  <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}symbolKind> <https://jido.run/ontology/concept/Module> ;
+                  <#{@jf}displayName> ?name .
+        }
+      }
+    }
+    ORDER BY ?name
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:source_functions) do
+    """
+    SELECT ?entity ?name ?arity ?visibility ?analyzer ?configuration ?tree ?coverage ?analysisWarning WHERE {
+      GRAPH {{graph}} {
+        {{graph}} <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}analyzerVersion> ?analyzer ;
+                  <#{@jf}configurationDigest> ?configuration ;
+                  <#{@jf}inputTreeDigest> ?tree ;
+                  <#{@jf}coverageStatus> ?coverage .
+        OPTIONAL { {{graph}} <#{@jf}analysisWarning> ?analysisWarning }
+        OPTIONAL {
+          ?entity a <#{@jf}CodeSymbol> ;
+                  <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}symbolKind> <https://jido.run/ontology/concept/Function> ;
+                  <#{@jf}displayName> ?name ;
+                  <#{@jf}arity> ?arity ;
+                  <#{@jf}visibility> ?visibility .
+        }
+      }
+    }
+    ORDER BY ?name
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:source_otp_patterns) do
+    """
+    SELECT ?entity ?name ?pattern ?analyzer ?configuration ?tree ?coverage ?analysisWarning WHERE {
+      GRAPH {{graph}} {
+        {{graph}} <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}analyzerVersion> ?analyzer ;
+                  <#{@jf}configurationDigest> ?configuration ;
+                  <#{@jf}inputTreeDigest> ?tree ;
+                  <#{@jf}coverageStatus> ?coverage .
+        OPTIONAL { {{graph}} <#{@jf}analysisWarning> ?analysisWarning }
+        OPTIONAL {
+          ?entity <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}displayName> ?name ;
+                  <#{@jf}otpPattern> ?pattern .
+        }
+      }
+    }
+    ORDER BY ?name ?pattern
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:source_dependencies) do
+    """
+    SELECT ?entity ?name ?dependency ?dependencyName ?analyzer ?configuration ?tree ?coverage ?analysisWarning WHERE {
+      GRAPH {{graph}} {
+        {{graph}} <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}analyzerVersion> ?analyzer ;
+                  <#{@jf}configurationDigest> ?configuration ;
+                  <#{@jf}inputTreeDigest> ?tree ;
+                  <#{@jf}coverageStatus> ?coverage .
+        OPTIONAL { {{graph}} <#{@jf}analysisWarning> ?analysisWarning }
+        OPTIONAL {
+          ?entity <#{@jf}sourceSnapshot> {{snapshot}} ;
+                  <#{@jf}displayName> ?name ;
+                  <#{@jf}dependsOn> ?dependency .
+          ?dependency <#{@jf}sourceSnapshot> {{snapshot}} ;
+                      <#{@jf}displayName> ?dependencyName .
+        }
+      }
+    }
+    ORDER BY ?name ?dependencyName
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:source_entity_neighborhood) do
+    source_relation_query(false)
+  end
+
+  def fetch(:source_impact) do
+    source_relation_query(true)
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
@@ -336,5 +454,51 @@ defmodule JidoCode.Knowledge.QuerySource do
     }
     #{order}
     """
+  end
+
+  defp source_relation_query(impact_only?) do
+    if impact_only? do
+      """
+      SELECT ?outCall ?outDependency ?inCaller ?inDependent ?definer ?analyzer ?configuration ?tree ?coverage ?analysisWarning WHERE {
+        GRAPH {{graph}} {
+          {{graph}} <#{@jf}sourceSnapshot> {{snapshot}} ;
+                    <#{@jf}analyzerVersion> ?analyzer ;
+                    <#{@jf}configurationDigest> ?configuration ;
+                    <#{@jf}inputTreeDigest> ?tree ;
+                    <#{@jf}coverageStatus> ?coverage .
+          OPTIONAL { {{graph}} <#{@jf}analysisWarning> ?analysisWarning }
+          {{resource}} <#{@jf}sourceSnapshot> {{snapshot}} .
+          { {{resource}} <#{@jf}calls> ?outCall }
+          UNION
+          { {{resource}} <#{@jf}dependsOn> ?outDependency }
+          UNION
+          { ?inCaller <#{@jf}calls> {{resource}} }
+          UNION
+          { ?inDependent <#{@jf}dependsOn> {{resource}} }
+          UNION
+          { ?definer <#{@jf}defines> {{resource}} }
+        }
+      }
+      LIMIT {{row_limit}}
+      """
+    else
+      """
+      SELECT ?outPredicate ?outValue ?inSubject ?inPredicate ?analyzer ?configuration ?tree ?coverage ?analysisWarning WHERE {
+        GRAPH {{graph}} {
+          {{graph}} <#{@jf}sourceSnapshot> {{snapshot}} ;
+                    <#{@jf}analyzerVersion> ?analyzer ;
+                    <#{@jf}configurationDigest> ?configuration ;
+                    <#{@jf}inputTreeDigest> ?tree ;
+                    <#{@jf}coverageStatus> ?coverage .
+          OPTIONAL { {{graph}} <#{@jf}analysisWarning> ?analysisWarning }
+          {{resource}} <#{@jf}sourceSnapshot> {{snapshot}} .
+          { {{resource}} ?outPredicate ?outValue }
+          UNION
+          { ?inSubject ?inPredicate {{resource}} }
+        }
+      }
+      LIMIT {{row_limit}}
+      """
+    end
   end
 end

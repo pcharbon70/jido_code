@@ -147,43 +147,43 @@ Back to plan: [README](./README.md)
       - [x] 6.3.3.3 Subtask {#jcf-p06-6-3-3-3} - Reuse the same snapshot resource for identical repository/tree identity while preserving each observation activity that encountered it.
       - [x] 6.3.3.4 Subtask {#jcf-p06-6-3-3-4} - Mark force-push/ref movement as new observations rather than changing immutable snapshot identity.
 
-  - [ ] 6.4 Section - Analyze and publish revision-scoped source semantics.
+  - [x] 6.4 Section - Analyze and publish revision-scoped source semantics.
 
     This section converts an exact disposable checkout into a coherent source
     graph that remains separate from ontology schema and from later control
     truth.
 
-    - [ ] 6.4.1 Task {#jcf-p06-source-analysis-port} [repo: jido_code] [after: {#jcf-p06-repository-snapshot}] - Define and implement the source analyzer boundary.
+    - [x] 6.4.1 Task {#jcf-p06-source-analysis-port} [repo: jido_code] [after: {#jcf-p06-repository-snapshot}] - Define and implement the source analyzer boundary.
 
       This task makes semantic extraction deterministic, versioned, bounded,
       and attributable without giving the analyzer direct store access.
 
-      - [ ] 6.4.1.1 Subtask {#jcf-p06-6-4-1-1} - Define analyzer input as repository/snapshot IRI, verified worktree, language/profile, include/exclude scopes, limits, ontology version, and expected output graph.
-      - [ ] 6.4.1.2 Subtask {#jcf-p06-6-4-1-2} - Evaluate and pin the source ontology/analyzer dependency needed for Elixir modules, functions, expressions, OTP patterns, dependencies, and optional Git evolution.
-      - [ ] 6.4.1.3 Subtask {#jcf-p06-6-4-1-3} - Return an RDF dataset plus analyzer version, configuration, input tree digest, coverage, warnings, resource counts, and no commit authority.
-      - [ ] 6.4.1.4 Subtask {#jcf-p06-6-4-1-4} - Bound files, bytes, symbols, expressions, time, memory, and unsupported language behavior.
-      - [ ] 6.4.1.5 Subtask {#jcf-p06-6-4-1-5} - Exclude raw source text by default and require an explicit accepted policy before storing any source literal.
+      - [x] 6.4.1.1 Subtask {#jcf-p06-6-4-1-1} - Define analyzer input as repository/snapshot IRI, verified worktree, language/profile, include/exclude scopes, limits, ontology version, and expected output graph.
+      - [x] 6.4.1.2 Subtask {#jcf-p06-6-4-1-2} - Evaluate and pin the source ontology/analyzer dependency needed for Elixir modules, functions, expressions, OTP patterns, dependencies, and optional Git evolution.
+      - [x] 6.4.1.3 Subtask {#jcf-p06-6-4-1-3} - Return an RDF dataset plus analyzer version, configuration, input tree digest, coverage, warnings, resource counts, and no commit authority.
+      - [x] 6.4.1.4 Subtask {#jcf-p06-6-4-1-4} - Bound files, bytes, symbols, expressions, time, memory, and unsupported language behavior.
+      - [x] 6.4.1.5 Subtask {#jcf-p06-6-4-1-5} - Exclude raw source text by default and require an explicit accepted policy before storing any source literal.
 
-    - [ ] 6.4.2 Task {#jcf-p06-source-graph-publication} [repo: jido_code] [after: {#jcf-p06-source-analysis-port}] - Publish immutable source revision graphs.
+    - [x] 6.4.2 Task {#jcf-p06-source-graph-publication} [repo: jido_code] [after: {#jcf-p06-source-analysis-port}] - Publish immutable source revision graphs.
 
       This task validates and atomically closes source semantics for one exact
       repository snapshot.
 
-      - [ ] 6.4.2.1 Subtask {#jcf-p06-6-4-2-1} - Target `repo/{repo}/source/{revision}` and require repository/snapshot scope on every generated source entity IRI.
-      - [ ] 6.4.2.2 Subtask {#jcf-p06-6-4-2-2} - Validate source ontology compatibility, graph metadata, entity scope, result limits, and analyzer provenance before commit.
-      - [ ] 6.4.2.3 Subtask {#jcf-p06-6-4-2-3} - Publish the complete graph atomically, close it immutable, and link snapshot/analyzer activity/coverage without mixing ontology schema.
-      - [ ] 6.4.2.4 Subtask {#jcf-p06-6-4-2-4} - Make identical analysis replay idempotent and divergent output for one analyzer/input identity a conflict requiring a new analyzer revision.
-      - [ ] 6.4.2.5 Subtask {#jcf-p06-6-4-2-5} - Preserve prior revision graphs and mark latest/current source selection as a bounded query, not a mutable global graph replacement.
+      - [x] 6.4.2.1 Subtask {#jcf-p06-6-4-2-1} - Target `repo/{repo}/source/{revision}` and require repository/snapshot scope on every generated source entity IRI.
+      - [x] 6.4.2.2 Subtask {#jcf-p06-6-4-2-2} - Validate source ontology compatibility, graph metadata, entity scope, result limits, and analyzer provenance before commit.
+      - [x] 6.4.2.3 Subtask {#jcf-p06-6-4-2-3} - Publish the complete graph atomically, close it immutable, and link snapshot/analyzer activity/coverage without mixing ontology schema.
+      - [x] 6.4.2.4 Subtask {#jcf-p06-6-4-2-4} - Make identical analysis replay idempotent and divergent output for one analyzer/input identity a conflict requiring a new analyzer revision.
+      - [x] 6.4.2.5 Subtask {#jcf-p06-6-4-2-5} - Preserve prior revision graphs and mark latest/current source selection as a bounded query, not a mutable global graph replacement.
 
-    - [ ] 6.4.3 Task {#jcf-p06-source-projections} [repo: jido_code] [after: {#jcf-p06-source-graph-publication}] - Implement bounded repository and source-semantic projections.
+    - [x] 6.4.3 Task {#jcf-p06-source-projections} [repo: jido_code] [after: {#jcf-p06-source-graph-publication}] - Implement bounded repository and source-semantic projections.
 
       This task exposes exact-snapshot semantic context to later workflows and
       product surfaces without permitting arbitrary dataset traversal.
 
-      - [ ] 6.4.3.1 Subtask {#jcf-p06-6-4-3-1} - Add queries for snapshot readiness/freshness, modules, functions, OTP/runtime patterns, dependencies, and bounded source-entity neighborhoods.
-      - [ ] 6.4.3.2 Subtask {#jcf-p06-6-4-3-2} - Add exact snapshot/revision, coverage, analyzer/ontology version, stale/degraded state, truncation, and warnings to every result.
-      - [ ] 6.4.3.3 Subtask {#jcf-p06-6-4-3-3} - Add bounded impact projection around a source entity while preserving incoming/outgoing predicate identity and graph provenance.
-      - [ ] 6.4.3.4 Subtask {#jcf-p06-6-4-3-4} - Reject an explicit source query that omits repository/snapshot scope or attempts unauthorized historical graph access.
+      - [x] 6.4.3.1 Subtask {#jcf-p06-6-4-3-1} - Add queries for snapshot readiness/freshness, modules, functions, OTP/runtime patterns, dependencies, and bounded source-entity neighborhoods.
+      - [x] 6.4.3.2 Subtask {#jcf-p06-6-4-3-2} - Add exact snapshot/revision, coverage, analyzer/ontology version, stale/degraded state, truncation, and warnings to every result.
+      - [x] 6.4.3.3 Subtask {#jcf-p06-6-4-3-3} - Add bounded impact projection around a source entity while preserving incoming/outgoing predicate identity and graph provenance.
+      - [x] 6.4.3.4 Subtask {#jcf-p06-6-4-3-4} - Reject an explicit source query that omits repository/snapshot scope or attempts unauthorized historical graph access.
 
   - [ ] 6.5 Section - Phase 6 Integration Tests.
 

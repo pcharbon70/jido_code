@@ -20,7 +20,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     authorization-grant change-set command-request graph-revision-reference validation-report
     validation-result management-enrollment enrollment-transition enrollment-decision
     repository-reconciliation observation-activity observation-batch repository-snapshot
-    observed-claim provider-object
+    observed-claim provider-object source-artifact code-symbol source-analysis
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
@@ -212,6 +212,59 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   rescue
     _error -> invalid(:observed_claim_identity)
   end
+
+  @spec source_artifact(String.t(), String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def source_artifact(snapshot_iri, relative_path, content_digest)
+      when is_binary(relative_path) and is_binary(content_digest) do
+    with :ok <- validate(snapshot_iri),
+         {:ok, path} <- normalize_relative_path(relative_path),
+         true <- Regex.match?(~r/^[a-f0-9]{64}$/, content_digest) do
+      deterministic(:source_artifact, Enum.join([snapshot_iri, path, content_digest], "\n"))
+    else
+      _invalid -> invalid(:source_artifact_identity)
+    end
+  end
+
+  def source_artifact(_snapshot_iri, _relative_path, _content_digest),
+    do: invalid(:source_artifact_identity)
+
+  @spec code_symbol(String.t(), atom() | String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def code_symbol(snapshot_iri, kind, qualified_name) when is_binary(qualified_name) do
+    kind = if is_atom(kind), do: Atom.to_string(kind), else: kind
+
+    with :ok <- validate(snapshot_iri),
+         {:ok, normalized_kind} <- normalize_text(kind, 64),
+         {:ok, normalized_name} <- normalize_text(qualified_name, @max_segment_bytes) do
+      deterministic(
+        :code_symbol,
+        Enum.join([snapshot_iri, normalized_kind, normalized_name], "\n")
+      )
+    end
+  end
+
+  def code_symbol(_snapshot_iri, _kind, _qualified_name),
+    do: invalid(:code_symbol_identity)
+
+  @spec source_analysis(String.t(), String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def source_analysis(snapshot_iri, analyzer_version, configuration_digest)
+      when is_binary(analyzer_version) and is_binary(configuration_digest) do
+    with :ok <- validate(snapshot_iri),
+         {:ok, analyzer} <- normalize_text(analyzer_version, 128),
+         true <- Regex.match?(~r/^[a-f0-9]{64}$/, configuration_digest) do
+      deterministic(
+        :source_analysis,
+        Enum.join([snapshot_iri, analyzer, configuration_digest], "\n")
+      )
+    else
+      _invalid -> invalid(:source_analysis_identity)
+    end
+  end
+
+  def source_analysis(_snapshot_iri, _analyzer_version, _configuration_digest),
+    do: invalid(:source_analysis_identity)
 
   @spec git_object(String.t() | atom(), String.t()) :: {:ok, String.t()} | {:error, Error.t()}
   def git_object(algorithm, hex) when is_binary(hex) do
@@ -434,6 +487,18 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
 
   defp traversal_segment?(value),
     do: value |> String.split(["/", "\\"]) |> Enum.any?(&(&1 in [".", ".."]))
+
+  defp normalize_relative_path(value) do
+    normalized = value |> String.replace("\\", "/") |> String.trim()
+
+    if normalized != "" and byte_size(normalized) <= 512 and
+         not String.starts_with?(normalized, "/") and not traversal_segment?(normalized) and
+         not control_character?(normalized) do
+      {:ok, normalized}
+    else
+      invalid(:source_path)
+    end
+  end
 
   defp locator_material?(value) do
     String.contains?(value, ["://", "/", "\\"]) or

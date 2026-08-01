@@ -295,7 +295,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     ]
 
     if version == @repository_version,
-      do: base ++ repository_specifications(resource),
+      do: base ++ repository_specifications(resource) ++ source_specifications(graph),
       else: base
   end
 
@@ -410,6 +410,91 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         "Describe one exact repository snapshot anchor.",
         :product,
         :declared
+      )
+    ]
+  end
+
+  defp source_specifications(graph) do
+    snapshot = Map.put(graph, :snapshot, %{type: :resource_iri, required: true})
+    entity = Map.put(snapshot, :resource, %{type: :resource_iri, required: true})
+
+    [
+      spec(
+        :snapshot_readiness_freshness,
+        :select,
+        snapshot,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read analyzer readiness and observation freshness for one exact snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_modules,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read modules for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_functions,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read functions for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_otp_patterns,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read bounded OTP/runtime patterns for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_dependencies,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read dependency relationships for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_entity_neighborhood,
+        :select,
+        entity,
+        :source,
+        [:source_revision],
+        :table,
+        "Read a bounded incoming and outgoing neighborhood in one exact snapshot.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :source_impact,
+        :select,
+        entity,
+        :source,
+        [:source_revision],
+        :table,
+        "Read bounded code-relation impact around one exact source entity.",
+        :product,
+        :open_world
       )
     ]
   end
