@@ -19,7 +19,7 @@ defmodule JidoCode.Knowledge.WriterTest do
 
   setup context do
     root = unique_root(context)
-    on_exit(fn -> File.rm_rf!(root) end)
+    on_exit(fn -> remove_root!(root) end)
     {:ok, config} = Config.for_test(Path.join(root, "store"))
     %{config: config}
   end
@@ -355,6 +355,20 @@ defmodule JidoCode.Knowledge.WriterTest do
 
   defp stop_process(pid) do
     if Process.alive?(pid), do: GenServer.stop(pid)
+  end
+
+  defp remove_root!(root, attempts \\ 20)
+  defp remove_root!(root, 0), do: File.rm_rf!(root)
+
+  defp remove_root!(root, attempts) do
+    case File.rm_rf(root) do
+      {:ok, _paths} ->
+        :ok
+
+      {:error, _reason, _path} ->
+        Process.sleep(25)
+        remove_root!(root, attempts - 1)
+    end
   end
 
   defp unique_root(context) do

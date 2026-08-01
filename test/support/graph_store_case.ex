@@ -38,7 +38,8 @@ defmodule JidoCode.GraphStoreCase do
       raise ArgumentError, "graph-store tests require schema: :quad"
     end
 
-    {:ok, store} = TripleStore.open(path, Keyword.put(opts, :schema, :quad))
+    deadline = System.monotonic_time(:millisecond) + 5_000
+    {:ok, store} = open_store(path, Keyword.put(opts, :schema, :quad), deadline)
 
     ExUnit.Callbacks.on_exit({:close_graph_store, System.unique_integer([:positive])}, fn ->
       close_store(store)
@@ -85,6 +86,29 @@ defmodule JidoCode.GraphStoreCase do
 
     unique = System.unique_integer([:positive, :monotonic])
     Path.join([System.tmp_dir!(), @temp_prefix, "#{digest}-#{unique}"])
+  end
+
+  defp open_store(path, opts, deadline) do
+    case TripleStore.open(path, opts) do
+      {:error, {:db_open, reason}} = error ->
+        if transient_lock?(reason) and System.monotonic_time(:millisecond) < deadline do
+          Process.sleep(20)
+          open_store(path, opts, deadline)
+        else
+          error
+        end
+
+      result ->
+        result
+    end
+  end
+
+  defp transient_lock?(reason) do
+    reason
+    |> to_string()
+    |> String.contains?(["/LOCK", "lock hold", "No locks available"])
+  rescue
+    _error -> false
   end
 
   defp cleanup_root!(root) do

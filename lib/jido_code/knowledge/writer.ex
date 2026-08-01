@@ -15,6 +15,8 @@ defmodule JidoCode.Knowledge.Writer do
   alias JidoCode.Knowledge.CommandPipeline
   alias JidoCode.Knowledge.CommandReceipt
   alias JidoCode.Knowledge.CommandStatus
+  alias JidoCode.Knowledge.DerivationRequest
+  alias JidoCode.Knowledge.DerivedGraphManager
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Telemetry
@@ -138,6 +140,22 @@ defmodule JidoCode.Knowledge.Writer do
     end
   end
 
+  @doc false
+  @spec publish_derived(GenServer.server(), DerivationRequest.t(), keyword()) ::
+          {:ok, CommandReceipt.t()} | {:error, Error.t()}
+  def publish_derived(server, %DerivationRequest{} = request, options \\ []) do
+    with {:ok, operation_timeout, caller_timeout} <- timeouts(options) do
+      deadline = System.monotonic_time(:millisecond) + operation_timeout
+
+      safe_call(
+        server,
+        {:publish_derived, request, deadline},
+        caller_timeout,
+        :derived_graph_response
+      )
+    end
+  end
+
   @impl true
   def init(options) do
     {:ok,
@@ -204,6 +222,22 @@ defmodule JidoCode.Knowledge.Writer do
         state.store_server,
         deadline
       )
+
+    {:reply, reply, state}
+  end
+
+  def handle_call({:publish_derived, %DerivationRequest{} = request, deadline}, _from, state) do
+    reply =
+      case DerivedGraphManager.execute(
+             request,
+             state.store_server,
+             state.clock,
+             deadline,
+             state.pubsub
+           ) do
+        {:ok, receipt, _envelope} -> {:ok, receipt}
+        {:error, %Error{} = error} -> {:error, error}
+      end
 
     {:reply, reply, state}
   end

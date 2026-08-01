@@ -40,6 +40,7 @@ defmodule JidoCode.Knowledge.Authorization do
     :decision,
     :ontology,
     :security,
+    :reasoner,
     :administrative
   ]
 
