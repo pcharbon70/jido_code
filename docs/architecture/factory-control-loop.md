@@ -128,3 +128,43 @@ governance transition history, applicability, strict capability, and derived
 hierarchy reads. Governance projections preserve the evaluated graph revision,
 derived source revisions, declared derivation source references, completeness,
 freshness, bounds, and query version.
+
+## Reconciliation Plane
+
+A reconciliation input package binds one active enrollment and repository
+scope to exact catalog, policy, observation, source, derived, and control graph
+revisions. It also records the complete observation/snapshot, active desired
+outcomes and policies, accepted knowledge, current goals and obligations,
+ontology/query/rule versions, actor, deadline, and bounded row/change/time
+budget. Package construction fails for mixed or stale revisions, unauthorized
+graphs, suspended enrollment, incompatible ontology, or absence conclusions
+against incomplete observations.
+
+`RecordReconciliation` appends the package, a durable reconciliation activity,
+semantic gaps, and bounded `ControlProposal` resources to the repository
+control graph. Stable identities reuse the same package/gap/proposal for the
+same exact context; a meaningful graph revision change creates a new context
+that can explicitly supersede prior proposals. Accepted transition chains
+track proposed, running, completed, failed, cancelled, and superseded activity
+states without mutable status fields.
+
+The evaluator distinguishes no gap, unknown knowledge, contradiction, policy
+conflict, pending proposal, existing work reuse, and obsolete work
+supersession. Unknown or incomplete inputs never become negative facts.
+Contradiction, policy conflict, ambiguity, high risk, and declared approval
+requirements produce an explicit pending decision. Reconciliation can propose
+or reuse a goal and cite an obligation, but cannot adopt work, infer
+authorization, or create an execution lease.
+
+Query catalog version 1.4 adds enrollment-scope discovery, incomplete activity,
+exact input, and explanation queries. Broad catalog candidates are resolved
+through each enrollment's full accepted transition history before entering the
+coordinator. Explanations cite graph resources, exact revisions, result
+classifications, proposal/decision IRIs, and applied bounds rather than hidden
+reasoning.
+
+`JidoCode.Factory.Reconciler` keeps only coalesced wakeups and recent
+diagnostics in memory. Startup and explicit rediscovery use reviewed graph
+queries; `Task.async_stream/3` applies bounded concurrency and back-pressure.
+Retries and notifications are hints. Restart recovery comes from active scopes
+and incomplete graph activities, not a durable process queue or OTP snapshot.

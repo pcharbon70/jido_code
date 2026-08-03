@@ -23,6 +23,7 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     conflictPosture staticMember queryDerived member inCohort membershipPath applicabilityEvidence
     requiredOutcome acceptanceRequirement heldBy capabilityKind supportsScope supportsEffect
     authorizedBy evidenceSource broaderCapability
+    inputPackage evaluatedContext proposes reuses omittedBecause governedProposal
   ])
   @max_guards 100
 

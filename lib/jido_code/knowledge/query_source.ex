@@ -677,6 +677,72 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:active_reconciliation_scopes) do
+    """
+    SELECT ?enrollment ?repository ?scope ?transition ?revision WHERE {
+      GRAPH {{graph}} {
+        ?enrollment <#{@jf}manages> ?repository ;
+                    <#{@jf}inScope> ?scope .
+      }
+    }
+    ORDER BY ?repository
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:incomplete_reconciliations) do
+    """
+    SELECT ?activity ?scope ?transition ?state ?revision WHERE {
+      GRAPH {{graph}} {
+        ?activity a <#{@jf}ReconciliationActivity> ;
+                  <#{@jf}validFor> ?scope .
+        ?transition <#{@jf}transitionSubject> ?activity ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision .
+        ?decision <#{@jf}accepts> ?transition .
+        FILTER(?state = <https://jido.run/ontology/concept/ReconciliationProposed> ||
+               ?state = <https://jido.run/ontology/concept/ReconciliationRunning>)
+        FILTER NOT EXISTS {
+          ?successor <#{@jf}expectedPredecessor> ?transition .
+          ?successorDecision <#{@jf}accepts> ?successor .
+        }
+      }
+    }
+    ORDER BY ?activity
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:reconciliation_input) do
+    """
+    SELECT ?predicate ?object ?revisionReference ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+        OPTIONAL {
+          {{resource}} <#{@jf}sourceGraphRevision> ?revisionReference .
+          ?revisionReference <#{@jf}sourceGraph> ?sourceGraphIri ;
+                             <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:reconciliation_explanation) do
+    """
+    SELECT ?subject ?desired ?result WHERE {
+      GRAPH {{graph}} {
+        ?subject <#{@jf}inputPackage> {{resource}} .
+        ?subject <#{@jf}about> ?desired .
+        ?subject <#{@jf}epistemicState> ?result .
+      }
+    }
+    ORDER BY ?subject
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {

@@ -15,6 +15,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Control.GovernanceProjection
   alias JidoCode.Knowledge.Control.Obligation
   alias JidoCode.Knowledge.Control.Policy
+  alias JidoCode.Knowledge.Control.Reconciliation
+  alias JidoCode.Knowledge.Control.ReconciliationPackage
+  alias JidoCode.Knowledge.Control.ReconciliationProjection
   alias JidoCode.Knowledge.Control.WorkGraph
   alias JidoCode.Knowledge.Control.WorkProjection
   alias JidoCode.Knowledge.Readiness
@@ -84,6 +87,15 @@ defmodule JidoCode.Knowledge do
     do: CapabilityRegistry.register_command(capability, attributes, options)
 
   def project_governance(result, context), do: GovernanceProjection.build(result, context)
+  def reconciliation_package(attributes), do: ReconciliationPackage.new(attributes)
+
+  def reconcile(package, evaluations, attributes),
+    do: Reconciliation.new(package, evaluations, attributes)
+
+  def record_reconciliation(reconciliation, attributes, options \\ []),
+    do: Reconciliation.record_command(reconciliation, attributes, options)
+
+  def project_reconciliation(result, context), do: ReconciliationProjection.build(result, context)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

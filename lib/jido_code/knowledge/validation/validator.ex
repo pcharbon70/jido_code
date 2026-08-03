@@ -44,6 +44,7 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     conflictPosture staticMember queryDerived member inCohort membershipPath applicabilityEvidence
     requiredOutcome acceptanceRequirement heldBy capabilityKind supportsScope supportsEffect
     authorizedBy evidenceSource broaderCapability
+    inputPackage evaluatedContext proposes reuses omittedBecause governedProposal
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i

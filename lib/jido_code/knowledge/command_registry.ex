@@ -13,6 +13,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @derived_version "1.1.0"
   @control_loop_version "1.2.0"
   @governance_version "1.3.0"
+  @reconciliation_version "1.4.0"
   @commands %{
     "EnrollRepository" => %{
       owner: :factory,
@@ -184,6 +185,21 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
   @version_1_3 Map.merge(@version_1_2, @phase_07_governance_commands)
+  @phase_07_reconciliation_commands %{
+    "RecordReconciliation" => %{
+      owner: :factory,
+      capability: :proposal,
+      graph_families: [:repository_control],
+      preconditions: [:input_revisions_exact, :reconciliation_absent]
+    },
+    "TransitionReconciliation" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control],
+      preconditions: [:reconciliation_known, :unique_transition_successor]
+    }
+  }
+  @version_1_4 Map.merge(@version_1_3, @phase_07_reconciliation_commands)
 
   @spec version() :: String.t()
   def version, do: @version
@@ -196,6 +212,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@derived_version), do: @version_1_1 |> Map.keys() |> Enum.sort()
   def names(@control_loop_version), do: @version_1_2 |> Map.keys() |> Enum.sort()
   def names(@governance_version), do: @version_1_3 |> Map.keys() |> Enum.sort()
+  def names(@reconciliation_version), do: @version_1_4 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -230,6 +247,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_1_3, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @governance_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @reconciliation_version) when is_binary(name) do
+    case Map.fetch(@version_1_4, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @reconciliation_version})}
 
       :error ->
         invalid(:command_type)

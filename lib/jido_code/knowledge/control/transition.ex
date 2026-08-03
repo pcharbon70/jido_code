@@ -25,7 +25,15 @@ defmodule JidoCode.Knowledge.Control.Transition do
   ]
   defstruct @enforce_keys
 
-  @type domain :: :desired_outcome | :goal | :plan | :task | :policy | :obligation | :capability
+  @type domain ::
+          :desired_outcome
+          | :goal
+          | :plan
+          | :task
+          | :policy
+          | :obligation
+          | :capability
+          | :reconciliation
   @type t :: %__MODULE__{}
 
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -42,7 +50,8 @@ defmodule JidoCode.Knowledge.Control.Transition do
       ~w[proposed approved eligible blocked leased executing awaiting_evidence awaiting_decision satisfied rejected cancelled superseded]a,
     policy: ~w[proposed active suspended superseded retired]a,
     obligation: ~w[proposed active satisfied waived superseded retired]a,
-    capability: ~w[proposed available stale unavailable retired]a
+    capability: ~w[proposed available stale unavailable retired]a,
+    reconciliation: ~w[proposed running completed failed cancelled superseded]a
   }
 
   @edges %{
@@ -112,6 +121,14 @@ defmodule JidoCode.Knowledge.Control.Transition do
       stale: ~w[available unavailable retired]a,
       unavailable: ~w[available retired]a,
       retired: []
+    },
+    reconciliation: %{
+      proposed: ~w[running cancelled superseded]a,
+      running: ~w[completed failed cancelled superseded]a,
+      completed: [:superseded],
+      failed: ~w[running cancelled superseded]a,
+      cancelled: [:superseded],
+      superseded: []
     }
   }
 

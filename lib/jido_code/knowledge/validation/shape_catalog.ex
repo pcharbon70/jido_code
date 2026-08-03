@@ -21,7 +21,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     source_revision: ~w[RepositorySnapshot SourceArtifact CodeSymbol Scope MigrationActivity],
     repository_control: ~w[
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
-      GraphRevisionReference
+      GraphRevisionReference ReconciliationActivity ReconciliationInput Gap ControlProposal
     ],
     run_attempt: ~w[
       ExecutionAttempt ToolInvocation Patch VerificationActivity Artifact Message MigrationActivity

@@ -119,52 +119,52 @@ Back to plan: [README](./README.md)
       - [x] 7.2.4.3 Subtask {#jcf-p07-7-2-4-3} - Add capability hierarchy/classification through rebuildable inference with explicit source and rule versions.
       - [x] 7.2.4.4 Subtask {#jcf-p07-7-2-4-4} - Mark stale/unavailable capability observations and prohibit scheduling from an incomplete strict capability view.
 
-  - [ ] 7.3 Section - Implement desired/observed-state reconciliation.
+  - [x] 7.3 Section - Implement desired/observed-state reconciliation.
 
     This section compares exact graph revisions, derives explainable gaps and
     proposals, and converges idempotently without letting an inference engine
     grant execution authority.
 
-    - [ ] 7.3.1 Task {#jcf-p07-reconciliation-input} [repo: jido_code] [after: {#jcf-p07-capability-registry}] - Build bounded reconciliation input packages.
+    - [x] 7.3.1 Task {#jcf-p07-reconciliation-input} [repo: jido_code] [after: {#jcf-p07-capability-registry}] - Build bounded reconciliation input packages.
 
       This task selects one coherent desired/observed/policy/knowledge context
       for an enrollment or cohort.
 
-      - [ ] 7.3.1.1 Subtask {#jcf-p07-7-3-1-1} - Select active enrollment, exact/latest complete observations, exact source snapshot, applicable policy versions, desired outcomes, accepted knowledge, active goals/obligations, and current control revision.
-      - [ ] 7.3.1.2 Subtask {#jcf-p07-7-3-1-2} - Require explicit completeness for every negative/absence conclusion and retain unknown/contradictory input state.
-      - [ ] 7.3.1.3 Subtask {#jcf-p07-7-3-1-3} - Bind input graph/revision set, query/rule versions, actor, budget, deadline, and reconciliation identity.
-      - [ ] 7.3.1.4 Subtask {#jcf-p07-7-3-1-4} - Reject stale, mixed-snapshot, unauthorized, over-budget, or ontology-incompatible packages before deriving control changes.
+      - [x] 7.3.1.1 Subtask {#jcf-p07-7-3-1-1} - Select active enrollment, exact/latest complete observations, exact source snapshot, applicable policy versions, desired outcomes, accepted knowledge, active goals/obligations, and current control revision.
+      - [x] 7.3.1.2 Subtask {#jcf-p07-7-3-1-2} - Require explicit completeness for every negative/absence conclusion and retain unknown/contradictory input state.
+      - [x] 7.3.1.3 Subtask {#jcf-p07-7-3-1-3} - Bind input graph/revision set, query/rule versions, actor, budget, deadline, and reconciliation identity.
+      - [x] 7.3.1.4 Subtask {#jcf-p07-7-3-1-4} - Reject stale, mixed-snapshot, unauthorized, over-budget, or ontology-incompatible packages before deriving control changes.
 
-    - [ ] 7.3.2 Task {#jcf-p07-gap-reconciliation} [repo: jido_code] [after: {#jcf-p07-reconciliation-input}] - Derive gaps, contradictions, obligations, and goal proposals.
+    - [x] 7.3.2 Task {#jcf-p07-gap-reconciliation} [repo: jido_code] [after: {#jcf-p07-reconciliation-input}] - Derive gaps, contradictions, obligations, and goal proposals.
 
       This task compares graph-native propositions and policy requirements and
       records proposals with complete explanations.
 
-      - [ ] 7.3.2.1 Subtask {#jcf-p07-7-3-2-1} - Detect unsatisfied desired outcomes, applicable unsatisfied policy obligations, stale evidence, invalid assumptions, contradictions, and goals made obsolete by current observations.
-      - [ ] 7.3.2.2 Subtask {#jcf-p07-7-3-2-2} - Produce proposed finding/obligation/goal/supersession change sets with source graph refs, rule version, confidence, explanation, and no automatic execution lease.
-      - [ ] 7.3.2.3 Subtask {#jcf-p07-7-3-2-3} - Reuse semantic gap/goal identities across identical reconciliation input and supersede stale proposals after meaningful source/policy change.
-      - [ ] 7.3.2.4 Subtask {#jcf-p07-7-3-2-4} - Require human or policy-authorized adoption where risk, ambiguity, contradiction, or incomplete knowledge exceeds accepted bounds.
-      - [ ] 7.3.2.5 Subtask {#jcf-p07-7-3-2-5} - Never treat derived cohort, inferred capability, or high-confidence claim as accepted control truth without the declared command/decision path.
+      - [x] 7.3.2.1 Subtask {#jcf-p07-7-3-2-1} - Detect unsatisfied desired outcomes, applicable unsatisfied policy obligations, stale evidence, invalid assumptions, contradictions, and goals made obsolete by current observations.
+      - [x] 7.3.2.2 Subtask {#jcf-p07-7-3-2-2} - Produce proposed finding/obligation/goal/supersession change sets with source graph refs, rule version, confidence, explanation, and no automatic execution lease.
+      - [x] 7.3.2.3 Subtask {#jcf-p07-7-3-2-3} - Reuse semantic gap/goal identities across identical reconciliation input and supersede stale proposals after meaningful source/policy change.
+      - [x] 7.3.2.4 Subtask {#jcf-p07-7-3-2-4} - Require human or policy-authorized adoption where risk, ambiguity, contradiction, or incomplete knowledge exceeds accepted bounds.
+      - [x] 7.3.2.5 Subtask {#jcf-p07-7-3-2-5} - Never treat derived cohort, inferred capability, or high-confidence claim as accepted control truth without the declared command/decision path.
 
-    - [ ] 7.3.3 Task {#jcf-p07-reconciler-process} [repo: jido_code] [after: {#jcf-p07-gap-reconciliation}] - Implement the restart-safe reconciler coordinator.
+    - [x] 7.3.3 Task {#jcf-p07-reconciler-process} [repo: jido_code] [after: {#jcf-p07-gap-reconciliation}] - Implement the restart-safe reconciler coordinator.
 
       This task uses graph state to discover work, coalesce triggers, and run
       bounded reconciliation without persisting a second queue.
 
-      - [ ] 7.3.3.1 Subtask {#jcf-p07-7-3-3-1} - Discover active/stale enrollment scopes by query at startup and after relevant change notifications.
-      - [ ] 7.3.3.2 Subtask {#jcf-p07-7-3-3-2} - Coalesce duplicate triggers while recording durable reconciliation activity and input revisions through semantic commands.
-      - [ ] 7.3.3.3 Subtask {#jcf-p07-7-3-3-3} - Enforce per-factory/repository concurrency, budgets, timeouts, backoff, and cancellation without durable process snapshots.
-      - [ ] 7.3.3.4 Subtask {#jcf-p07-7-3-3-4} - On restart, query incomplete reconciliation activities and recover, supersede, or retry according to graph-visible state.
+      - [x] 7.3.3.1 Subtask {#jcf-p07-7-3-3-1} - Discover active/stale enrollment scopes by query at startup and after relevant change notifications.
+      - [x] 7.3.3.2 Subtask {#jcf-p07-7-3-3-2} - Coalesce duplicate triggers while recording durable reconciliation activity and input revisions through semantic commands.
+      - [x] 7.3.3.3 Subtask {#jcf-p07-7-3-3-3} - Enforce per-factory/repository concurrency, budgets, timeouts, backoff, and cancellation without durable process snapshots.
+      - [x] 7.3.3.4 Subtask {#jcf-p07-7-3-3-4} - On restart, query incomplete reconciliation activities and recover, supersede, or retry according to graph-visible state.
 
-    - [ ] 7.3.4 Task {#jcf-p07-reconciliation-explanation} [repo: jido_code] [after: {#jcf-p07-reconciler-process}] - Implement gap and work-selection explanations.
+    - [x] 7.3.4 Task {#jcf-p07-reconciliation-explanation} [repo: jido_code] [after: {#jcf-p07-reconciler-process}] - Implement gap and work-selection explanations.
 
       This task makes every proposed, reused, superseded, blocked, or omitted
       goal traceable without exposing hidden model reasoning.
 
-      - [ ] 7.3.4.1 Subtask {#jcf-p07-7-3-4-1} - Project desired proposition, observed/unknown state, policy/applicability path, source revisions, rule/query versions, constraints, and resulting proposal.
-      - [ ] 7.3.4.2 Subtask {#jcf-p07-7-3-4-2} - Distinguish no gap, unknown due to incomplete input, contradiction, policy conflict, proposal pending, existing work reused, and work superseded.
-      - [ ] 7.3.4.3 Subtask {#jcf-p07-7-3-4-3} - Bound explanation size and cite graph resources instead of persisting or exposing chain-of-thought.
-      - [ ] 7.3.4.4 Subtask {#jcf-p07-7-3-4-4} - Add exact-context reconstruction for authorized audit and later evidence evaluation.
+      - [x] 7.3.4.1 Subtask {#jcf-p07-7-3-4-1} - Project desired proposition, observed/unknown state, policy/applicability path, source revisions, rule/query versions, constraints, and resulting proposal.
+      - [x] 7.3.4.2 Subtask {#jcf-p07-7-3-4-2} - Distinguish no gap, unknown due to incomplete input, contradiction, policy conflict, proposal pending, existing work reused, and work superseded.
+      - [x] 7.3.4.3 Subtask {#jcf-p07-7-3-4-3} - Bound explanation size and cite graph resources instead of persisting or exposing chain-of-thought.
+      - [x] 7.3.4.4 Subtask {#jcf-p07-7-3-4-4} - Add exact-context reconstruction for authorized audit and later evidence evaluation.
 
   - [ ] 7.4 Section - Implement eligibility, scheduling, and fenced leases.
 
