@@ -53,6 +53,7 @@ defmodule JidoCode.MixProject do
       # to unbounded allocation. Decimal 3 retains the API RDF uses.
       {:decimal, "~> 3.1", override: true},
       {:rdf, "~> 2.1"},
+      {:jido, "== 2.3.2"},
       {:triple_store,
        git: "https://github.com/pcharbon70/triple_store.git",
        ref: "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"},
@@ -64,7 +65,7 @@ defmodule JidoCode.MixProject do
        compile: false,
        depth: 1},
       {:swoosh, "~> 1.16"},
-      {:req, "~> 0.5"},
+      {:req, "~> 0.6.1"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},

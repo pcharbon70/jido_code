@@ -26,6 +26,7 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     authorizedBy evidenceSource broaderCapability
     inputPackage evaluatedContext proposes reuses omittedBecause governedProposal
     leasesTask eligibilityReceipt livenessEvidence
+    scopedTo participant audience replyTo resultingCommand instruction contextItem
   ])
   @max_guards 100
 

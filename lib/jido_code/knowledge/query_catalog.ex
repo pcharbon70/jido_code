@@ -17,13 +17,15 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @governance_version "1.3.0"
   @reconciliation_version "1.4.0"
   @scheduling_version "1.5.0"
+  @execution_version "1.6.0"
   @versions [
     @version,
     @repository_version,
     @control_loop_version,
     @governance_version,
     @reconciliation_version,
-    @scheduling_version
+    @scheduling_version,
+    @execution_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -52,6 +54,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec scheduling_version() :: String.t()
   def scheduling_version, do: @scheduling_version
+
+  @spec execution_version() :: String.t()
+  def execution_version, do: @execution_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -353,6 +358,16 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           governance_specifications(resource) ++
           reconciliation_specifications(graph, resource) ++
           scheduling_specifications(graph, resource)
+
+      @execution_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource)
     end
   end
 
@@ -840,6 +855,44 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:repository_control],
         :timeline,
         "Read the accepted transition history for one execution lease.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp execution_boundary_specifications(resource) do
+    [
+      spec(
+        :execution_context_subject,
+        :select,
+        resource,
+        :execution,
+        [:factory_catalog, :factory_policy, :source_revision, :repository_control, :memory],
+        :table,
+        "Read one bounded subject used to assemble exact execution context.",
+        :product,
+        :declared
+      ),
+      spec(
+        :interaction_session,
+        :select,
+        resource,
+        :execution,
+        [:repository_control, :run_attempt],
+        :table,
+        "Read one interaction session without runtime-private state.",
+        :product,
+        :declared
+      ),
+      spec(
+        :interaction_timeline,
+        :select,
+        resource,
+        :execution,
+        [:repository_control, :run_attempt],
+        :table,
+        "Read a bounded chronological interaction timeline.",
         :product,
         :declared
       )

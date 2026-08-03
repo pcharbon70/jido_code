@@ -22,6 +22,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Control.ReconciliationProjection
   alias JidoCode.Knowledge.Control.WorkGraph
   alias JidoCode.Knowledge.Control.WorkProjection
+  alias JidoCode.Knowledge.Execution.InteractionMessage
+  alias JidoCode.Knowledge.Execution.InteractionProjection
+  alias JidoCode.Knowledge.Execution.InteractionSession
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -122,6 +125,21 @@ defmodule JidoCode.Knowledge do
 
   def execution_lease_guard(lease, control_graph_iri, fence, at),
     do: ExecutionLease.execution_guard(lease, control_graph_iri, fence, at)
+
+  def interaction_session(attributes), do: InteractionSession.new(attributes)
+
+  def open_interaction_session(session, attributes, options \\ []),
+    do: InteractionSession.open_command(session, attributes, options)
+
+  def transition_interaction_session(session, resolution, attributes, options \\ []),
+    do: InteractionSession.transition_command(session, resolution, attributes, options)
+
+  def interaction_message(attributes), do: InteractionMessage.new(attributes)
+
+  def record_interaction_message(message, resolution, attributes, options \\ []),
+    do: InteractionMessage.record_command(message, resolution, attributes, options)
+
+  def project_interaction(result, context), do: InteractionProjection.build(result, context)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

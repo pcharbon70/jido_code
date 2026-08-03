@@ -22,10 +22,11 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     repository_control: ~w[
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
       GraphRevisionReference ReconciliationActivity ReconciliationInput Gap ControlProposal
-      EligibilityReceipt
+      EligibilityReceipt InteractionSession Message Instruction
     ],
     run_attempt: ~w[
-      ExecutionAttempt ToolInvocation Patch VerificationActivity Artifact Message MigrationActivity
+      ExecutionAttempt ToolInvocation Patch VerificationActivity Artifact InteractionSession Message
+      Instruction MigrationActivity
     ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationActivity MigrationActivity

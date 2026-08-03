@@ -60,6 +60,26 @@ defmodule JidoCode.Architecture.CheckerTest do
     assert Enum.count(violations, &(&1.rule == :dependency_direction)) == 4
   end
 
+  test "keeps Jido internals inside the runtime namespace" do
+    sources = [
+      {"lib/jido_code/knowledge/runtime_leak.ex",
+       "defmodule JidoCode.Knowledge.RuntimeLeak do\n  alias Jido.AgentServer\nend"},
+      {"lib/jido_code/factory/runtime_leak.ex",
+       "defmodule JidoCode.Factory.RuntimeLeak do\n  alias Jido.Signal\nend"},
+      {"lib/jido_code_web/runtime_leak.ex",
+       "defmodule JidoCodeWeb.RuntimeLeak do\n  alias Jido.Agent\nend"}
+    ]
+
+    assert {:error, violations} = Checker.check_sources(sources)
+    assert Enum.count(violations, &(&1.rule == :runtime_namespace)) == 3
+
+    assert {:ok, []} =
+             Checker.check_sources([
+               {"lib/jido_code/runtime/jido_adapter.ex",
+                "defmodule JidoCode.Runtime.JidoAdapter do\n  alias Jido.AgentServer\nend"}
+             ])
+  end
+
   test "allows explicit public contracts and owned filesystem roles" do
     sources = [
       {"lib/jido_code/factory/service.ex",

@@ -20,67 +20,67 @@ Back to plan: [README](./README.md)
   ensuring every operation is scoped by one current lease, exact source
   revision, explicit constraints, and graph-visible attempt history.
 
-  - [ ] 8.1 Section - Define runtime, agent, and execution-context boundaries.
+  - [x] 8.1 Section - Define runtime, agent, and execution-context boundaries.
 
     This section creates a product-owned facade over Jido and other runtime
     implementations without encoding kernels, pods, process IDs, or snapshots
     as domain identity.
 
-    - [ ] 8.1.1 Task {#jcf-p08-runtime-dependencies} [repo: jido_code] [after: {#jcf-p07-phase-receipt}] - Select and pin the execution runtime dependency set.
+    - [x] 8.1.1 Task {#jcf-p08-runtime-dependencies} [repo: jido_code] [after: {#jcf-p07-phase-receipt}] - Select and pin the execution runtime dependency set.
 
       This task admits Jido and related runtime/tool libraries only after their
       lifecycle, persistence, supervision, and version contracts fit the
       graph-only architecture.
 
-      - [ ] 8.1.1.1 Subtask {#jcf-p08-8-1-1-1} - Evaluate current Jido runtime APIs, agent/action contracts, supervision requirements, optional persistence behavior, and compatibility with the accepted Elixir/OTP toolchain.
-      - [ ] 8.1.1.2 Subtask {#jcf-p08-8-1-1-2} - Pin exact versions/revisions and disable or replace any runtime snapshot, memory, queue, or checkpoint persistence outside `TripleStore`.
-      - [ ] 8.1.1.3 Subtask {#jcf-p08-8-1-1-3} - Record adapter boundaries for model providers, tools, sandboxes, clocks, secrets, and cancellation without granting them graph handles.
-      - [ ] 8.1.1.4 Subtask {#jcf-p08-8-1-1-4} - Add dependency/namespace checks preventing Jido internals from entering ontology, command, query, or web contracts.
-      - [ ] 8.1.1.5 Subtask {#jcf-p08-8-1-1-5} - Define upgrade compatibility and mixed-attempt behavior for agent/runtime versions.
+      - [x] 8.1.1.1 Subtask {#jcf-p08-8-1-1-1} - Evaluate current Jido runtime APIs, agent/action contracts, supervision requirements, optional persistence behavior, and compatibility with the accepted Elixir/OTP toolchain.
+      - [x] 8.1.1.2 Subtask {#jcf-p08-8-1-1-2} - Pin exact versions/revisions and disable or replace any runtime snapshot, memory, queue, or checkpoint persistence outside `TripleStore`.
+      - [x] 8.1.1.3 Subtask {#jcf-p08-8-1-1-3} - Record adapter boundaries for model providers, tools, sandboxes, clocks, secrets, and cancellation without granting them graph handles.
+      - [x] 8.1.1.4 Subtask {#jcf-p08-8-1-1-4} - Add dependency/namespace checks preventing Jido internals from entering ontology, command, query, or web contracts.
+      - [x] 8.1.1.5 Subtask {#jcf-p08-8-1-1-5} - Define upgrade compatibility and mixed-attempt behavior for agent/runtime versions.
 
-    - [ ] 8.1.2 Task {#jcf-p08-runtime-port} [repo: jido_code] [after: {#jcf-p08-runtime-dependencies}] - Implement the product-owned execution runtime port.
+    - [x] 8.1.2 Task {#jcf-p08-runtime-port} [repo: jido_code] [after: {#jcf-p08-runtime-dependencies}] - Implement the product-owned execution runtime port.
 
       This task exposes capability-oriented attempt operations while hiding
       concrete runtime topology and provider payloads from factory services.
 
-      - [ ] 8.1.2.1 Subtask {#jcf-p08-8-1-2-1} - Define prepare, start, signal, cancel, status, and terminate operations keyed by attempt/lease/task IRIs plus fencing token.
-      - [ ] 8.1.2.2 Subtask {#jcf-p08-8-1-2-2} - Define bounded runtime events and outputs containing attempt/tool refs, sequence, times, outcome class, usage, and safe diagnostics.
-      - [ ] 8.1.2.3 Subtask {#jcf-p08-8-1-2-3} - Keep runtime process IDs, kernel/pod names, provider sessions, model structs, and sandbox handles private to adapters.
-      - [ ] 8.1.2.4 Subtask {#jcf-p08-8-1-2-4} - Require every runtime callback to validate current fence/cancellation state through bounded factory services before effects.
-      - [ ] 8.1.2.5 Subtask {#jcf-p08-8-1-2-5} - Supply deterministic fake runtime behavior for success, tool use, timeout, cancellation, crash, lost response, duplicate event, and stale lease.
+      - [x] 8.1.2.1 Subtask {#jcf-p08-8-1-2-1} - Define prepare, start, signal, cancel, status, and terminate operations keyed by attempt/lease/task IRIs plus fencing token.
+      - [x] 8.1.2.2 Subtask {#jcf-p08-8-1-2-2} - Define bounded runtime events and outputs containing attempt/tool refs, sequence, times, outcome class, usage, and safe diagnostics.
+      - [x] 8.1.2.3 Subtask {#jcf-p08-8-1-2-3} - Keep runtime process IDs, kernel/pod names, provider sessions, model structs, and sandbox handles private to adapters.
+      - [x] 8.1.2.4 Subtask {#jcf-p08-8-1-2-4} - Require every runtime callback to validate current fence/cancellation state through bounded factory services before effects.
+      - [x] 8.1.2.5 Subtask {#jcf-p08-8-1-2-5} - Supply deterministic fake runtime behavior for success, tool use, timeout, cancellation, crash, lost response, duplicate event, and stale lease.
 
-    - [ ] 8.1.3 Task {#jcf-p08-context-package} [repo: jido_code] [after: {#jcf-p08-runtime-port}] - Implement bounded execution context assembly.
+    - [x] 8.1.3 Task {#jcf-p08-context-package} [repo: jido_code] [after: {#jcf-p08-runtime-port}] - Implement bounded execution context assembly.
 
       This task builds a reproducible least-privilege package from reviewed
       graph projections instead of dumping repository or memory graphs into an
       agent prompt.
 
-      - [ ] 8.1.3.1 Subtask {#jcf-p08-8-1-3-1} - Include enrollment, goal/task/plan, lease/fence, exact repository snapshot, constraints, allowed effects, expected artifacts/evidence, applicable policy, and actor/agent refs.
-      - [ ] 8.1.3.2 Subtask {#jcf-p08-8-1-3-2} - Select bounded source neighborhoods and accepted knowledge using versioned query/projection contracts with exact source graph revisions.
-      - [ ] 8.1.3.3 Subtask {#jcf-p08-8-1-3-3} - Apply token/byte/item budgets, redaction, visibility, freshness, contradiction, and truncation policy and preserve what was omitted.
-      - [ ] 8.1.3.4 Subtask {#jcf-p08-8-1-3-4} - Fingerprint the normalized context and persist its durable instruction/context entities only through the attempt-start change set.
-      - [ ] 8.1.3.5 Subtask {#jcf-p08-8-1-3-5} - Reject stale leases, mismatched snapshots, unaccepted plans, incomplete strict inputs, secret-bearing projections, and authority widening.
+      - [x] 8.1.3.1 Subtask {#jcf-p08-8-1-3-1} - Include enrollment, goal/task/plan, lease/fence, exact repository snapshot, constraints, allowed effects, expected artifacts/evidence, applicable policy, and actor/agent refs.
+      - [x] 8.1.3.2 Subtask {#jcf-p08-8-1-3-2} - Select bounded source neighborhoods and accepted knowledge using versioned query/projection contracts with exact source graph revisions.
+      - [x] 8.1.3.3 Subtask {#jcf-p08-8-1-3-3} - Apply token/byte/item budgets, redaction, visibility, freshness, contradiction, and truncation policy and preserve what was omitted.
+      - [x] 8.1.3.4 Subtask {#jcf-p08-8-1-3-4} - Fingerprint the normalized context and persist its durable instruction/context entities only through the attempt-start change set.
+      - [x] 8.1.3.5 Subtask {#jcf-p08-8-1-3-5} - Reject stale leases, mismatched snapshots, unaccepted plans, incomplete strict inputs, secret-bearing projections, and authority widening.
 
-    - [ ] 8.1.4 Task {#jcf-p08-runtime-supervision} [repo: jido_code] [after: {#jcf-p08-context-package}] - Implement execution supervision by attempt identity.
+    - [x] 8.1.4 Task {#jcf-p08-runtime-supervision} [repo: jido_code] [after: {#jcf-p08-context-package}] - Implement execution supervision by attempt identity.
 
       This task manages ephemeral workers while allowing every process to be
       recreated or abandoned from graph-visible lifecycle state.
 
-      - [ ] 8.1.4.1 Subtask {#jcf-p08-8-1-4-1} - Add a registry and `DynamicSupervisor` for active attempts with names derived from opaque attempt IRIs through a bounded mapping.
-      - [ ] 8.1.4.2 Subtask {#jcf-p08-8-1-4-2} - Start at most one local worker per active attempt/fence and reject duplicate stale workers.
-      - [ ] 8.1.4.3 Subtask {#jcf-p08-8-1-4-3} - Permit optional warm repository runtime processes only as caches and prove they can be recreated without domain changes.
-      - [ ] 8.1.4.4 Subtask {#jcf-p08-8-1-4-4} - Define restart intensity, isolation, admission, shutdown, and orphan cleanup so one failing attempt cannot destabilize the store or endpoint.
+      - [x] 8.1.4.1 Subtask {#jcf-p08-8-1-4-1} - Add a registry and `DynamicSupervisor` for active attempts with names derived from opaque attempt IRIs through a bounded mapping.
+      - [x] 8.1.4.2 Subtask {#jcf-p08-8-1-4-2} - Start at most one local worker per active attempt/fence and reject duplicate stale workers.
+      - [x] 8.1.4.3 Subtask {#jcf-p08-8-1-4-3} - Permit optional warm repository runtime processes only as caches and prove they can be recreated without domain changes.
+      - [x] 8.1.4.4 Subtask {#jcf-p08-8-1-4-4} - Define restart intensity, isolation, admission, shutdown, and orphan cleanup so one failing attempt cannot destabilize the store or endpoint.
 
-    - [ ] 8.1.5 Task {#jcf-p08-interaction-session} [repo: jido_code] [after: {#jcf-p08-runtime-supervision}] - Implement graph-native interaction and instruction sessions.
+    - [x] 8.1.5 Task {#jcf-p08-interaction-session} [repo: jido_code] [after: {#jcf-p08-runtime-supervision}] - Implement graph-native interaction and instruction sessions.
 
       This task makes durable human/agent interaction auditable without turning
       chat state or prompt memory into a parallel source of truth.
 
-      - [ ] 8.1.5.1 Subtask {#jcf-p08-8-1-5-1} - Scope each interaction session to repository enrollment, goal, task, or attempt IRIs and record participants, audiences, authority, purpose, lifecycle, and provenance.
-      - [ ] 8.1.5.2 Subtask {#jcf-p08-8-1-5-2} - Persist durable messages as graph resources with sender, audience, sequence, reply references, content classification, timestamps, and provenance while keeping unsent UI drafts ephemeral.
-      - [ ] 8.1.5.3 Subtask {#jcf-p08-8-1-5-3} - Interpret message intent only as a proposal, clarification, steering request, or cancellation request that invokes a separately authorized semantic command and never mutates goals, tasks, leases, or attempts directly.
-      - [ ] 8.1.5.4 Subtask {#jcf-p08-8-1-5-4} - Persist instructions and assembled context only when required for durability, replay, or audit, with redaction and size bounds; keep transient prompt assembly disposable.
-      - [ ] 8.1.5.5 Subtask {#jcf-p08-8-1-5-5} - Provide authorized, paginated interaction projections that preserve chronology, reply relationships, redaction state, and links to resulting commands, evidence, and decisions.
+      - [x] 8.1.5.1 Subtask {#jcf-p08-8-1-5-1} - Scope each interaction session to repository enrollment, goal, task, or attempt IRIs and record participants, audiences, authority, purpose, lifecycle, and provenance.
+      - [x] 8.1.5.2 Subtask {#jcf-p08-8-1-5-2} - Persist durable messages as graph resources with sender, audience, sequence, reply references, content classification, timestamps, and provenance while keeping unsent UI drafts ephemeral.
+      - [x] 8.1.5.3 Subtask {#jcf-p08-8-1-5-3} - Interpret message intent only as a proposal, clarification, steering request, or cancellation request that invokes a separately authorized semantic command and never mutates goals, tasks, leases, or attempts directly.
+      - [x] 8.1.5.4 Subtask {#jcf-p08-8-1-5-4} - Persist instructions and assembled context only when required for durability, replay, or audit, with redaction and size bounds; keep transient prompt assembly disposable.
+      - [x] 8.1.5.5 Subtask {#jcf-p08-8-1-5-5} - Provide authorized, paginated interaction projections that preserve chronology, reply relationships, redaction state, and links to resulting commands, evidence, and decisions.
 
   - [ ] 8.2 Section - Implement execution-attempt and lease-fencing lifecycle.
 

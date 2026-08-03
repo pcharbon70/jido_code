@@ -791,6 +791,42 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:execution_context_subject) do
+    """
+    SELECT ?predicate ?object WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+      }
+    }
+    ORDER BY ?predicate ?object
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:interaction_session), do: fetch(:execution_context_subject)
+
+  def fetch(:interaction_timeline) do
+    """
+    SELECT ?message ?sequence ?sender ?audience ?reply ?classification ?intent ?content ?recorded ?command WHERE {
+      GRAPH {{graph}} {
+        ?message a <#{@jf}Message> ;
+                 <#{@jf}validFor> {{resource}} ;
+                 <#{@jf}sequence> ?sequence ;
+                 <#{@prov}wasAssociatedWith> ?sender ;
+                 <#{@jf}contentClassification> ?classification ;
+                 <#{@jf}messageIntent> ?intent ;
+                 <#{@jf}content> ?content ;
+                 <#{@jf}recordedAt> ?recorded .
+        OPTIONAL { ?message <#{@jf}audience> ?audience }
+        OPTIONAL { ?message <#{@jf}replyTo> ?reply }
+        OPTIONAL { ?message <#{@jf}resultingCommand> ?command }
+      }
+    }
+    ORDER BY ?sequence ?message
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
