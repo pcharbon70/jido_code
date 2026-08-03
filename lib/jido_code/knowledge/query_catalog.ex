@@ -12,6 +12,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   alias JidoCode.Knowledge.QuerySource
 
   @version "1.0.0"
+  @repository_version "1.1.0"
   @default_limits %{
     timeout_ms: 5_000,
     row_limit: 200,
@@ -25,12 +26,22 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @spec version() :: String.t()
   def version, do: @version
 
+  @spec repository_version() :: String.t()
+  def repository_version, do: @repository_version
+
   @spec names() :: [atom()]
-  def names, do: definitions() |> Map.keys() |> Enum.sort()
+  def names, do: names(@version)
+
+  @spec names(String.t()) :: [atom()]
+  def names(version) when version in [@version, @repository_version],
+    do: version |> definitions() |> Map.keys() |> Enum.sort()
+
+  def names(_version), do: []
 
   @spec fetch(atom(), String.t()) :: {:ok, QueryDefinition.t()} | {:error, Error.t()}
-  def fetch(name, @version) when is_atom(name) do
-    case Map.fetch(definitions(), name) do
+  def fetch(name, version)
+      when is_atom(name) and version in [@version, @repository_version] do
+    case Map.fetch(definitions(version), name) do
       {:ok, definition} -> {:ok, definition}
       :error -> invalid()
     end
@@ -40,14 +51,21 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec verify() :: :ok | {:error, Error.t()}
   def verify do
-    if Enum.all?(definitions(), fn {_name, definition} -> valid?(definition) end),
+    definitions =
+      [@version, @repository_version]
+      |> Enum.flat_map(&(definitions(&1) |> Map.values()))
+
+    if Enum.all?(definitions, &valid?/1),
       do: :ok,
       else: {:error, Error.new(:incompatible, :verify_query_catalog)}
   end
 
   @spec digest() :: String.t()
-  def digest do
-    definitions()
+  def digest, do: digest(@version)
+
+  @spec digest(String.t()) :: String.t()
+  def digest(version) when version in [@version, @repository_version] do
+    definitions(version)
     |> Enum.sort_by(fn {name, _definition} -> name end)
     |> Enum.map_join("\n", fn {name, definition} ->
       "#{name}:#{definition.version}:#{definition.source_digest}"
@@ -55,14 +73,14 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     |> QueryDefinition.source_digest()
   end
 
-  defp definitions do
-    Map.new(specifications(), fn specification ->
+  defp definitions(version) do
+    Map.new(specifications(version), fn specification ->
       source = QuerySource.fetch(specification.name)
 
       definition =
         struct!(QueryDefinition, %{
           name: specification.name,
-          version: @version,
+          version: version,
           purpose: specification.purpose,
           form: specification.form,
           parameters: specification.parameters,
@@ -82,11 +100,11 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     end)
   end
 
-  defp specifications do
+  defp specifications(version) do
     graph = %{graph: %{type: :graph_iri, required: true}}
     resource = Map.put(graph, :resource, %{type: :resource_iri, required: true})
 
-    [
+    base = [
       spec(
         :dataset_revision,
         :select,
@@ -275,6 +293,210 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :declared
       )
     ]
+
+    if version == @repository_version,
+      do: base ++ repository_specifications(resource) ++ source_specifications(graph),
+      else: base
+  end
+
+  defp repository_specifications(resource) do
+    [
+      spec(
+        :repository_description,
+        :construct,
+        resource,
+        :observation,
+        [:factory_catalog],
+        :subgraph,
+        "Describe one conceptual repository in the factory catalog.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :locator_resolution,
+        :select,
+        resource,
+        :observation,
+        [:factory_catalog],
+        :table,
+        "Resolve conceptual repositories explicitly related to one locator.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :active_enrollment,
+        :select,
+        resource,
+        :observation,
+        [:factory_catalog],
+        :table,
+        "Read enrollment candidates for current-state resolution.",
+        :product,
+        :declared
+      ),
+      spec(
+        :enrollment_history,
+        :select,
+        resource,
+        :observation,
+        [:factory_catalog],
+        :timeline,
+        "Read accepted enrollment transition history.",
+        :product,
+        :declared
+      ),
+      spec(
+        :factory_repository_cohort,
+        :select,
+        resource,
+        :observation,
+        [:factory_catalog],
+        :table,
+        "Read bounded enrollment and repository members for one factory.",
+        :product,
+        :declared
+      ),
+      spec(
+        :latest_complete_observation,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read a complete observation candidate at an enrollment scope.",
+        :product,
+        :declared
+      ),
+      spec(
+        :observation_claim_history,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read sourced claim history about one repository resource.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :observation_contradictions,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :table,
+        "Read explicit contradiction relationships for one claim.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :provider_freshness,
+        :select,
+        resource,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read provider source and retrieval times at an enrollment scope.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_snapshot_description,
+        :construct,
+        resource,
+        :observation,
+        [:observation_batch],
+        :subgraph,
+        "Describe one exact repository snapshot anchor.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp source_specifications(graph) do
+    snapshot = Map.put(graph, :snapshot, %{type: :resource_iri, required: true})
+    entity = Map.put(snapshot, :resource, %{type: :resource_iri, required: true})
+
+    [
+      spec(
+        :snapshot_readiness_freshness,
+        :select,
+        snapshot,
+        :observation,
+        [:observation_batch],
+        :timeline,
+        "Read analyzer readiness and observation freshness for one exact snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_modules,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read modules for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_functions,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read functions for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_otp_patterns,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read bounded OTP/runtime patterns for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_dependencies,
+        :select,
+        snapshot,
+        :source,
+        [:source_revision],
+        :table,
+        "Read dependency relationships for one exact repository snapshot.",
+        :product,
+        :declared
+      ),
+      spec(
+        :source_entity_neighborhood,
+        :select,
+        entity,
+        :source,
+        [:source_revision],
+        :table,
+        "Read a bounded incoming and outgoing neighborhood in one exact snapshot.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :source_impact,
+        :select,
+        entity,
+        :source,
+        [:source_revision],
+        :table,
+        "Read bounded code-relation impact around one exact source entity.",
+        :product,
+        :open_world
+      )
+    ]
   end
 
   defp spec(
@@ -304,7 +526,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   defp valid?(definition) do
     definition.source_digest == QueryDefinition.source_digest(definition.source) and
-      definition.version == @version and
+      definition.version in [@version, @repository_version] and
       definition.form in [:select, :ask, :construct] and
       definition.compatibility_notes != "" and
       bounded_source?(definition)

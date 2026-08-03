@@ -8,9 +8,9 @@ attributable projections, disposable caches, revision-aware subscriptions,
 governed derived graphs, and bounded read diagnostics are implemented and pass
 the local repository gates.
 
-G4 is a merge-pending candidate. It remains blocked until the pull request
-passes clean-checkout CI and the merged candidate commit is pinned here. No
-local evidence found a caller-controlled SPARQL path, unattributed result,
+Pull request 7 passed clean-checkout CI and was merged as
+`97690f4796433baca759e5f294e71b0bda9a7991`. G4 is complete and Phase 6 is
+authorized. No evidence found a caller-controlled SPARQL path, unattributed result,
 authoritative cache or notification dependency, stale strict read, or
 projection that remains accessible after grant revocation.
 
@@ -24,7 +24,7 @@ projection that remains accessible after grant revocation.
 | Section 5.3 | `c9c24c6` - implement bounded projection delivery |
 | Section 5.4 | `7e6617e` - implement derived graph lifecycle |
 | Section 5.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `97690f4796433baca759e5f294e71b0bda9a7991` |
 
 ## Contract Pins
 
@@ -147,6 +147,6 @@ The Phase 5 integration and retained unit suites prove:
 
 ## Gate G4
 
-G4 is merge-pending. Local bounded-interpretation evidence is complete, but
-Phase 6 remains unauthorized until clean-checkout CI passes and the merged
-candidate commit is pinned.
+G4 is complete. The bounded-interpretation evidence passed clean-checkout CI,
+and the accepted merge commit is pinned above. Phase 6 is authorized from that
+immutable baseline.

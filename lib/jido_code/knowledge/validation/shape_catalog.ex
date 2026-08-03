@@ -15,7 +15,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     observation_batch: ~w[
       ObservationActivity ObservationBatch RepositorySnapshot SourceArtifact Claim Finding
-      Contradiction AssessmentActivity
+      Contradiction AssessmentActivity CompletenessAssertion
     ],
     source_revision: ~w[RepositorySnapshot SourceArtifact CodeSymbol Scope MigrationActivity],
     repository_control: ~w[
