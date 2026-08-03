@@ -21,7 +21,8 @@ defmodule JidoCode.Factory.Sandbox.Event do
            attributes[:provider_ref],
          details when is_map(details) <- attributes[:details],
          true <- byte_size(:erlang.term_to_binary(details, [:deterministic])) <= 16_384,
-         false <- private_detail?(details) do
+         false <- private_detail?(details),
+         false <- secret_detail?(details) do
       {:ok,
        %__MODULE__{
          attempt_iri: attempt,
@@ -54,4 +55,19 @@ defmodule JidoCode.Factory.Sandbox.Event do
     do: key in ["path", "handle", "pid", "port", "session"]
 
   defp private_key?(_key), do: false
+
+  defp secret_detail?(value) when is_map(value) do
+    Enum.any?(value, fn {key, item} -> secret_detail?(key) or secret_detail?(item) end)
+  end
+
+  defp secret_detail?(value) when is_list(value), do: Enum.any?(value, &secret_detail?/1)
+
+  defp secret_detail?(value) when is_binary(value) do
+    Regex.match?(
+      ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i,
+      value
+    )
+  end
+
+  defp secret_detail?(_value), do: false
 end

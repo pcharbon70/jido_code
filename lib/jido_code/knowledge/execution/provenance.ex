@@ -179,6 +179,7 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
            true <- Regex.match?(~r/^[a-f0-9]{64}$/, provider),
            details when is_map(details) <- activity[:details],
            true <- byte_size(:erlang.term_to_binary(details, [:deterministic])) <= 16_384,
+           true <- safe_details?(details),
            {:ok, iri} <-
              ResourceIdentity.deterministic(
                :sandbox_activity,
@@ -301,6 +302,15 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
       value
     )
   end
+
+  defp safe_details?(value) when is_map(value),
+    do: Enum.all?(value, fn {key, item} -> safe_details?(key) and safe_details?(item) end)
+
+  defp safe_details?(value) when is_list(value), do: Enum.all?(value, &safe_details?/1)
+  defp safe_details?(value) when is_binary(value), do: not secret?(value)
+  defp safe_details?(value) when is_atom(value) or is_number(value) or is_boolean(value), do: true
+  defp safe_details?(nil), do: true
+  defp safe_details?(_value), do: false
 
   defp refs(subject, predicate, values),
     do: Enum.map(values, &{subject, predicate, RDF.iri(&1)})

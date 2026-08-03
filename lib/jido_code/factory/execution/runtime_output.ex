@@ -19,6 +19,7 @@ defmodule JidoCode.Factory.Execution.RuntimeOutput do
          true <- Enum.all?(artifacts, &(Knowledge.validate_resource_identity(&1) == :ok)),
          usage when is_map(usage) <- attributes[:usage],
          true <- byte_size(:erlang.term_to_binary(usage, [:deterministic])) <= 4_096,
+         false <- secret?(usage),
          %DateTime{} = completed_at <- attributes[:completed_at],
          :ok <- optional_diagnostic(attributes[:diagnostic]) do
       {:ok,
@@ -41,10 +42,26 @@ defmodule JidoCode.Factory.Execution.RuntimeOutput do
 
   defp optional_diagnostic(nil), do: :ok
 
-  defp optional_diagnostic(value) when is_binary(value) and byte_size(value) <= 1_024,
-    do: :ok
+  defp optional_diagnostic(value) when is_binary(value) and byte_size(value) <= 1_024 do
+    if secret?(value), do: :error, else: :ok
+  end
 
   defp optional_diagnostic(_value), do: :error
+
+  defp secret?(value) when is_map(value) do
+    Enum.any?(value, fn {key, item} -> secret?(key) or secret?(item) end)
+  end
+
+  defp secret?(value) when is_list(value), do: Enum.any?(value, &secret?/1)
+
+  defp secret?(value) when is_binary(value) do
+    Regex.match?(
+      ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i,
+      value
+    )
+  end
+
+  defp secret?(_value), do: false
 
   defp invalid(operation), do: {:error, AdapterError.new(:invalid_input, operation)}
 end

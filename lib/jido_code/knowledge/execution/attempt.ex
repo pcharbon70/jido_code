@@ -477,8 +477,11 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
            event[:outcome_class],
          usage when is_map(usage) <- event[:usage],
          true <- byte_size(:erlang.term_to_binary(usage, [:deterministic])) <= 4_096,
+         false <- secret?(usage),
          diagnostic when is_nil(diagnostic) or is_binary(diagnostic) <- event[:diagnostic],
-         true <- is_nil(diagnostic) or byte_size(diagnostic) <= 1_024 do
+         true <-
+           is_nil(diagnostic) or
+             (byte_size(diagnostic) <= 1_024 and not secret?(diagnostic)) do
       usage_digest = digest(usage)
 
       {:ok,
@@ -572,6 +575,21 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
     |> then(&:crypto.hash(:sha256, &1))
     |> Base.encode16(case: :lower)
   end
+
+  defp secret?(value) when is_map(value) do
+    Enum.any?(value, fn {key, item} -> secret?(key) or secret?(item) end)
+  end
+
+  defp secret?(value) when is_list(value), do: Enum.any?(value, &secret?/1)
+
+  defp secret?(value) when is_binary(value) do
+    Regex.match?(
+      ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i,
+      value
+    )
+  end
+
+  defp secret?(_value), do: false
 
   defp optional_resource(nil), do: :ok
   defp optional_resource(value), do: ResourceIdentity.validate(value)

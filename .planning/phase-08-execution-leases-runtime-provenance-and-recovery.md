@@ -194,42 +194,42 @@ Back to plan: [README](./README.md)
       - [x] 8.4.3.4 Subtask {#jcf-p08-8-4-3-4} - Recover missing terminal callbacks idempotently and reject stale provider events after lease/attempt supersession.
       - [x] 8.4.3.5 Subtask {#jcf-p08-8-4-3-5} - Discover and clean orphaned runtime/sandbox resources without inventing completed graph state.
 
-  - [ ] 8.5 Section - Phase 8 Integration Tests.
+  - [x] 8.5 Section - Phase 8 Integration Tests.
 
     This final section proves only currently leased and fenced attempts can
     produce effects, all execution remains attributable, and complete behavior
     can recover from graph after runtime, sandbox, scheduler, store, or host
     interruption.
 
-    - [ ] 8.5.1 Task {#jcf-p08-execution-integration} [repo: jido_code] [after: {#jcf-p08-runtime-recovery}] - Execute one leased task through runtime, tools, patch output, and immutable provenance.
+    - [x] 8.5.1 Task {#jcf-p08-execution-integration} [repo: jido_code] [after: {#jcf-p08-runtime-recovery}] - Execute one leased task through runtime, tools, patch output, and immutable provenance.
 
       This task validates the complete control-to-execution seam with a
       deterministic runtime and controlled real sandbox/tool fixture.
 
-      - [ ] 8.5.1.1 Subtask {#jcf-p08-8-5-1-1} - Acquire a lease, create/start an attempt, build exact context, invoke tools, produce a patch, complete, close the run graph, and project the timeline.
-      - [ ] 8.5.1.2 Subtask {#jcf-p08-8-5-1-2} - Verify every effect cites current task/lease/fence, actor/agent/capability, snapshot, constraint, invocation, and graph revision.
-      - [ ] 8.5.1.3 Subtask {#jcf-p08-8-5-1-3} - Race duplicate starts/events, stale fences, lease expiry/renewal, cancellation, tool timeout, and retry creation.
-      - [ ] 8.5.1.4 Subtask {#jcf-p08-8-5-1-4} - Prove completed runtime output does not satisfy the goal or become accepted evidence/knowledge before Phase 9 decisions.
+      - [x] 8.5.1.1 Subtask {#jcf-p08-8-5-1-1} - Acquire a lease, create/start an attempt, build exact context, invoke tools, produce a patch, complete, close the run graph, and project the timeline.
+      - [x] 8.5.1.2 Subtask {#jcf-p08-8-5-1-2} - Verify every effect cites current task/lease/fence, actor/agent/capability, snapshot, constraint, invocation, and graph revision.
+      - [x] 8.5.1.3 Subtask {#jcf-p08-8-5-1-3} - Race duplicate starts/events, stale fences, lease expiry/renewal, cancellation, tool timeout, and retry creation.
+      - [x] 8.5.1.4 Subtask {#jcf-p08-8-5-1-4} - Prove completed runtime output does not satisfy the goal or become accepted evidence/knowledge before Phase 9 decisions.
 
-    - [ ] 8.5.2 Task {#jcf-p08-recovery-security-integration} [repo: jido_code] [after: {#jcf-p08-execution-integration}] - Exercise crash recovery, hostile tools, redaction, and disposable-state loss.
+    - [x] 8.5.2 Task {#jcf-p08-recovery-security-integration} [repo: jido_code] [after: {#jcf-p08-execution-integration}] - Exercise crash recovery, hostile tools, redaction, and disposable-state loss.
 
       This task falsifies the execution boundary under process death, provider
       ambiguity, unsafe repository content, and secret exposure attempts.
 
-      - [ ] 8.5.2.1 Subtask {#jcf-p08-8-5-2-1} - Kill runtime, attempt worker, sandbox adapter, scheduler, store process, and BEAM at prepared/running/tool/commit/completed boundaries and reconcile each outcome.
-      - [ ] 8.5.2.2 Subtask {#jcf-p08-8-5-2-2} - Delete process registries, in-memory queues/caches, and local worktrees, restart, and rebuild active/historical attempt behavior from graph plus external provider status.
-      - [ ] 8.5.2.3 Subtask {#jcf-p08-8-5-2-3} - Attempt path escape, hook/config abuse, unauthorized network/tool use, resource exhaustion, output flooding, artifact substitution, and stale provider callbacks.
-      - [ ] 8.5.2.4 Subtask {#jcf-p08-8-5-2-4} - Inject fixture secrets and verify graph, run exports, logs, telemetry, events, errors, prompts/context projections, and artifacts honor redaction policy.
-      - [ ] 8.5.2.5 Subtask {#jcf-p08-8-5-2-5} - Backup/restore during supported attempt states and verify recovery/abandonment semantics at the restored dataset lineage.
-      - [ ] 8.5.2.6 Subtask {#jcf-p08-8-5-2-6} - Rerun Phases 1-7 suites and `mix precommit`.
+      - [x] 8.5.2.1 Subtask {#jcf-p08-8-5-2-1} - Kill runtime, attempt worker, sandbox adapter, scheduler, store process, and BEAM at prepared/running/tool/commit/completed boundaries and reconcile each outcome.
+      - [x] 8.5.2.2 Subtask {#jcf-p08-8-5-2-2} - Delete process registries, in-memory queues/caches, and local worktrees, restart, and rebuild active/historical attempt behavior from graph plus external provider status.
+      - [x] 8.5.2.3 Subtask {#jcf-p08-8-5-2-3} - Attempt path escape, hook/config abuse, unauthorized network/tool use, resource exhaustion, output flooding, artifact substitution, and stale provider callbacks.
+      - [x] 8.5.2.4 Subtask {#jcf-p08-8-5-2-4} - Inject fixture secrets and verify graph, run exports, logs, telemetry, events, errors, prompts/context projections, and artifacts honor redaction policy.
+      - [x] 8.5.2.5 Subtask {#jcf-p08-8-5-2-5} - Backup/restore during supported attempt states and verify recovery/abandonment semantics at the restored dataset lineage.
+      - [x] 8.5.2.6 Subtask {#jcf-p08-8-5-2-6} - Rerun Phases 1-7 suites and `mix precommit`.
 
-    - [ ] 8.5.3 Task {#jcf-p08-phase-receipt} [repo: jido_code] [after: {#jcf-p08-recovery-security-integration}] - Publish the Phase 8 governed-execution receipt.
+    - [x] 8.5.3 Task {#jcf-p08-phase-receipt} [repo: jido_code] [after: {#jcf-p08-recovery-security-integration}] - Publish the Phase 8 governed-execution receipt.
 
       This task binds G7 to exact runtime, agent, context, lease/fence, sandbox,
       tool, artifact, provenance, retry, cancellation, recovery, security, and
       restart evidence.
 
-      - [ ] 8.5.3.1 Subtask {#jcf-p08-8-5-3-1} - Record runtime/tool/sandbox versions, context/query/ontology versions, scenario/snapshot/artifact digests, limits, and candidate commit.
-      - [ ] 8.5.3.2 Subtask {#jcf-p08-8-5-3-2} - Attach lease/start races, attempt timelines, tool/patch provenance, cancellation/retry, crash/restart, hostile-input, redaction, and restore results.
-      - [ ] 8.5.3.3 Subtask {#jcf-p08-8-5-3-3} - Keep G7 blocked if process/runtime state is required for recovery, a stale fence can cause effects, or completion can self-satisfy a goal.
+      - [x] 8.5.3.1 Subtask {#jcf-p08-8-5-3-1} - Record runtime/tool/sandbox versions, context/query/ontology versions, scenario/snapshot/artifact digests, limits, and candidate commit.
+      - [x] 8.5.3.2 Subtask {#jcf-p08-8-5-3-2} - Attach lease/start races, attempt timelines, tool/patch provenance, cancellation/retry, crash/restart, hostile-input, redaction, and restore results.
+      - [x] 8.5.3.3 Subtask {#jcf-p08-8-5-3-3} - Keep G7 blocked if process/runtime state is required for recovery, a stale fence can cause effects, or completion can self-satisfy a goal.
       - [ ] 8.5.3.4 Subtask {#jcf-p08-8-5-3-4} - Pin the merged candidate commit before authorizing Phase 9.

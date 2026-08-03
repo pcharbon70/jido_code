@@ -74,3 +74,4 @@ implementation plan was merged.
 - [Execution attempt lifecycle](./execution-attempt-lifecycle.md)
 - [Governed execution effects and artifacts](./execution-effects-provenance.md)
 - [Execution provenance and recovery](./execution-provenance-and-recovery.md)
+- [Phase 8 governed execution receipt](./phase-08-receipt.md)

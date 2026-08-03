@@ -227,6 +227,7 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
          stdout when is_binary(stdout) <- attributes[:stdout],
          stderr when is_binary(stderr) <- attributes[:stderr],
          true <- byte_size(stdout) + byte_size(stderr) <= 65_536,
+         false <- secret?(stdout) or secret?(stderr),
          :ok <- resources(attributes[:external_output_iris]),
          :ok <- resources(attributes[:artifact_iris]),
          usage when is_map(usage) <- attributes[:usage],
@@ -369,6 +370,13 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
     |> :erlang.term_to_binary([:deterministic])
     |> then(&:crypto.hash(:sha256, &1))
     |> Base.encode16(case: :lower)
+  end
+
+  defp secret?(value) do
+    Regex.match?(
+      ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i,
+      value
+    )
   end
 
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}
