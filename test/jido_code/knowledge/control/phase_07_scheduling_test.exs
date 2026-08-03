@@ -263,6 +263,30 @@ defmodule JidoCode.Knowledge.Control.Phase07SchedulingTest do
              )
   end
 
+  test "cancels a fenced lease and its task without erasing history", %{fixture: fixture} do
+    cancelled =
+      Phase07SchedulingFixture.transition_lease!(fixture, :cancel, 812, %{
+        recorded_at: DateTime.add(fixture.eligibility.evaluated_at, 120, :second)
+      })
+
+    assert cancelled.lease_transition_receipt.outcome == :committed
+    assert cancelled.lease_resolution.current_state == :cancelled
+    assert cancelled.schedulable_task_resolution.current_state == :cancelled
+    assert length(cancelled.lease_resolution.history) == 3
+  end
+
+  test "supersedes a fenced lease and its task without erasing history", %{fixture: fixture} do
+    superseded =
+      Phase07SchedulingFixture.transition_lease!(fixture, :supersede, 813, %{
+        recorded_at: DateTime.add(fixture.eligibility.evaluated_at, 120, :second)
+      })
+
+    assert superseded.lease_transition_receipt.outcome == :committed
+    assert superseded.lease_resolution.current_state == :superseded
+    assert superseded.schedulable_task_resolution.current_state == :superseded
+    assert length(superseded.lease_resolution.history) == 3
+  end
+
   test "rebuilds deterministic scheduling from startup and periodic graph discovery", %{
     fixture: fixture
   } do

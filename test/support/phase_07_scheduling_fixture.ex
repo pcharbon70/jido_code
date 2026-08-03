@@ -98,7 +98,8 @@ defmodule JidoCode.TestSupport.Phase07SchedulingFixture do
         authorized?: true,
         policy_iris: [fixture.policy.iri]
       },
-      capabilities: [capability_projection(fixture)],
+      capabilities:
+        [capability_projection(fixture)] ++ Map.get(fixture, :extra_capability_projections, []),
       leases: %{complete?: true, active: []},
       cancelled?: false,
       capacity: %{complete?: true, available?: true},

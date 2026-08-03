@@ -205,43 +205,43 @@ Back to plan: [README](./README.md)
       - [x] 7.4.3.4 Subtask {#jcf-p07-7-4-3-4} - Enforce global, cohort, repository, capability, and risk admission limits and expose bounded reasons for deferred work.
       - [x] 7.4.3.5 Subtask {#jcf-p07-7-4-3-5} - Treat PubSub as a wake-up hint and periodically reconcile from graph revisions to prevent missed work.
 
-  - [ ] 7.5 Section - Phase 7 Integration Tests.
+  - [x] 7.5 Section - Phase 7 Integration Tests.
 
     This final section proves desired-state reconciliation and work scheduling
     remain deterministic, explainable, idempotent, closed-world safe, and
     fenced under policy changes, conflicting observations, concurrency, and
     restart.
 
-    - [ ] 7.5.1 Task {#jcf-p07-reconciliation-integration} [repo: jido_code] [after: {#jcf-p07-scheduler}] - Execute observation-to-goal reconciliation scenarios.
+    - [x] 7.5.1 Task {#jcf-p07-reconciliation-integration} [repo: jido_code] [after: {#jcf-p07-scheduler}] - Execute observation-to-goal reconciliation scenarios.
 
       This task validates the full control-plane derivation using exact
       repository observations, desired outcomes, policies, and graph-native
       work neighborhoods.
 
-      - [ ] 7.5.1.1 Subtask {#jcf-p07-7-5-1-1} - Assert a desired protected-main outcome, observe a contradictory repository claim, derive one obligation/goal, adopt a task plan, and explain every edge and revision.
-      - [ ] 7.5.1.2 Subtask {#jcf-p07-7-5-1-2} - Replay identical reconciliation, reorder observation events, update policy/source revisions, and prove goal reuse or explicit supersession without duplicates.
-      - [ ] 7.5.1.3 Subtask {#jcf-p07-7-5-1-3} - Exercise incomplete observations, contradictory claims, policy conflicts, stale source graphs, missing capabilities, suspended enrollment, and human-approval requirements.
-      - [ ] 7.5.1.4 Subtask {#jcf-p07-7-5-1-4} - Apply one policy to a graph-derived multi-repository cohort and verify applicability/obligation explanations preserve authorization boundaries.
+      - [x] 7.5.1.1 Subtask {#jcf-p07-7-5-1-1} - Assert a desired protected-main outcome, observe a contradictory repository claim, derive one obligation/goal, adopt a task plan, and explain every edge and revision.
+      - [x] 7.5.1.2 Subtask {#jcf-p07-7-5-1-2} - Replay identical reconciliation, reorder observation events, update policy/source revisions, and prove goal reuse or explicit supersession without duplicates.
+      - [x] 7.5.1.3 Subtask {#jcf-p07-7-5-1-3} - Exercise incomplete observations, contradictory claims, policy conflicts, stale source graphs, missing capabilities, suspended enrollment, and human-approval requirements.
+      - [x] 7.5.1.4 Subtask {#jcf-p07-7-5-1-4} - Apply one policy to a graph-derived multi-repository cohort and verify applicability/obligation explanations preserve authorization boundaries.
 
-    - [ ] 7.5.2 Task {#jcf-p07-scheduling-integration} [repo: jido_code] [after: {#jcf-p07-reconciliation-integration}] - Exercise eligibility, lease races, expiry, and scheduler rebuild.
+    - [x] 7.5.2 Task {#jcf-p07-scheduling-integration} [repo: jido_code] [after: {#jcf-p07-reconciliation-integration}] - Exercise eligibility, lease races, expiry, and scheduler rebuild.
 
       This task proves no task executes without one current fenced lease and no
       process-local queue is needed for recovery.
 
-      - [ ] 7.5.2.1 Subtask {#jcf-p07-7-5-2-1} - Race multiple compatible agents for one task and prove one lease/fence wins with deterministic losing receipts.
-      - [ ] 7.5.2.2 Subtask {#jcf-p07-7-5-2-2} - Renew, release, cancel, expire, supersede, and reacquire leases while stale fences are rejected.
-      - [ ] 7.5.2.3 Subtask {#jcf-p07-7-5-2-3} - Kill/restart reconciler and scheduler with eligible, blocked, and leased work and compare rebuilt decisions to pre-crash graph state.
-      - [ ] 7.5.2.4 Subtask {#jcf-p07-7-5-2-4} - Drop notifications and prove periodic revision-based reconciliation discovers work without duplicate semantic effects.
-      - [ ] 7.5.2.5 Subtask {#jcf-p07-7-5-2-5} - Verify missing data never satisfies eligibility and every blocked/selected result has an exact explanation path.
-      - [ ] 7.5.2.6 Subtask {#jcf-p07-7-5-2-6} - Rerun Phases 1-6 suites and `mix precommit`.
+      - [x] 7.5.2.1 Subtask {#jcf-p07-7-5-2-1} - Race multiple compatible agents for one task and prove one lease/fence wins with deterministic losing receipts.
+      - [x] 7.5.2.2 Subtask {#jcf-p07-7-5-2-2} - Renew, release, cancel, expire, supersede, and reacquire leases while stale fences are rejected.
+      - [x] 7.5.2.3 Subtask {#jcf-p07-7-5-2-3} - Kill/restart reconciler and scheduler with eligible, blocked, and leased work and compare rebuilt decisions to pre-crash graph state.
+      - [x] 7.5.2.4 Subtask {#jcf-p07-7-5-2-4} - Drop notifications and prove periodic revision-based reconciliation discovers work without duplicate semantic effects.
+      - [x] 7.5.2.5 Subtask {#jcf-p07-7-5-2-5} - Verify missing data never satisfies eligibility and every blocked/selected result has an exact explanation path.
+      - [x] 7.5.2.6 Subtask {#jcf-p07-7-5-2-6} - Rerun Phases 1-6 suites and `mix precommit`.
 
-    - [ ] 7.5.3 Task {#jcf-p07-phase-receipt} [repo: jido_code] [after: {#jcf-p07-scheduling-integration}] - Publish the Phase 7 factory-control-loop receipt.
+    - [x] 7.5.3 Task {#jcf-p07-phase-receipt} [repo: jido_code] [after: {#jcf-p07-scheduling-integration}] - Publish the Phase 7 factory-control-loop receipt.
 
       This task binds G6 to exact desired-state, policy, cohort, obligation,
       reconciliation, goal/task/plan, eligibility, capability, lease, and
       restart evidence.
 
-      - [ ] 7.5.3.1 Subtask {#jcf-p07-7-5-3-1} - Record policy/rule/query/ontology versions, scenario and cohort fixture digests, capability providers, scheduler settings, and candidate commit.
-      - [ ] 7.5.3.2 Subtask {#jcf-p07-7-5-3-2} - Attach reconciliation replay, contradiction/incomplete cases, cohort applicability, lease races, expiry/fencing, notification loss, restart, and explanation results.
-      - [ ] 7.5.3.3 Subtask {#jcf-p07-7-5-3-3} - Keep G6 blocked if work can exist only in a queue/struct, absence can satisfy eligibility without completeness, or an inference can grant a lease directly.
+      - [x] 7.5.3.1 Subtask {#jcf-p07-7-5-3-1} - Record policy/rule/query/ontology versions, scenario and cohort fixture digests, capability providers, scheduler settings, and candidate commit.
+      - [x] 7.5.3.2 Subtask {#jcf-p07-7-5-3-2} - Attach reconciliation replay, contradiction/incomplete cases, cohort applicability, lease races, expiry/fencing, notification loss, restart, and explanation results.
+      - [x] 7.5.3.3 Subtask {#jcf-p07-7-5-3-3} - Keep G6 blocked if work can exist only in a queue/struct, absence can satisfy eligibility without completeness, or an inference can grant a lease directly.
       - [ ] 7.5.3.4 Subtask {#jcf-p07-7-5-3-4} - Pin the merged candidate commit before authorizing Phase 8.
