@@ -15,6 +15,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @governance_version "1.3.0"
   @reconciliation_version "1.4.0"
   @scheduling_version "1.5.0"
+  @execution_version "1.6.0"
   @commands %{
     "EnrollRepository" => %{
       owner: :factory,
@@ -216,9 +217,83 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
   @version_1_5 Map.merge(@version_1_4, @phase_07_scheduling_commands)
+  @phase_08_boundary_commands %{
+    "OpenInteractionSession" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [:session_absent, :scope_authorized]
+    },
+    "TransitionInteractionSession" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [:session_active, :unique_transition_successor]
+    },
+    "RecordInteractionMessage" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [:session_active, :message_sequence_absent]
+    }
+  }
+  @phase_08_attempt_commands %{
+    "RecordExecutionAttempt" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [:active_lease, :current_fence, :attempt_absent, :context_exact]
+    },
+    "TransitionExecutionAttempt" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [:attempt_current, :current_fence, :unique_transition_successor]
+    },
+    "RequestExecutionCancellation" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :unique_transition_successor]
+    }
+  }
+  @phase_08_effect_commands %{
+    "RecordToolInvocation" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :invocation_absent]
+    },
+    "RecordToolOutcome" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :outcome_absent]
+    },
+    "RecordExecutionArtifact" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :artifact_absent]
+    },
+    "FinalizeExecutionRun" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_terminal, :current_fence, :provenance_complete],
+      allow_closure?: true
+    }
+  }
+  @version_1_6 @version_1_5
+               |> Map.merge(@phase_08_boundary_commands)
+               |> Map.merge(@phase_08_attempt_commands)
+               |> Map.merge(@phase_08_effect_commands)
 
   @spec version() :: String.t()
   def version, do: @version
+
+  @spec execution_version() :: String.t()
+  def execution_version, do: @execution_version
 
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
@@ -230,6 +305,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@governance_version), do: @version_1_3 |> Map.keys() |> Enum.sort()
   def names(@reconciliation_version), do: @version_1_4 |> Map.keys() |> Enum.sort()
   def names(@scheduling_version), do: @version_1_5 |> Map.keys() |> Enum.sort()
+  def names(@execution_version), do: @version_1_6 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -284,6 +360,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_1_5, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @scheduling_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @execution_version) when is_binary(name) do
+    case Map.fetch(@version_1_6, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @execution_version})}
 
       :error ->
         invalid(:command_type)

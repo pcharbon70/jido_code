@@ -85,7 +85,17 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       mutability: :closeable,
       completeness: :building,
       retention: :run_history,
-      allowed_links: [:factory_catalog, :source_revision, :repository_control, :run_attempt]
+      allowed_links: [
+        :factory_catalog,
+        :factory_policy,
+        :observation_batch,
+        :source_revision,
+        :repository_control,
+        :run_attempt,
+        :evidence,
+        :memory,
+        :derived
+      ]
     },
     evidence: %{
       required_scopes: [:repository],

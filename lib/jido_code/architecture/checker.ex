@@ -99,6 +99,7 @@ defmodule JidoCode.Architecture.Checker do
         []
         |> add_multiple_module_violation(path, modules)
         |> add_forbidden_dependency_violations(path, aliases)
+        |> add_runtime_dependency_violations(path, caller, plane, aliases)
         |> add_direction_violations(path, caller, plane, aliases)
         |> add_call_violations(path, caller, plane, calls, file_role)
         |> add_model_violations(
@@ -170,6 +171,24 @@ defmodule JidoCode.Architecture.Checker do
             path,
             line,
             "#{target} is a prohibited application persistence dependency"
+          )
+          | acc
+        ]
+      else
+        acc
+      end
+    end)
+  end
+
+  defp add_runtime_dependency_violations(violations, path, caller, caller_plane, aliases) do
+    Enum.reduce(aliases, violations, fn {target, line}, acc ->
+      if module_prefix?(target, "Jido") and caller_plane != :runtime do
+        [
+          violation(
+            :runtime_namespace,
+            path,
+            line,
+            "#{caller} must use the product-owned runtime port instead of #{target}"
           )
           | acc
         ]

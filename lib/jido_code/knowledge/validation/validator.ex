@@ -189,7 +189,9 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     end
   end
 
-  defp completeness_allowed?(:run_attempt, state), do: state in [:building, :complete]
+  defp completeness_allowed?(:run_attempt, state),
+    do: state in [:building, :complete, :incomplete]
+
   defp completeness_allowed?(_family, state), do: state == :complete
 
   defp term_issues(quads, graph_iri) do

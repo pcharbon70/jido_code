@@ -22,9 +22,18 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Control.ReconciliationProjection
   alias JidoCode.Knowledge.Control.WorkGraph
   alias JidoCode.Knowledge.Control.WorkProjection
+  alias JidoCode.Knowledge.Execution.InteractionMessage
+  alias JidoCode.Knowledge.Execution.InteractionProjection
+  alias JidoCode.Knowledge.Execution.InteractionSession
+  alias JidoCode.Knowledge.Execution.Attempt
+  alias JidoCode.Knowledge.Execution.AttemptProjection
+  alias JidoCode.Knowledge.Execution.Artifact
+  alias JidoCode.Knowledge.Execution.ToolInvocation
+  alias JidoCode.Knowledge.Execution.Provenance
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
+  alias JidoCode.Knowledge.Queries.ExecutionRecovery
   alias JidoCode.Knowledge.Projection
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Knowledge.DerivedGraphManager
@@ -122,6 +131,68 @@ defmodule JidoCode.Knowledge do
 
   def execution_lease_guard(lease, control_graph_iri, fence, at),
     do: ExecutionLease.execution_guard(lease, control_graph_iri, fence, at)
+
+  def interaction_session(attributes), do: InteractionSession.new(attributes)
+
+  def open_interaction_session(session, attributes, options \\ []),
+    do: InteractionSession.open_command(session, attributes, options)
+
+  def transition_interaction_session(session, resolution, attributes, options \\ []),
+    do: InteractionSession.transition_command(session, resolution, attributes, options)
+
+  def interaction_message(attributes), do: InteractionMessage.new(attributes)
+
+  def record_interaction_message(message, resolution, attributes, options \\ []),
+    do: InteractionMessage.record_command(message, resolution, attributes, options)
+
+  def project_interaction(result, context), do: InteractionProjection.build(result, context)
+
+  def execution_attempt(context, attributes), do: Attempt.new(context, attributes)
+
+  def start_execution_attempt(attempt, context, lease, resolutions, attributes, options \\ []),
+    do: Attempt.start_command(attempt, context, lease, resolutions, attributes, options)
+
+  def transition_execution_attempt(
+        attempt,
+        attempt_resolution,
+        lease,
+        task_resolution,
+        attributes,
+        options \\ []
+      ),
+      do:
+        Attempt.transition_command(
+          attempt,
+          attempt_resolution,
+          lease,
+          task_resolution,
+          attributes,
+          options
+        )
+
+  def tool_invocation(attempt, attributes), do: ToolInvocation.new(attempt, attributes)
+
+  def start_tool_invocation(invocation, attempt, resolution, lease, attributes, options \\ []),
+    do: ToolInvocation.start_command(invocation, attempt, resolution, lease, attributes, options)
+
+  def record_tool_outcome(invocation, attempt, resolution, lease, attributes, options \\ []),
+    do:
+      ToolInvocation.outcome_command(invocation, attempt, resolution, lease, attributes, options)
+
+  def execution_artifact(attributes), do: Artifact.new(attributes)
+
+  def record_execution_artifact(artifact, attempt, resolution, lease, attributes, options \\ []),
+    do: Artifact.record_command(artifact, attempt, resolution, lease, attributes, options)
+
+  def verify_execution_artifact(artifact, options \\ []), do: Artifact.verify(artifact, options)
+
+  def finalize_execution_run(attempt, resolution, lease, attributes, options \\ []),
+    do: Provenance.finalize_command(attempt, resolution, lease, attributes, options)
+
+  def project_execution_attempt(results, context), do: AttemptProjection.build(results, context)
+
+  def execution_recovery_candidates(result, graph_iri),
+    do: ExecutionRecovery.candidates(result, graph_iri)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

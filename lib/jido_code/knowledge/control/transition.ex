@@ -35,6 +35,8 @@ defmodule JidoCode.Knowledge.Control.Transition do
           | :capability
           | :reconciliation
           | :lease
+          | :interaction_session
+          | :execution_attempt
   @type t :: %__MODULE__{}
 
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -53,7 +55,12 @@ defmodule JidoCode.Knowledge.Control.Transition do
     obligation: ~w[proposed active satisfied waived superseded retired]a,
     capability: ~w[proposed available stale unavailable retired]a,
     reconciliation: ~w[proposed running completed failed cancelled superseded]a,
-    lease: ~w[proposed active released cancelled expired superseded]a
+    lease: ~w[proposed active executing released cancelled expired superseded]a,
+    interaction_session: ~w[proposed active closed cancelled]a,
+    execution_attempt: ~w[
+      prepared starting running waiting_tool cancelling cancelled completed failed timed_out
+      abandoned recovered superseded
+    ]a
   }
 
   @edges %{
@@ -134,10 +141,32 @@ defmodule JidoCode.Knowledge.Control.Transition do
     },
     lease: %{
       proposed: ~w[active cancelled]a,
-      active: ~w[active released cancelled expired superseded]a,
+      active: ~w[active executing released cancelled expired superseded]a,
+      executing: ~w[executing released cancelled expired superseded]a,
       released: [:superseded],
       cancelled: [:superseded],
       expired: [:superseded],
+      superseded: []
+    },
+    interaction_session: %{
+      proposed: ~w[active cancelled]a,
+      active: ~w[closed cancelled]a,
+      closed: [],
+      cancelled: []
+    },
+    execution_attempt: %{
+      prepared: ~w[starting cancelled failed superseded]a,
+      starting: ~w[running cancelling failed timed_out abandoned superseded]a,
+      running:
+        ~w[running waiting_tool cancelling completed failed timed_out abandoned superseded]a,
+      waiting_tool: ~w[running waiting_tool cancelling failed timed_out abandoned superseded]a,
+      cancelling: ~w[cancelled failed timed_out abandoned superseded]a,
+      cancelled: [:superseded],
+      completed: [:superseded],
+      failed: ~w[recovered superseded]a,
+      timed_out: ~w[recovered superseded]a,
+      abandoned: ~w[recovered superseded]a,
+      recovered: ~w[running cancelling failed superseded]a,
       superseded: []
     }
   }
@@ -273,7 +302,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
     predecessor = attributes[:expected_predecessor]
 
     cond do
-      revision == 0 and is_nil(prior) and next == :proposed and is_nil(predecessor) ->
+      revision == 0 and is_nil(prior) and next == initial_state(domain) and is_nil(predecessor) ->
         :ok
 
       is_integer(revision) and revision > 0 and prior in Map.fetch!(@states, domain) and
@@ -301,7 +330,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
   end
 
   defp contiguous?(domain, [first | rest]) do
-    if first.revision == 0 and first.next_state == :proposed do
+    if first.revision == 0 and first.next_state == initial_state(domain) do
       Enum.reduce_while(rest, {:ok, first}, fn current, {:ok, prior} ->
         if current.revision == prior.revision + 1 and
              current.expected_predecessor == prior.iri and
@@ -325,6 +354,9 @@ defmodule JidoCode.Knowledge.Control.Transition do
     revisions = Enum.map(transitions, & &1.revision)
     length(revisions) == length(Enum.uniq(revisions))
   end
+
+  defp initial_state(:execution_attempt), do: :prepared
+  defp initial_state(_domain), do: :proposed
 
   defp valid_reason?(value), do: is_binary(value) and byte_size(value) in 1..512
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}
