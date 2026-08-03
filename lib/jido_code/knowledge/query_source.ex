@@ -1284,6 +1284,14 @@ defmodule JidoCode.Knowledge.QuerySource do
     """)
   end
 
+  def fetch(:shared_dependencies), do: insight_query("dependsOn")
+  def fetch(:repeated_findings), do: insight_query("hasFinding")
+  def fetch(:repeated_failures), do: insight_query("hasFailure")
+  def fetch(:policy_outcome_patterns), do: insight_query("policyOutcome")
+  def fetch(:reusable_evidence_methods), do: insight_query("usesVerificationMethod")
+  def fetch(:related_source_symbols), do: insight_query("relatedSymbol")
+  def fetch(:applicable_lessons), do: insight_query("applicableLesson")
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
@@ -1426,6 +1434,24 @@ defmodule JidoCode.Knowledge.QuerySource do
       }
     }
     ORDER BY DESC(?recorded) ?assertion
+    LIMIT {{row_limit}}
+    """
+  end
+
+  defp insight_query(predicate) do
+    """
+    SELECT ?repository ?candidate ?evidence ?classification ?confidence ?limitation WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}#{predicate}> ?candidate .
+        ?repository <#{@jf}#{predicate}> ?candidate .
+        FILTER(?repository != {{resource}})
+        OPTIONAL { ?candidate <#{@jf}evidenceSource> ?evidence }
+        OPTIONAL { ?candidate <#{@jf}knowledgeClassification> ?classification }
+        OPTIONAL { ?candidate <#{@jf}confidenceScore> ?confidence }
+        OPTIONAL { ?candidate <#{@jf}limitation> ?limitation }
+      }
+    }
+    ORDER BY ?candidate ?repository
     LIMIT {{row_limit}}
     """
   end

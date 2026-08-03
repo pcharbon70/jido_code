@@ -44,6 +44,11 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
   alias JidoCode.Knowledge.Memory.StateTransition, as: KnowledgeStateTransition
+  alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.Learning.Feedback, as: LearningFeedback
+  alias JidoCode.Knowledge.Learning.Insight, as: LearningInsight
+  alias JidoCode.Knowledge.Reasoning.Profiles, as: ReasoningProfiles
+  alias JidoCode.Knowledge.Reasoning.Service, as: ReasoningService
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -54,6 +59,11 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.Writer
 
+  @cross_graph_insight_queries ~w[
+    shared_dependencies repeated_findings repeated_failures policy_outcome_patterns
+    reusable_evidence_methods related_source_symbols applicable_lessons
+  ]a
+
   def execute(%CommandEnvelope{} = envelope, options \\ []), do: Writer.execute(envelope, options)
 
   def command_status(%CommandEnvelope{} = envelope, options \\ []),
@@ -62,8 +72,54 @@ defmodule JidoCode.Knowledge do
   def subscribe_changes(scope_iri), do: ChangeFeed.subscribe(scope_iri)
   def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
 
-  def query(name, version, parameters, %AuthorityContext{} = authority, scope_iri, options \\ []),
+  def query(name, version, parameters, authority, scope_iri, options \\ [])
+
+  def query(name, _version, _parameters, %AuthorityContext{}, _scope_iri, _options)
+      when name in @cross_graph_insight_queries,
+      do: {:error, Error.new(:unauthorized, :cross_graph_insight)}
+
+  def query(name, version, parameters, %AuthorityContext{} = authority, scope_iri, options),
     do: QueryRunner.execute(name, version, parameters, authority, scope_iri, options)
+
+  def discover_cross_graph_insights(
+        name,
+        version,
+        parameters,
+        authority,
+        scope_iri,
+        context,
+        options \\ []
+      )
+
+  def discover_cross_graph_insights(
+        name,
+        version,
+        parameters,
+        %AuthorityContext{} = authority,
+        scope_iri,
+        context,
+        options
+      )
+      when name in @cross_graph_insight_queries and is_map(context) and is_list(options) do
+    options = Keyword.put(options, :evaluated_at, context[:evaluated_at])
+
+    with {:ok, result} <-
+           QueryRunner.execute(name, version, parameters, authority, scope_iri, options),
+         {:ok, projection} <- LearningInsight.build(result, context) do
+      {:ok, projection}
+    end
+  end
+
+  def discover_cross_graph_insights(
+        _name,
+        _version,
+        _parameters,
+        _authority,
+        _scope_iri,
+        _context,
+        _options
+      ),
+      do: {:error, Error.new(:invalid_input, :cross_graph_insight)}
 
   def project(result, %AuthorityContext{} = authority, scope_iri, options \\ []),
     do: Projection.build(result, authority, scope_iri, options)
@@ -254,6 +310,21 @@ defmodule JidoCode.Knowledge do
   def resolve_knowledge_state(transitions), do: KnowledgeStateTransition.resolve(transitions)
   def retrieve_knowledge(result, context), do: KnowledgeRetrieval.build(result, context)
   def memory_graph_identity(repository_iri), do: MemoryGraph.memory_graph(repository_iri)
+
+  def reasoning_profiles, do: ReasoningProfiles.names()
+
+  def materialize_reasoning(attributes, options \\ []),
+    do: ReasoningService.materialize(attributes, options)
+
+  def project_cross_graph_insight(result, context), do: LearningInsight.build(result, context)
+
+  def build_learning_inputs(retrieval, reasoning, attributes),
+    do: LearningFeedback.build_inputs(retrieval, reasoning, attributes)
+
+  def learning_feedback_stale?(package, current_revisions),
+    do: LearningFeedback.stale?(package, current_revisions)
+
+  def learning_measurement(attributes), do: LearningFeedback.measurement(attributes)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

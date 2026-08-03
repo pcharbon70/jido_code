@@ -385,7 +385,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           execution_boundary_specifications(resource) ++
           evidence_specifications(resource) ++
           decision_specifications(resource) ++
-          memory_specifications(resource)
+          memory_specifications(resource) ++
+          insight_specifications(resource)
     end
   end
 
@@ -1319,6 +1320,33 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :declared
       )
     ]
+  end
+
+  defp insight_specifications(resource) do
+    [
+      {:shared_dependencies, "Discover dependencies shared with other visible repositories."},
+      {:repeated_findings, "Discover findings repeated across visible repositories."},
+      {:repeated_failures, "Discover failures repeated across visible repositories."},
+      {:policy_outcome_patterns,
+       "Discover repeated policy outcomes across visible repositories."},
+      {:reusable_evidence_methods,
+       "Discover verification methods reused by visible repositories."},
+      {:related_source_symbols, "Discover related source symbols across visible repositories."},
+      {:applicable_lessons, "Discover accepted lessons applicable across visible repositories."}
+    ]
+    |> Enum.map(fn {name, purpose} ->
+      spec(
+        name,
+        :select,
+        resource,
+        :reasoner,
+        [:derived],
+        :table,
+        purpose,
+        :product,
+        :declared
+      )
+    end)
   end
 
   defp spec(

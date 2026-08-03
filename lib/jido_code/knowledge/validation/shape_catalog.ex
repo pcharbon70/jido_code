@@ -42,7 +42,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     derived: ~w[
       Claim Finding Contradiction GraphRevisionReference ValidationReport ValidationResult
-      CohortMembership CapabilityClassification
+      CohortMembership CapabilityClassification ReasoningActivity ReasoningValidationReport
     ]
   }
 

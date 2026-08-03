@@ -155,42 +155,42 @@ Back to plan: [README](./README.md)
       - [x] 9.3.3.4 Subtask {#jcf-p09-9-3-3-4} - Keep short-term prompt context ephemeral; persist it only when a separate adoption command accepts a durable takeaway.
       - [x] 9.3.3.5 Subtask {#jcf-p09-9-3-3-5} - Reauthorize and re-query knowledge for every new execution context rather than carrying stale prompt memory between attempts.
 
-  - [ ] 9.4 Section - Implement bounded reasoning and cross-graph learning.
+  - [x] 9.4 Section - Implement bounded reasoning and cross-graph learning.
 
     This section uses `TripleStore` reasoning and versioned rules to enrich
     classification and discovery while retaining asserted/derived and
     proposed/accepted authority boundaries.
 
-    - [ ] 9.4.1 Task {#jcf-p09-reasoning-service} [repo: jido_code] [after: {#jcf-p09-knowledge-retrieval}] - Implement versioned OWL 2 RL and rule materialization.
+    - [x] 9.4.1 Task {#jcf-p09-reasoning-service} [repo: jido_code] [after: {#jcf-p09-knowledge-retrieval}] - Implement versioned OWL 2 RL and rule materialization.
 
       This task produces rebuildable derived graphs from exact asserted inputs
       under bounded resource and publication controls.
 
-      - [ ] 9.4.1.1 Subtask {#jcf-p09-9-4-1-1} - Define allowed OWL 2 RL profiles and project rules for class hierarchy, capability hierarchy, repository/cohort classification, dependency transitivity where safe, and knowledge applicability.
-      - [ ] 9.4.1.2 Subtask {#jcf-p09-9-4-1-2} - Build each rule-set output in an isolated derived graph with source revisions, ontology/rule version, generation activity, counts, limits, and validation report.
-      - [ ] 9.4.1.3 Subtask {#jcf-p09-9-4-1-3} - Atomically publish complete output, mark it stale on source commits, and retain prior derived revisions only under explicit retention policy.
-      - [ ] 9.4.1.4 Subtask {#jcf-p09-9-4-1-4} - Prevent inference from issuing commands, granting authorization/leases, accepting evidence, satisfying goals, or adopting knowledge.
-      - [ ] 9.4.1.5 Subtask {#jcf-p09-9-4-1-5} - Bound entailment size, iterations, time, memory, graph scope, and recursive/pathological ontology inputs.
+      - [x] 9.4.1.1 Subtask {#jcf-p09-9-4-1-1} - Define allowed OWL 2 RL profiles and project rules for class hierarchy, capability hierarchy, repository/cohort classification, dependency transitivity where safe, and knowledge applicability.
+      - [x] 9.4.1.2 Subtask {#jcf-p09-9-4-1-2} - Build each rule-set output in an isolated derived graph with source revisions, ontology/rule version, generation activity, counts, limits, and validation report.
+      - [x] 9.4.1.3 Subtask {#jcf-p09-9-4-1-3} - Atomically publish complete output, mark it stale on source commits, and retain prior derived revisions only under explicit retention policy.
+      - [x] 9.4.1.4 Subtask {#jcf-p09-9-4-1-4} - Prevent inference from issuing commands, granting authorization/leases, accepting evidence, satisfying goals, or adopting knowledge.
+      - [x] 9.4.1.5 Subtask {#jcf-p09-9-4-1-5} - Bound entailment size, iterations, time, memory, graph scope, and recursive/pathological ontology inputs.
 
-    - [ ] 9.4.2 Task {#jcf-p09-cross-graph-insight} [repo: jido_code] [after: {#jcf-p09-reasoning-service}] - Implement explainable cross-repository knowledge discovery.
+    - [x] 9.4.2 Task {#jcf-p09-cross-graph-insight} [repo: jido_code] [after: {#jcf-p09-reasoning-service}] - Implement explainable cross-repository knowledge discovery.
 
       This task exploits the knowledge graph for fleet patterns and candidate
       improvements without turning correlations into accepted truth.
 
-      - [ ] 9.4.2.1 Subtask {#jcf-p09-9-4-2-1} - Add bounded queries for shared dependencies, repeated findings/failures, policy outcome patterns, reusable evidence methods, related source symbols, and applicable accepted lessons.
-      - [ ] 9.4.2.2 Subtask {#jcf-p09-9-4-2-2} - Generate proposed findings or goals with source repository set, rule/query version, confidence, limitations, and no automatic acceptance.
-      - [ ] 9.4.2.3 Subtask {#jcf-p09-9-4-2-3} - Preserve tenant/repository visibility and prevent one repository's confidential knowledge from leaking through cohort counts, labels, or explanations.
-      - [ ] 9.4.2.4 Subtask {#jcf-p09-9-4-2-4} - Require independent evidence and policy authorization before applying learned proposals to another repository.
+      - [x] 9.4.2.1 Subtask {#jcf-p09-9-4-2-1} - Add bounded queries for shared dependencies, repeated findings/failures, policy outcome patterns, reusable evidence methods, related source symbols, and applicable accepted lessons.
+      - [x] 9.4.2.2 Subtask {#jcf-p09-9-4-2-2} - Generate proposed findings or goals with source repository set, rule/query version, confidence, limitations, and no automatic acceptance.
+      - [x] 9.4.2.3 Subtask {#jcf-p09-9-4-2-3} - Preserve tenant/repository visibility and prevent one repository's confidential knowledge from leaking through cohort counts, labels, or explanations.
+      - [x] 9.4.2.4 Subtask {#jcf-p09-9-4-2-4} - Require independent evidence and policy authorization before applying learned proposals to another repository.
 
-    - [ ] 9.4.3 Task {#jcf-p09-learning-feedback} [repo: jido_code] [after: {#jcf-p09-cross-graph-insight}] - Feed accepted outcomes into future reconciliation and execution safely.
+    - [x] 9.4.3 Task {#jcf-p09-learning-feedback} [repo: jido_code] [after: {#jcf-p09-cross-graph-insight}] - Feed accepted outcomes into future reconciliation and execution safely.
 
       This task closes the learning loop through reviewed projections rather
       than hidden mutable agent memory.
 
-      - [ ] 9.4.3.1 Subtask {#jcf-p09-9-4-3-1} - Add accepted knowledge and valid derived classifications to reconciliation input with exact versions, provenance, and contradiction state.
-      - [ ] 9.4.3.2 Subtask {#jcf-p09-9-4-3-2} - Add bounded relevant knowledge to execution context with selection explanation, visibility, and prompt budget.
-      - [ ] 9.4.3.3 Subtask {#jcf-p09-9-4-3-3} - Invalidate/rebuild affected reconciliation, eligibility, and context projections when knowledge or reasoning revisions change.
-      - [ ] 9.4.3.4 Subtask {#jcf-p09-9-4-3-4} - Measure whether adopted knowledge improved outcomes as new observations/evidence, never by editing confidence silently.
+      - [x] 9.4.3.1 Subtask {#jcf-p09-9-4-3-1} - Add accepted knowledge and valid derived classifications to reconciliation input with exact versions, provenance, and contradiction state.
+      - [x] 9.4.3.2 Subtask {#jcf-p09-9-4-3-2} - Add bounded relevant knowledge to execution context with selection explanation, visibility, and prompt budget.
+      - [x] 9.4.3.3 Subtask {#jcf-p09-9-4-3-3} - Invalidate/rebuild affected reconciliation, eligibility, and context projections when knowledge or reasoning revisions change.
+      - [x] 9.4.3.4 Subtask {#jcf-p09-9-4-3-4} - Measure whether adopted knowledge improved outcomes as new observations/evidence, never by editing confidence silently.
 
   - [ ] 9.5 Section - Phase 9 Integration Tests.
 
