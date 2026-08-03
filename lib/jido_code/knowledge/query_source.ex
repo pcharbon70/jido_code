@@ -827,6 +827,173 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:active_attempts) do
+    """
+    SELECT ?attempt ?lease ?task ?fence ?validTo ?state ?transition ?successor ?successorState WHERE {
+      GRAPH {{graph}} {
+        ?lease a <#{@jf}Lease> ;
+               <#{@jf}leasesTask> ?task ;
+               <#{@jf}fencingToken> ?fence .
+        ?transition <#{@jf}transitionSubject> ?lease ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}executes> ?attempt .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL { ?transition <#{@jf}validTo> ?validTo }
+        OPTIONAL {
+          ?successor <#{@jf}expectedPredecessor> ?transition .
+          ?successorDecision <#{@jf}accepts> ?successor .
+          ?successor <#{@jf}nextState> ?successorState .
+        }
+      }
+    }
+    ORDER BY ?task ?attempt
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:attempt_by_task) do
+    """
+    SELECT ?attempt ?lease ?fence ?validTo ?state ?transition WHERE {
+      GRAPH {{graph}} {
+        ?lease a <#{@jf}Lease> ;
+               <#{@jf}leasesTask> {{resource}} ;
+               <#{@jf}fencingToken> ?fence .
+        ?transition <#{@jf}transitionSubject> ?lease ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}executes> ?attempt .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL { ?transition <#{@jf}validTo> ?validTo }
+      }
+    }
+    ORDER BY DESC(?fence) ?attempt
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:attempt_status) do
+    """
+    SELECT ?predicate ?object WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+      }
+    }
+    ORDER BY ?predicate ?object
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:attempt_timeline) do
+    """
+    SELECT ?transition ?prior ?state ?revision ?recorded ?runtimeSequence ?outcome ?diagnostic WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> {{resource}} ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ;
+                    <#{@jf}recordedAt> ?recorded .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL { ?transition <#{@jf}priorState> ?prior }
+        OPTIONAL { ?transition <#{@jf}runtimeSequence> ?runtimeSequence }
+        OPTIONAL { ?transition <#{@jf}outcomeClass> ?outcome }
+        OPTIONAL { ?transition <#{@jf}diagnostic> ?diagnostic }
+      }
+    }
+    ORDER BY DESC(?revision)
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:tool_invocations) do
+    """
+    SELECT ?invocation ?tool ?version ?sequence ?effect ?started ?deadline ?result ?status ?ended
+           ?exitStatus ?stdoutDigest ?stderrDigest ?usageDigest ?redaction ?artifact WHERE {
+      GRAPH {{graph}} {
+        ?invocation a <#{@jf}ToolInvocation> ;
+                    <#{@jf}attempts> {{resource}} ;
+                    <#{@jf}executes> ?tool ;
+                    <#{@jf}toolVersion> ?version ;
+                    <#{@jf}invocationSequence> ?sequence ;
+                    <#{@jf}expectedEffect> ?effect ;
+                    <#{@prov}startedAtTime> ?started ;
+                    <#{@jf}deadline> ?deadline .
+        OPTIONAL {
+          ?invocation <#{@jf}result> ?result .
+          ?result <#{@jf}outcomeClass> ?status ;
+                  <#{@prov}endedAtTime> ?ended ;
+                  <#{@jf}stdoutDigest> ?stdoutDigest ;
+                  <#{@jf}stderrDigest> ?stderrDigest ;
+                  <#{@jf}usageDigest> ?usageDigest ;
+                  <#{@jf}redactionResult> ?redaction .
+          OPTIONAL { ?result <#{@jf}exitStatus> ?exitStatus }
+          OPTIONAL { ?result <#{@prov}generated> ?artifact }
+        }
+      }
+    }
+    ORDER BY ?sequence ?invocation
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:attempt_artifacts) do
+    """
+    SELECT ?artifact ?kind ?snapshot ?generator ?digest ?mediaType ?byteCount ?storage
+           ?external ?path ?symbol ?commit ?tree WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@prov}generated> ?artifact .
+        ?artifact a <#{@jf}Artifact> ;
+                  <#{@jf}artifactKind> ?kind ;
+                  <#{@jf}sourceSnapshot> ?snapshot ;
+                  <#{@prov}wasGeneratedBy> ?generator ;
+                  <#{@jf}contentDigest> ?digest ;
+                  <#{@jf}mediaType> ?mediaType ;
+                  <#{@jf}byteCount> ?byteCount ;
+                  <#{@jf}storageClass> ?storage .
+        OPTIONAL { ?artifact <#{@jf}externalOutput> ?external }
+        OPTIONAL { ?artifact <#{@jf}affectedPath> ?path }
+        OPTIONAL { ?artifact <#{@jf}affects> ?symbol }
+        OPTIONAL { ?artifact <#{@jf}proposedCommit> ?commit }
+        OPTIONAL { ?artifact <#{@jf}proposedTree> ?tree }
+      }
+    }
+    ORDER BY ?artifact ?path ?symbol
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:cancellation_retry_lineage) do
+    """
+    SELECT ?retryOf ?retry ?cancellation ?outcome WHERE {
+      GRAPH {{graph}} {
+        OPTIONAL { {{resource}} <#{@jf}retryOf> ?retryOf }
+        OPTIONAL { ?retry <#{@jf}retryOf> {{resource}} }
+        OPTIONAL { {{resource}} <#{@jf}cancellationRequest> ?cancellation }
+        OPTIONAL { {{resource}} <#{@jf}outcomeClass> ?outcome }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:run_completeness) do
+    """
+    SELECT ?lifecycle ?state ?closed ?assertion ?runtimeCompletion ?missing ?limitation ?usageDigest WHERE {
+      GRAPH {{graph}} {
+        {{graph}} <#{@jf}lifecycleState> ?lifecycle ;
+                  <#{@jf}completenessState> ?state .
+        OPTIONAL { {{graph}} <#{@jf}closedAt> ?closed }
+        OPTIONAL {
+          {{resource}} <#{@jf}provenanceCompleteness> ?assertion .
+          ?assertion <#{@jf}usageDigest> ?usageDigest .
+          OPTIONAL { ?assertion <#{@jf}missingOutput> ?missing }
+          OPTIONAL { ?assertion <#{@jf}limitation> ?limitation }
+        }
+        OPTIONAL { {{resource}} <#{@jf}runtimeCompletion> ?runtimeCompletion }
+      }
+    }
+    ORDER BY ?missing ?limitation
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {

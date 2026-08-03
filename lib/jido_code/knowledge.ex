@@ -26,11 +26,14 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.InteractionProjection
   alias JidoCode.Knowledge.Execution.InteractionSession
   alias JidoCode.Knowledge.Execution.Attempt
+  alias JidoCode.Knowledge.Execution.AttemptProjection
   alias JidoCode.Knowledge.Execution.Artifact
   alias JidoCode.Knowledge.Execution.ToolInvocation
+  alias JidoCode.Knowledge.Execution.Provenance
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
+  alias JidoCode.Knowledge.Queries.ExecutionRecovery
   alias JidoCode.Knowledge.Projection
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Knowledge.DerivedGraphManager
@@ -182,6 +185,14 @@ defmodule JidoCode.Knowledge do
     do: Artifact.record_command(artifact, attempt, resolution, lease, attributes, options)
 
   def verify_execution_artifact(artifact, options \\ []), do: Artifact.verify(artifact, options)
+
+  def finalize_execution_run(attempt, resolution, lease, attributes, options \\ []),
+    do: Provenance.finalize_command(attempt, resolution, lease, attributes, options)
+
+  def project_execution_attempt(results, context), do: AttemptProjection.build(results, context)
+
+  def execution_recovery_candidates(result, graph_iri),
+    do: ExecutionRecovery.candidates(result, graph_iri)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

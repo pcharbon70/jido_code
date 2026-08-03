@@ -71,6 +71,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
             not is_nil(existing) and
               GraphRegistry.write_allowed?(target.family, :append, existing)
 
+          :close ->
+            not is_nil(existing) and
+              GraphRegistry.write_allowed?(target.family, :close, existing)
+
           :replace ->
             not is_nil(existing) and
               GraphRegistry.write_allowed?(target.family, :replace, existing)
@@ -374,16 +378,19 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
       existing_metadata = Map.get(snapshot.graph_metadata, target.graph_iri)
 
       metadata =
-        if target.operation == :replace,
+        if target.operation in [:replace, :close],
           do: target.metadata,
           else: existing_metadata || target.metadata
 
-      operation = if target.operation == :maintenance, do: :append, else: target.operation
+      operation =
+        if target.operation in [:maintenance, :close], do: :append, else: target.operation
 
       existing =
-        if target.operation == :replace,
-          do: [],
-          else: graph_quads(snapshot.dataset, target.graph_iri)
+        case target.operation do
+          :replace -> []
+          :close -> graph_quads(snapshot.dataset, target.graph_iri) -- target.removals
+          _other -> graph_quads(snapshot.dataset, target.graph_iri)
+        end
 
       result =
         Validator.validate(

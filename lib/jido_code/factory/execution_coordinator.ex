@@ -2,6 +2,7 @@ defmodule JidoCode.Factory.ExecutionCoordinator do
   @moduledoc "Commits attempt authority before dispatching any runtime effect."
 
   alias JidoCode.Factory.AdapterError
+  alias JidoCode.Factory.AttemptRecovery
   alias JidoCode.Factory.Execution.Request
   alias JidoCode.Factory.ExecutionRuntime
 
@@ -11,8 +12,11 @@ defmodule JidoCode.Factory.ExecutionCoordinator do
     adapter = Keyword.get(options, :adapter)
     failure_recorder = Keyword.get(options, :failure_recorder)
     runtime_options = Keyword.get(options, :runtime_options, [])
+    recovery_ready? = Keyword.get(options, :recovery_ready?, &recovery_ready?/0)
 
-    with true <- is_function(commit, 1),
+    with true <- is_function(recovery_ready?, 0),
+         true <- recovery_ready?.(),
+         true <- is_function(commit, 1),
          true <- is_atom(adapter),
          true <- is_function(failure_recorder, 2),
          {:ok, receipt} <- commit.(command),
@@ -50,4 +54,14 @@ defmodule JidoCode.Factory.ExecutionCoordinator do
 
   defp effect_authorized?(%{outcome: outcome}) when outcome in [:committed, :idempotent], do: true
   defp effect_authorized?(_receipt), do: false
+
+  defp recovery_ready? do
+    options = Application.get_env(:jido_code, :attempt_recovery, [])
+
+    if Keyword.get(options, :enabled, false) do
+      options |> Keyword.get(:name, AttemptRecovery) |> AttemptRecovery.ready?()
+    else
+      true
+    end
+  end
 end

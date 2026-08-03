@@ -157,42 +157,42 @@ Back to plan: [README](./README.md)
       - [x] 8.3.3.4 Subtask {#jcf-p08-8-3-3-4} - Preserve patch conflicts, partial output, rejected paths, and cleanup failures as attempt findings without accepting them as evidence.
       - [x] 8.3.3.5 Subtask {#jcf-p08-8-3-3-5} - Verify artifact content/digest on every later use and fail closed on unavailable or mismatched external content.
 
-  - [ ] 8.4 Section - Implement execution provenance projection and restart recovery.
+  - [x] 8.4 Section - Implement execution provenance projection and restart recovery.
 
     This section makes active and historical attempts inspectable and allows
     runtime state to be rebuilt after process or host failure.
 
-    - [ ] 8.4.1 Task {#jcf-p08-provenance-capture} [repo: jido_code] [after: {#jcf-p08-patch-artifacts}] - Finalize immutable run graph capture.
+    - [x] 8.4.1 Task {#jcf-p08-provenance-capture} [repo: jido_code] [after: {#jcf-p08-patch-artifacts}] - Finalize immutable run graph capture.
 
       This task closes one attempt's operational history with complete inputs,
       activities, outputs, limitations, and outcome while leaving evaluation
       to Phase 9.
 
-      - [ ] 8.4.1.1 Subtask {#jcf-p08-8-4-1-1} - Link attempt to enrollment, goal/task/plan, lease/fence, exact snapshot, context/instruction, actor/agent/runtime, tool invocations, sandbox activity, patches/artifacts, and transitions.
-      - [ ] 8.4.1.2 Subtask {#jcf-p08-8-4-1-2} - Record terminal outcome, bounded diagnostics, usage, cancellation/retry refs, missing outputs, and provenance completeness.
-      - [ ] 8.4.1.3 Subtask {#jcf-p08-8-4-1-3} - Validate and close the run graph immutable only after all accepted invocation/activity events through the terminal sequence are present.
-      - [ ] 8.4.1.4 Subtask {#jcf-p08-8-4-1-4} - Mark incomplete/abandoned run graphs explicitly and permit later recovery additions only through the defined open lifecycle before closure.
+      - [x] 8.4.1.1 Subtask {#jcf-p08-8-4-1-1} - Link attempt to enrollment, goal/task/plan, lease/fence, exact snapshot, context/instruction, actor/agent/runtime, tool invocations, sandbox activity, patches/artifacts, and transitions.
+      - [x] 8.4.1.2 Subtask {#jcf-p08-8-4-1-2} - Record terminal outcome, bounded diagnostics, usage, cancellation/retry refs, missing outputs, and provenance completeness.
+      - [x] 8.4.1.3 Subtask {#jcf-p08-8-4-1-3} - Validate and close the run graph immutable only after all accepted invocation/activity events through the terminal sequence are present.
+      - [x] 8.4.1.4 Subtask {#jcf-p08-8-4-1-4} - Mark incomplete/abandoned run graphs explicitly and permit later recovery additions only through the defined open lifecycle before closure.
 
-    - [ ] 8.4.2 Task {#jcf-p08-attempt-projections} [repo: jido_code] [after: {#jcf-p08-provenance-capture}] - Implement attempt status, timeline, and artifact projections.
+    - [x] 8.4.2 Task {#jcf-p08-attempt-projections} [repo: jido_code] [after: {#jcf-p08-provenance-capture}] - Implement attempt status, timeline, and artifact projections.
 
       This task exposes bounded execution state and history to product,
       recovery, and later evaluation services.
 
-      - [ ] 8.4.2.1 Subtask {#jcf-p08-8-4-2-1} - Add active-attempt, attempt-by-task, transition timeline, tool invocation, patch/artifact, cancellation, retry lineage, and run completeness queries.
-      - [ ] 8.4.2.2 Subtask {#jcf-p08-8-4-2-2} - Include current fence, runtime/agent versions, source snapshot, graph revisions, last bounded activity, terminal state, warnings, and redacted diagnostics.
-      - [ ] 8.4.2.3 Subtask {#jcf-p08-8-4-2-3} - Bound timeline pages, tool output summaries, artifacts, source links, and retained context without exposing secret-bearing prompts or raw runtime internals.
-      - [ ] 8.4.2.4 Subtask {#jcf-p08-8-4-2-4} - Distinguish runtime completion from verification/evidence/decision state explicitly.
+      - [x] 8.4.2.1 Subtask {#jcf-p08-8-4-2-1} - Add active-attempt, attempt-by-task, transition timeline, tool invocation, patch/artifact, cancellation, retry lineage, and run completeness queries.
+      - [x] 8.4.2.2 Subtask {#jcf-p08-8-4-2-2} - Include current fence, runtime/agent versions, source snapshot, graph revisions, last bounded activity, terminal state, warnings, and redacted diagnostics.
+      - [x] 8.4.2.3 Subtask {#jcf-p08-8-4-2-3} - Bound timeline pages, tool output summaries, artifacts, source links, and retained context without exposing secret-bearing prompts or raw runtime internals.
+      - [x] 8.4.2.4 Subtask {#jcf-p08-8-4-2-4} - Distinguish runtime completion from verification/evidence/decision state explicitly.
 
-    - [ ] 8.4.3 Task {#jcf-p08-runtime-recovery} [repo: jido_code] [after: {#jcf-p08-attempt-projections}] - Implement startup and periodic attempt recovery.
+    - [x] 8.4.3 Task {#jcf-p08-runtime-recovery} [repo: jido_code] [after: {#jcf-p08-attempt-projections}] - Implement startup and periodic attempt recovery.
 
       This task reconciles graph-visible attempts and leases with disposable
       runtime/sandbox state after crashes or lost callbacks.
 
-      - [ ] 8.4.3.1 Subtask {#jcf-p08-8-4-3-1} - Query non-terminal attempts and valid/expired leases at startup before admitting new execution.
-      - [ ] 8.4.3.2 Subtask {#jcf-p08-8-4-3-2} - Inspect provider/runtime/sandbox status through opaque refs and current fence without trusting process registry alone.
-      - [ ] 8.4.3.3 Subtask {#jcf-p08-8-4-3-3} - Resume only when runtime/version/snapshot/lease policy permits; otherwise cancel, abandon, fail, or supersede through semantic transitions.
-      - [ ] 8.4.3.4 Subtask {#jcf-p08-8-4-3-4} - Recover missing terminal callbacks idempotently and reject stale provider events after lease/attempt supersession.
-      - [ ] 8.4.3.5 Subtask {#jcf-p08-8-4-3-5} - Discover and clean orphaned runtime/sandbox resources without inventing completed graph state.
+      - [x] 8.4.3.1 Subtask {#jcf-p08-8-4-3-1} - Query non-terminal attempts and valid/expired leases at startup before admitting new execution.
+      - [x] 8.4.3.2 Subtask {#jcf-p08-8-4-3-2} - Inspect provider/runtime/sandbox status through opaque refs and current fence without trusting process registry alone.
+      - [x] 8.4.3.3 Subtask {#jcf-p08-8-4-3-3} - Resume only when runtime/version/snapshot/lease policy permits; otherwise cancel, abandon, fail, or supersede through semantic transitions.
+      - [x] 8.4.3.4 Subtask {#jcf-p08-8-4-3-4} - Recover missing terminal callbacks idempotently and reject stale provider events after lease/attempt supersession.
+      - [x] 8.4.3.5 Subtask {#jcf-p08-8-4-3-5} - Discover and clean orphaned runtime/sandbox resources without inventing completed graph state.
 
   - [ ] 8.5 Section - Phase 8 Integration Tests.
 

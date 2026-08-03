@@ -28,6 +28,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     execution-attempt execution-context execution-instruction interaction-session
     interaction-message cancellation-request retry-decision
     tool-invocation tool-invocation-event patch-artifact generated-artifact artifact-finding
+    sandbox-activity run-completeness
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

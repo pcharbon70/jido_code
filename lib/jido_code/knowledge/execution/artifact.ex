@@ -219,13 +219,34 @@ defmodule JidoCode.Knowledge.Execution.Artifact do
 
   defp validate_authority(artifact, attempt, resolution, lease, attributes) do
     cond do
-      artifact.base_snapshot_iri != attempt.snapshot_iri -> :error
-      resolution.subject_iri != attempt.iri -> :error
-      resolution.current_state not in [:running, :waiting_tool] -> :error
-      lease.iri != attempt.lease_iri or lease.fencing_token != attempt.fencing_token -> :error
-      attributes[:fencing_token] != attempt.fencing_token -> :error
-      not match?(%DateTime{}, attributes[:recorded_at]) -> :error
-      true -> :ok
+      artifact.base_snapshot_iri != attempt.snapshot_iri ->
+        :error
+
+      resolution.subject_iri != attempt.iri ->
+        :error
+
+      resolution.current_state not in [
+        :running,
+        :waiting_tool,
+        :completed,
+        :failed,
+        :timed_out,
+        :cancelled,
+        :abandoned
+      ] ->
+        :error
+
+      lease.iri != attempt.lease_iri or lease.fencing_token != attempt.fencing_token ->
+        :error
+
+      attributes[:fencing_token] != attempt.fencing_token ->
+        :error
+
+      not match?(%DateTime{}, attributes[:recorded_at]) ->
+        :error
+
+      true ->
+        :ok
     end
   end
 

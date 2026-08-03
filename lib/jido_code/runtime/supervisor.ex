@@ -19,6 +19,15 @@ defmodule JidoCode.Runtime.Supervisor do
        max_seconds: 10}
     ]
 
+    recovery = Application.get_env(:jido_code, :attempt_recovery, [])
+
+    children =
+      if Keyword.get(recovery, :enabled, false) do
+        children ++ [{JidoCode.Factory.AttemptRecovery, Keyword.delete(recovery, :enabled)}]
+      else
+        children
+      end
+
     Supervisor.init(children, strategy: :one_for_one)
   end
 end

@@ -275,6 +275,13 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       capability: :execution,
       graph_families: [:run_attempt],
       preconditions: [:attempt_current, :current_fence, :artifact_absent]
+    },
+    "FinalizeExecutionRun" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_terminal, :current_fence, :provenance_complete],
+      allow_closure?: true
     }
   }
   @version_1_6 @version_1_5

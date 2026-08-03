@@ -73,3 +73,4 @@ implementation plan was merged.
 - [Execution runtime boundary](./execution-runtime-boundary.md)
 - [Execution attempt lifecycle](./execution-attempt-lifecycle.md)
 - [Governed execution effects and artifacts](./execution-effects-provenance.md)
+- [Execution provenance and recovery](./execution-provenance-and-recovery.md)

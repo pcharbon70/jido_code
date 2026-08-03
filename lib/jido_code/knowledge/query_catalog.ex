@@ -862,6 +862,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   end
 
   defp execution_boundary_specifications(resource) do
+    graph = Map.take(resource, [:graph])
+
     [
       spec(
         :execution_context_subject,
@@ -893,6 +895,94 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:repository_control, :run_attempt],
         :table,
         "Read a bounded chronological interaction timeline.",
+        :product,
+        :declared
+      ),
+      spec(
+        :active_attempts,
+        :select,
+        graph,
+        :execution,
+        [:repository_control],
+        :table,
+        "Discover graph-visible execution attempts with direct lease-successor state.",
+        :product,
+        :declared
+      ),
+      spec(
+        :attempt_by_task,
+        :select,
+        resource,
+        :execution,
+        [:repository_control],
+        :table,
+        "Read bounded attempt and lease lineage for one task.",
+        :product,
+        :declared
+      ),
+      spec(
+        :attempt_status,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :table,
+        "Read bounded attempt identity, fence, runtime, snapshot, and context facts.",
+        :product,
+        :declared
+      ),
+      spec(
+        :attempt_timeline,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :timeline,
+        "Read a bounded accepted attempt transition timeline.",
+        :product,
+        :declared
+      ),
+      spec(
+        :tool_invocations,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :timeline,
+        "Read bounded tool invocation metadata and redacted output digests.",
+        :product,
+        :declared
+      ),
+      spec(
+        :attempt_artifacts,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :table,
+        "Read content-addressed attempt artifact metadata without embedded content.",
+        :product,
+        :declared
+      ),
+      spec(
+        :cancellation_retry_lineage,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :table,
+        "Read cancellation and retry lineage without provider-private state.",
+        :product,
+        :declared
+      ),
+      spec(
+        :run_completeness,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :table,
+        "Read run graph lifecycle, provenance completeness, missing outputs, and limitations.",
         :product,
         :declared
       )

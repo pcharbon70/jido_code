@@ -131,12 +131,20 @@ defmodule JidoCode.Knowledge.ChangeSet do
     graph_iri = change[:graph_iri]
     operation = change[:operation]
     replacement? = operation == :replace and Map.get(definition, :allow_replacement?, false)
-    lifecycle_metadata = if operation == :create, do: nil, else: change[:metadata]
+    closure? = operation == :close and Map.get(definition, :allow_closure?, false)
+
+    lifecycle_metadata =
+      case operation do
+        :create -> nil
+        :close -> %{lifecycle_state: :open}
+        _other -> change[:metadata]
+      end
 
     with true <- family in definition.graph_families,
          {:ok, ^family} <- GraphRegistry.identify(graph_iri),
-         true <- operation in [:create, :append, :replace, :maintenance],
+         true <- operation in [:create, :append, :close, :replace, :maintenance],
          true <- operation != :replace or replacement?,
+         true <- operation != :close or closure?,
          true <- operation != :maintenance or maintenance?,
          true <-
            GraphRegistry.write_allowed?(
@@ -151,7 +159,7 @@ defmodule JidoCode.Knowledge.ChangeSet do
            normalize_removals(
              change[:removals] || [],
              graph_iri,
-             maintenance? or replacement?
+             maintenance? or replacement? or closure?
            ) do
       {:ok,
        %{

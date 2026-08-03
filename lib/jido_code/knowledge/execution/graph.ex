@@ -7,6 +7,9 @@ defmodule JidoCode.Knowledge.Execution.Graph do
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.ResourceIdentity
 
+  @jf "https://jido.run/ontology/factory#"
+  @concept "https://jido.run/ontology/concept/"
+
   @spec run_graph(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
   def run_graph(attempt_iri), do: GraphRegistry.graph_iri(:run_attempt, %{attempt: attempt_iri})
 
@@ -85,6 +88,62 @@ defmodule JidoCode.Knowledge.Execution.Graph do
 
   def append_target(_graph, _revision, _scope, _activity, _recorded_at, _additions),
     do: invalid(:execution_graph_target)
+
+  @spec close_target(map(), String.t(), String.t(), DateTime.t(), :complete | :incomplete, list()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def close_target(metadata, owner_scope, activity, closed_at, completeness, additions)
+      when is_map(metadata) and completeness in [:complete, :incomplete] and is_list(additions) do
+    graph_iri = metadata[:graph_iri]
+
+    with {:ok, :run_attempt} <- GraphRegistry.identify(graph_iri),
+         true <- metadata[:family] == :run_attempt,
+         true <- metadata[:lifecycle_state] == :open,
+         true <- metadata[:completeness_state] == :building,
+         :ok <- ResourceIdentity.validate(owner_scope),
+         :ok <- ResourceIdentity.validate(activity),
+         true <- match?(%DateTime{}, closed_at),
+         true <- owner_scope == metadata[:owner_scope],
+         {:ok, closed_metadata} <-
+           GraphMetadata.new(graph_iri, %{
+             owner_scope: metadata.owner_scope,
+             ontology_version: metadata.ontology_version,
+             creation_activity: metadata.creation_activity,
+             created_at: metadata.created_at,
+             lifecycle_state: :closed,
+             completeness_state: completeness,
+             closed_at: closed_at,
+             graph_revision: metadata.graph_revision
+           }) do
+      {:ok,
+       %{
+         family: :run_attempt,
+         graph_iri: graph_iri,
+         operation: :close,
+         metadata: closed_metadata,
+         additions:
+           [
+             {graph_iri, @jf <> "lifecycleState", RDF.iri(@concept <> "Closed")},
+             {graph_iri, @jf <> "completenessState",
+              RDF.iri(@concept <> Macro.camelize(to_string(completeness)))},
+             {graph_iri, @jf <> "closedAt", RDF.XSD.DateTime.new(closed_at)}
+           ] ++ additions,
+         supersessions: [],
+         invalidations: [],
+         removals: [
+           {graph_iri, @jf <> "lifecycleState", RDF.iri(@concept <> "Open")},
+           {graph_iri, @jf <> "completenessState", RDF.iri(@concept <> "Building")}
+         ]
+       }}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _invalid -> invalid(:execution_graph_close)
+    end
+  rescue
+    _error -> invalid(:execution_graph_close)
+  end
+
+  def close_target(_metadata, _scope, _activity, _closed_at, _completeness, _additions),
+    do: invalid(:execution_graph_close)
 
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}
 end

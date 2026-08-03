@@ -243,6 +243,8 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
          {event_iri, @prov <> "endedAtTime", RDF.XSD.DateTime.new(attributes.recorded_at)},
          {event_iri, @jf <> "stdout", RDF.XSD.String.new(stdout)},
          {event_iri, @jf <> "stderr", RDF.XSD.String.new(stderr)},
+         {event_iri, @jf <> "stdoutDigest", RDF.XSD.String.new(digest(stdout))},
+         {event_iri, @jf <> "stderrDigest", RDF.XSD.String.new(digest(stderr))},
          {event_iri, @jf <> "usageDigest", RDF.XSD.String.new(digest(usage))}
        ] ++
          optional_integer(event_iri, @jf <> "exitStatus", attributes.exit_status) ++

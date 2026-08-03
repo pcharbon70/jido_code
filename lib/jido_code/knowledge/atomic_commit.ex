@@ -79,6 +79,16 @@ defmodule JidoCode.Knowledge.AtomicCommit do
        }),
        do: :ok
 
+  defp validate_removals(%WriteBatch{
+         removal_policy: :maintenance,
+         operation_metadata: %{
+           class: :semantic_command,
+           command_type: "FinalizeExecutionRun",
+           command_version: "1.6.0"
+         }
+       }),
+       do: :ok
+
   defp validate_removals(%WriteBatch{}) do
     {:error, Error.new(:invalid_input, :atomic_removal_not_supported)}
   end

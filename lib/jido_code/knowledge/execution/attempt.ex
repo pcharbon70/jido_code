@@ -412,6 +412,8 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
       {attempt.iri, @rdf_type, RDF.iri(@jf <> "ExecutionAttempt")},
       {attempt.iri, @jf <> "executes", RDF.iri(attempt.task_iri)},
       {attempt.iri, @jf <> "attempts", RDF.iri(attempt.goal_iri)},
+      {attempt.iri, @jf <> "enrollment", RDF.iri(attempt.enrollment_iri)},
+      {attempt.iri, @jf <> "inScope", RDF.iri(attempt.repository_iri)},
       {attempt.iri, @jf <> "derivedFrom", RDF.iri(attempt.plan_iri)},
       {attempt.iri, @jf <> "validFor", RDF.iri(attempt.lease_iri)},
       {attempt.iri, @jf <> "sourceSnapshot", RDF.iri(attempt.snapshot_iri)},
@@ -421,12 +423,26 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
       {attempt.iri, @jf <> "requiresCapability", RDF.iri(attempt.capability_iri)},
       {attempt.iri, @jf <> "fencingToken", RDF.XSD.NonNegativeInteger.new(attempt.fencing_token)},
       {attempt.iri, @jf <> "runtimeVersion", RDF.XSD.String.new(attempt.runtime_version)},
+      {attempt.iri, @jf <> "contextDigest", RDF.XSD.String.new(attempt.context_digest)},
+      {attempt.iri, @jf <> "constraintPayload",
+       RDF.XSD.String.new(Jason.encode!(context.constraints))},
       {attempt.context_iri, @rdf_type, RDF.iri(@jf <> "ExecutionContext")},
       {attempt.context_iri, @jf <> "contextDigest", RDF.XSD.String.new(attempt.context_digest)},
+      {attempt.context_iri, @jf <> "constraintPayload",
+       RDF.XSD.String.new(Jason.encode!(context.constraints))},
       {attempt.context_iri, @jf <> "instruction", RDF.iri(attempt.instruction_iri)},
       {attempt.instruction_iri, @rdf_type, RDF.iri(@jf <> "Instruction")},
       {attempt.instruction_iri, @jf <> "content", RDF.XSD.String.new(context.instruction)}
     ] ++
+      Enum.map(context.allowed_effects, fn effect ->
+        {attempt.context_iri, @jf <> "allowedEffectName", RDF.XSD.String.new(effect)}
+      end) ++
+      Enum.map(context.expected_artifacts, fn artifact ->
+        {attempt.context_iri, @jf <> "expectedArtifactClass", RDF.XSD.String.new(artifact)}
+      end) ++
+      Enum.map(context.expected_evidence, fn evidence ->
+        {attempt.context_iri, @jf <> "expectedEvidenceClass", RDF.XSD.String.new(evidence)}
+      end) ++
       optional_iri(attempt.iri, @jf <> "retryOf", attempt.retry_of_iri) ++
       graph_reference_statements(attempt, context.source_graph_revisions) ++
       Enum.map(context.omissions, fn omission ->
