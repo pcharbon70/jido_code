@@ -166,44 +166,44 @@ Back to plan: [README](./README.md)
       - [x] 7.3.4.3 Subtask {#jcf-p07-7-3-4-3} - Bound explanation size and cite graph resources instead of persisting or exposing chain-of-thought.
       - [x] 7.3.4.4 Subtask {#jcf-p07-7-3-4-4} - Add exact-context reconstruction for authorized audit and later evidence evaluation.
 
-  - [ ] 7.4 Section - Implement eligibility, scheduling, and fenced leases.
+  - [x] 7.4 Section - Implement eligibility, scheduling, and fenced leases.
 
     This section turns approved task graphs into explainable execution
     candidates while keeping scheduler memory disposable and lease authority
     durable in the graph.
 
-    - [ ] 7.4.1 Task {#jcf-p07-eligibility-query} [repo: jido_code] [after: {#jcf-p07-reconciliation-explanation}] - Implement the closed-world eligible-work query.
+    - [x] 7.4.1 Task {#jcf-p07-eligibility-query} [repo: jido_code] [after: {#jcf-p07-reconciliation-explanation}] - Implement the closed-world eligible-work query.
 
       This task selects tasks only when every declared prerequisite,
       authorization, capability, freshness, and capacity condition is known to
       hold.
 
-      - [ ] 7.4.1.1 Subtask {#jcf-p07-7-4-1-1} - Require active enrollment/goal/plan, approved task, satisfied dependencies, available required artifacts, fresh source snapshot, applicable authorization, capability match, and no valid conflicting lease.
-      - [ ] 7.4.1.2 Subtask {#jcf-p07-7-4-1-2} - Require complete graph boundaries for dependency, lease, cancellation, capability, and policy checks.
-      - [ ] 7.4.1.3 Subtask {#jcf-p07-7-4-1-3} - Return candidate priority/fairness inputs plus an explanation of every satisfied and blocking condition.
-      - [ ] 7.4.1.4 Subtask {#jcf-p07-7-4-1-4} - Treat unknown, stale, contradictory, unauthorized, over-capacity, and incomplete states as blocked with machine-readable reasons.
+      - [x] 7.4.1.1 Subtask {#jcf-p07-7-4-1-1} - Require active enrollment/goal/plan, approved task, satisfied dependencies, available required artifacts, fresh source snapshot, applicable authorization, capability match, and no valid conflicting lease.
+      - [x] 7.4.1.2 Subtask {#jcf-p07-7-4-1-2} - Require complete graph boundaries for dependency, lease, cancellation, capability, and policy checks.
+      - [x] 7.4.1.3 Subtask {#jcf-p07-7-4-1-3} - Return candidate priority/fairness inputs plus an explanation of every satisfied and blocking condition.
+      - [x] 7.4.1.4 Subtask {#jcf-p07-7-4-1-4} - Treat unknown, stale, contradictory, unauthorized, over-capacity, and incomplete states as blocked with machine-readable reasons.
 
-    - [ ] 7.4.2 Task {#jcf-p07-lease-command} [repo: jido_code] [after: {#jcf-p07-eligibility-query}] - Implement lease acquisition, renewal, release, and expiry transitions.
+    - [x] 7.4.2 Task {#jcf-p07-lease-command} [repo: jido_code] [after: {#jcf-p07-eligibility-query}] - Implement lease acquisition, renewal, release, and expiry transitions.
 
       This task creates exclusive, fenced execution authority that survives
       scheduler/runtime process loss.
 
-      - [ ] 7.4.2.1 Subtask {#jcf-p07-7-4-2-1} - Implement `AcquireExecutionLease` with task, actor/agent, capability, expected task/control revisions, acquisition/expiry, fencing token, and eligibility receipt.
-      - [ ] 7.4.2.2 Subtask {#jcf-p07-7-4-2-2} - Atomically transition task and lease state, reject competing acquisitions, and advance monotonic fencing per task.
-      - [ ] 7.4.2.3 Subtask {#jcf-p07-7-4-2-3} - Implement bounded renewal with current fence, liveness evidence, maximum duration, policy, and no silent owner/capability widening.
-      - [ ] 7.4.2.4 Subtask {#jcf-p07-7-4-2-4} - Implement release, cancellation, expiry observation, supersession, and recovery decisions without erasing prior leases.
-      - [ ] 7.4.2.5 Subtask {#jcf-p07-7-4-2-5} - Require every execution-side mutation to present the current lease IRI and fencing token.
+      - [x] 7.4.2.1 Subtask {#jcf-p07-7-4-2-1} - Implement `AcquireExecutionLease` with task, actor/agent, capability, expected task/control revisions, acquisition/expiry, fencing token, and eligibility receipt.
+      - [x] 7.4.2.2 Subtask {#jcf-p07-7-4-2-2} - Atomically transition task and lease state, reject competing acquisitions, and advance monotonic fencing per task.
+      - [x] 7.4.2.3 Subtask {#jcf-p07-7-4-2-3} - Implement bounded renewal with current fence, liveness evidence, maximum duration, policy, and no silent owner/capability widening.
+      - [x] 7.4.2.4 Subtask {#jcf-p07-7-4-2-4} - Implement release, cancellation, expiry observation, supersession, and recovery decisions without erasing prior leases.
+      - [x] 7.4.2.5 Subtask {#jcf-p07-7-4-2-5} - Require every execution-side mutation to present the current lease IRI and fencing token.
 
-    - [ ] 7.4.3 Task {#jcf-p07-scheduler} [repo: jido_code] [after: {#jcf-p07-lease-command}] - Implement the graph-rebuildable scheduler.
+    - [x] 7.4.3 Task {#jcf-p07-scheduler} [repo: jido_code] [after: {#jcf-p07-lease-command}] - Implement the graph-rebuildable scheduler.
 
       This task orders eligible candidates and grants leases while retaining no
       durable queue or hidden work ownership.
 
-      - [ ] 7.4.3.1 Subtask {#jcf-p07-7-4-3-1} - Query eligible candidates by bounded factory/repository pages and apply deterministic priority, fairness, risk, and capacity policy.
-      - [ ] 7.4.3.2 Subtask {#jcf-p07-7-4-3-2} - Match candidate requirements to currently authorized capability providers and issue guarded lease commands.
-      - [ ] 7.4.3.3 Subtask {#jcf-p07-7-4-3-3} - Recover on restart from valid/expired leases, task transition chains, and available capability projections.
-      - [ ] 7.4.3.4 Subtask {#jcf-p07-7-4-3-4} - Enforce global, cohort, repository, capability, and risk admission limits and expose bounded reasons for deferred work.
-      - [ ] 7.4.3.5 Subtask {#jcf-p07-7-4-3-5} - Treat PubSub as a wake-up hint and periodically reconcile from graph revisions to prevent missed work.
+      - [x] 7.4.3.1 Subtask {#jcf-p07-7-4-3-1} - Query eligible candidates by bounded factory/repository pages and apply deterministic priority, fairness, risk, and capacity policy.
+      - [x] 7.4.3.2 Subtask {#jcf-p07-7-4-3-2} - Match candidate requirements to currently authorized capability providers and issue guarded lease commands.
+      - [x] 7.4.3.3 Subtask {#jcf-p07-7-4-3-3} - Recover on restart from valid/expired leases, task transition chains, and available capability projections.
+      - [x] 7.4.3.4 Subtask {#jcf-p07-7-4-3-4} - Enforce global, cohort, repository, capability, and risk admission limits and expose bounded reasons for deferred work.
+      - [x] 7.4.3.5 Subtask {#jcf-p07-7-4-3-5} - Treat PubSub as a wake-up hint and periodically reconcile from graph revisions to prevent missed work.
 
   - [ ] 7.5 Section - Phase 7 Integration Tests.
 

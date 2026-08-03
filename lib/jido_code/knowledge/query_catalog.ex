@@ -16,12 +16,14 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @control_loop_version "1.2.0"
   @governance_version "1.3.0"
   @reconciliation_version "1.4.0"
+  @scheduling_version "1.5.0"
   @versions [
     @version,
     @repository_version,
     @control_loop_version,
     @governance_version,
-    @reconciliation_version
+    @reconciliation_version,
+    @scheduling_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -47,6 +49,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec reconciliation_version() :: String.t()
   def reconciliation_version, do: @reconciliation_version
+
+  @spec scheduling_version() :: String.t()
+  def scheduling_version, do: @scheduling_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -339,6 +344,15 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           work_specifications(graph) ++
           governance_specifications(resource) ++
           reconciliation_specifications(graph, resource)
+
+      @scheduling_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource)
     end
   end
 
@@ -777,6 +791,55 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:repository_control],
         :table,
         "Read bounded gaps, proposals, omissions, decisions, and explanation edges.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp scheduling_specifications(graph, resource) do
+    [
+      spec(
+        :eligible_work_candidates,
+        :select,
+        graph,
+        :control,
+        [:repository_control],
+        :table,
+        "Discover bounded task candidates whose accepted endpoint is eligible.",
+        :product,
+        :declared
+      ),
+      spec(
+        :eligibility_context,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one task's direct closed-world eligibility context for exact-revision evaluation.",
+        :product,
+        :declared
+      ),
+      spec(
+        :lease_description,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one execution lease, eligibility receipt, owner, capability, interval, and fence.",
+        :product,
+        :declared
+      ),
+      spec(
+        :lease_transition_history,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :timeline,
+        "Read the accepted transition history for one execution lease.",
         :product,
         :declared
       )

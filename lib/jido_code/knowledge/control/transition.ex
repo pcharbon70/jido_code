@@ -34,6 +34,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
           | :obligation
           | :capability
           | :reconciliation
+          | :lease
   @type t :: %__MODULE__{}
 
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -51,7 +52,8 @@ defmodule JidoCode.Knowledge.Control.Transition do
     policy: ~w[proposed active suspended superseded retired]a,
     obligation: ~w[proposed active satisfied waived superseded retired]a,
     capability: ~w[proposed available stale unavailable retired]a,
-    reconciliation: ~w[proposed running completed failed cancelled superseded]a
+    reconciliation: ~w[proposed running completed failed cancelled superseded]a,
+    lease: ~w[proposed active released cancelled expired superseded]a
   }
 
   @edges %{
@@ -128,6 +130,14 @@ defmodule JidoCode.Knowledge.Control.Transition do
       completed: [:superseded],
       failed: ~w[running cancelled superseded]a,
       cancelled: [:superseded],
+      superseded: []
+    },
+    lease: %{
+      proposed: ~w[active cancelled]a,
+      active: ~w[active released cancelled expired superseded]a,
+      released: [:superseded],
+      cancelled: [:superseded],
+      expired: [:superseded],
       superseded: []
     }
   }

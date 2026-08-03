@@ -24,7 +24,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     control-constraint control-transition control-decision goal-proposal plan-proposal task-proposal
     plan-adoption policy-version policy-evaluator repository-cohort cohort-membership
     policy-obligation capability-declaration capability-classification reconciliation-package
-    reconciliation-activity reconciliation-gap control-proposal
+    reconciliation-activity reconciliation-gap control-proposal eligibility-receipt execution-lease
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

@@ -168,3 +168,47 @@ diagnostics in memory. Startup and explicit rediscovery use reviewed graph
 queries; `Task.async_stream/3` applies bounded concurrency and back-pressure.
 Retries and notifications are hints. Restart recovery comes from active scopes
 and incomplete graph activities, not a durable process queue or OTP snapshot.
+
+## Eligibility And Scheduling
+
+Eligibility is a closed-world evaluation over one exact, authorized graph
+revision set. A task is eligible only when enrollment, goal, plan, and task
+states are admitted; every dependency is satisfied; required artifacts are
+available; source observations are complete, fresh, and non-contradictory;
+policy authorization is complete and applicable; a directly declared
+capability is available and authorized for the scope; capacity is available;
+and the lease and cancellation views prove no conflict. Dependency, artifact,
+source, policy, capability, cancellation, and lease boundaries must each be
+explicitly complete. Unknown, stale, contradictory, unauthorized, incomplete,
+and over-capacity inputs produce bounded machine-readable blockers.
+
+An eligible result is a disposable explanation until
+`AcquireExecutionLease` records its deterministic `EligibilityReceipt`. The
+same atomic command appends the task's eligible/leased transitions, creates
+the lease's proposed/active transition chain, and grants the next monotonic
+fencing token. Precommit guards require the expected task endpoint, absence of
+another unexpired active lease, and the next fence for that task. Concurrent
+or stale acquisitions return a refreshable conflict receipt.
+
+A lease records the task, holder, capability declaration, eligibility receipt,
+acquisition/expiry/maximum interval, and fence. Renewal requires the current
+lease endpoint and fence, fresh liveness evidence, a later bounded expiry, and
+the same owner and capability. Release, cancellation, observed expiry, and
+supersession append terminal lease and corresponding task transitions; prior
+leases remain in the graph. Every execution-side mutation must include the
+control graph, lease IRI, task IRI, current fence, and evaluation time in a
+`current_lease_fence` guard.
+
+Query catalog version 1.5 adds eligible-candidate discovery, direct eligibility
+context, lease description, and lease transition-history reads. Candidate
+discovery is only the first bounded query: admission still requires the full
+closed-world evaluator and exact graph revisions.
+
+`JidoCode.Factory.Scheduler` stores no durable queue or ownership. It
+rediscovers candidates at startup, periodically, and on wake-up hints; orders
+them deterministically by priority, fairness, risk, and task IRI; chooses an
+authorized provider deterministically; and applies global, cohort, repository,
+capability, and risk limits. Its process state contains only recent bounded
+diagnostics. Restart and dropped-notification recovery come from graph
+discovery, while the guarded lease command remains the sole execution
+authority grant.

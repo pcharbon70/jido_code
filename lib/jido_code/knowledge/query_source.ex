@@ -743,6 +743,54 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:eligible_work_candidates) do
+    """
+    SELECT ?task ?transition ?revision WHERE {
+      GRAPH {{graph}} {
+        ?task a <#{@jf}Task> .
+        ?transition <#{@jf}transitionSubject> ?task ;
+                    <#{@jf}nextState> <https://jido.run/ontology/concept/TaskEligible> ;
+                    <#{@jf}subjectRevision> ?revision .
+        ?decision <#{@jf}accepts> ?transition .
+        FILTER NOT EXISTS {
+          ?successor <#{@jf}expectedPredecessor> ?transition .
+          ?successorDecision <#{@jf}accepts> ?successor .
+        }
+      }
+    }
+    ORDER BY ?task
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:eligibility_context) do
+    """
+    SELECT ?predicate ?object WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:lease_description), do: fetch(:eligibility_context)
+
+  def fetch(:lease_transition_history) do
+    """
+    SELECT ?transition ?state ?revision WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> {{resource}} ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision .
+        ?decision <#{@jf}accepts> ?transition .
+      }
+    }
+    ORDER BY ?revision
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {

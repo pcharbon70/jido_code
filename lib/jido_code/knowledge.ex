@@ -10,6 +10,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Commands.PublishSourceGraph
   alias JidoCode.Knowledge.Control.DesiredOutcome
+  alias JidoCode.Knowledge.Control.Eligibility
+  alias JidoCode.Knowledge.Control.ExecutionLease
   alias JidoCode.Knowledge.Control.CapabilityRegistry
   alias JidoCode.Knowledge.Control.Cohort
   alias JidoCode.Knowledge.Control.GovernanceProjection
@@ -96,6 +98,30 @@ defmodule JidoCode.Knowledge do
     do: Reconciliation.record_command(reconciliation, attributes, options)
 
   def project_reconciliation(result, context), do: ReconciliationProjection.build(result, context)
+
+  def evaluate_eligibility(context), do: Eligibility.evaluate(context)
+
+  def acquire_execution_lease(eligibility, task_resolution, attributes, options \\ []),
+    do: ExecutionLease.acquire_command(eligibility, task_resolution, attributes, options)
+
+  def transition_execution_lease(
+        lease,
+        lease_resolution,
+        task_resolution,
+        attributes,
+        options \\ []
+      ),
+      do:
+        ExecutionLease.transition_command(
+          lease,
+          lease_resolution,
+          task_resolution,
+          attributes,
+          options
+        )
+
+  def execution_lease_guard(lease, control_graph_iri, fence, at),
+    do: ExecutionLease.execution_guard(lease, control_graph_iri, fence, at)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)
