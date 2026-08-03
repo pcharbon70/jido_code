@@ -32,6 +32,9 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     verificationActivity evaluatedAttempt evaluatedTask evaluatedGoal evaluatedSnapshot
     hasCheck rawOutcome
     verificationKind inputClass checkStatus evidenceStrength evidenceClassification
+    defers requestsMoreEvidence decisionMode outcomeStage decisionDisposition rationaleReference
+    consideredEvidence causedBy followUpGoal followUpTask followUpKind confirmation
+    riskClass
   ])
   @max_guards 100
 

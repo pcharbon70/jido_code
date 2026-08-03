@@ -79,3 +79,4 @@ implementation plan was merged.
 ## Phase 9 Evidence And Learning
 
 - [Verification and evidence boundary](./verification-evidence-boundary.md)
+- [Governed decision outcomes](./governed-decision-outcomes.md)

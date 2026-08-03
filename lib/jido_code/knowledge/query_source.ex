@@ -1146,6 +1146,108 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:decision_by_goal),
+    do: decision_query("?decision <#{@jf}addresses> {{resource}} .")
+
+  def fetch(:decision_by_claim) do
+    decision_query("""
+    {
+      ?decision ?claimDispositionPredicate {{resource}} .
+      FILTER(?claimDispositionPredicate IN (<#{@jf}accepts>, <#{@jf}rejects>, <#{@jf}waives>, <#{@jf}defers>, <#{@jf}supersedes>))
+    } UNION {
+      ?dispositionClaim <#{@jf}supersedes> {{resource}} .
+      ?decision ?claimDispositionPredicate ?dispositionClaim .
+      FILTER(?claimDispositionPredicate IN (<#{@jf}accepts>, <#{@jf}rejects>, <#{@jf}waives>))
+    }
+    """)
+  end
+
+  def fetch(:decision_by_evidence) do
+    decision_query("""
+    ?assessment <#{@jf}consideredEvidence> {{resource}} .
+    ?decision <#{@jf}evaluates> ?assessment .
+    """)
+  end
+
+  def fetch(:decision_by_actor),
+    do: decision_query("?decision <#{@jf}decisionAuthority> {{resource}} .")
+
+  def fetch(:decision_waivers),
+    do: decision_query("?decision <#{@jf}addresses> {{resource}} ; <#{@jf}waives> ?waived .")
+
+  def fetch(:decision_rejections),
+    do: decision_query("?decision <#{@jf}addresses> {{resource}} ; <#{@jf}rejects> ?rejected .")
+
+  def fetch(:deferred_actions) do
+    decision_query("""
+    ?decision <#{@jf}addresses> {{resource}} .
+    { ?decision <#{@jf}defers> ?deferred }
+    UNION
+    { ?decision <#{@jf}requestsMoreEvidence> ?requested }
+    """)
+  end
+
+  def fetch(:decision_supersession) do
+    """
+    SELECT ?decision ?superseded ?superseder ?actor ?recorded ?disposition ?stage WHERE {
+      GRAPH {{graph}} {
+        {
+          {{resource}} <#{@jf}supersedes> ?superseded .
+          BIND({{resource}} AS ?decision)
+        } UNION {
+          ?superseder <#{@jf}supersedes> {{resource}} .
+          BIND({{resource}} AS ?decision)
+        }
+        ?decision <#{@jf}decisionAuthority> ?actor ;
+                  <#{@jf}recordedAt> ?recorded ;
+                  <#{@jf}decisionDisposition> ?disposition ;
+                  <#{@jf}outcomeStage> ?stage .
+      }
+    }
+    ORDER BY ?recorded ?decision
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:satisfaction_path) do
+    """
+    SELECT ?transition ?state ?revision ?decision ?stage ?disposition ?cause ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> {{resource}} ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ;
+                    <#{@jf}cause> ?cause ;
+                    <#{@jf}recordedAt> ?recorded .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL { ?cause <#{@jf}outcomeStage> ?stage }
+        OPTIONAL { ?cause <#{@jf}decisionDisposition> ?disposition }
+      }
+    }
+    ORDER BY ?revision
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:decision_follow_up) do
+    """
+    SELECT ?followUp ?decision ?goal ?task ?kind ?requiresLease ?target ?superseder WHERE {
+      GRAPH {{graph}} {
+        ?followUp a <#{@jf}DecisionFollowUp> ;
+                  <#{@jf}causedBy> ?decision ;
+                  <#{@jf}about> ?target ;
+                  <#{@jf}followUpGoal> ?goal ;
+                  <#{@jf}followUpTask> ?task ;
+                  <#{@jf}followUpKind> ?kind ;
+                  <#{@jf}requiresLease> ?requiresLease .
+        OPTIONAL { ?superseder <#{@jf}supersedes> ?followUp }
+        FILTER(?decision = {{resource}} || ?target = {{resource}} || ?goal = {{resource}} || ?task = {{resource}})
+      }
+    }
+    ORDER BY ?followUp
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
@@ -1195,6 +1297,51 @@ defmodule JidoCode.Knowledge.QuerySource do
       }
     }
     ORDER BY ?bundle ?sourceGraphIri
+    LIMIT {{row_limit}}
+    """
+  end
+
+  defp decision_query(match) do
+    """
+    SELECT ?decision ?goal ?actor ?policy ?assessment ?mode ?stage ?disposition ?validFrom ?validTo
+           ?recorded ?accepted ?rejected ?waived ?deferred ?requested ?superseded ?rationale
+           ?evidence ?claimState ?sourceSnapshot ?sourceGraphIri ?sourceRevision
+           ?policyGraphRevision ?planGraphRevision WHERE {
+      GRAPH {{graph}} {
+        #{match}
+        ?decision a <#{@jf}Decision> ;
+                  <#{@jf}addresses> ?goal ;
+                  <#{@jf}decisionAuthority> ?actor ;
+                  <#{@jf}governedBy> ?policy ;
+                  <#{@jf}evaluates> ?assessment ;
+                  <#{@jf}decisionMode> ?mode ;
+                  <#{@jf}outcomeStage> ?stage ;
+                  <#{@jf}decisionDisposition> ?disposition ;
+                  <#{@jf}validFrom> ?validFrom ;
+                  <#{@jf}validTo> ?validTo ;
+                  <#{@jf}recordedAt> ?recorded .
+        OPTIONAL { ?decision <#{@jf}accepts> ?accepted }
+        OPTIONAL { ?decision <#{@jf}rejects> ?rejected }
+        OPTIONAL { ?decision <#{@jf}waives> ?waived }
+        OPTIONAL { ?decision <#{@jf}defers> ?deferred }
+        OPTIONAL { ?decision <#{@jf}requestsMoreEvidence> ?requested }
+        OPTIONAL { ?decision <#{@jf}supersedes> ?superseded }
+        OPTIONAL { ?decision <#{@jf}rationaleReference> ?rationale }
+        OPTIONAL { ?assessment <#{@jf}consideredEvidence> ?evidence }
+        OPTIONAL { ?assessment <#{@jf}policyGraphRevision> ?policyGraphRevision }
+        OPTIONAL { ?assessment <#{@jf}planGraphRevision> ?planGraphRevision }
+        OPTIONAL {
+          ?assessment <#{@jf}sourceGraphRevision> ?sourceReference .
+          ?sourceReference <#{@jf}sourceGraph> ?sourceGraphIri ;
+                           <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+        OPTIONAL {
+          ?accepted <#{@jf}epistemicState> ?claimState .
+          OPTIONAL { ?accepted <#{@jf}sourceSnapshot> ?sourceSnapshot }
+        }
+      }
+    }
+    ORDER BY ?recorded ?decision
     LIMIT {{row_limit}}
     """
   end

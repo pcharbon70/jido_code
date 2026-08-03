@@ -30,6 +30,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Artifact
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
+  alias JidoCode.Knowledge.Decision.GoalOutcome
+  alias JidoCode.Knowledge.Decision.Projection, as: DecisionProjection
   alias JidoCode.Knowledge.Evidence.Bundle, as: EvidenceBundle
   alias JidoCode.Knowledge.Evidence.Graph, as: EvidenceGraph
   alias JidoCode.Knowledge.Evidence.Projection, as: EvidenceProjection
@@ -218,6 +220,14 @@ defmodule JidoCode.Knowledge do
   def project_evidence_sufficiency(assessment), do: EvidenceProjection.sufficiency(assessment)
 
   def evidence_graph_identity(repository_iri), do: EvidenceGraph.evidence_graph(repository_iri)
+
+  def goal_outcome_decision(assessment, bundles, goal_resolution, task_resolution, attributes),
+    do: GoalOutcome.new(assessment, bundles, goal_resolution, task_resolution, attributes)
+
+  def decide_goal_outcome(decision, attributes, options \\ []),
+    do: GoalOutcome.record_command(decision, attributes, options)
+
+  def project_decision(result, context), do: DecisionProjection.build(result, context)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

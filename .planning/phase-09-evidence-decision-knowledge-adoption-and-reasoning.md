@@ -70,52 +70,52 @@ Back to plan: [README](./README.md)
       - [x] 9.1.4.3 Subtask {#jcf-p09-9-1-4-3} - Preserve failed/skipped checks and contradictory evidence in projections instead of summarizing them away.
       - [x] 9.1.4.4 Subtask {#jcf-p09-9-1-4-4} - Redact sensitive artifacts and require separate authorization for raw retained outputs.
 
-  - [ ] 9.2 Section - Implement governed decisions and outcome transitions.
+  - [x] 9.2 Section - Implement governed decisions and outcome transitions.
 
     This section grants acceptance authority only through explicit decisions
     that cite policy, evidence, actor, scope, and exact graph revisions.
 
-    - [ ] 9.2.1 Task {#jcf-p09-decision-command} [repo: jido_code] [after: {#jcf-p09-evidence-projections}] - Implement `DecideGoalOutcome` and claim disposition semantics.
+    - [x] 9.2.1 Task {#jcf-p09-decision-command} [repo: jido_code] [after: {#jcf-p09-evidence-projections}] - Implement `DecideGoalOutcome` and claim disposition semantics.
 
       This task records accept, reject, defer, waive, supersede, or request-more
       outcomes without letting the decider mutate external systems implicitly.
 
-      - [ ] 9.2.1.1 Subtask {#jcf-p09-9-2-1-1} - Require decision IRI/type, actor/delegation, goal/claim/evidence targets, exact sufficiency/policy/source/control revisions, disposition, rationale refs, validity, and idempotency.
-      - [ ] 9.2.1.2 Subtask {#jcf-p09-9-2-1-2} - Authorize human, policy-automatic, or delegated agent decisions separately by risk, scope, evidence class, and disposition.
-      - [ ] 9.2.1.3 Subtask {#jcf-p09-9-2-1-3} - Reevaluate evidence sufficiency, contradictions, stale inputs, policy version, actor separation, and goal/lease/attempt state in the transaction snapshot.
-      - [ ] 9.2.1.4 Subtask {#jcf-p09-9-2-1-4} - Atomically record decision, accepted/rejected/waived claim state, goal/task/obligation transitions, follow-up relation, provenance, audit, and revisions.
-      - [ ] 9.2.1.5 Subtask {#jcf-p09-9-2-1-5} - Reject self-acceptance, stale evidence, policy bypass, cross-scope disposition, contradictory mandatory evidence, and direct side effects.
+      - [x] 9.2.1.1 Subtask {#jcf-p09-9-2-1-1} - Require decision IRI/type, actor/delegation, goal/claim/evidence targets, exact sufficiency/policy/source/control revisions, disposition, rationale refs, validity, and idempotency.
+      - [x] 9.2.1.2 Subtask {#jcf-p09-9-2-1-2} - Authorize human, policy-automatic, or delegated agent decisions separately by risk, scope, evidence class, and disposition.
+      - [x] 9.2.1.3 Subtask {#jcf-p09-9-2-1-3} - Reevaluate evidence sufficiency, contradictions, stale inputs, policy version, actor separation, and goal/lease/attempt state in the transaction snapshot.
+      - [x] 9.2.1.4 Subtask {#jcf-p09-9-2-1-4} - Atomically record decision, accepted/rejected/waived claim state, goal/task/obligation transitions, follow-up relation, provenance, audit, and revisions.
+      - [x] 9.2.1.5 Subtask {#jcf-p09-9-2-1-5} - Reject self-acceptance, stale evidence, policy bypass, cross-scope disposition, contradictory mandatory evidence, and direct side effects.
 
-    - [ ] 9.2.2 Task {#jcf-p09-goal-satisfaction} [repo: jido_code] [after: {#jcf-p09-decision-command}] - Implement goal, obligation, and desired-outcome satisfaction semantics.
+    - [x] 9.2.2 Task {#jcf-p09-goal-satisfaction} [repo: jido_code] [after: {#jcf-p09-decision-command}] - Implement goal, obligation, and desired-outcome satisfaction semantics.
 
       This task ensures satisfaction describes an accepted observed outcome,
       not merely a completed attempt or approved patch.
 
-      - [ ] 9.2.2.1 Subtask {#jcf-p09-9-2-2-1} - Require evidence that addresses the goal's precise proposition and accepted policy requirements at the applicable repository/post-change snapshot.
-      - [ ] 9.2.2.2 Subtask {#jcf-p09-9-2-2-2} - Permit patch approval to create an application/follow-up goal while reserving final satisfaction for post-change observation/verification where policy requires it.
-      - [ ] 9.2.2.3 Subtask {#jcf-p09-9-2-2-3} - Propagate satisfaction to tasks, obligations, and desired outcomes only through explicit graph rules and decision transitions.
-      - [ ] 9.2.2.4 Subtask {#jcf-p09-9-2-2-4} - Reopen or supersede satisfaction when later valid evidence contradicts the accepted claim according to policy, preserving original decision history.
-      - [ ] 9.2.2.5 Subtask {#jcf-p09-9-2-2-5} - Reconcile dependent goals and plans after acceptance/rejection without mutating them inside the decision implementation.
+      - [x] 9.2.2.1 Subtask {#jcf-p09-9-2-2-1} - Require evidence that addresses the goal's precise proposition and accepted policy requirements at the applicable repository/post-change snapshot.
+      - [x] 9.2.2.2 Subtask {#jcf-p09-9-2-2-2} - Permit patch approval to create an application/follow-up goal while reserving final satisfaction for post-change observation/verification where policy requires it.
+      - [x] 9.2.2.3 Subtask {#jcf-p09-9-2-2-3} - Propagate satisfaction to tasks, obligations, and desired outcomes only through explicit graph rules and decision transitions.
+      - [x] 9.2.2.4 Subtask {#jcf-p09-9-2-2-4} - Reopen or supersede satisfaction when later valid evidence contradicts the accepted claim according to policy, preserving original decision history.
+      - [x] 9.2.2.5 Subtask {#jcf-p09-9-2-2-5} - Reconcile dependent goals and plans after acceptance/rejection without mutating them inside the decision implementation.
 
-    - [ ] 9.2.3 Task {#jcf-p09-follow-up-control} [repo: jido_code] [after: {#jcf-p09-goal-satisfaction}] - Implement decision-triggered follow-up and external-change confirmation.
+    - [x] 9.2.3 Task {#jcf-p09-follow-up-control} [repo: jido_code] [after: {#jcf-p09-goal-satisfaction}] - Implement decision-triggered follow-up and external-change confirmation.
 
       This task feeds governed outcomes back into the control loop instead of
       hiding additional actions in decision callbacks.
 
-      - [ ] 9.2.3.1 Subtask {#jcf-p09-9-2-3-1} - Express apply-patch, open/update pull request, request review, remediate failure, gather evidence, rollback, or monitor outcomes as new or related goals/tasks.
-      - [ ] 9.2.3.2 Subtask {#jcf-p09-9-2-3-2} - Require new leases/attempts for every effectful follow-up and preserve causation to the decision.
-      - [ ] 9.2.3.3 Subtask {#jcf-p09-9-2-3-3} - Observe provider/Git post-change state through Phase 6 ingress and link confirmations or contradictions to the decision/goal.
-      - [ ] 9.2.3.4 Subtask {#jcf-p09-9-2-3-4} - Make follow-up derivation idempotent and supersede it when decision or external state changes.
+      - [x] 9.2.3.1 Subtask {#jcf-p09-9-2-3-1} - Express apply-patch, open/update pull request, request review, remediate failure, gather evidence, rollback, or monitor outcomes as new or related goals/tasks.
+      - [x] 9.2.3.2 Subtask {#jcf-p09-9-2-3-2} - Require new leases/attempts for every effectful follow-up and preserve causation to the decision.
+      - [x] 9.2.3.3 Subtask {#jcf-p09-9-2-3-3} - Observe provider/Git post-change state through Phase 6 ingress and link confirmations or contradictions to the decision/goal.
+      - [x] 9.2.3.4 Subtask {#jcf-p09-9-2-3-4} - Make follow-up derivation idempotent and supersede it when decision or external state changes.
 
-    - [ ] 9.2.4 Task {#jcf-p09-decision-projections} [repo: jido_code] [after: {#jcf-p09-follow-up-control}] - Implement decision and accepted-outcome projections.
+    - [x] 9.2.4 Task {#jcf-p09-decision-projections} [repo: jido_code] [after: {#jcf-p09-follow-up-control}] - Implement decision and accepted-outcome projections.
 
       This task lets operators inspect who decided what, under which policy and
       evidence, and what downstream state changed.
 
-      - [ ] 9.2.4.1 Subtask {#jcf-p09-9-2-4-1} - Add decision-by-goal/claim/evidence/actor, satisfaction path, waiver, rejection, deferred action, supersession, and follow-up queries.
-      - [ ] 9.2.4.2 Subtask {#jcf-p09-9-2-4-2} - Project evidence sufficiency, contradictory evidence, actor/delegation, policy/decision versions, exact source snapshots, transitions, and current validity.
-      - [ ] 9.2.4.3 Subtask {#jcf-p09-9-2-4-3} - Distinguish attempt completion, patch approval, external application, post-change verification, and final goal satisfaction.
-      - [ ] 9.2.4.4 Subtask {#jcf-p09-9-2-4-4} - Bound rationale display to authored explanation refs and never require or expose chain-of-thought.
+      - [x] 9.2.4.1 Subtask {#jcf-p09-9-2-4-1} - Add decision-by-goal/claim/evidence/actor, satisfaction path, waiver, rejection, deferred action, supersession, and follow-up queries.
+      - [x] 9.2.4.2 Subtask {#jcf-p09-9-2-4-2} - Project evidence sufficiency, contradictory evidence, actor/delegation, policy/decision versions, exact source snapshots, transitions, and current validity.
+      - [x] 9.2.4.3 Subtask {#jcf-p09-9-2-4-3} - Distinguish attempt completion, patch approval, external application, post-change verification, and final goal satisfaction.
+      - [x] 9.2.4.4 Subtask {#jcf-p09-9-2-4-4} - Bound rationale display to authored explanation refs and never require or expose chain-of-thought.
 
   - [ ] 9.3 Section - Implement governed knowledge adoption and retrieval.
 

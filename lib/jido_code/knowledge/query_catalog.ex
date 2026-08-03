@@ -383,7 +383,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           reconciliation_specifications(graph, resource) ++
           scheduling_specifications(graph, resource) ++
           execution_boundary_specifications(resource) ++
-          evidence_specifications(resource)
+          evidence_specifications(resource) ++
+          decision_specifications(resource)
     end
   end
 
@@ -1105,6 +1106,121 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:evidence],
         :table,
         "Read recorded method and coverage facts used to explain missing requirements.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp decision_specifications(resource) do
+    [
+      spec(
+        :decision_by_goal,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read decisions that address one exact goal.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_by_claim,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read decisions that disposition one claim or its immutable successor.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_by_evidence,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read decisions whose sufficiency snapshot considered one evidence bundle.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_by_actor,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded decisions attributed to one authority actor.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_waivers,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read explicit waiver decisions connected to one goal or claim.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_rejections,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read explicit rejection decisions connected to one goal or claim.",
+        :product,
+        :declared
+      ),
+      spec(
+        :deferred_actions,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read defer and request-more-evidence dispositions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_supersession,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read immutable decision supersession history.",
+        :product,
+        :declared
+      ),
+      spec(
+        :satisfaction_path,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :timeline,
+        "Read accepted work transitions and their governing outcome stage.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_follow_up,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read lease-gated follow-up goals and tasks caused by one decision or goal.",
         :product,
         :declared
       )

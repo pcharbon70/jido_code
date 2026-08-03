@@ -301,6 +301,18 @@ defmodule JidoCode.Knowledge.CommandRegistry do
         :attempt_provenance_exact,
         :evidence_bundle_absent
       ]
+    },
+    "DecideGoalOutcome" => %{
+      owner: :evaluation,
+      capability: :decision,
+      graph_families: [:repository_control, :evidence],
+      preconditions: [
+        :sufficiency_rechecked,
+        :decision_actor_separated,
+        :policy_revision_exact,
+        :work_endpoints_exact,
+        :no_direct_side_effects
+      ]
     }
   }
   @version_1_7 Map.merge(@version_1_6, @phase_09_evidence_commands)

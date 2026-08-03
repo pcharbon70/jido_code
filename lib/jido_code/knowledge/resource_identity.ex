@@ -29,7 +29,8 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     interaction-message cancellation-request retry-decision
     tool-invocation tool-invocation-event patch-artifact generated-artifact artifact-finding
     sandbox-activity run-completeness verification-method verification-activity verification-check
-    evidence-bundle evidence-claim evidence-sufficiency
+    evidence-bundle evidence-claim evidence-sufficiency goal-outcome-decision claim-disposition
+    decision-follow-up follow-up-goal follow-up-task decision-reconciliation
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
