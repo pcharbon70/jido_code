@@ -66,6 +66,10 @@ implementation plan was merged.
 ## Phase 7 Factory Control Loop
 
 - [Factory control loop](./factory-control-loop.md)
+- [Phase 7 factory control loop receipt](./phase-07-receipt.md)
+
+## Phase 8 Governed Execution
+
 - [Execution runtime boundary](./execution-runtime-boundary.md)
 - [Execution attempt lifecycle](./execution-attempt-lifecycle.md)
-- [Phase 7 factory control loop receipt](./phase-07-receipt.md)
+- [Governed execution effects and artifacts](./execution-effects-provenance.md)

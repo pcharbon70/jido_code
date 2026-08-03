@@ -26,6 +26,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.InteractionProjection
   alias JidoCode.Knowledge.Execution.InteractionSession
   alias JidoCode.Knowledge.Execution.Attempt
+  alias JidoCode.Knowledge.Execution.Artifact
+  alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -164,6 +166,22 @@ defmodule JidoCode.Knowledge do
           attributes,
           options
         )
+
+  def tool_invocation(attempt, attributes), do: ToolInvocation.new(attempt, attributes)
+
+  def start_tool_invocation(invocation, attempt, resolution, lease, attributes, options \\ []),
+    do: ToolInvocation.start_command(invocation, attempt, resolution, lease, attributes, options)
+
+  def record_tool_outcome(invocation, attempt, resolution, lease, attributes, options \\ []),
+    do:
+      ToolInvocation.outcome_command(invocation, attempt, resolution, lease, attributes, options)
+
+  def execution_artifact(attributes), do: Artifact.new(attributes)
+
+  def record_execution_artifact(artifact, attempt, resolution, lease, attributes, options \\ []),
+    do: Artifact.record_command(artifact, attempt, resolution, lease, attributes, options)
+
+  def verify_execution_artifact(artifact, options \\ []), do: Artifact.verify(artifact, options)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

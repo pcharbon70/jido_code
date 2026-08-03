@@ -27,7 +27,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     run_attempt: ~w[
       ExecutionAttempt ExecutionContext ToolInvocation Patch VerificationActivity Artifact
       InteractionSession Message Instruction StateTransition Decision GraphRevisionReference
-      MigrationActivity
+      MigrationActivity Finding
     ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationActivity MigrationActivity

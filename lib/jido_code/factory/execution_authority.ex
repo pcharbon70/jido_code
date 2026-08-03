@@ -6,7 +6,10 @@ defmodule JidoCode.Factory.ExecutionAuthority do
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Factory.Execution.Request
 
-  @operations ~w[prepare start signal cancel status terminate]a
+  @operations ~w[
+    prepare start signal cancel status terminate provision materialize execute inspect collect
+    destroy tool_execute
+  ]a
 
   @impl true
   def authorize(operation, %Request{} = request, options) when operation in @operations do

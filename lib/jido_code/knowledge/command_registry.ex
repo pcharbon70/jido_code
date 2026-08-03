@@ -257,9 +257,30 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       preconditions: [:attempt_current, :current_fence, :unique_transition_successor]
     }
   }
+  @phase_08_effect_commands %{
+    "RecordToolInvocation" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :invocation_absent]
+    },
+    "RecordToolOutcome" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :outcome_absent]
+    },
+    "RecordExecutionArtifact" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :artifact_absent]
+    }
+  }
   @version_1_6 @version_1_5
                |> Map.merge(@phase_08_boundary_commands)
                |> Map.merge(@phase_08_attempt_commands)
+               |> Map.merge(@phase_08_effect_commands)
 
   @spec version() :: String.t()
   def version, do: @version

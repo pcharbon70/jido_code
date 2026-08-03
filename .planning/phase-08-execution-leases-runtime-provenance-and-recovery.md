@@ -119,43 +119,43 @@ Back to plan: [README](./README.md)
       - [x] 8.2.3.3 Subtask {#jcf-p08-8-2-3-3} - Require replanning/reconciliation instead of retry when source snapshot, constraints, policy, or required capability changed materially.
       - [x] 8.2.3.4 Subtask {#jcf-p08-8-2-3-4} - Bound automated attempts and require an explicit decision for exhausted, unsafe, repeated, or ambiguous failure.
 
-  - [ ] 8.3 Section - Implement sandbox, tool, and patch provenance.
+  - [x] 8.3 Section - Implement sandbox, tool, and patch provenance.
 
     This section performs bounded effects and captures their operational
     history without promoting raw output into evidence or durable knowledge.
 
-    - [ ] 8.3.1 Task {#jcf-p08-sandbox-port} [repo: jido_code] [after: {#jcf-p08-attempt-retry}] - Define and implement the disposable sandbox boundary.
+    - [x] 8.3.1 Task {#jcf-p08-sandbox-port} [repo: jido_code] [after: {#jcf-p08-attempt-retry}] - Define and implement the disposable sandbox boundary.
 
       This task isolates repository work and external commands under explicit
       resource, network, filesystem, and lifecycle constraints.
 
-      - [ ] 8.3.1.1 Subtask {#jcf-p08-8-3-1-1} - Define provision, materialize snapshot, execute, inspect, cancel, collect, and destroy operations keyed by attempt/lease/fence.
-      - [ ] 8.3.1.2 Subtask {#jcf-p08-8-3-1-2} - Enforce base snapshot, allowed write scope, command/tool allowlist, environment allowlist, secret injection scope, CPU/memory/disk/time/network limits, and output bounds.
-      - [ ] 8.3.1.3 Subtask {#jcf-p08-8-3-1-3} - Keep sandbox IDs/paths private and represent durable identity through attempt, snapshot, artifact digests, and provider refs only.
-      - [ ] 8.3.1.4 Subtask {#jcf-p08-8-3-1-4} - Destroy or quarantine work material after collection and prove its loss does not remove committed attempt history.
-      - [ ] 8.3.1.5 Subtask {#jcf-p08-8-3-1-5} - Handle sandbox unavailable, partial provisioning, network denial, resource exhaustion, cleanup failure, and orphan discovery explicitly.
+      - [x] 8.3.1.1 Subtask {#jcf-p08-8-3-1-1} - Define provision, materialize snapshot, execute, inspect, cancel, collect, and destroy operations keyed by attempt/lease/fence.
+      - [x] 8.3.1.2 Subtask {#jcf-p08-8-3-1-2} - Enforce base snapshot, allowed write scope, command/tool allowlist, environment allowlist, secret injection scope, CPU/memory/disk/time/network limits, and output bounds.
+      - [x] 8.3.1.3 Subtask {#jcf-p08-8-3-1-3} - Keep sandbox IDs/paths private and represent durable identity through attempt, snapshot, artifact digests, and provider refs only.
+      - [x] 8.3.1.4 Subtask {#jcf-p08-8-3-1-4} - Destroy or quarantine work material after collection and prove its loss does not remove committed attempt history.
+      - [x] 8.3.1.5 Subtask {#jcf-p08-8-3-1-5} - Handle sandbox unavailable, partial provisioning, network denial, resource exhaustion, cleanup failure, and orphan discovery explicitly.
 
-    - [ ] 8.3.2 Task {#jcf-p08-tool-invocation} [repo: jido_code] [after: {#jcf-p08-sandbox-port}] - Implement governed tool invocation and event capture.
+    - [x] 8.3.2 Task {#jcf-p08-tool-invocation} [repo: jido_code] [after: {#jcf-p08-sandbox-port}] - Implement governed tool invocation and event capture.
 
       This task records which capability performed which bounded effect with
       which inputs and outputs while treating all tool results as untrusted.
 
-      - [ ] 8.3.2.1 Subtask {#jcf-p08-8-3-2-1} - Create tool invocation activity IRIs with attempt, tool/capability/version, actor/agent, lease/fence, input refs/digests, sequence, deadline, and expected effect class.
-      - [ ] 8.3.2.2 Subtask {#jcf-p08-8-3-2-2} - Authorize each invocation against task constraints and current fence immediately before effect.
-      - [ ] 8.3.2.3 Subtask {#jcf-p08-8-3-2-3} - Record start/outcome, timing, exit/status class, bounded stdout/stderr or external refs, resource usage, generated artifact refs, and redaction result.
-      - [ ] 8.3.2.4 Subtask {#jcf-p08-8-3-2-4} - Make duplicate provider/runtime events idempotent by invocation/sequence identity and reject divergent replay.
-      - [ ] 8.3.2.5 Subtask {#jcf-p08-8-3-2-5} - Prohibit a tool adapter from issuing semantic commands beyond its declared observation/execution result capability.
+      - [x] 8.3.2.1 Subtask {#jcf-p08-8-3-2-1} - Create tool invocation activity IRIs with attempt, tool/capability/version, actor/agent, lease/fence, input refs/digests, sequence, deadline, and expected effect class.
+      - [x] 8.3.2.2 Subtask {#jcf-p08-8-3-2-2} - Authorize each invocation against task constraints and current fence immediately before effect.
+      - [x] 8.3.2.3 Subtask {#jcf-p08-8-3-2-3} - Record start/outcome, timing, exit/status class, bounded stdout/stderr or external refs, resource usage, generated artifact refs, and redaction result.
+      - [x] 8.3.2.4 Subtask {#jcf-p08-8-3-2-4} - Make duplicate provider/runtime events idempotent by invocation/sequence identity and reject divergent replay.
+      - [x] 8.3.2.5 Subtask {#jcf-p08-8-3-2-5} - Prohibit a tool adapter from issuing semantic commands beyond its declared observation/execution result capability.
 
-    - [ ] 8.3.3 Task {#jcf-p08-patch-artifacts} [repo: jido_code] [after: {#jcf-p08-tool-invocation}] - Implement patch and generated-artifact identity.
+    - [x] 8.3.3 Task {#jcf-p08-patch-artifacts} [repo: jido_code] [after: {#jcf-p08-tool-invocation}] - Implement patch and generated-artifact identity.
 
       This task makes proposed changes reproducible against an exact base
       snapshot without introducing an application-owned blob database.
 
-      - [ ] 8.3.3.1 Subtask {#jcf-p08-8-3-3-1} - Identify patches by base snapshot, normalized diff/content digest, media type, size, generator activity, and affected path/symbol scope.
-      - [ ] 8.3.3.2 Subtask {#jcf-p08-8-3-3-2} - Store bounded textual artifacts as graph literals only under accepted size/sensitivity policy; otherwise store provider-owned immutable URI plus digest/verification metadata.
-      - [ ] 8.3.3.3 Subtask {#jcf-p08-8-3-3-3} - Record proposed commit/tree identity when materialized and link source semantic entities affected by the patch.
-      - [ ] 8.3.3.4 Subtask {#jcf-p08-8-3-3-4} - Preserve patch conflicts, partial output, rejected paths, and cleanup failures as attempt findings without accepting them as evidence.
-      - [ ] 8.3.3.5 Subtask {#jcf-p08-8-3-3-5} - Verify artifact content/digest on every later use and fail closed on unavailable or mismatched external content.
+      - [x] 8.3.3.1 Subtask {#jcf-p08-8-3-3-1} - Identify patches by base snapshot, normalized diff/content digest, media type, size, generator activity, and affected path/symbol scope.
+      - [x] 8.3.3.2 Subtask {#jcf-p08-8-3-3-2} - Store bounded textual artifacts as graph literals only under accepted size/sensitivity policy; otherwise store provider-owned immutable URI plus digest/verification metadata.
+      - [x] 8.3.3.3 Subtask {#jcf-p08-8-3-3-3} - Record proposed commit/tree identity when materialized and link source semantic entities affected by the patch.
+      - [x] 8.3.3.4 Subtask {#jcf-p08-8-3-3-4} - Preserve patch conflicts, partial output, rejected paths, and cleanup failures as attempt findings without accepting them as evidence.
+      - [x] 8.3.3.5 Subtask {#jcf-p08-8-3-3-5} - Verify artifact content/digest on every later use and fail closed on unavailable or mismatched external content.
 
   - [ ] 8.4 Section - Implement execution provenance projection and restart recovery.
 
