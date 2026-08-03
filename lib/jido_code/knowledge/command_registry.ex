@@ -11,6 +11,10 @@ defmodule JidoCode.Knowledge.CommandRegistry do
 
   @version "1.0.0"
   @derived_version "1.1.0"
+  @control_loop_version "1.2.0"
+  @governance_version "1.3.0"
+  @reconciliation_version "1.4.0"
+  @scheduling_version "1.5.0"
   @commands %{
     "EnrollRepository" => %{
       owner: :factory,
@@ -116,6 +120,102 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
   @version_1_1 @commands |> Map.merge(@derived_commands) |> Map.merge(@phase_06_commands)
+  @phase_07_work_commands %{
+    "TransitionDesiredOutcome" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control],
+      preconditions: [:desired_outcome_known, :unique_transition_successor]
+    },
+    "TransitionWork" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control],
+      preconditions: [:work_known, :unique_transition_successor]
+    },
+    "ProposePlan" => %{
+      owner: :factory,
+      capability: :proposal,
+      graph_families: [:repository_control],
+      preconditions: [:accepted_goal, :source_revisions_exact]
+    }
+  }
+  @version_1_2 Map.merge(@version_1_1, @phase_07_work_commands)
+  @phase_07_governance_commands %{
+    "ProposePolicy" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:factory_policy],
+      preconditions: [:policy_version_absent, :evaluator_allowlisted]
+    },
+    "TransitionPolicy" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:factory_policy],
+      preconditions: [:policy_known, :unique_transition_successor]
+    },
+    "DefineRepositoryCohort" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:factory_policy],
+      preconditions: [:cohort_absent, :evaluator_allowlisted]
+    },
+    "DerivePolicyObligation" => %{
+      owner: :factory,
+      capability: :proposal,
+      graph_families: [:repository_control],
+      preconditions: [:applicability_exact, :obligation_identity_stable]
+    },
+    "TransitionObligation" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control],
+      preconditions: [:obligation_known, :unique_transition_successor]
+    },
+    "RegisterCapability" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:factory_policy],
+      preconditions: [:capability_identity_stable]
+    },
+    "TransitionCapability" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:factory_policy],
+      preconditions: [:capability_known, :unique_transition_successor]
+    }
+  }
+  @version_1_3 Map.merge(@version_1_2, @phase_07_governance_commands)
+  @phase_07_reconciliation_commands %{
+    "RecordReconciliation" => %{
+      owner: :factory,
+      capability: :proposal,
+      graph_families: [:repository_control],
+      preconditions: [:input_revisions_exact, :reconciliation_absent]
+    },
+    "TransitionReconciliation" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control],
+      preconditions: [:reconciliation_known, :unique_transition_successor]
+    }
+  }
+  @version_1_4 Map.merge(@version_1_3, @phase_07_reconciliation_commands)
+  @phase_07_scheduling_commands %{
+    "AcquireExecutionLease" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control],
+      preconditions: [:eligibility_exact, :lease_absent, :fence_monotonic]
+    },
+    "TransitionExecutionLease" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control],
+      preconditions: [:current_lease_fence, :unique_transition_successor]
+    }
+  }
+  @version_1_5 Map.merge(@version_1_4, @phase_07_scheduling_commands)
 
   @spec version() :: String.t()
   def version, do: @version
@@ -126,6 +226,10 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec names(String.t()) :: [String.t()]
   def names(@version), do: names()
   def names(@derived_version), do: @version_1_1 |> Map.keys() |> Enum.sort()
+  def names(@control_loop_version), do: @version_1_2 |> Map.keys() |> Enum.sort()
+  def names(@governance_version), do: @version_1_3 |> Map.keys() |> Enum.sort()
+  def names(@reconciliation_version), do: @version_1_4 |> Map.keys() |> Enum.sort()
+  def names(@scheduling_version), do: @version_1_5 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -140,6 +244,46 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_1_1, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @derived_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @control_loop_version) when is_binary(name) do
+    case Map.fetch(@version_1_2, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @control_loop_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @governance_version) when is_binary(name) do
+    case Map.fetch(@version_1_3, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @governance_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @reconciliation_version) when is_binary(name) do
+    case Map.fetch(@version_1_4, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @reconciliation_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @scheduling_version) when is_binary(name) do
+    case Map.fetch(@version_1_5, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @scheduling_version})}
 
       :error ->
         invalid(:command_type)

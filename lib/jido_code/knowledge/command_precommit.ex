@@ -8,6 +8,7 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
   alias JidoCode.Knowledge.Validation.Validator
 
   @jf "https://jido.run/ontology/factory#"
+  @concept "https://jido.run/ontology/concept/"
   @relationship_predicates MapSet.new(~w[
     enrolls manages locatedBy inScope about derivedFrom supports contradicts addresses
     decomposesInto dependsOn blocks requiresCapability governedBy executes evaluates accepts
@@ -17,8 +18,16 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     completenessState sourceRevision parentGraph sourceGraph targetGraph validationReport
     sourceGraphRevision sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath
     severity ruleSet invalidationState
+    priority expectedEvidence constrainedBy targetCapability includesTask alternativeTo requiresArtifact
+    sourceSnapshot planner originActivity expectedEffect transitionDomain conflictsWith taskKind
+    ownedBy policyKind applicabilityEvaluator closedInput obligationTemplate requiresDecision
+    conflictPosture staticMember queryDerived member inCohort membershipPath applicabilityEvidence
+    requiredOutcome acceptanceRequirement heldBy capabilityKind supportsScope supportsEffect
+    authorizedBy evidenceSource broaderCapability
+    inputPackage evaluatedContext proposes reuses omittedBecause governedProposal
+    leasesTask eligibilityReceipt livenessEvidence
   ])
-  @max_guards 20
+  @max_guards 100
 
   @spec validate(CommandEnvelope.t(), ChangeSet.t(), map(), [RDF.Quad.t()], String.t(), integer()) ::
           {:ok, [map()]} | {:error, Error.t()} | {:error, Error.t(), map()}
@@ -126,6 +135,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     _error -> false
   end
 
+  defp guard_satisfied?({:triple_absent, graph, subject, predicate, object}, dataset) do
+    not guard_satisfied?({:triple_present, graph, subject, predicate, object}, dataset)
+  end
+
   defp guard_satisfied?({:transition_endpoint, graph, subject, transition}, dataset) do
     quads = graph_quads(dataset, graph)
 
@@ -148,7 +161,169 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     _error -> false
   end
 
+  defp guard_satisfied?({:no_active_lease, graph, task, %DateTime{} = at}, dataset) do
+    dataset
+    |> graph_quads(graph)
+    |> active_leases(task, at)
+    |> Enum.empty?()
+  rescue
+    _error -> false
+  end
+
+  defp guard_satisfied?({:next_fence, graph, task, fence}, dataset)
+       when is_integer(fence) and fence > 0 do
+    fences =
+      dataset
+      |> graph_quads(graph)
+      |> lease_subjects(task)
+      |> Enum.flat_map(&literal_values(graph_quads(dataset, graph), &1, @jf <> "fencingToken"))
+
+    fence == Enum.max([0 | Enum.filter(fences, &is_integer/1)]) + 1
+  rescue
+    _error -> false
+  end
+
+  defp guard_satisfied?(
+         {:current_lease_fence, graph, task, lease, fence, %DateTime{} = at},
+         dataset
+       )
+       when is_integer(fence) and fence > 0 do
+    guard_satisfied?({:current_lease_fence, graph, task, lease, fence, at, :current}, dataset)
+  end
+
+  defp guard_satisfied?(
+         {:current_lease_fence, graph, task, lease, fence, %DateTime{} = at, mode},
+         dataset
+       )
+       when is_integer(fence) and fence > 0 and mode in [:current, :expired] do
+    quads = graph_quads(dataset, graph)
+
+    lease in lease_subjects(quads, task) and
+      literal_values(quads, lease, @jf <> "fencingToken") == [fence] and
+      lease_temporally_valid?(quads, lease, at, mode)
+  rescue
+    _error -> false
+  end
+
   defp guard_satisfied?(_guard, _dataset), do: false
+
+  defp active_leases(quads, task, at) do
+    quads
+    |> lease_subjects(task)
+    |> Enum.filter(fn lease ->
+      case transition_endpoint(quads, lease) do
+        %{state: @concept <> "LeaseActive", transition: transition} ->
+          case literal_values(quads, transition, @jf <> "validTo") do
+            [%DateTime{} = expiry] -> DateTime.compare(at, expiry) == :lt
+            _invalid -> false
+          end
+
+        _inactive ->
+          false
+      end
+    end)
+  end
+
+  defp lease_temporally_valid?(quads, lease, at, mode) do
+    case transition_endpoint(quads, lease) do
+      %{state: @concept <> "LeaseActive", transition: transition} ->
+        case literal_values(quads, transition, @jf <> "validTo") do
+          [%DateTime{} = expiry] when mode == :current ->
+            DateTime.compare(at, expiry) == :lt
+
+          [%DateTime{} = expiry] when mode == :expired ->
+            DateTime.compare(at, expiry) in [:eq, :gt]
+
+          _invalid ->
+            false
+        end
+
+      _inactive ->
+        false
+    end
+  end
+
+  defp lease_subjects(quads, task) do
+    quads
+    |> Enum.flat_map(fn {subject, predicate, object, _graph} ->
+      if term_equal?(predicate, @jf <> "leasesTask") and term_equal?(object, task),
+        do: [to_string(subject)],
+        else: []
+    end)
+    |> Enum.uniq()
+  end
+
+  defp transition_endpoint(quads, subject) do
+    accepted =
+      quads
+      |> Enum.flat_map(fn {transition, predicate, object, _graph} ->
+        if term_equal?(predicate, @jf <> "transitionSubject") and term_equal?(object, subject) and
+             accepted_transition?(quads, transition) do
+          [transition]
+        else
+          []
+        end
+      end)
+
+    endpoints =
+      Enum.reject(accepted, fn transition ->
+        Enum.any?(accepted, fn successor ->
+          triple_present?(
+            quads,
+            to_string(successor),
+            @jf <> "expectedPredecessor",
+            to_string(transition)
+          )
+        end)
+      end)
+
+    case endpoints do
+      [transition] ->
+        case iri_values(quads, to_string(transition), @jf <> "nextState") do
+          [state] -> %{transition: to_string(transition), state: state}
+          _invalid -> nil
+        end
+
+      _invalid ->
+        nil
+    end
+  end
+
+  defp accepted_transition?(quads, transition) do
+    Enum.any?(quads, fn {_decision, predicate, object, _graph} ->
+      term_equal?(predicate, @jf <> "accepts") and RDF.Term.equal_value?(object, transition)
+    end)
+  end
+
+  defp iri_values(quads, subject, predicate) do
+    quads
+    |> Enum.flat_map(fn {stored_subject, stored_predicate, object, _graph} ->
+      if term_equal?(stored_subject, subject) and term_equal?(stored_predicate, predicate) do
+        case object do
+          %RDF.IRI{value: value} -> [value]
+          _other -> []
+        end
+      else
+        []
+      end
+    end)
+    |> Enum.uniq()
+  end
+
+  defp literal_values(quads, subject, predicate) do
+    quads
+    |> Enum.flat_map(fn {stored_subject, stored_predicate, object, _graph} ->
+      if term_equal?(stored_subject, subject) and term_equal?(stored_predicate, predicate) do
+        case object do
+          %RDF.Literal{} = literal -> [RDF.Literal.value(literal)]
+          _other -> []
+        end
+      else
+        []
+      end
+    end)
+    |> Enum.uniq()
+  end
 
   defp validate_targets(change_set, snapshot, deadline) do
     Enum.reduce_while(change_set.targets, {:ok, []}, fn target, {:ok, reports} ->

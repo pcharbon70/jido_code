@@ -1,0 +1,214 @@
+# Factory Control Loop
+
+## Authority Boundary
+
+The factory control loop persists only RDF in registered TripleStore named
+graphs. Desired propositions and reusable constraints live in the factory
+policy graph. Goals, plans, tasks, dependencies, accepted transitions, and
+decisions live in the repository control graph. Elixir structs and maps in the
+control modules are bounded command or projection values and are disposable.
+
+Observed claims remain in immutable observation graphs and inferred facts
+remain in replaceable derived graphs. Reusing the same RDF proposition does
+not merge those epistemic categories: graph family, resource type,
+provenance, and command authority preserve the distinction.
+
+## Desired And Work Graphs
+
+`AssertDesiredOutcome` records a reified proposition or capability target,
+scope, priority concept, validity interval, governing policies, expected
+evidence, and typed constraints. Conflicting authored outcomes are retained.
+A caller must cite a decision already in the policy graph or explicitly
+supersede every cited conflict.
+
+`ProposeGoal` derives a stable goal identity from repository scope, addressed
+resources, and a semantic key. One goal can address many findings or outcomes,
+and one evidence resource can be referenced by many goals.
+
+`ProposePlan` records a bounded task graph, exact source/policy/observation
+graph revision references, source snapshot, planner identity/version,
+assumptions, expected effects, and verification strategy. Dependency cycles
+are rejected unless every participating task explicitly permits iteration.
+Required verification and approval nodes and capability coverage are checked
+before proposal.
+
+`AdoptPlan` is a separate control decision. It advances the plan and all tasks
+from proposed to approved only when the goal endpoint and every exact input
+graph revision still match. Invalid assumptions require a new plan instead of
+silently mutating the proposal.
+
+Lifecycle state is resolved from accepted `StateTransition` chains. There is
+no mutable status literal. `WorkItem` is reserved for a bounded projection of
+a goal/task neighborhood and is not a persisted RDF class.
+
+## Vocabulary Contract
+
+The Phase 7 work slice uses these bounded operational predicates in addition
+to the ontology 1.0 baseline:
+
+| Predicate | Meaning | Cardinality guidance |
+| --- | --- | --- |
+| `priority` | Controlled desired-outcome priority concept | exactly one |
+| `expectedEvidence` | Evidence type or resource required for acceptance | one or more |
+| `constrainedBy` | Constraint governing an outcome, goal, or task | zero or more |
+| `targetCapability` | Capability that should become available | zero or one |
+| `includesTask` | Task included by an immutable plan proposal | one or more |
+| `alternativeTo` | Explicit alternative task path | zero or more |
+| `requiresArtifact` | Input artifact required by a task | zero or more |
+| `sourceSnapshot` | Exact repository snapshot used for planning | exactly one |
+| `sourceGraphRevision` | Graph revision reference used as plan input | two to ten |
+| `planner` | Planner actor or agent | exactly one |
+| `originActivity` | Activity that proposed a goal | exactly one |
+| `expectedEffect` | Expected plan effect | one or more |
+| `verificationStrategy` | Bounded strategy identifier | exactly one |
+| `transitionDomain` | Controlled lifecycle domain for a transition | exactly one |
+| `conflictsWith` | Explicitly retained conflicting intent | zero or more |
+| `iterationAllowed` | Declares that iterative dependency structure is intentional | zero or one |
+| `taskKind` | Controlled constraint or task kind | exactly one |
+
+## Read Boundary
+
+Query catalog version 1.2 adds desired-outcome, goal-neighborhood, task-DAG,
+blocker, transition-history, work-lens, and plan-context queries. Every query
+uses one caller-authorized named graph and fixed limits. Work projections carry
+the exact dataset and graph revisions, completeness, freshness, truncation,
+warnings, and applied bounds.
+
+## Policy And Applicability
+
+Policies are immutable versioned resources in the factory policy graph. Each
+policy has one owner, scope, policy kind, effective interval, controlled
+priority and conflict posture, reviewed evaluator identity/version, and a
+closed list of graph inputs. RDF contains evaluator references, never
+executable policy code. Desired-posture, authorization, and acceptance
+policies remain separate kinds and cannot be resolved as one conflict set.
+
+Repository cohorts are policy resources with either explicit static members
+or an allowlisted query evaluator. Query-derived `CohortMembership` resources
+exist only in a replaceable derived graph. Its metadata binds the membership
+to the evaluator, rule revision, and exact catalog, source, observation, and
+policy graph revisions. A source revision change makes the derived view stale;
+it does not silently reinterpret the old membership.
+
+Applicability explanations cite the cohort, repository, bounded membership
+path, evaluator version, declared source revisions, completeness, and any
+incomplete reasons. Query authorization checks the cohort graph's owner scope,
+so a repository-scoped caller cannot enumerate a factory-scoped cohort.
+
+## Obligations
+
+A policy obligation is an append-only repository-control resource derived from
+the policy version, applicable scope, desired outcome/dimension, and exact
+source revision set. It cites the triggering gap, applicability evidence,
+constraints, acceptance requirements, and validity. Reconciliation reuses the
+same identity for the same semantic input and produces a different identity
+when the relevant context changes.
+
+Obligation lifecycle is an accepted transition chain: proposed, active,
+satisfied, waived, superseded, or retired. An obligation is neither an
+approved goal nor an executable task; later reconciliation and decision paths
+connect those resources explicitly.
+
+## Capability Boundary
+
+Capability declarations record a holder, actor/agent/tool/sandbox kind,
+provider and version, declared or observed mode, supported scopes and effects,
+limits, evidence, completeness, validity, and lifecycle. Possession and
+availability do not grant authority. Scheduling additionally requires an
+explicit complete authorization view for the task scope.
+
+Capability hierarchy is rebuildable classification in a derived graph. Every
+classification carries source and evaluator revisions and is projected with
+`authority?: false`. An inferred broader capability can aid matching but
+cannot supply an authorization grant or make an incomplete capability view
+schedulable.
+
+Query catalog version 1.3 adds policy/cohort/obligation/capability descriptions,
+governance transition history, applicability, strict capability, and derived
+hierarchy reads. Governance projections preserve the evaluated graph revision,
+derived source revisions, declared derivation source references, completeness,
+freshness, bounds, and query version.
+
+## Reconciliation Plane
+
+A reconciliation input package binds one active enrollment and repository
+scope to exact catalog, policy, observation, source, derived, and control graph
+revisions. It also records the complete observation/snapshot, active desired
+outcomes and policies, accepted knowledge, current goals and obligations,
+ontology/query/rule versions, actor, deadline, and bounded row/change/time
+budget. Package construction fails for mixed or stale revisions, unauthorized
+graphs, suspended enrollment, incompatible ontology, or absence conclusions
+against incomplete observations.
+
+`RecordReconciliation` appends the package, a durable reconciliation activity,
+semantic gaps, and bounded `ControlProposal` resources to the repository
+control graph. Stable identities reuse the same package/gap/proposal for the
+same exact context; a meaningful graph revision change creates a new context
+that can explicitly supersede prior proposals. Accepted transition chains
+track proposed, running, completed, failed, cancelled, and superseded activity
+states without mutable status fields.
+
+The evaluator distinguishes no gap, unknown knowledge, contradiction, policy
+conflict, pending proposal, existing work reuse, and obsolete work
+supersession. Unknown or incomplete inputs never become negative facts.
+Contradiction, policy conflict, ambiguity, high risk, and declared approval
+requirements produce an explicit pending decision. Reconciliation can propose
+or reuse a goal and cite an obligation, but cannot adopt work, infer
+authorization, or create an execution lease.
+
+Query catalog version 1.4 adds enrollment-scope discovery, incomplete activity,
+exact input, and explanation queries. Broad catalog candidates are resolved
+through each enrollment's full accepted transition history before entering the
+coordinator. Explanations cite graph resources, exact revisions, result
+classifications, proposal/decision IRIs, and applied bounds rather than hidden
+reasoning.
+
+`JidoCode.Factory.Reconciler` keeps only coalesced wakeups and recent
+diagnostics in memory. Startup and explicit rediscovery use reviewed graph
+queries; `Task.async_stream/3` applies bounded concurrency and back-pressure.
+Retries and notifications are hints. Restart recovery comes from active scopes
+and incomplete graph activities, not a durable process queue or OTP snapshot.
+
+## Eligibility And Scheduling
+
+Eligibility is a closed-world evaluation over one exact, authorized graph
+revision set. A task is eligible only when enrollment, goal, plan, and task
+states are admitted; every dependency is satisfied; required artifacts are
+available; source observations are complete, fresh, and non-contradictory;
+policy authorization is complete and applicable; a directly declared
+capability is available and authorized for the scope; capacity is available;
+and the lease and cancellation views prove no conflict. Dependency, artifact,
+source, policy, capability, cancellation, and lease boundaries must each be
+explicitly complete. Unknown, stale, contradictory, unauthorized, incomplete,
+and over-capacity inputs produce bounded machine-readable blockers.
+
+An eligible result is a disposable explanation until
+`AcquireExecutionLease` records its deterministic `EligibilityReceipt`. The
+same atomic command appends the task's eligible/leased transitions, creates
+the lease's proposed/active transition chain, and grants the next monotonic
+fencing token. Precommit guards require the expected task endpoint, absence of
+another unexpired active lease, and the next fence for that task. Concurrent
+or stale acquisitions return a refreshable conflict receipt.
+
+A lease records the task, holder, capability declaration, eligibility receipt,
+acquisition/expiry/maximum interval, and fence. Renewal requires the current
+lease endpoint and fence, fresh liveness evidence, a later bounded expiry, and
+the same owner and capability. Release, cancellation, observed expiry, and
+supersession append terminal lease and corresponding task transitions; prior
+leases remain in the graph. Every execution-side mutation must include the
+control graph, lease IRI, task IRI, current fence, and evaluation time in a
+`current_lease_fence` guard.
+
+Query catalog version 1.5 adds eligible-candidate discovery, direct eligibility
+context, lease description, and lease transition-history reads. Candidate
+discovery is only the first bounded query: admission still requires the full
+closed-world evaluator and exact graph revisions.
+
+`JidoCode.Factory.Scheduler` stores no durable queue or ownership. It
+rediscovers candidates at startup, periodically, and on wake-up hints; orders
+them deterministically by priority, fairness, risk, and task IRI; chooses an
+authorized provider deterministically; and applies global, cohort, repository,
+capability, and risk limits. Its process state contains only recent bounded
+diagnostics. Restart and dropped-notification recovery come from graph
+discovery, while the guarded lease command remains the sole execution
+authority grant.

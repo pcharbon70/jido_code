@@ -62,3 +62,8 @@ implementation plan was merged.
 
 - [Source analysis boundary](./source-analysis.md)
 - [Phase 6 repository knowledge receipt](./phase-06-receipt.md)
+
+## Phase 7 Factory Control Loop
+
+- [Factory control loop](./factory-control-loop.md)
+- [Phase 7 factory control loop receipt](./phase-07-receipt.md)

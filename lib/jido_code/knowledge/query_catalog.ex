@@ -13,6 +13,18 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @version "1.0.0"
   @repository_version "1.1.0"
+  @control_loop_version "1.2.0"
+  @governance_version "1.3.0"
+  @reconciliation_version "1.4.0"
+  @scheduling_version "1.5.0"
+  @versions [
+    @version,
+    @repository_version,
+    @control_loop_version,
+    @governance_version,
+    @reconciliation_version,
+    @scheduling_version
+  ]
   @default_limits %{
     timeout_ms: 5_000,
     row_limit: 200,
@@ -29,18 +41,29 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @spec repository_version() :: String.t()
   def repository_version, do: @repository_version
 
+  @spec control_loop_version() :: String.t()
+  def control_loop_version, do: @control_loop_version
+
+  @spec governance_version() :: String.t()
+  def governance_version, do: @governance_version
+
+  @spec reconciliation_version() :: String.t()
+  def reconciliation_version, do: @reconciliation_version
+
+  @spec scheduling_version() :: String.t()
+  def scheduling_version, do: @scheduling_version
+
   @spec names() :: [atom()]
   def names, do: names(@version)
 
   @spec names(String.t()) :: [atom()]
-  def names(version) when version in [@version, @repository_version],
+  def names(version) when version in @versions,
     do: version |> definitions() |> Map.keys() |> Enum.sort()
 
   def names(_version), do: []
 
   @spec fetch(atom(), String.t()) :: {:ok, QueryDefinition.t()} | {:error, Error.t()}
-  def fetch(name, version)
-      when is_atom(name) and version in [@version, @repository_version] do
+  def fetch(name, version) when is_atom(name) and version in @versions do
     case Map.fetch(definitions(version), name) do
       {:ok, definition} -> {:ok, definition}
       :error -> invalid()
@@ -52,7 +75,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @spec verify() :: :ok | {:error, Error.t()}
   def verify do
     definitions =
-      [@version, @repository_version]
+      @versions
       |> Enum.flat_map(&(definitions(&1) |> Map.values()))
 
     if Enum.all?(definitions, &valid?/1),
@@ -64,7 +87,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   def digest, do: digest(@version)
 
   @spec digest(String.t()) :: String.t()
-  def digest(version) when version in [@version, @repository_version] do
+  def digest(version) when version in @versions do
     definitions(version)
     |> Enum.sort_by(fn {name, _definition} -> name end)
     |> Enum.map_join("\n", fn {name, definition} ->
@@ -294,9 +317,43 @@ defmodule JidoCode.Knowledge.QueryCatalog do
       )
     ]
 
-    if version == @repository_version,
-      do: base ++ repository_specifications(resource) ++ source_specifications(graph),
-      else: base
+    case version do
+      @version ->
+        base
+
+      @repository_version ->
+        base ++ repository_specifications(resource) ++ source_specifications(graph)
+
+      @control_loop_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph)
+
+      @governance_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource)
+
+      @reconciliation_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource)
+
+      @scheduling_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource)
+    end
   end
 
   defp repository_specifications(resource) do
@@ -499,6 +556,296 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     ]
   end
 
+  defp work_specifications(graph) do
+    resource = Map.put(graph, :resource, %{type: :resource_iri, required: true})
+
+    state =
+      Map.put(graph, :state, %{
+        type: :concept,
+        required: true,
+        values: %{
+          proposed: "https://jido.run/ontology/concept/GoalProposed",
+          active: "https://jido.run/ontology/concept/DesiredOutcomeActive",
+          approved: "https://jido.run/ontology/concept/GoalApproved",
+          eligible: "https://jido.run/ontology/concept/TaskEligible",
+          blocked: "https://jido.run/ontology/concept/TaskBlocked",
+          executing: "https://jido.run/ontology/concept/TaskExecuting",
+          awaiting_decision: "https://jido.run/ontology/concept/TaskAwaitingDecision"
+        }
+      })
+
+    [
+      spec(
+        :desired_outcome_description,
+        :select,
+        resource,
+        :control,
+        [:factory_policy],
+        :table,
+        "Read one desired proposition, constraints, policies, and validity.",
+        :product,
+        :declared
+      ),
+      spec(
+        :goal_neighborhood,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one bounded goal neighborhood with policy and addressed-resource edges.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :task_dag,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read tasks and dependency edges for one plan.",
+        :product,
+        :declared
+      ),
+      spec(
+        :work_blockers,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read declared blockers and unsatisfied prerequisite edges for one task.",
+        :product,
+        :declared
+      ),
+      spec(
+        :work_transition_history,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :timeline,
+        "Read the accepted transition history for one desired or work resource.",
+        :product,
+        :declared
+      ),
+      spec(
+        :work_lens,
+        :select,
+        state,
+        :control,
+        [:repository_control],
+        :table,
+        "List bounded current transition endpoints for one controlled work state.",
+        :product,
+        :declared
+      ),
+      spec(
+        :plan_context,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read exact source, policy, assumptions, effects, and planner context for one plan.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp governance_specifications(resource) do
+    [
+      spec(
+        :policy_description,
+        :select,
+        resource,
+        :control,
+        [:factory_policy],
+        :table,
+        "Read one versioned policy contract and evaluator binding.",
+        :product,
+        :declared
+      ),
+      spec(
+        :governance_transition_history,
+        :select,
+        resource,
+        :control,
+        [:factory_policy, :repository_control],
+        :timeline,
+        "Read accepted policy, obligation, or capability lifecycle transitions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :cohort_definition,
+        :select,
+        resource,
+        :control,
+        [:factory_policy],
+        :table,
+        "Read one static or query-derived repository cohort definition.",
+        :product,
+        :declared
+      ),
+      spec(
+        :cohort_membership,
+        :select,
+        resource,
+        :control,
+        [:derived],
+        :table,
+        "Read bounded derived membership and explanation paths for one cohort.",
+        :product,
+        :declared
+      ),
+      spec(
+        :policy_applicability,
+        :select,
+        resource,
+        :control,
+        [:derived],
+        :table,
+        "Read applicability evidence bound to exact derived graph revisions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :obligation_description,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one policy obligation, evidence, constraints, and source revisions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :capability_strict_view,
+        :select,
+        resource,
+        :control,
+        [:factory_policy],
+        :table,
+        "Read declared capability, availability, authorization, limits, and completeness.",
+        :product,
+        :declared
+      ),
+      spec(
+        :capability_hierarchy,
+        :select,
+        resource,
+        :control,
+        [:derived],
+        :table,
+        "Read rebuildable capability classifications without granting authority.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp reconciliation_specifications(graph, resource) do
+    [
+      spec(
+        :active_reconciliation_scopes,
+        :select,
+        graph,
+        :control,
+        [:factory_catalog],
+        :table,
+        "Discover active enrollment scopes requiring reconciliation.",
+        :product,
+        :declared
+      ),
+      spec(
+        :incomplete_reconciliations,
+        :select,
+        graph,
+        :control,
+        [:repository_control],
+        :table,
+        "Discover proposed or running reconciliation activities from graph state.",
+        :product,
+        :declared
+      ),
+      spec(
+        :reconciliation_input,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one exact reconciliation input package and its graph revisions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :reconciliation_explanation,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read bounded gaps, proposals, omissions, decisions, and explanation edges.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp scheduling_specifications(graph, resource) do
+    [
+      spec(
+        :eligible_work_candidates,
+        :select,
+        graph,
+        :control,
+        [:repository_control],
+        :table,
+        "Discover bounded task candidates whose accepted endpoint is eligible.",
+        :product,
+        :declared
+      ),
+      spec(
+        :eligibility_context,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one task's direct closed-world eligibility context for exact-revision evaluation.",
+        :product,
+        :declared
+      ),
+      spec(
+        :lease_description,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one execution lease, eligibility receipt, owner, capability, interval, and fence.",
+        :product,
+        :declared
+      ),
+      spec(
+        :lease_transition_history,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :timeline,
+        "Read the accepted transition history for one execution lease.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
   defp spec(
          name,
          form,
@@ -526,7 +873,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   defp valid?(definition) do
     definition.source_digest == QueryDefinition.source_digest(definition.source) and
-      definition.version in [@version, @repository_version] and
+      definition.version in @versions and
       definition.form in [:select, :ask, :construct] and
       definition.compatibility_notes != "" and
       bounded_source?(definition)

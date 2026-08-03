@@ -38,6 +38,14 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     completenessState sourceRevision parentGraph sourceGraph targetGraph validationReport
     sourceGraphRevision sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath
     severity ruleSet invalidationState
+    priority expectedEvidence constrainedBy targetCapability includesTask alternativeTo requiresArtifact
+    sourceSnapshot planner originActivity expectedEffect transitionDomain conflictsWith taskKind
+    ownedBy policyKind applicabilityEvaluator closedInput obligationTemplate requiresDecision
+    conflictPosture staticMember queryDerived member inCohort membershipPath applicabilityEvidence
+    requiredOutcome acceptanceRequirement heldBy capabilityKind supportsScope supportsEffect
+    authorizedBy evidenceSource broaderCapability
+    inputPackage evaluatedContext proposes reuses omittedBecause governedProposal
+    leasesTask eligibilityReceipt livenessEvidence
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i

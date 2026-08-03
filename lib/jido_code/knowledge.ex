@@ -9,6 +9,19 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Commands.PublishSourceGraph
+  alias JidoCode.Knowledge.Control.DesiredOutcome
+  alias JidoCode.Knowledge.Control.Eligibility
+  alias JidoCode.Knowledge.Control.ExecutionLease
+  alias JidoCode.Knowledge.Control.CapabilityRegistry
+  alias JidoCode.Knowledge.Control.Cohort
+  alias JidoCode.Knowledge.Control.GovernanceProjection
+  alias JidoCode.Knowledge.Control.Obligation
+  alias JidoCode.Knowledge.Control.Policy
+  alias JidoCode.Knowledge.Control.Reconciliation
+  alias JidoCode.Knowledge.Control.ReconciliationPackage
+  alias JidoCode.Knowledge.Control.ReconciliationProjection
+  alias JidoCode.Knowledge.Control.WorkGraph
+  alias JidoCode.Knowledge.Control.WorkProjection
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -37,6 +50,78 @@ defmodule JidoCode.Knowledge do
 
   def source_publication_command(attributes, options \\ []),
     do: PublishSourceGraph.build(attributes, options)
+
+  def desired_outcome(attributes), do: DesiredOutcome.new(attributes)
+
+  def assert_desired_outcome(outcome, attributes, options \\ []),
+    do: DesiredOutcome.assert_command(outcome, attributes, options)
+
+  def propose_goal(attributes, options \\ []), do: WorkGraph.propose_goal(attributes, options)
+  def propose_plan(attributes, options \\ []), do: WorkGraph.propose_plan(attributes, options)
+
+  def adopt_plan(plan, attributes, options \\ []),
+    do: WorkGraph.adopt_plan(plan, attributes, options)
+
+  def project_work(result, context), do: WorkProjection.build(result, context)
+
+  def policy(attributes), do: Policy.new(attributes)
+
+  def propose_policy(policy, attributes, options \\ []),
+    do: Policy.propose_command(policy, attributes, options)
+
+  def resolve_policy_conflicts(policies), do: Policy.resolve_conflicts(policies)
+  def repository_cohort(attributes), do: Cohort.new(attributes)
+
+  def define_repository_cohort(cohort, attributes, options \\ []),
+    do: Cohort.define_command(cohort, attributes, options)
+
+  def publish_cohort_membership(cohort, memberships, attributes, options \\ []),
+    do: Cohort.publish_membership(cohort, memberships, attributes, options)
+
+  def policy_obligation(attributes), do: Obligation.new(attributes)
+
+  def derive_policy_obligation(obligation, attributes, options \\ []),
+    do: Obligation.derive_command(obligation, attributes, options)
+
+  def capability(attributes), do: CapabilityRegistry.new(attributes)
+
+  def register_capability(capability, attributes, options \\ []),
+    do: CapabilityRegistry.register_command(capability, attributes, options)
+
+  def project_governance(result, context), do: GovernanceProjection.build(result, context)
+  def reconciliation_package(attributes), do: ReconciliationPackage.new(attributes)
+
+  def reconcile(package, evaluations, attributes),
+    do: Reconciliation.new(package, evaluations, attributes)
+
+  def record_reconciliation(reconciliation, attributes, options \\ []),
+    do: Reconciliation.record_command(reconciliation, attributes, options)
+
+  def project_reconciliation(result, context), do: ReconciliationProjection.build(result, context)
+
+  def evaluate_eligibility(context), do: Eligibility.evaluate(context)
+
+  def acquire_execution_lease(eligibility, task_resolution, attributes, options \\ []),
+    do: ExecutionLease.acquire_command(eligibility, task_resolution, attributes, options)
+
+  def transition_execution_lease(
+        lease,
+        lease_resolution,
+        task_resolution,
+        attributes,
+        options \\ []
+      ),
+      do:
+        ExecutionLease.transition_command(
+          lease,
+          lease_resolution,
+          task_resolution,
+          attributes,
+          options
+        )
+
+  def execution_lease_guard(lease, control_graph_iri, fence, at),
+    do: ExecutionLease.execution_guard(lease, control_graph_iri, fence, at)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

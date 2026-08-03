@@ -12,6 +12,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     factory_policy: ~w[
       DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope Decision
+      StateTransition RepositoryCohort GraphRevisionReference
     ],
     observation_batch: ~w[
       ObservationActivity ObservationBatch RepositorySnapshot SourceArtifact Claim Finding
@@ -20,6 +21,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     source_revision: ~w[RepositorySnapshot SourceArtifact CodeSymbol Scope MigrationActivity],
     repository_control: ~w[
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
+      GraphRevisionReference ReconciliationActivity ReconciliationInput Gap ControlProposal
+      EligibilityReceipt
     ],
     run_attempt: ~w[
       ExecutionAttempt ToolInvocation Patch VerificationActivity Artifact Message MigrationActivity
@@ -31,8 +34,10 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     security_audit: ~w[
       AuthorizationGrant CredentialReference ValidationReport ValidationResult MigrationActivity
     ],
-    derived:
-      ~w[Claim Finding Contradiction GraphRevisionReference ValidationReport ValidationResult]
+    derived: ~w[
+      Claim Finding Contradiction GraphRevisionReference ValidationReport ValidationResult
+      CohortMembership CapabilityClassification
+    ]
   }
 
   @spec version() :: String.t()
