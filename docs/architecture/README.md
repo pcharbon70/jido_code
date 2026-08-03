@@ -82,3 +82,4 @@ implementation plan was merged.
 - [Governed decision outcomes](./governed-decision-outcomes.md)
 - [Governed knowledge memory](./governed-knowledge-memory.md)
 - [Bounded reasoning and cross-graph learning](./bounded-reasoning-and-learning.md)
+- [Phase 9 accepted outcome and learning receipt](./phase-09-receipt.md)

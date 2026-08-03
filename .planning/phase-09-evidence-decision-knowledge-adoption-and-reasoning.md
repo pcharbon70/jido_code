@@ -192,42 +192,42 @@ Back to plan: [README](./README.md)
       - [x] 9.4.3.3 Subtask {#jcf-p09-9-4-3-3} - Invalidate/rebuild affected reconciliation, eligibility, and context projections when knowledge or reasoning revisions change.
       - [x] 9.4.3.4 Subtask {#jcf-p09-9-4-3-4} - Measure whether adopted knowledge improved outcomes as new observations/evidence, never by editing confidence silently.
 
-  - [ ] 9.5 Section - Phase 9 Integration Tests.
+  - [x] 9.5 Section - Phase 9 Integration Tests.
 
     This final section proves the complete execution-to-acceptance-to-learning
     loop preserves evidence, policy, actor, temporal, contradiction, and
     asserted/derived authority under stale data, self-approval attempts,
     retries, and later contradictory observations.
 
-    - [ ] 9.5.1 Task {#jcf-p09-outcome-integration} [repo: jido_code] [after: {#jcf-p09-learning-feedback}] - Execute verification, evidence, decision, and final satisfaction scenarios.
+    - [x] 9.5.1 Task {#jcf-p09-outcome-integration} [repo: jido_code] [after: {#jcf-p09-learning-feedback}] - Execute verification, evidence, decision, and final satisfaction scenarios.
 
       This task validates that runtime completion alone is insufficient and
       that accepted outcomes cite complete policy/evidence paths.
 
-      - [ ] 9.5.1.1 Subtask {#jcf-p09-9-5-1-1} - Verify a completed patch with tests/review, record supporting and contradictory evidence, evaluate sufficiency, decide, apply through follow-up work, observe post-change state, and satisfy the goal.
-      - [ ] 9.5.1.2 Subtask {#jcf-p09-9-5-1-2} - Exercise failed/skipped checks, stale artifacts, mismatched snapshots, missing independent review, policy conflict, waiver, defer, reject, and request-more-evidence paths.
-      - [ ] 9.5.1.3 Subtask {#jcf-p09-9-5-1-3} - Attempt agent self-approval, decision replay, stale sufficiency receipt, cross-scope evidence, hidden mandatory failure, and direct decision side effects.
-      - [ ] 9.5.1.4 Subtask {#jcf-p09-9-5-1-4} - Verify goal/task/obligation/desired-outcome transitions and follow-up reconciliation remain atomic, causal, idempotent, and explainable.
+      - [x] 9.5.1.1 Subtask {#jcf-p09-9-5-1-1} - Verify a completed patch with tests/review, record supporting and contradictory evidence, evaluate sufficiency, decide, apply through follow-up work, observe post-change state, and satisfy the goal.
+      - [x] 9.5.1.2 Subtask {#jcf-p09-9-5-1-2} - Exercise failed/skipped checks, stale artifacts, mismatched snapshots, missing independent review, policy conflict, waiver, defer, reject, and request-more-evidence paths.
+      - [x] 9.5.1.3 Subtask {#jcf-p09-9-5-1-3} - Attempt agent self-approval, decision replay, stale sufficiency receipt, cross-scope evidence, hidden mandatory failure, and direct decision side effects.
+      - [x] 9.5.1.4 Subtask {#jcf-p09-9-5-1-4} - Verify goal/task/obligation/desired-outcome transitions and follow-up reconciliation remain atomic, causal, idempotent, and explainable.
 
-    - [ ] 9.5.2 Task {#jcf-p09-learning-reasoning-integration} [repo: jido_code] [after: {#jcf-p09-outcome-integration}] - Exercise adoption, supersession, reasoning, and cross-repository reuse.
+    - [x] 9.5.2 Task {#jcf-p09-learning-reasoning-integration} [repo: jido_code] [after: {#jcf-p09-outcome-integration}] - Exercise adoption, supersession, reasoning, and cross-repository reuse.
 
       This task proves durable knowledge remains governed and derived insight
       remains disposable and non-authoritative.
 
-      - [ ] 9.5.2.1 Subtask {#jcf-p09-9-5-2-1} - Adopt an accepted lesson, retrieve it for a related goal/context, then introduce contradictory evidence and supersede/invalidate it through a new decision.
-      - [ ] 9.5.2.2 Subtask {#jcf-p09-9-5-2-2} - Reject adoption of raw prompt/tool output, unaccepted claims, stale evidence, over-broad scope, and secret-bearing content.
-      - [ ] 9.5.2.3 Subtask {#jcf-p09-9-5-2-3} - Materialize, query, stale, delete, and rebuild OWL/rule graphs and prove asserted truth, decisions, and accepted knowledge remain unchanged.
-      - [ ] 9.5.2.4 Subtask {#jcf-p09-9-5-2-4} - Derive a cross-repository candidate insight, preserve authorization/concealment, and require independent adoption before it affects the target repo.
-      - [ ] 9.5.2.5 Subtask {#jcf-p09-9-5-2-5} - Backup/restore and reconstruct an exact decision plus knowledge retrieval context from graph revisions.
-      - [ ] 9.5.2.6 Subtask {#jcf-p09-9-5-2-6} - Rerun Phases 1-8 suites and `mix precommit`.
+      - [x] 9.5.2.1 Subtask {#jcf-p09-9-5-2-1} - Adopt an accepted lesson, retrieve it for a related goal/context, then introduce contradictory evidence and supersede/invalidate it through a new decision.
+      - [x] 9.5.2.2 Subtask {#jcf-p09-9-5-2-2} - Reject adoption of raw prompt/tool output, unaccepted claims, stale evidence, over-broad scope, and secret-bearing content.
+      - [x] 9.5.2.3 Subtask {#jcf-p09-9-5-2-3} - Materialize, query, stale, delete, and rebuild OWL/rule graphs and prove asserted truth, decisions, and accepted knowledge remain unchanged.
+      - [x] 9.5.2.4 Subtask {#jcf-p09-9-5-2-4} - Derive a cross-repository candidate insight, preserve authorization/concealment, and require independent adoption before it affects the target repo.
+      - [x] 9.5.2.5 Subtask {#jcf-p09-9-5-2-5} - Backup/restore and reconstruct an exact decision plus knowledge retrieval context from graph revisions.
+      - [x] 9.5.2.6 Subtask {#jcf-p09-9-5-2-6} - Rerun Phases 1-8 suites and `mix precommit`.
 
-    - [ ] 9.5.3 Task {#jcf-p09-phase-receipt} [repo: jido_code] [after: {#jcf-p09-learning-reasoning-integration}] - Publish the Phase 9 accepted-outcome and learning receipt.
+    - [x] 9.5.3 Task {#jcf-p09-phase-receipt} [repo: jido_code] [after: {#jcf-p09-learning-reasoning-integration}] - Publish the Phase 9 accepted-outcome and learning receipt.
 
       This task binds G8 to exact verification, evidence, policy, decision,
       satisfaction, adoption, supersession, reasoning, retrieval, and
       cross-repository evidence.
 
-      - [ ] 9.5.3.1 Subtask {#jcf-p09-9-5-3-1} - Record method/policy/query/rule/ontology versions, scenario/snapshot/artifact/evidence digests, decision/adoption refs, and candidate commit.
-      - [ ] 9.5.3.2 Subtask {#jcf-p09-9-5-3-2} - Attach positive/negative sufficiency, self-approval, stale evidence, follow-up, contradiction, supersession, rebuild, cross-repo authorization, restore, and explanation results.
-      - [ ] 9.5.3.3 Subtask {#jcf-p09-9-5-3-3} - Keep G8 blocked if runtime output can become accepted directly, knowledge can lose provenance, or inference can mutate control/acceptance state.
+      - [x] 9.5.3.1 Subtask {#jcf-p09-9-5-3-1} - Record method/policy/query/rule/ontology versions, scenario/snapshot/artifact/evidence digests, decision/adoption refs, and candidate commit.
+      - [x] 9.5.3.2 Subtask {#jcf-p09-9-5-3-2} - Attach positive/negative sufficiency, self-approval, stale evidence, follow-up, contradiction, supersession, rebuild, cross-repo authorization, restore, and explanation results.
+      - [x] 9.5.3.3 Subtask {#jcf-p09-9-5-3-3} - Keep G8 blocked if runtime output can become accepted directly, knowledge can lose provenance, or inference can mutate control/acceptance state.
       - [ ] 9.5.3.4 Subtask {#jcf-p09-9-5-3-4} - Pin the merged candidate commit before authorizing Phase 10.

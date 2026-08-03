@@ -106,4 +106,3 @@ evidence, decision, snapshot, contradiction and support references, stale
 sources, deterministic selection explanation, truncation, and a query receipt.
 It does not accept or persist prompt/transcript/tool-output fields, so every new
 execution context must be reauthorized and re-queried.
-

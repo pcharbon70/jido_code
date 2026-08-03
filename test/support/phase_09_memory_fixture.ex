@@ -90,7 +90,12 @@ defmodule JidoCode.TestSupport.Phase09MemoryFixture do
   end
 
   def contradicted!(context) do
-    fixture = adopted!(context)
+    context
+    |> adopted!()
+    |> contradict!()
+  end
+
+  def contradict!(fixture) do
     recorded_at = DateTime.add(fixture.knowledge_assertion.recorded_at, 30, :second)
 
     source_revisions =

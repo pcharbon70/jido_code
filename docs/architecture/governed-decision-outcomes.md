@@ -101,4 +101,3 @@ and actor lenses plus waiver, rejection, deferred action, supersession,
 satisfaction-path, and follow-up views. Projections include query receipts and
 bounded decision provenance. Rationale is limited to authored references;
 private reasoning and chain-of-thought are neither required nor represented.
-

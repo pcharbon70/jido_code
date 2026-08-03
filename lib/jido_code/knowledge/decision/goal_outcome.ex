@@ -444,10 +444,7 @@ defmodule JidoCode.Knowledge.Decision.GoalOutcome do
   defp transition_chain(%{current_state: state}, state, _decision, _attributes), do: {:ok, []}
 
   defp transition_chain(resolution, final_state, decision, attributes) do
-    states =
-      if resolution.current_state == :awaiting_evidence and final_state != :awaiting_decision,
-        do: [:awaiting_decision, final_state],
-        else: [final_state]
+    states = transition_states(resolution, final_state)
 
     Enum.reduce_while(states, {:ok, [], resolution}, fn next_state, {:ok, transitions, current} ->
       transition_attributes = %{
@@ -483,6 +480,24 @@ defmodule JidoCode.Knowledge.Decision.GoalOutcome do
       {:error, %Error{} = error} -> {:error, error}
     end
   end
+
+  defp transition_states(%{domain: :goal, current_state: :approved}, :satisfied),
+    do: [:eligible, :executing, :awaiting_evidence, :awaiting_decision, :satisfied]
+
+  defp transition_states(%{domain: :goal, current_state: :eligible}, :satisfied),
+    do: [:executing, :awaiting_evidence, :awaiting_decision, :satisfied]
+
+  defp transition_states(%{domain: :goal, current_state: :leased}, :satisfied),
+    do: [:executing, :awaiting_evidence, :awaiting_decision, :satisfied]
+
+  defp transition_states(%{domain: :goal, current_state: :executing}, :satisfied),
+    do: [:awaiting_evidence, :awaiting_decision, :satisfied]
+
+  defp transition_states(%{current_state: :awaiting_evidence}, final_state)
+       when final_state != :awaiting_decision,
+       do: [:awaiting_decision, final_state]
+
+  defp transition_states(_resolution, final_state), do: [final_state]
 
   defp follow_ups(decision, disposition, attributes) do
     kinds = Map.get(attributes, :follow_up_kinds, default_follow_ups(disposition))
