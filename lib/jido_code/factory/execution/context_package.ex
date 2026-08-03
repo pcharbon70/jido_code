@@ -90,6 +90,9 @@ defmodule JidoCode.Factory.Execution.ContextPackage do
 
   def build(_attributes), do: invalid(:execution_context)
 
+  @spec durable_map(t()) :: map()
+  def durable_map(%__MODULE__{} = context), do: Map.from_struct(context)
+
   defp validate_resources(attributes) do
     if Enum.all?(@resource_fields, &(Knowledge.validate_resource_identity(attributes[&1]) == :ok)) and
          Knowledge.validate_resource_identity(attributes.task_snapshot_iri) == :ok do

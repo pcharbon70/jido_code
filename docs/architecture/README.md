@@ -67,4 +67,5 @@ implementation plan was merged.
 
 - [Factory control loop](./factory-control-loop.md)
 - [Execution runtime boundary](./execution-runtime-boundary.md)
+- [Execution attempt lifecycle](./execution-attempt-lifecycle.md)
 - [Phase 7 factory control loop receipt](./phase-07-receipt.md)

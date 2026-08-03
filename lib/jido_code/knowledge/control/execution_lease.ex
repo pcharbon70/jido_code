@@ -108,12 +108,13 @@ defmodule JidoCode.Knowledge.Control.ExecutionLease do
 
   def transition_command(
         %__MODULE__{} = lease,
-        %{domain: :lease, current_state: :active} = lease_resolution,
-        %{domain: :task, current_state: :leased} = task_resolution,
+        %{domain: :lease, current_state: lease_state} = lease_resolution,
+        %{domain: :task, current_state: task_state} = task_resolution,
         %{action: action} = attributes,
         options
       )
-      when action in @actions and is_list(options) do
+      when lease_state in [:active, :executing] and task_state in [:leased, :executing] and
+             action in @actions and is_list(options) do
     with true <- lease_resolution.subject_iri == lease.iri,
          true <- task_resolution.subject_iri == lease.task_iri,
          true <- attributes[:fencing_token] == lease.fencing_token,
@@ -270,8 +271,8 @@ defmodule JidoCode.Knowledge.Control.ExecutionLease do
     Transition.new(%{
       subject_iri: resolution.subject_iri,
       domain: :lease,
-      prior_state: :active,
-      next_state: lease_state(attributes.action),
+      prior_state: resolution.current_state,
+      next_state: lease_state(attributes.action, resolution.current_state),
       revision: resolution.current_revision + 1,
       expected_predecessor: resolution.current_transition,
       actor_iri: attributes[:actor_iri],
@@ -284,7 +285,11 @@ defmodule JidoCode.Knowledge.Control.ExecutionLease do
   defp next_task_transition(_resolution, %{action: :renew}), do: {:ok, nil}
 
   defp next_task_transition(resolution, attributes) do
-    task_transition(resolution, task_state(attributes.action), attributes)
+    task_transition(
+      resolution,
+      task_state(attributes.action, resolution.current_state),
+      attributes
+    )
   end
 
   defp acquisition_target(lease, lease_transitions, eligibility, task_transitions, attributes) do
@@ -473,15 +478,16 @@ defmodule JidoCode.Knowledge.Control.ExecutionLease do
 
   defp update_expiry(lease, _attributes), do: lease
 
-  defp lease_state(:renew), do: :active
-  defp lease_state(:release), do: :released
-  defp lease_state(:cancel), do: :cancelled
-  defp lease_state(:expire), do: :expired
-  defp lease_state(:supersede), do: :superseded
+  defp lease_state(:renew, current), do: current
+  defp lease_state(:release, _current), do: :released
+  defp lease_state(:cancel, _current), do: :cancelled
+  defp lease_state(:expire, _current), do: :expired
+  defp lease_state(:supersede, _current), do: :superseded
 
-  defp task_state(action) when action in [:release, :expire], do: :eligible
-  defp task_state(:cancel), do: :cancelled
-  defp task_state(:supersede), do: :superseded
+  defp task_state(action, :leased) when action in [:release, :expire], do: :eligible
+  defp task_state(action, :executing) when action in [:release, :expire], do: :blocked
+  defp task_state(:cancel, _current), do: :cancelled
+  defp task_state(:supersede, _current), do: :superseded
 
   defp validate_resource(value), do: ResourceIdentity.validate(value)
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}

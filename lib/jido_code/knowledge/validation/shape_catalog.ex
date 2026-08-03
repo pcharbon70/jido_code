@@ -25,8 +25,9 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       EligibilityReceipt InteractionSession Message Instruction
     ],
     run_attempt: ~w[
-      ExecutionAttempt ToolInvocation Patch VerificationActivity Artifact InteractionSession Message
-      Instruction MigrationActivity
+      ExecutionAttempt ExecutionContext ToolInvocation Patch VerificationActivity Artifact
+      InteractionSession Message Instruction StateTransition Decision GraphRevisionReference
+      MigrationActivity
     ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationActivity MigrationActivity

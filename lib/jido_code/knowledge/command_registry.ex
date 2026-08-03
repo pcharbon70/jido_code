@@ -237,7 +237,29 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       preconditions: [:session_active, :message_sequence_absent]
     }
   }
-  @version_1_6 Map.merge(@version_1_5, @phase_08_boundary_commands)
+  @phase_08_attempt_commands %{
+    "RecordExecutionAttempt" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [:active_lease, :current_fence, :attempt_absent, :context_exact]
+    },
+    "TransitionExecutionAttempt" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [:attempt_current, :current_fence, :unique_transition_successor]
+    },
+    "RequestExecutionCancellation" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :unique_transition_successor]
+    }
+  }
+  @version_1_6 @version_1_5
+               |> Map.merge(@phase_08_boundary_commands)
+               |> Map.merge(@phase_08_attempt_commands)
 
   @spec version() :: String.t()
   def version, do: @version

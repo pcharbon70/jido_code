@@ -25,7 +25,8 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     plan-adoption policy-version policy-evaluator repository-cohort cohort-membership
     policy-obligation capability-declaration capability-classification reconciliation-package
     reconciliation-activity reconciliation-gap control-proposal eligibility-receipt execution-lease
-    execution-context interaction-session interaction-message
+    execution-attempt execution-context execution-instruction interaction-session
+    interaction-message cancellation-request retry-decision
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

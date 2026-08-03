@@ -27,6 +27,7 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     inputPackage evaluatedContext proposes reuses omittedBecause governedProposal
     leasesTask eligibilityReceipt livenessEvidence
     scopedTo participant audience replyTo resultingCommand instruction contextItem
+    attempts delegatedAgent retryOf
   ])
   @max_guards 100
 
@@ -206,6 +207,21 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     _error -> false
   end
 
+  defp guard_satisfied?({:no_active_attempt, task}, dataset) do
+    quads = RDF.Dataset.quads(dataset)
+
+    quads
+    |> attempt_subjects(task)
+    |> Enum.all?(fn attempt ->
+      case transition_endpoint(quads, attempt) do
+        %{state: state} -> state not in active_attempt_states()
+        nil -> false
+      end
+    end)
+  rescue
+    _error -> false
+  end
+
   defp guard_satisfied?(_guard, _dataset), do: false
 
   defp active_leases(quads, task, at) do
@@ -213,7 +229,8 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     |> lease_subjects(task)
     |> Enum.filter(fn lease ->
       case transition_endpoint(quads, lease) do
-        %{state: @concept <> "LeaseActive", transition: transition} ->
+        %{state: state, transition: transition}
+        when state in [@concept <> "LeaseActive", @concept <> "LeaseExecuting"] ->
           case literal_values(quads, transition, @jf <> "validTo") do
             [%DateTime{} = expiry] -> DateTime.compare(at, expiry) == :lt
             _invalid -> false
@@ -227,7 +244,8 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
 
   defp lease_temporally_valid?(quads, lease, at, mode) do
     case transition_endpoint(quads, lease) do
-      %{state: @concept <> "LeaseActive", transition: transition} ->
+      %{state: state, transition: transition}
+      when state in [@concept <> "LeaseActive", @concept <> "LeaseExecuting"] ->
         case literal_values(quads, transition, @jf <> "validTo") do
           [%DateTime{} = expiry] when mode == :current ->
             DateTime.compare(at, expiry) == :lt
@@ -252,6 +270,31 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
         else: []
     end)
     |> Enum.uniq()
+  end
+
+  defp attempt_subjects(quads, task) do
+    quads
+    |> Enum.flat_map(fn {subject, predicate, object, _graph} ->
+      if term_equal?(predicate, @jf <> "executes") and term_equal?(object, task) and
+           triple_present?(
+             quads,
+             to_string(subject),
+             "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+             @jf <> "ExecutionAttempt"
+           ) do
+        [to_string(subject)]
+      else
+        []
+      end
+    end)
+    |> Enum.uniq()
+  end
+
+  defp active_attempt_states do
+    Enum.map(
+      ~w[prepared starting running waiting_tool cancelling recovered],
+      &(@concept <> "ExecutionAttempt" <> Macro.camelize(&1))
+    )
   end
 
   defp transition_endpoint(quads, subject) do

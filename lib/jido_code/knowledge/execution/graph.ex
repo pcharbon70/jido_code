@@ -3,8 +3,51 @@ defmodule JidoCode.Knowledge.Execution.Graph do
 
   alias JidoCode.Knowledge.Control.Graph, as: ControlGraph
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.GraphMetadata
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.ResourceIdentity
+
+  @spec run_graph(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
+  def run_graph(attempt_iri), do: GraphRegistry.graph_iri(:run_attempt, %{attempt: attempt_iri})
+
+  @spec create_target(String.t(), String.t(), String.t(), DateTime.t(), list()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def create_target(graph_iri, owner_scope, activity, created_at, additions)
+      when is_list(additions) do
+    with {:ok, :run_attempt} <- GraphRegistry.identify(graph_iri),
+         :ok <- ResourceIdentity.validate(owner_scope),
+         :ok <- ResourceIdentity.validate(activity),
+         true <- match?(%DateTime{}, created_at),
+         {:ok, metadata} <-
+           GraphMetadata.new(graph_iri, %{
+             owner_scope: owner_scope,
+             ontology_version: "https://jido.run/ontology/release/1.0.0",
+             creation_activity: activity,
+             created_at: created_at,
+             lifecycle_state: :open,
+             completeness_state: :building,
+             graph_revision: 1
+           }),
+         {:ok, metadata_quads} <- GraphMetadata.quads(metadata) do
+      {:ok,
+       %{
+         family: :run_attempt,
+         graph_iri: graph_iri,
+         operation: :create,
+         metadata: metadata,
+         additions: metadata_quads ++ additions,
+         supersessions: [],
+         invalidations: [],
+         removals: []
+       }}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _invalid -> invalid(:execution_graph_create)
+    end
+  end
+
+  def create_target(_graph, _scope, _activity, _created_at, _additions),
+    do: invalid(:execution_graph_create)
 
   @spec append_target(String.t(), non_neg_integer(), String.t(), String.t(), DateTime.t(), list()) ::
           {:ok, map()} | {:error, Error.t()}

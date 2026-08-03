@@ -82,42 +82,42 @@ Back to plan: [README](./README.md)
       - [x] 8.1.5.4 Subtask {#jcf-p08-8-1-5-4} - Persist instructions and assembled context only when required for durability, replay, or audit, with redaction and size bounds; keep transient prompt assembly disposable.
       - [x] 8.1.5.5 Subtask {#jcf-p08-8-1-5-5} - Provide authorized, paginated interaction projections that preserve chronology, reply relationships, redaction state, and links to resulting commands, evidence, and decisions.
 
-  - [ ] 8.2 Section - Implement execution-attempt and lease-fencing lifecycle.
+  - [x] 8.2 Section - Implement execution-attempt and lease-fencing lifecycle.
 
     This section binds runtime work to one graph-visible attempt, task, lease,
     actor, capability, snapshot, and transition chain.
 
-    - [ ] 8.2.1 Task {#jcf-p08-attempt-start} [repo: jido_code] [after: {#jcf-p08-interaction-session}] - Implement guarded execution-attempt creation and start.
+    - [x] 8.2.1 Task {#jcf-p08-attempt-start} [repo: jido_code] [after: {#jcf-p08-interaction-session}] - Implement guarded execution-attempt creation and start.
 
       This task creates durable execution identity before any effectful runtime
       operation can occur.
 
-      - [ ] 8.2.1.1 Subtask {#jcf-p08-8-2-1-1} - Implement `RecordExecutionAttempt` start semantics with attempt, task/goal/plan, lease/fence, actor/agent/capability, exact snapshot, context digest, runtime version, constraints, and idempotency.
-      - [ ] 8.2.1.2 Subtask {#jcf-p08-8-2-1-2} - Atomically transition task/lease to executing and create the run graph metadata plus attempt genesis transition.
-      - [ ] 8.2.1.3 Subtask {#jcf-p08-8-2-1-3} - Reject expired/superseded leases, stale fences, changed task/plan/snapshot, unauthorized agents, duplicate active attempts, and incompatible runtime versions.
-      - [ ] 8.2.1.4 Subtask {#jcf-p08-8-2-1-4} - Start the runtime only after the attempt-start receipt commits and recover response loss by attempt/idempotency identity.
-      - [ ] 8.2.1.5 Subtask {#jcf-p08-8-2-1-5} - If runtime start fails, record a governed failed-to-start transition rather than deleting the attempt.
+      - [x] 8.2.1.1 Subtask {#jcf-p08-8-2-1-1} - Implement `RecordExecutionAttempt` start semantics with attempt, task/goal/plan, lease/fence, actor/agent/capability, exact snapshot, context digest, runtime version, constraints, and idempotency.
+      - [x] 8.2.1.2 Subtask {#jcf-p08-8-2-1-2} - Atomically transition task/lease to executing and create the run graph metadata plus attempt genesis transition.
+      - [x] 8.2.1.3 Subtask {#jcf-p08-8-2-1-3} - Reject expired/superseded leases, stale fences, changed task/plan/snapshot, unauthorized agents, duplicate active attempts, and incompatible runtime versions.
+      - [x] 8.2.1.4 Subtask {#jcf-p08-8-2-1-4} - Start the runtime only after the attempt-start receipt commits and recover response loss by attempt/idempotency identity.
+      - [x] 8.2.1.5 Subtask {#jcf-p08-8-2-1-5} - If runtime start fails, record a governed failed-to-start transition rather than deleting the attempt.
 
-    - [ ] 8.2.2 Task {#jcf-p08-attempt-transitions} [repo: jido_code] [after: {#jcf-p08-attempt-start}] - Implement heartbeat, progress, completion, failure, and cancellation transitions.
+    - [x] 8.2.2 Task {#jcf-p08-attempt-transitions} [repo: jido_code] [after: {#jcf-p08-attempt-start}] - Implement heartbeat, progress, completion, failure, and cancellation transitions.
 
       This task records bounded operational state causally while preventing
       runtime events from mutating goals or decisions directly.
 
-      - [ ] 8.2.2.1 Subtask {#jcf-p08-8-2-2-1} - Define attempt states for prepared, starting, running, waiting-tool, cancelling, cancelled, completed, failed, timed-out, abandoned, recovered, and superseded.
-      - [ ] 8.2.2.2 Subtask {#jcf-p08-8-2-2-2} - Require current attempt predecessor/revision and lease fence on every runtime-origin transition.
-      - [ ] 8.2.2.3 Subtask {#jcf-p08-8-2-2-3} - Record bounded heartbeats/progress as transitions or summarized activities according to retention policy without high-frequency hidden state.
-      - [ ] 8.2.2.4 Subtask {#jcf-p08-8-2-2-4} - Make cancellation a control command, propagate it to runtime/tool/sandbox adapters, and record acknowledged, forced, timed-out, or ineffective outcomes.
-      - [ ] 8.2.2.5 Subtask {#jcf-p08-8-2-2-5} - Treat completion as an execution outcome only; never transition a goal to satisfied in this command.
+      - [x] 8.2.2.1 Subtask {#jcf-p08-8-2-2-1} - Define attempt states for prepared, starting, running, waiting-tool, cancelling, cancelled, completed, failed, timed-out, abandoned, recovered, and superseded.
+      - [x] 8.2.2.2 Subtask {#jcf-p08-8-2-2-2} - Require current attempt predecessor/revision and lease fence on every runtime-origin transition.
+      - [x] 8.2.2.3 Subtask {#jcf-p08-8-2-2-3} - Record bounded heartbeats/progress as transitions or summarized activities according to retention policy without high-frequency hidden state.
+      - [x] 8.2.2.4 Subtask {#jcf-p08-8-2-2-4} - Make cancellation a control command, propagate it to runtime/tool/sandbox adapters, and record acknowledged, forced, timed-out, or ineffective outcomes.
+      - [x] 8.2.2.5 Subtask {#jcf-p08-8-2-2-5} - Treat completion as an execution outcome only; never transition a goal to satisfied in this command.
 
-    - [ ] 8.2.3 Task {#jcf-p08-attempt-retry} [repo: jido_code] [after: {#jcf-p08-attempt-transitions}] - Implement retry and follow-up attempt semantics.
+    - [x] 8.2.3 Task {#jcf-p08-attempt-retry} [repo: jido_code] [after: {#jcf-p08-attempt-transitions}] - Implement retry and follow-up attempt semantics.
 
       This task ensures a retry is a new attributable activity rather than a
       mutable reset of prior execution history.
 
-      - [ ] 8.2.3.1 Subtask {#jcf-p08-8-2-3-1} - Evaluate retry policy from task/plan, failure classification, attempt count, budget, source/plan freshness, lease state, and cancellation.
-      - [ ] 8.2.3.2 Subtask {#jcf-p08-8-2-3-2} - Create a new attempt and lease/fence where required, link it to the prior attempt, and preserve all prior run graphs.
-      - [ ] 8.2.3.3 Subtask {#jcf-p08-8-2-3-3} - Require replanning/reconciliation instead of retry when source snapshot, constraints, policy, or required capability changed materially.
-      - [ ] 8.2.3.4 Subtask {#jcf-p08-8-2-3-4} - Bound automated attempts and require an explicit decision for exhausted, unsafe, repeated, or ambiguous failure.
+      - [x] 8.2.3.1 Subtask {#jcf-p08-8-2-3-1} - Evaluate retry policy from task/plan, failure classification, attempt count, budget, source/plan freshness, lease state, and cancellation.
+      - [x] 8.2.3.2 Subtask {#jcf-p08-8-2-3-2} - Create a new attempt and lease/fence where required, link it to the prior attempt, and preserve all prior run graphs.
+      - [x] 8.2.3.3 Subtask {#jcf-p08-8-2-3-3} - Require replanning/reconciliation instead of retry when source snapshot, constraints, policy, or required capability changed materially.
+      - [x] 8.2.3.4 Subtask {#jcf-p08-8-2-3-4} - Bound automated attempts and require an explicit decision for exhausted, unsafe, repeated, or ambiguous failure.
 
   - [ ] 8.3 Section - Implement sandbox, tool, and patch provenance.
 

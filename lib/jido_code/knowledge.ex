@@ -25,6 +25,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.InteractionMessage
   alias JidoCode.Knowledge.Execution.InteractionProjection
   alias JidoCode.Knowledge.Execution.InteractionSession
+  alias JidoCode.Knowledge.Execution.Attempt
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -140,6 +141,29 @@ defmodule JidoCode.Knowledge do
     do: InteractionMessage.record_command(message, resolution, attributes, options)
 
   def project_interaction(result, context), do: InteractionProjection.build(result, context)
+
+  def execution_attempt(context, attributes), do: Attempt.new(context, attributes)
+
+  def start_execution_attempt(attempt, context, lease, resolutions, attributes, options \\ []),
+    do: Attempt.start_command(attempt, context, lease, resolutions, attributes, options)
+
+  def transition_execution_attempt(
+        attempt,
+        attempt_resolution,
+        lease,
+        task_resolution,
+        attributes,
+        options \\ []
+      ),
+      do:
+        Attempt.transition_command(
+          attempt,
+          attempt_resolution,
+          lease,
+          task_resolution,
+          attributes,
+          options
+        )
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)
