@@ -17,8 +17,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     completenessState sourceRevision parentGraph sourceGraph targetGraph validationReport
     sourceGraphRevision sourceOntologyVersion targetOntologyVersion focusNode resultShape resultPath
     severity ruleSet invalidationState
+    priority expectedEvidence constrainedBy targetCapability includesTask alternativeTo requiresArtifact
+    sourceSnapshot planner originActivity expectedEffect transitionDomain conflictsWith taskKind
   ])
-  @max_guards 20
+  @max_guards 100
 
   @spec validate(CommandEnvelope.t(), ChangeSet.t(), map(), [RDF.Quad.t()], String.t(), integer()) ::
           {:ok, [map()]} | {:error, Error.t()} | {:error, Error.t(), map()}
@@ -124,6 +126,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     end)
   rescue
     _error -> false
+  end
+
+  defp guard_satisfied?({:triple_absent, graph, subject, predicate, object}, dataset) do
+    not guard_satisfied?({:triple_present, graph, subject, predicate, object}, dataset)
   end
 
   defp guard_satisfied?({:transition_endpoint, graph, subject, transition}, dataset) do

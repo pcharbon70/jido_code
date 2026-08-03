@@ -12,6 +12,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     factory_policy: ~w[
       DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope Decision
+      StateTransition
     ],
     observation_batch: ~w[
       ObservationActivity ObservationBatch RepositorySnapshot SourceArtifact Claim Finding
@@ -20,6 +21,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     source_revision: ~w[RepositorySnapshot SourceArtifact CodeSymbol Scope MigrationActivity],
     repository_control: ~w[
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
+      GraphRevisionReference
     ],
     run_attempt: ~w[
       ExecutionAttempt ToolInvocation Patch VerificationActivity Artifact Message MigrationActivity

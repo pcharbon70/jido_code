@@ -20,7 +20,9 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     authorization-grant change-set command-request graph-revision-reference validation-report
     validation-result management-enrollment enrollment-transition enrollment-decision
     repository-reconciliation observation-activity observation-batch repository-snapshot
-    observed-claim provider-object source-artifact code-symbol source-analysis
+    observed-claim provider-object source-artifact code-symbol source-analysis desired-outcome
+    control-constraint control-transition control-decision goal-proposal plan-proposal task-proposal
+    plan-adoption
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

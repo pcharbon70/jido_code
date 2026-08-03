@@ -8,8 +8,8 @@ batches, exact Git snapshots, deterministic source analysis, immutable source
 graphs, and bounded source projections are implemented through the graph-only
 authority boundary.
 
-G5 is merge-pending. It remains blocked until the pull request passes
-clean-checkout CI and the merged candidate commit is pinned here. No local
+G5 is closed. Pull request #8 passed clean-checkout CI and merged as
+`394657afdb1ad2453f7f21a0ceef61351d60860e` on 2026-08-03. No local
 evidence found a durable identity dependent on a checkout path, a provider or
 analyzer with direct commit authority, schema mixed into a source graph,
 duplicate delivery effects, partial source publication, accepted control truth
@@ -26,7 +26,7 @@ surfaces.
 | Section 6.3 | `7f403f6` - persist immutable repository observations |
 | Section 6.4 | `16d6405` - publish revision-scoped source semantics |
 | Section 6.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `394657afdb1ad2453f7f21a0ceef61351d60860e` |
 
 ## Contract Pins
 
@@ -165,6 +165,7 @@ The Phase 6 integration and retained focused suites prove:
 
 ## Gate G5
 
-G5 is merge-pending. Local repository-knowledge evidence is complete, but
-Phase 7 remains unauthorized until clean-checkout CI passes and the merged
-candidate commit is pinned in this receipt.
+G5 is closed at merged candidate
+`394657afdb1ad2453f7f21a0ceef61351d60860e`. Clean-checkout CI passed before
+merge, the graph-only repository knowledge invariants remain satisfied, and
+Phase 7 is authorized from this exact baseline.

@@ -15,7 +15,7 @@ projections.
 
 Back to plan: [README](./README.md)
 
-- [ ] 6 Phase - Enroll repositories and establish reproducible observed repository knowledge.
+- [x] 6 Phase - Enroll repositories and establish reproducible observed repository knowledge.
 
   This phase makes external repository reality available to later policy and
   reconciliation code without treating provider payloads, local clones, or a
@@ -223,4 +223,4 @@ Back to plan: [README](./README.md)
       - [x] 6.5.3.1 Subtask {#jcf-p06-6-5-3-1} - Record provider/Git/analyzer versions, ontology/query versions, fixture repository commits, observation/source graph digests, and candidate commit.
       - [x] 6.5.3.2 Subtask {#jcf-p06-6-5-3-2} - Attach duplicate/reorder, lifecycle, provider failure, force-push, cache deletion, crash, restore, redaction, and bounded-query results.
       - [x] 6.5.3.3 Subtask {#jcf-p06-6-5-3-3} - Keep G5 blocked if a local clone is required for durable identity, source graphs mix schema, or provider output can directly become accepted/control truth.
-      - [ ] 6.5.3.4 Subtask {#jcf-p06-6-5-3-4} - Pin the merged candidate commit before authorizing Phase 7.
+      - [x] 6.5.3.4 Subtask {#jcf-p06-6-5-3-4} - Pin the merged candidate commit before authorizing Phase 7.

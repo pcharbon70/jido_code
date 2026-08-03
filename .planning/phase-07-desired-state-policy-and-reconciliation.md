@@ -21,55 +21,55 @@ Back to plan: [README](./README.md)
   `WorkItem` aggregate or queue row and keeps policy, proposal, authorization,
   and execution admission as distinct decisions.
 
-  - [ ] 7.1 Section - Implement desired outcomes and graph-native work structure.
+  - [x] 7.1 Section - Implement desired outcomes and graph-native work structure.
 
     This section introduces repository intent and executable decomposition
     without flattening goals, findings, constraints, dependencies, and plans
     into one object.
 
-    - [ ] 7.1.1 Task {#jcf-p07-desired-outcomes} [repo: jido_code] [after: {#jcf-p06-phase-receipt}] - Implement desired-outcome and constraint commands.
+    - [x] 7.1.1 Task {#jcf-p07-desired-outcomes} [repo: jido_code] [after: {#jcf-p06-phase-receipt}] - Implement desired-outcome and constraint commands.
 
       This task records what should become true and under which scope,
       evidence, and policy without immediately creating executable work.
 
-      - [ ] 7.1.1.1 Subtask {#jcf-p07-7-1-1-1} - Implement `AssertDesiredOutcome` with actor, enrollment/cohort scope, proposition or capability target, priority concept, validity, policy refs, evidence requirement, and expected control revision.
-      - [ ] 7.1.1.2 Subtask {#jcf-p07-7-1-1-2} - Model constraints for allowed branches/paths, change/risk bounds, required checks, approvals, time/budget, tools, sandboxes, and prohibited effects.
-      - [ ] 7.1.1.3 Subtask {#jcf-p07-7-1-1-3} - Add proposal, active, suspended, satisfied, waived, superseded, and retired transition concepts without a mutable status literal.
-      - [ ] 7.1.1.4 Subtask {#jcf-p07-7-1-1-4} - Require explicit supersession or decision when desired outcomes conflict and preserve both authored intents.
-      - [ ] 7.1.1.5 Subtask {#jcf-p07-7-1-1-5} - Keep desired state distinct from observed/inferred claims even when they use the same subject/predicate/object proposition.
+      - [x] 7.1.1.1 Subtask {#jcf-p07-7-1-1-1} - Implement `AssertDesiredOutcome` with actor, enrollment/cohort scope, proposition or capability target, priority concept, validity, policy refs, evidence requirement, and expected control revision.
+      - [x] 7.1.1.2 Subtask {#jcf-p07-7-1-1-2} - Model constraints for allowed branches/paths, change/risk bounds, required checks, approvals, time/budget, tools, sandboxes, and prohibited effects.
+      - [x] 7.1.1.3 Subtask {#jcf-p07-7-1-1-3} - Add proposal, active, suspended, satisfied, waived, superseded, and retired transition concepts without a mutable status literal.
+      - [x] 7.1.1.4 Subtask {#jcf-p07-7-1-1-4} - Require explicit supersession or decision when desired outcomes conflict and preserve both authored intents.
+      - [x] 7.1.1.5 Subtask {#jcf-p07-7-1-1-5} - Keep desired state distinct from observed/inferred claims even when they use the same subject/predicate/object proposition.
 
-    - [ ] 7.1.2 Task {#jcf-p07-goal-task-graph} [repo: jido_code] [after: {#jcf-p07-desired-outcomes}] - Implement goal, task, and dependency graph commands.
+    - [x] 7.1.2 Task {#jcf-p07-goal-task-graph} [repo: jido_code] [after: {#jcf-p07-desired-outcomes}] - Implement goal, task, and dependency graph commands.
 
       This task creates bounded units of intent and execution whose
       relationships remain directly queryable across findings, repositories,
       artifacts, and policies.
 
-      - [ ] 7.1.2.1 Subtask {#jcf-p07-7-1-2-1} - Implement `ProposeGoal` with scope, addressed outcome/finding/claim, governing policies, constraints, expected evidence, origin activity, and semantic deduplication key.
-      - [ ] 7.1.2.2 Subtask {#jcf-p07-7-1-2-2} - Model task decomposition, dependency, blocking, ordering, alternative paths, required input artifacts, required capabilities, and verification tasks as edges.
-      - [ ] 7.1.2.3 Subtask {#jcf-p07-7-1-2-3} - Define goal/task transitions for proposed, approved, eligible, blocked, leased, executing, awaiting evidence/decision, satisfied, rejected, cancelled, and superseded.
-      - [ ] 7.1.2.4 Subtask {#jcf-p07-7-1-2-4} - Permit a goal to address multiple findings and a task/evidence artifact to serve multiple goals without duplicated records.
-      - [ ] 7.1.2.5 Subtask {#jcf-p07-7-1-2-5} - Treat any UI `WorkItem` as a bounded projection anchored at a goal/task neighborhood, never a separate persisted resource family.
+      - [x] 7.1.2.1 Subtask {#jcf-p07-7-1-2-1} - Implement `ProposeGoal` with scope, addressed outcome/finding/claim, governing policies, constraints, expected evidence, origin activity, and semantic deduplication key.
+      - [x] 7.1.2.2 Subtask {#jcf-p07-7-1-2-2} - Model task decomposition, dependency, blocking, ordering, alternative paths, required input artifacts, required capabilities, and verification tasks as edges.
+      - [x] 7.1.2.3 Subtask {#jcf-p07-7-1-2-3} - Define goal/task transitions for proposed, approved, eligible, blocked, leased, executing, awaiting evidence/decision, satisfied, rejected, cancelled, and superseded.
+      - [x] 7.1.2.4 Subtask {#jcf-p07-7-1-2-4} - Permit a goal to address multiple findings and a task/evidence artifact to serve multiple goals without duplicated records.
+      - [x] 7.1.2.5 Subtask {#jcf-p07-7-1-2-5} - Treat any UI `WorkItem` as a bounded projection anchored at a goal/task neighborhood, never a separate persisted resource family.
 
-    - [ ] 7.1.3 Task {#jcf-p07-plan-adoption} [repo: jido_code] [after: {#jcf-p07-goal-task-graph}] - Implement plan proposal, validation, and adoption.
+    - [x] 7.1.3 Task {#jcf-p07-plan-adoption} [repo: jido_code] [after: {#jcf-p07-goal-task-graph}] - Implement plan proposal, validation, and adoption.
 
       This task separates a proposed decomposition from the governed act that
       makes tasks eligible for scheduling.
 
-      - [ ] 7.1.3.1 Subtask {#jcf-p07-7-1-3-1} - Define plan resources with goal, task/dependency graph, source claims/snapshot, planner actor/version, assumptions, expected effects, verification strategy, and bounds.
-      - [ ] 7.1.3.2 Subtask {#jcf-p07-7-1-3-2} - Validate acyclic or explicitly iterative dependency structure, scope compatibility, capability availability, constraint coverage, and mandatory verification/approval tasks.
-      - [ ] 7.1.3.3 Subtask {#jcf-p07-7-1-3-3} - Implement `AdoptPlan` as an authorized decision/transition with exact plan and source graph revisions.
-      - [ ] 7.1.3.4 Subtask {#jcf-p07-7-1-3-4} - Preserve rejected/superseded plan proposals and prevent stale plans from becoming current after source, policy, or goal changes.
-      - [ ] 7.1.3.5 Subtask {#jcf-p07-7-1-3-5} - Require explicit replanning when observed reality invalidates assumptions or dependency inputs.
+      - [x] 7.1.3.1 Subtask {#jcf-p07-7-1-3-1} - Define plan resources with goal, task/dependency graph, source claims/snapshot, planner actor/version, assumptions, expected effects, verification strategy, and bounds.
+      - [x] 7.1.3.2 Subtask {#jcf-p07-7-1-3-2} - Validate acyclic or explicitly iterative dependency structure, scope compatibility, capability availability, constraint coverage, and mandatory verification/approval tasks.
+      - [x] 7.1.3.3 Subtask {#jcf-p07-7-1-3-3} - Implement `AdoptPlan` as an authorized decision/transition with exact plan and source graph revisions.
+      - [x] 7.1.3.4 Subtask {#jcf-p07-7-1-3-4} - Preserve rejected/superseded plan proposals and prevent stale plans from becoming current after source, policy, or goal changes.
+      - [x] 7.1.3.5 Subtask {#jcf-p07-7-1-3-5} - Require explicit replanning when observed reality invalidates assumptions or dependency inputs.
 
-    - [ ] 7.1.4 Task {#jcf-p07-work-projections} [repo: jido_code] [after: {#jcf-p07-plan-adoption}] - Implement goal, plan, task, and dependency projections.
+    - [x] 7.1.4 Task {#jcf-p07-work-projections} [repo: jido_code] [after: {#jcf-p07-plan-adoption}] - Implement goal, plan, task, and dependency projections.
 
       This task provides human and runtime consumers with bounded work views
       while retaining graph identity and explanation paths.
 
-      - [ ] 7.1.4.1 Subtask {#jcf-p07-7-1-4-1} - Add goal neighborhood, task DAG, blocker, dependency, addressed finding/outcome, governing policy, required capability, and transition-history queries.
-      - [ ] 7.1.4.2 Subtask {#jcf-p07-7-1-4-2} - Project exact source/observation/policy/control revisions, current state chain, contradictions, stale assumptions, and missing evidence.
-      - [ ] 7.1.4.3 Subtask {#jcf-p07-7-1-4-3} - Add list/lens projections for proposed, active, eligible, blocked, executing, and awaiting-decision work without status fields.
-      - [ ] 7.1.4.4 Subtask {#jcf-p07-7-1-4-4} - Bound graph depth, task count, history, labels, and cross-repository expansion with explicit truncation.
+      - [x] 7.1.4.1 Subtask {#jcf-p07-7-1-4-1} - Add goal neighborhood, task DAG, blocker, dependency, addressed finding/outcome, governing policy, required capability, and transition-history queries.
+      - [x] 7.1.4.2 Subtask {#jcf-p07-7-1-4-2} - Project exact source/observation/policy/control revisions, current state chain, contradictions, stale assumptions, and missing evidence.
+      - [x] 7.1.4.3 Subtask {#jcf-p07-7-1-4-3} - Add list/lens projections for proposed, active, eligible, blocked, executing, and awaiting-decision work without status fields.
+      - [x] 7.1.4.4 Subtask {#jcf-p07-7-1-4-4} - Bound graph depth, task count, history, labels, and cross-repository expansion with explicit truncation.
 
   - [ ] 7.2 Section - Implement policies, cohorts, obligations, and capabilities.
 

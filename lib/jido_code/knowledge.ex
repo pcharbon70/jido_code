@@ -9,6 +9,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Commands.PublishSourceGraph
+  alias JidoCode.Knowledge.Control.DesiredOutcome
+  alias JidoCode.Knowledge.Control.WorkGraph
+  alias JidoCode.Knowledge.Control.WorkProjection
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -37,6 +40,19 @@ defmodule JidoCode.Knowledge do
 
   def source_publication_command(attributes, options \\ []),
     do: PublishSourceGraph.build(attributes, options)
+
+  def desired_outcome(attributes), do: DesiredOutcome.new(attributes)
+
+  def assert_desired_outcome(outcome, attributes, options \\ []),
+    do: DesiredOutcome.assert_command(outcome, attributes, options)
+
+  def propose_goal(attributes, options \\ []), do: WorkGraph.propose_goal(attributes, options)
+  def propose_plan(attributes, options \\ []), do: WorkGraph.propose_plan(attributes, options)
+
+  def adopt_plan(plan, attributes, options \\ []),
+    do: WorkGraph.adopt_plan(plan, attributes, options)
+
+  def project_work(result, context), do: WorkProjection.build(result, context)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

@@ -137,8 +137,13 @@ defmodule JidoCode.Knowledge.QueryParameters do
 
   defp bind_value(value, %{type: :concept, values: values}, _definition) when is_atom(value) do
     case Map.fetch(values, value) do
-      {:ok, iri} -> bind_value(iri, %{type: :resource_iri}, nil)
-      :error -> invalid()
+      {:ok, iri} ->
+        with :ok <- safe_iri(iri) do
+          {:ok, %{term: encode_iri(iri), normalized: iri}}
+        end
+
+      :error ->
+        invalid()
     end
   end
 

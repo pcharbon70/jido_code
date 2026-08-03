@@ -422,6 +422,135 @@ defmodule JidoCode.Knowledge.QuerySource do
     source_relation_query(true)
   end
 
+  def fetch(:desired_outcome_description) do
+    """
+    SELECT ?predicate ?object ?constraint ?constraintPredicate ?constraintValue WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+        OPTIONAL {
+          {{resource}} <#{@jf}constrainedBy> ?constraint .
+          ?constraint ?constraintPredicate ?constraintValue .
+        }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:goal_neighborhood) do
+    """
+    SELECT ?predicate ?object ?incoming ?incomingPredicate WHERE {
+      GRAPH {{graph}} {
+        { {{resource}} ?predicate ?object }
+        UNION
+        { ?incoming ?incomingPredicate {{resource}} }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:task_dag) do
+    """
+    SELECT ?task ?kind ?dependency ?blocker ?alternative ?capability ?artifact WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}includesTask> ?task .
+        OPTIONAL { ?task <#{@jf}taskKind> ?kind }
+        OPTIONAL { ?task <#{@jf}dependsOn> ?dependency }
+        OPTIONAL { ?task <#{@jf}blocks> ?blocker }
+        OPTIONAL { ?task <#{@jf}alternativeTo> ?alternative }
+        OPTIONAL { ?task <#{@jf}requiresCapability> ?capability }
+        OPTIONAL { ?task <#{@jf}requiresArtifact> ?artifact }
+      }
+    }
+    ORDER BY ?task ?dependency
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:work_blockers) do
+    """
+    SELECT ?dependency ?dependencyTransition ?dependencyState ?blocker WHERE {
+      GRAPH {{graph}} {
+        OPTIONAL { {{resource}} <#{@jf}dependsOn> ?dependency }
+        OPTIONAL { ?blocker <#{@jf}blocks> {{resource}} }
+        OPTIONAL {
+          ?dependencyTransition <#{@jf}transitionSubject> ?dependency ;
+                                <#{@jf}nextState> ?dependencyState .
+          ?decision <#{@jf}accepts> ?dependencyTransition .
+          FILTER NOT EXISTS {
+            ?successor <#{@jf}expectedPredecessor> ?dependencyTransition .
+            ?successorDecision <#{@jf}accepts> ?successor .
+          }
+        }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:work_transition_history) do
+    """
+    SELECT ?transition ?state ?revision ?predecessor ?actor ?cause ?reason ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> {{resource}} ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ;
+                    <#{@prov}wasAssociatedWith> ?actor ;
+                    <#{@jf}cause> ?cause ;
+                    <#{@jf}reason> ?reason ;
+                    <#{@jf}recordedAt> ?recorded .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+      }
+    }
+    ORDER BY ?revision
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:work_lens) do
+    """
+    SELECT ?work ?transition ?revision ?successor WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> ?work ;
+                    <#{@jf}nextState> {{state}} ;
+                    <#{@jf}subjectRevision> ?revision .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL {
+          ?successor <#{@jf}expectedPredecessor> ?transition .
+          ?successorDecision <#{@jf}accepts> ?successor .
+        }
+      }
+    }
+    ORDER BY ?work
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:plan_context) do
+    """
+    SELECT ?sourceGraphIri ?sourceRevision ?snapshot ?planner ?plannerVersion ?assumption ?effect ?strategy ?revisionReference ?inputGraphIri ?inputRevision WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}sourceGraph> ?sourceGraphIri ;
+                     <#{@jf}sourceRevisionNumber> ?sourceRevision ;
+                     <#{@jf}sourceSnapshot> ?snapshot ;
+                     <#{@jf}planner> ?planner ;
+                     <#{@jf}displayId> ?plannerVersion ;
+                     <#{@jf}verificationStrategy> ?strategy .
+        OPTIONAL { {{resource}} <#{@jf}derivedFrom> ?assumption }
+        OPTIONAL { {{resource}} <#{@jf}expectedEffect> ?effect }
+        OPTIONAL {
+          {{resource}} <#{@jf}sourceGraphRevision> ?revisionReference .
+          ?revisionReference <#{@jf}sourceGraph> ?inputGraphIri ;
+                             <#{@jf}sourceRevisionNumber> ?inputRevision .
+        }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
