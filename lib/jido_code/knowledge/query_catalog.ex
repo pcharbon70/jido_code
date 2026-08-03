@@ -18,6 +18,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @reconciliation_version "1.4.0"
   @scheduling_version "1.5.0"
   @execution_version "1.6.0"
+  @knowledge_version "1.7.0"
   @versions [
     @version,
     @repository_version,
@@ -25,7 +26,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @governance_version,
     @reconciliation_version,
     @scheduling_version,
-    @execution_version
+    @execution_version,
+    @knowledge_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -57,6 +59,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec execution_version() :: String.t()
   def execution_version, do: @execution_version
+
+  @spec knowledge_version() :: String.t()
+  def knowledge_version, do: @knowledge_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -368,6 +373,17 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           reconciliation_specifications(graph, resource) ++
           scheduling_specifications(graph, resource) ++
           execution_boundary_specifications(resource)
+
+      @knowledge_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource)
     end
   end
 
@@ -983,6 +999,112 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:run_attempt],
         :table,
         "Read run graph lifecycle, provenance completeness, missing outputs, and limitations.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp evidence_specifications(resource) do
+    stale = Map.put(resource, :instant, %{type: :datetime, required: true})
+
+    [
+      spec(
+        :evidence_by_goal,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded evidence connected to one exact goal.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_by_claim,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded support and contradiction for one exact claim.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_by_attempt,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded evidence generated from one exact execution attempt.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_by_artifact,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded evidence that evaluated one content-addressed artifact.",
+        :product,
+        :declared
+      ),
+      spec(
+        :verification_timeline,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read verification activities and failed, skipped, or unknown checks.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_support,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read supporting and contradictory evidence without collapsing either side.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_sufficiency,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read exact evidence inputs for a pure sufficiency evaluation.",
+        :product,
+        :declared
+      ),
+      spec(
+        :stale_evidence,
+        :select,
+        stale,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read expired or superseded evidence candidates at one instant.",
+        :product,
+        :declared
+      ),
+      spec(
+        :missing_evidence_requirements,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read recorded method and coverage facts used to explain missing requirements.",
         :product,
         :declared
       )

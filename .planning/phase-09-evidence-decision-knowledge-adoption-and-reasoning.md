@@ -21,54 +21,54 @@ Back to plan: [README](./README.md)
   claims and artifacts, but only verification plus an authorized decision can
   satisfy work or adopt knowledge for future factory behavior.
 
-  - [ ] 9.1 Section - Implement verification activities and evidence bundles.
+  - [x] 9.1 Section - Implement verification activities and evidence bundles.
 
     This section evaluates exact artifacts, snapshots, claims, and goals under
     versioned methods and packages the result as support or contradiction
     rather than a generic success flag.
 
-    - [ ] 9.1.1 Task {#jcf-p09-verification-contract} [repo: jido_code] [after: {#jcf-p08-phase-receipt}] - Define verification method and activity contracts.
+    - [x] 9.1.1 Task {#jcf-p09-verification-contract} [repo: jido_code] [after: {#jcf-p08-phase-receipt}] - Define verification method and activity contracts.
 
       This task makes tests, reviews, policy checks, source comparisons, and
       provider confirmations reproducible and explicit about what they can
       prove.
 
-      - [ ] 9.1.1.1 Subtask {#jcf-p09-9-1-1-1} - Define verification method identity/version, input classes, expected claims, completeness requirements, evaluator capability, environment, bounds, and interpretation limits.
-      - [ ] 9.1.1.2 Subtask {#jcf-p09-9-1-1-2} - Define verification activities with attempt/task/goal, exact source/proposed/post-change snapshot, artifact digests, method/version, actor/evaluator, start/end, and raw bounded outcome refs.
-      - [ ] 9.1.1.3 Subtask {#jcf-p09-9-1-1-3} - Distinguish test execution, static analysis, semantic comparison, human review, policy check, security review, and external-provider confirmation.
-      - [ ] 9.1.1.4 Subtask {#jcf-p09-9-1-1-4} - Require strict input freshness and reject unavailable/mismatched artifacts, stale source graphs, incomplete suites, wrong environments, and unsupported method versions.
-      - [ ] 9.1.1.5 Subtask {#jcf-p09-9-1-1-5} - Keep evaluator conclusions advisory until evidence construction and decision policy accept them.
+      - [x] 9.1.1.1 Subtask {#jcf-p09-9-1-1-1} - Define verification method identity/version, input classes, expected claims, completeness requirements, evaluator capability, environment, bounds, and interpretation limits.
+      - [x] 9.1.1.2 Subtask {#jcf-p09-9-1-1-2} - Define verification activities with attempt/task/goal, exact source/proposed/post-change snapshot, artifact digests, method/version, actor/evaluator, start/end, and raw bounded outcome refs.
+      - [x] 9.1.1.3 Subtask {#jcf-p09-9-1-1-3} - Distinguish test execution, static analysis, semantic comparison, human review, policy check, security review, and external-provider confirmation.
+      - [x] 9.1.1.4 Subtask {#jcf-p09-9-1-1-4} - Require strict input freshness and reject unavailable/mismatched artifacts, stale source graphs, incomplete suites, wrong environments, and unsupported method versions.
+      - [x] 9.1.1.5 Subtask {#jcf-p09-9-1-1-5} - Keep evaluator conclusions advisory until evidence construction and decision policy accept them.
 
-    - [ ] 9.1.2 Task {#jcf-p09-evidence-bundle} [repo: jido_code] [after: {#jcf-p09-verification-contract}] - Implement `RecordVerificationEvidence` and evidence-bundle construction.
+    - [x] 9.1.2 Task {#jcf-p09-evidence-bundle} [repo: jido_code] [after: {#jcf-p09-verification-contract}] - Implement `RecordVerificationEvidence` and evidence-bundle construction.
 
       This task creates a governed semantic collection that connects precise
       verification outputs to the claims and goals they support or contradict.
 
-      - [ ] 9.1.2.1 Subtask {#jcf-p09-9-1-2-1} - Require verification activity/method, input graph/artifact/snapshot revisions, generated claims, support/contradiction targets, evaluator, completeness, limitations, and idempotency.
-      - [ ] 9.1.2.2 Subtask {#jcf-p09-9-1-2-2} - Validate every cited artifact digest, attempt provenance, source snapshot, claim proposition, and authorized evidence writer capability.
-      - [ ] 9.1.2.3 Subtask {#jcf-p09-9-1-2-3} - Record evidence strength/classification, coverage, failures, skipped/unknown checks, environmental limits, validity interval, and supersession links without equating confidence with acceptance.
-      - [ ] 9.1.2.4 Subtask {#jcf-p09-9-1-2-4} - Commit evidence and generated claim resources atomically in the repository evidence graph with provenance and audit.
-      - [ ] 9.1.2.5 Subtask {#jcf-p09-9-1-2-5} - Reject evidence bundles that cite unverified content, broaden scope, hide failed mandatory checks, or originate from the same agent when policy requires independent evaluation.
+      - [x] 9.1.2.1 Subtask {#jcf-p09-9-1-2-1} - Require verification activity/method, input graph/artifact/snapshot revisions, generated claims, support/contradiction targets, evaluator, completeness, limitations, and idempotency.
+      - [x] 9.1.2.2 Subtask {#jcf-p09-9-1-2-2} - Validate every cited artifact digest, attempt provenance, source snapshot, claim proposition, and authorized evidence writer capability.
+      - [x] 9.1.2.3 Subtask {#jcf-p09-9-1-2-3} - Record evidence strength/classification, coverage, failures, skipped/unknown checks, environmental limits, validity interval, and supersession links without equating confidence with acceptance.
+      - [x] 9.1.2.4 Subtask {#jcf-p09-9-1-2-4} - Commit evidence and generated claim resources atomically in the repository evidence graph with provenance and audit.
+      - [x] 9.1.2.5 Subtask {#jcf-p09-9-1-2-5} - Reject evidence bundles that cite unverified content, broaden scope, hide failed mandatory checks, or originate from the same agent when policy requires independent evaluation.
 
-    - [ ] 9.1.3 Task {#jcf-p09-evidence-requirements} [repo: jido_code] [after: {#jcf-p09-evidence-bundle}] - Implement policy-driven evidence sufficiency evaluation.
+    - [x] 9.1.3 Task {#jcf-p09-evidence-requirements} [repo: jido_code] [after: {#jcf-p09-evidence-bundle}] - Implement policy-driven evidence sufficiency evaluation.
 
       This task compares collected evidence with goal/policy requirements and
       returns an explainable readiness assessment, not a decision.
 
-      - [ ] 9.1.3.1 Subtask {#jcf-p09-9-1-3-1} - Resolve required method classes, independent reviewers, freshness, coverage, environments, security checks, post-change observations, and waiver rules from exact policy/plan revisions.
-      - [ ] 9.1.3.2 Subtask {#jcf-p09-9-1-3-2} - Evaluate supporting/contradicting evidence, supersession, validity, artifact/snapshot consistency, missing/unknown checks, and policy conflicts under declared complete graphs.
-      - [ ] 9.1.3.3 Subtask {#jcf-p09-9-1-3-3} - Return sufficient, insufficient, contradicted, stale, incomplete, policy-conflicted, or waiver-required with exact explanation paths.
-      - [ ] 9.1.3.4 Subtask {#jcf-p09-9-1-3-4} - Prohibit sufficiency output from transitioning goals or accepting claims directly.
+      - [x] 9.1.3.1 Subtask {#jcf-p09-9-1-3-1} - Resolve required method classes, independent reviewers, freshness, coverage, environments, security checks, post-change observations, and waiver rules from exact policy/plan revisions.
+      - [x] 9.1.3.2 Subtask {#jcf-p09-9-1-3-2} - Evaluate supporting/contradicting evidence, supersession, validity, artifact/snapshot consistency, missing/unknown checks, and policy conflicts under declared complete graphs.
+      - [x] 9.1.3.3 Subtask {#jcf-p09-9-1-3-3} - Return sufficient, insufficient, contradicted, stale, incomplete, policy-conflicted, or waiver-required with exact explanation paths.
+      - [x] 9.1.3.4 Subtask {#jcf-p09-9-1-3-4} - Prohibit sufficiency output from transitioning goals or accepting claims directly.
 
-    - [ ] 9.1.4 Task {#jcf-p09-evidence-projections} [repo: jido_code] [after: {#jcf-p09-evidence-requirements}] - Implement evidence and verification projections.
+    - [x] 9.1.4 Task {#jcf-p09-evidence-projections} [repo: jido_code] [after: {#jcf-p09-evidence-requirements}] - Implement evidence and verification projections.
 
       This task gives operators and decision services bounded views over what
       was checked, what was proved, what failed, and what remains unknown.
 
-      - [ ] 9.1.4.1 Subtask {#jcf-p09-9-1-4-1} - Add evidence-by-goal/claim/attempt/artifact, verification timeline, support/contradiction, sufficiency, stale evidence, and missing requirement queries.
-      - [ ] 9.1.4.2 Subtask {#jcf-p09-9-1-4-2} - Include exact method/policy/source/run/query revisions, evaluator authority, validity, coverage, limitations, and truncation.
-      - [ ] 9.1.4.3 Subtask {#jcf-p09-9-1-4-3} - Preserve failed/skipped checks and contradictory evidence in projections instead of summarizing them away.
-      - [ ] 9.1.4.4 Subtask {#jcf-p09-9-1-4-4} - Redact sensitive artifacts and require separate authorization for raw retained outputs.
+      - [x] 9.1.4.1 Subtask {#jcf-p09-9-1-4-1} - Add evidence-by-goal/claim/attempt/artifact, verification timeline, support/contradiction, sufficiency, stale evidence, and missing requirement queries.
+      - [x] 9.1.4.2 Subtask {#jcf-p09-9-1-4-2} - Include exact method/policy/source/run/query revisions, evaluator authority, validity, coverage, limitations, and truncation.
+      - [x] 9.1.4.3 Subtask {#jcf-p09-9-1-4-3} - Preserve failed/skipped checks and contradictory evidence in projections instead of summarizing them away.
+      - [x] 9.1.4.4 Subtask {#jcf-p09-9-1-4-4} - Redact sensitive artifacts and require separate authorization for raw retained outputs.
 
   - [ ] 9.2 Section - Implement governed decisions and outcome transitions.
 

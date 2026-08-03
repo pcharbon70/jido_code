@@ -30,6 +30,12 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Artifact
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
+  alias JidoCode.Knowledge.Evidence.Bundle, as: EvidenceBundle
+  alias JidoCode.Knowledge.Evidence.Graph, as: EvidenceGraph
+  alias JidoCode.Knowledge.Evidence.Projection, as: EvidenceProjection
+  alias JidoCode.Knowledge.Evidence.Sufficiency, as: EvidenceSufficiency
+  alias JidoCode.Knowledge.Evidence.VerificationActivity
+  alias JidoCode.Knowledge.Evidence.VerificationMethod
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -193,6 +199,25 @@ defmodule JidoCode.Knowledge do
 
   def execution_recovery_candidates(result, graph_iri),
     do: ExecutionRecovery.candidates(result, graph_iri)
+
+  def verification_method(attributes), do: VerificationMethod.new(attributes)
+
+  def verification_activity(method, attributes),
+    do: VerificationActivity.new(method, attributes)
+
+  def evidence_bundle(activity, evidence_graph_iri, attributes),
+    do: EvidenceBundle.new(activity, evidence_graph_iri, attributes)
+
+  def record_verification_evidence(bundle, attributes, options \\ []),
+    do: EvidenceBundle.record_command(bundle, attributes, options)
+
+  def evaluate_evidence_sufficiency(bundles, requirements, context),
+    do: EvidenceSufficiency.evaluate(bundles, requirements, context)
+
+  def project_evidence(result, context), do: EvidenceProjection.build(result, context)
+  def project_evidence_sufficiency(assessment), do: EvidenceProjection.sufficiency(assessment)
+
+  def evidence_graph_identity(repository_iri), do: EvidenceGraph.evidence_graph(repository_iri)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

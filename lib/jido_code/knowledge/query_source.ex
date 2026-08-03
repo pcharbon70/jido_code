@@ -994,6 +994,158 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:evidence_by_goal),
+    do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
+
+  def fetch(:evidence_by_claim) do
+    evidence_bundle_query("""
+    {
+      ?bundle <#{@jf}generatedClaim> {{resource}} .
+    } UNION {
+      ?bundle <#{@jf}supports> {{resource}} .
+    } UNION {
+      ?bundle <#{@jf}contradicts> {{resource}} .
+    }
+    """)
+  end
+
+  def fetch(:evidence_by_attempt) do
+    """
+    SELECT ?bundle ?activity ?method ?methodVersion ?kind ?evaluator ?strength ?classification
+           ?coverageTotal ?coveragePassed ?coverageFailed ?coverageSkipped ?coverageUnknown
+           ?completeness ?support ?contradiction ?claim ?limitation ?validFrom ?validTo
+           ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        ?activity <#{@jf}evaluatedAttempt> {{resource}} .
+        ?bundle a <#{@jf}EvidenceBundle> ;
+                <#{@jf}verificationActivity> ?activity ;
+                <#{@jf}evidenceStrength> ?strength ;
+                <#{@jf}evidenceClassification> ?classification ;
+                <#{@jf}coverageTotal> ?coverageTotal ;
+                <#{@jf}coveragePassed> ?coveragePassed ;
+                <#{@jf}coverageFailed> ?coverageFailed ;
+                <#{@jf}coverageSkipped> ?coverageSkipped ;
+                <#{@jf}coverageUnknown> ?coverageUnknown ;
+                <#{@jf}completenessState> ?completeness ;
+                <#{@jf}validFrom> ?validFrom ;
+                <#{@jf}validTo> ?validTo .
+        ?activity <#{@jf}usesVerificationMethod> ?method ;
+                  <#{@prov}wasAssociatedWith> ?evaluator .
+        ?method <#{@jf}version> ?methodVersion ; <#{@jf}verificationKind> ?kind .
+        OPTIONAL { ?bundle <#{@jf}supports> ?support }
+        OPTIONAL { ?bundle <#{@jf}contradicts> ?contradiction }
+        OPTIONAL { ?bundle <#{@jf}generatedClaim> ?claim }
+        OPTIONAL { ?bundle <#{@jf}limitation> ?limitation }
+        OPTIONAL {
+          ?bundle <#{@jf}sourceGraphRevision> ?sourceRef .
+          ?sourceRef <#{@jf}sourceGraph> ?sourceGraphIri ;
+                     <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+      }
+    }
+    ORDER BY ?bundle ?sourceGraphIri
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:evidence_by_artifact) do
+    """
+    SELECT ?bundle ?activity ?method ?methodVersion ?kind ?evaluator ?strength ?classification
+           ?coverageTotal ?coveragePassed ?coverageFailed ?coverageSkipped ?coverageUnknown
+           ?completeness ?support ?contradiction ?claim ?limitation ?validFrom ?validTo
+           ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        ?activity <#{@jf}evaluatesArtifact> {{resource}} .
+        ?bundle a <#{@jf}EvidenceBundle> ;
+                <#{@jf}verificationActivity> ?activity ;
+                <#{@jf}evidenceStrength> ?strength ;
+                <#{@jf}evidenceClassification> ?classification ;
+                <#{@jf}coverageTotal> ?coverageTotal ;
+                <#{@jf}coveragePassed> ?coveragePassed ;
+                <#{@jf}coverageFailed> ?coverageFailed ;
+                <#{@jf}coverageSkipped> ?coverageSkipped ;
+                <#{@jf}coverageUnknown> ?coverageUnknown ;
+                <#{@jf}completenessState> ?completeness ;
+                <#{@jf}validFrom> ?validFrom ;
+                <#{@jf}validTo> ?validTo .
+        ?activity <#{@jf}usesVerificationMethod> ?method ;
+                  <#{@prov}wasAssociatedWith> ?evaluator .
+        ?method <#{@jf}version> ?methodVersion ; <#{@jf}verificationKind> ?kind .
+        OPTIONAL { ?bundle <#{@jf}supports> ?support }
+        OPTIONAL { ?bundle <#{@jf}contradicts> ?contradiction }
+        OPTIONAL { ?bundle <#{@jf}generatedClaim> ?claim }
+        OPTIONAL { ?bundle <#{@jf}limitation> ?limitation }
+        OPTIONAL {
+          ?bundle <#{@jf}sourceGraphRevision> ?sourceRef .
+          ?sourceRef <#{@jf}sourceGraph> ?sourceGraphIri ;
+                     <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+      }
+    }
+    ORDER BY ?bundle ?sourceGraphIri
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:verification_timeline) do
+    """
+    SELECT ?activity ?method ?methodVersion ?kind ?evaluator ?started ?ended ?completeness
+           ?snapshot ?artifact ?check ?checkId ?checkStatus ?mandatory ?rawRef WHERE {
+      GRAPH {{graph}} {
+        ?activity a <#{@jf}VerificationActivity> ;
+                  <#{@jf}evaluatedGoal> {{resource}} ;
+                  <#{@jf}usesVerificationMethod> ?method ;
+                  <#{@jf}evaluatedSnapshot> ?snapshot ;
+                  <#{@prov}wasAssociatedWith> ?evaluator ;
+                  <#{@prov}startedAtTime> ?started ;
+                  <#{@prov}endedAtTime> ?ended ;
+                  <#{@jf}completenessState> ?completeness .
+        ?method <#{@jf}version> ?methodVersion ; <#{@jf}verificationKind> ?kind .
+        OPTIONAL { ?activity <#{@jf}evaluatesArtifact> ?artifact }
+        OPTIONAL {
+          ?activity <#{@jf}hasCheck> ?check .
+          ?check <#{@jf}displayId> ?checkId ;
+                 <#{@jf}checkStatus> ?checkStatus ;
+                 <#{@jf}mandatory> ?mandatory .
+          OPTIONAL { ?check <#{@jf}rawOutcome> ?rawRef }
+        }
+      }
+    }
+    ORDER BY ?started ?activity ?checkId
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:evidence_support), do: fetch(:evidence_by_claim)
+
+  def fetch(:evidence_sufficiency),
+    do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
+
+  def fetch(:missing_evidence_requirements),
+    do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
+
+  def fetch(:stale_evidence) do
+    """
+    SELECT ?bundle ?validTo ?superseder ?activity ?method ?methodVersion ?kind ?evaluator
+           ?support ?contradiction WHERE {
+      GRAPH {{graph}} {
+        ?bundle a <#{@jf}EvidenceBundle> ;
+                <#{@jf}verificationActivity> ?activity ;
+                <#{@jf}validTo> ?validTo .
+        ?activity <#{@jf}usesVerificationMethod> ?method ;
+                  <#{@prov}wasAssociatedWith> ?evaluator .
+        ?method <#{@jf}version> ?methodVersion ; <#{@jf}verificationKind> ?kind .
+        OPTIONAL { ?bundle <#{@jf}supports> ?support }
+        OPTIONAL { ?bundle <#{@jf}contradicts> ?contradiction }
+        OPTIONAL { ?superseder <#{@jf}supersedes> ?bundle }
+        FILTER(?validTo < {{instant}} || BOUND(?superseder))
+      }
+    }
+    ORDER BY ?validTo ?bundle
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
@@ -1001,6 +1153,48 @@ defmodule JidoCode.Knowledge.QuerySource do
         ?claim <#{@jf}#{predicate}> {{resource}} .
       }
     }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  defp evidence_bundle_query(match) do
+    """
+    SELECT ?bundle ?activity ?attempt ?goal ?artifact ?method ?methodVersion ?kind ?evaluator
+           ?strength ?classification ?coverageTotal ?coveragePassed ?coverageFailed
+           ?coverageSkipped ?coverageUnknown ?completeness ?support ?contradiction ?claim
+           ?limitation ?validFrom ?validTo ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        #{match}
+        ?bundle a <#{@jf}EvidenceBundle> ;
+                <#{@jf}verificationActivity> ?activity ;
+                <#{@jf}evidenceStrength> ?strength ;
+                <#{@jf}evidenceClassification> ?classification ;
+                <#{@jf}coverageTotal> ?coverageTotal ;
+                <#{@jf}coveragePassed> ?coveragePassed ;
+                <#{@jf}coverageFailed> ?coverageFailed ;
+                <#{@jf}coverageSkipped> ?coverageSkipped ;
+                <#{@jf}coverageUnknown> ?coverageUnknown ;
+                <#{@jf}completenessState> ?completeness ;
+                <#{@jf}validFrom> ?validFrom ;
+                <#{@jf}validTo> ?validTo .
+        ?activity <#{@jf}usesVerificationMethod> ?method ;
+                  <#{@jf}evaluatedAttempt> ?attempt ;
+                  <#{@jf}evaluatedGoal> ?goal ;
+                  <#{@prov}wasAssociatedWith> ?evaluator .
+        ?method <#{@jf}version> ?methodVersion ; <#{@jf}verificationKind> ?kind .
+        OPTIONAL { ?activity <#{@jf}evaluatesArtifact> ?artifact }
+        OPTIONAL { ?bundle <#{@jf}supports> ?support }
+        OPTIONAL { ?bundle <#{@jf}contradicts> ?contradiction }
+        OPTIONAL { ?bundle <#{@jf}generatedClaim> ?claim }
+        OPTIONAL { ?bundle <#{@jf}limitation> ?limitation }
+        OPTIONAL {
+          ?bundle <#{@jf}sourceGraphRevision> ?sourceRef .
+          ?sourceRef <#{@jf}sourceGraph> ?sourceGraphIri ;
+                     <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+      }
+    }
+    ORDER BY ?bundle ?sourceGraphIri
     LIMIT {{row_limit}}
     """
   end

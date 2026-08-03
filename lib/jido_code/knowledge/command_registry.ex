@@ -16,6 +16,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @reconciliation_version "1.4.0"
   @scheduling_version "1.5.0"
   @execution_version "1.6.0"
+  @knowledge_version "1.7.0"
   @commands %{
     "EnrollRepository" => %{
       owner: :factory,
@@ -289,11 +290,29 @@ defmodule JidoCode.Knowledge.CommandRegistry do
                |> Map.merge(@phase_08_attempt_commands)
                |> Map.merge(@phase_08_effect_commands)
 
+  @phase_09_evidence_commands %{
+    "RecordVerificationEvidence" => %{
+      owner: :evaluation,
+      capability: :evidence,
+      graph_families: [:evidence],
+      preconditions: [
+        :verification_inputs_exact,
+        :artifacts_verified,
+        :attempt_provenance_exact,
+        :evidence_bundle_absent
+      ]
+    }
+  }
+  @version_1_7 Map.merge(@version_1_6, @phase_09_evidence_commands)
+
   @spec version() :: String.t()
   def version, do: @version
 
   @spec execution_version() :: String.t()
   def execution_version, do: @execution_version
+
+  @spec knowledge_version() :: String.t()
+  def knowledge_version, do: @knowledge_version
 
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
@@ -306,6 +325,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@reconciliation_version), do: @version_1_4 |> Map.keys() |> Enum.sort()
   def names(@scheduling_version), do: @version_1_5 |> Map.keys() |> Enum.sort()
   def names(@execution_version), do: @version_1_6 |> Map.keys() |> Enum.sort()
+  def names(@knowledge_version), do: @version_1_7 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -370,6 +390,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_1_6, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @execution_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @knowledge_version) when is_binary(name) do
+    case Map.fetch(@version_1_7, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @knowledge_version})}
 
       :error ->
         invalid(:command_type)

@@ -28,6 +28,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     leasesTask eligibilityReceipt livenessEvidence
     scopedTo participant audience replyTo resultingCommand instruction contextItem
     attempts delegatedAgent retryOf
+    usesVerificationMethod evaluatorCapability expectedClaim evaluatesArtifact generatedClaim
+    verificationActivity evaluatedAttempt evaluatedTask evaluatedGoal evaluatedSnapshot
+    hasCheck rawOutcome
+    verificationKind inputClass checkStatus evidenceStrength evidenceClassification
   ])
   @max_guards 100
 
