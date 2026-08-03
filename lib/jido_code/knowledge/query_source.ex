@@ -1248,6 +1248,42 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:knowledge_by_scope),
+    do: knowledge_query("?assertion <#{@jf}validFor> {{resource}} .")
+
+  def fetch(:knowledge_by_goal),
+    do: knowledge_query("?assertion <#{@jf}addresses> {{resource}} .")
+
+  def fetch(:knowledge_by_task),
+    do: knowledge_query("?assertion <#{@jf}addresses> {{resource}} .")
+
+  def fetch(:knowledge_by_source),
+    do:
+      knowledge_query(
+        "?assertion <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> {{resource}} ."
+      )
+
+  def fetch(:knowledge_by_policy),
+    do: knowledge_query("?assertion <#{@jf}governedBy> {{resource}} .")
+
+  def fetch(:knowledge_by_classification),
+    do: knowledge_query("?assertion <#{@jf}knowledgeClassification> {{resource}} .")
+
+  def fetch(:knowledge_by_validity),
+    do: knowledge_query("?assertion <#{@jf}validFor> {{resource}} .")
+
+  def fetch(:knowledge_neighborhood) do
+    knowledge_query("""
+    {
+      ?assertion ?neighborhoodPredicate {{resource}} .
+      FILTER(?neighborhoodPredicate IN (<#{@jf}supports>, <#{@jf}contradicts>, <#{@jf}supersedes>))
+    } UNION {
+      {{resource}} ?neighborhoodPredicate ?assertion .
+      FILTER(?neighborhoodPredicate IN (<#{@jf}supports>, <#{@jf}contradicts>, <#{@jf}supersedes>))
+    }
+    """)
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {
@@ -1342,6 +1378,54 @@ defmodule JidoCode.Knowledge.QuerySource do
       }
     }
     ORDER BY ?recorded ?decision
+    LIMIT {{row_limit}}
+    """
+  end
+
+  defp knowledge_query(match) do
+    """
+    SELECT ?assertion ?subject ?predicate ?object ?classification ?scope ?state ?stateRevision
+           ?stateTransition ?adoption ?actor ?policy ?policyVersion ?confidence ?validFrom ?validTo
+           ?recorded ?decision ?claim ?evidence ?snapshot ?related ?support ?contradiction
+           ?superseded ?limitation ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        #{match}
+        ?assertion a <#{@jf}KnowledgeAssertion> ;
+                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ?subject ;
+                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> ?predicate ;
+                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ?object ;
+                   <#{@jf}knowledgeClassification> ?classification ;
+                   <#{@jf}validFor> ?scope ;
+                   <#{@jf}sourceActivity> ?adoption ;
+                   <#{@jf}governedBy> ?policy ;
+                   <#{@jf}version> ?policyVersion ;
+                   <#{@jf}confidenceScore> ?confidence ;
+                   <#{@jf}validFrom> ?validFrom ;
+                   <#{@jf}validTo> ?validTo ;
+                   <#{@jf}recordedAt> ?recorded .
+        ?adoption <#{@prov}wasAssociatedWith> ?actor .
+        ?stateTransition a <#{@jf}KnowledgeStateTransition> ;
+                         <#{@jf}transitionSubject> ?assertion ;
+                         <#{@jf}nextState> ?state ;
+                         <#{@jf}subjectRevision> ?stateRevision .
+        ?stateActivity <#{@jf}accepts> ?stateTransition .
+        OPTIONAL { ?assertion <#{@prov}wasDerivedFrom> ?decision }
+        OPTIONAL { ?assertion <#{@jf}sourceClaim> ?claim }
+        OPTIONAL { ?assertion <#{@jf}evidenceSource> ?evidence }
+        OPTIONAL { ?assertion <#{@jf}sourceSnapshot> ?snapshot }
+        OPTIONAL { ?assertion <#{@jf}addresses> ?related }
+        OPTIONAL { ?assertion <#{@jf}supports> ?support }
+        OPTIONAL { ?assertion <#{@jf}contradicts> ?contradiction }
+        OPTIONAL { ?superseded <#{@jf}supersedes> ?assertion }
+        OPTIONAL { ?assertion <#{@jf}limitation> ?limitation }
+        OPTIONAL {
+          ?assertion <#{@jf}sourceGraphRevision> ?sourceReference .
+          ?sourceReference <#{@jf}sourceGraph> ?sourceGraphIri ;
+                           <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+      }
+    }
+    ORDER BY DESC(?recorded) ?assertion
     LIMIT {{row_limit}}
     """
   end

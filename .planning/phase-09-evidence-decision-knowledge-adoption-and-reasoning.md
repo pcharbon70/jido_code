@@ -117,43 +117,43 @@ Back to plan: [README](./README.md)
       - [x] 9.2.4.3 Subtask {#jcf-p09-9-2-4-3} - Distinguish attempt completion, patch approval, external application, post-change verification, and final goal satisfaction.
       - [x] 9.2.4.4 Subtask {#jcf-p09-9-2-4-4} - Bound rationale display to authored explanation refs and never require or expose chain-of-thought.
 
-  - [ ] 9.3 Section - Implement governed knowledge adoption and retrieval.
+  - [x] 9.3 Section - Implement governed knowledge adoption and retrieval.
 
     This section makes durable repository memory a set of accepted knowledge
     assertions linked to evidence and decisions rather than a separate record
     store or transcript cache.
 
-    - [ ] 9.3.1 Task {#jcf-p09-adoption-command} [repo: jido_code] [after: {#jcf-p09-decision-projections}] - Implement `AdoptKnowledge` semantics.
+    - [x] 9.3.1 Task {#jcf-p09-adoption-command} [repo: jido_code] [after: {#jcf-p09-decision-projections}] - Implement `AdoptKnowledge` semantics.
 
       This task promotes a bounded accepted claim into reusable repository or
       factory knowledge under explicit scope, classification, and validity.
 
-      - [ ] 9.3.1.1 Subtask {#jcf-p09-9-3-1-1} - Require accepted source claim/decision/evidence, adoption actor/policy, repository/cohort scope, knowledge classification, validity, confidence/limitations, and expected memory revision.
-      - [ ] 9.3.1.2 Subtask {#jcf-p09-9-3-1-2} - Define classifications for fact, convention, decision, lesson, pattern, known issue, risk, workaround, preference, and open question as controlled concepts.
-      - [ ] 9.3.1.3 Subtask {#jcf-p09-9-3-1-3} - Record `KnowledgeAssertion` and `AdoptionActivity` in the memory graph with direct links to all source claims, evidence, decisions, snapshots, actors, and policy versions.
-      - [ ] 9.3.1.4 Subtask {#jcf-p09-9-3-1-4} - Reject raw prompt/tool output, unaccepted claims, stale/contradicted evidence, over-broad scope, unsupported classification, and secret-bearing content.
-      - [ ] 9.3.1.5 Subtask {#jcf-p09-9-3-1-5} - Make identical adoption idempotent and preserve independently adopted compatible assertions as explicit support.
+      - [x] 9.3.1.1 Subtask {#jcf-p09-9-3-1-1} - Require accepted source claim/decision/evidence, adoption actor/policy, repository/cohort scope, knowledge classification, validity, confidence/limitations, and expected memory revision.
+      - [x] 9.3.1.2 Subtask {#jcf-p09-9-3-1-2} - Define classifications for fact, convention, decision, lesson, pattern, known issue, risk, workaround, preference, and open question as controlled concepts.
+      - [x] 9.3.1.3 Subtask {#jcf-p09-9-3-1-3} - Record `KnowledgeAssertion` and `AdoptionActivity` in the memory graph with direct links to all source claims, evidence, decisions, snapshots, actors, and policy versions.
+      - [x] 9.3.1.4 Subtask {#jcf-p09-9-3-1-4} - Reject raw prompt/tool output, unaccepted claims, stale/contradicted evidence, over-broad scope, unsupported classification, and secret-bearing content.
+      - [x] 9.3.1.5 Subtask {#jcf-p09-9-3-1-5} - Make identical adoption idempotent and preserve independently adopted compatible assertions as explicit support.
 
-    - [ ] 9.3.2 Task {#jcf-p09-knowledge-evolution} [repo: jido_code] [after: {#jcf-p09-adoption-command}] - Implement knowledge update, contradiction, invalidation, and supersession.
+    - [x] 9.3.2 Task {#jcf-p09-knowledge-evolution} [repo: jido_code] [after: {#jcf-p09-adoption-command}] - Implement knowledge update, contradiction, invalidation, and supersession.
 
       This task preserves the history and evidence behind changing repository
       knowledge instead of editing a memory record in place.
 
-      - [ ] 9.3.2.1 Subtask {#jcf-p09-9-3-2-1} - Implement `SupersedeClaim` and knowledge supersession with replacement assertion, evidence, decision, actor, scope, validity, and expected memory revision.
-      - [ ] 9.3.2.2 Subtask {#jcf-p09-9-3-2-2} - Link later contradictory observations/evidence to active knowledge and derive a review-required state without automatic deletion.
-      - [ ] 9.3.2.3 Subtask {#jcf-p09-9-3-2-3} - Distinguish superseded, invalidated, expired, contradicted, under-review, and still-valid assertions through transition/epistemic semantics.
-      - [ ] 9.3.2.4 Subtask {#jcf-p09-9-3-2-4} - Preserve prior adoption/decision context and prevent current retrieval from returning obsolete assertions without explicit historical mode.
+      - [x] 9.3.2.1 Subtask {#jcf-p09-9-3-2-1} - Implement `SupersedeClaim` and knowledge supersession with replacement assertion, evidence, decision, actor, scope, validity, and expected memory revision.
+      - [x] 9.3.2.2 Subtask {#jcf-p09-9-3-2-2} - Link later contradictory observations/evidence to active knowledge and derive a review-required state without automatic deletion.
+      - [x] 9.3.2.3 Subtask {#jcf-p09-9-3-2-3} - Distinguish superseded, invalidated, expired, contradicted, under-review, and still-valid assertions through transition/epistemic semantics.
+      - [x] 9.3.2.4 Subtask {#jcf-p09-9-3-2-4} - Preserve prior adoption/decision context and prevent current retrieval from returning obsolete assertions without explicit historical mode.
 
-    - [ ] 9.3.3 Task {#jcf-p09-knowledge-retrieval} [repo: jido_code] [after: {#jcf-p09-knowledge-evolution}] - Implement bounded, policy-aware knowledge retrieval.
+    - [x] 9.3.3 Task {#jcf-p09-knowledge-retrieval} [repo: jido_code] [after: {#jcf-p09-knowledge-evolution}] - Implement bounded, policy-aware knowledge retrieval.
 
       This task supplies future reconciliation and execution with relevant
       accepted knowledge while exposing provenance, conflicts, and omissions.
 
-      - [ ] 9.3.3.1 Subtask {#jcf-p09-9-3-3-1} - Query by repository/cohort, goal/task, source entity, policy, classification, validity, and relationship neighborhood under exact memory/source revisions.
-      - [ ] 9.3.3.2 Subtask {#jcf-p09-9-3-3-2} - Rank through reviewed deterministic policy using scope specificity, recency/validity, supporting decisions/evidence, contradiction, and task relevance.
-      - [ ] 9.3.3.3 Subtask {#jcf-p09-9-3-3-3} - Return bounded assertions with source/evidence/decision refs, confidence/limitations, validity, contradiction, truncation, and selection explanation.
-      - [ ] 9.3.3.4 Subtask {#jcf-p09-9-3-3-4} - Keep short-term prompt context ephemeral; persist it only when a separate adoption command accepts a durable takeaway.
-      - [ ] 9.3.3.5 Subtask {#jcf-p09-9-3-3-5} - Reauthorize and re-query knowledge for every new execution context rather than carrying stale prompt memory between attempts.
+      - [x] 9.3.3.1 Subtask {#jcf-p09-9-3-3-1} - Query by repository/cohort, goal/task, source entity, policy, classification, validity, and relationship neighborhood under exact memory/source revisions.
+      - [x] 9.3.3.2 Subtask {#jcf-p09-9-3-3-2} - Rank through reviewed deterministic policy using scope specificity, recency/validity, supporting decisions/evidence, contradiction, and task relevance.
+      - [x] 9.3.3.3 Subtask {#jcf-p09-9-3-3-3} - Return bounded assertions with source/evidence/decision refs, confidence/limitations, validity, contradiction, truncation, and selection explanation.
+      - [x] 9.3.3.4 Subtask {#jcf-p09-9-3-3-4} - Keep short-term prompt context ephemeral; persist it only when a separate adoption command accepts a durable takeaway.
+      - [x] 9.3.3.5 Subtask {#jcf-p09-9-3-3-5} - Reauthorize and re-query knowledge for every new execution context rather than carrying stale prompt memory between attempts.
 
   - [ ] 9.4 Section - Implement bounded reasoning and cross-graph learning.
 

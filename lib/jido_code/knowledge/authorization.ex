@@ -38,6 +38,7 @@ defmodule JidoCode.Knowledge.Authorization do
     :execution,
     :evidence,
     :decision,
+    :memory,
     :ontology,
     :security,
     :source,

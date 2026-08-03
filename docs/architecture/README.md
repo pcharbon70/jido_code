@@ -80,3 +80,4 @@ implementation plan was merged.
 
 - [Verification and evidence boundary](./verification-evidence-boundary.md)
 - [Governed decision outcomes](./governed-decision-outcomes.md)
+- [Governed knowledge memory](./governed-knowledge-memory.md)

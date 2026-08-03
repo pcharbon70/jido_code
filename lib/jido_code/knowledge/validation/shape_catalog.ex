@@ -33,7 +33,10 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity
       VerificationCheck EvidenceSufficiency GraphRevisionReference MigrationActivity
     ],
-    memory: ~w[KnowledgeAssertion Claim AdoptionActivity Contradiction MigrationActivity],
+    memory: ~w[
+      KnowledgeAssertion Claim AdoptionActivity KnowledgeStateTransition
+      KnowledgeEvolutionActivity Contradiction MigrationActivity GraphRevisionReference
+    ],
     security_audit: ~w[
       AuthorizationGrant CredentialReference ValidationReport ValidationResult MigrationActivity
     ],

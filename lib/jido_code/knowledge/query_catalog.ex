@@ -384,7 +384,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           scheduling_specifications(graph, resource) ++
           execution_boundary_specifications(resource) ++
           evidence_specifications(resource) ++
-          decision_specifications(resource)
+          decision_specifications(resource) ++
+          memory_specifications(resource)
     end
   end
 
@@ -1221,6 +1222,99 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:repository_control],
         :table,
         "Read lease-gated follow-up goals and tasks caused by one decision or goal.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp memory_specifications(resource) do
+    [
+      spec(
+        :knowledge_by_scope,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions for one exact repository or cohort scope.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_goal,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions explicitly related to one goal.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_task,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions explicitly related to one task.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_source,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions whose precise proposition names one source entity.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_policy,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions adopted under one policy version.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_classification,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions in one controlled classification.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_validity,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read scope-bounded knowledge for deterministic validity filtering.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_neighborhood,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read the bounded support, contradiction, and supersession neighborhood.",
         :product,
         :declared
       )

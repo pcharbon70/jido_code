@@ -38,6 +38,12 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Evidence.Sufficiency, as: EvidenceSufficiency
   alias JidoCode.Knowledge.Evidence.VerificationActivity
   alias JidoCode.Knowledge.Evidence.VerificationMethod
+  alias JidoCode.Knowledge.Memory.Adoption, as: KnowledgeAdoption
+  alias JidoCode.Knowledge.Memory.Assertion, as: KnowledgeAssertion
+  alias JidoCode.Knowledge.Memory.Evolution, as: KnowledgeEvolution
+  alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
+  alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
+  alias JidoCode.Knowledge.Memory.StateTransition, as: KnowledgeStateTransition
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -228,6 +234,26 @@ defmodule JidoCode.Knowledge do
     do: GoalOutcome.record_command(decision, attributes, options)
 
   def project_decision(result, context), do: DecisionProjection.build(result, context)
+
+  def knowledge_assertion(decision, source_claims, attributes),
+    do: KnowledgeAssertion.new(decision, source_claims, attributes)
+
+  def adopt_knowledge(assertion, decision, attributes, options \\ []),
+    do: KnowledgeAdoption.record_command(assertion, decision, attributes, options)
+
+  def evolve_knowledge(assertion, resolution, replacement, attributes, options \\ []),
+    do:
+      KnowledgeEvolution.record_command(
+        assertion,
+        resolution,
+        replacement,
+        attributes,
+        options
+      )
+
+  def resolve_knowledge_state(transitions), do: KnowledgeStateTransition.resolve(transitions)
+  def retrieve_knowledge(result, context), do: KnowledgeRetrieval.build(result, context)
+  def memory_graph_identity(repository_iri), do: MemoryGraph.memory_graph(repository_iri)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

@@ -313,6 +313,29 @@ defmodule JidoCode.Knowledge.CommandRegistry do
         :work_endpoints_exact,
         :no_direct_side_effects
       ]
+    },
+    "AdoptKnowledge" => %{
+      owner: :learning,
+      capability: :decision,
+      graph_families: [:memory],
+      preconditions: [
+        :accepted_claim_current,
+        :adoption_scope_authorized,
+        :source_provenance_complete,
+        :memory_revision_exact,
+        :secret_free
+      ]
+    },
+    "SupersedeClaim" => %{
+      owner: :learning,
+      capability: :decision,
+      graph_families: [:memory],
+      preconditions: [
+        :knowledge_endpoint_current,
+        :replacement_provenance_complete,
+        :contradiction_preserved,
+        :memory_revision_exact
+      ]
     }
   }
   @version_1_7 Map.merge(@version_1_6, @phase_09_evidence_commands)

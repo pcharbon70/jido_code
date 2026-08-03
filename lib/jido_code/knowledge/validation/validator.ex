@@ -28,7 +28,8 @@ defmodule JidoCode.Knowledge.Validation.Validator do
   @prov_invalidated_at "http://www.w3.org/ns/prov#invalidatedAtTime"
   @allowed_epistemic MapSet.new(~w[
     Observed Asserted Inferred ClaimProposed Accepted Rejected Waived Contradicted ClaimSuperseded
-    Invalidated
+    Invalidated KnowledgeStillValid KnowledgeUnderReview KnowledgeContradicted KnowledgeInvalidated
+    KnowledgeExpired KnowledgeSuperseded
   ])
   @relationship_predicates MapSet.new(~w[
     enrolls manages locatedBy inScope about derivedFrom supports contradicts addresses
@@ -53,7 +54,7 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     verificationKind inputClass checkStatus evidenceStrength evidenceClassification
     defers requestsMoreEvidence decisionMode outcomeStage decisionDisposition rationaleReference
     consideredEvidence causedBy followUpGoal followUpTask followUpKind confirmation
-    riskClass
+    riskClass knowledgeClassification sourceClaim
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i
