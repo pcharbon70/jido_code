@@ -551,6 +551,132 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:policy_description) do
+    """
+    SELECT ?predicate ?object WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:governance_transition_history), do: fetch(:work_transition_history)
+
+  def fetch(:cohort_definition) do
+    """
+    SELECT ?predicate ?object WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:cohort_membership) do
+    """
+    SELECT ?membership ?repository ?path ?completeness ?evaluator ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        ?membership a <#{@jf}CohortMembership> ;
+                    <#{@jf}inCohort> {{resource}} ;
+                    <#{@jf}member> ?repository ;
+                    <#{@jf}completenessState> ?completeness ;
+                    <#{@jf}applicabilityEvaluator> ?evaluator .
+        OPTIONAL { ?membership <#{@jf}membershipPath> ?path }
+        OPTIONAL {
+          {{graph}} <#{@jf}sourceGraphRevision> ?sourceReference .
+          ?sourceReference <#{@jf}sourceGraph> ?sourceGraphIri ;
+                           <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+      }
+    }
+    ORDER BY ?repository ?membership
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:policy_applicability) do
+    """
+    SELECT ?membership ?repository ?cohort ?path ?completeness ?evaluator ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        ?membership <#{@jf}inCohort> ?cohort ;
+                    <#{@jf}member> ?repository ;
+                    <#{@jf}completenessState> ?completeness ;
+                    <#{@jf}applicabilityEvaluator> ?evaluator .
+        OPTIONAL { ?membership <#{@jf}membershipPath> ?path }
+        OPTIONAL {
+          {{graph}} <#{@jf}sourceGraphRevision> ?sourceReference .
+          ?sourceReference <#{@jf}sourceGraph> ?sourceGraphIri ;
+                           <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+        FILTER(?cohort = {{resource}} || ?membership = {{resource}})
+      }
+    }
+    ORDER BY ?repository ?membership
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:obligation_description) do
+    """
+    SELECT ?predicate ?object ?revisionReference ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+        OPTIONAL {
+          {{resource}} <#{@jf}sourceGraphRevision> ?revisionReference .
+          ?revisionReference <#{@jf}sourceGraph> ?sourceGraphIri ;
+                             <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:capability_strict_view) do
+    """
+    SELECT ?predicate ?object ?transition ?state ?revision ?successor WHERE {
+      GRAPH {{graph}} {
+        {{resource}} ?predicate ?object .
+        OPTIONAL {
+          ?transition <#{@jf}transitionSubject> {{resource}} ;
+                      <#{@jf}nextState> ?state ;
+                      <#{@jf}subjectRevision> ?revision .
+          ?decision <#{@jf}accepts> ?transition .
+          OPTIONAL {
+            ?successor <#{@jf}expectedPredecessor> ?transition .
+            ?successorDecision <#{@jf}accepts> ?successor .
+          }
+        }
+      }
+    }
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:capability_hierarchy) do
+    """
+    SELECT ?classification ?capability ?broader ?version ?sourceGraphIri ?sourceRevision WHERE {
+      GRAPH {{graph}} {
+        ?classification a <#{@jf}CapabilityClassification> ;
+                        <#{@jf}member> ?capability ;
+                        <#{@jf}broaderCapability> ?broader ;
+                        <#{@jf}version> ?version .
+        OPTIONAL {
+          {{graph}} <#{@jf}sourceGraphRevision> ?sourceReference .
+          ?sourceReference <#{@jf}sourceGraph> ?sourceGraphIri ;
+                           <#{@jf}sourceRevisionNumber> ?sourceRevision .
+        }
+        FILTER(?capability = {{resource}} || ?broader = {{resource}})
+      }
+    }
+    ORDER BY ?capability ?broader
+    LIMIT {{row_limit}}
+    """
+  end
+
   defp claim_query(predicate) do
     """
     SELECT ?claim WHERE {

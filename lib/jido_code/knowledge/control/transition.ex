@@ -25,7 +25,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
   ]
   defstruct @enforce_keys
 
-  @type domain :: :desired_outcome | :goal | :plan | :task
+  @type domain :: :desired_outcome | :goal | :plan | :task | :policy | :obligation | :capability
   @type t :: %__MODULE__{}
 
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -39,7 +39,10 @@ defmodule JidoCode.Knowledge.Control.Transition do
       ~w[proposed approved eligible blocked leased executing awaiting_evidence awaiting_decision satisfied rejected cancelled superseded]a,
     plan: ~w[proposed approved stale rejected superseded retired]a,
     task:
-      ~w[proposed approved eligible blocked leased executing awaiting_evidence awaiting_decision satisfied rejected cancelled superseded]a
+      ~w[proposed approved eligible blocked leased executing awaiting_evidence awaiting_decision satisfied rejected cancelled superseded]a,
+    policy: ~w[proposed active suspended superseded retired]a,
+    obligation: ~w[proposed active satisfied waived superseded retired]a,
+    capability: ~w[proposed available stale unavailable retired]a
   }
 
   @edges %{
@@ -87,6 +90,28 @@ defmodule JidoCode.Knowledge.Control.Transition do
       rejected: [:superseded],
       cancelled: [:superseded],
       superseded: []
+    },
+    policy: %{
+      proposed: ~w[active suspended superseded retired]a,
+      active: ~w[suspended superseded retired]a,
+      suspended: ~w[active superseded retired]a,
+      superseded: [:retired],
+      retired: []
+    },
+    obligation: %{
+      proposed: ~w[active waived superseded retired]a,
+      active: ~w[satisfied waived superseded retired]a,
+      satisfied: ~w[superseded retired]a,
+      waived: ~w[superseded retired]a,
+      superseded: [:retired],
+      retired: []
+    },
+    capability: %{
+      proposed: ~w[available unavailable retired]a,
+      available: ~w[stale unavailable retired]a,
+      stale: ~w[available unavailable retired]a,
+      unavailable: ~w[available retired]a,
+      retired: []
     }
   }
 

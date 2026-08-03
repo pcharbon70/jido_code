@@ -14,6 +14,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @version "1.0.0"
   @repository_version "1.1.0"
   @control_loop_version "1.2.0"
+  @governance_version "1.3.0"
+  @versions [@version, @repository_version, @control_loop_version, @governance_version]
   @default_limits %{
     timeout_ms: 5_000,
     row_limit: 200,
@@ -33,18 +35,20 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @spec control_loop_version() :: String.t()
   def control_loop_version, do: @control_loop_version
 
+  @spec governance_version() :: String.t()
+  def governance_version, do: @governance_version
+
   @spec names() :: [atom()]
   def names, do: names(@version)
 
   @spec names(String.t()) :: [atom()]
-  def names(version) when version in [@version, @repository_version, @control_loop_version],
+  def names(version) when version in @versions,
     do: version |> definitions() |> Map.keys() |> Enum.sort()
 
   def names(_version), do: []
 
   @spec fetch(atom(), String.t()) :: {:ok, QueryDefinition.t()} | {:error, Error.t()}
-  def fetch(name, version)
-      when is_atom(name) and version in [@version, @repository_version, @control_loop_version] do
+  def fetch(name, version) when is_atom(name) and version in @versions do
     case Map.fetch(definitions(version), name) do
       {:ok, definition} -> {:ok, definition}
       :error -> invalid()
@@ -56,7 +60,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @spec verify() :: :ok | {:error, Error.t()}
   def verify do
     definitions =
-      [@version, @repository_version, @control_loop_version]
+      @versions
       |> Enum.flat_map(&(definitions(&1) |> Map.values()))
 
     if Enum.all?(definitions, &valid?/1),
@@ -68,7 +72,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   def digest, do: digest(@version)
 
   @spec digest(String.t()) :: String.t()
-  def digest(version) when version in [@version, @repository_version, @control_loop_version] do
+  def digest(version) when version in @versions do
     definitions(version)
     |> Enum.sort_by(fn {name, _definition} -> name end)
     |> Enum.map_join("\n", fn {name, definition} ->
@@ -310,6 +314,13 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           repository_specifications(resource) ++
           source_specifications(graph) ++
           work_specifications(graph)
+
+      @governance_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource)
     end
   end
 
@@ -612,6 +623,99 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     ]
   end
 
+  defp governance_specifications(resource) do
+    [
+      spec(
+        :policy_description,
+        :select,
+        resource,
+        :control,
+        [:factory_policy],
+        :table,
+        "Read one versioned policy contract and evaluator binding.",
+        :product,
+        :declared
+      ),
+      spec(
+        :governance_transition_history,
+        :select,
+        resource,
+        :control,
+        [:factory_policy, :repository_control],
+        :timeline,
+        "Read accepted policy, obligation, or capability lifecycle transitions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :cohort_definition,
+        :select,
+        resource,
+        :control,
+        [:factory_policy],
+        :table,
+        "Read one static or query-derived repository cohort definition.",
+        :product,
+        :declared
+      ),
+      spec(
+        :cohort_membership,
+        :select,
+        resource,
+        :control,
+        [:derived],
+        :table,
+        "Read bounded derived membership and explanation paths for one cohort.",
+        :product,
+        :declared
+      ),
+      spec(
+        :policy_applicability,
+        :select,
+        resource,
+        :control,
+        [:derived],
+        :table,
+        "Read applicability evidence bound to exact derived graph revisions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :obligation_description,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read one policy obligation, evidence, constraints, and source revisions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :capability_strict_view,
+        :select,
+        resource,
+        :control,
+        [:factory_policy],
+        :table,
+        "Read declared capability, availability, authorization, limits, and completeness.",
+        :product,
+        :declared
+      ),
+      spec(
+        :capability_hierarchy,
+        :select,
+        resource,
+        :control,
+        [:derived],
+        :table,
+        "Read rebuildable capability classifications without granting authority.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
   defp spec(
          name,
          form,
@@ -639,7 +743,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   defp valid?(definition) do
     definition.source_digest == QueryDefinition.source_digest(definition.source) and
-      definition.version in [@version, @repository_version, @control_loop_version] and
+      definition.version in @versions and
       definition.form in [:select, :ask, :construct] and
       definition.compatibility_notes != "" and
       bounded_source?(definition)

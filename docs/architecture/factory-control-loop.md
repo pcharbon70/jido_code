@@ -73,3 +73,58 @@ blocker, transition-history, work-lens, and plan-context queries. Every query
 uses one caller-authorized named graph and fixed limits. Work projections carry
 the exact dataset and graph revisions, completeness, freshness, truncation,
 warnings, and applied bounds.
+
+## Policy And Applicability
+
+Policies are immutable versioned resources in the factory policy graph. Each
+policy has one owner, scope, policy kind, effective interval, controlled
+priority and conflict posture, reviewed evaluator identity/version, and a
+closed list of graph inputs. RDF contains evaluator references, never
+executable policy code. Desired-posture, authorization, and acceptance
+policies remain separate kinds and cannot be resolved as one conflict set.
+
+Repository cohorts are policy resources with either explicit static members
+or an allowlisted query evaluator. Query-derived `CohortMembership` resources
+exist only in a replaceable derived graph. Its metadata binds the membership
+to the evaluator, rule revision, and exact catalog, source, observation, and
+policy graph revisions. A source revision change makes the derived view stale;
+it does not silently reinterpret the old membership.
+
+Applicability explanations cite the cohort, repository, bounded membership
+path, evaluator version, declared source revisions, completeness, and any
+incomplete reasons. Query authorization checks the cohort graph's owner scope,
+so a repository-scoped caller cannot enumerate a factory-scoped cohort.
+
+## Obligations
+
+A policy obligation is an append-only repository-control resource derived from
+the policy version, applicable scope, desired outcome/dimension, and exact
+source revision set. It cites the triggering gap, applicability evidence,
+constraints, acceptance requirements, and validity. Reconciliation reuses the
+same identity for the same semantic input and produces a different identity
+when the relevant context changes.
+
+Obligation lifecycle is an accepted transition chain: proposed, active,
+satisfied, waived, superseded, or retired. An obligation is neither an
+approved goal nor an executable task; later reconciliation and decision paths
+connect those resources explicitly.
+
+## Capability Boundary
+
+Capability declarations record a holder, actor/agent/tool/sandbox kind,
+provider and version, declared or observed mode, supported scopes and effects,
+limits, evidence, completeness, validity, and lifecycle. Possession and
+availability do not grant authority. Scheduling additionally requires an
+explicit complete authorization view for the task scope.
+
+Capability hierarchy is rebuildable classification in a derived graph. Every
+classification carries source and evaluator revisions and is projected with
+`authority?: false`. An inferred broader capability can aid matching but
+cannot supply an authorization grant or make an incomplete capability view
+schedulable.
+
+Query catalog version 1.3 adds policy/cohort/obligation/capability descriptions,
+governance transition history, applicability, strict capability, and derived
+hierarchy reads. Governance projections preserve the evaluated graph revision,
+derived source revisions, declared derivation source references, completeness,
+freshness, bounds, and query version.

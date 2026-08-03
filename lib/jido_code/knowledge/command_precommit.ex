@@ -19,6 +19,10 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     severity ruleSet invalidationState
     priority expectedEvidence constrainedBy targetCapability includesTask alternativeTo requiresArtifact
     sourceSnapshot planner originActivity expectedEffect transitionDomain conflictsWith taskKind
+    ownedBy policyKind applicabilityEvaluator closedInput obligationTemplate requiresDecision
+    conflictPosture staticMember queryDerived member inCohort membershipPath applicabilityEvidence
+    requiredOutcome acceptanceRequirement heldBy capabilityKind supportsScope supportsEffect
+    authorizedBy evidenceSource broaderCapability
   ])
   @max_guards 100
 

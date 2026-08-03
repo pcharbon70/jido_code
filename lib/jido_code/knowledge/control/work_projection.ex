@@ -114,7 +114,7 @@ defmodule JidoCode.Knowledge.Control.WorkProjection do
   defp decode(:work_lens, rows, limits) when is_list(rows) do
     values =
       rows
-      |> Enum.filter(&(is_nil(term_value(&1["successor"]))))
+      |> Enum.filter(&is_nil(term_value(&1["successor"])))
       |> Enum.map(fn row ->
         %{
           work_iri: term_value(row["work"]),

@@ -22,7 +22,8 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     repository-reconciliation observation-activity observation-batch repository-snapshot
     observed-claim provider-object source-artifact code-symbol source-analysis desired-outcome
     control-constraint control-transition control-decision goal-proposal plan-proposal task-proposal
-    plan-adoption
+    plan-adoption policy-version policy-evaluator repository-cohort cohort-membership
+    policy-obligation capability-declaration capability-classification
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

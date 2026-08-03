@@ -71,53 +71,53 @@ Back to plan: [README](./README.md)
       - [x] 7.1.4.3 Subtask {#jcf-p07-7-1-4-3} - Add list/lens projections for proposed, active, eligible, blocked, executing, and awaiting-decision work without status fields.
       - [x] 7.1.4.4 Subtask {#jcf-p07-7-1-4-4} - Bound graph depth, task count, history, labels, and cross-repository expansion with explicit truncation.
 
-  - [ ] 7.2 Section - Implement policies, cohorts, obligations, and capabilities.
+  - [x] 7.2 Section - Implement policies, cohorts, obligations, and capabilities.
 
     This section expresses factory governance as queryable graph resources and
     versioned evaluation rules that can explain applicability and required
     action.
 
-    - [ ] 7.2.1 Task {#jcf-p07-policy-contract} [repo: jido_code] [after: {#jcf-p07-work-projections}] - Implement policy definition and lifecycle commands.
+    - [x] 7.2.1 Task {#jcf-p07-policy-contract} [repo: jido_code] [after: {#jcf-p07-work-projections}] - Implement policy definition and lifecycle commands.
 
       This task gives policy authors a bounded semantic contract without
       embedding arbitrary executable code or opaque inference authority in RDF.
 
-      - [ ] 7.2.1.1 Subtask {#jcf-p07-7-2-1-1} - Define policy identity/version, owner, applicability query/rule ref, desired outcomes, constraints, obligation template, evidence/decision requirements, effective interval, priority, and conflict posture.
-      - [ ] 7.2.1.2 Subtask {#jcf-p07-7-2-1-2} - Validate policy queries/rules against allowlisted versioned evaluators and declared closed-world inputs.
-      - [ ] 7.2.1.3 Subtask {#jcf-p07-7-2-1-3} - Implement proposed, active, suspended, superseded, and retired policy transitions with no retroactive reinterpretation of prior decisions.
-      - [ ] 7.2.1.4 Subtask {#jcf-p07-7-2-1-4} - Define deterministic priority/conflict handling and require an explicit decision when applicable policies cannot be jointly satisfied.
-      - [ ] 7.2.1.5 Subtask {#jcf-p07-7-2-1-5} - Keep authorization policy evaluation separate from desired-posture and acceptance policy evaluation.
+      - [x] 7.2.1.1 Subtask {#jcf-p07-7-2-1-1} - Define policy identity/version, owner, applicability query/rule ref, desired outcomes, constraints, obligation template, evidence/decision requirements, effective interval, priority, and conflict posture.
+      - [x] 7.2.1.2 Subtask {#jcf-p07-7-2-1-2} - Validate policy queries/rules against allowlisted versioned evaluators and declared closed-world inputs.
+      - [x] 7.2.1.3 Subtask {#jcf-p07-7-2-1-3} - Implement proposed, active, suspended, superseded, and retired policy transitions with no retroactive reinterpretation of prior decisions.
+      - [x] 7.2.1.4 Subtask {#jcf-p07-7-2-1-4} - Define deterministic priority/conflict handling and require an explicit decision when applicable policies cannot be jointly satisfied.
+      - [x] 7.2.1.5 Subtask {#jcf-p07-7-2-1-5} - Keep authorization policy evaluation separate from desired-posture and acceptance policy evaluation.
 
-    - [ ] 7.2.2 Task {#jcf-p07-cohort-applicability} [repo: jido_code] [after: {#jcf-p07-policy-contract}] - Implement graph-defined repository cohorts and policy applicability.
+    - [x] 7.2.2 Task {#jcf-p07-cohort-applicability} [repo: jido_code] [after: {#jcf-p07-policy-contract}] - Implement graph-defined repository cohorts and policy applicability.
 
       This task exploits cross-repository graph relationships so one policy can
       govern a selected fleet without copying object records into every repo.
 
-      - [ ] 7.2.2.1 Subtask {#jcf-p07-7-2-2-1} - Define static membership and reviewed query-derived cohorts over enrollment, organization, provider, language, dependency, risk, ownership, or capability relationships.
-      - [ ] 7.2.2.2 Subtask {#jcf-p07-7-2-2-2} - Materialize cohort membership only in a derived graph bound to source revisions and policy evaluator version.
-      - [ ] 7.2.2.3 Subtask {#jcf-p07-7-2-2-3} - Return applicability explanations citing policy, cohort/membership path, input graph revisions, validity, and any incomplete knowledge.
-      - [ ] 7.2.2.4 Subtask {#jcf-p07-7-2-2-4} - Reevaluate and invalidate derived membership after relevant catalog, observation, source, or policy commits.
-      - [ ] 7.2.2.5 Subtask {#jcf-p07-7-2-2-5} - Prohibit unauthorized cohort enumeration and cross-tenant/repository side channels.
+      - [x] 7.2.2.1 Subtask {#jcf-p07-7-2-2-1} - Define static membership and reviewed query-derived cohorts over enrollment, organization, provider, language, dependency, risk, ownership, or capability relationships.
+      - [x] 7.2.2.2 Subtask {#jcf-p07-7-2-2-2} - Materialize cohort membership only in a derived graph bound to source revisions and policy evaluator version.
+      - [x] 7.2.2.3 Subtask {#jcf-p07-7-2-2-3} - Return applicability explanations citing policy, cohort/membership path, input graph revisions, validity, and any incomplete knowledge.
+      - [x] 7.2.2.4 Subtask {#jcf-p07-7-2-2-4} - Reevaluate and invalidate derived membership after relevant catalog, observation, source, or policy commits.
+      - [x] 7.2.2.5 Subtask {#jcf-p07-7-2-2-5} - Prohibit unauthorized cohort enumeration and cross-tenant/repository side channels.
 
-    - [ ] 7.2.3 Task {#jcf-p07-obligation-derivation} [repo: jido_code] [after: {#jcf-p07-cohort-applicability}] - Implement policy obligation derivation.
+    - [x] 7.2.3 Task {#jcf-p07-obligation-derivation} [repo: jido_code] [after: {#jcf-p07-cohort-applicability}] - Implement policy obligation derivation.
 
       This task records why a policy requires action for a repository while
       avoiding duplicate obligations on every reconciliation pass.
 
-      - [ ] 7.2.3.1 Subtask {#jcf-p07-7-2-3-1} - Derive obligation identity from policy version, applicable scope, desired outcome/dimension, and relevant source revision.
-      - [ ] 7.2.3.2 Subtask {#jcf-p07-7-2-3-2} - Record policy/applicability evidence, triggering finding/gap, required outcome, constraints, due/valid interval, and acceptance requirements.
-      - [ ] 7.2.3.3 Subtask {#jcf-p07-7-2-3-3} - Reuse, supersede, waive, or satisfy obligations through governed transitions rather than recreating rows.
-      - [ ] 7.2.3.4 Subtask {#jcf-p07-7-2-3-4} - Preserve the distinction between a derived obligation, an approved goal, and executable tasks.
+      - [x] 7.2.3.1 Subtask {#jcf-p07-7-2-3-1} - Derive obligation identity from policy version, applicable scope, desired outcome/dimension, and relevant source revision.
+      - [x] 7.2.3.2 Subtask {#jcf-p07-7-2-3-2} - Record policy/applicability evidence, triggering finding/gap, required outcome, constraints, due/valid interval, and acceptance requirements.
+      - [x] 7.2.3.3 Subtask {#jcf-p07-7-2-3-3} - Reuse, supersede, waive, or satisfy obligations through governed transitions rather than recreating rows.
+      - [x] 7.2.3.4 Subtask {#jcf-p07-7-2-3-4} - Preserve the distinction between a derived obligation, an approved goal, and executable tasks.
 
-    - [ ] 7.2.4 Task {#jcf-p07-capability-registry} [repo: jido_code] [after: {#jcf-p07-obligation-derivation}] - Implement actor, agent, tool, and sandbox capability projections.
+    - [x] 7.2.4 Task {#jcf-p07-capability-registry} [repo: jido_code] [after: {#jcf-p07-obligation-derivation}] - Implement actor, agent, tool, and sandbox capability projections.
 
       This task supplies scheduling with versioned capability facts and
       constraints without binding domain semantics to process names or pods.
 
-      - [ ] 7.2.4.1 Subtask {#jcf-p07-7-2-4-1} - Represent declared and observed capabilities, provider/agent/tool version, supported scopes/effects, availability, limits, and evidence source.
-      - [ ] 7.2.4.2 Subtask {#jcf-p07-7-2-4-2} - Distinguish capability possession from authorization to apply it in one enrollment/task scope.
-      - [ ] 7.2.4.3 Subtask {#jcf-p07-7-2-4-3} - Add capability hierarchy/classification through rebuildable inference with explicit source and rule versions.
-      - [ ] 7.2.4.4 Subtask {#jcf-p07-7-2-4-4} - Mark stale/unavailable capability observations and prohibit scheduling from an incomplete strict capability view.
+      - [x] 7.2.4.1 Subtask {#jcf-p07-7-2-4-1} - Represent declared and observed capabilities, provider/agent/tool version, supported scopes/effects, availability, limits, and evidence source.
+      - [x] 7.2.4.2 Subtask {#jcf-p07-7-2-4-2} - Distinguish capability possession from authorization to apply it in one enrollment/task scope.
+      - [x] 7.2.4.3 Subtask {#jcf-p07-7-2-4-3} - Add capability hierarchy/classification through rebuildable inference with explicit source and rule versions.
+      - [x] 7.2.4.4 Subtask {#jcf-p07-7-2-4-4} - Mark stale/unavailable capability observations and prohibit scheduling from an incomplete strict capability view.
 
   - [ ] 7.3 Section - Implement desired/observed-state reconciliation.
 
