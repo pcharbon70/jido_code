@@ -1,0 +1,42 @@
+<Layouts.app flash={@flash}>
+  <main id="operator-sign-in" class="grid min-h-full place-items-center bg-frame-canvas p-4">
+    <section
+      aria-labelledby="operator-sign-in-title"
+      class="w-full max-w-sm border-y border-border bg-background py-8"
+    >
+      <div class="flex items-center gap-3">
+        <img src={~p"/images/logo.svg"} width="36" height="36" alt="" aria-hidden="true" />
+        <div>
+          <p class="text-xs font-medium uppercase text-muted-foreground">JidoCode</p>
+          <h1 id="operator-sign-in-title" class="mt-1 text-xl font-semibold">Operator sign in</h1>
+        </div>
+      </div>
+
+      <p class="mt-4 text-sm leading-6 text-muted-foreground">
+        Authenticate to enter the repository factory control plane.
+      </p>
+
+      <div
+        :if={@error}
+        id="operator-sign-in-error"
+        role="alert"
+        class="mt-4 border-l-2 border-status-failure bg-muted px-3 py-2 text-sm"
+      >
+        {@error}
+      </div>
+
+      <.form for={@form} id="operator-sign-in-form" action={~p"/sign-in"} class="mt-6 grid gap-4">
+        <.input
+          field={@form[:credential]}
+          type="password"
+          label="Operator credential"
+          autocomplete="current-password"
+          required
+        />
+        <UI.button id="operator-sign-in-submit" type="submit">
+          <.icon name="hero-arrow-right-end-on-rectangle" class="size-4" /> Sign in
+        </UI.button>
+      </.form>
+    </section>
+  </main>
+</Layouts.app>

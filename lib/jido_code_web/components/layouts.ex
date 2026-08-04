@@ -60,7 +60,20 @@ defmodule JidoCodeWeb.Layouts do
           </span>
         </div>
 
-        <.theme_toggle />
+        <div class="flex items-center gap-2">
+          <.theme_toggle />
+          <.link
+            :if={@current_scope}
+            id="application-sign-out"
+            href={~p"/sign-out"}
+            method="delete"
+            aria-label="Sign out"
+            title="Sign out"
+            class="inline-flex size-9 items-center justify-center rounded-md border border-frame-border bg-frame-chrome-elevated text-frame-text-muted outline-none transition-colors hover:text-frame-text focus-visible:ring-2 focus-visible:ring-frame-focus"
+          >
+            <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" />
+          </.link>
+        </div>
       </header>
 
       <main id="application-outlet" class="min-h-0 overflow-auto">
@@ -71,8 +84,8 @@ defmodule JidoCodeWeb.Layouts do
         id="application-status-bar"
         class="flex items-center justify-between border-t border-frame-border bg-frame-chrome px-4 font-mono text-[0.6875rem] text-frame-text-muted sm:px-6"
       >
-        <span>session: liveview</span>
-        <span>surface: vite/livevue</span>
+        <span>{if(@current_scope, do: "session: authenticated", else: "session: public")}</span>
+        <span>authority: graph-scoped</span>
       </footer>
 
       <.flash_group flash={@flash} />

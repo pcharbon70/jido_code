@@ -1,4 +1,4 @@
-defmodule JidoCodeWeb.Product.GraphProjectionProvider do
+defmodule JidoCode.Product.GraphProjectionProvider do
   @moduledoc """
   Rebuilds the product workbench from closed catalog queries.
 
@@ -7,7 +7,7 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
   metadata.
   """
 
-  @behaviour JidoCodeWeb.Product.ProjectionProvider
+  @behaviour JidoCode.Product.ProjectionProvider
 
   alias JidoCode.Knowledge
   alias JidoCode.Knowledge.AuthorityContext
@@ -16,7 +16,8 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
   alias JidoCode.Knowledge.Health
   alias JidoCode.Knowledge.QueryResult
   alias JidoCode.Knowledge.Readiness
-  alias JidoCodeWeb.Product.Projection
+  alias JidoCode.Product.Projection
+  alias JidoCode.Product.QuerySecurity
 
   @query_version "1.7.0"
   @work_states [:eligible, :blocked, :executing, :awaiting_decision]
@@ -33,7 +34,8 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
     with :ok <- ready(health),
          {:ok, catalog_graph} <- GraphRegistry.graph_iri(:factory_catalog, %{}),
          {:ok, revision_result} <-
-           query.(
+           secure_query(
+             query,
              :dataset_revision,
              @query_version,
              %{},
@@ -42,7 +44,8 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
              []
            ),
          {:ok, cohort_result} <-
-           query.(
+           secure_query(
+             query,
              :factory_repository_cohort,
              @query_version,
              %{graph: catalog_graph, resource: identity.factory_iri},
@@ -135,7 +138,8 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
            {:ok, work, work_results} <-
              load_work(control_graph, authority, identity.factory_scope_iri, query),
            {:ok, attempts} <-
-             query.(
+             secure_query(
+               query,
                :active_attempts,
                @query_version,
                %{graph: control_graph},
@@ -144,7 +148,8 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
                []
              ),
            {:ok, knowledge} <-
-             query.(
+             secure_query(
+               query,
                :knowledge_by_scope,
                @query_version,
                %{graph: memory_graph, resource: repository},
@@ -169,7 +174,8 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
   defp load_work(graph, authority, scope, query) do
     Enum.reduce_while(@work_states, {:ok, Projection.empty_work(), []}, fn state,
                                                                            {:ok, work, results} ->
-      case query.(
+      case secure_query(
+             query,
              :work_lens,
              @query_version,
              %{graph: graph, state: state},
@@ -272,4 +278,8 @@ defmodule JidoCodeWeb.Product.GraphProjectionProvider do
   defp error_state(%Error{kind: :unauthorized}), do: :unauthorized
   defp error_state(%Error{kind: :stale_precondition}), do: :stale
   defp error_state(_error), do: :unavailable
+
+  defp secure_query(query, name, version, parameters, authority, scope, options) do
+    QuerySecurity.execute(query, name, version, parameters, authority, scope, options)
+  end
 end

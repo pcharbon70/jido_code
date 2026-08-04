@@ -3,11 +3,11 @@ defmodule JidoCodeWeb.HomeLiveTest do
 
   import Phoenix.LiveViewTest
 
-  alias JidoCodeWeb.Product.Projection
-  alias JidoCodeWeb.Product.SurfaceContract
-  alias JidoCode.Knowledge.CommandReceipt
+  alias JidoCode.Product.CommandOutcome
+  alias JidoCode.Product.Projection
+  alias JidoCode.Product.SurfaceContract
 
-  setup do
+  setup %{conn: conn} do
     prior_provider = Application.get_env(:jido_code, :product_projection_provider)
     prior_fixture = Application.get_env(:jido_code, :product_projection_fixture)
     prior_pid = Application.get_env(:jido_code, :product_projection_test_pid)
@@ -39,13 +39,19 @@ defmodule JidoCodeWeb.HomeLiveTest do
       restore_env(:product_command_fixture, prior_command)
     end)
 
-    :ok
+    conn =
+      conn
+      |> init_test_session(%{})
+      |> JidoCodeWeb.ProductAuth.establish_session()
+
+    {:ok, conn: conn}
   end
 
   test "renders graph-backed factory posture and bounded island props", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
     assert has_element?(view, "#application-shell")
+    assert has_element?(view, "#application-sign-out[href='/sign-out']")
     assert has_element?(view, "#factory-workbench")
     assert has_element?(view, "#factory-posture")
     assert has_element?(view, "#factory-flow-island")
@@ -190,17 +196,10 @@ defmodule JidoCodeWeb.HomeLiveTest do
   defp restore_env(key, value), do: Application.put_env(:jido_code, key, value)
 
   defp command_receipt do
-    CommandReceipt.success(:committed, %{
-      command_iri: "https://jido.run/id/command/1",
-      receipt_iri: "https://jido.run/id/receipt/1",
-      change_set_iri: "https://jido.run/id/change-set/1",
-      dataset_revision: 42,
-      graph_revisions: %{},
-      affected_graphs: [],
-      assertion_count: 1,
-      supersession_count: 0,
-      actor_iri: "https://jido.run/id/actor/local-operator",
-      committed_at: ~U[2026-08-04 11:00:00Z]
-    })
+    %CommandOutcome{
+      outcome: :committed,
+      retry: :never,
+      dataset_revision: 42
+    }
   end
 end

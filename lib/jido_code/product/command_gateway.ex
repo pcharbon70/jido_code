@@ -1,4 +1,4 @@
-defmodule JidoCodeWeb.Product.CommandGateway do
+defmodule JidoCode.Product.CommandGateway do
   @moduledoc """
   Server-owned constructor for finite product semantic intents.
 
@@ -17,12 +17,14 @@ defmodule JidoCodeWeb.Product.CommandGateway do
   alias JidoCode.Knowledge.Repositories.Locator
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Knowledge.StoreServer
+  alias JidoCode.Product.CommandOutcome
+  alias JidoCode.Security.Redactor
 
   @valid_to ~U[9999-12-31 23:59:59Z]
   @max_value_bytes 160
 
   @spec enroll_repository(AuthorityContext.t(), map(), map(), keyword()) ::
-          {:ok, CommandReceipt.t()} | {:error, Error.t()}
+          {:ok, CommandOutcome.t()} | {:error, Error.t()}
   def enroll_repository(authority, identity, params, options \\ [])
 
   def enroll_repository(%AuthorityContext{} = authority, identity, params, options)
@@ -32,7 +34,11 @@ defmodule JidoCodeWeb.Product.CommandGateway do
     metadata = Keyword.get(options, :metadata, &QueryRunner.graph_metadata/1)
     execute = Keyword.get(options, :execute, &Knowledge.execute/1)
 
-    with {:ok, input} <- validate_input(params),
+    with :ok <-
+           Redactor.reject_sensitive(
+             Map.take(params, ~w[conceptual_key provider external_id owner name reason])
+           ),
+         {:ok, input} <- validate_input(params),
          true <- input.confirmed?,
          %DateTime{} = recorded_at <- clock.() |> DateTime.truncate(:microsecond),
          {:ok, catalog_graph} <- GraphRegistry.graph_iri(:factory_catalog, %{}),
@@ -67,7 +73,7 @@ defmodule JidoCodeWeb.Product.CommandGateway do
              recorded_at
            ),
          {:ok, %CommandReceipt{} = receipt} <- execute.(command) do
-      {:ok, receipt}
+      {:ok, CommandOutcome.from_receipt(receipt)}
     else
       false -> invalid(:enrollment_confirmation)
       {:error, %Error{} = error} -> {:error, error}

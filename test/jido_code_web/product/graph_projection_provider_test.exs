@@ -1,10 +1,10 @@
-defmodule JidoCodeWeb.Product.GraphProjectionProviderTest do
+defmodule JidoCode.Product.GraphProjectionProviderTest do
   use ExUnit.Case, async: true
 
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.Health
   alias JidoCode.Knowledge.QueryResult
-  alias JidoCodeWeb.Product.GraphProjectionProvider
+  alias JidoCode.Product.GraphProjectionProvider
 
   test "builds a bounded projection from reviewed graph queries" do
     test_pid = self()

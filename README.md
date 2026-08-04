@@ -39,7 +39,7 @@ mix setup
 Start the development server:
 
 ```sh
-mix phx.server
+JIDO_CODE_OPERATOR_TOKEN='replace-with-a-long-random-value' mix phx.server
 ```
 
 If port 4000 is already in use:

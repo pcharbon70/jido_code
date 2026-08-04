@@ -20,7 +20,25 @@ if System.get_env("PHX_SERVER") do
   config :jido_code, JidoCodeWeb.Endpoint, server: true
 end
 
+if operator_token = System.get_env("JIDO_CODE_OPERATOR_TOKEN") do
+  config :jido_code, :product_auth,
+    credential_digest: :crypto.hash(:sha256, operator_token),
+    session_ttl_seconds:
+      String.to_integer(System.get_env("JIDO_CODE_SESSION_TTL_SECONDS") || "28800"),
+    session_generation: System.get_env("JIDO_CODE_SESSION_GENERATION") || "1"
+end
+
 if config_env() == :prod do
+  operator_token =
+    System.get_env("JIDO_CODE_OPERATOR_TOKEN") ||
+      raise "environment variable JIDO_CODE_OPERATOR_TOKEN is missing"
+
+  config :jido_code, :product_auth,
+    credential_digest: :crypto.hash(:sha256, operator_token),
+    session_ttl_seconds:
+      String.to_integer(System.get_env("JIDO_CODE_SESSION_TTL_SECONDS") || "28800"),
+    session_generation: System.get_env("JIDO_CODE_SESSION_GENERATION") || "1"
+
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want

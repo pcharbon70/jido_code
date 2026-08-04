@@ -30,6 +30,11 @@ config :jido_code,
 
 config :live_vue, ssr: true
 
+config :jido_code, :product_auth,
+  credential_digest: nil,
+  session_ttl_seconds: 28_800,
+  session_generation: "1"
+
 config :phoenix_vite, PhoenixVite.Npm,
   assets: [args: [], cd: Path.expand("..", __DIR__)],
   vite: [

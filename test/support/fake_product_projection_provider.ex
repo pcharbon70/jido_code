@@ -1,7 +1,7 @@
 defmodule JidoCode.TestSupport.FakeProductProjectionProvider do
   @moduledoc false
 
-  @behaviour JidoCodeWeb.Product.ProjectionProvider
+  @behaviour JidoCode.Product.ProjectionProvider
 
   @impl true
   def load(authority, identity, options) do

@@ -14,10 +14,26 @@ defmodule JidoCodeWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :require_authenticated_operator do
+    plug JidoCodeWeb.ProductAuth, :fetch_current_scope
+    plug JidoCodeWeb.ProductAuth, :require_authenticated_operator
+  end
+
   scope "/", JidoCodeWeb do
     pipe_through :browser
 
-    live "/", HomeLive
+    get "/sign-in", AuthController, :new
+    post "/sign-in", AuthController, :create
+    delete "/sign-out", AuthController, :delete
+  end
+
+  scope "/", JidoCodeWeb do
+    pipe_through [:browser, :require_authenticated_operator]
+
+    live_session :authenticated,
+      on_mount: [{JidoCodeWeb.ProductAuth, :require_authenticated}] do
+      live "/", HomeLive
+    end
   end
 
   # Other scopes may use custom stacks.
@@ -35,7 +51,7 @@ defmodule JidoCodeWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through [:browser, :require_authenticated_operator]
 
       live_dashboard "/dashboard", metrics: JidoCodeWeb.Telemetry
     end

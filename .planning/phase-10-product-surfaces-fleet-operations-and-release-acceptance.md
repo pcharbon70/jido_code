@@ -74,55 +74,55 @@ Back to plan: [README](./README.md)
       - [x] 10.1.4.5 Subtask {#jcf-p10-10-1-4-5} - Preserve deep-link, back/forward, reload, reconnect, responsive navigation, keyboard, focus, and screen-reader behavior under authorization and stale-data changes.
       - [x] 10.1.4.6 Subtask {#jcf-p10-10-1-4-6} - Support bounded human/agent interaction, clarification, steering, cancellation, and message-to-goal, evidence, or decision handoffs where required by the current surface contract.
 
-  - [ ] 10.2 Section - Harden authentication, authorization, privacy, and query security.
+  - [x] 10.2 Section - Harden authentication, authorization, privacy, and query security.
 
     This section verifies browser, graph, command, runtime, provider, and
     administrative boundaries enforce least privilege without leaking resource
     existence, source content, prompts, artifacts, or secrets.
 
-    - [ ] 10.2.1 Task {#jcf-p10-web-authority} [repo: jido_code] [after: {#jcf-p10-product-workflows}] - Implement authenticated route, resource, projection, and action authorization.
+    - [x] 10.2.1 Task {#jcf-p10-web-authority} [repo: jido_code] [after: {#jcf-p10-product-workflows}] - Implement authenticated route, resource, projection, and action authorization.
 
       This task keeps route admission and resource/action authority distinct
       while binding graph commands to the authenticated actor and current
       scope.
 
-      - [ ] 10.2.1.1 Subtask {#jcf-p10-10-2-1-1} - Establish or integrate the accepted authentication/session boundary and map authenticated principals to graph actor/delegation context without persisting credentials.
-      - [ ] 10.2.1.2 Subtask {#jcf-p10-10-2-1-2} - Enforce route admission in Plug/live-session boundaries and repeat resource/projection/action authorization in each owning LiveView.
-      - [ ] 10.2.1.3 Subtask {#jcf-p10-10-2-1-3} - Reauthorize route parameters, presentation refs, query values, semantic events, command targets, and subscriptions on every relevant transition.
-      - [ ] 10.2.1.4 Subtask {#jcf-p10-10-2-1-4} - Apply concealment-oriented not-found behavior for unknown, disabled, unauthorized, cross-scope, malformed, and revoked resources.
-      - [ ] 10.2.1.5 Subtask {#jcf-p10-10-2-1-5} - Clear protected projections and runtime context on logout, revocation, tenant/scope change, or untrustworthy reconnect.
+      - [x] 10.2.1.1 Subtask {#jcf-p10-10-2-1-1} - Establish or integrate the accepted authentication/session boundary and map authenticated principals to graph actor/delegation context without persisting credentials.
+      - [x] 10.2.1.2 Subtask {#jcf-p10-10-2-1-2} - Enforce route admission in Plug/live-session boundaries and repeat resource/projection/action authorization in each owning LiveView.
+      - [x] 10.2.1.3 Subtask {#jcf-p10-10-2-1-3} - Reauthorize route parameters, presentation refs, query values, semantic events, command targets, and subscriptions on every relevant transition.
+      - [x] 10.2.1.4 Subtask {#jcf-p10-10-2-1-4} - Apply concealment-oriented not-found behavior for unknown, disabled, unauthorized, cross-scope, malformed, and revoked resources.
+      - [x] 10.2.1.5 Subtask {#jcf-p10-10-2-1-5} - Clear protected projections and runtime context on logout, revocation, tenant/scope change, or untrustworthy reconnect.
 
-    - [ ] 10.2.2 Task {#jcf-p10-query-command-security} [repo: jido_code] [after: {#jcf-p10-web-authority}] - Audit query, command, and semantic-event attack surfaces.
+    - [x] 10.2.2 Task {#jcf-p10-query-command-security} [repo: jido_code] [after: {#jcf-p10-web-authority}] - Audit query, command, and semantic-event attack surfaces.
 
       This task proves browser input cannot widen graph scope, execute raw
       SPARQL, select modules/atoms, forge authority, or bypass command
       validation.
 
-      - [ ] 10.2.2.1 Subtask {#jcf-p10-10-2-2-1} - Fuzz route refs, form fields, semantic events, IRIs, literals, cursors, idempotency keys, graph/query names, transition refs, lease fences, and command versions.
-      - [ ] 10.2.2.2 Subtask {#jcf-p10-10-2-2-2} - Test SPARQL injection, catalog bypass, graph enumeration, expensive query amplification, historical-read escalation, and derived-graph confusion.
-      - [ ] 10.2.2.3 Subtask {#jcf-p10-10-2-2-3} - Test CSRF, session fixation, stale authorization, cross-repository command refs, delegation widening, replay, confused deputy, and concurrent revocation.
-      - [ ] 10.2.2.4 Subtask {#jcf-p10-10-2-2-4} - Verify limits and stable safe errors for malformed/oversized inputs without reflecting sensitive values.
+      - [x] 10.2.2.1 Subtask {#jcf-p10-10-2-2-1} - Fuzz route refs, form fields, semantic events, IRIs, literals, cursors, idempotency keys, graph/query names, transition refs, lease fences, and command versions.
+      - [x] 10.2.2.2 Subtask {#jcf-p10-10-2-2-2} - Test SPARQL injection, catalog bypass, graph enumeration, expensive query amplification, historical-read escalation, and derived-graph confusion.
+      - [x] 10.2.2.3 Subtask {#jcf-p10-10-2-2-3} - Test CSRF, session fixation, stale authorization, cross-repository command refs, delegation widening, replay, confused deputy, and concurrent revocation.
+      - [x] 10.2.2.4 Subtask {#jcf-p10-10-2-2-4} - Verify limits and stable safe errors for malformed/oversized inputs without reflecting sensitive values.
 
-    - [ ] 10.2.3 Task {#jcf-p10-privacy-redaction} [repo: jido_code] [after: {#jcf-p10-query-command-security}] - Complete data-classification, privacy, and redaction enforcement.
+    - [x] 10.2.3 Task {#jcf-p10-privacy-redaction} [repo: jido_code] [after: {#jcf-p10-query-command-security}] - Complete data-classification, privacy, and redaction enforcement.
 
       This task applies one explicit policy across graph literals, artifacts,
       prompts/context, provider payloads, UI, diagnostics, telemetry, backups,
       exports, and test fixtures.
 
-      - [ ] 10.2.3.1 Subtask {#jcf-p10-10-2-3-1} - Classify public, internal, confidential, secret-reference, secret-value, source-body, prompt, tool-output, personal, and audit data and map allowed graph families/readers.
-      - [ ] 10.2.3.2 Subtask {#jcf-p10-10-2-3-2} - Scan all durable and transient outputs for secret values, credentials, private URLs/paths, source bodies, prompt content, raw model/tool output, and personal data beyond policy.
-      - [ ] 10.2.3.3 Subtask {#jcf-p10-10-2-3-3} - Implement bounded redaction receipts and fail closed when classification or sanitization cannot be completed.
-      - [ ] 10.2.3.4 Subtask {#jcf-p10-10-2-3-4} - Verify backup/export/restore and legal-erasure processes preserve encryption/access and do not reintroduce erased sensitive statements through derived graphs or caches.
+      - [x] 10.2.3.1 Subtask {#jcf-p10-10-2-3-1} - Classify public, internal, confidential, secret-reference, secret-value, source-body, prompt, tool-output, personal, and audit data and map allowed graph families/readers.
+      - [x] 10.2.3.2 Subtask {#jcf-p10-10-2-3-2} - Scan all durable and transient outputs for secret values, credentials, private URLs/paths, source bodies, prompt content, raw model/tool output, and personal data beyond policy.
+      - [x] 10.2.3.3 Subtask {#jcf-p10-10-2-3-3} - Implement bounded redaction receipts and fail closed when classification or sanitization cannot be completed.
+      - [x] 10.2.3.4 Subtask {#jcf-p10-10-2-3-4} - Verify backup/export/restore and legal-erasure processes preserve encryption/access and do not reintroduce erased sensitive statements through derived graphs or caches.
 
-    - [ ] 10.2.4 Task {#jcf-p10-threat-model} [repo: jido_code] [after: {#jcf-p10-privacy-redaction}] - Complete the factory threat model and residual-risk review.
+    - [x] 10.2.4 Task {#jcf-p10-threat-model} [repo: jido_code] [after: {#jcf-p10-privacy-redaction}] - Complete the factory threat model and residual-risk review.
 
       This task records trust boundaries, abuse cases, mitigations, test proof,
       and accepted limitations for the release candidate.
 
-      - [ ] 10.2.4.1 Subtask {#jcf-p10-10-2-4-1} - Model threats across browser/session, provider/webhook, Git/worktree, ontology/import, SPARQL, command writer, PubSub, Jido/model, tool/sandbox, artifact URI, backup/restore, and operator maintenance boundaries.
-      - [ ] 10.2.4.2 Subtask {#jcf-p10-10-2-4-2} - Map each high-risk threat to preventative controls, detection, recovery, owning tests, and operator response.
-      - [ ] 10.2.4.3 Subtask {#jcf-p10-10-2-4-3} - Record residual risks and block release on unresolved credential exposure, cross-scope access, arbitrary mutation/query, sandbox escape, or restore-integrity risk.
-      - [ ] 10.2.4.4 Subtask {#jcf-p10-10-2-4-4} - Review dependencies, native components, licenses, advisories, and update/rollback procedures at exact release pins.
+      - [x] 10.2.4.1 Subtask {#jcf-p10-10-2-4-1} - Model threats across browser/session, provider/webhook, Git/worktree, ontology/import, SPARQL, command writer, PubSub, Jido/model, tool/sandbox, artifact URI, backup/restore, and operator maintenance boundaries.
+      - [x] 10.2.4.2 Subtask {#jcf-p10-10-2-4-2} - Map each high-risk threat to preventative controls, detection, recovery, owning tests, and operator response.
+      - [x] 10.2.4.3 Subtask {#jcf-p10-10-2-4-3} - Record residual risks and block release on unresolved credential exposure, cross-scope access, arbitrary mutation/query, sandbox escape, or restore-integrity risk.
+      - [x] 10.2.4.4 Subtask {#jcf-p10-10-2-4-4} - Review dependencies, native components, licenses, advisories, and update/rollback procedures at exact release pins.
 
   - [ ] 10.3 Section - Implement fleet operations, retention, and observability.
 

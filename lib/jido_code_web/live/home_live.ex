@@ -1,27 +1,24 @@
 defmodule JidoCodeWeb.HomeLive do
   use JidoCodeWeb, :live_view
 
-  alias JidoCode.Knowledge.AuthorityContext
-  alias JidoCode.Knowledge.CommandReceipt
   alias JidoCode.Knowledge.Error
-  alias JidoCodeWeb.Product.CommandGateway
-  alias JidoCodeWeb.Product.GraphProjectionProvider
-  alias JidoCodeWeb.Product.Projection
-  alias JidoCodeWeb.Product.SurfaceContract
+  alias JidoCode.Product
+  alias JidoCode.Product.CommandGateway
+  alias JidoCode.Product.CommandOutcome
+  alias JidoCode.Product.GraphProjectionProvider
+  alias JidoCode.Product.Projection
+  alias JidoCode.Product.SurfaceContract
 
   @impl true
   def mount(_params, _session, socket) do
-    identity = product_identity()
-    authority = authority!(identity)
+    identity = socket.assigns.product_identity
 
-    if connected?(socket), do: JidoCode.Knowledge.subscribe_changes(identity.factory_scope_iri)
+    if connected?(socket), do: Product.subscribe_changes(identity.factory_scope_iri)
 
     {:ok,
      socket
      |> assign(:page_title, "Repository factory")
-     |> assign(:current_scope, %{iri: identity.factory_scope_iri, actor_iri: authority.actor_iri})
      |> assign(:identity, identity)
-     |> assign(:authority, authority)
      |> assign(:surface, SurfaceContract.default())
      |> assign(:selected_repository, nil)
      |> assign(:selected_repository_ref, nil)
@@ -108,7 +105,7 @@ defmodule JidoCodeWeb.HomeLive do
     gateway = Application.get_env(:jido_code, :product_command_gateway, CommandGateway)
 
     case gateway.enroll_repository(socket.assigns.authority, socket.assigns.identity, params) do
-      {:ok, %CommandReceipt{} = receipt} ->
+      {:ok, %CommandOutcome{} = receipt} ->
         {:noreply,
          socket
          |> assign(:command_receipt, receipt_view(receipt))
@@ -762,31 +759,6 @@ defmodule JidoCodeWeb.HomeLive do
         }
       end)
     end)
-  end
-
-  defp product_identity do
-    config = Application.fetch_env!(:jido_code, :product_surface)
-
-    %{
-      factory_iri: Keyword.fetch!(config, :factory_iri),
-      factory_scope_iri: Keyword.fetch!(config, :factory_scope_iri),
-      policy_boundary_iri: Keyword.fetch!(config, :policy_boundary_iri),
-      policy_iris: Keyword.fetch!(config, :policy_iris),
-      principal_iri: Keyword.fetch!(config, :principal_iri),
-      actor_iri: Keyword.fetch!(config, :actor_iri)
-    }
-  end
-
-  defp authority!(identity) do
-    {:ok, authority} =
-      AuthorityContext.new(%{
-        principal_iri: identity.principal_iri,
-        actor_iri: identity.actor_iri,
-        delegated_agent_iri: nil,
-        delegation_iri: nil
-      })
-
-    authority
   end
 
   defp decode_repository(nil), do: nil

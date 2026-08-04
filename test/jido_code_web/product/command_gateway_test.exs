@@ -1,10 +1,11 @@
-defmodule JidoCodeWeb.Product.CommandGatewayTest do
+defmodule JidoCode.Product.CommandGatewayTest do
   use ExUnit.Case, async: true
 
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.CommandReceipt
-  alias JidoCodeWeb.Product.CommandGateway
+  alias JidoCode.Product.CommandGateway
+  alias JidoCode.Product.CommandOutcome
 
   test "constructs enrollment command identity, graph, revisions, and actor on the server" do
     test_pid = self()
@@ -14,7 +15,7 @@ defmodule JidoCodeWeb.Product.CommandGatewayTest do
       {:ok, receipt(command)}
     end
 
-    assert {:ok, %CommandReceipt{outcome: :committed}} =
+    assert {:ok, %CommandOutcome{outcome: :committed}} =
              CommandGateway.enroll_repository(authority(), identity(), params(),
                clock: fn -> ~U[2026-08-04 11:00:00Z] end,
                summary: fn -> %{dataset_revision: 22} end,
@@ -59,6 +60,15 @@ defmodule JidoCodeWeb.Product.CommandGatewayTest do
              )
 
     assert error.kind == :invalid_input
+
+    params = Map.put(params(), "reason", "Authorization: Bearer abcdefghijklmnopqrst")
+
+    assert {:error, error} =
+             CommandGateway.enroll_repository(authority(), identity(), params,
+               summary: fn -> flunk("graph must not be read") end
+             )
+
+    assert error.operation == :sensitive_input
   end
 
   test "ignores browser attempts to select commands, graphs, revisions, or actors" do

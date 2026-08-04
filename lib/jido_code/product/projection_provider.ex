@@ -1,10 +1,10 @@
-defmodule JidoCodeWeb.Product.ProjectionProvider do
+defmodule JidoCode.Product.ProjectionProvider do
   @moduledoc """
   Product-owned boundary for rebuilding workbench projections from the graph.
   """
 
   alias JidoCode.Knowledge.AuthorityContext
-  alias JidoCodeWeb.Product.Projection
+  alias JidoCode.Product.Projection
 
   @callback load(AuthorityContext.t(), map(), keyword()) ::
               {:ok, Projection.t()} | {:error, term()}

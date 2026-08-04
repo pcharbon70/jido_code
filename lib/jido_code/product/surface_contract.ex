@@ -1,4 +1,4 @@
-defmodule JidoCodeWeb.Product.SurfaceContract do
+defmodule JidoCode.Product.SurfaceContract do
   @moduledoc """
   Closed route and ownership contract for the repository factory workbench.
 

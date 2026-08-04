@@ -1,4 +1,4 @@
-defmodule JidoCodeWeb.Product.Projection do
+defmodule JidoCode.Product.Projection do
   @moduledoc """
   Transient, browser-safe workbench projection.
 

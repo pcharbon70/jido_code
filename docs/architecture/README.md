@@ -87,3 +87,4 @@ implementation plan was merged.
 ## Phase 10 Product Acceptance
 
 - [Product surface and island contract](./product-surface-and-island-contract.md)
+- [Product security, privacy, and threat model](./product-security-privacy-and-threat-model.md)
