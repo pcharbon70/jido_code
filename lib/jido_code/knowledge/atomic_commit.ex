@@ -82,6 +82,17 @@ defmodule JidoCode.Knowledge.AtomicCommit do
   defp validate_removals(%WriteBatch{
          removal_policy: :maintenance,
          operation_metadata: %{
+           operation: :retention,
+           plan_id: "urn:jido-code:retention-plan:" <> _token,
+           checksum: checksum
+         }
+       })
+       when is_binary(checksum) and byte_size(checksum) == 64,
+       do: :ok
+
+  defp validate_removals(%WriteBatch{
+         removal_policy: :maintenance,
+         operation_metadata: %{
            class: :semantic_command,
            command_type: "FinalizeExecutionRun",
            command_version: "1.6.0"

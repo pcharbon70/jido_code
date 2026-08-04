@@ -18,6 +18,7 @@ defmodule JidoCode.Product.CommandGateway do
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Product.CommandOutcome
+  alias JidoCode.Observability
   alias JidoCode.Security.Redactor
 
   @valid_to ~U[9999-12-31 23:59:59Z]
@@ -72,7 +73,10 @@ defmodule JidoCode.Product.CommandGateway do
              catalog_revision,
              recorded_at
            ),
-         {:ok, %CommandReceipt{} = receipt} <- execute.(command) do
+         {:ok, %CommandReceipt{} = receipt} <-
+           Observability.span(:command, Observability.correlation_ref(request_iri), fn ->
+             execute.(command)
+           end) do
       {:ok, CommandOutcome.from_receipt(receipt)}
     else
       false -> invalid(:enrollment_confirmation)

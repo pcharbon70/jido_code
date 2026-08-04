@@ -18,6 +18,16 @@ config :jido_code,
     policy_boundary_iri: "https://jido.run/id/policy-boundary/default",
     policy_iris: ["https://jido.run/id/policy/default"]
   ],
+  fleet_runtime_ceilings: %{
+    concurrency: %{global: 16, cohort: 8, repository: 2, provider: 4, capability: 4},
+    rate_units: 100,
+    budget_units: 100,
+    max_risk: 10,
+    max_candidates: 200,
+    max_campaign_repositories: 50,
+    starvation_cycles: 5,
+    emergency_priority: 100
+  },
   knowledge_store: [
     enabled: true,
     root: Path.expand("../var/knowledge/#{config_env()}", __DIR__),

@@ -65,6 +65,25 @@ defmodule JidoCodeWeb.Telemetry do
         tags: [:operation, :outcome]
       ),
 
+      # Factory metrics intentionally exclude the opaque trace correlation ref.
+      summary("jido_code.factory.operation.stop.duration",
+        tags: [:stage, :outcome],
+        unit: {:native, :millisecond}
+      ),
+      last_value("jido_code.factory.snapshot.queue_depth", tags: [:kind, :state]),
+      sum("jido_code.factory.snapshot.admission_deferred_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.graph_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.quad_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.stale_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.incomplete_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.active_lease_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.active_attempt_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.decision_pending_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.cache_entry_count", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.pubsub_lag_ms", tags: [:kind, :state]),
+      last_value("jido_code.factory.snapshot.backup_age_seconds", tags: [:kind, :state]),
+      sum("jido_code.factory.snapshot.projection_error_count", tags: [:kind, :state]),
+
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),

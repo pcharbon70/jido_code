@@ -124,54 +124,54 @@ Back to plan: [README](./README.md)
       - [x] 10.2.4.3 Subtask {#jcf-p10-10-2-4-3} - Record residual risks and block release on unresolved credential exposure, cross-scope access, arbitrary mutation/query, sandbox escape, or restore-integrity risk.
       - [x] 10.2.4.4 Subtask {#jcf-p10-10-2-4-4} - Review dependencies, native components, licenses, advisories, and update/rollback procedures at exact release pins.
 
-  - [ ] 10.3 Section - Implement fleet operations, retention, and observability.
+  - [x] 10.3 Section - Implement fleet operations, retention, and observability.
 
     This section makes continuous multi-repository operation predictable and
     bounded while retaining the graph as the only durable coordination state.
 
-    - [ ] 10.3.1 Task {#jcf-p10-fleet-coordination} [repo: jido_code] [after: {#jcf-p10-threat-model}] - Harden multi-repository reconciliation and scheduling.
+    - [x] 10.3.1 Task {#jcf-p10-fleet-coordination} [repo: jido_code] [after: {#jcf-p10-threat-model}] - Harden multi-repository reconciliation and scheduling.
 
       This task validates fair, bounded operation across cohorts, repositories,
       capabilities, risks, and external provider limits.
 
-      - [ ] 10.3.1.1 Subtask {#jcf-p10-10-3-1-1} - Implement configurable global/cohort/repository/provider/capability concurrency, rate, budget, and risk limits from graph policy plus trusted runtime ceilings.
-      - [ ] 10.3.1.2 Subtask {#jcf-p10-10-3-1-2} - Enforce deterministic fairness and starvation prevention while preserving priority and emergency policy.
-      - [ ] 10.3.1.3 Subtask {#jcf-p10-10-3-1-3} - Coalesce observation/reconciliation storms, apply provider backpressure, and retain explainable deferred/blocked reasons.
-      - [ ] 10.3.1.4 Subtask {#jcf-p10-10-3-1-4} - Rebuild all fleet coordinators from graph after restart and prove no local queue/snapshot is required.
-      - [ ] 10.3.1.5 Subtask {#jcf-p10-10-3-1-5} - Bound cross-repository campaign queries and preserve per-repository authorization and failure isolation.
+      - [x] 10.3.1.1 Subtask {#jcf-p10-10-3-1-1} - Implement configurable global/cohort/repository/provider/capability concurrency, rate, budget, and risk limits from graph policy plus trusted runtime ceilings.
+      - [x] 10.3.1.2 Subtask {#jcf-p10-10-3-1-2} - Enforce deterministic fairness and starvation prevention while preserving priority and emergency policy.
+      - [x] 10.3.1.3 Subtask {#jcf-p10-10-3-1-3} - Coalesce observation/reconciliation storms, apply provider backpressure, and retain explainable deferred/blocked reasons.
+      - [x] 10.3.1.4 Subtask {#jcf-p10-10-3-1-4} - Rebuild all fleet coordinators from graph after restart and prove no local queue/snapshot is required.
+      - [x] 10.3.1.5 Subtask {#jcf-p10-10-3-1-5} - Bound cross-repository campaign queries and preserve per-repository authorization and failure isolation.
 
-    - [ ] 10.3.2 Task {#jcf-p10-retention-compaction} [repo: jido_code] [after: {#jcf-p10-fleet-coordination}] - Implement graph retention, compaction, archival, and legal-erasure policy.
+    - [x] 10.3.2 Task {#jcf-p10-retention-compaction} [repo: jido_code] [after: {#jcf-p10-fleet-coordination}] - Implement graph retention, compaction, archival, and legal-erasure policy.
 
       This task controls dataset growth without silently severing the evidence
       and provenance required by accepted outcomes.
 
-      - [ ] 10.3.2.1 Subtask {#jcf-p10-10-3-2-1} - Define retention classes for ontology, catalog/control, observations, source revisions, run attempts, evidence/decisions, memory, audit, derived graphs, command receipts, and validation reports.
-      - [ ] 10.3.2.2 Subtask {#jcf-p10-10-3-2-2} - Compute reachability from active/retained decisions, knowledge, goals, policy, audits, and legal holds before archival or removal.
-      - [ ] 10.3.2.3 Subtask {#jcf-p10-10-3-2-3} - Record authorized retention/compaction/erasure activity, exact affected graphs/resources, summaries, checksums, rationale, and validation results.
-      - [ ] 10.3.2.4 Subtask {#jcf-p10-10-3-2-4} - Remove/rebuild affected derived graphs and caches and prevent restored backups from silently reactivating erased data.
-      - [ ] 10.3.2.5 Subtask {#jcf-p10-10-3-2-5} - Keep ordinary domain commands unable to invoke destructive retention or repair behavior.
+      - [x] 10.3.2.1 Subtask {#jcf-p10-10-3-2-1} - Define retention classes for ontology, catalog/control, observations, source revisions, run attempts, evidence/decisions, memory, audit, derived graphs, command receipts, and validation reports.
+      - [x] 10.3.2.2 Subtask {#jcf-p10-10-3-2-2} - Compute reachability from active/retained decisions, knowledge, goals, policy, audits, and legal holds before archival or removal.
+      - [x] 10.3.2.3 Subtask {#jcf-p10-10-3-2-3} - Record authorized retention/compaction/erasure activity, exact affected graphs/resources, summaries, checksums, rationale, and validation results.
+      - [x] 10.3.2.4 Subtask {#jcf-p10-10-3-2-4} - Remove/rebuild affected derived graphs and caches and prevent restored backups from silently reactivating erased data.
+      - [x] 10.3.2.5 Subtask {#jcf-p10-10-3-2-5} - Keep ordinary domain commands unable to invoke destructive retention or repair behavior.
 
-    - [ ] 10.3.3 Task {#jcf-p10-observability-slo} [repo: jido_code] [after: {#jcf-p10-retention-compaction}] - Implement end-to-end observability and service objectives.
+    - [x] 10.3.3 Task {#jcf-p10-observability-slo} [repo: jido_code] [after: {#jcf-p10-retention-compaction}] - Implement end-to-end observability and service objectives.
 
       This task makes store, ingestion, reconciliation, scheduling, execution,
       evaluation, reasoning, projection, and UI health diagnosable without
       persisting telemetry as product truth.
 
-      - [ ] 10.3.3.1 Subtask {#jcf-p10-10-3-3-1} - Define low-cardinality metrics for operation latency/outcomes, queue/admission pressure, graph growth, stale/incomplete state, leases, attempts, evidence decisions, reasoning, cache, PubSub lag, backup age, and UI projection errors.
-      - [ ] 10.3.3.2 Subtask {#jcf-p10-10-3-3-2} - Add trace correlation from HTTP/LiveView intent through semantic command, graph commit, reconciliation, lease, attempt, tool, evidence, decision, and re-projection using safe opaque refs.
-      - [ ] 10.3.3.3 Subtask {#jcf-p10-10-3-3-3} - Define readiness, availability, durability, recovery-point/recovery-time, freshness, and bounded-query objectives with actionable alerts.
-      - [ ] 10.3.3.4 Subtask {#jcf-p10-10-3-3-4} - Ensure observability remains useful during store unavailability and excludes arbitrary IRIs, graph contents, source, prompts, and secrets.
+      - [x] 10.3.3.1 Subtask {#jcf-p10-10-3-3-1} - Define low-cardinality metrics for operation latency/outcomes, queue/admission pressure, graph growth, stale/incomplete state, leases, attempts, evidence decisions, reasoning, cache, PubSub lag, backup age, and UI projection errors.
+      - [x] 10.3.3.2 Subtask {#jcf-p10-10-3-3-2} - Add trace correlation from HTTP/LiveView intent through semantic command, graph commit, reconciliation, lease, attempt, tool, evidence, decision, and re-projection using safe opaque refs.
+      - [x] 10.3.3.3 Subtask {#jcf-p10-10-3-3-3} - Define readiness, availability, durability, recovery-point/recovery-time, freshness, and bounded-query objectives with actionable alerts.
+      - [x] 10.3.3.4 Subtask {#jcf-p10-10-3-3-4} - Ensure observability remains useful during store unavailability and excludes arbitrary IRIs, graph contents, source, prompts, and secrets.
 
-    - [ ] 10.3.4 Task {#jcf-p10-capacity-performance} [repo: jido_code] [after: {#jcf-p10-observability-slo}] - Establish fleet capacity and performance limits.
+    - [x] 10.3.4 Task {#jcf-p10-capacity-performance} [repo: jido_code] [after: {#jcf-p10-observability-slo}] - Establish fleet capacity and performance limits.
 
       This task measures representative workloads and sets explicit supported
       bounds rather than assuming the embedded store scales indefinitely.
 
-      - [ ] 10.3.4.1 Subtask {#jcf-p10-10-3-4-1} - Create representative small/medium/maximum-supported fixtures for repositories, snapshots, source symbols, observations, goals/tasks, runs, evidence, memory, audit, and derived graphs.
-      - [ ] 10.3.4.2 Subtask {#jcf-p10-10-3-4-2} - Benchmark startup/recovery, ingestion, semantic writes, common/bounded graph queries, reconciliation, eligibility, reasoning, backup/restore, retention, and UI projections.
-      - [ ] 10.3.4.3 Subtask {#jcf-p10-10-3-4-3} - Measure concurrent readers/writers, provider storms, scheduler fairness, long-running attempts, cache cold/warm behavior, RocksDB growth/compaction, and memory use.
-      - [ ] 10.3.4.4 Subtask {#jcf-p10-10-3-4-4} - Set hard/soft limits, timeouts, pagination, backpressure, degraded behavior, and operator guidance from measured results.
-      - [ ] 10.3.4.5 Subtask {#jcf-p10-10-3-4-5} - Fail boundedly beyond supported limits without partial writes, unbounded memory, scheduler starvation, or misleading current-state claims.
+      - [x] 10.3.4.1 Subtask {#jcf-p10-10-3-4-1} - Create representative small/medium/maximum-supported fixtures for repositories, snapshots, source symbols, observations, goals/tasks, runs, evidence, memory, audit, and derived graphs.
+      - [x] 10.3.4.2 Subtask {#jcf-p10-10-3-4-2} - Benchmark startup/recovery, ingestion, semantic writes, common/bounded graph queries, reconciliation, eligibility, reasoning, backup/restore, retention, and UI projections.
+      - [x] 10.3.4.3 Subtask {#jcf-p10-10-3-4-3} - Measure concurrent readers/writers, provider storms, scheduler fairness, long-running attempts, cache cold/warm behavior, RocksDB growth/compaction, and memory use.
+      - [x] 10.3.4.4 Subtask {#jcf-p10-10-3-4-4} - Set hard/soft limits, timeouts, pagination, backpressure, degraded behavior, and operator guidance from measured results.
+      - [x] 10.3.4.5 Subtask {#jcf-p10-10-3-4-5} - Fail boundedly beyond supported limits without partial writes, unbounded memory, scheduler starvation, or misleading current-state claims.
 
   - [ ] 10.4 Section - Complete deployment, migration, recovery, and operator readiness.
 

@@ -57,7 +57,7 @@ defmodule JidoCode.Knowledge.Health do
           state: state(),
           store_verified?: boolean(),
           ontology_verified?: boolean(),
-          maintenance_reason: :restore | :integrity_repair | :schema_migration | nil,
+          maintenance_reason: :restore | :integrity_repair | :schema_migration | :retention | nil,
           failure: Error.t() | nil
         }
 
@@ -118,7 +118,7 @@ defmodule JidoCode.Knowledge.Health do
   def ontology_verified(%__MODULE__{}), do: invalid_transition()
 
   def enter_maintenance(%__MODULE__{state: :ready} = health, reason)
-      when reason in [:restore, :integrity_repair, :schema_migration] do
+      when reason in [:restore, :integrity_repair, :schema_migration, :retention] do
     {:ok, %{health | state: :maintenance, maintenance_reason: reason}}
   end
 

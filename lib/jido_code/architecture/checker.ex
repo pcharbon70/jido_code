@@ -32,6 +32,7 @@ defmodule JidoCode.Architecture.Checker do
     "JidoCode.Knowledge.Bootstrap",
     "JidoCode.Knowledge.CommandPipeline",
     "JidoCode.Knowledge.Commands.Graphs",
+    "JidoCode.Knowledge.Commands.Retention",
     "JidoCode.Knowledge.Ontology.Release"
   ]
   @theme_path "assets/js/theme.js"

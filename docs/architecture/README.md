@@ -88,3 +88,4 @@ implementation plan was merged.
 
 - [Product surface and island contract](./product-surface-and-island-contract.md)
 - [Product security, privacy, and threat model](./product-security-privacy-and-threat-model.md)
+- [Fleet capacity, retention, and observability](../operations/fleet-capacity-retention-and-observability.md)
