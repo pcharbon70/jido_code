@@ -7,6 +7,8 @@ defmodule JidoCode.Application do
 
   @impl true
   def start(_type, _args) do
+    :ok = verify_release_contract!()
+
     children = [
       JidoCodeWeb.Telemetry,
       TwMerge.Cache,
@@ -24,6 +26,16 @@ defmodule JidoCode.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: JidoCode.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp verify_release_contract! do
+    case JidoCode.ReleaseContract.verify() do
+      :ok ->
+        :ok
+
+      {:error, error} ->
+        raise "release contract failed: #{error.kind}/#{error.operation}"
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration

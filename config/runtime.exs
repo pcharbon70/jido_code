@@ -20,11 +20,23 @@ if System.get_env("PHX_SERVER") do
   config :jido_code, JidoCodeWeb.Endpoint, server: true
 end
 
+session_ttl_seconds = fn ->
+  value = System.get_env("JIDO_CODE_SESSION_TTL_SECONDS") || "28800"
+
+  case Integer.parse(value) do
+    {seconds, ""} when seconds in 300..86_400 -> seconds
+    _invalid -> raise "JIDO_CODE_SESSION_TTL_SECONDS must be an integer from 300 through 86400"
+  end
+end
+
 if operator_token = System.get_env("JIDO_CODE_OPERATOR_TOKEN") do
+  if byte_size(operator_token) < 24 or byte_size(operator_token) > 512 do
+    raise "JIDO_CODE_OPERATOR_TOKEN must contain from 24 through 512 bytes"
+  end
+
   config :jido_code, :product_auth,
     credential_digest: :crypto.hash(:sha256, operator_token),
-    session_ttl_seconds:
-      String.to_integer(System.get_env("JIDO_CODE_SESSION_TTL_SECONDS") || "28800"),
+    session_ttl_seconds: session_ttl_seconds.(),
     session_generation: System.get_env("JIDO_CODE_SESSION_GENERATION") || "1"
 end
 
@@ -33,10 +45,13 @@ if config_env() == :prod do
     System.get_env("JIDO_CODE_OPERATOR_TOKEN") ||
       raise "environment variable JIDO_CODE_OPERATOR_TOKEN is missing"
 
+  if byte_size(operator_token) < 24 or byte_size(operator_token) > 512 do
+    raise "JIDO_CODE_OPERATOR_TOKEN must contain from 24 through 512 bytes"
+  end
+
   config :jido_code, :product_auth,
     credential_digest: :crypto.hash(:sha256, operator_token),
-    session_ttl_seconds:
-      String.to_integer(System.get_env("JIDO_CODE_SESSION_TTL_SECONDS") || "28800"),
+    session_ttl_seconds: session_ttl_seconds.(),
     session_generation: System.get_env("JIDO_CODE_SESSION_GENERATION") || "1"
 
   # The secret key base is used to sign/encrypt cookies and other secrets.

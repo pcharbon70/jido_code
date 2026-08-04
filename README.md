@@ -58,3 +58,9 @@ Run the test suite and precommit checks:
 mix test
 mix precommit
 ```
+
+Operational workflows are documented in the
+[operator handbook](docs/operations/operator-handbook.md). Exact release gates
+are available through `mix jido_code.release verify|preflight|audit`; initialize
+a pristine dataset only with
+`mix jido_code.bootstrap --confirm INITIALIZE`.

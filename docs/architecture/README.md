@@ -89,3 +89,8 @@ implementation plan was merged.
 - [Product surface and island contract](./product-surface-and-island-contract.md)
 - [Product security, privacy, and threat model](./product-security-privacy-and-threat-model.md)
 - [Fleet capacity, retention, and observability](../operations/fleet-capacity-retention-and-observability.md)
+- [Install, upgrade, and rollback](../operations/install-upgrade-and-rollback.md)
+- [Disaster recovery](../operations/disaster-recovery.md)
+- [Operator handbook](../operations/operator-handbook.md)
+- [Graph-native contributor fitness checks](../contributing/graph-native-fitness-checks.md)
+- [Phase 10 architecture audit](./phase-10-architecture-audit.md)

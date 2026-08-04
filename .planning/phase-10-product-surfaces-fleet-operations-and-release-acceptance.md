@@ -173,55 +173,55 @@ Back to plan: [README](./README.md)
       - [x] 10.3.4.4 Subtask {#jcf-p10-10-3-4-4} - Set hard/soft limits, timeouts, pagination, backpressure, degraded behavior, and operator guidance from measured results.
       - [x] 10.3.4.5 Subtask {#jcf-p10-10-3-4-5} - Fail boundedly beyond supported limits without partial writes, unbounded memory, scheduler starvation, or misleading current-state claims.
 
-  - [ ] 10.4 Section - Complete deployment, migration, recovery, and operator readiness.
+  - [x] 10.4 Section - Complete deployment, migration, recovery, and operator readiness.
 
     This section makes clean install, upgrade, rollback, backup/restore,
     corruption response, and architectural compliance reproducible for the
     release candidate.
 
-    - [ ] 10.4.1 Task {#jcf-p10-clean-install-upgrade} [repo: jido_code] [after: {#jcf-p10-capacity-performance}] - Implement clean-install and supported upgrade workflows.
+    - [x] 10.4.1 Task {#jcf-p10-clean-install-upgrade} [repo: jido_code] [after: {#jcf-p10-capacity-performance}] - Implement clean-install and supported upgrade workflows.
 
       This task creates or upgrades a dataset only through versioned,
       verifiable operations with no hidden defaults or partial readiness.
 
-      - [ ] 10.4.1.1 Subtask {#jcf-p10-10-4-1-1} - Document/install native dependencies, trusted store/backup paths, secret references, initial bootstrap, ontology load, integrity verification, and first operator login/enrollment.
-      - [ ] 10.4.1.2 Subtask {#jcf-p10-10-4-1-2} - Apply application, ontology/shape, query, rule, backend schema, and graph migrations in an explicit compatible order under maintenance mode.
-      - [ ] 10.4.1.3 Subtask {#jcf-p10-10-4-1-3} - Verify backups/checksums/free space before destructive migration and preserve a tested rollback target until post-upgrade acceptance.
-      - [ ] 10.4.1.4 Subtask {#jcf-p10-10-4-1-4} - Block startup/readiness on missing, incompatible, interrupted, or failed migrations and expose safe remediation.
+      - [x] 10.4.1.1 Subtask {#jcf-p10-10-4-1-1} - Document/install native dependencies, trusted store/backup paths, secret references, initial bootstrap, ontology load, integrity verification, and first operator login/enrollment.
+      - [x] 10.4.1.2 Subtask {#jcf-p10-10-4-1-2} - Apply application, ontology/shape, query, rule, backend schema, and graph migrations in an explicit compatible order under maintenance mode.
+      - [x] 10.4.1.3 Subtask {#jcf-p10-10-4-1-3} - Verify backups/checksums/free space before destructive migration and preserve a tested rollback target until post-upgrade acceptance.
+      - [x] 10.4.1.4 Subtask {#jcf-p10-10-4-1-4} - Block startup/readiness on missing, incompatible, interrupted, or failed migrations and expose safe remediation.
 
-    - [ ] 10.4.2 Task {#jcf-p10-disaster-recovery} [repo: jido_code] [after: {#jcf-p10-clean-install-upgrade}] - Complete disaster-recovery and integrity-repair runbooks.
+    - [x] 10.4.2 Task {#jcf-p10-disaster-recovery} [repo: jido_code] [after: {#jcf-p10-clean-install-upgrade}] - Complete disaster-recovery and integrity-repair runbooks.
 
       This task restores authoritative operation from verified graph backups
       and external system state without relying on process snapshots or local
       worktrees.
 
-      - [ ] 10.4.2.1 Subtask {#jcf-p10-10-4-2-1} - Define response for store unavailable/locked/corrupt, disk full, failed migration, lost backup, stale external artifact, orphan runtime, and inconsistent graph integrity.
-      - [ ] 10.4.2.2 Subtask {#jcf-p10-10-4-2-2} - Restore a backup into an isolated target, validate checksums/schema/ontology/integrity, switch active lineage, reconcile external provider/runtime state, and resume admission.
-      - [ ] 10.4.2.3 Subtask {#jcf-p10-10-4-2-3} - Rebuild derived graphs, caches, schedulers, reconcilers, subscriptions, and runtime workers from asserted graph state.
-      - [ ] 10.4.2.4 Subtask {#jcf-p10-10-4-2-4} - Define when integrity repair is permitted, which history must remain immutable, and when operator escalation/fail-stop is mandatory.
-      - [ ] 10.4.2.5 Subtask {#jcf-p10-10-4-2-5} - Measure and record achieved recovery point/time against the accepted objectives.
+      - [x] 10.4.2.1 Subtask {#jcf-p10-10-4-2-1} - Define response for store unavailable/locked/corrupt, disk full, failed migration, lost backup, stale external artifact, orphan runtime, and inconsistent graph integrity.
+      - [x] 10.4.2.2 Subtask {#jcf-p10-10-4-2-2} - Restore a backup into an isolated target, validate checksums/schema/ontology/integrity, switch active lineage, reconcile external provider/runtime state, and resume admission.
+      - [x] 10.4.2.3 Subtask {#jcf-p10-10-4-2-3} - Rebuild derived graphs, caches, schedulers, reconcilers, subscriptions, and runtime workers from asserted graph state.
+      - [x] 10.4.2.4 Subtask {#jcf-p10-10-4-2-4} - Define when integrity repair is permitted, which history must remain immutable, and when operator escalation/fail-stop is mandatory.
+      - [x] 10.4.2.5 Subtask {#jcf-p10-10-4-2-5} - Measure and record achieved recovery point/time against the accepted objectives.
 
-    - [ ] 10.4.3 Task {#jcf-p10-operator-docs} [repo: jido_code] [after: {#jcf-p10-disaster-recovery}] - Complete operator and contributor documentation.
+    - [x] 10.4.3 Task {#jcf-p10-operator-docs} [repo: jido_code] [after: {#jcf-p10-disaster-recovery}] - Complete operator and contributor documentation.
 
       This task makes the graph-native boundaries and routine operations clear
       enough to maintain without reintroducing record-shaped shortcuts.
 
-      - [ ] 10.4.3.1 Subtask {#jcf-p10-10-4-3-1} - Document architecture planes, ontology/graph topology, command/query boundaries, repository control loop, execution/evidence/decision flow, and UI projection model.
-      - [ ] 10.4.3.2 Subtask {#jcf-p10-10-4-3-2} - Document enrollment, provider credentials, source refresh, blocked work, lease recovery, attempt cancellation, evidence review, decisions, knowledge supersession, and policy operations.
-      - [ ] 10.4.3.3 Subtask {#jcf-p10-10-4-3-3} - Document backup/restore/export, integrity, migrations, retention/erasure, capacity, observability, alerts, incident response, and rollback.
-      - [ ] 10.4.3.4 Subtask {#jcf-p10-10-4-3-4} - Add contributor fitness checks for new predicates, graph families, commands, queries, projections, adapters, persistence, and route surfaces.
+      - [x] 10.4.3.1 Subtask {#jcf-p10-10-4-3-1} - Document architecture planes, ontology/graph topology, command/query boundaries, repository control loop, execution/evidence/decision flow, and UI projection model.
+      - [x] 10.4.3.2 Subtask {#jcf-p10-10-4-3-2} - Document enrollment, provider credentials, source refresh, blocked work, lease recovery, attempt cancellation, evidence review, decisions, knowledge supersession, and policy operations.
+      - [x] 10.4.3.3 Subtask {#jcf-p10-10-4-3-3} - Document backup/restore/export, integrity, migrations, retention/erasure, capacity, observability, alerts, incident response, and rollback.
+      - [x] 10.4.3.4 Subtask {#jcf-p10-10-4-3-4} - Add contributor fitness checks for new predicates, graph families, commands, queries, projections, adapters, persistence, and route surfaces.
 
-    - [ ] 10.4.4 Task {#jcf-p10-final-architecture-audit} [repo: jido_code] [after: {#jcf-p10-operator-docs}] - Audit the release candidate for one-source-of-truth compliance.
+    - [x] 10.4.4 Task {#jcf-p10-final-architecture-audit} [repo: jido_code] [after: {#jcf-p10-operator-docs}] - Audit the release candidate for one-source-of-truth compliance.
 
       This task verifies the completed implementation did not acquire a second
       object model, persistence mechanism, or hidden authority while features
       were added.
 
-      - [ ] 10.4.4.1 Subtask {#jcf-p10-10-4-4-1} - Scan dependencies, code, configuration, browser assets, runtime state, files, test support, and deployment manifests for alternate durable stores, queues, snapshots, caches, or prompt memory.
-      - [ ] 10.4.4.2 Subtask {#jcf-p10-10-4-4-2} - Scan for entity CRUD stores/codecs, persisted aggregate structs, foreign-key-shaped joins, direct subject replacement, mutable status properties, and ontology terms mirroring modules.
-      - [ ] 10.4.4.3 Subtask {#jcf-p10-10-4-4-3} - Scan for raw store handles/SPARQL outside knowledge modules, unbounded browser graphs, direct runtime acceptance, inference authority, and secret-value persistence.
-      - [ ] 10.4.4.4 Subtask {#jcf-p10-10-4-4-4} - Trace representative durable user-visible facts back to one semantic command, graph commit, provenance/audit, and current transition/decision chain.
-      - [ ] 10.4.4.5 Subtask {#jcf-p10-10-4-4-5} - Resolve every finding or record an explicit release-blocking disposition; no compatibility facade is accepted silently.
+      - [x] 10.4.4.1 Subtask {#jcf-p10-10-4-4-1} - Scan dependencies, code, configuration, browser assets, runtime state, files, test support, and deployment manifests for alternate durable stores, queues, snapshots, caches, or prompt memory.
+      - [x] 10.4.4.2 Subtask {#jcf-p10-10-4-4-2} - Scan for entity CRUD stores/codecs, persisted aggregate structs, foreign-key-shaped joins, direct subject replacement, mutable status properties, and ontology terms mirroring modules.
+      - [x] 10.4.4.3 Subtask {#jcf-p10-10-4-4-3} - Scan for raw store handles/SPARQL outside knowledge modules, unbounded browser graphs, direct runtime acceptance, inference authority, and secret-value persistence.
+      - [x] 10.4.4.4 Subtask {#jcf-p10-10-4-4-4} - Trace representative durable user-visible facts back to one semantic command, graph commit, provenance/audit, and current transition/decision chain.
+      - [x] 10.4.4.5 Subtask {#jcf-p10-10-4-4-5} - Resolve every finding or record an explicit release-blocking disposition; no compatibility facade is accepted silently.
 
   - [ ] 10.5 Section - Phase 10 Integration Tests.
 
