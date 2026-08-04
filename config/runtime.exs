@@ -38,6 +38,24 @@ if operator_token = System.get_env("JIDO_CODE_OPERATOR_TOKEN") do
     credential_digest: :crypto.hash(:sha256, operator_token),
     session_ttl_seconds: session_ttl_seconds.(),
     session_generation: System.get_env("JIDO_CODE_SESSION_GENERATION") || "1"
+
+  config :jido_code, :authority_bootstrap, %{
+    enabled?: true,
+    token_digest: :crypto.hash(:sha256, operator_token)
+  }
+end
+
+case {System.get_env("JIDO_CODE_STORE_ROOT"), System.get_env("JIDO_CODE_BACKUP_ROOT")} do
+  {nil, nil} ->
+    :ok
+
+  {store_root, backup_root} when is_binary(store_root) and is_binary(backup_root) ->
+    config :jido_code, :knowledge_store,
+      root: store_root,
+      backup_root: backup_root
+
+  _partial ->
+    raise "JIDO_CODE_STORE_ROOT and JIDO_CODE_BACKUP_ROOT must be configured together"
 end
 
 if config_env() == :prod do
@@ -53,6 +71,11 @@ if config_env() == :prod do
     credential_digest: :crypto.hash(:sha256, operator_token),
     session_ttl_seconds: session_ttl_seconds.(),
     session_generation: System.get_env("JIDO_CODE_SESSION_GENERATION") || "1"
+
+  config :jido_code, :authority_bootstrap, %{
+    enabled?: true,
+    token_digest: :crypto.hash(:sha256, operator_token)
+  }
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you

@@ -4,6 +4,7 @@ defmodule JidoCode.Product.GraphProjectionProviderTest do
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.Health
   alias JidoCode.Knowledge.QueryResult
+  alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Product.GraphProjectionProvider
 
   test "builds a bounded projection from reviewed graph queries" do
@@ -38,17 +39,28 @@ defmodule JidoCode.Product.GraphProjectionProviderTest do
 
   test "loads only accepted repository-scoped product lenses" do
     test_pid = self()
+    repository = "https://jido.run/id/repository/alpha"
+    {:ok, repository_scope} = ResourceIdentity.scope(:repository, repository)
 
-    query = fn name, _version, parameters, _authority, _scope, _options ->
-      send(test_pid, {:query, name, parameters})
+    query = fn name, _version, parameters, _authority, scope, _options ->
+      send(test_pid, {:query, name, parameters, scope})
       {:ok, query_result(name, data(name), 15)}
+    end
+
+    metadata = fn _graph ->
+      {:ok,
+       %{
+         owner_scope: repository_scope,
+         lifecycle_state: :open
+       }}
     end
 
     {:ok, projection} =
       GraphProjectionProvider.load(authority(), identity(),
         health: ready_health(),
         query: query,
-        repository: "https://jido.run/id/repository/alpha"
+        metadata: metadata,
+        repository: repository
       )
 
     assert projection.state == :ready
@@ -56,14 +68,42 @@ defmodule JidoCode.Product.GraphProjectionProviderTest do
     assert length(projection.attempts) == 1
     assert length(projection.knowledge) == 1
 
-    assert_receive {:query, :work_lens, %{state: :eligible}}
-    assert_receive {:query, :work_lens, %{state: :blocked}}
-    assert_receive {:query, :work_lens, %{state: :executing}}
-    assert_receive {:query, :work_lens, %{state: :awaiting_decision}}
-    assert_receive {:query, :active_attempts, %{graph: control_graph}}
+    assert_receive {:query, :work_lens, %{state: :eligible}, ^repository_scope}
+    assert_receive {:query, :work_lens, %{state: :blocked}, ^repository_scope}
+    assert_receive {:query, :work_lens, %{state: :executing}, ^repository_scope}
+    assert_receive {:query, :work_lens, %{state: :awaiting_decision}, ^repository_scope}
+    assert_receive {:query, :active_attempts, %{graph: control_graph}, ^repository_scope}
     assert String.contains?(control_graph, "/control")
-    assert_receive {:query, :knowledge_by_scope, %{graph: memory_graph, resource: _repository}}
+
+    assert_receive {:query, :knowledge_by_scope, %{graph: memory_graph, resource: _repository},
+                    ^repository_scope}
+
     assert String.contains?(memory_graph, "/memory")
+  end
+
+  test "renders authorized repositories with not-yet-created graphs as empty" do
+    test_pid = self()
+
+    query = fn name, _version, _parameters, _authority, _scope, _options ->
+      send(test_pid, {:query, name})
+      {:ok, query_result(name, data(name), 16)}
+    end
+
+    {:ok, projection} =
+      GraphProjectionProvider.load(authority(), identity(),
+        health: ready_health(),
+        query: query,
+        metadata: fn _graph -> {:ok, nil} end,
+        repository: "https://jido.run/id/repository/alpha"
+      )
+
+    assert projection.state == :ready
+    assert projection.work == JidoCode.Product.Projection.empty_work()
+    assert projection.attempts == []
+    assert projection.knowledge == []
+    refute_receive {:query, :work_lens}
+    refute_receive {:query, :active_attempts}
+    refute_receive {:query, :knowledge_by_scope}
   end
 
   test "conceals repository selections outside the authorized cohort" do

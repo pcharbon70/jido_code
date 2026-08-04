@@ -9,13 +9,17 @@ defmodule JidoCode.Product.GraphProjectionProvider do
 
   @behaviour JidoCode.Product.ProjectionProvider
 
+  require Logger
+
   alias JidoCode.Knowledge
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.Health
   alias JidoCode.Knowledge.QueryResult
+  alias JidoCode.Knowledge.QueryRunner
   alias JidoCode.Knowledge.Readiness
+  alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Product.Projection
   alias JidoCode.Product.QuerySecurity
 
@@ -28,6 +32,7 @@ defmodule JidoCode.Product.GraphProjectionProvider do
 
   def load(%AuthorityContext{} = authority, identity, options) when is_map(identity) do
     query = Keyword.get(options, :query, &Knowledge.query/6)
+    metadata = Keyword.get(options, :metadata, &QueryRunner.graph_metadata/1)
     health = Keyword.get(options, :health, Readiness.snapshot())
     selected_repository = Keyword.get(options, :repository)
 
@@ -57,7 +62,14 @@ defmodule JidoCode.Product.GraphProjectionProvider do
          repositories <- repositories(cohort_result),
          :ok <- bounded(repositories),
          {:ok, repository_projection} <-
-           load_repository(selected_repository, repositories, authority, identity, query) do
+           load_repository(
+             selected_repository,
+             repositories,
+             authority,
+             identity,
+             query,
+             metadata
+           ) do
       {:ok,
        build_projection(
          revision_result,
@@ -66,12 +78,22 @@ defmodule JidoCode.Product.GraphProjectionProvider do
          repository_projection
        )}
     else
-      {:error, %Error{} = error} -> {:ok, Projection.unavailable(error_state(error))}
-      {:error, state} when is_atom(state) -> {:ok, Projection.unavailable(state)}
-      _invalid -> {:ok, Projection.unavailable()}
+      {:error, %Error{} = error} ->
+        Logger.debug("product projection rejected: #{error.kind}/#{error.operation}")
+        {:ok, Projection.unavailable(error_state(error))}
+
+      {:error, state} when is_atom(state) ->
+        Logger.debug("product projection gated: #{state}")
+        {:ok, Projection.unavailable(state)}
+
+      _invalid ->
+        Logger.debug("product projection returned an invalid result")
+        {:ok, Projection.unavailable()}
     end
   rescue
-    _error -> {:ok, Projection.unavailable()}
+    _error ->
+      Logger.debug("product projection raised during bounded decoding")
+      {:ok, Projection.unavailable()}
   end
 
   def load(_authority, _identity, _options), do: {:ok, Projection.unavailable(:unauthorized)}
@@ -119,7 +141,7 @@ defmodule JidoCode.Product.GraphProjectionProvider do
   defp bounded(repositories) when length(repositories) <= @maximum_repositories, do: :ok
   defp bounded(_repositories), do: {:error, Error.new(:invalid_input, :product_projection_limit)}
 
-  defp load_repository(nil, _repositories, _authority, _identity, _query) do
+  defp load_repository(nil, _repositories, _authority, _identity, _query, _metadata) do
     {:ok,
      %{
        work: Projection.empty_work(),
@@ -130,40 +152,34 @@ defmodule JidoCode.Product.GraphProjectionProvider do
      }}
   end
 
-  defp load_repository(repository, repositories, authority, identity, query) do
+  defp load_repository(repository, repositories, authority, _identity, query, metadata) do
     if Enum.any?(repositories, &(&1.iri == repository)) do
       with {:ok, control_graph} <-
              GraphRegistry.graph_iri(:repository_control, %{repository: repository}),
            {:ok, memory_graph} <- GraphRegistry.graph_iri(:memory, %{repository: repository}),
+           {:ok, repository_scope} <- ResourceIdentity.scope(:repository, repository),
+           {:ok, control_state} <- graph_state(metadata, control_graph, repository_scope),
+           {:ok, memory_state} <- graph_state(metadata, memory_graph, repository_scope),
            {:ok, work, work_results} <-
-             load_work(control_graph, authority, identity.factory_scope_iri, query),
-           {:ok, attempts} <-
-             secure_query(
-               query,
-               :active_attempts,
-               @query_version,
-               %{graph: control_graph},
+             load_work(control_state, control_graph, authority, repository_scope, query),
+           {:ok, attempts, attempt_results} <-
+             load_attempts(control_state, control_graph, authority, repository_scope, query),
+           {:ok, knowledge, knowledge_results} <-
+             load_knowledge(
+               memory_state,
+               memory_graph,
+               repository,
                authority,
-               identity.factory_scope_iri,
-               []
-             ),
-           {:ok, knowledge} <-
-             secure_query(
-               query,
-               :knowledge_by_scope,
-               @query_version,
-               %{graph: memory_graph, resource: repository},
-               authority,
-               identity.factory_scope_iri,
-               []
+               repository_scope,
+               query
              ) do
         {:ok,
          %{
            work: work,
-           attempts: rows(attempts),
+           attempts: attempts,
            outcomes: Projection.empty_outcomes(),
-           knowledge: rows(knowledge),
-           results: work_results ++ [attempts, knowledge]
+           knowledge: knowledge,
+           results: work_results ++ attempt_results ++ knowledge_results
          }}
       end
     else
@@ -171,7 +187,30 @@ defmodule JidoCode.Product.GraphProjectionProvider do
     end
   end
 
-  defp load_work(graph, authority, scope, query) do
+  defp graph_state(metadata, graph, scope) do
+    case metadata.(graph) do
+      {:ok, nil} ->
+        {:ok, :missing}
+
+      {:ok, %{owner_scope: ^scope, lifecycle_state: state}}
+      when state in [:open, :closed] ->
+        {:ok, :present}
+
+      {:ok, _metadata} ->
+        {:error, Error.new(:unauthorized, :product_repository_graph)}
+
+      {:error, %Error{} = error} ->
+        {:error, error}
+
+      _invalid ->
+        {:error, Error.new(:unavailable, :product_repository_graph)}
+    end
+  end
+
+  defp load_work(:missing, _graph, _authority, _scope, _query),
+    do: {:ok, Projection.empty_work(), []}
+
+  defp load_work(:present, graph, authority, scope, query) do
     Enum.reduce_while(@work_states, {:ok, Projection.empty_work(), []}, fn state,
                                                                            {:ok, work, results} ->
       case secure_query(
@@ -187,6 +226,41 @@ defmodule JidoCode.Product.GraphProjectionProvider do
         {:error, error} -> {:halt, {:error, error}}
       end
     end)
+  end
+
+  defp load_attempts(:missing, _graph, _authority, _scope, _query), do: {:ok, [], []}
+
+  defp load_attempts(:present, graph, authority, scope, query) do
+    with {:ok, result} <-
+           secure_query(
+             query,
+             :active_attempts,
+             @query_version,
+             %{graph: graph},
+             authority,
+             scope,
+             []
+           ) do
+      {:ok, rows(result), [result]}
+    end
+  end
+
+  defp load_knowledge(:missing, _graph, _repository, _authority, _scope, _query),
+    do: {:ok, [], []}
+
+  defp load_knowledge(:present, graph, repository, authority, scope, query) do
+    with {:ok, result} <-
+           secure_query(
+             query,
+             :knowledge_by_scope,
+             @query_version,
+             %{graph: graph, resource: repository},
+             authority,
+             scope,
+             []
+           ) do
+      {:ok, rows(result), [result]}
+    end
   end
 
   defp build_projection(revision, cohort, repositories, repository_projection) do
@@ -231,14 +305,19 @@ defmodule JidoCode.Product.GraphProjectionProvider do
 
   defp rows(_result), do: []
 
+  defp complete?(%QueryResult{query_name: :dataset_revision, truncated?: false}), do: true
   defp complete?(%QueryResult{completeness: %{complete?: value}}), do: value == true
   defp complete?(_result), do: false
 
   defp freshness(results) do
-    if Enum.any?(results, &(Map.get(&1.freshness, :state) == :stale)),
+    if Enum.any?(results, &(freshness_state(&1) == :stale)),
       do: "stale",
       else: "current"
   end
+
+  defp freshness_state(%QueryResult{freshness: state}) when is_atom(state), do: state
+  defp freshness_state(%QueryResult{freshness: %{state: state}}) when is_atom(state), do: state
+  defp freshness_state(_result), do: :unknown
 
   defp term_value(row, key) when is_map(row) do
     case Map.get(row, key) do
@@ -258,7 +337,12 @@ defmodule JidoCode.Product.GraphProjectionProvider do
   defp safe_key(key) when is_binary(key), do: String.slice(key, 0, 80)
   defp safe_key(_key), do: "value"
 
-  defp safe_text(value), do: value |> to_string() |> String.slice(0, 160)
+  defp safe_text(value) when is_atom(value), do: Atom.to_string(value)
+
+  defp safe_text({:consistency, value}) when is_atom(value),
+    do: "consistency:" <> Atom.to_string(value)
+
+  defp safe_text(_value), do: "query_warning"
 
   defp display_label(nil), do: "Unknown repository"
 

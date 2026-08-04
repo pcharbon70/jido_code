@@ -151,6 +151,34 @@ defmodule JidoCodeWeb.HomeLiveTest do
     assert has_element?(view, "#product-command-receipt", "committed")
   end
 
+  test "does not present a failed semantic outcome as committed", %{conn: conn} do
+    Application.put_env(
+      :jido_code,
+      :product_command_fixture,
+      {:ok, %CommandOutcome{outcome: :unavailable, retry: :retry, dataset_revision: nil}}
+    )
+
+    {:ok, view, _html} = live(conn, ~p"/?surface=repositories")
+
+    params = %{
+      conceptual_key: "repo-unavailable",
+      provider: "https://github.com",
+      external_id: "R_unavailable",
+      owner: "agentjido",
+      name: "unavailable",
+      reason: "Exercise failed command outcome",
+      confirmed: "true"
+    }
+
+    view
+    |> form("#repository-enrollment-form", enrollment: params)
+    |> render_submit()
+
+    assert has_element?(view, "#product-command-receipt", "unavailable")
+    assert has_element?(view, "#flash-group")
+    refute render(view) =~ "Repository enrollment committed"
+  end
+
   defp projection do
     %Projection{
       state: :ready,

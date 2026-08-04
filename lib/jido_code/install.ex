@@ -18,8 +18,9 @@ defmodule JidoCode.Install do
 
     with :ok <- ReleaseContract.verify(),
          true <- byte_size(operator_token) in 24..512,
-         %{ready?: true, dataset_revision: 0} <- StoreServer.summary(store_server),
+         %{ready?: true} <- StoreServer.summary(store_server),
          {:ok, ontology} <- Release.load(store_server: store_server, writer: writer),
+         :ok <- ontology_only(store_server, ontology.receipt.dataset_revision),
          {:ok, command_iri} <- ResourceIdentity.generate_local(:command),
          {:ok, receipt} <-
            Writer.bootstrap(
@@ -47,9 +48,6 @@ defmodule JidoCode.Install do
       %{ready?: false} ->
         {:error, Error.new(:unavailable, :clean_install)}
 
-      %{dataset_revision: revision} when is_integer(revision) and revision > 0 ->
-        {:error, Error.new(:conflict, :clean_install_already_initialized)}
-
       {:error, %Error{} = error} ->
         {:error, error}
 
@@ -63,6 +61,19 @@ defmodule JidoCode.Install do
 
   def bootstrap(_operator_token, _options),
     do: {:error, Error.new(:invalid_input, :clean_install)}
+
+  defp ontology_only(store_server, ontology_revision) do
+    case StoreServer.summary(store_server) do
+      %{ready?: true, dataset_revision: ^ontology_revision} ->
+        :ok
+
+      %{dataset_revision: revision} when is_integer(revision) and revision > ontology_revision ->
+        {:error, Error.new(:conflict, :clean_install_already_initialized)}
+
+      _invalid ->
+        {:error, Error.new(:conflict, :clean_install_not_pristine)}
+    end
+  end
 
   defp configured_identity do
     config = Application.fetch_env!(:jido_code, :product_surface)

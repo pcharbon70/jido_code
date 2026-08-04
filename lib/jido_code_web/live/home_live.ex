@@ -105,7 +105,8 @@ defmodule JidoCodeWeb.HomeLive do
     gateway = Application.get_env(:jido_code, :product_command_gateway, CommandGateway)
 
     case gateway.enroll_repository(socket.assigns.authority, socket.assigns.identity, params) do
-      {:ok, %CommandOutcome{} = receipt} ->
+      {:ok, %CommandOutcome{outcome: outcome} = receipt}
+      when outcome in [:committed, :already_committed] ->
         {:noreply,
          socket
          |> assign(:command_receipt, receipt_view(receipt))
@@ -116,6 +117,13 @@ defmodule JidoCodeWeb.HomeLive do
            "Repository enrollment committed at graph revision #{receipt.dataset_revision}."
          )
          |> load_projection()}
+
+      {:ok, %CommandOutcome{} = receipt} ->
+        {:noreply,
+         socket
+         |> assign(:enrollment_form, to_form(params, as: :enrollment))
+         |> assign(:command_receipt, receipt_view(receipt))
+         |> put_flash(:error, command_outcome_message(receipt))}
 
       {:error, %Error{} = error} ->
         {:noreply,
@@ -892,5 +900,17 @@ defmodule JidoCodeWeb.HomeLive do
     do: "Review the enrollment values and confirmation."
 
   defp command_error_message(_error),
+    do: "The enrollment command could not be completed."
+
+  defp command_outcome_message(%CommandOutcome{outcome: :conflicted}),
+    do: "Graph state changed. Refresh and review the command again."
+
+  defp command_outcome_message(%CommandOutcome{outcome: :unauthorized}),
+    do: "Repository is not available."
+
+  defp command_outcome_message(%CommandOutcome{outcome: :unknown_after_timeout}),
+    do: "The command outcome is unknown. Verify its receipt before retrying."
+
+  defp command_outcome_message(_receipt),
     do: "The enrollment command could not be completed."
 end

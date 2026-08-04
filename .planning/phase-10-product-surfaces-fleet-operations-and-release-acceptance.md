@@ -15,7 +15,7 @@ acceptance without any second durable source of truth.
 
 Back to plan: [README](./README.md)
 
-- [ ] 10 Phase - Deliver and accept the graph-backed managed repository factory as an operable product.
+- [x] 10 Phase - Deliver and accept the graph-backed managed repository factory as an operable product.
 
   This phase integrates every prior seam through LiveView and LiveVue, then
   validates security, accessibility, observability, performance, retention,
@@ -223,54 +223,54 @@ Back to plan: [README](./README.md)
       - [x] 10.4.4.4 Subtask {#jcf-p10-10-4-4-4} - Trace representative durable user-visible facts back to one semantic command, graph commit, provenance/audit, and current transition/decision chain.
       - [x] 10.4.4.5 Subtask {#jcf-p10-10-4-4-5} - Resolve every finding or record an explicit release-blocking disposition; no compatibility facade is accepted silently.
 
-  - [ ] 10.5 Section - Phase 10 Integration Tests.
+  - [x] 10.5 Section - Phase 10 Integration Tests.
 
     This final section proves the complete managed repository factory through
     browser, API/provider, graph, reconciliation, execution, evidence,
     decision, learning, fleet, security, restart, and disaster-recovery paths
     at the exact release candidate.
 
-    - [ ] 10.5.1 Task {#jcf-p10-product-e2e} [repo: jido_code] [after: {#jcf-p10-final-architecture-audit}] - Run the complete operator workflow through product surfaces.
+    - [x] 10.5.1 Task {#jcf-p10-product-e2e} [repo: jido_code] [after: {#jcf-p10-final-architecture-audit}] - Run the complete operator workflow through product surfaces.
 
       This task validates actual LiveView and LiveVue behavior against the
       authoritative graph and runtime seams rather than testing projections in
       isolation.
 
-      - [ ] 10.5.1.1 Subtask {#jcf-p10-10-5-1-1} - Authenticate, enroll a repository, ingest provider/Git observations, publish source semantics, and inspect exact freshness/provenance in the current route/workbench surface.
-      - [ ] 10.5.1.2 Subtask {#jcf-p10-10-5-1-2} - Assert desired state/policy, reconcile and explain work, adopt a plan, acquire a lease, execute tools in a sandbox, supervise/cancel/retry as applicable, and inspect provenance.
-      - [ ] 10.5.1.3 Subtask {#jcf-p10-10-5-1-3} - Verify patch/outcome, review evidence, decide/apply through follow-up work, observe post-change state, satisfy the goal, adopt knowledge, and inspect the complete causal path.
-      - [ ] 10.5.1.4 Subtask {#jcf-p10-10-5-1-4} - Exercise loading/empty/stale/incomplete/contradicted/truncated/unauthorized/unavailable/maintenance/recovery states, deep links, back/forward, reload, reconnect, and session revocation.
-      - [ ] 10.5.1.5 Subtask {#jcf-p10-10-5-1-5} - Use LiveView element-ID/outcome tests plus desktop/mobile browser verification for layout, light/dark/system theme, keyboard, focus, accessibility, island updates, console errors, and overlapping/overflowing content.
+      - [x] 10.5.1.1 Subtask {#jcf-p10-10-5-1-1} - Authenticate, enroll a repository, ingest provider/Git observations, publish source semantics, and inspect exact freshness/provenance in the current route/workbench surface.
+      - [x] 10.5.1.2 Subtask {#jcf-p10-10-5-1-2} - Assert desired state/policy, reconcile and explain work, adopt a plan, acquire a lease, execute tools in a sandbox, supervise/cancel/retry as applicable, and inspect provenance.
+      - [x] 10.5.1.3 Subtask {#jcf-p10-10-5-1-3} - Verify patch/outcome, review evidence, decide/apply through follow-up work, observe post-change state, satisfy the goal, adopt knowledge, and inspect the complete causal path.
+      - [x] 10.5.1.4 Subtask {#jcf-p10-10-5-1-4} - Exercise loading/empty/stale/incomplete/contradicted/truncated/unauthorized/unavailable/maintenance/recovery states, deep links, back/forward, reload, reconnect, and session revocation.
+      - [x] 10.5.1.5 Subtask {#jcf-p10-10-5-1-5} - Use LiveView element-ID/outcome tests plus desktop/mobile browser verification for layout, light/dark/system theme, keyboard, focus, accessibility, island updates, console errors, and overlapping/overflowing content.
 
-    - [ ] 10.5.2 Task {#jcf-p10-fleet-resilience-integration} [repo: jido_code] [after: {#jcf-p10-product-e2e}] - Run multi-repository load, failure, and recovery acceptance.
+    - [x] 10.5.2 Task {#jcf-p10-fleet-resilience-integration} [repo: jido_code] [after: {#jcf-p10-product-e2e}] - Run multi-repository load, failure, and recovery acceptance.
 
       This task proves continuous factory operation remains fair, bounded, and
       recoverable under representative fleet scale and concurrent failures.
 
-      - [ ] 10.5.2.1 Subtask {#jcf-p10-10-5-2-1} - Enroll the representative fleet, apply cohort policies, ingest observation storms, reconcile campaigns, schedule concurrent capabilities, and verify fairness/backpressure/isolation.
-      - [ ] 10.5.2.2 Subtask {#jcf-p10-10-5-2-2} - Exercise provider rate limits/outages, graph query/write pressure, stale source analysis, conflicting policies, lease races, long attempts, tool/sandbox failure, reasoning staleness, and projection reconnect storms.
-      - [ ] 10.5.2.3 Subtask {#jcf-p10-10-5-2-3} - Kill/restart all non-store OTP workers and prove the factory converges from graph without lost/duplicated work; then restart the full BEAM and repeat.
-      - [ ] 10.5.2.4 Subtask {#jcf-p10-10-5-2-4} - Run performance/capacity baselines and verify hard limits fail boundedly with accepted health/telemetry/alert behavior.
-      - [ ] 10.5.2.5 Subtask {#jcf-p10-10-5-2-5} - Apply retention/compaction and prove accepted evidence/decision/knowledge reachability plus derived/cache rebuild behavior.
+      - [x] 10.5.2.1 Subtask {#jcf-p10-10-5-2-1} - Enroll the representative fleet, apply cohort policies, ingest observation storms, reconcile campaigns, schedule concurrent capabilities, and verify fairness/backpressure/isolation.
+      - [x] 10.5.2.2 Subtask {#jcf-p10-10-5-2-2} - Exercise provider rate limits/outages, graph query/write pressure, stale source analysis, conflicting policies, lease races, long attempts, tool/sandbox failure, reasoning staleness, and projection reconnect storms.
+      - [x] 10.5.2.3 Subtask {#jcf-p10-10-5-2-3} - Kill/restart all non-store OTP workers and prove the factory converges from graph without lost/duplicated work; then restart the full BEAM and repeat.
+      - [x] 10.5.2.4 Subtask {#jcf-p10-10-5-2-4} - Run performance/capacity baselines and verify hard limits fail boundedly with accepted health/telemetry/alert behavior.
+      - [x] 10.5.2.5 Subtask {#jcf-p10-10-5-2-5} - Apply retention/compaction and prove accepted evidence/decision/knowledge reachability plus derived/cache rebuild behavior.
 
-    - [ ] 10.5.3 Task {#jcf-p10-security-recovery-integration} [repo: jido_code] [after: {#jcf-p10-fleet-resilience-integration}] - Run adversarial security and disaster-recovery acceptance.
+    - [x] 10.5.3 Task {#jcf-p10-security-recovery-integration} [repo: jido_code] [after: {#jcf-p10-fleet-resilience-integration}] - Run adversarial security and disaster-recovery acceptance.
 
       This task certifies the release candidate protects authority and data and
       can restore the graph-only system of record after loss.
 
-      - [ ] 10.5.3.1 Subtask {#jcf-p10-10-5-3-1} - Run route/resource/action, CSRF/session, delegation, query/SPARQL, webhook/provider, Git/worktree, ontology/import, tool/sandbox, artifact, backup/restore, privacy, and redaction attack suites.
-      - [ ] 10.5.3.2 Subtask {#jcf-p10-10-5-3-2} - Restore the accepted backup into a clean environment with empty caches/worktrees/runtime registries and only required external credentials, then reconstruct every durable product surface.
-      - [ ] 10.5.3.3 Subtask {#jcf-p10-10-5-3-3} - Compare canonical dataset exports, graph revisions/lineage, active control state, pending/recoverable attempts, evidence/decisions, knowledge, and UI projections before/after restore.
-      - [ ] 10.5.3.4 Subtask {#jcf-p10-10-5-3-4} - Reconcile external provider state after restore and verify stale callbacks, leases, and artifacts cannot cause duplicate or unauthorized effects.
-      - [ ] 10.5.3.5 Subtask {#jcf-p10-10-5-3-5} - Exercise supported upgrade and rollback from the prior accepted dataset and application versions.
+      - [x] 10.5.3.1 Subtask {#jcf-p10-10-5-3-1} - Run route/resource/action, CSRF/session, delegation, query/SPARQL, webhook/provider, Git/worktree, ontology/import, tool/sandbox, artifact, backup/restore, privacy, and redaction attack suites.
+      - [x] 10.5.3.2 Subtask {#jcf-p10-10-5-3-2} - Restore the accepted backup into a clean environment with empty caches/worktrees/runtime registries and only required external credentials, then reconstruct every durable product surface.
+      - [x] 10.5.3.3 Subtask {#jcf-p10-10-5-3-3} - Compare canonical dataset exports, graph revisions/lineage, active control state, pending/recoverable attempts, evidence/decisions, knowledge, and UI projections before/after restore.
+      - [x] 10.5.3.4 Subtask {#jcf-p10-10-5-3-4} - Reconcile external provider state after restore and verify stale callbacks, leases, and artifacts cannot cause duplicate or unauthorized effects.
+      - [x] 10.5.3.5 Subtask {#jcf-p10-10-5-3-5} - Exercise supported upgrade and rollback from the prior accepted dataset and application versions.
 
-    - [ ] 10.5.4 Task {#jcf-p10-final-release-receipt} [repo: jido_code] [after: {#jcf-p10-security-recovery-integration}] - Publish the final release and graph-only architecture receipt.
+    - [x] 10.5.4 Task {#jcf-p10-final-release-receipt} [repo: jido_code] [after: {#jcf-p10-security-recovery-integration}] - Publish the final release and graph-only architecture receipt.
 
       This task binds G9 and plan completion to exact default-branch product,
       graph, runtime, security, fleet, migration, and recovery evidence.
 
-      - [ ] 10.5.4.1 Subtask {#jcf-p10-10-5-4-1} - Record application/dependency/backend/ontology/shape/query/rule/policy/runtime/tool/sandbox versions, fixture and dataset digests, configuration posture, and candidate commit.
-      - [ ] 10.5.4.2 Subtask {#jcf-p10-10-5-4-2} - Attach full operator E2E, LiveView/browser/accessibility, fleet/load, failure/restart, security/privacy, retention, upgrade/rollback, backup/restore, and architecture-audit results.
-      - [ ] 10.5.4.3 Subtask {#jcf-p10-10-5-4-3} - Run all phase suites, `mix precommit`, production asset build, clean install, and restored-environment smoke/browser verification at the merged candidate.
-      - [ ] 10.5.4.4 Subtask {#jcf-p10-10-5-4-4} - Keep release blocked for any second durable store, unexplained accepted fact, unrecoverable process state, raw graph/UI bypass, security finding, failed objective, or prospective-only evidence.
-      - [ ] 10.5.4.5 Subtask {#jcf-p10-10-5-4-5} - Pin the accepted release commit and publish the final completion disposition with all known limits and follow-up work.
+      - [x] 10.5.4.1 Subtask {#jcf-p10-10-5-4-1} - Record application/dependency/backend/ontology/shape/query/rule/policy/runtime/tool/sandbox versions, fixture and dataset digests, configuration posture, and candidate commit.
+      - [x] 10.5.4.2 Subtask {#jcf-p10-10-5-4-2} - Attach full operator E2E, LiveView/browser/accessibility, fleet/load, failure/restart, security/privacy, retention, upgrade/rollback, backup/restore, and architecture-audit results.
+      - [x] 10.5.4.3 Subtask {#jcf-p10-10-5-4-3} - Run all phase suites, `mix precommit`, production asset build, clean install, and restored-environment smoke/browser verification at the merged candidate.
+      - [x] 10.5.4.4 Subtask {#jcf-p10-10-5-4-4} - Keep release blocked for any second durable store, unexplained accepted fact, unrecoverable process state, raw graph/UI bypass, security finding, failed objective, or prospective-only evidence.
+      - [x] 10.5.4.5 Subtask {#jcf-p10-10-5-4-5} - Pin the accepted release commit and publish the final completion disposition with all known limits and follow-up work.

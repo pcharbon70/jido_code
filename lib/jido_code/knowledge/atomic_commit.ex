@@ -2,6 +2,7 @@ defmodule JidoCode.Knowledge.AtomicCommit do
   @moduledoc false
 
   alias JidoCode.Knowledge.BackendFailure
+  alias JidoCode.Knowledge.Backend.Durability
   alias JidoCode.Knowledge.CommitLog
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Revision
@@ -124,7 +125,9 @@ defmodule JidoCode.Knowledge.AtomicCommit do
 
     case result do
       {:ok, ^expected_count} ->
-        {:ok, receipt}
+        with :ok <- Durability.sync(store, :sync_atomic_commit) do
+          {:ok, receipt}
+        end
 
       other ->
         reconcile_uncertain_result(store, batch, other)

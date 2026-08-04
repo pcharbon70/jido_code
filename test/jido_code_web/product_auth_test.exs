@@ -64,6 +64,6 @@ defmodule JidoCodeWeb.ProductAuthTest do
              "https://jido.run/id/actor/local-operator"
 
     assert conn.assigns.current_scope.principal_iri ==
-             "https://jido.run/id/principal/local-operator"
+             "https://jido.run/id/actor/local-operator"
   end
 end

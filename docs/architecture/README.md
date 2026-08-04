@@ -94,3 +94,4 @@ implementation plan was merged.
 - [Operator handbook](../operations/operator-handbook.md)
 - [Graph-native contributor fitness checks](../contributing/graph-native-fitness-checks.md)
 - [Phase 10 architecture audit](./phase-10-architecture-audit.md)
+- [Phase 10 product and release acceptance receipt](./phase-10-receipt.md)

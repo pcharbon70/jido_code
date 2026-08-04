@@ -39,16 +39,16 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
   ])
   @max_guards 100
 
-  @spec validate(CommandEnvelope.t(), ChangeSet.t(), map(), [RDF.Quad.t()], String.t(), integer()) ::
+  @spec validate(CommandEnvelope.t(), ChangeSet.t(), map(), map(), integer()) ::
           {:ok, [map()]} | {:error, Error.t()} | {:error, Error.t(), map()}
-  def validate(envelope, change_set, snapshot, audit_additions, audit_graph, deadline) do
+  def validate(envelope, change_set, snapshot, audit, deadline) do
     with :ok <- before_deadline(deadline),
          :ok <- revision_preconditions(envelope, snapshot),
          :ok <- target_lifecycle(change_set, snapshot),
          :ok <- topology(change_set),
          :ok <- guards(envelope.payload[:guards] || [], snapshot),
          {:ok, reports} <- validate_targets(change_set, snapshot, deadline),
-         {:ok, audit_report} <- validate_audit(snapshot, audit_additions, audit_graph, deadline),
+         {:ok, audit_report} <- validate_audit(snapshot, audit, deadline),
          :ok <- before_deadline(deadline) do
       {:ok, reports ++ [audit_report]}
     end
@@ -435,25 +435,31 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     end
   end
 
-  defp validate_audit(snapshot, additions, graph, deadline) do
-    metadata = Map.get(snapshot.graph_metadata, graph)
+  defp validate_audit(snapshot, audit, deadline) do
+    existing_metadata = Map.get(snapshot.graph_metadata, audit.graph_iri)
 
-    if is_map(metadata) do
+    valid_lifecycle? =
+      case audit.operation do
+        :append -> is_map(existing_metadata)
+        :create -> is_nil(existing_metadata)
+      end
+
+    if valid_lifecycle? do
       Validator.validate(
         %{
-          operation: :append,
+          operation: audit.operation,
           family: :security_audit,
-          graph_iri: graph,
-          metadata: metadata,
-          existing_metadata: metadata,
-          additions: additions,
-          existing: graph_quads(snapshot.dataset, graph),
+          graph_iri: audit.graph_iri,
+          metadata: audit.metadata,
+          existing_metadata: existing_metadata,
+          additions: audit.additions,
+          existing: graph_quads(snapshot.dataset, audit.graph_iri),
           shape_version: "1.0.0"
         },
         deadline_monotonic_ms: deadline
       )
     else
-      {:error, Error.new(:unavailable, :audit_graph_required)}
+      {:error, Error.new(:conflict, :audit_graph_lifecycle)}
     end
   end
 

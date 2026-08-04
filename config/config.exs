@@ -13,7 +13,7 @@ config :jido_code,
   product_surface: [
     factory_iri: "https://jido.run/id/repository-factory/default",
     factory_scope_iri: "https://jido.run/id/scope/factory/default",
-    principal_iri: "https://jido.run/id/principal/local-operator",
+    principal_iri: "https://jido.run/id/actor/local-operator",
     actor_iri: "https://jido.run/id/actor/local-operator",
     policy_boundary_iri: "https://jido.run/id/policy-boundary/default",
     policy_iris: ["https://jido.run/id/policy/default"]
