@@ -22,57 +22,57 @@ Back to plan: [README](./README.md)
   backup/restore, upgrade, rollback, and fleet-wide end-to-end behavior at one
   release candidate.
 
-  - [ ] 10.1 Section - Integrate graph-backed product and workbench surfaces.
+  - [x] 10.1 Section - Integrate graph-backed product and workbench surfaces.
 
     This section maps the route and workbench contract owned by this repository
     onto bounded projections and semantic commands without importing the older
     implementation's route surface or exposing graph internals to the browser.
 
-    - [ ] 10.1.1 Task {#jcf-p10-surface-contracts} [repo: jido_code] [after: {#jcf-p09-phase-receipt}] - Ratify product surface and projection ownership.
+    - [x] 10.1.1 Task {#jcf-p10-surface-contracts} [repo: jido_code] [after: {#jcf-p09-phase-receipt}] - Ratify product surface and projection ownership.
 
       This task defines which current routes/workbench areas present factory,
       repository, work, execution, evidence, decision, and knowledge concepts
       and which LiveView owns each semantic session.
 
-      - [ ] 10.1.1.1 Subtask {#jcf-p10-10-1-1-1} - Inventory the current repository route/workbench specification and map each implemented route to an owning LiveView, actor scope, resource authorization rule, and projection contract.
-      - [ ] 10.1.1.2 Subtask {#jcf-p10-10-1-1-2} - Define navigation and handoff identities using verified routes and canonical graph resource IRIs without copying paths from `mikehostetler/jido_code`.
-      - [ ] 10.1.1.3 Subtask {#jcf-p10-10-1-1-3} - Assign LiveView ownership for route/session/scope/current selection and LiveVue ownership only for bounded local interaction state.
-      - [ ] 10.1.1.4 Subtask {#jcf-p10-10-1-1-4} - Define loading, empty, stale, incomplete, contradicted, truncated, unauthorized, unavailable, maintenance, and recovery presentation states for every projection.
-      - [ ] 10.1.1.5 Subtask {#jcf-p10-10-1-1-5} - Keep arbitrary graph browsing/query authoring outside ordinary product routes unless separately accepted and read-only bounded.
+      - [x] 10.1.1.1 Subtask {#jcf-p10-10-1-1-1} - Inventory the current repository route/workbench specification and map each implemented route to an owning LiveView, actor scope, resource authorization rule, and projection contract.
+      - [x] 10.1.1.2 Subtask {#jcf-p10-10-1-1-2} - Define navigation and handoff identities using verified routes and canonical graph resource IRIs without copying paths from `mikehostetler/jido_code`.
+      - [x] 10.1.1.3 Subtask {#jcf-p10-10-1-1-3} - Assign LiveView ownership for route/session/scope/current selection and LiveVue ownership only for bounded local interaction state.
+      - [x] 10.1.1.4 Subtask {#jcf-p10-10-1-1-4} - Define loading, empty, stale, incomplete, contradicted, truncated, unauthorized, unavailable, maintenance, and recovery presentation states for every projection.
+      - [x] 10.1.1.5 Subtask {#jcf-p10-10-1-1-5} - Keep arbitrary graph browsing/query authoring outside ordinary product routes unless separately accepted and read-only bounded.
 
-    - [ ] 10.1.2 Task {#jcf-p10-liveview-projections} [repo: jido_code] [after: {#jcf-p10-surface-contracts}] - Implement LiveView-owned factory projections and semantic actions.
+    - [x] 10.1.2 Task {#jcf-p10-liveview-projections} [repo: jido_code] [after: {#jcf-p10-surface-contracts}] - Implement LiveView-owned factory projections and semantic actions.
 
       This task replaces demo runtime assigns with graph-derived state and
       routes every durable user action through the command boundary.
 
-      - [ ] 10.1.2.1 Subtask {#jcf-p10-10-1-2-1} - Mount actor-authorized projections for factory posture, repository enrollment/observation/source freshness, goals/work, attempts, evidence/decisions, and accepted knowledge according to current surface ownership.
-      - [ ] 10.1.2.2 Subtask {#jcf-p10-10-1-2-2} - Use LiveView streams for rendered collections and track count/empty/freshness metadata in separate assigns.
-      - [ ] 10.1.2.3 Subtask {#jcf-p10-10-1-2-3} - Implement graph-backed forms with `to_form/2`, `<.form>`, `<.input>`, unique DOM IDs, validation previews, explicit confirmation where policy requires it, and idempotency keys.
-      - [ ] 10.1.2.4 Subtask {#jcf-p10-10-1-2-4} - Re-query bounded projections after relevant graph revisions, reconnect, route parameter changes, authorization changes, and missed notifications.
-      - [ ] 10.1.2.5 Subtask {#jcf-p10-10-1-2-5} - Render command receipts and conflicts as outcome-focused product feedback without raw RDF, SPARQL, backend errors, or concealed resource details.
+      - [x] 10.1.2.1 Subtask {#jcf-p10-10-1-2-1} - Mount actor-authorized projections for factory posture, repository enrollment/observation/source freshness, goals/work, attempts, evidence/decisions, and accepted knowledge according to current surface ownership.
+      - [x] 10.1.2.2 Subtask {#jcf-p10-10-1-2-2} - Use LiveView streams for rendered collections and track count/empty/freshness metadata in separate assigns.
+      - [x] 10.1.2.3 Subtask {#jcf-p10-10-1-2-3} - Implement graph-backed forms with `to_form/2`, `<.form>`, `<.input>`, unique DOM IDs, validation previews, explicit confirmation where policy requires it, and idempotency keys.
+      - [x] 10.1.2.4 Subtask {#jcf-p10-10-1-2-4} - Re-query bounded projections after relevant graph revisions, reconnect, route parameter changes, authorization changes, and missed notifications.
+      - [x] 10.1.2.5 Subtask {#jcf-p10-10-1-2-5} - Render command receipts and conflicts as outcome-focused product feedback without raw RDF, SPARQL, backend errors, or concealed resource details.
 
-    - [ ] 10.1.3 Task {#jcf-p10-livevue-islands} [repo: jido_code] [after: {#jcf-p10-liveview-projections}] - Implement bounded LiveVue interaction islands over graph projections.
+    - [x] 10.1.3 Task {#jcf-p10-livevue-islands} [repo: jido_code] [after: {#jcf-p10-liveview-projections}] - Implement bounded LiveVue interaction islands over graph projections.
 
       This task uses Vue where interaction density benefits from client state
       while preserving LiveView and the graph as semantic/session authority.
 
-      - [ ] 10.1.3.1 Subtask {#jcf-p10-10-1-3-1} - Define explicit component props/events for work dependency visualization, execution timelines, evidence comparison, source neighborhoods, or other accepted islands.
-      - [ ] 10.1.3.2 Subtask {#jcf-p10-10-1-3-2} - Send bounded JSON-safe projection data with revision/freshness/truncation metadata and no raw RDF structs, secrets, complete dataset mirrors, or write capability.
-      - [ ] 10.1.3.3 Subtask {#jcf-p10-10-1-3-3} - Emit semantic interaction intents to owning LiveViews and reauthorize every command or cross-surface handoff server-side.
-      - [ ] 10.1.3.4 Subtask {#jcf-p10-10-1-3-4} - Reconcile props after LiveView updates/reconnect and discard stale client selection when source projection identity changes.
-      - [ ] 10.1.3.5 Subtask {#jcf-p10-10-1-3-5} - Keep theme, shell, SaladUI, shadcn-vue, Vite, and light/dark behavior consistent with the accepted interface system.
+      - [x] 10.1.3.1 Subtask {#jcf-p10-10-1-3-1} - Define explicit component props/events for work dependency visualization, execution timelines, evidence comparison, source neighborhoods, or other accepted islands.
+      - [x] 10.1.3.2 Subtask {#jcf-p10-10-1-3-2} - Send bounded JSON-safe projection data with revision/freshness/truncation metadata and no raw RDF structs, secrets, complete dataset mirrors, or write capability.
+      - [x] 10.1.3.3 Subtask {#jcf-p10-10-1-3-3} - Emit semantic interaction intents to owning LiveViews and reauthorize every command or cross-surface handoff server-side.
+      - [x] 10.1.3.4 Subtask {#jcf-p10-10-1-3-4} - Reconcile props after LiveView updates/reconnect and discard stale client selection when source projection identity changes.
+      - [x] 10.1.3.5 Subtask {#jcf-p10-10-1-3-5} - Keep theme, shell, SaladUI, shadcn-vue, Vite, and light/dark behavior consistent with the accepted interface system.
 
-    - [ ] 10.1.4 Task {#jcf-p10-product-workflows} [repo: jido_code] [after: {#jcf-p10-livevue-islands}] - Implement the end-user factory workflows across current surfaces.
+    - [x] 10.1.4 Task {#jcf-p10-product-workflows} [repo: jido_code] [after: {#jcf-p10-livevue-islands}] - Implement the end-user factory workflows across current surfaces.
 
       This task makes enrollment through accepted outcome navigable and
       explainable without creating a route-specific alternate domain model.
 
-      - [ ] 10.1.4.1 Subtask {#jcf-p10-10-1-4-1} - Support repository enrollment/retirement, locator/provider status, observation/source refresh, and recovery through semantic commands and projections.
-      - [ ] 10.1.4.2 Subtask {#jcf-p10-10-1-4-2} - Support desired outcome/policy/goal/plan review, eligibility/block explanation, lease/attempt supervision, cancellation, and retry.
-      - [ ] 10.1.4.3 Subtask {#jcf-p10-10-1-4-3} - Support artifact/patch inspection, verification/evidence review, decision/waiver/follow-up, post-change confirmation, and satisfaction history.
-      - [ ] 10.1.4.4 Subtask {#jcf-p10-10-1-4-4} - Support accepted knowledge inspection, provenance, contradiction, supersession, and relevant-context explanation.
-      - [ ] 10.1.4.5 Subtask {#jcf-p10-10-1-4-5} - Preserve deep-link, back/forward, reload, reconnect, responsive navigation, keyboard, focus, and screen-reader behavior under authorization and stale-data changes.
-      - [ ] 10.1.4.6 Subtask {#jcf-p10-10-1-4-6} - Support bounded human/agent interaction, clarification, steering, cancellation, and message-to-goal, evidence, or decision handoffs where required by the current surface contract.
+      - [x] 10.1.4.1 Subtask {#jcf-p10-10-1-4-1} - Support repository enrollment/retirement, locator/provider status, observation/source refresh, and recovery through semantic commands and projections.
+      - [x] 10.1.4.2 Subtask {#jcf-p10-10-1-4-2} - Support desired outcome/policy/goal/plan review, eligibility/block explanation, lease/attempt supervision, cancellation, and retry.
+      - [x] 10.1.4.3 Subtask {#jcf-p10-10-1-4-3} - Support artifact/patch inspection, verification/evidence review, decision/waiver/follow-up, post-change confirmation, and satisfaction history.
+      - [x] 10.1.4.4 Subtask {#jcf-p10-10-1-4-4} - Support accepted knowledge inspection, provenance, contradiction, supersession, and relevant-context explanation.
+      - [x] 10.1.4.5 Subtask {#jcf-p10-10-1-4-5} - Preserve deep-link, back/forward, reload, reconnect, responsive navigation, keyboard, focus, and screen-reader behavior under authorization and stale-data changes.
+      - [x] 10.1.4.6 Subtask {#jcf-p10-10-1-4-6} - Support bounded human/agent interaction, clarification, steering, cancellation, and message-to-goal, evidence, or decision handoffs where required by the current surface contract.
 
   - [ ] 10.2 Section - Harden authentication, authorization, privacy, and query security.
 

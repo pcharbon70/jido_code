@@ -2,9 +2,10 @@
 
 JidoCode is a Phoenix LiveView server project.
 
-The root route (`/`) renders `JidoCodeWeb.HomeLive`, a small server console that
-keeps state over a LiveView socket and verifies that server-rendered events are
-working.
+The root route (`/`) renders the graph-backed managed repository factory
+workbench. LiveView owns actor-scoped projections, navigation, forms, semantic
+commands, and receipts; bounded LiveVue islands provide focused local
+interaction without becoming a second source of truth.
 
 ## Architecture
 

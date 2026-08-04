@@ -10,6 +10,14 @@ import Config
 config :jido_code,
   runtime_mode: config_env(),
   generators: [timestamp_type: :utc_datetime],
+  product_surface: [
+    factory_iri: "https://jido.run/id/repository-factory/default",
+    factory_scope_iri: "https://jido.run/id/scope/factory/default",
+    principal_iri: "https://jido.run/id/principal/local-operator",
+    actor_iri: "https://jido.run/id/actor/local-operator",
+    policy_boundary_iri: "https://jido.run/id/policy-boundary/default",
+    policy_iris: ["https://jido.run/id/policy/default"]
+  ],
   knowledge_store: [
     enabled: true,
     root: Path.expand("../var/knowledge/#{config_env()}", __DIR__),

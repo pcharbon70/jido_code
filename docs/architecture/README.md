@@ -83,3 +83,7 @@ implementation plan was merged.
 - [Governed knowledge memory](./governed-knowledge-memory.md)
 - [Bounded reasoning and cross-graph learning](./bounded-reasoning-and-learning.md)
 - [Phase 9 accepted outcome and learning receipt](./phase-09-receipt.md)
+
+## Phase 10 Product Acceptance
+
+- [Product surface and island contract](./product-surface-and-island-contract.md)
