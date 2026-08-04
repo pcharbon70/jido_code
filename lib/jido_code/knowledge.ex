@@ -30,6 +30,25 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Artifact
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
+  alias JidoCode.Knowledge.Decision.GoalOutcome
+  alias JidoCode.Knowledge.Decision.Projection, as: DecisionProjection
+  alias JidoCode.Knowledge.Evidence.Bundle, as: EvidenceBundle
+  alias JidoCode.Knowledge.Evidence.Graph, as: EvidenceGraph
+  alias JidoCode.Knowledge.Evidence.Projection, as: EvidenceProjection
+  alias JidoCode.Knowledge.Evidence.Sufficiency, as: EvidenceSufficiency
+  alias JidoCode.Knowledge.Evidence.VerificationActivity
+  alias JidoCode.Knowledge.Evidence.VerificationMethod
+  alias JidoCode.Knowledge.Memory.Adoption, as: KnowledgeAdoption
+  alias JidoCode.Knowledge.Memory.Assertion, as: KnowledgeAssertion
+  alias JidoCode.Knowledge.Memory.Evolution, as: KnowledgeEvolution
+  alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
+  alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
+  alias JidoCode.Knowledge.Memory.StateTransition, as: KnowledgeStateTransition
+  alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.Learning.Feedback, as: LearningFeedback
+  alias JidoCode.Knowledge.Learning.Insight, as: LearningInsight
+  alias JidoCode.Knowledge.Reasoning.Profiles, as: ReasoningProfiles
+  alias JidoCode.Knowledge.Reasoning.Service, as: ReasoningService
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.QueryRunner
@@ -40,6 +59,11 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.Writer
 
+  @cross_graph_insight_queries ~w[
+    shared_dependencies repeated_findings repeated_failures policy_outcome_patterns
+    reusable_evidence_methods related_source_symbols applicable_lessons
+  ]a
+
   def execute(%CommandEnvelope{} = envelope, options \\ []), do: Writer.execute(envelope, options)
 
   def command_status(%CommandEnvelope{} = envelope, options \\ []),
@@ -48,8 +72,54 @@ defmodule JidoCode.Knowledge do
   def subscribe_changes(scope_iri), do: ChangeFeed.subscribe(scope_iri)
   def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
 
-  def query(name, version, parameters, %AuthorityContext{} = authority, scope_iri, options \\ []),
+  def query(name, version, parameters, authority, scope_iri, options \\ [])
+
+  def query(name, _version, _parameters, %AuthorityContext{}, _scope_iri, _options)
+      when name in @cross_graph_insight_queries,
+      do: {:error, Error.new(:unauthorized, :cross_graph_insight)}
+
+  def query(name, version, parameters, %AuthorityContext{} = authority, scope_iri, options),
     do: QueryRunner.execute(name, version, parameters, authority, scope_iri, options)
+
+  def discover_cross_graph_insights(
+        name,
+        version,
+        parameters,
+        authority,
+        scope_iri,
+        context,
+        options \\ []
+      )
+
+  def discover_cross_graph_insights(
+        name,
+        version,
+        parameters,
+        %AuthorityContext{} = authority,
+        scope_iri,
+        context,
+        options
+      )
+      when name in @cross_graph_insight_queries and is_map(context) and is_list(options) do
+    options = Keyword.put(options, :evaluated_at, context[:evaluated_at])
+
+    with {:ok, result} <-
+           QueryRunner.execute(name, version, parameters, authority, scope_iri, options),
+         {:ok, projection} <- LearningInsight.build(result, context) do
+      {:ok, projection}
+    end
+  end
+
+  def discover_cross_graph_insights(
+        _name,
+        _version,
+        _parameters,
+        _authority,
+        _scope_iri,
+        _context,
+        _options
+      ),
+      do: {:error, Error.new(:invalid_input, :cross_graph_insight)}
 
   def project(result, %AuthorityContext{} = authority, scope_iri, options \\ []),
     do: Projection.build(result, authority, scope_iri, options)
@@ -193,6 +263,68 @@ defmodule JidoCode.Knowledge do
 
   def execution_recovery_candidates(result, graph_iri),
     do: ExecutionRecovery.candidates(result, graph_iri)
+
+  def verification_method(attributes), do: VerificationMethod.new(attributes)
+
+  def verification_activity(method, attributes),
+    do: VerificationActivity.new(method, attributes)
+
+  def evidence_bundle(activity, evidence_graph_iri, attributes),
+    do: EvidenceBundle.new(activity, evidence_graph_iri, attributes)
+
+  def record_verification_evidence(bundle, attributes, options \\ []),
+    do: EvidenceBundle.record_command(bundle, attributes, options)
+
+  def evaluate_evidence_sufficiency(bundles, requirements, context),
+    do: EvidenceSufficiency.evaluate(bundles, requirements, context)
+
+  def project_evidence(result, context), do: EvidenceProjection.build(result, context)
+  def project_evidence_sufficiency(assessment), do: EvidenceProjection.sufficiency(assessment)
+
+  def evidence_graph_identity(repository_iri), do: EvidenceGraph.evidence_graph(repository_iri)
+
+  def goal_outcome_decision(assessment, bundles, goal_resolution, task_resolution, attributes),
+    do: GoalOutcome.new(assessment, bundles, goal_resolution, task_resolution, attributes)
+
+  def decide_goal_outcome(decision, attributes, options \\ []),
+    do: GoalOutcome.record_command(decision, attributes, options)
+
+  def project_decision(result, context), do: DecisionProjection.build(result, context)
+
+  def knowledge_assertion(decision, source_claims, attributes),
+    do: KnowledgeAssertion.new(decision, source_claims, attributes)
+
+  def adopt_knowledge(assertion, decision, attributes, options \\ []),
+    do: KnowledgeAdoption.record_command(assertion, decision, attributes, options)
+
+  def evolve_knowledge(assertion, resolution, replacement, attributes, options \\ []),
+    do:
+      KnowledgeEvolution.record_command(
+        assertion,
+        resolution,
+        replacement,
+        attributes,
+        options
+      )
+
+  def resolve_knowledge_state(transitions), do: KnowledgeStateTransition.resolve(transitions)
+  def retrieve_knowledge(result, context), do: KnowledgeRetrieval.build(result, context)
+  def memory_graph_identity(repository_iri), do: MemoryGraph.memory_graph(repository_iri)
+
+  def reasoning_profiles, do: ReasoningProfiles.names()
+
+  def materialize_reasoning(attributes, options \\ []),
+    do: ReasoningService.materialize(attributes, options)
+
+  def project_cross_graph_insight(result, context), do: LearningInsight.build(result, context)
+
+  def build_learning_inputs(retrieval, reasoning, attributes),
+    do: LearningFeedback.build_inputs(retrieval, reasoning, attributes)
+
+  def learning_feedback_stale?(package, current_revisions),
+    do: LearningFeedback.stale?(package, current_revisions)
+
+  def learning_measurement(attributes), do: LearningFeedback.measurement(attributes)
 
   def repository_locator_identity(provider, external_id),
     do: ResourceIdentity.repository_locator(provider, external_id)

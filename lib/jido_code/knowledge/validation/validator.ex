@@ -27,7 +27,9 @@ defmodule JidoCode.Knowledge.Validation.Validator do
   @prov_ended_at "http://www.w3.org/ns/prov#endedAtTime"
   @prov_invalidated_at "http://www.w3.org/ns/prov#invalidatedAtTime"
   @allowed_epistemic MapSet.new(~w[
-    Observed Asserted Inferred ClaimProposed Accepted Rejected Contradicted ClaimSuperseded Invalidated
+    Observed Asserted Inferred ClaimProposed Accepted Rejected Waived Contradicted ClaimSuperseded
+    Invalidated KnowledgeStillValid KnowledgeUnderReview KnowledgeContradicted KnowledgeInvalidated
+    KnowledgeExpired KnowledgeSuperseded
   ])
   @relationship_predicates MapSet.new(~w[
     enrolls manages locatedBy inScope about derivedFrom supports contradicts addresses
@@ -46,6 +48,14 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     authorizedBy evidenceSource broaderCapability
     inputPackage evaluatedContext proposes reuses omittedBecause governedProposal
     leasesTask eligibilityReceipt livenessEvidence
+    usesVerificationMethod evaluatorCapability expectedClaim evaluatesArtifact generatedClaim
+    verificationActivity evaluatedAttempt evaluatedTask evaluatedGoal evaluatedSnapshot
+    hasCheck rawOutcome
+    verificationKind inputClass checkStatus evidenceStrength evidenceClassification
+    defers requestsMoreEvidence decisionMode outcomeStage decisionDisposition rationaleReference
+    consideredEvidence causedBy followUpGoal followUpTask followUpKind confirmation
+    riskClass knowledgeClassification sourceClaim hasFinding hasFailure policyOutcome
+    relatedSymbol applicableLesson reasoningProfile validatedResource
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i
@@ -391,7 +401,10 @@ defmodule JidoCode.Knowledge.Validation.Validator do
       cardinality(index, subject, @jf <> "decisionAuthority", 1, 1, "DecisionShape", graph)
 
     dispositions =
-      Enum.flat_map(~w[accepts rejects waives], &values(index, subject, @jf <> &1))
+      Enum.flat_map(
+        ~w[accepts rejects waives defers requestsMoreEvidence supersedes],
+        &values(index, subject, @jf <> &1)
+      )
 
     if dispositions == [] do
       [

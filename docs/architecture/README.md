@@ -75,3 +75,11 @@ implementation plan was merged.
 - [Governed execution effects and artifacts](./execution-effects-provenance.md)
 - [Execution provenance and recovery](./execution-provenance-and-recovery.md)
 - [Phase 8 governed execution receipt](./phase-08-receipt.md)
+
+## Phase 9 Evidence And Learning
+
+- [Verification and evidence boundary](./verification-evidence-boundary.md)
+- [Governed decision outcomes](./governed-decision-outcomes.md)
+- [Governed knowledge memory](./governed-knowledge-memory.md)
+- [Bounded reasoning and cross-graph learning](./bounded-reasoning-and-learning.md)
+- [Phase 9 accepted outcome and learning receipt](./phase-09-receipt.md)

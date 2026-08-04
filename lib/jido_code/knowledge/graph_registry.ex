@@ -104,6 +104,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       completeness: :complete,
       retention: :evidence_history,
       allowed_links: [
+        :factory_policy,
         :observation_batch,
         :source_revision,
         :repository_control,
@@ -117,7 +118,17 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       mutability: :append_supersede,
       completeness: :complete,
       retention: :knowledge_history,
-      allowed_links: [:factory_catalog, :repository_control, :evidence, :memory]
+      allowed_links: [
+        :factory_catalog,
+        :factory_policy,
+        :observation_batch,
+        :source_revision,
+        :repository_control,
+        :run_attempt,
+        :evidence,
+        :memory,
+        :derived
+      ]
     },
     security_audit: %{
       required_scopes: [:period],

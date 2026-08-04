@@ -28,6 +28,14 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     leasesTask eligibilityReceipt livenessEvidence
     scopedTo participant audience replyTo resultingCommand instruction contextItem
     attempts delegatedAgent retryOf
+    usesVerificationMethod evaluatorCapability expectedClaim evaluatesArtifact generatedClaim
+    verificationActivity evaluatedAttempt evaluatedTask evaluatedGoal evaluatedSnapshot
+    hasCheck rawOutcome
+    verificationKind inputClass checkStatus evidenceStrength evidenceClassification
+    defers requestsMoreEvidence decisionMode outcomeStage decisionDisposition rationaleReference
+    consideredEvidence causedBy followUpGoal followUpTask followUpKind confirmation
+    riskClass knowledgeClassification sourceClaim hasFinding hasFailure policyOutcome
+    relatedSymbol applicableLesson reasoningProfile validatedResource
   ])
   @max_guards 100
 
@@ -143,6 +151,14 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
 
   defp guard_satisfied?({:triple_absent, graph, subject, predicate, object}, dataset) do
     not guard_satisfied?({:triple_present, graph, subject, predicate, object}, dataset)
+  end
+
+  defp guard_satisfied?({:object_absent, graph, predicate, object}, dataset) do
+    not Enum.any?(graph_quads(dataset, graph), fn {_subject, stored_predicate, stored_object, _g} ->
+      term_equal?(stored_predicate, predicate) and term_equal?(stored_object, object)
+    end)
+  rescue
+    _error -> false
   end
 
   defp guard_satisfied?({:transition_endpoint, graph, subject, transition}, dataset) do

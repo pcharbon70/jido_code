@@ -22,7 +22,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     repository_control: ~w[
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
       GraphRevisionReference ReconciliationActivity ReconciliationInput Gap ControlProposal
-      EligibilityReceipt InteractionSession Message Instruction
+      EligibilityReceipt InteractionSession Message Instruction DecisionFollowUp
     ],
     run_attempt: ~w[
       ExecutionAttempt ExecutionContext ToolInvocation Patch VerificationActivity Artifact
@@ -30,15 +30,19 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       MigrationActivity Finding
     ],
     evidence: ~w[
-      EvidenceBundle Decision Claim Finding Contradiction VerificationActivity MigrationActivity
+      EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity
+      VerificationCheck EvidenceSufficiency GraphRevisionReference MigrationActivity
     ],
-    memory: ~w[KnowledgeAssertion Claim AdoptionActivity Contradiction MigrationActivity],
+    memory: ~w[
+      KnowledgeAssertion Claim AdoptionActivity KnowledgeStateTransition
+      KnowledgeEvolutionActivity Contradiction MigrationActivity GraphRevisionReference
+    ],
     security_audit: ~w[
       AuthorizationGrant CredentialReference ValidationReport ValidationResult MigrationActivity
     ],
     derived: ~w[
       Claim Finding Contradiction GraphRevisionReference ValidationReport ValidationResult
-      CohortMembership CapabilityClassification
+      CohortMembership CapabilityClassification ReasoningActivity ReasoningValidationReport
     ]
   }
 

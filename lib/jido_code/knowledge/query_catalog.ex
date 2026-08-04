@@ -18,6 +18,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @reconciliation_version "1.4.0"
   @scheduling_version "1.5.0"
   @execution_version "1.6.0"
+  @knowledge_version "1.7.0"
   @versions [
     @version,
     @repository_version,
@@ -25,7 +26,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @governance_version,
     @reconciliation_version,
     @scheduling_version,
-    @execution_version
+    @execution_version,
+    @knowledge_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -57,6 +59,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec execution_version() :: String.t()
   def execution_version, do: @execution_version
+
+  @spec knowledge_version() :: String.t()
+  def knowledge_version, do: @knowledge_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -368,6 +373,20 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           reconciliation_specifications(graph, resource) ++
           scheduling_specifications(graph, resource) ++
           execution_boundary_specifications(resource)
+
+      @knowledge_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource)
     end
   end
 
@@ -987,6 +1006,347 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :declared
       )
     ]
+  end
+
+  defp evidence_specifications(resource) do
+    stale = Map.put(resource, :instant, %{type: :datetime, required: true})
+
+    [
+      spec(
+        :evidence_by_goal,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded evidence connected to one exact goal.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_by_claim,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded support and contradiction for one exact claim.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_by_attempt,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded evidence generated from one exact execution attempt.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_by_artifact,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded evidence that evaluated one content-addressed artifact.",
+        :product,
+        :declared
+      ),
+      spec(
+        :verification_timeline,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read verification activities and failed, skipped, or unknown checks.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_support,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read supporting and contradictory evidence without collapsing either side.",
+        :product,
+        :declared
+      ),
+      spec(
+        :evidence_sufficiency,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read exact evidence inputs for a pure sufficiency evaluation.",
+        :product,
+        :declared
+      ),
+      spec(
+        :stale_evidence,
+        :select,
+        stale,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read expired or superseded evidence candidates at one instant.",
+        :product,
+        :declared
+      ),
+      spec(
+        :missing_evidence_requirements,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read recorded method and coverage facts used to explain missing requirements.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp decision_specifications(resource) do
+    [
+      spec(
+        :decision_by_goal,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read decisions that address one exact goal.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_by_claim,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read decisions that disposition one claim or its immutable successor.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_by_evidence,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read decisions whose sufficiency snapshot considered one evidence bundle.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_by_actor,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read bounded decisions attributed to one authority actor.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_waivers,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read explicit waiver decisions connected to one goal or claim.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_rejections,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read explicit rejection decisions connected to one goal or claim.",
+        :product,
+        :declared
+      ),
+      spec(
+        :deferred_actions,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read defer and request-more-evidence dispositions.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_supersession,
+        :select,
+        resource,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read immutable decision supersession history.",
+        :product,
+        :declared
+      ),
+      spec(
+        :satisfaction_path,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :timeline,
+        "Read accepted work transitions and their governing outcome stage.",
+        :product,
+        :declared
+      ),
+      spec(
+        :decision_follow_up,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read lease-gated follow-up goals and tasks caused by one decision or goal.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp memory_specifications(resource) do
+    [
+      spec(
+        :knowledge_by_scope,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions for one exact repository or cohort scope.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_goal,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions explicitly related to one goal.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_task,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions explicitly related to one task.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_source,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions whose precise proposition names one source entity.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_policy,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions adopted under one policy version.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_classification,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read knowledge assertions in one controlled classification.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_by_validity,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read scope-bounded knowledge for deterministic validity filtering.",
+        :product,
+        :declared
+      ),
+      spec(
+        :knowledge_neighborhood,
+        :select,
+        resource,
+        :memory,
+        [:memory],
+        :table,
+        "Read the bounded support, contradiction, and supersession neighborhood.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp insight_specifications(resource) do
+    [
+      {:shared_dependencies, "Discover dependencies shared with other visible repositories."},
+      {:repeated_findings, "Discover findings repeated across visible repositories."},
+      {:repeated_failures, "Discover failures repeated across visible repositories."},
+      {:policy_outcome_patterns,
+       "Discover repeated policy outcomes across visible repositories."},
+      {:reusable_evidence_methods,
+       "Discover verification methods reused by visible repositories."},
+      {:related_source_symbols, "Discover related source symbols across visible repositories."},
+      {:applicable_lessons, "Discover accepted lessons applicable across visible repositories."}
+    ]
+    |> Enum.map(fn {name, purpose} ->
+      spec(
+        name,
+        :select,
+        resource,
+        :reasoner,
+        [:derived],
+        :table,
+        purpose,
+        :product,
+        :declared
+      )
+    end)
   end
 
   defp spec(
