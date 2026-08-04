@@ -23,6 +23,7 @@ defmodule JidoCode.Knowledge.StoreServer do
   alias JidoCode.Knowledge.Metadata
   alias JidoCode.Knowledge.Ontology.StartupGate
   alias JidoCode.Knowledge.Readiness
+  alias JidoCode.Knowledge.Retention.RestoreGuard
   alias JidoCode.Knowledge.RestoreLog
   alias JidoCode.Knowledge.QueryExecution
   alias JidoCode.Knowledge.SemanticSnapshot
@@ -51,6 +52,7 @@ defmodule JidoCode.Knowledge.StoreServer do
     export: :maintenance,
     integrity: :maintenance,
     retention_candidates: :maintenance,
+    retention_apply: :maintenance,
     restore: :maintenance,
     enter_maintenance: :maintenance,
     leave_maintenance: :maintenance
@@ -437,6 +439,14 @@ defmodule JidoCode.Knowledge.StoreServer do
     end
   end
 
+  defp dispatch({:retention_apply, batch}, state) do
+    case AtomicCommit.apply(state.store, state.metadata, batch) do
+      {:ok, receipt, metadata} -> {:ok, receipt, %{state | metadata: metadata}}
+      {:error, %Error{} = error} -> {:error, error}
+      {:error, %Error{} = error, details} -> {:error, error, details}
+    end
+  end
+
   defp dispatch({:enter_maintenance, reason}, state) do
     case Readiness.transition(state.readiness, {:enter_maintenance, reason}) do
       {:ok, health} ->
@@ -466,6 +476,13 @@ defmodule JidoCode.Knowledge.StoreServer do
     case Readiness.snapshot(state.readiness) do
       %{state: :maintenance, maintenance_reason: :restore} -> :ok
       _health -> {:error, Error.new(:unavailable, :restore)}
+    end
+  end
+
+  defp gate_request(state, :retention_apply) do
+    case Readiness.snapshot(state.readiness) do
+      %{state: :maintenance, maintenance_reason: :retention} -> :ok
+      _health -> {:error, Error.new(:unavailable, :retention_execution)}
     end
   end
 
@@ -642,8 +659,10 @@ defmodule JidoCode.Knowledge.StoreServer do
   end
 
   defp restore_candidate(state, artifact_id) do
-    with {:ok, old_selection} <- DatasetSelector.current(state.config),
+    with {:ok, retention_floor} <- RestoreGuard.floor(state.store),
+         {:ok, old_selection} <- DatasetSelector.current(state.config),
          {:ok, manifest, checkpoint_path} <- Backup.load_checkpoint(state.config, artifact_id),
+         :ok <- RestoreGuard.authorize(manifest.dataset_revision, retention_floor),
          {:ok, dataset_id, candidate_path} <-
            Backup.stage_checkpoint(state.config, checkpoint_path) do
       restore_staged_candidate(state, old_selection, manifest, dataset_id, candidate_path)

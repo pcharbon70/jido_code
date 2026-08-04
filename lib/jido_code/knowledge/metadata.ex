@@ -2,6 +2,7 @@ defmodule JidoCode.Knowledge.Metadata do
   @moduledoc false
 
   alias JidoCode.Knowledge.BackendFailure
+  alias JidoCode.Knowledge.Backend.Durability
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Vocabulary
   alias TripleStore.QuadOperations
@@ -63,6 +64,7 @@ defmodule JidoCode.Knowledge.Metadata do
     with {:ok, summary} <- backend_graph_summary(store),
          true <- empty_dataset?(summary),
          {:ok, 6} <- TripleStore.update(store, bootstrap_update(schema_version, lineage_iri)),
+         :ok <- Durability.sync(store, :sync_store_metadata),
          {:ok, metadata} when not is_nil(metadata) <- read(store),
          {:ok, validated} <- validate(metadata, schema_version) do
       {:ok, validated}

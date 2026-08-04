@@ -1,6 +1,8 @@
 defmodule JidoCode.Knowledge.SemanticSnapshot do
   @moduledoc false
 
+  require Logger
+
   alias JidoCode.Knowledge.BackendFailure
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.GraphMetadata
@@ -89,8 +91,17 @@ defmodule JidoCode.Knowledge.SemanticSnapshot do
         {:cont, {:ok, Map.put(metadata, graph, nil)}}
       else
         case GraphMetadata.read(store, graph) do
-          {:ok, value} -> {:cont, {:ok, Map.put(metadata, graph, value)}}
-          {:error, %Error{} = error} -> {:halt, {:error, error}}
+          {:ok, value} ->
+            {:cont, {:ok, Map.put(metadata, graph, value)}}
+
+          {:error, %Error{} = error} ->
+            {:ok, family} = GraphRegistry.identify(graph)
+
+            Logger.debug(
+              "semantic snapshot rejected #{family} graph metadata: #{error.operation}"
+            )
+
+            {:halt, {:error, error}}
         end
       end
     end)

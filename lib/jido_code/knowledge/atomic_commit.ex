@@ -2,6 +2,7 @@ defmodule JidoCode.Knowledge.AtomicCommit do
   @moduledoc false
 
   alias JidoCode.Knowledge.BackendFailure
+  alias JidoCode.Knowledge.Backend.Durability
   alias JidoCode.Knowledge.CommitLog
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Revision
@@ -82,6 +83,17 @@ defmodule JidoCode.Knowledge.AtomicCommit do
   defp validate_removals(%WriteBatch{
          removal_policy: :maintenance,
          operation_metadata: %{
+           operation: :retention,
+           plan_id: "urn:jido-code:retention-plan:" <> _token,
+           checksum: checksum
+         }
+       })
+       when is_binary(checksum) and byte_size(checksum) == 64,
+       do: :ok
+
+  defp validate_removals(%WriteBatch{
+         removal_policy: :maintenance,
+         operation_metadata: %{
            class: :semantic_command,
            command_type: "FinalizeExecutionRun",
            command_version: "1.6.0"
@@ -113,7 +125,9 @@ defmodule JidoCode.Knowledge.AtomicCommit do
 
     case result do
       {:ok, ^expected_count} ->
-        {:ok, receipt}
+        with :ok <- Durability.sync(store, :sync_atomic_commit) do
+          {:ok, receipt}
+        end
 
       other ->
         reconcile_uncertain_result(store, batch, other)

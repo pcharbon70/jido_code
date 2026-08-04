@@ -230,4 +230,4 @@ Back to plan: [README](./README.md)
       - [x] 9.5.3.1 Subtask {#jcf-p09-9-5-3-1} - Record method/policy/query/rule/ontology versions, scenario/snapshot/artifact/evidence digests, decision/adoption refs, and candidate commit.
       - [x] 9.5.3.2 Subtask {#jcf-p09-9-5-3-2} - Attach positive/negative sufficiency, self-approval, stale evidence, follow-up, contradiction, supersession, rebuild, cross-repo authorization, restore, and explanation results.
       - [x] 9.5.3.3 Subtask {#jcf-p09-9-5-3-3} - Keep G8 blocked if runtime output can become accepted directly, knowledge can lose provenance, or inference can mutate control/acceptance state.
-      - [ ] 9.5.3.4 Subtask {#jcf-p09-9-5-3-4} - Pin the merged candidate commit before authorizing Phase 10.
+      - [x] 9.5.3.4 Subtask {#jcf-p09-9-5-3-4} - Pin the merged candidate commit before authorizing Phase 10.

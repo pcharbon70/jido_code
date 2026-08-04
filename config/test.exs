@@ -4,6 +4,11 @@ config :live_vue, ssr: false
 
 config :jido_code, :knowledge_store, enabled: false
 
+config :jido_code, :product_auth,
+  credential_digest: :crypto.hash(:sha256, "test-operator-token"),
+  session_ttl_seconds: 3_600,
+  session_generation: "test-1"
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :jido_code, JidoCodeWeb.Endpoint,

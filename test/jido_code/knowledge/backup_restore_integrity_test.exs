@@ -13,6 +13,7 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.WriteBatch
   alias JidoCode.Knowledge.Writer
+  alias JidoCode.TestSupport.Filesystem
 
   @moduletag capture_log: true
 
@@ -20,7 +21,7 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
 
   setup context do
     root = unique_root(context)
-    on_exit(fn -> File.rm_rf!(root) end)
+    on_exit(fn -> Filesystem.remove_root!(root) end)
     {:ok, config} = Config.for_test(Path.join(root, "store"))
     %{config: config}
   end

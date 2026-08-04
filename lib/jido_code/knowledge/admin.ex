@@ -8,9 +8,10 @@ defmodule JidoCode.Knowledge.Admin do
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Maintenance
+  alias JidoCode.Knowledge.Retention.Plan
   alias JidoCode.Knowledge.StoreServer
 
-  @type command :: :health | :integrity | :backup | :export | :restore
+  @type command :: :health | :integrity | :backup | :export | :restore | :retention
 
   @spec execute(command(), keyword()) :: {:ok, term()} | {:error, Error.t()}
   def execute(command, options \\ [])
@@ -52,6 +53,13 @@ defmodule JidoCode.Knowledge.Admin do
     Maintenance.restore(maintenance, artifact_id, confirm: Keyword.fetch!(options, :confirm))
   end
 
+  defp do_execute(:retention, options) do
+    maintenance = Keyword.get(options, :maintenance, Maintenance)
+    plan = Keyword.fetch!(options, :plan)
+
+    Maintenance.apply_retention(maintenance, plan, confirm: Keyword.fetch!(options, :confirm))
+  end
+
   defp do_execute(_command, _options) do
     {:error, Error.new(:invalid_input, :admin_command)}
   end
@@ -76,6 +84,16 @@ defmodule JidoCode.Knowledge.Admin do
       :ok
     else
       _invalid -> {:error, Error.new(:invalid_input, :admin_restore)}
+    end
+  end
+
+  defp validate_options(:retention, options) do
+    with :ok <- only_keys(options, [:plan, :confirm, :maintenance]),
+         %Plan{} = plan <- Keyword.get(options, :plan),
+         true <- Keyword.get(options, :confirm) == plan.id do
+      :ok
+    else
+      _invalid -> {:error, Error.new(:invalid_input, :admin_retention)}
     end
   end
 

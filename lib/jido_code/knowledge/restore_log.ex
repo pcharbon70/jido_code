@@ -2,6 +2,7 @@ defmodule JidoCode.Knowledge.RestoreLog do
   @moduledoc false
 
   alias JidoCode.Knowledge.BackendFailure
+  alias JidoCode.Knowledge.Backend.Durability
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Identity
   alias JidoCode.Knowledge.Metadata
@@ -17,18 +18,22 @@ defmodule JidoCode.Knowledge.RestoreLog do
       dataset_revision = metadata.dataset_revision + 1
       system_graph_revision = metadata.system_graph_revision + 1
 
-      case TripleStore.update(
-             store,
-             update(
-               activity,
-               source_digest,
-               metadata.dataset_revision,
-               dataset_revision,
-               system_graph_revision
-             )
-           ) do
-        {:ok, 7} -> Metadata.read(store)
+      with {:ok, 7} <-
+             TripleStore.update(
+               store,
+               update(
+                 activity,
+                 source_digest,
+                 metadata.dataset_revision,
+                 dataset_revision,
+                 system_graph_revision
+               )
+             ),
+           :ok <- Durability.sync(store, :sync_restore_activity) do
+        Metadata.read(store)
+      else
         {:ok, _count} -> {:error, Error.new(:persistence_failure, :record_restore_activity)}
+        {:error, %Error{} = error} -> {:error, error}
         {:error, reason} -> {:error, BackendFailure.translate(reason, :record_restore_activity)}
       end
     else

@@ -83,3 +83,15 @@ implementation plan was merged.
 - [Governed knowledge memory](./governed-knowledge-memory.md)
 - [Bounded reasoning and cross-graph learning](./bounded-reasoning-and-learning.md)
 - [Phase 9 accepted outcome and learning receipt](./phase-09-receipt.md)
+
+## Phase 10 Product Acceptance
+
+- [Product surface and island contract](./product-surface-and-island-contract.md)
+- [Product security, privacy, and threat model](./product-security-privacy-and-threat-model.md)
+- [Fleet capacity, retention, and observability](../operations/fleet-capacity-retention-and-observability.md)
+- [Install, upgrade, and rollback](../operations/install-upgrade-and-rollback.md)
+- [Disaster recovery](../operations/disaster-recovery.md)
+- [Operator handbook](../operations/operator-handbook.md)
+- [Graph-native contributor fitness checks](../contributing/graph-native-fitness-checks.md)
+- [Phase 10 architecture audit](./phase-10-architecture-audit.md)
+- [Phase 10 product and release acceptance receipt](./phase-10-receipt.md)

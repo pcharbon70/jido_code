@@ -16,6 +16,7 @@ defmodule JidoCode.Knowledge.CommandPipeline do
   alias JidoCode.Knowledge.CommandReceipt
   alias JidoCode.Knowledge.CommandRegistry
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.GraphMetadata
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.WriteBatch
@@ -102,32 +103,32 @@ defmodule JidoCode.Knowledge.CommandPipeline do
          {:ok, snapshot} <-
            request(store_server, {:semantic_snapshot, snapshot_graphs}, deadline),
          {:ok, authority} <- Authorization.authorize(envelope, definition, change_set, snapshot),
-         audit_additions =
+         provenance =
            CommandProvenance.quads(envelope, change_set, authority, identities, audit_graph),
-         :ok <- AuditPolicy.validate(audit_additions),
+         {:ok, audit} <- audit_partition(envelope, snapshot, audit_graph, provenance),
+         :ok <- AuditPolicy.validate(audit.additions),
          {:ok, _reports} <-
            CommandPrecommit.validate(
              envelope,
              change_set,
              snapshot,
-             audit_additions,
-             audit_graph,
+             audit,
              deadline
            ),
          {:ok, batch} <-
-           build_batch(envelope, change_set, identities, snapshot, audit_additions, audit_graph),
+           build_batch(envelope, change_set, identities, audit),
          {:ok, receipt} <- request(store_server, {:atomic_update, batch}, deadline) do
       {:ok, semantic_receipt(:committed, envelope, change_set, identities, receipt)}
     end
   end
 
-  defp build_batch(envelope, change_set, identities, snapshot, audit_additions, audit_graph) do
+  defp build_batch(envelope, change_set, identities, audit) do
     graph_revisions =
       change_set.expected_graph_revisions
       |> Map.take(change_set.target_graphs)
-      |> Map.put(audit_graph, Map.fetch!(snapshot.graph_revisions, audit_graph))
+      |> Map.put(audit.graph_iri, audit.expected_graph_revision)
 
-    WriteBatch.new(change_set.additions ++ audit_additions,
+    WriteBatch.new(change_set.additions ++ audit.additions,
       commit_id: identities.commit_id,
       removals: change_set.removals,
       removal_policy: if(change_set.removals == [], do: :forbid, else: :maintenance),
@@ -142,6 +143,52 @@ defmodule JidoCode.Knowledge.CommandPipeline do
         registry_version: envelope.command_version
       }
     )
+  end
+
+  defp audit_partition(envelope, snapshot, graph, provenance) do
+    case Map.get(snapshot.graph_metadata, graph) do
+      metadata when is_map(metadata) ->
+        {:ok,
+         %{
+           graph_iri: graph,
+           operation: :append,
+           metadata: metadata,
+           expected_graph_revision: Map.fetch!(snapshot.graph_revisions, graph),
+           additions: provenance
+         }}
+
+      nil ->
+        create_audit_partition(envelope, snapshot, graph, provenance)
+    end
+  end
+
+  defp create_audit_partition(envelope, snapshot, graph, provenance) do
+    with {:ok, policy_graph} <- GraphRegistry.graph_iri(:factory_policy, %{}),
+         policy_metadata when is_map(policy_metadata) <-
+           Map.get(snapshot.graph_metadata, policy_graph),
+         {:ok, metadata} <-
+           GraphMetadata.new(graph, %{
+             owner_scope: policy_metadata.owner_scope,
+             ontology_version: "https://jido.run/ontology/release/#{envelope.ontology_version}",
+             creation_activity: envelope.command_iri,
+             created_at: envelope.issued_at,
+             lifecycle_state: :open,
+             completeness_state: :complete,
+             graph_revision: 1
+           }),
+         {:ok, metadata_quads} <- GraphMetadata.quads(metadata) do
+      {:ok,
+       %{
+         graph_iri: graph,
+         operation: :create,
+         metadata: metadata,
+         expected_graph_revision: 0,
+         additions: metadata_quads ++ provenance
+       }}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _missing -> {:error, Error.new(:unavailable, :audit_graph_required)}
+    end
   end
 
   defp semantic_receipt(outcome, envelope, change_set, identities, receipt) do

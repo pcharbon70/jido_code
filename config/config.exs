@@ -10,6 +10,24 @@ import Config
 config :jido_code,
   runtime_mode: config_env(),
   generators: [timestamp_type: :utc_datetime],
+  product_surface: [
+    factory_iri: "https://jido.run/id/repository-factory/default",
+    factory_scope_iri: "https://jido.run/id/scope/factory/default",
+    principal_iri: "https://jido.run/id/actor/local-operator",
+    actor_iri: "https://jido.run/id/actor/local-operator",
+    policy_boundary_iri: "https://jido.run/id/policy-boundary/default",
+    policy_iris: ["https://jido.run/id/policy/default"]
+  ],
+  fleet_runtime_ceilings: %{
+    concurrency: %{global: 16, cohort: 8, repository: 2, provider: 4, capability: 4},
+    rate_units: 100,
+    budget_units: 100,
+    max_risk: 10,
+    max_candidates: 200,
+    max_campaign_repositories: 50,
+    starvation_cycles: 5,
+    emergency_priority: 100
+  },
   knowledge_store: [
     enabled: true,
     root: Path.expand("../var/knowledge/#{config_env()}", __DIR__),
@@ -21,6 +39,11 @@ config :jido_code,
   ]
 
 config :live_vue, ssr: true
+
+config :jido_code, :product_auth,
+  credential_digest: nil,
+  session_ttl_seconds: 28_800,
+  session_generation: "1"
 
 config :phoenix_vite, PhoenixVite.Npm,
   assets: [args: [], cd: Path.expand("..", __DIR__)],

@@ -2,9 +2,10 @@
 
 JidoCode is a Phoenix LiveView server project.
 
-The root route (`/`) renders `JidoCodeWeb.HomeLive`, a small server console that
-keeps state over a LiveView socket and verifies that server-rendered events are
-working.
+The root route (`/`) renders the graph-backed managed repository factory
+workbench. LiveView owns actor-scoped projections, navigation, forms, semantic
+commands, and receipts; bounded LiveVue islands provide focused local
+interaction without becoming a second source of truth.
 
 ## Architecture
 
@@ -38,7 +39,7 @@ mix setup
 Start the development server:
 
 ```sh
-mix phx.server
+JIDO_CODE_OPERATOR_TOKEN='replace-with-a-long-random-value' mix phx.server
 ```
 
 If port 4000 is already in use:
@@ -57,3 +58,9 @@ Run the test suite and precommit checks:
 mix test
 mix precommit
 ```
+
+Operational workflows are documented in the
+[operator handbook](docs/operations/operator-handbook.md). Exact release gates
+are available through `mix jido_code.release verify|preflight|audit`; initialize
+a pristine dataset only with
+`mix jido_code.bootstrap --confirm INITIALIZE`.

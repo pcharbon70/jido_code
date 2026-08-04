@@ -7,6 +7,8 @@ defmodule JidoCode.Knowledge.GraphMetadata do
   resource itself and never expose graph contents.
   """
 
+  require Logger
+
   alias JidoCode.Knowledge.BackendFailure
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.GraphRegistry
@@ -139,14 +141,7 @@ defmodule JidoCode.Knowledge.GraphMetadata do
           {:ok, nil}
 
         {:ok, rows} when length(rows) < @max_metadata_statements ->
-          with {:ok, metadata} <- decode_rows(graph_iri, rows),
-               {:ok, metadata} <- load_family_metadata(context, metadata),
-               {:ok, revision} when is_integer(revision) <-
-                 SubstrateMetadata.graph_revision(store, graph_iri) do
-            {:ok, %{metadata | graph_revision: revision}}
-          else
-            _invalid -> {:error, Error.new(:corrupt, :read_graph_metadata)}
-          end
+          read_rows(store, context, graph_iri, rows)
 
         {:ok, _too_many} ->
           {:error, Error.new(:corrupt, :read_graph_metadata)}
@@ -158,6 +153,30 @@ defmodule JidoCode.Knowledge.GraphMetadata do
   end
 
   def read(_store, _graph_iri), do: invalid(:read_graph_metadata)
+
+  defp read_rows(store, context, graph_iri, rows) do
+    with {:ok, metadata} <- metadata_stage(graph_iri, :decode, decode_rows(graph_iri, rows)),
+         {:ok, metadata} <-
+           metadata_stage(graph_iri, :family, load_family_metadata(context, metadata)),
+         {:ok, revision} when is_integer(revision) <-
+           metadata_stage(
+             graph_iri,
+             :revision,
+             SubstrateMetadata.graph_revision(store, graph_iri)
+           ) do
+      {:ok, %{metadata | graph_revision: revision}}
+    else
+      _invalid -> {:error, Error.new(:corrupt, :read_graph_metadata)}
+    end
+  end
+
+  defp metadata_stage(_graph_iri, _stage, {:ok, _value} = result), do: result
+
+  defp metadata_stage(graph_iri, stage, _invalid) do
+    {:ok, family} = GraphRegistry.identify(graph_iri)
+    Logger.debug("rejected #{family} graph metadata at #{stage}")
+    {:error, Error.new(:corrupt, :read_graph_metadata)}
+  end
 
   defp validate_required(metadata) do
     cond do

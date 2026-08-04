@@ -2,13 +2,15 @@
 
 ## Status
 
-This receipt records the Phase 9 candidate verified locally on 2026-08-03.
+This receipt records the Phase 9 candidate verified locally on 2026-08-03 and
+accepted after pull request merge on 2026-08-04.
 Verification, evidence, explicit decisions, final satisfaction, knowledge
 adoption/evolution, bounded reasoning, and cross-repository proposals are
 implemented through the graph-only authority boundary.
 
-G8 is merge-pending. It remains blocked until the pull request passes
-clean-checkout CI and the merged candidate commit is pinned here. No local
+G8 is accepted at merged candidate `de5e5a34e50bd23d71ee14742bccb18cdae0711d`.
+The pull request passed its required checks and the merge was fast-forwarded
+into the Phase 10 baseline. No local
 evidence found runtime output becoming accepted directly, knowledge losing its
 decision/evidence provenance, or inference mutating command, control,
 acceptance, lease, satisfaction, or adoption state.
@@ -23,7 +25,7 @@ acceptance, lease, satisfaction, or adoption state.
 | Section 9.3 | `6a9a2ebab74fd4d2f884e59d337a8512d5c0caea` - govern knowledge adoption |
 | Section 9.4 | `dda6b26a118ebb5bee962ffef9990b6eebf767cc` - bound graph reasoning |
 | Section 9.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `de5e5a34e50bd23d71ee14742bccb18cdae0711d` |
 
 ## Contract Pins
 
