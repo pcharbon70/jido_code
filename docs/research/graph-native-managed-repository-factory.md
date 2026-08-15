@@ -1081,3 +1081,20 @@ As implementation proceeds, every feature should answer:
 These questions preserve the central design: JidoCode is not an object system
 stored in RDF. It is a repository factory whose knowledge, intent, execution
 history, and learning are natively connected in one governed graph.
+
+## Milestones
+
+1. Knowledge kernel: one supervised embedded quad store with graph topology,
+   transactions, backup/restore, export, and health checks as the sole durable store.
+2. Core ontology and semantic commands: factory vocabulary, validation shapes,
+   idempotent change sets with provenance and audit, and query-catalog infrastructure.
+3. Enrollment and observation: repositories enrolled via locators, provider/Git
+   observations recorded as immutable batches, snapshots analyzed into source graphs.
+4. Intent and reconciliation: desired outcomes and policies expressed, closed-world
+   gap and eligible-work queries answered with leases and fencing.
+5. Execution, evidence, and decision: bounded attempts run under leases, evidence
+   bundles evaluated, and governed decisions made without runtime self-acceptance.
+6. Learning and reasoning: adopted/superseded repository knowledge and rebuildable
+   derived inference graphs feeding future contexts.
+7. Product projections: the route/workbench surface driven entirely by bounded,
+   subscribable graph projections with operator explanations.

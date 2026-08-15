@@ -2332,3 +2332,20 @@ The local JidoCode conclusions additionally derive from:
 - **S48.** Sourcegraph, [Precise code navigation](https://sourcegraph.com/docs/code-search/code-navigation/precise_code_navigation), accessed 2026-08-15.
 - **S49.** Collard et al., [srcML: An Infrastructure for the Exploration, Analysis, and Manipulation of Source Code: A Tool Demonstration](https://doi.org/10.1109/ICSM.2013.85), ICSM, 2013, and [srcML project](https://www.srcml.org/).
 - **S50.** GitHub, [Found means fixed: Secure code more than three times faster with Copilot Autofix](https://github.blog/news-insights/product-news/secure-code-more-than-three-times-faster-with-copilot-autofix/), product-reported beta data, 2024.
+
+## Milestones
+
+1. Corrected structural source profile: typed call relations, deterministic
+   source spans, ordered clauses, and occurrence-scoped identities.
+2. Segmented source publication: manifest and immutable segment protocol within
+   accepted capacity and snapshot bounds.
+3. Reviewed semantic tool surface: search, definitions/references, neighborhood,
+   and impact tools bounded and authorized through the query catalog.
+4. Hybrid retrieval service: lexical anchoring resolving to revision-pinned
+   entities with bounded one-hop expansion and ranked source spans.
+5. Pinned elixir-ontologies adapter spike: bounded contextual file API evaluated
+   behind the SourceAnalyzer port with a closed admission contract.
+6. Impact and migration planning: evidence-path impact queries and edit-obligation
+   planning tools over the enriched graph.
+7. Measured adoption: graph-assisted retrieval validated against exact, lexical,
+   and skeleton baselines before influencing production execution.
