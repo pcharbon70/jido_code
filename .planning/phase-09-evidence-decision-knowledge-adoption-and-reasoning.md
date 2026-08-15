@@ -15,7 +15,7 @@ non-authoritative.
 
 Back to plan: [README](./README.md)
 
-- [ ] 9 Phase - Govern how execution results become accepted outcomes and reusable knowledge.
+- [x] 9 Phase - Govern how execution results become accepted outcomes and reusable knowledge.
 
   This phase closes the epistemic boundary: tools and agents may generate
   claims and artifacts, but only verification plus an authorized decision can
