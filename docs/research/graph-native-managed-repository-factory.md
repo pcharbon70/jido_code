@@ -1,4 +1,4 @@
-# Graph-Native Managed Repository Factory
+## 1. Graph-Native Managed Repository Factory
 
 Status: proposed research architecture
 

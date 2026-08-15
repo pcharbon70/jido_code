@@ -1,4 +1,4 @@
-# Ontology-Backed Source Graphs for Coding Agents
+## 4. Ontology-Backed Source Graphs for Coding Agents
 
 - Status: research proposal, not an accepted architecture decision
 - Research cutoff: 2026-08-15
