@@ -15,7 +15,7 @@ leases.
 
 Back to plan: [README](./README.md)
 
-- [ ] 7 Phase - Derive and schedule governed work from the difference between desired and observed repository state.
+- [x] 7 Phase - Derive and schedule governed work from the difference between desired and observed repository state.
 
   This phase makes work a connected semantic graph rather than a persisted
   `WorkItem` aggregate or queue row and keeps policy, proposal, authorization,
@@ -244,4 +244,4 @@ Back to plan: [README](./README.md)
       - [x] 7.5.3.1 Subtask {#jcf-p07-7-5-3-1} - Record policy/rule/query/ontology versions, scenario and cohort fixture digests, capability providers, scheduler settings, and candidate commit.
       - [x] 7.5.3.2 Subtask {#jcf-p07-7-5-3-2} - Attach reconciliation replay, contradiction/incomplete cases, cohort applicability, lease races, expiry/fencing, notification loss, restart, and explanation results.
       - [x] 7.5.3.3 Subtask {#jcf-p07-7-5-3-3} - Keep G6 blocked if work can exist only in a queue/struct, absence can satisfy eligibility without completeness, or an inference can grant a lease directly.
-      - [ ] 7.5.3.4 Subtask {#jcf-p07-7-5-3-4} - Pin the merged candidate commit before authorizing Phase 8.
+      - [x] 7.5.3.4 Subtask {#jcf-p07-7-5-3-4} - Pin the merged candidate commit before authorizing Phase 8. (`f7b3d57748c7c830add4a815257ed3a79ce54e29`)
