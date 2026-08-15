@@ -1,4 +1,4 @@
-# Total Agent Memory For Long-Lived Software Engineering
+## 3. Total Agent Memory For Long-Lived Software Engineering
 
 - Status: research proposal, not an accepted architecture decision
 - Evidence cutoff: 2026-08-15

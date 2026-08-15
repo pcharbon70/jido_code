@@ -1,4 +1,4 @@
-# A Proper Elixir Ontology for Coding Agents
+## 5. A Proper Elixir Ontology for Coding Agents
 
 - Status: research proposal, not an accepted architecture decision
 - Research cutoff: 2026-08-15

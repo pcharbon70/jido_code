@@ -1,4 +1,4 @@
-# Secure And Effective Agent Harness For JidoCode
+## 2. Secure And Effective Agent Harness For JidoCode
 
 Status: proposed research architecture
 
