@@ -2107,3 +2107,20 @@ The durable principle should be:
 76. Luke Hinds et al., [Sigstore: Software Signing For
     Everybody](https://doi.org/10.1145/3548606.3560596), CCS, 2022. Connects
     signatures, authenticated identities, transparency, and monitoring.
+
+## Milestones
+
+1. Contract reconciliation: content classifications, retention semantics, and
+   proposed graph families accepted or rejected through architecture decisions.
+2. Total semantic accounting: episode capture manifests, multidimensional content
+   state, and bounded verifiable event segments for every attempt.
+3. History queries: bounded timelines, failure search, and lineage lenses over
+   disposable lexical indexes.
+4. Cases and failure memory: ExperienceCase resources with applicability-filtered
+   similarity retrieval.
+5. Artifact claims and procedures: artifact-grounded claims with freshness, and
+   validated ProcedureRevision workflows.
+6. Exact content at scale: benchmarked payload storage, with an encrypted-content
+   vault ADR only if graph-native chunks prove insufficient.
+7. Cross-repository and training uses enabled under separate purpose and
+   authorization with leakage-controlled datasets.

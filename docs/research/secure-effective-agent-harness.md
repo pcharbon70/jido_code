@@ -2482,3 +2482,24 @@ The highest-value additions are:
 This design uses model intelligence where it is valuable while ensuring that a
 compromised, mistaken, stale, or terminated agent cannot exceed its graph-
 authorized role or convert its own output into accepted truth.
+
+## Milestones
+
+1. Deterministic harness coordinator driving graph-owned transitions for attempts,
+   leases, verification, decisions, and publication.
+2. Context compiler producing immutable, digest-attributed ContextManifests
+   atomically with execution attempts and model invocations.
+3. Model access profiles covering host_api, host_subscription, and delegated_cli
+   with credential brokering and no silent provider fallback.
+4. ReqLLM model gateway integrated under a pinned, reviewed release with the
+   strict structured-output and streaming contracts.
+5. Capability-enforcing tool gateway and policy governor mediating every
+   host-controlled effect.
+6. Production sandbox plus credential and egress brokers isolating untrusted
+   repository execution.
+7. JidoHarness delegated-CLI runtime admitted behind resolved compatibility,
+   prompt-transport, journal, and cancellation blockers.
+8. Independent fresh-checkout verification, digest-bound approval, and separate
+   publication tasks with post-change goal decisions.
+9. Adversarial and fresh-task evaluation program gating gradual autonomy
+   increases.

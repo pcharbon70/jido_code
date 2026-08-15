@@ -2654,3 +2654,20 @@ knowledge system.
 
 - **JR01.** `docs/research/secure-effective-agent-harness.md`
 - **JR02.** `docs/research/ontology-backed-source-graphs-for-coding-agents.md`
+
+## Milestones
+
+1. Accepted contracts: namespace/module ownership, symbol-versus-occurrence
+   identity, certainty vocabulary, and span conventions decided through ADRs.
+2. Vocabulary reconciliation: every emitted term declared or replaced, Source
+   Core and provenance alignment shipped with a namespace-aware registry.
+3. Corrected structural Elixir profile: safe syntax-only extraction of modules,
+   clauses, patterns, guards, directives, behaviours, protocols, and structs.
+4. Segmented publication and reviewed tools: manifest/segment families, logical
+   analysis snapshots, and the minimal authorized source tool surface.
+5. Compiler, Mix, BEAM, and type profiles: governed macro expansion provenance,
+   build lineage, and separate typespec/Dialyzer/gradual-type modules.
+6. OTP runtime and framework overlays: declared-versus-observed topology plus
+   Phoenix/LiveView/Ecto/Telemetry profiles.
+7. Collaboration, supply chain, and governance: actor reconciliation, external
+   format adapters, and privacy/retention/erasure contracts.
