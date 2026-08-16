@@ -2267,8 +2267,8 @@ The local JidoCode conclusions additionally derive from:
 - `docs/architecture/graph-identity-and-topology.md`
 - `docs/architecture/reviewed-query-catalog.md`
 - `docs/architecture/query-consistency-and-temporal-state.md`
-- `docs/research/secure-effective-agent-harness.md`
-- `docs/research/total-agent-memory-for-software-engineering.md`
+- `docs/research/2-secure-effective-agent-harness.md`
+- `docs/research/3-total-agent-memory-for-software-engineering.md`
 - `lib/jido_code/integrations/elixir_source_analyzer.ex`
 - `lib/jido_code/knowledge/commands/publish_source_graph.ex`
 - `lib/jido_code/knowledge/query_catalog.ex`

@@ -17,7 +17,7 @@ This document analyzes extensions but does not itself override:
 - [Governed Decision Outcomes](../architecture/governed-decision-outcomes.md)
 - [Governed Knowledge Memory](../architecture/governed-knowledge-memory.md)
 - [Product Security, Privacy, And Threat Model](../architecture/product-security-privacy-and-threat-model.md)
-- [Secure And Effective Agent Harness](./secure-effective-agent-harness.md)
+- [Secure And Effective Agent Harness](./2-secure-effective-agent-harness.md)
 
 Any profile below that would retain a content class currently required to remain
 ephemeral is a conditional alternative. It cannot ship until an explicit
@@ -1885,7 +1885,7 @@ The durable principle should be:
    adoption.
 10. JidoCode, [Product Security, Privacy, And Threat Model](../architecture/product-security-privacy-and-threat-model.md).
     Defines current content classifications and durable locations.
-11. JidoCode, [Secure And Effective Agent Harness](./secure-effective-agent-harness.md).
+11. JidoCode, [Secure And Effective Agent Harness](./2-secure-effective-agent-harness.md).
     Defines model access, context manifests, disposable runtime, and governed
     model/tool provenance.
 12. JidoCode, [Backup, Restore, And Integrity](../architecture/backup-restore-and-integrity.md).

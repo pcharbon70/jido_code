@@ -4,7 +4,7 @@
 - Date: 2026-07-31
 - Owners: JidoCode maintainers
 - Decision scope: Application architecture and persistence
-- Research: [Graph-Native Managed Repository Factory](../research/graph-native-managed-repository-factory.md)
+- Research: [Graph-Native Managed Repository Factory](../research/1-graph-native-managed-repository-factory.md)
 - Baseline: [Current-State Inventory](../architecture/current-state-inventory.md)
 
 ## Context
