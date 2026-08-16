@@ -20,7 +20,7 @@ The accepted architectural authorities are:
 - [Backend compatibility contract](./backend-compatibility.md)
 - [Failure, health, and telemetry contract](./failure-health-and-telemetry.md)
 - [Architecture guardrails](./architecture-guardrails.md)
-- [Phase 1 implementation plan](../../.planning/phase-01-architecture-contract-compatibility-and-guardrails.md)
+- [Phase 1 implementation plan](../planning/graph-native-managed-repository-factory/phase-01-architecture-contract-compatibility-and-guardrails.md)
 
 The [research proposal](../research/graph-native-managed-repository-factory.md)
 remains design rationale, not a higher authority than the ADRs. This repository
