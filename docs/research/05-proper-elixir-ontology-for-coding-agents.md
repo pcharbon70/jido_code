@@ -105,7 +105,7 @@ addresses those semantic gaps rather than merely adding missing classes
 ## Research scope and method
 
 This report extends
-`docs/research/4-ontology-backed-source-graphs-for-coding-agents.md`. The earlier
+`docs/research/04-ontology-backed-source-graphs-for-coding-agents.md`. The earlier
 report established that bounded source relationships improve repository
 navigation and exposed implementation defects in the external ontology. This
 report asks what the ontology itself should mean.
@@ -2652,8 +2652,8 @@ knowledge system.
 
 ### JidoCode research background
 
-- **JR01.** `docs/research/2-secure-effective-agent-harness.md`
-- **JR02.** `docs/research/4-ontology-backed-source-graphs-for-coding-agents.md`
+- **JR01.** `docs/research/02-secure-effective-agent-harness.md`
+- **JR02.** `docs/research/04-ontology-backed-source-graphs-for-coding-agents.md`
 
 ## Milestones
 

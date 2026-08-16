@@ -7,7 +7,7 @@ Date: 2026-08-15
 ## Relationship To Existing Architecture
 
 This document extends the proposed
-[Graph-Native Managed Repository Factory](./1-graph-native-managed-repository-factory.md)
+[Graph-Native Managed Repository Factory](./01-graph-native-managed-repository-factory.md)
 with a concrete agent-harness design. It focuses on how language-model agents
 receive context, propose and execute actions, use tools, recover from failures,
 produce evidence, and remain constrained by JidoCode's graph-native authority
