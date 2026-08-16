@@ -13,7 +13,7 @@ The managed repository factory uses an embedded knowledge graph as its only
 application-owned durable source of truth. See the
 [architecture index](docs/architecture/README.md),
 [accepted ADRs](docs/adr/README.md), and
-[implementation plan](.planning/README.md).
+[implementation plan](docs/planning/graph-native-managed-repository-factory/README.md).
 
 ## Requirements
 

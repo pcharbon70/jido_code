@@ -8,7 +8,7 @@ planning:
 2. Architecture documents in this directory define the current evidence and
    module boundaries that implement those decisions.
 3. [`docs/research`](../research/) records analysis and recommendations.
-4. [`.planning`](../../.planning/) sequences implementation work but does not
+4. [`docs/planning`](../planning/) sequences implementation work but does not
    override an accepted ADR or tested backend constraint.
 
 ## Phase 1 Baseline
