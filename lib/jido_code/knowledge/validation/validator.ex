@@ -651,7 +651,14 @@ defmodule JidoCode.Knowledge.Validation.Validator do
       ~w[toolName toolVersion inputSchemaDigest outputSchemaDigest adapterDigest],
       fn local ->
         cardinality(index, subject, @jf <> local, 1, 1, "ToolDefinitionRevisionShape", graph) ++
-          datatype(index, subject, @jf <> local, RDF.XSD.String, "ToolDefinitionRevisionShape", graph)
+          datatype(
+            index,
+            subject,
+            @jf <> local,
+            RDF.XSD.String,
+            "ToolDefinitionRevisionShape",
+            graph
+          )
       end
     ) ++
       concept_values(
@@ -697,9 +704,9 @@ defmodule JidoCode.Knowledge.Validation.Validator do
   defp shape_issues(@jf <> "ContextManifest", subject, index, graph) do
     Enum.flat_map([@jf <> "manifestOf", @jf <> "manifestDigest"], fn predicate ->
       cardinality(index, subject, predicate, 1, 1, "ContextManifestShape", graph) ++
-        (if predicate == @jf <> "manifestOf",
-           do: node_kind(index, subject, predicate, :iri, "ContextManifestShape", graph),
-           else: datatype(index, subject, predicate, RDF.XSD.String, "ContextManifestShape", graph))
+        if predicate == @jf <> "manifestOf",
+          do: node_kind(index, subject, predicate, :iri, "ContextManifestShape", graph),
+          else: datatype(index, subject, predicate, RDF.XSD.String, "ContextManifestShape", graph)
     end) ++
       cardinality(index, subject, @jf <> "manifestIndex", 1, 1, "ContextManifestShape", graph) ++
       datatype(
@@ -733,7 +740,15 @@ defmodule JidoCode.Knowledge.Validation.Validator do
       cardinality(index, subject, predicate, 1, 1, "ModelInvocationShape", graph) ++
         node_kind(index, subject, predicate, :iri, "ModelInvocationShape", graph)
     end) ++
-      cardinality(index, subject, @jf <> "invocationSequence", 1, 1, "ModelInvocationShape", graph) ++
+      cardinality(
+        index,
+        subject,
+        @jf <> "invocationSequence",
+        1,
+        1,
+        "ModelInvocationShape",
+        graph
+      ) ++
       datatype(
         index,
         subject,

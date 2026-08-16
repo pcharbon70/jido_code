@@ -118,9 +118,16 @@ defmodule JidoCode.Knowledge.Control.ToolDefinition do
          {:ok, command} <-
            CommandEnvelope.new(
              envelope("PublishToolDefinition", command_iri, definition, attributes, graph, [
-               %{family: :factory_policy, graph_iri: graph, operation: :append,
-                 metadata: %{lifecycle_state: :open}, additions: statements(definition),
-                 supersessions: [], invalidations: [], removals: []}
+               %{
+                 family: :factory_policy,
+                 graph_iri: graph,
+                 operation: :append,
+                 metadata: %{lifecycle_state: :open},
+                 additions: statements(definition),
+                 supersessions: [],
+                 invalidations: [],
+                 removals: []
+               }
              ]),
              options
            ) do

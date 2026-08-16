@@ -48,8 +48,6 @@ defmodule JidoCode.Knowledge.Trust do
 
   @authority_sinks ~w[capability_grant policy_mutation accepted_memory sink_selection declassification ontology_mutation]a
 
-  @authority_sources ~w[authorized_decision accepted_policy]a
-
   @spec source_classes() :: [atom()]
   def source_classes, do: Map.keys(@integrity)
 

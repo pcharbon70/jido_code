@@ -112,9 +112,16 @@ defmodule JidoCode.Knowledge.Control.HarnessProfile do
          {:ok, command} <-
            CommandEnvelope.new(
              envelope("AdoptHarnessProfile", command_iri, profile, attributes, graph, [
-               %{family: :factory_policy, graph_iri: graph, operation: :append,
-                 metadata: %{lifecycle_state: :open}, additions: statements(profile),
-                 supersessions: [], invalidations: [], removals: []}
+               %{
+                 family: :factory_policy,
+                 graph_iri: graph,
+                 operation: :append,
+                 metadata: %{lifecycle_state: :open},
+                 additions: statements(profile),
+                 supersessions: [],
+                 invalidations: [],
+                 removals: []
+               }
              ]),
              options
            ) do
