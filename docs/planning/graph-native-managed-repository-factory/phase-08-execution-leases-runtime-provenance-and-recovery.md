@@ -14,7 +14,7 @@ retry, and restart recovery whose durable truth remains entirely in the graph.
 
 Back to plan: [README](./README.md)
 
-- [ ] 8 Phase - Execute governed work without making runtime topology, process state, or tool output authoritative.
+- [x] 8 Phase - Execute governed work without making runtime topology, process state, or tool output authoritative.
 
   This phase connects the control plane to effectful agents and tools while
   ensuring every operation is scoped by one current lease, exact source
@@ -232,4 +232,4 @@ Back to plan: [README](./README.md)
       - [x] 8.5.3.1 Subtask {#jcf-p08-8-5-3-1} - Record runtime/tool/sandbox versions, context/query/ontology versions, scenario/snapshot/artifact digests, limits, and candidate commit.
       - [x] 8.5.3.2 Subtask {#jcf-p08-8-5-3-2} - Attach lease/start races, attempt timelines, tool/patch provenance, cancellation/retry, crash/restart, hostile-input, redaction, and restore results.
       - [x] 8.5.3.3 Subtask {#jcf-p08-8-5-3-3} - Keep G7 blocked if process/runtime state is required for recovery, a stale fence can cause effects, or completion can self-satisfy a goal.
-      - [ ] 8.5.3.4 Subtask {#jcf-p08-8-5-3-4} - Pin the merged candidate commit before authorizing Phase 9.
+      - [x] 8.5.3.4 Subtask {#jcf-p08-8-5-3-4} - Pin the merged candidate commit before authorizing Phase 9.

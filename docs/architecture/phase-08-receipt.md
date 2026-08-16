@@ -2,14 +2,15 @@
 
 ## Status
 
-This receipt records the Phase 8 candidate verified locally on 2026-08-03.
+This receipt records the Phase 8 candidate verified locally on 2026-08-03 and
+accepted after pull request merge on 2026-08-03.
 Bounded execution context, disposable Jido workers, fenced attempts, sandbox
 and tool effects, content-addressed patches, immutable run closure, bounded
 projections, and graph-driven recovery are implemented through the graph-only
 authority boundary.
 
-G7 is merge-pending. It remains blocked until the pull request passes
-clean-checkout CI and the merged candidate commit is pinned here. No local
+G7 is accepted at merged candidate `6a0b3d192e5b87862d2735ccfcfc7f4dcff28631`
+after the pull request passed clean-checkout CI on 2026-08-03. No local
 evidence found an effect admitted without the current lease/fence, runtime or
 sandbox state required for recovery, provider output promoted to accepted
 evidence, or execution completion able to satisfy its own goal.
@@ -24,7 +25,7 @@ evidence, or execution completion able to satisfy its own goal.
 | Section 8.3 | `92a5dabaf7b33f87c9e306860d6187935b650234` - govern execution effects and artifacts |
 | Section 8.4 | `b8f02d282ebb69fb9b1bbbf13b72efa91fb14a24` - recover execution from graph provenance |
 | Section 8.5 | This receipt and its integration/security tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `6a0b3d192e5b87862d2735ccfcfc7f4dcff28631` |
 
 ## Contract Pins
 
@@ -165,8 +166,8 @@ asset gates remain inherited from the merged Phase 7 baseline.
 
 ## Gate G7
 
-G7 remains merge-pending. It closes only after clean-checkout CI passes and the
-merged candidate commit is pinned in this receipt and the Phase 8 plan. Any
+G7 is accepted at merged candidate `6a0b3d192e5b87862d2735ccfcfc7f4dcff28631`,
+pinned in this receipt and the Phase 8 plan. Any
 evidence that disposable runtime state is required for recovery, a stale or
 expired fence can cause or record an effect, provider output can bypass
 verification, or completion can self-satisfy a goal reopens the gate.

@@ -2,10 +2,12 @@
 
 ## Status
 
-This receipt records the Phase 10 candidate verified locally on 2026-08-04.
+This receipt records the Phase 10 candidate verified locally on 2026-08-04 and
+accepted after pull request merge on 2026-08-04.
 The graph-backed product workbench, product security boundary, fleet controls,
 retention, release operations, and final acceptance suites are implemented.
-Pull request merge and default-branch CI remain the final G9 actions.
+The pull request passed clean-checkout CI and merged on 2026-08-04 as
+`6c15f152abab457a93273a5a4863dca0e2fb7bd5`; G9 is accepted.
 
 The embedded TripleStore quad dataset remains the only durable source of
 truth. Browser state, LiveView streams, LiveVue island state, PubSub,
@@ -23,6 +25,7 @@ depends on any of them surviving restart.
 | Section 10.3 | `a1c5704ba6f7fefe251e1350f0ddf89252efa516` - harden fleet operations and retention |
 | Section 10.4 | `97f208f886320572405ea438baf6e974f49d3efd` - complete release operations readiness |
 | Section 10.5 | This receipt, final integration fixes, and acceptance tests; exact commit recorded by Git history |
+| Merged candidate | `6c15f152abab457a93273a5a4863dca0e2fb7bd5` |
 
 ## Contract Pins
 
@@ -196,13 +199,14 @@ operator root.
   startup, backup/restore, retention, restart, and concurrent command behavior
   are measured by their owning integration suites, not by that synthetic
   timing alone.
-- G9 remains merge-pending until clean-checkout CI passes on the pull request
-  and the merged default-branch commit is recorded.
+- G9 closed after clean-checkout CI passed on the pull request; the merged
+  default-branch commit is `6c15f152abab457a93273a5a4863dca0e2fb7bd5`.
 
 ## Gate G9
 
-The local release candidate is accepted. G9 closes after pull request CI and
-merge confirm the same candidate on the default branch. Discovery of a second
+G9 is accepted at merged candidate `6c15f152abab457a93273a5a4863dca0e2fb7bd5`.
+Pull request CI and the default-branch merge confirmed the same candidate.
+Discovery of a second
 durable source of truth, an unexplained accepted fact, dictionary durability
 regression, raw graph/UI bypass, cross-scope disclosure, unrecoverable process
 state, restore-integrity failure, or a failed release objective reopens the

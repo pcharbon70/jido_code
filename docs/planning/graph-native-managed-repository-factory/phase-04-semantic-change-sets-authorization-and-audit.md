@@ -14,7 +14,7 @@ recover idempotent outcomes, and publish disposable post-commit notifications.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Make every graph-visible product mutation semantic, governed, atomic, and recoverable.
+- [x] 4 Phase - Make every graph-visible product mutation semantic, governed, atomic, and recoverable.
 
   This phase replaces generic CRUD and record codecs with intent-named command
   contracts while preserving the knowledge substrate's one-writer and
@@ -181,7 +181,7 @@ Back to plan: [README](./README.md)
       - [x] 4.4.2.3 Subtask {#jcf-p04-4-4-2-3} - Reconcile uncommitted staging graphs according to the Phase 2 recovery protocol before reporting final status.
       - [x] 4.4.2.4 Subtask {#jcf-p04-4-4-2-4} - Preserve authorization and concealment on lookup; possession of an idempotency key alone grants no read authority.
 
-  - [ ] 4.5 Section - Phase 4 Integration Tests.
+  - [x] 4.5 Section - Phase 4 Integration Tests.
 
     This final section proves semantic commands remain authorized, valid,
     atomic, idempotent, attributable, and recoverable under races, retries,
@@ -209,7 +209,7 @@ Back to plan: [README](./README.md)
       - [x] 4.5.2.5 Subtask {#jcf-p04-4-5-2-5} - Scan logs, telemetry, errors, receipts, events, and graph literals for fixture secrets and forbidden raw payloads.
       - [x] 4.5.2.6 Subtask {#jcf-p04-4-5-2-6} - Rerun Phases 1-3 suites and `mix precommit`.
 
-    - [ ] 4.5.3 Task {#jcf-p04-phase-receipt} [repo: jido_code] [after: {#jcf-p04-concurrency-security-integration}] - Publish the Phase 4 controlled-mutation receipt.
+    - [x] 4.5.3 Task {#jcf-p04-phase-receipt} [repo: jido_code] [after: {#jcf-p04-concurrency-security-integration}] - Publish the Phase 4 controlled-mutation receipt.
 
       This task binds G3 to exact command, authorization, validation,
       transaction, audit, idempotency, recovery, and notification evidence.
@@ -217,4 +217,4 @@ Back to plan: [README](./README.md)
       - [x] 4.5.3.1 Subtask {#jcf-p04-4-5-3-1} - Record command registry/version, ontology/shape versions, capability model, transaction strategy, fixture digests, and candidate commit.
       - [x] 4.5.3.2 Subtask {#jcf-p04-4-5-3-2} - Attach valid/invalid command traces, race and crash results, delegation/concealment tests, audit checks, and event-loss recovery proof.
       - [x] 4.5.3.3 Subtask {#jcf-p04-4-5-3-3} - Keep G3 blocked if any visible statement lacks atomic provenance/audit, any adapter can issue raw mutations, or retries can duplicate semantic effects.
-      - [ ] 4.5.3.4 Subtask {#jcf-p04-4-5-3-4} - Pin the merged candidate commit before authorizing Phase 5.
+      - [x] 4.5.3.4 Subtask {#jcf-p04-4-5-3-4} - Pin the merged candidate commit before authorizing Phase 5.

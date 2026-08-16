@@ -2,14 +2,15 @@
 
 ## Status
 
-This receipt records the Phase 7 candidate verified locally on 2026-08-03.
+This receipt records the Phase 7 candidate verified locally on 2026-08-03 and
+accepted after pull request merge on 2026-08-03.
 Desired outcomes, policies, cohorts, obligations, graph-native work,
 reconciliation, closed-world eligibility, capabilities, deterministic
 scheduling, and fenced leases are implemented through the graph-only authority
 boundary.
 
-G6 is merge-pending. It remains blocked until the pull request passes
-clean-checkout CI and the merged candidate commit is pinned here. No local
+G6 is accepted at merged candidate `f7b3d57748c7c830add4a815257ed3a79ce54e29`
+after the pull request passed clean-checkout CI on 2026-08-03. No local
 evidence found durable work outside TripleStore, absence-based eligibility
 without a complete boundary, inferred authority, an unfenced execution grant,
 or a scheduler queue required for restart recovery.
@@ -24,7 +25,7 @@ or a scheduler queue required for restart recovery.
 | Section 7.3 | `8ae6748be3d27b6644ddf866b93e95d1359b7c84` - implement graph-native reconciliation |
 | Section 7.4 | `596189762e5366d6bab6ccdded04ad27f4f2b269` - add fenced graph scheduling |
 | Section 7.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `f7b3d57748c7c830add4a815257ed3a79ce54e29` |
 
 ## Contract Pins
 
@@ -155,8 +156,8 @@ asset gates remain inherited from the merged Phase 6 baseline.
 
 ## Gate G6
 
-G6 remains merge-pending. It closes only after clean-checkout CI passes and the
-merged candidate commit is pinned in this receipt and the Phase 7 plan. Any
+G6 is accepted at merged candidate `f7b3d57748c7c830add4a815257ed3a79ce54e29`,
+pinned in this receipt and the Phase 7 plan. Any
 evidence that work exists only in a queue/struct, incomplete absence satisfies
 eligibility, inferred capability grants authority, or execution mutates state
 without the current lease/fence reopens the gate.
