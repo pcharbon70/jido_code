@@ -170,8 +170,8 @@ asset gates remain inherited from the merged Phase 8 baseline.
 
 ## Gate G8
 
-G8 remains merge-pending. It closes only after clean-checkout CI passes and the
-merged candidate commit is pinned in this receipt and the Phase 9 plan. Any
+G8 is accepted at merged candidate `de5e5a34e50bd23d71ee14742bccb18cdae0711d`,
+pinned in this receipt and the Phase 9 plan. Any
 evidence that runtime output can bypass verification/decision, accepted
 knowledge can lose provenance or contradiction history, hidden repositories
 can leak through insights, or inference can mutate accepted/control state

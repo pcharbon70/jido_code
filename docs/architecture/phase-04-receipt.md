@@ -2,14 +2,15 @@
 
 ## Status
 
-This receipt records the Phase 4 candidate verified locally on 2026-07-31.
+This receipt records the Phase 4 candidate verified locally on 2026-07-31 and
+accepted after pull request merge on 2026-08-01.
 Versioned intent commands, graph-native change sets, current semantic
 authorization, one-time bootstrap, atomic assertion provenance, semantic
 audit, idempotency recovery, and disposable change delivery are implemented
 and pass the local repository gates.
 
-G3 is a merge-pending candidate. It remains blocked until the pull request
-passes clean-checkout CI and the merged candidate commit is pinned here. No
+G3 is accepted at merged candidate `b99826b447260cef998b62b3053586aa857eea4f`
+after the pull request passed clean-checkout CI on 2026-08-01. No
 local evidence found a partial semantic commit, unauthorized outcome
 disclosure, duplicate idempotent effect, authoritative PubSub dependency, raw
 secret in RDF or public receipts, or visible assertion without deterministic
@@ -25,7 +26,7 @@ change-set provenance.
 | Section 4.3 | d1a03d6 - implement semantic authority and bootstrap |
 | Section 4.4 | 2eb3276 - implement change delivery and command recovery |
 | Section 4.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Merged candidate | `b99826b447260cef998b62b3053586aa857eea4f` |
 
 ## Contract Pins
 
@@ -149,6 +150,5 @@ transition, migration, restore, and inference evidence.
 
 ## Gate G3
 
-G3 is merge-pending. Local controlled-mutation evidence is complete, but Phase
-5 remains unauthorized until clean-checkout CI passes and the merged candidate
-commit is pinned.
+G3 is accepted at merged candidate `b99826b447260cef998b62b3053586aa857eea4f`.
+Phase 5 was authorized from that baseline.

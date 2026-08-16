@@ -5,6 +5,16 @@ This is a web application written using the Phoenix web framework.
 - Use `mix precommit` alias when you are done with all changes and fix any pending issues
 - Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
 
+### Planning phase closure pattern
+
+Implementation plans live in `docs/planning/<plan-name>/phase-NN-*.md` checklists, and each phase records its evidence in `docs/architecture/phase-NN-receipt.md`. A phase closes only after its implementation pull request passes clean-checkout CI and merges:
+
+1. In the phase receipt, pin the merged candidate: record the full merge-commit SHA in `Candidate Provenance`, change the Status and `Gate GN` sections from "merge-pending" to accepted-at-merged-candidate, and note the merge date. Keep every gate reopening condition intact; never weaken or delete them.
+2. In the plan file, tick the phase-level checkbox, the final `Phase N Integration Tests` section checkbox, the phase-receipt task checkbox, and the `Pin the merged candidate commit` subtask.
+3. The next phase is authorized only from that pinned baseline.
+
+A gate reopens if any of its listed invariants fails, regardless of checkbox state.
+
 ### Phoenix v1.8 guidelines
 
 - **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content
