@@ -2,7 +2,7 @@
 id: plan.jido_code_graph_factory_phase_10
 intent: release_gate_change
 source:
-  - docs/research/graph-native-managed-repository-factory.md
+  - docs/research/01-graph-native-managed-repository-factory.md
 ---
 
 # Phase 10 - Product Surfaces, Fleet Operations, And Release Acceptance

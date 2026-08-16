@@ -1,7 +1,7 @@
 # Graph-Native Managed Repository Factory Implementation Plan
 
 This phased plan turns the proposed
-[Graph-Native Managed Repository Factory architecture](../../research/graph-native-managed-repository-factory.md)
+[Graph-Native Managed Repository Factory architecture](../../research/01-graph-native-managed-repository-factory.md)
 into an executable JidoCode system. It establishes `TripleStore` as the sole
 application-owned durable store, models repository-factory knowledge directly
 as RDF, and delivers the control loop from repository enrollment through
@@ -41,7 +41,7 @@ adopted for future work.
 
 The governing research input is:
 
-- [Graph-Native Managed Repository Factory](../../research/graph-native-managed-repository-factory.md)
+- [Graph-Native Managed Repository Factory](../../research/01-graph-native-managed-repository-factory.md)
 
 The repository currently provides a minimal Phoenix 1.8 application with a
 LiveView-owned shell, SaladUI components, bounded LiveVue islands, Vite, and
