@@ -371,6 +371,18 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       capability: :harness,
       graph_families: [:repository_control],
       preconditions: [:approval_absent, :action_digest_bound, :evidence_present]
+    },
+    "RecordModelInvocationStart" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :invocation_absent, :manifest_bound]
+    },
+    "RecordModelInvocationOutcome" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :outcome_absent]
     }
   }
   @version_1_8 Map.merge(@version_1_7, @phase_h01_contract_commands)

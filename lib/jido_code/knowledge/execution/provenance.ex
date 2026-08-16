@@ -5,6 +5,7 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
   alias JidoCode.Knowledge.Control.ExecutionLease
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Execution.Attempt
+  alias JidoCode.Knowledge.Execution.ContextManifest
   alias JidoCode.Knowledge.Execution.Graph, as: ExecutionGraph
   alias JidoCode.Knowledge.ResourceIdentity
 
@@ -69,7 +70,7 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
   defp validate(attempt, resolution, lease, attributes) do
     required_lists = ~w[
       tool_invocation_iris artifact_iris required_event_iris missing_outputs limitations
-      sandbox_activities
+      sandbox_activities model_invocation_iris model_invocation_outcome_iris
     ]a
 
     cond do
@@ -111,7 +112,8 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
       resources(
         attributes.tool_invocation_iris ++
             attributes.artifact_iris ++
-            attributes.required_event_iris
+            attributes.required_event_iris ++
+            attributes.model_invocation_iris ++ attributes.model_invocation_outcome_iris
       ) != :ok ->
         :error
 
@@ -162,6 +164,8 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
       optional_iri(attempt.iri, @jf <> "cancellationRequest", attributes.cancellation_iri) ++
       usage_statements(completeness_iri, attributes.usage) ++
       refs(attempt.iri, @jf <> "toolInvocation", attributes.tool_invocation_iris) ++
+      refs(attempt.iri, @jf <> "modelInvocation", attributes.model_invocation_iris) ++
+      refs(attempt.iri, @jf <> "modelInvocationOutcome", attributes.model_invocation_outcome_iris) ++
       refs(attempt.iri, @prov <> "generated", attributes.artifact_iris) ++
       refs(attempt.iri, @jf <> "sandboxActivity", sandbox_iris) ++
       literals(completeness_iri, @jf <> "missingOutput", attributes.missing_outputs) ++
@@ -210,13 +214,23 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
     required =
       attributes.tool_invocation_iris ++
         attributes.artifact_iris ++
-        attributes.required_event_iris ++ List.wrap(attributes.cancellation_iri)
+        attributes.required_event_iris ++
+        attributes.model_invocation_iris ++
+        attributes.model_invocation_outcome_iris ++ List.wrap(attributes.cancellation_iri)
+
+    manifest_guard =
+      case ContextManifest.first_manifest_iri(attempt.iri) do
+        {:ok, manifest_iri} -> [{:subject_present, attempt.run_graph_iri, manifest_iri}]
+        _unavailable -> []
+      end
 
     [
       {:transition_endpoint, attempt.run_graph_iri, attempt.iri, resolution.current_transition},
       {:current_lease_fence, attributes.control_graph_iri, attempt.task_iri, lease.iri,
        attempt.fencing_token, attributes.recorded_at, attributes.lease_mode}
-    ] ++ Enum.map(Enum.uniq(required), &{:subject_present, attempt.run_graph_iri, &1})
+    ] ++
+      manifest_guard ++
+      Enum.map(Enum.uniq(required), &{:subject_present, attempt.run_graph_iri, &1})
   end
 
   defp envelope(attempt, attributes, target, guards) do

@@ -151,6 +151,8 @@ defmodule JidoCode.Knowledge.Execution.Phase08ProvenanceClosureTest do
       lease_mode: :current,
       terminal_sequence: fixture.attempt_resolution.current_revision,
       tool_invocation_iris: [],
+      model_invocation_iris: [],
+      model_invocation_outcome_iris: [],
       artifact_iris: [],
       required_event_iris: [],
       sandbox_activities: [],

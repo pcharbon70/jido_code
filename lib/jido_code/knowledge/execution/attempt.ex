@@ -11,6 +11,7 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
   alias JidoCode.Knowledge.Control.Graph, as: ControlGraph
   alias JidoCode.Knowledge.Control.Transition
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.Execution.ContextManifest
   alias JidoCode.Knowledge.Execution.Graph, as: ExecutionGraph
   alias JidoCode.Knowledge.ResourceIdentity
 
@@ -112,6 +113,13 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
       )
       when is_map(context) and is_map(attributes) and is_list(options) do
     with :ok <- validate_start(attempt, context, lease, resolutions, attributes),
+         {:ok, first_manifest} <-
+           ContextManifest.new(attempt.iri, %{
+             index: 0,
+             digest: attempt.context_digest,
+             kind: Map.get(attributes, :manifest_kind, :host_context),
+             reconstruction: :exact
+           }),
          {:ok, prepared} <- attempt_transition(attempt, nil, :prepared, 0, nil, attributes),
          {:ok, starting} <-
            attempt_transition(attempt, :prepared, :starting, 1, prepared.iri, attributes),
@@ -125,6 +133,7 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
              attributes.command_iri,
              attributes.recorded_at,
              attempt_statements(attempt, context) ++
+               ContextManifest.statements(first_manifest) ++
                Transition.statements(prepared) ++ Transition.statements(starting)
            ),
          {:ok, control_target} <-

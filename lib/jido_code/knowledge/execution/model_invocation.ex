@@ -1,29 +1,34 @@
-defmodule JidoCode.Knowledge.Execution.ToolInvocation do
-  @moduledoc "Graph-native identity and replay-safe event capture for governed tool effects."
+defmodule JidoCode.Knowledge.Execution.ModelInvocation do
+  @moduledoc """
+  Graph-native identity and replay-safe capture for governed model calls.
+
+  Each host-controlled model interaction becomes one `ModelInvocation`
+  resource in the run graph: its start is committed before provider dispatch
+  with an immutable context-manifest reference, and its outcome closes the
+  invocation under the next expected sequence. Ambiguous outcomes are an
+  explicit terminal class, never overwritten history.
+  """
 
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Control.ExecutionLease
   alias JidoCode.Knowledge.Error
-  alias JidoCode.Knowledge.Execution.ActionProposal
   alias JidoCode.Knowledge.Execution.Attempt
+  alias JidoCode.Knowledge.Execution.ContextManifest
   alias JidoCode.Knowledge.Execution.Graph, as: ExecutionGraph
   alias JidoCode.Knowledge.ResourceIdentity
 
   @enforce_keys [
     :iri,
     :attempt_iri,
-    :tool_iri,
-    :capability_iri,
-    :tool_version,
+    :profile_iri,
+    :model_version,
     :actor_iri,
     :agent_iri,
     :lease_iri,
     :fencing_token,
-    :input_refs,
-    :input_digests,
+    :context_manifest_iri,
     :sequence,
-    :deadline,
-    :expected_effect
+    :deadline
   ]
   defstruct @enforce_keys
 
@@ -33,25 +38,22 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
   @prov "http://www.w3.org/ns/prov#"
   @jf "https://jido.run/ontology/factory#"
   @concept "https://jido.run/ontology/concept/"
-  @statuses ~w[completed failed timed_out cancelled rejected]a
+  @statuses ~w[completed failed timed_out cancelled ambiguous]a
+  @usage_keys ~w[input_tokens output_tokens cost_units cpu_ms memory_bytes]a
 
   @spec new(Attempt.t(), map()) :: {:ok, t()} | {:error, Error.t()}
   def new(%Attempt{} = attempt, attributes) when is_map(attributes) do
-    with :ok <- resource(attributes[:tool_iri]),
-         :ok <- resource(attributes[:capability_iri]),
-         true <- attributes[:capability_iri] == attempt.capability_iri,
+    with :ok <- ResourceIdentity.validate(attributes[:profile_iri]),
          version when is_binary(version) and byte_size(version) in 1..128 <-
-           attributes[:tool_version],
+           attributes[:model_version],
          sequence when is_integer(sequence) and sequence >= 0 <- attributes[:sequence],
          %DateTime{} = deadline <- attributes[:deadline],
-         :ok <- resource(attributes[:expected_effect]),
-         :ok <- resources(attributes[:input_refs]),
-         :ok <- digests(attributes[:input_digests]),
+         :ok <- ResourceIdentity.validate(attributes[:context_manifest_iri]),
          {:ok, iri} <-
            ResourceIdentity.deterministic(
-             :tool_invocation,
+             :model_invocation,
              Enum.join(
-               [attempt.iri, Integer.to_string(sequence), attributes.tool_iri, version],
+               [attempt.iri, Integer.to_string(sequence), attributes.profile_iri, version],
                "\n"
              )
            ) do
@@ -59,28 +61,25 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
        %__MODULE__{
          iri: iri,
          attempt_iri: attempt.iri,
-         tool_iri: attributes.tool_iri,
-         capability_iri: attributes.capability_iri,
-         tool_version: version,
+         profile_iri: attributes.profile_iri,
+         model_version: version,
          actor_iri: attempt.actor_iri,
          agent_iri: attempt.agent_iri,
          lease_iri: attempt.lease_iri,
          fencing_token: attempt.fencing_token,
-         input_refs: Enum.sort(attributes.input_refs),
-         input_digests: attributes.input_digests,
+         context_manifest_iri: attributes.context_manifest_iri,
          sequence: sequence,
-         deadline: DateTime.truncate(deadline, :microsecond),
-         expected_effect: attributes.expected_effect
+         deadline: DateTime.truncate(deadline, :microsecond)
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:tool_invocation)
+      _invalid -> invalid(:model_invocation)
     end
   rescue
-    _error -> invalid(:tool_invocation)
+    _error -> invalid(:model_invocation)
   end
 
-  def new(_attempt, _attributes), do: invalid(:tool_invocation)
+  def new(_attempt, _attributes), do: invalid(:model_invocation)
 
   @spec start_command(t(), Attempt.t(), map(), ExecutionLease.t(), map(), keyword()) ::
           {:ok, CommandEnvelope.t()} | {:error, Error.t()}
@@ -96,7 +95,8 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
       )
       when is_map(attributes) and is_list(options) do
     with :ok <- validate_authority(invocation, attempt, attempt_resolution, lease, attributes),
-         {:ok, proposal_statements} <- proposal_statements(invocation, attributes),
+         {:ok, manifest_statements, manifest_guards} <-
+           manifest_context(invocation, attempt, attributes),
          {:ok, target} <-
            ExecutionGraph.append_target(
              attempt.run_graph_iri,
@@ -104,17 +104,20 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
              attributes.repository_scope_iri,
              command_iri(invocation, :start),
              attributes.recorded_at,
-             start_statements(invocation, attributes.recorded_at) ++ proposal_statements
+             start_statements(invocation, attributes.recorded_at) ++ manifest_statements
            ),
+         guards =
+           [{:subject_absent, attempt.run_graph_iri, invocation.iri}] ++
+             manifest_guards ++ authority_guards(attempt, attempt_resolution, lease, attributes),
          {:ok, command} <-
            CommandEnvelope.new(
              envelope(
-               "RecordToolInvocation",
+               "RecordModelInvocationStart",
                invocation,
                attempt,
                attributes,
                target,
-               start_guards(invocation, attempt, attempt_resolution, lease, attributes),
+               guards,
                :start
              ),
              options
@@ -122,14 +125,14 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
       {:ok, command}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:start_tool_invocation)
+      _invalid -> invalid(:start_model_invocation)
     end
   rescue
-    _error -> invalid(:start_tool_invocation)
+    _error -> invalid(:start_model_invocation)
   end
 
   def start_command(_invocation, _attempt, _resolution, _lease, _attributes, _options),
-    do: invalid(:start_tool_invocation)
+    do: invalid(:start_model_invocation)
 
   @spec outcome_command(t(), Attempt.t(), map(), ExecutionLease.t(), map(), keyword()) ::
           {:ok, CommandEnvelope.t()} | {:error, Error.t()}
@@ -157,12 +160,12 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
              statements
            ),
          guards =
-           authority_guards(attempt, attempt_resolution, lease, attributes) ++
-             [{:subject_absent, attempt.run_graph_iri, event_iri}],
+           [{:subject_present, attempt.run_graph_iri, invocation.iri}] ++
+             authority_guards(attempt, attempt_resolution, lease, attributes),
          {:ok, command} <-
            CommandEnvelope.new(
              envelope(
-               "RecordToolOutcome",
+               "RecordModelInvocationOutcome",
                invocation,
                attempt,
                attributes,
@@ -175,14 +178,14 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
       {:ok, command}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:record_tool_outcome)
+      _invalid -> invalid(:record_model_outcome)
     end
   rescue
-    _error -> invalid(:record_tool_outcome)
+    _error -> invalid(:record_model_outcome)
   end
 
   def outcome_command(_invocation, _attempt, _resolution, _lease, _attributes, _options),
-    do: invalid(:record_tool_outcome)
+    do: invalid(:record_model_outcome)
 
   defp validate_authority(invocation, attempt, resolution, lease, attributes) do
     cond do
@@ -192,95 +195,83 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
       resolution.current_state not in [:running, :waiting_tool] -> :error
       not match?(%DateTime{}, attributes[:recorded_at]) -> :error
       DateTime.compare(attributes.recorded_at, invocation.deadline) == :gt -> :error
+      DateTime.compare(attributes.recorded_at, lease.expires_at) == :gt -> :error
       attributes[:fencing_token] != invocation.fencing_token -> :error
       true -> :ok
     end
   end
 
-  defp proposal_statements(invocation, attributes) do
-    case attributes[:action_proposal] do
+  defp manifest_context(invocation, attempt, attributes) do
+    case attributes[:next_manifest] do
       nil ->
-        {:ok, []}
+        with {:ok, _index_zero} <- ContextManifest.first_manifest_iri(attempt.iri) do
+          {:ok, [],
+           [
+             {:subject_present, attempt.run_graph_iri, invocation.context_manifest_iri}
+           ]}
+        else
+          {:error, %Error{} = error} -> {:error, error}
+          _invalid -> invalid(:model_invocation_manifest)
+        end
 
-      %ActionProposal{} = proposal when proposal.invocation_iri == invocation.iri ->
-        {:ok, ActionProposal.statements(proposal)}
+      %ContextManifest{} = manifest ->
+        cond do
+          manifest.attempt_iri != attempt.iri ->
+            invalid(:model_invocation_manifest)
 
-      _mismatched ->
-        invalid(:tool_invocation_proposal)
+          manifest.index <= 0 ->
+            invalid(:model_invocation_manifest)
+
+          true ->
+            {:ok, ContextManifest.statements(manifest),
+             [{:subject_absent, attempt.run_graph_iri, manifest.iri}]}
+        end
+
+      _invalid_manifest ->
+        invalid(:model_invocation_manifest)
     end
   end
 
   defp start_statements(invocation, recorded_at) do
     [
-      {invocation.iri, @rdf_type, RDF.iri(@jf <> "ToolInvocation")},
-      {invocation.iri, @jf <> "executes", RDF.iri(invocation.tool_iri)},
+      {invocation.iri, @rdf_type, RDF.iri(@jf <> "ModelInvocation")},
+      {invocation.iri, @jf <> "usesModelAccessProfile", RDF.iri(invocation.profile_iri)},
       {invocation.iri, @jf <> "attempts", RDF.iri(invocation.attempt_iri)},
-      {invocation.iri, @jf <> "requiresCapability", RDF.iri(invocation.capability_iri)},
       {invocation.iri, @jf <> "validFor", RDF.iri(invocation.lease_iri)},
       {invocation.iri, @prov <> "wasAssociatedWith", RDF.iri(invocation.actor_iri)},
       {invocation.iri, @jf <> "delegatedAgent", RDF.iri(invocation.agent_iri)},
-      {invocation.iri, @jf <> "toolVersion", RDF.XSD.String.new(invocation.tool_version)},
+      {invocation.iri, @jf <> "modelVersion", RDF.XSD.String.new(invocation.model_version)},
       {invocation.iri, @jf <> "fencingToken",
        RDF.XSD.NonNegativeInteger.new(invocation.fencing_token)},
       {invocation.iri, @jf <> "invocationSequence",
        RDF.XSD.NonNegativeInteger.new(invocation.sequence)},
-      {invocation.iri, @jf <> "expectedEffect", RDF.iri(invocation.expected_effect)},
+      {invocation.iri, @jf <> "hasContextManifest", RDF.iri(invocation.context_manifest_iri)},
       {invocation.iri, @jf <> "deadline", RDF.XSD.DateTime.new(invocation.deadline)},
       {invocation.iri, @prov <> "startedAtTime", RDF.XSD.DateTime.new(recorded_at)}
-    ] ++
-      Enum.map(invocation.input_refs, fn ref ->
-        {invocation.iri, @prov <> "used", RDF.iri(ref)}
-      end) ++
-      Enum.map(Enum.sort(invocation.input_digests), fn {name, digest} ->
-        {invocation.iri, @jf <> "inputDigest", RDF.XSD.String.new(name <> "=" <> digest)}
-      end)
+    ]
   end
 
   defp outcome_statements(invocation, event_iri, attributes) do
     with status when status in @statuses <- attributes[:status],
-         :ok <- exit_status(attributes[:exit_status]),
-         stdout when is_binary(stdout) <- attributes[:stdout],
-         stderr when is_binary(stderr) <- attributes[:stderr],
-         true <- byte_size(stdout) + byte_size(stderr) <= 65_536,
-         false <- secret?(stdout) or secret?(stderr),
-         :ok <- resources(attributes[:external_output_iris]),
-         :ok <- resources(attributes[:artifact_iris]),
+         true <- safe_ref?(attributes[:model_call_ref]),
          usage when is_map(usage) <- attributes[:usage],
          :ok <- usage(usage),
-         redaction when redaction in [:none, :applied, :fully_redacted] <- attributes[:redaction] do
+         true <- safe_diagnostic?(attributes[:diagnostic]) do
       {:ok,
        [
          {invocation.iri, @jf <> "result", RDF.iri(event_iri)},
          {event_iri, @rdf_type, RDF.iri(@prov <> "Activity")},
          {event_iri, @jf <> "outcomeClass",
           RDF.iri(@concept <> Macro.camelize(to_string(status)))},
-         {event_iri, @jf <> "redactionResult",
-          RDF.iri(@concept <> Macro.camelize(to_string(redaction)))},
          {event_iri, @prov <> "endedAtTime", RDF.XSD.DateTime.new(attributes.recorded_at)},
-         {event_iri, @jf <> "stdout", RDF.XSD.String.new(stdout)},
-         {event_iri, @jf <> "stderr", RDF.XSD.String.new(stderr)},
-         {event_iri, @jf <> "stdoutDigest", RDF.XSD.String.new(digest(stdout))},
-         {event_iri, @jf <> "stderrDigest", RDF.XSD.String.new(digest(stderr))},
          {event_iri, @jf <> "usageDigest", RDF.XSD.String.new(digest(usage))}
        ] ++
-         optional_integer(event_iri, @jf <> "exitStatus", attributes.exit_status) ++
-         usage_statements(event_iri, usage) ++
-         Enum.map(attributes.external_output_iris, fn iri ->
-           {event_iri, @jf <> "externalOutput", RDF.iri(iri)}
-         end) ++
-         Enum.map(attributes.artifact_iris, fn iri ->
-           {event_iri, @prov <> "generated", RDF.iri(iri)}
-         end)}
+         optional_literal(event_iri, @jf <> "modelCallRef", attributes.model_call_ref) ++
+         optional_literal(event_iri, @jf <> "diagnostic", attributes.diagnostic) ++
+         usage_statements(event_iri, usage)}
     else
-      _invalid -> invalid(:tool_outcome)
+      _invalid -> invalid(:model_outcome)
     end
-  end
-
-  defp start_guards(invocation, attempt, resolution, lease, attributes) do
-    [
-      {:subject_absent, attempt.run_graph_iri, invocation.iri}
-      | authority_guards(attempt, resolution, lease, attributes)
-    ]
   end
 
   defp authority_guards(attempt, resolution, lease, attributes) do
@@ -300,7 +291,7 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
 
     %{
       command_type: type,
-      command_version: "1.6.0",
+      command_version: "1.8.0",
       command_iri: command,
       principal_iri: attributes[:principal_iri],
       actor_iri: attributes[:actor_iri],
@@ -333,18 +324,12 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
   end
 
   defp outcome_event_iri(invocation),
-    do: ResourceIdentity.deterministic(:tool_invocation_event, invocation.iri <> "\noutcome")
-
-  defp exit_status(nil), do: :ok
-  defp exit_status(status) when is_integer(status) and status in 0..255, do: :ok
-  defp exit_status(_status), do: :error
+    do: ResourceIdentity.deterministic(:model_invocation_event, invocation.iri <> "\noutcome")
 
   defp usage(usage) do
-    allowed = ~w[cpu_ms memory_bytes output_bytes disk_bytes]a
-
-    if map_size(usage) <= 4 and
+    if map_size(usage) <= 8 and
          Enum.all?(usage, fn {key, value} ->
-           key in allowed and is_integer(value) and value >= 0
+           key in @usage_keys and is_integer(value) and value >= 0
          end),
        do: :ok,
        else: :error
@@ -356,29 +341,24 @@ defmodule JidoCode.Knowledge.Execution.ToolInvocation do
     end)
   end
 
-  defp resources(values) when is_list(values) and length(values) <= 100 do
-    if Enum.all?(values, &(ResourceIdentity.validate(&1) == :ok)), do: :ok, else: :error
-  end
+  defp safe_ref?(nil), do: true
 
-  defp resources(_values), do: :error
+  defp safe_ref?(value) when is_binary(value),
+    do: byte_size(value) <= 256 and not secret?(value)
 
-  defp resource(value), do: ResourceIdentity.validate(value)
+  defp safe_ref?(_value), do: false
 
-  defp digests(values) when is_map(values) and map_size(values) <= 100 do
-    if Enum.all?(values, fn {name, value} ->
-         is_binary(name) and byte_size(name) in 1..256 and is_binary(value) and
-           Regex.match?(~r/^sha256:[a-f0-9]{64}$/, value)
-       end),
-       do: :ok,
-       else: :error
-  end
+  defp safe_diagnostic?(nil), do: true
 
-  defp digests(_values), do: :error
+  defp safe_diagnostic?(value) when is_binary(value),
+    do: byte_size(value) <= 1_024 and not secret?(value)
 
-  defp optional_integer(_subject, _predicate, nil), do: []
+  defp safe_diagnostic?(_value), do: false
 
-  defp optional_integer(subject, predicate, value),
-    do: [{subject, predicate, RDF.XSD.NonNegativeInteger.new(value)}]
+  defp optional_literal(_subject, _predicate, nil), do: []
+
+  defp optional_literal(subject, predicate, value),
+    do: [{subject, predicate, RDF.XSD.String.new(value)}]
 
   defp digest(value) do
     value
