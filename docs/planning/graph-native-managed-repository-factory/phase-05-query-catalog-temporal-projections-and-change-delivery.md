@@ -2,7 +2,7 @@
 id: plan.jido_code_graph_factory_phase_05
 intent: feature
 source:
-  - docs/research/graph-native-managed-repository-factory.md
+  - docs/research/01-graph-native-managed-repository-factory.md
 ---
 
 # Phase 5 - Query Catalog, Temporal Projections, And Change Delivery

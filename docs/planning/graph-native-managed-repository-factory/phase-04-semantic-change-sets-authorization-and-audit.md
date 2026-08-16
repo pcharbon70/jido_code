@@ -2,7 +2,7 @@
 id: plan.jido_code_graph_factory_phase_04
 intent: control_plane_change
 source:
-  - docs/research/graph-native-managed-repository-factory.md
+  - docs/research/01-graph-native-managed-repository-factory.md
 ---
 
 # Phase 4 - Semantic Change Sets, Authorization, And Audit

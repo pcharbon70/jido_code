@@ -22,7 +22,7 @@ The accepted architectural authorities are:
 - [Architecture guardrails](./architecture-guardrails.md)
 - [Phase 1 implementation plan](../planning/graph-native-managed-repository-factory/phase-01-architecture-contract-compatibility-and-guardrails.md)
 
-The [research proposal](../research/graph-native-managed-repository-factory.md)
+The [research proposal](../research/01-graph-native-managed-repository-factory.md)
 remains design rationale, not a higher authority than the ADRs. This repository
 has no `.spec` tree at this checkpoint; the ADRs, architecture contracts, and
 tracked implementation plan are the repository-local specifications.
