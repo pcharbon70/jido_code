@@ -14,7 +14,7 @@ subscription profiles.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Give the harness attributable context and one controlled model seam.
+- [x] 2 Phase - Give the harness attributable context and one controlled model seam.
 
   This phase makes every model input digest-attributable and every model
   call a brokered, pinned, recorded interaction before tools or sandboxes
@@ -103,7 +103,7 @@ Back to plan: [README](./README.md)
       - [x] 2.5.1.3 Subtask {#sah-p02-2-5-1-3} - Pin each subscription path (OpenAI Codex OAuth, Anthropic subscription compatibility, GitHub Copilot tokens) as a version-sensitive integration contract with consent-gated live tests and provider-terms review before release.
       - [x] 2.5.1.4 Subtask {#sah-p02-2-5-1-4} - Keep provider conversation and response IDs as external references only; recovery always starts another explicit interaction from graph state.
 
-  - [ ] 2.6 Section - Phase 2 Integration Tests.
+  - [x] 2.6 Section - Phase 2 Integration Tests.
 
     This final section proves gateway behavior against fixtures, wire
     conformance, and failure injection.
@@ -119,7 +119,7 @@ Back to plan: [README](./README.md)
       - [x] 2.6.1.4 Subtask {#sah-p02-2-6-1-4} - Prove revocation before release yields no-dispatch, revocation after release blocks later dispatch, and no profile silently falls back across provider, model, or billing mode.
       - [x] 2.6.1.5 Subtask {#sah-p02-2-6-1-5} - Rerun Phase 1 suites, architecture scans, and `mix precommit`.
 
-    - [ ] 2.6.2 Task {#sah-p02-phase-receipt} [repo: jido_code] [after: {#sah-p02-integration}] - Publish the Phase 2 model-gateway receipt.
+    - [x] 2.6.2 Task {#sah-p02-phase-receipt} [repo: jido_code] [after: {#sah-p02-integration}] - Publish the Phase 2 model-gateway receipt.
 
       This task records the gateway evidence in
       `docs/architecture/harness-phase-02-receipt.md` and authorizes Phase 3
@@ -128,4 +128,4 @@ Back to plan: [README](./README.md)
       - [x] 2.6.2.1 Subtask {#sah-p02-2-6-2-1} - Record the ReqLLM pin and digest, enabled profiles with their credential classes, adapter hardening proofs, and the candidate commit.
       - [x] 2.6.2.2 Subtask {#sah-p02-2-6-2-2} - Attach conformance, wire, streaming, revocation, and no-fallback results with known limitations.
       - [x] 2.6.2.3 Subtask {#sah-p02-2-6-2-3} - Keep HG2 blocked while any dispatch can bypass the broker, any cache or retry path survives, or any fallback is silent.
-      - [ ] 2.6.2.4 Subtask {#sah-p02-2-6-2-4} - Pin the merged candidate commit before authorizing Phase 3.
+      - [x] 2.6.2.4 Subtask {#sah-p02-2-6-2-4} - Pin the merged candidate commit before authorizing Phase 3.
