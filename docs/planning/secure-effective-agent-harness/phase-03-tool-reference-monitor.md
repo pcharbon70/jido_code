@@ -18,20 +18,20 @@ Back to plan: [README](./README.md)
   This phase gives the model small, typed, immediate-feedback tools while
   keeping complete mediation of every effect in deterministic code.
 
-  - [ ] 3.1 Section - Implement the closed tool catalog and input validation.
+  - [x] 3.1 Section - Implement the closed tool catalog and input validation.
 
     This section makes the model-facing interface a versioned, reviewed,
     schema-enforced collection rather than an open API.
 
-    - [ ] 3.1.1 Task {#sah-p03-tool-catalog} [repo: jido_code] [after: {#sah-p02-phase-receipt}] - Publish the versioned tool catalog.
+    - [x] 3.1.1 Task {#sah-p03-tool-catalog} [repo: jido_code] [after: {#sah-p02-phase-receipt}] - Publish the versioned tool catalog.
 
       This task pins every tool contract, effect class, and supply-chain
       identity before any tool is executable.
 
-      - [ ] 3.1.1.1 Subtask {#sah-p03-3-1-1-1} - Define the initial model-facing tool set (`search_source`, `inspect_symbol`, `read_file`, `apply_edit`, `create_file`, `delete_file`, `run_registered_check`, `run_governed_command`, `show_candidate_diff`, `submit_candidate`, `request_clarification`) with stable names, versions, and input/output schema digests.
-      - [ ] 3.1.1.2 Subtask {#sah-p03-3-1-1-2} - Record capability and effect class, preconditions and expected revisions, side effects and reversibility, timeout, retry and idempotency policy, maximum output size, approval requirements, adapter identity and supply-chain digest, and safe error vocabulary for every tool.
-      - [ ] 3.1.1.3 Subtask {#sah-p03-3-1-1-3} - Implement closed structural and semantic validation rejecting unknown properties, path traversal, absolute paths, ambiguous replacements, unauthorized refs, unapproved destinations, and scope-expanding arguments before any effect.
-      - [ ] 3.1.1.4 Subtask {#sah-p03-3-1-1-4} - Keep raw shell access a separate high-risk capability; routine work uses registered commands whose executable, working directory, arguments, environment, network policy, and resource limits are server-owned.
+      - [x] 3.1.1.1 Subtask {#sah-p03-3-1-1-1} - Define the initial model-facing tool set (`search_source`, `inspect_symbol`, `read_file`, `apply_edit`, `create_file`, `delete_file`, `run_registered_check`, `run_governed_command`, `show_candidate_diff`, `submit_candidate`, `request_clarification`) with stable names, versions, and input/output schema digests.
+      - [x] 3.1.1.2 Subtask {#sah-p03-3-1-1-2} - Record capability and effect class, preconditions and expected revisions, side effects and reversibility, timeout, retry and idempotency policy, maximum output size, approval requirements, adapter identity and supply-chain digest, and safe error vocabulary for every tool.
+      - [x] 3.1.1.3 Subtask {#sah-p03-3-1-1-3} - Implement closed structural and semantic validation rejecting unknown properties, path traversal, absolute paths, ambiguous replacements, unauthorized refs, unapproved destinations, and scope-expanding arguments before any effect.
+      - [x] 3.1.1.4 Subtask {#sah-p03-3-1-1-4} - Keep raw shell access a separate high-risk capability; routine work uses registered commands whose executable, working directory, arguments, environment, network policy, and resource limits are server-owned.
 
   - [ ] 3.2 Section - Implement action proposals and deterministic authorization.
 
