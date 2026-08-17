@@ -2,11 +2,11 @@
 
 ## Status
 
-This receipt is being assembled with the Harness Phase 4 implementation. The
-current candidate is merge-pending; HG4 remains blocked until every section is
-complete, the isolation, credential, egress, hostile-repository, exhaustion,
-and full regression matrices pass, clean-checkout CI passes, and the pull
-request merges. Phase 5 is not authorized from this document yet.
+This receipt records the Harness Phase 4 candidate verified locally and
+accepted after pull request merge on 2026-08-17. The isolation, credential,
+egress, hostile-repository, exhaustion, and full regression matrices passed;
+pull request #33 passed clean-checkout CI and merged on 2026-08-17. Phase 5 is
+authorized from that exact baseline.
 
 ## Candidate Provenance
 
@@ -18,8 +18,8 @@ request merges. Phase 5 is not authorized from this document yet.
 | Section 4.2 | `69904e676f5606b3e2cd5496c2f5792f2ec80794` |
 | Section 4.3 | `149134da15d34a4909219f215d581a295c4414ff` |
 | Section 4.4 | `10423fa85a0691c60e74c17241ea86b43b2ebdde` |
-| Section 4.5 | This section's exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
+| Section 4.5 | `e196e937b4d5658f21dee21d9b0c2b691a81abba` |
+| Merged candidate | `c7ea711abacee22924d1ab23751da1ebbe23cc85` |
 
 ## Tiered Production Sandbox
 
@@ -156,13 +156,13 @@ credential bytes nor its vault key. Credential and egress authority mutation
 matrices independently recheck lease, fence, invocation, profile revision,
 domain-specific revision, and revocation generation before either side effect.
 
-HG4 remains merge-pending because these in-process ports specify and test the
-boundary but do not themselves install Firecracker, gVisor, vault, DNS, audit,
-or transport infrastructure. A deployment may claim the gate only when its
-registered adapters attest the pinned profiles and preserve direct credential
-delivery, streaming byte ceilings, IP-bound TLS, required audit durability,
-and destruction semantics. Clean-checkout CI and the merged commit remain the
-final candidate evidence.
+These in-process ports specify and test the accepted boundary but do not
+themselves install Firecracker, gVisor, vault, DNS, audit, or transport
+infrastructure. A deployment may claim the gate only when its registered
+adapters attest the pinned profiles and preserve direct credential delivery,
+streaming byte ceilings, IP-bound TLS, required audit durability, and
+destruction semantics. Pull request #33's clean-checkout CI and merged commit
+are the final candidate evidence.
 
 ## Verification Record
 
@@ -178,11 +178,14 @@ final candidate evidence.
 | Phase 1 through Phase 3 harness regression suites | Pass |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
-| `mix precommit` | Pass on the merge-pending candidate tree |
+| `mix precommit` | 476 tests, 0 failures; pass |
+| Pull request #33 clean-checkout CI | Pass; merged 2026-08-17 |
 
 ## Gate HG4
 
-HG4 is merge-pending and remains blocked. It reopens—or remains blocked—while
-any workload can execute outside a tier, any credential can reach untrusted
-code, or any egress can bypass the broker. These reopening conditions remain
-in force regardless of checklist state.
+HG4 is accepted at merged candidate
+`c7ea711abacee22924d1ab23751da1ebbe23cc85`, pinned in this receipt and the
+Harness Phase 4 plan. Harness Phase 5 is authorized from that baseline. HG4
+reopens if any workload can execute outside a tier, any credential can reach
+untrusted code, or any egress can bypass the broker. These reopening conditions
+remain in force regardless of checklist state.
