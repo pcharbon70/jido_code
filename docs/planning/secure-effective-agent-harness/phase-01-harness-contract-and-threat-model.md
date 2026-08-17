@@ -14,7 +14,7 @@ before any provider call or tool effect exists.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Make harness authority and threats executable before model effects.
+- [x] 1 Phase - Make harness authority and threats executable before model effects.
 
   This phase proves capability, context, invocation, tool, approval, and
   publication semantics against the accepted graph boundary so unsafe
@@ -93,7 +93,7 @@ Back to plan: [README](./README.md)
       - [x] 1.4.1.3 Subtask {#sah-p01-1-4-1-3} - Build conformance fixtures for authorization denial, stale-fence rejection, idempotent replay, and indirect prompt injection, covering both task utility and security outcome.
       - [x] 1.4.1.4 Subtask {#sah-p01-1-4-1-4} - Wire the fixtures into `mix precommit` so every later phase inherits them as regression gates.
 
-  - [ ] 1.5 Section - Phase 1 Integration Tests.
+  - [x] 1.5 Section - Phase 1 Integration Tests.
 
     This final section proves the contract layer holds against the real
     store and closes the phase with its receipt.
@@ -108,7 +108,7 @@ Back to plan: [README](./README.md)
       - [x] 1.5.1.3 Subtask {#sah-p01-1-5-1-3} - Prove manifest bound enforcement at and beyond every accepted limit with recorded truncation and omission metadata.
       - [x] 1.5.1.4 Subtask {#sah-p01-1-5-1-4} - Run the trust-model fixtures, prior-plan regression suites, architecture scans, and `mix precommit`.
 
-    - [ ] 1.5.2 Task {#sah-p01-phase-receipt} [repo: jido_code] [after: {#sah-p01-integration}] - Publish the Phase 1 harness-contract receipt.
+    - [x] 1.5.2 Task {#sah-p01-phase-receipt} [repo: jido_code] [after: {#sah-p01-integration}] - Publish the Phase 1 harness-contract receipt.
 
       This task records the contract evidence in
       `docs/architecture/harness-phase-01-receipt.md` and authorizes Phase 2
@@ -117,4 +117,4 @@ Back to plan: [README](./README.md)
       - [x] 1.5.2.1 Subtask {#sah-p01-1-5-2-1} - Record resource mappings, shape digests, command-protocol revisions, manifest bounds, and the candidate commit.
       - [x] 1.5.2.2 Subtask {#sah-p01-1-5-2-2} - Attach contract, sequence, bound, and trust-fixture results with known limitations.
       - [x] 1.5.2.3 Subtask {#sah-p01-1-5-2-3} - Keep HG1 blocked while any mapped resource lacks a shape, any invocation can bypass its command, or any untrusted fixture gains authority.
-      - [ ] 1.5.2.4 Subtask {#sah-p01-1-5-2-4} - Pin the merged candidate commit before authorizing Phase 2.
+      - [x] 1.5.2.4 Subtask {#sah-p01-1-5-2-4} - Pin the merged candidate commit before authorizing Phase 2.

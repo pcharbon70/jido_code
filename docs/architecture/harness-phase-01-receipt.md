@@ -3,13 +3,14 @@
 ## Status
 
 This receipt records the Harness Phase 1 candidate verified locally on
-2026-08-16. Harness graph resources, the model-access-profile contracts, the
-invocation command protocol, context-manifest bounds, and the trust model
-with conformance fixtures are implemented through the graph-only authority
-boundary.
+2026-08-16 and accepted after pull request merge on 2026-08-17. Harness
+graph resources, the model-access-profile contracts, the invocation command
+protocol, context-manifest bounds, and the trust model with conformance
+fixtures are implemented through the graph-only authority boundary.
 
-HG1 is a merge-pending candidate. It remains blocked until the pull request
-passes clean-checkout CI and the merged candidate commit is pinned here. No
+HG1 is accepted at merged candidate
+`1fd544b901168b3a1130097bf5723644cb1aac83` after the pull request passed
+clean-checkout CI on 2026-08-17. No
 local evidence found an unmapped harness resource, an invocation that can
 bypass its semantic command, a manifest exceeding an accepted bound, or an
 untrusted fixture gaining authority.
@@ -24,7 +25,9 @@ untrusted fixture gaining authority.
 | Section 1.3 | `5933299` - define context manifest bounds and reconstruction contracts |
 | Section 1.4 | `e97bec6` - add harness trust model and conformance fixtures |
 | Section 1.5 | This receipt and its integration tests; exact commit recorded by Git history |
-| Merged candidate | Pending pull-request merge |
+| Dependency security fix | `73cbb95` - bump phoenix_live_view 1.1.33 for CVE-2026-64941 plus regenerated npm lock |
+| CI recovery | `ac277bc` - provide CI-only operator token for asset build (main CI had been red since the phase-10 runtime-config change) |
+| Merged candidate | `1fd544b901168b3a1130097bf5723644cb1aac83` |
 
 ## Contract Pins
 
@@ -156,9 +159,10 @@ The phase adds 39 tests across five files:
 
 ## Gate HG1
 
-HG1 is merge-pending. Local contract evidence is complete, but Harness
-Phase 2 remains unauthorized until clean-checkout CI passes and the merged
-candidate commit is pinned in this receipt and the Harness Phase 1 plan.
-Any evidence that a mapped harness resource lacks a shape, an invocation
+HG1 is accepted at merged candidate
+`1fd544b901168b3a1130097bf5723644cb1aac83`,
+pinned in this receipt and the Harness Phase 1 plan. Harness Phase 2 is
+authorized from that baseline. Any evidence that a mapped harness resource
+lacks a shape, an invocation
 can bypass its semantic command, a manifest can exceed an accepted bound,
 or an untrusted fixture gains authority reopens the gate.
