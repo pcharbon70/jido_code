@@ -54,6 +54,7 @@ defmodule JidoCode.MixProject do
       {:decimal, "~> 3.1", override: true},
       {:rdf, "~> 2.1"},
       {:jido, "== 2.3.2"},
+      {:req_llm, "== 1.20.0"},
       {:triple_store,
        git: "https://github.com/pcharbon70/triple_store.git",
        ref: "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"},

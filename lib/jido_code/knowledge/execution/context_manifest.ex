@@ -46,6 +46,7 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   @missing_reconstruction_classes ~w[
     raw_prompt raw_response raw_tool_output provider_session retention_gap
   ]a
+  @classifications ~w[public internal confidential]a
 
   @spec new(String.t(), map()) :: {:ok, t()} | {:error, Error.t()}
   def new(attempt_iri, attributes) when is_binary(attempt_iri) and is_map(attributes) do
@@ -144,7 +145,18 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   defp item_statements(manifest) do
     Enum.map(manifest.items, fn item ->
       {manifest.iri, @jf <> "manifestItem",
-       RDF.XSD.String.new(item.iri <> "|" <> item.digest <> "|" <> Integer.to_string(item.bytes))}
+       RDF.XSD.String.new(
+         Enum.join(
+           [
+             item.iri,
+             item.digest,
+             Integer.to_string(item.bytes),
+             to_string(Map.get(item, :classification, :internal)),
+             Map.get(item, :provenance_digest, item.digest)
+           ],
+           "|"
+         )
+       )}
     end)
   end
 
@@ -192,7 +204,9 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
            is_map(item) and is_binary(item[:iri]) and
              ResourceIdentity.validate(item.iri) == :ok and
              is_binary(item[:digest]) and Regex.match?(@digest64, item.digest) and
-             is_integer(item[:bytes]) and item.bytes in 1..@max_item_bytes
+             is_integer(item[:bytes]) and item.bytes in 1..@max_item_bytes and
+             Map.get(item, :classification, :internal) in @classifications and
+             provenance_digest?(Map.get(item, :provenance_digest, item.digest))
          end),
        do: {:ok, values},
        else: invalid(:context_manifest_items)
@@ -283,6 +297,9 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   end
 
   defp missing_classes(_reconstruction, _values), do: invalid(:context_manifest_missing)
+
+  defp provenance_digest?(value),
+    do: is_binary(value) and Regex.match?(@digest64, value)
 
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}
 end
