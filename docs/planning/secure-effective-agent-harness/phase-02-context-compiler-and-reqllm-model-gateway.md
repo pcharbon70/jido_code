@@ -108,16 +108,16 @@ Back to plan: [README](./README.md)
     This final section proves gateway behavior against fixtures, wire
     conformance, and failure injection.
 
-    - [ ] 2.6.1 Task {#sah-p02-integration} [repo: jido_code] [after: {#sah-p02-subscription-profiles}] - Execute the gateway conformance and failure matrices.
+    - [x] 2.6.1 Task {#sah-p02-integration} [repo: jido_code] [after: {#sah-p02-subscription-profiles}] - Execute the gateway conformance and failure matrices.
 
       This task certifies the model seam before any tool or sandbox is
       authorized.
 
-      - [ ] 2.6.1.1 Subtask {#sah-p02-2-6-1-1} - Prove context manifests match reviewed-query outputs at pinned revisions, record every omission, and reject any silently substituted revision.
-      - [ ] 2.6.1.2 Subtask {#sah-p02-2-6-1-2} - Prove missing broker credentials fail before dispatch, fail-first transports never retry, sentinel cache backends are unused, telemetry canaries are absent, repair callbacks are never invoked, and repair or coercion diagnostics are rejected.
-      - [ ] 2.6.1.3 Subtask {#sah-p02-2-6-1-3} - Prove wire fixtures show `store: false` where applicable and no auto-injected provider tool; prove streaming assembly, cancellation propagation, cleanup on every early-exit path, and exactly one terminal outcome.
-      - [ ] 2.6.1.4 Subtask {#sah-p02-2-6-1-4} - Prove revocation before release yields no-dispatch, revocation after release blocks later dispatch, and no profile silently falls back across provider, model, or billing mode.
-      - [ ] 2.6.1.5 Subtask {#sah-p02-2-6-1-5} - Rerun Phase 1 suites, architecture scans, and `mix precommit`.
+      - [x] 2.6.1.1 Subtask {#sah-p02-2-6-1-1} - Prove context manifests match reviewed-query outputs at pinned revisions, record every omission, and reject any silently substituted revision.
+      - [x] 2.6.1.2 Subtask {#sah-p02-2-6-1-2} - Prove missing broker credentials fail before dispatch, fail-first transports never retry, sentinel cache backends are unused, telemetry canaries are absent, repair callbacks are never invoked, and repair or coercion diagnostics are rejected.
+      - [x] 2.6.1.3 Subtask {#sah-p02-2-6-1-3} - Prove wire fixtures show `store: false` where applicable and no auto-injected provider tool; prove streaming assembly, cancellation propagation, cleanup on every early-exit path, and exactly one terminal outcome.
+      - [x] 2.6.1.4 Subtask {#sah-p02-2-6-1-4} - Prove revocation before release yields no-dispatch, revocation after release blocks later dispatch, and no profile silently falls back across provider, model, or billing mode.
+      - [x] 2.6.1.5 Subtask {#sah-p02-2-6-1-5} - Rerun Phase 1 suites, architecture scans, and `mix precommit`.
 
     - [ ] 2.6.2 Task {#sah-p02-phase-receipt} [repo: jido_code] [after: {#sah-p02-integration}] - Publish the Phase 2 model-gateway receipt.
 
@@ -125,7 +125,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/harness-phase-02-receipt.md` and authorizes Phase 3
       only from the pinned merged baseline.
 
-      - [ ] 2.6.2.1 Subtask {#sah-p02-2-6-2-1} - Record the ReqLLM pin and digest, enabled profiles with their credential classes, adapter hardening proofs, and the candidate commit.
-      - [ ] 2.6.2.2 Subtask {#sah-p02-2-6-2-2} - Attach conformance, wire, streaming, revocation, and no-fallback results with known limitations.
-      - [ ] 2.6.2.3 Subtask {#sah-p02-2-6-2-3} - Keep HG2 blocked while any dispatch can bypass the broker, any cache or retry path survives, or any fallback is silent.
+      - [x] 2.6.2.1 Subtask {#sah-p02-2-6-2-1} - Record the ReqLLM pin and digest, enabled profiles with their credential classes, adapter hardening proofs, and the candidate commit.
+      - [x] 2.6.2.2 Subtask {#sah-p02-2-6-2-2} - Attach conformance, wire, streaming, revocation, and no-fallback results with known limitations.
+      - [x] 2.6.2.3 Subtask {#sah-p02-2-6-2-3} - Keep HG2 blocked while any dispatch can bypass the broker, any cache or retry path survives, or any fallback is silent.
       - [ ] 2.6.2.4 Subtask {#sah-p02-2-6-2-4} - Pin the merged candidate commit before authorizing Phase 3.

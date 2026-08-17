@@ -17,7 +17,8 @@ is not authorized from this document yet.
 | Section 2.2 | `8f035e1` - add governed ReqLLM model gateway |
 | Section 2.3 | `09d5c75` - harden buffered model profile |
 | Section 2.4 | `7ff236f` - supervise model response streams |
-| Section 2.5 | This section's exact commit is recorded by Git history |
+| Section 2.5 | `779ad56` - add host-controlled subscription profiles |
+| Section 2.6 | This receipt and its integration certification; exact commit recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## ReqLLM Dependency Review
@@ -181,7 +182,23 @@ conversation identifiers are bounded external call metadata only; they are
 never sent as continuation options, and recovery is recorded as a new explicit
 interaction reconstructed from graph state.
 
-## Section 2.2 Verification Record
+## Phase 2 Conformance And Failure Matrix
+
+| Required proof | Executable evidence | Result |
+| --- | --- | --- |
+| Exact reviewed-query context and omission recording | `phase_h02_context_compiler_test.exs` | 5 tests pass; exact pins, stale dataset/graph/snapshot denial, linked lossy summaries, and explicit budget omissions |
+| Broker, retry, cache, telemetry, and repair hardening | Buffered-profile and gateway-integration suites | Missing credentials stop before dispatch; injected cache/repair/hook/provider options stop before release; one failed transport produces one ReqLLM call with `max_retries: 0` |
+| Wire and streaming cleanup | Buffered-profile and streaming suites | OpenAI fixture encodes `store: false` with no tools; every stream path retains and closes one handle; cancellation, lease loss, timeout, duplicate terminal, and tool-call paths fail closed |
+| Revocation and no fallback | `phase_h02_gateway_integration_test.exs` | Revocation before release exposes no credential; revocation after release stops dispatch; runtime revalidation rejects mutated provider, model, endpoint, access mode, credential class, and billing mode |
+| Subscription enrollment | `phase_h02_subscription_profile_test.exs` | Exact catalog contracts, consent and terms gates, short-lived tokens, developer-local `gh`, file ownership/mode/path checks, refresh serialization, and graph-state recovery pass |
+
+The final integration matrix added runtime profile-invariant validation in
+addition to constructor admission. An already-built profile is therefore
+rechecked before credential release and again when the adapter validates its
+dispatch; mutating a struct cannot turn an accepted profile into a provider,
+endpoint, access-mode, credential-class, or billing-mode fallback.
+
+## Verification Record
 
 | Command or gate | Result |
 | --- | --- |
@@ -192,7 +209,25 @@ interaction reconstructed from graph state.
 | `phase_h02_buffered_profile_test.exs` | 9 tests, 0 failures |
 | `phase_h02_streaming_test.exs` | 6 tests, 0 failures |
 | `phase_h02_subscription_profile_test.exs` | 11 tests, 0 failures |
-| Complete Phase H02 harness through Section 2.5 | 37 tests, 0 failures |
+| `phase_h02_gateway_integration_test.exs` | 4 tests, 0 failures |
+| Complete Phase H02 harness | 41 tests, 0 failures |
+| Phase H01 regression files | 49 tests, 0 failures |
+| `mix precommit` (compile, architecture, dependency cleanup, format, full suite) | Pass; 403 tests, 0 failures |
+
+## Known Limits At Merge-Pending Candidate
+
+- No live provider call was made while assembling this receipt. Subscription
+  release remains conditional on explicit operator consent, accepted
+  provider-terms evidence, and a successful live-verification record.
+- File-backed OAuth and `gh auth token` are developer-local only. Managed and
+  multi-user use remains blocked until a dedicated credential broker is proven.
+- Provider contractual retention, training, prompt-cache behavior, and
+  subscription accounting remain explicit external residuals; JidoCode
+  disables its own cache and records observed cost but does not claim hard
+  subscription-budget enforcement.
+- Clean-checkout CI and the merge commit are not local evidence. HG2 and Phase 3
+  remain blocked until the pull request passes CI, merges, and this receipt is
+  updated with the full merge-commit SHA.
 
 ## Gate HG2
 

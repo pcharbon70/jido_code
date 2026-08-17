@@ -6,8 +6,8 @@ defmodule JidoCode.Factory.Model.Profile do
   alias JidoCode.Factory.Model.SubscriptionProfile
 
   @spec valid?(term()) :: boolean()
-  def valid?(%BufferedProfile{}), do: true
-  def valid?(%SubscriptionProfile{}), do: true
+  def valid?(%BufferedProfile{} = profile), do: BufferedProfile.valid?(profile)
+  def valid?(%SubscriptionProfile{} = profile), do: SubscriptionProfile.valid?(profile)
   def valid?(_profile), do: false
 
   @spec accepts?(BufferedProfile.t() | SubscriptionProfile.t(), Request.t()) :: boolean()

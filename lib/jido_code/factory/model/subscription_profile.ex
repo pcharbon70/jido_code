@@ -139,6 +139,31 @@ defmodule JidoCode.Factory.Model.SubscriptionProfile do
 
   def new(_attributes, _reference, _options), do: invalid()
 
+  @spec valid?(t()) :: boolean()
+  def valid?(%__MODULE__{} = profile) do
+    contract = Map.get(@contracts, profile.contract)
+
+    is_map(contract) and
+      Knowledge.validate_resource_identity(profile.profile_iri) == :ok and
+      Knowledge.validate_resource_identity(profile.credential_reference.iri) == :ok and
+      Knowledge.validate_resource_identity(profile.terms_evidence_iri) == :ok and
+      Knowledge.validate_resource_identity(profile.live_verification_iri) == :ok and
+      profile.credential_reference.provider == profile.provider and
+      exact_contract?(profile, contract) and
+      profile.contract_version == contract.version and
+      profile.credential_source in contract.sources and
+      deployment?(profile) and
+      refresh_owner?(profile) and
+      credential_lifetime?(profile) and
+      valid_timeouts?(profile.timeouts) and
+      oauth_file_reference(profile, profile.oauth_file_reference) == :ok and
+      exact_posture?(profile)
+  rescue
+    _error -> false
+  end
+
+  def valid?(_profile), do: false
+
   @spec accepts?(t(), Request.t()) :: boolean()
   def accepts?(%__MODULE__{} = profile, %Request{} = request) do
     profile.profile_iri == request.profile_iri and profile.provider == request.provider and
@@ -151,11 +176,21 @@ defmodule JidoCode.Factory.Model.SubscriptionProfile do
   def contracts, do: @contracts
 
   defp exact_contract?(attributes, contract) do
-    attributes[:provider] == contract.provider and attributes[:model] == contract.model and
-      attributes[:endpoint] == contract.endpoint and
-      attributes[:access_mode] == :host_subscription and
-      attributes[:credential_class] == :short_lived_bearer and
-      attributes[:billing_mode] == :subscription
+    Map.get(attributes, :provider) == contract.provider and
+      Map.get(attributes, :model) == contract.model and
+      Map.get(attributes, :endpoint) == contract.endpoint and
+      Map.get(attributes, :access_mode) == :host_subscription and
+      Map.get(attributes, :credential_class) == :short_lived_bearer and
+      Map.get(attributes, :billing_mode) == :subscription
+  end
+
+  defp exact_posture?(profile) do
+    profile.retention_posture == :provider_contract_external and
+      profile.provider_cache_posture == :provider_managed_residual and
+      profile.training_posture == :provider_contract_external and
+      profile.structured_effects == :disabled_pending_separate_conformance and
+      profile.cost_enforcement == :observed_post_dispatch and
+      profile.recovery_mode == :new_interaction_from_graph
   end
 
   defp deployment?(%{credential_source: source, deployment: :developer_local})

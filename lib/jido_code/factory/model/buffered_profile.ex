@@ -102,6 +102,27 @@ defmodule JidoCode.Factory.Model.BufferedProfile do
 
   def new(_attributes, _reference, _options), do: invalid()
 
+  @spec valid?(t()) :: boolean()
+  def valid?(%__MODULE__{} = profile) do
+    Knowledge.validate_resource_identity(profile.profile_iri) == :ok and
+      Knowledge.validate_resource_identity(profile.credential_reference.iri) == :ok and
+      profile.credential_reference.provider == profile.provider and
+      exact_initial_profile?(profile) and
+      profile.access_mode == :host_api and
+      profile.credential_class == :static_reusable and
+      profile.billing_mode == :metered_api and
+      validate_timeouts(profile.timeouts) == :ok and
+      profile.retention_posture == :provider_contract_external and
+      profile.provider_cache_posture == :provider_managed_residual and
+      profile.training_posture == :provider_contract_external and
+      profile.structured_effects == :disabled_unproven_strict_json and
+      profile.cost_enforcement == :observed_post_dispatch
+  rescue
+    _error -> false
+  end
+
+  def valid?(_profile), do: false
+
   @spec accepts?(t(), Request.t()) :: boolean()
   def accepts?(%__MODULE__{} = profile, %Request{} = request) do
     profile.profile_iri == request.profile_iri and
@@ -114,7 +135,7 @@ defmodule JidoCode.Factory.Model.BufferedProfile do
   def default_timeouts, do: @default_timeouts
 
   defp exact_initial_profile?(attributes) do
-    Enum.all?(@initial_profile, fn {key, expected} -> attributes[key] == expected end)
+    Enum.all?(@initial_profile, fn {key, expected} -> Map.get(attributes, key) == expected end)
   end
 
   defp readiness?(readiness) when is_list(readiness) do
