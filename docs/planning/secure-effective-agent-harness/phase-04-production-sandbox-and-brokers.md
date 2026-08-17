@@ -13,7 +13,7 @@ sandbox, a default-deny egress broker, and hostile-repository hardening.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Isolate untrusted execution and remove the credential-egress combination.
+- [x] 4 Phase - Isolate untrusted execution and remove the credential-egress combination.
 
   This phase ensures that even a fully compromised model cannot reach host
   filesystems, ambient credentials, or unapproved networks.
@@ -80,7 +80,7 @@ Back to plan: [README](./README.md)
       - [x] 4.4.1.3 Subtask {#sah-p04-4-4-1-3} - Exercise CPU, memory, process, disk, output, and time exhaustion against sandbox limits and prove supervisor stability and bounded artifact capture.
       - [x] 4.4.1.4 Subtask {#sah-p04-4-4-1-4} - Prove sandbox destruction after capture and no persistence or escape across attempts.
 
-  - [ ] 4.5 Section - Phase 4 Integration Tests.
+  - [x] 4.5 Section - Phase 4 Integration Tests.
 
     This final section proves isolation, brokering, and hardening end to
     end.
@@ -95,7 +95,7 @@ Back to plan: [README](./README.md)
       - [x] 4.5.1.3 Subtask {#sah-p04-4-5-1-3} - Prove default-deny egress, approved-destination passage, classification-based blocking, and visible failure for incompatible builds.
       - [x] 4.5.1.4 Subtask {#sah-p04-4-5-1-4} - Rerun hostile-repository and exhaustion suites, prior phases, architecture scans, and `mix precommit`.
 
-    - [ ] 4.5.2 Task {#sah-p04-phase-receipt} [repo: jido_code] [after: {#sah-p04-integration}] - Publish the Phase 4 sandbox-and-broker receipt.
+    - [x] 4.5.2 Task {#sah-p04-phase-receipt} [repo: jido_code] [after: {#sah-p04-integration}] - Publish the Phase 4 sandbox-and-broker receipt.
 
       This task records the isolation evidence in
       `docs/architecture/harness-phase-04-receipt.md` and authorizes Phase 5
@@ -104,4 +104,4 @@ Back to plan: [README](./README.md)
       - [x] 4.5.2.1 Subtask {#sah-p04-4-5-2-1} - Record tier implementations, image digests, broker policies, and the candidate commit.
       - [x] 4.5.2.2 Subtask {#sah-p04-4-5-2-2} - Attach isolation, credential, egress, and hostile-suite results with known limitations.
       - [x] 4.5.2.3 Subtask {#sah-p04-4-5-2-3} - Keep HG4 blocked while any workload can execute outside a tier, any credential can reach untrusted code, or any egress can bypass the broker.
-      - [ ] 4.5.2.4 Subtask {#sah-p04-4-5-2-4} - Pin the merged candidate commit before authorizing Phase 5.
+      - [x] 4.5.2.4 Subtask {#sah-p04-4-5-2-4} - Pin the merged candidate commit before authorizing Phase 5.
