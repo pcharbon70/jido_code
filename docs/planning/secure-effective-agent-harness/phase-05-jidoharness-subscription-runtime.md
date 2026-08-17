@@ -64,20 +64,20 @@ Back to plan: [README](./README.md)
       - [x] 5.3.1.3 Subtask {#sah-p05-5-3-1-3} - Exclude no additional directories, project extensions, MCP servers, skills, or provider configuration beyond the accepted profile; allow none of them to grant protected-branch or publication authority.
       - [x] 5.3.1.4 Subtask {#sah-p05-5-3-1-4} - Label every developer-local profile opt-in and exclude it from managed-fleet security claims; keep managed delegated use blocked until the credential-helper or proxy boundary from Phase 4 is proven per provider.
 
-  - [ ] 5.4 Section - Prove cancellation and containment.
+  - [x] 5.4 Section - Prove cancellation and containment.
 
     This section makes outer process-namespace termination the safety net
     that adapter bugs cannot defeat.
 
-    - [ ] 5.4.1 Task {#sah-p05-cancellation} [repo: jido_code] [after: {#sah-p05-developer-local}] - Prove bounded process-group cancellation per adapter.
+    - [x] 5.4.1 Task {#sah-p05-cancellation} [repo: jido_code] [after: {#sah-p05-developer-local}] - Prove bounded process-group cancellation per adapter.
 
       This task prevents orphaned CLI process trees after cancellation,
       expiry, or supersession.
 
-      - [ ] 5.4.1.1 Subtask {#sah-p05-5-4-1-1} - Require every enabled adapter to prove cancellation terminates its CLI parent and descendant process group within a bound; keep the Z.AI adapter disabled until it exposes and proves native cancellation.
-      - [ ] 5.4.1.2 Subtask {#sah-p05-5-4-1-2} - On lease expiry or supersession, commit cancellation, ask the adapter to stop, and independently kill the outer worker's process namespace before sandbox destruction.
-      - [ ] 5.4.1.3 Subtask {#sah-p05-5-4-1-3} - Reject any late event, diff, artifact, callback, or result by the current-fence check so nothing enters durable graph state or triggers an external JidoCode effect after expiry.
-      - [ ] 5.4.1.4 Subtask {#sah-p05-5-4-1-4} - Add non-billable readiness discovery and consent-gated live smoke tests per supported subscription profile, reporting authentication evidence without claiming actor identity.
+      - [x] 5.4.1.1 Subtask {#sah-p05-5-4-1-1} - Require every enabled adapter to prove cancellation terminates its CLI parent and descendant process group within a bound; keep the Z.AI adapter disabled until it exposes and proves native cancellation.
+      - [x] 5.4.1.2 Subtask {#sah-p05-5-4-1-2} - On lease expiry or supersession, commit cancellation, ask the adapter to stop, and independently kill the outer worker's process namespace before sandbox destruction.
+      - [x] 5.4.1.3 Subtask {#sah-p05-5-4-1-3} - Reject any late event, diff, artifact, callback, or result by the current-fence check so nothing enters durable graph state or triggers an external JidoCode effect after expiry.
+      - [x] 5.4.1.4 Subtask {#sah-p05-5-4-1-4} - Add non-billable readiness discovery and consent-gated live smoke tests per supported subscription profile, reporting authentication evidence without claiming actor identity.
 
   - [ ] 5.5 Section - Phase 5 Integration Tests.
 

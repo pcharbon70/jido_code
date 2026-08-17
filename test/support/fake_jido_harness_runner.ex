@@ -36,6 +36,8 @@ defmodule JidoCode.TestSupport.FakeJidoHarnessRunner do
   @impl true
   def cancel(handle, cancellation, options) do
     notify(options, {:jido_harness_runner, :cancel, handle, cancellation})
+    delay = Keyword.get(options, :cancel_delay_ms, 0)
+    if is_integer(delay) and delay > 0, do: Process.sleep(delay)
     {:ok, Keyword.get(options, :cancel_receipt, %{state: :cancelled})}
   end
 

@@ -81,9 +81,19 @@ defmodule JidoCode.Runtime.JidoHarness.ProcessRunner do
   @impl true
   def cancel(handle, _cancellation, options) do
     with :ok <- valid_handle(handle),
-         :ok <- api(options).cancel(handle.runtime_ref, api_options(options)) do
-      {:ok, %{state: :cancelled, observations: []}}
+         {:ok, proof} <- bounded_cancel(handle.runtime_ref, options) do
+      {:ok,
+       %{
+         state: :cancelled,
+         observations: [],
+         usage: %{
+           cancellation: proof,
+           cancellation_bound_ms: cancellation_bound(options),
+           enforcement: :hard
+         }
+       }}
     else
+      {:error, %AdapterError{} = error} -> {:error, error}
       {:error, reason} -> {:error, reason}
       _invalid -> invalid(:jido_harness_process_cancel)
     end
@@ -92,7 +102,7 @@ defmodule JidoCode.Runtime.JidoHarness.ProcessRunner do
   @impl true
   def terminate(handle, _reason, options) do
     with :ok <- valid_handle(handle),
-         :ok <- normalize_missing(api(options).kill(handle.runtime_ref, api_options(options))),
+         :ok <- force_stop(handle.runtime_ref, options),
          :ok <- normalize_missing(api(options).prune(handle.runtime_ref, api_options(options))),
          :ok <- cleanup_retention(handle.run_id, options) do
       {:ok, %{state: :terminated, observations: []}}
@@ -225,6 +235,58 @@ defmodule JidoCode.Runtime.JidoHarness.ProcessRunner do
 
   defp valid_handle(_handle), do: :error
 
+  defp bounded_cancel(process_id, options) do
+    with :ok <- api(options).cancel(process_id, api_options(options)) do
+      case api(options).await(process_id, cancellation_bound(options), api_options(options)) do
+        {:ok, info} ->
+          if terminal_info?(info),
+            do: {:ok, :graceful_process_group},
+            else: force_cancel(process_id, options)
+
+        {:error, :timeout} ->
+          force_cancel(process_id, options)
+
+        {:error, :not_found} ->
+          {:ok, :already_absent}
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    end
+  end
+
+  defp force_cancel(process_id, options) do
+    with :ok <- normalize_missing(api(options).kill(process_id, api_options(options))),
+         :ok <- await_forced_stop(process_id, options) do
+      {:ok, :forced_process_group}
+    end
+  end
+
+  defp force_stop(process_id, options) do
+    with :ok <- normalize_missing(api(options).kill(process_id, api_options(options))),
+         :ok <- await_forced_stop(process_id, options) do
+      :ok
+    end
+  end
+
+  defp await_forced_stop(process_id, options) do
+    case api(options).await(process_id, kill_bound(options), api_options(options)) do
+      {:ok, info} ->
+        if terminal_info?(info), do: :ok, else: unavailable(:jido_harness_process_group)
+
+      {:error, :not_found} ->
+        :ok
+
+      {:error, _reason} ->
+        unavailable(:jido_harness_process_group)
+    end
+  end
+
+  defp terminal_info?(%{state: state}),
+    do: state in [:exited, :failed, :cancelled, :timed_out]
+
+  defp terminal_info?(_info), do: false
+
   defp cleanup_retention(run_id, options) do
     key = retention_key(run_id)
     root = Path.join(retention_base(options), "jido-code-harness-" <> key)
@@ -244,6 +306,16 @@ defmodule JidoCode.Runtime.JidoHarness.ProcessRunner do
   end
 
   defp retention_base(options), do: Keyword.get(options, :retention_base, System.tmp_dir!())
+  defp cancellation_bound(options), do: bounded_timeout(options, :cancellation_bound_ms, 12_000)
+  defp kill_bound(options), do: bounded_timeout(options, :kill_bound_ms, 2_000)
+
+  defp bounded_timeout(options, key, default) do
+    case Keyword.get(options, key, default) do
+      value when is_integer(value) and value in 1..30_000 -> value
+      _invalid -> default
+    end
+  end
+
   defp api(options), do: Keyword.get(options, :process_api, JidoHarnessProcessAPI)
   defp api_options(options), do: Keyword.get(options, :process_api_options, [])
   defp normalize_missing(:ok), do: :ok

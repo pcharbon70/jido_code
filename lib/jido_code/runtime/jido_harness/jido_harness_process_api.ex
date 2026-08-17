@@ -14,6 +14,9 @@ defmodule JidoCode.Runtime.JidoHarness.JidoHarnessProcessAPI do
   def info(process_id, _options), do: Jido.Harness.Process.info(process_id)
 
   @impl true
+  def await(process_id, timeout, _options), do: Jido.Harness.Process.await(process_id, timeout)
+
+  @impl true
   def replay(process_id, replay_options, _options),
     do: Jido.Harness.Process.replay(process_id, replay_options)
 

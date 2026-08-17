@@ -29,6 +29,23 @@ defmodule JidoCode.TestSupport.FakeJidoHarnessProcessAPI do
   end
 
   @impl true
+  def await(process_id, timeout, options) do
+    notify(options, {:jido_harness_process_api, :await, process_id, timeout})
+
+    case Keyword.get(options, :await_fun) do
+      fun when is_function(fun, 2) ->
+        fun.(process_id, timeout)
+
+      _missing ->
+        Keyword.get(
+          options,
+          :await_result,
+          {:ok, %{process_id: process_id, state: :cancelled, output_cursor: 1}}
+        )
+    end
+  end
+
+  @impl true
   def replay(process_id, replay_options, options) do
     notify(options, {:jido_harness_process_api, :replay, process_id, replay_options})
     {:ok, Keyword.get(options, :replay_result, [])}
