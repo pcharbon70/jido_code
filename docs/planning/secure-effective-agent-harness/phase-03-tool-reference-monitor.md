@@ -33,20 +33,20 @@ Back to plan: [README](./README.md)
       - [x] 3.1.1.3 Subtask {#sah-p03-3-1-1-3} - Implement closed structural and semantic validation rejecting unknown properties, path traversal, absolute paths, ambiguous replacements, unauthorized refs, unapproved destinations, and scope-expanding arguments before any effect.
       - [x] 3.1.1.4 Subtask {#sah-p03-3-1-1-4} - Keep raw shell access a separate high-risk capability; routine work uses registered commands whose executable, working directory, arguments, environment, network policy, and resource limits are server-owned.
 
-  - [ ] 3.2 Section - Implement action proposals and deterministic authorization.
+  - [x] 3.2 Section - Implement action proposals and deterministic authorization.
 
     This section converts model output into governed proposals and derives
     attenuated capabilities deterministically.
 
-    - [ ] 3.2.1 Task {#sah-p03-action-proposals} [repo: jido_code] [after: {#sah-p03-tool-catalog}] - Convert directives into authorized action proposals.
+    - [x] 3.2.1 Task {#sah-p03-action-proposals} [repo: jido_code] [after: {#sah-p03-tool-catalog}] - Convert directives into authorized action proposals.
 
       This task ensures a directive is never authority by itself and every
       capability shrinks from the lease outward.
 
-      - [ ] 3.2.1.1 Subtask {#sah-p03-3-2-1-1} - Convert Jido directives and model tool calls into normalized `ActionProposal` resources carrying bounded classified digests and references, never raw secret-bearing arguments.
-      - [ ] 3.2.1.2 Subtask {#sah-p03-3-2-1-2} - Implement the policy governor deriving the attempt capability set from lease, task, repository policy, actor, and data classification: scope, profile, model and versions, snapshot and graph revisions, permitted tools, filesystem paths and refs, graph scopes, network destinations and data classes, resource ceilings, credential references, expiry, fencing token, and idempotency namespace.
-      - [ ] 3.2.1.3 Subtask {#sah-p03-3-2-1-3} - Keep execution capabilities free of decision, acceptance, ontology, security-policy, durable-memory, verification, and publication authority.
-      - [ ] 3.2.1.4 Subtask {#sah-p03-3-2-1-4} - Revalidate current policy, revisions, capability, and fence immediately before every effect; a race-time denial after an admitted start becomes an authorized no-effect outcome.
+      - [x] 3.2.1.1 Subtask {#sah-p03-3-2-1-1} - Convert Jido directives and model tool calls into normalized `ActionProposal` resources carrying bounded classified digests and references, never raw secret-bearing arguments.
+      - [x] 3.2.1.2 Subtask {#sah-p03-3-2-1-2} - Implement the policy governor deriving the attempt capability set from lease, task, repository policy, actor, and data classification: scope, profile, model and versions, snapshot and graph revisions, permitted tools, filesystem paths and refs, graph scopes, network destinations and data classes, resource ceilings, credential references, expiry, fencing token, and idempotency namespace.
+      - [x] 3.2.1.3 Subtask {#sah-p03-3-2-1-3} - Keep execution capabilities free of decision, acceptance, ontology, security-policy, durable-memory, verification, and publication authority.
+      - [x] 3.2.1.4 Subtask {#sah-p03-3-2-1-4} - Revalidate current policy, revisions, capability, and fence immediately before every effect; a race-time denial after an admitted start becomes an authorized no-effect outcome.
 
   - [ ] 3.3 Section - Implement invocation-before-effect commits.
 

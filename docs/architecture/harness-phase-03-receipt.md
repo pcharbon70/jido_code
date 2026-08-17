@@ -14,7 +14,8 @@ from this document yet.
 | --- | --- |
 | Phase baseline and merged HG2 closure | `3be8e017849a56da286e143eb9d61c638caaaf5e` |
 | Accepted Phase 2 candidate | `49453d05fe72c45431420c05591f89d4ff09f0a8` |
-| Section 3.1 | This section's exact commit is recorded by Git history |
+| Section 3.1 | `c2a61e1` - publish closed tool catalog |
+| Section 3.2 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Closed Tool Catalog
@@ -51,11 +52,41 @@ allowlists. Edits require one exact match. No raw-shell tool exists; registered
 commands keep executable, working directory, fixed arguments, environment,
 network policy, and resource limits in server-owned configuration.
 
+## Deterministic Proposals And Authority
+
+`JidoCode.Factory.Tool.Proposal` converts only closed Jido-directive or model
+tool-call envelopes into the same normalized proposal. Raw arguments exist only
+in the transient value and are omitted from inspection and durable attributes;
+the persistent projection contains the invocation and command references plus
+deterministic proposal and argument digests. Classification and authorized
+input refs participate in the proposal digest and remain attached to the
+transient authorization decision; the tool invocation separately persists its
+bounded refs and classified digests.
+
+The policy governor intersects, never unions, lease, task, repository-policy,
+and actor constraints. The resulting capability pins attempt, lease, task,
+repository, actor, agent, profile, model, catalog, snapshot and graph revisions,
+permitted tools, relative path prefixes, input and graph refs, registered
+commands, network destinations, data classes, resource ceilings, credential
+refs, expiry, monotonic fence, policy and revocation revisions, and a
+deterministic idempotency namespace. Its only authority class is
+`tool_execution`; requests for decision, acceptance, ontology, security-policy,
+durable-memory, verification, or publication authority fail closed.
+
+The reference monitor validates catalog input under the derived constraints and
+requires the exact current invocation, lease state, policy revision, source
+graph revisions, snapshot, fence, revocation generation, data class, refs,
+resource ceilings, and approval evidence. It repeats the same decision
+immediately before effect. The returned explanation contains no reusable token;
+a live capability and current facts are always required for revalidation.
+
 ## Verification Record
 
 | Command or gate | Result |
 | --- | --- |
 | `phase_h03_tool_catalog_test.exs` | 8 tests, 0 failures |
+| `phase_h03_policy_governor_test.exs` | 8 tests, 0 failures |
+| Phase H03 harness through Section 3.2 | 16 tests, 0 failures |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 
