@@ -19,20 +19,20 @@ Back to plan: [README](./README.md)
   coarse-grained authority, credential isolation, and disposable runtime
   truth.
 
-  - [ ] 5.1 Section - Resolve the JidoHarness adoption gates.
+  - [x] 5.1 Section - Resolve the JidoHarness adoption gates.
 
     This section converts the research's release blockers into accepted
     evidence before any dependency merge.
 
-    - [ ] 5.1.1 Task {#sah-p05-adoption-gates} [repo: jido_code] - Resolve compatibility, prompt-transport, journal, and tool-profile gates.
+    - [x] 5.1.1 Task {#sah-p05-adoption-gates} [repo: jido_code] - Resolve compatibility, prompt-transport, journal, and tool-profile gates.
 
       This task keeps an unreleased, incompatible runtime out of the
       production dependency tree until each gap is closed.
 
-      - [ ] 5.1.1.1 Subtask {#sah-p05-5-1-1-1} - Resolve the Elixir `~> 1.19` versus JidoCode `~> 1.18` toolchain conflict and JidoHarness's unreleased state through an accepted dependency and toolchain decision with a pinned revision and digest.
-      - [ ] 5.1.1.2 Subtask {#sah-p05-5-1-1-2} - Require protected prompt transport (stdin or protected file, never CLI argv) so prompts are not readable through process inspection.
-      - [ ] 5.1.1.3 Subtask {#sah-p05-5-1-1-3} - Require disabled, memory-only, or separately owned journals inaccessible to tool descendants, with per-record and total retention bounds and propagation through every nested process; disposable disk journals remain developer-local opt-in only and are disclosed.
-      - [ ] 5.1.1.4 Subtask {#sah-p05-5-1-1-4} - Require verified deny-all-tools and bounded-tool profiles with conformance tests; an empty tool list must mean no tools, not a missing flag.
+      - [x] 5.1.1.1 Subtask {#sah-p05-5-1-1-1} - Resolve the Elixir `~> 1.19` versus JidoCode `~> 1.18` toolchain conflict and JidoHarness's unreleased state through an accepted dependency and toolchain decision with a pinned revision and digest.
+      - [x] 5.1.1.2 Subtask {#sah-p05-5-1-1-2} - Require protected prompt transport (stdin or protected file, never CLI argv) so prompts are not readable through process inspection.
+      - [x] 5.1.1.3 Subtask {#sah-p05-5-1-1-3} - Require disabled, memory-only, or separately owned journals inaccessible to tool descendants, with per-record and total retention bounds and propagation through every nested process; disposable disk journals remain developer-local opt-in only and are disclosed.
+      - [x] 5.1.1.4 Subtask {#sah-p05-5-1-1-4} - Require verified deny-all-tools and bounded-tool profiles with conformance tests; an empty tool list must mean no tools, not a missing flag.
 
   - [ ] 5.2 Section - Implement the delegated runtime adapter.
 
