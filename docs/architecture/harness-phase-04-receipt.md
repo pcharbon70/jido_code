@@ -14,10 +14,11 @@ request merges. Phase 5 is not authorized from this document yet.
 | --- | --- |
 | Phase baseline and merged HG3 closure | `2b7d5478dcc39df14e39ff3cede400c8f98fd1cc` |
 | Accepted Phase 3 candidate | `779afa09763c3d0fb698e4d29b83d99d654fd88e` |
-| Section 4.1 | This section's exact commit is recorded by Git history |
-| Section 4.2 | This section's exact commit is recorded by Git history |
-| Section 4.3 | This section's exact commit is recorded by Git history |
-| Section 4.4 | This section's exact commit is recorded by Git history |
+| Section 4.1 | `306d456467735cd6be3312f9f03d9d720a36974b` |
+| Section 4.2 | `69904e676f5606b3e2cd5496c2f5792f2ec80794` |
+| Section 4.3 | `149134da15d34a4909219f215d581a295c4414ff` |
+| Section 4.4 | `10423fa85a0691c60e74c17241ea86b43b2ebdde` |
+| Section 4.5 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Tiered Production Sandbox
@@ -143,6 +144,26 @@ attempt is provisioned. The suite validates the supervisor contracts and
 adapters' required observations; production isolation still depends on the
 deployed adapters enforcing their attested kernel or hypervisor limits.
 
+## Integrated Boundary
+
+The integration flow provisions an attested, network-denied microVM session,
+executes a resource-bounded build command, releases one scoped credential only
+into its digest-pinned trusted connector, sends a separately classified
+credential-free request through the IP-pinned egress transport, and destroys
+the sandbox. The exposed prompt, argument, journal, telemetry, graph
+observation, credential result, and egress result surfaces contain neither the
+credential bytes nor its vault key. Credential and egress authority mutation
+matrices independently recheck lease, fence, invocation, profile revision,
+domain-specific revision, and revocation generation before either side effect.
+
+HG4 remains merge-pending because these in-process ports specify and test the
+boundary but do not themselves install Firecracker, gVisor, vault, DNS, audit,
+or transport infrastructure. A deployment may claim the gate only when its
+registered adapters attest the pinned profiles and preserve direct credential
+delivery, streaming byte ceilings, IP-bound TLS, required audit durability,
+and destruction semantics. Clean-checkout CI and the merged commit remain the
+final candidate evidence.
+
 ## Verification Record
 
 | Command or gate | Result |
@@ -152,8 +173,12 @@ deployed adapters enforcing their attested kernel or hypervisor limits.
 | `phase_h04_credential_broker_test.exs` | 7 tests, 0 failures |
 | `phase_h04_egress_broker_test.exs` | 10 tests, 0 failures |
 | `phase_h04_hostile_hardening_test.exs` | 6 tests, 0 failures; 24 tier-by-limit exhaustion cases plus hostile matrices |
+| `phase_h04_integration_test.exs` | 3 tests, 0 failures |
+| Complete Phase 4 focused suite | 34 tests, 0 failures |
+| Phase 1 through Phase 3 harness regression suites | Pass |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
+| `mix precommit` | Pass on the merge-pending candidate tree |
 
 ## Gate HG4
 

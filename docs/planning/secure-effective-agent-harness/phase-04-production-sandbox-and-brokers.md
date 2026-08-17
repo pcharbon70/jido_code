@@ -85,15 +85,15 @@ Back to plan: [README](./README.md)
     This final section proves isolation, brokering, and hardening end to
     end.
 
-    - [ ] 4.5.1 Task {#sah-p04-integration} [repo: jido_code] [after: {#sah-p04-hostile-hardening}] - Execute the isolation and broker matrices.
+    - [x] 4.5.1 Task {#sah-p04-integration} [repo: jido_code] [after: {#sah-p04-hostile-hardening}] - Execute the isolation and broker matrices.
 
       This task certifies the execution environment before delegated CLI
       work is authorized.
 
-      - [ ] 4.5.1.1 Subtask {#sah-p04-4-5-1-1} - Prove tier selection follows the risk table, images match pinned digests, and every limit is enforced with bounded failures.
-      - [ ] 4.5.1.2 Subtask {#sah-p04-4-5-1-2} - Prove credential release requires every broker condition, revoked and expired references never release, and no material appears in prompts, arguments, journals, telemetry, or the graph.
-      - [ ] 4.5.1.3 Subtask {#sah-p04-4-5-1-3} - Prove default-deny egress, approved-destination passage, classification-based blocking, and visible failure for incompatible builds.
-      - [ ] 4.5.1.4 Subtask {#sah-p04-4-5-1-4} - Rerun hostile-repository and exhaustion suites, prior phases, architecture scans, and `mix precommit`.
+      - [x] 4.5.1.1 Subtask {#sah-p04-4-5-1-1} - Prove tier selection follows the risk table, images match pinned digests, and every limit is enforced with bounded failures.
+      - [x] 4.5.1.2 Subtask {#sah-p04-4-5-1-2} - Prove credential release requires every broker condition, revoked and expired references never release, and no material appears in prompts, arguments, journals, telemetry, or the graph.
+      - [x] 4.5.1.3 Subtask {#sah-p04-4-5-1-3} - Prove default-deny egress, approved-destination passage, classification-based blocking, and visible failure for incompatible builds.
+      - [x] 4.5.1.4 Subtask {#sah-p04-4-5-1-4} - Rerun hostile-repository and exhaustion suites, prior phases, architecture scans, and `mix precommit`.
 
     - [ ] 4.5.2 Task {#sah-p04-phase-receipt} [repo: jido_code] [after: {#sah-p04-integration}] - Publish the Phase 4 sandbox-and-broker receipt.
 
@@ -101,7 +101,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/harness-phase-04-receipt.md` and authorizes Phase 5
       only from the pinned merged baseline.
 
-      - [ ] 4.5.2.1 Subtask {#sah-p04-4-5-2-1} - Record tier implementations, image digests, broker policies, and the candidate commit.
-      - [ ] 4.5.2.2 Subtask {#sah-p04-4-5-2-2} - Attach isolation, credential, egress, and hostile-suite results with known limitations.
-      - [ ] 4.5.2.3 Subtask {#sah-p04-4-5-2-3} - Keep HG4 blocked while any workload can execute outside a tier, any credential can reach untrusted code, or any egress can bypass the broker.
+      - [x] 4.5.2.1 Subtask {#sah-p04-4-5-2-1} - Record tier implementations, image digests, broker policies, and the candidate commit.
+      - [x] 4.5.2.2 Subtask {#sah-p04-4-5-2-2} - Attach isolation, credential, egress, and hostile-suite results with known limitations.
+      - [x] 4.5.2.3 Subtask {#sah-p04-4-5-2-3} - Keep HG4 blocked while any workload can execute outside a tier, any credential can reach untrusted code, or any egress can bypass the broker.
       - [ ] 4.5.2.4 Subtask {#sah-p04-4-5-2-4} - Pin the merged candidate commit before authorizing Phase 5.
