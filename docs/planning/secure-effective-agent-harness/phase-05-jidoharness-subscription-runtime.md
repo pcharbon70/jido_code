@@ -49,20 +49,20 @@ Back to plan: [README](./README.md)
       - [x] 5.2.1.3 Subtask {#sah-p05-5-2-1-3} - Map Harness lifecycle and normalized terminal results to graph attempts; treat missing CLI processes after restart as runtime diagnostics classified through the accepted transition vocabulary (recover, supersede, propagated cancellation, abandon, retry-later), never an invented `crashed` state.
       - [x] 5.2.1.4 Subtask {#sah-p05-5-2-1-4} - Record the delegated run, CLI and provider versions, bounded normalized lifecycle observations, final workspace digest, candidate diff, and artifacts; keep CLI event records observations rather than proof of complete tool mediation, and never adopt provider-internal context claims.
 
-  - [ ] 5.3 Section - Implement developer-local delegated mode.
+  - [x] 5.3 Section - Implement developer-local delegated mode.
 
     This section ships the explicit local opt-in inside the Phase 4 isolated
     worker while managed fleet use stays blocked.
 
-    - [ ] 5.3.1 Task {#sah-p05-developer-local} [repo: jido_code] [after: {#sah-p05-harness-adapter}] - Offer official CLIs as explicit developer-local opt-in.
+    - [x] 5.3.1 Task {#sah-p05-developer-local} [repo: jido_code] [after: {#sah-p05-harness-adapter}] - Offer official CLIs as explicit developer-local opt-in.
 
       This task matches the trust assumptions of running the CLI manually
       and labels them honestly.
 
-      - [ ] 5.3.1.1 Subtask {#sah-p05-5-3-1-1} - Run developer-local CLIs only inside the Phase 4 isolated worker with one disposable worktree at the exact snapshot, `env_mode: :replace` with a minimal environment, provider endpoint egress only, no store handle, no publication credentials, no SSH agent or Docker socket, and no unrelated repository access.
-      - [ ] 5.3.1.2 Subtask {#sah-p05-5-3-1-2} - Apply hard finite outer run and session-turn counts, idle, wall-clock, output, process, memory, and disk limits, plus CLI-internal ceilings only where the selected profile can enforce or reliably report them, recording each dimension's enforcement class.
-      - [ ] 5.3.1.3 Subtask {#sah-p05-5-3-1-3} - Exclude no additional directories, project extensions, MCP servers, skills, or provider configuration beyond the accepted profile; allow none of them to grant protected-branch or publication authority.
-      - [ ] 5.3.1.4 Subtask {#sah-p05-5-3-1-4} - Label every developer-local profile opt-in and exclude it from managed-fleet security claims; keep managed delegated use blocked until the credential-helper or proxy boundary from Phase 4 is proven per provider.
+      - [x] 5.3.1.1 Subtask {#sah-p05-5-3-1-1} - Run developer-local CLIs only inside the Phase 4 isolated worker with one disposable worktree at the exact snapshot, `env_mode: :replace` with a minimal environment, provider endpoint egress only, no store handle, no publication credentials, no SSH agent or Docker socket, and no unrelated repository access.
+      - [x] 5.3.1.2 Subtask {#sah-p05-5-3-1-2} - Apply hard finite outer run and session-turn counts, idle, wall-clock, output, process, memory, and disk limits, plus CLI-internal ceilings only where the selected profile can enforce or reliably report them, recording each dimension's enforcement class.
+      - [x] 5.3.1.3 Subtask {#sah-p05-5-3-1-3} - Exclude no additional directories, project extensions, MCP servers, skills, or provider configuration beyond the accepted profile; allow none of them to grant protected-branch or publication authority.
+      - [x] 5.3.1.4 Subtask {#sah-p05-5-3-1-4} - Label every developer-local profile opt-in and exclude it from managed-fleet security claims; keep managed delegated use blocked until the credential-helper or proxy boundary from Phase 4 is proven per provider.
 
   - [ ] 5.4 Section - Prove cancellation and containment.
 

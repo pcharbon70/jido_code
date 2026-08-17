@@ -12,6 +12,7 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
   alias JidoCode.Factory.Execution.Request
   alias JidoCode.Factory.Execution.RuntimeEvent
   alias JidoCode.Runtime.JidoHarness.Adoption
+  alias JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch
   alias JidoCode.Runtime.JidoHarness.Recovery
   alias JidoCode.Runtime.JidoHarness.RunRecord
   alias JidoCode.Runtime.JidoHarness.RunRegistry
@@ -107,16 +108,9 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
 
   def terminate(_request, _reason, _options), do: invalid(:terminate)
 
-  defp start_record(request, %RunRecord{state: :prepared}, profile, prompt, options) do
-    launch = %{
-      prompt: prompt,
-      attempt_iri: request.attempt_iri,
-      snapshot_iri: request.snapshot_iri,
-      context_digest: request.context_digest,
-      fencing_token: request.fencing_token
-    }
-
-    with {:ok, receipt} <- invoke_runner(:start, options, [profile, launch]),
+  defp start_record(request, %RunRecord{state: :prepared} = record, profile, prompt, options) do
+    with {:ok, launch} <- build_launch(request, record, profile, prompt, options),
+         {:ok, receipt} <- invoke_runner(:start, options, [profile, launch]),
          {:ok, updated} <- RunRegistry.started(registry(options), request, receipt),
          {:ok, observed} <-
            adopt_observations(request, updated, Map.get(receipt, :observations, []), options) do
@@ -206,6 +200,32 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
     end
   end
 
+  defp build_launch(request, record, profile, prompt, options) do
+    base = %{
+      prompt: prompt,
+      run_id: record.run_id,
+      attempt_iri: request.attempt_iri,
+      snapshot_iri: request.snapshot_iri,
+      context_digest: request.context_digest,
+      fencing_token: request.fencing_token,
+      occurred_at: clock(options).()
+    }
+
+    case Keyword.get(options, :developer_local) do
+      nil ->
+        {:ok, base}
+
+      attributes when is_map(attributes) ->
+        case DeveloperLocalLaunch.build(request, profile, attributes) do
+          {:ok, launch} -> {:ok, Map.merge(base, launch)}
+          {:error, %AdapterError{} = error} -> {:error, error}
+        end
+
+      _invalid ->
+        invalid(:jido_harness_developer_local_launch)
+    end
+  end
+
   defp missing_event(request, options) do
     context =
       Keyword.get(options, :recovery_context, %{
@@ -280,7 +300,8 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
       case apply(runner, operation, arguments ++ [runner_options]) do
         {:ok, receipt} when is_map(receipt) -> {:ok, receipt}
         {:error, %AdapterError{} = error} -> {:error, error}
-        {:error, reason} -> {:error, reason}
+        {:error, reason} when reason in [:not_found, :missing] -> {:error, reason}
+        {:error, _reason} -> unavailable(operation)
         _invalid -> invalid(operation)
       end
     else
