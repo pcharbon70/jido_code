@@ -3,6 +3,7 @@ defmodule JidoCode.Factory.Tool.Request do
 
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Factory.Execution.Request, as: ExecutionRequest
+  alias JidoCode.Factory.Tool.EffectIdentity
   alias JidoCode.Knowledge
 
   @enforce_keys [
@@ -17,7 +18,8 @@ defmodule JidoCode.Factory.Tool.Request do
     :input_refs,
     :input_digests,
     :arguments,
-    :output_bytes
+    :output_bytes,
+    :effect_identity
   ]
   defstruct @enforce_keys
 
@@ -40,8 +42,14 @@ defmodule JidoCode.Factory.Tool.Request do
          :ok <- digests(attributes[:input_digests]),
          arguments when is_map(arguments) <- attributes[:arguments],
          true <- byte_size(:erlang.term_to_binary(arguments, [:deterministic])) <= 32_768,
-         output when is_integer(output) and output in 1..1_048_576 <- attributes[:output_bytes] do
-      {:ok, struct!(__MODULE__, Map.take(attributes, @enforce_keys))}
+         output when is_integer(output) and output in 1..1_048_576 <- attributes[:output_bytes],
+         {:ok, effect_identity} <- EffectIdentity.new(attributes.execution, effect, sequence) do
+      values =
+        attributes
+        |> Map.take(@enforce_keys)
+        |> Map.put(:effect_identity, effect_identity)
+
+      {:ok, struct!(__MODULE__, values)}
     else
       _invalid -> {:error, AdapterError.new(:invalid_input, :tool_request)}
     end

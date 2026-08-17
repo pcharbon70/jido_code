@@ -16,7 +16,8 @@ from this document yet.
 | Accepted Phase 2 candidate | `49453d05fe72c45431420c05591f89d4ff09f0a8` |
 | Section 3.1 | `c2a61e1` - publish closed tool catalog |
 | Section 3.2 | `31cd7cb` - govern tool action proposals |
-| Section 3.3 | This section's exact commit is recorded by Git history |
+| Section 3.3 | `206cd12` - commit tool invocations before effects |
+| Section 3.4 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Closed Tool Catalog
@@ -101,14 +102,44 @@ The durable authorization digest explains why the start was admitted but is not
 accepted as effect authority: dispatch still requires the live capability and
 immediate current-state revalidation.
 
+## Fencing And Idempotency Sinks
+
+Every effect request carries a deterministic `sha256` identity over the exact
+attempt, repository snapshot, monotonic fencing token, operation, and sequence.
+The sink guard compares those fields with current lease facts immediately
+before its atomic claim. A completed claim replays the first bounded result;
+an in-flight duplicate conflicts, and an ambiguous claim must be reconciled as
+applied or not applied before it can retry. Mutation adapters for Git, provider,
+and publication sinks must return a bounded stable external effect ID before
+the journal will close their effect.
+
+| Sink class | Immediate fence and replay boundary |
+| --- | --- |
+| Graph command | Command guards pin the active execution lease and current monotonic fence; the accepted command pipeline enforces command idempotency atomically. |
+| Sandbox mutation | `ExecutionAuthority` revalidates the fence; the sink inventory requires the same execution identity at atomic effect claim. |
+| Tool execution | `ReferenceMonitor` revalidates current authority, then `SinkGuard` atomically claims the derived effect identity before adapter dispatch. |
+| Git write | Closed sink contract requires a current fence, derived effect identity, and stable external effect ID such as a commit identity. |
+| Provider write | Closed sink contract requires a current fence, derived effect identity, and provider-stable external effect ID. |
+| Artifact publication | Closed sink contract requires a current fence, derived effect identity, and publication-stable external effect ID. |
+| Execution outcome | Knowledge outcome commands pin the active lease and fence; the sink contract rejects stale or replay-conflicting writes. |
+
+Ambiguous external outcomes remain blocked in the journal until explicit
+reconciliation. A semantic retry must use a different attempt identity and
+retains the prior effect digest as its history link. Model gateway timeouts or
+unavailability after dispatch are recorded as `ambiguous`, while failures known
+to precede dispatch remain `failed`. The recovery arbiter admits exactly one
+result under the expected revision; identical replay is idempotent and a
+different result or stale revision conflicts.
+
 ## Verification Record
 
 | Command or gate | Result |
 | --- | --- |
 | `phase_h03_tool_catalog_test.exs` | 8 tests, 0 failures |
 | `phase_h03_policy_governor_test.exs` | 8 tests, 0 failures |
-| `phase_h03_tool_gateway_test.exs` | 7 tests, 0 failures |
-| Phase H03 harness through Section 3.3 | 23 tests, 0 failures |
+| `phase_h03_fencing_idempotency_test.exs` | 9 tests, 0 failures |
+| `phase_h03_tool_gateway_test.exs` | 8 tests, 0 failures |
+| Phase H03 harness through Section 3.4 | 33 tests, 0 failures |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 

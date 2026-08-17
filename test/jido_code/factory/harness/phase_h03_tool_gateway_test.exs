@@ -7,6 +7,7 @@ defmodule JidoCode.Factory.Harness.PhaseH03ToolGatewayTest do
   alias JidoCode.Factory.Tool.Capability
   alias JidoCode.Factory.Tool.Catalog
   alias JidoCode.Factory.Tool.ExecutionReceipt
+  alias JidoCode.Factory.Tool.EffectJournal
   alias JidoCode.Factory.Tool.Proposal
   alias JidoCode.Factory.Tool.Request
   alias JidoCode.Factory.Tool.Result
@@ -134,6 +135,23 @@ defmodule JidoCode.Factory.Harness.PhaseH03ToolGatewayTest do
     refute_received {:tool_ledger_outcome, _start, _duplicate}
   end
 
+  test "replaying the same effect identity returns the first result without redispatch" do
+    {proposal, capability, current, options} = gateway_fixture()
+
+    assert {:ok, %ExecutionReceipt{effect_dispatched: true}} =
+             ToolGateway.execute(proposal, capability, current, options)
+
+    assert_received {:reference_tool_effect, request, _options}
+
+    assert {:ok,
+            %ExecutionReceipt{
+              effect_dispatched: false,
+              result: %Result{stdout: "safe output"}
+            }} = ToolGateway.execute(proposal, capability, current, options)
+
+    refute_received {:reference_tool_effect, ^request, _options}
+  end
+
   test "the Knowledge ledger atomically builds proposal/start and bounded outcome commands" do
     fixture =
       %{test: :phase_h03_knowledge_ledger}
@@ -259,6 +277,7 @@ defmodule JidoCode.Factory.Harness.PhaseH03ToolGatewayTest do
 
     ledger = Keyword.get(options, :ledger, %{owner: self()})
     adapter_result = Keyword.get(options, :adapter_result, result("safe output"))
+    {:ok, effect_journal} = EffectJournal.start_link()
 
     gateway_options = [
       execution_request: execution_request!(),
@@ -266,6 +285,7 @@ defmodule JidoCode.Factory.Harness.PhaseH03ToolGatewayTest do
       expected_effect: "source.read",
       allowed_effects: ["source.read"],
       ledger: {FakeToolLedger, ledger},
+      effect_sink: {EffectJournal, effect_journal},
       current_provider: current_provider,
       adapter: {FakeReferenceToolAdapter, %{owner: self(), result: adapter_result}},
       adapter_options: [mode: :fixture]
@@ -358,6 +378,8 @@ defmodule JidoCode.Factory.Harness.PhaseH03ToolGatewayTest do
     %{
       now: DateTime.utc_now(),
       invocation_iri: proposal.invocation_iri,
+      attempt_iri: capability.attempt_iri,
+      lease_iri: capability.lease_iri,
       lease_state: :active,
       policy_revision: capability.policy_revision,
       source_graph_revisions: capability.source_graph_revisions,

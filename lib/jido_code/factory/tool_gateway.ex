@@ -10,6 +10,7 @@ defmodule JidoCode.Factory.ToolGateway do
   alias JidoCode.Factory.Tool.ReferenceMonitor
   alias JidoCode.Factory.Tool.Request
   alias JidoCode.Factory.Tool.Result
+  alias JidoCode.Factory.Tool.SinkGuard
   alias JidoCode.Factory.Tool.StartReceipt
 
   @spec execute(Proposal.t(), Capability.t(), map(), keyword()) ::
@@ -61,7 +62,15 @@ defmodule JidoCode.Factory.ToolGateway do
        ) do
     case ReferenceMonitor.revalidate(authorization, current) do
       {:ok, _refreshed} ->
-        dispatch_effect(request, start_receipt, ledger_module, ledger, options)
+        claim_effect(
+          authorization,
+          request,
+          start_receipt,
+          current,
+          ledger_module,
+          ledger,
+          options
+        )
 
       {:error, %AdapterError{}} ->
         result = terminal_result!(:rejected, "tool=authorization_revoked")
@@ -69,7 +78,56 @@ defmodule JidoCode.Factory.ToolGateway do
     end
   end
 
-  defp dispatch_effect(request, start_receipt, ledger_module, ledger, options) do
+  defp claim_effect(
+         authorization,
+         request,
+         start_receipt,
+         current,
+         ledger_module,
+         ledger,
+         options
+       ) do
+    effect_sink = Keyword.get(options, :effect_sink)
+
+    case SinkGuard.claim(
+           :tool_execution,
+           request.execution,
+           request.effect_identity,
+           current,
+           effect_sink
+         ) do
+      {:ok, :dispatch} ->
+        dispatch_effect(
+          authorization,
+          request,
+          start_receipt,
+          ledger_module,
+          ledger,
+          effect_sink,
+          options
+        )
+
+      {:ok, {:replay, result}} ->
+        record_terminal(result, false, start_receipt, ledger_module, ledger)
+
+      {:error, %AdapterError{operation: :stale_effect_fence}} ->
+        result = terminal_result!(:rejected, "tool=effect_claim_denied")
+        record_terminal(result, false, start_receipt, ledger_module, ledger)
+
+      {:error, %AdapterError{} = error} ->
+        {:error, error}
+    end
+  end
+
+  defp dispatch_effect(
+         authorization,
+         request,
+         start_receipt,
+         ledger_module,
+         ledger,
+         effect_sink,
+         options
+       ) do
     with {adapter_module, adapter} when is_atom(adapter_module) <- Keyword.get(options, :adapter),
          true <- adapter?(adapter_module) do
       adapter_options = Keyword.get(options, :adapter_options, [])
@@ -78,34 +136,143 @@ defmodule JidoCode.Factory.ToolGateway do
         {:ok, %Result{} = result} ->
           case Result.new(Map.from_struct(result), request.output_bytes) do
             {:ok, bounded} ->
-              record_terminal(bounded, true, start_receipt, ledger_module, ledger)
+              if valid_external_effect?(authorization, bounded) do
+                complete_and_record(
+                  bounded,
+                  true,
+                  request,
+                  effect_sink,
+                  start_receipt,
+                  ledger_module,
+                  ledger
+                )
+              else
+                ambiguous_and_record(
+                  terminal_result!(:failed, "tool=missing_external_effect_id"),
+                  request,
+                  effect_sink,
+                  start_receipt,
+                  ledger_module,
+                  ledger
+                )
+              end
 
             {:error, %AdapterError{}} ->
               result = terminal_result!(:failed, "tool=corrupt_adapter_result")
-              record_terminal(result, true, start_receipt, ledger_module, ledger)
+
+              ambiguous_and_record(
+                result,
+                request,
+                effect_sink,
+                start_receipt,
+                ledger_module,
+                ledger
+              )
           end
 
         {:error, %AdapterError{} = error} ->
           result = terminal_result!(:failed, "tool=#{error.kind};operation=#{error.operation}")
-          record_terminal(result, true, start_receipt, ledger_module, ledger)
+
+          ambiguous_and_record(
+            result,
+            request,
+            effect_sink,
+            start_receipt,
+            ledger_module,
+            ledger
+          )
 
         _invalid ->
           result = terminal_result!(:failed, "tool=invalid_adapter_result")
-          record_terminal(result, true, start_receipt, ledger_module, ledger)
+
+          ambiguous_and_record(
+            result,
+            request,
+            effect_sink,
+            start_receipt,
+            ledger_module,
+            ledger
+          )
       end
     else
       _invalid ->
         result = terminal_result!(:failed, "tool=adapter_unavailable")
-        record_terminal(result, false, start_receipt, ledger_module, ledger)
+
+        complete_and_record(
+          result,
+          false,
+          request,
+          effect_sink,
+          start_receipt,
+          ledger_module,
+          ledger
+        )
     end
   rescue
     _error ->
       result = terminal_result!(:failed, "tool=adapter_unavailable")
-      record_terminal(result, true, start_receipt, ledger_module, ledger)
+
+      ambiguous_and_record(
+        result,
+        request,
+        effect_sink,
+        start_receipt,
+        ledger_module,
+        ledger
+      )
   catch
     :exit, _reason ->
       result = terminal_result!(:failed, "tool=adapter_unavailable")
-      record_terminal(result, true, start_receipt, ledger_module, ledger)
+
+      ambiguous_and_record(
+        result,
+        request,
+        effect_sink,
+        start_receipt,
+        ledger_module,
+        ledger
+      )
+  end
+
+  defp complete_and_record(
+         result,
+         dispatched?,
+         request,
+         {module, state},
+         start_receipt,
+         ledger_module,
+         ledger
+       ) do
+    case module.complete(state, :tool_execution, request.effect_identity, result) do
+      {:ok, outcome} when outcome in [:committed, :idempotent] ->
+        record_terminal(result, dispatched?, start_receipt, ledger_module, ledger)
+
+      {:error, %AdapterError{} = error} ->
+        {:error, error}
+
+      _invalid ->
+        {:error, AdapterError.new(:corrupt, :effect_sink_completion)}
+    end
+  end
+
+  defp ambiguous_and_record(
+         result,
+         request,
+         {module, state},
+         start_receipt,
+         ledger_module,
+         ledger
+       ) do
+    case module.ambiguous(state, :tool_execution, request.effect_identity) do
+      {:ok, outcome} when outcome in [:committed, :idempotent] ->
+        record_terminal(result, true, start_receipt, ledger_module, ledger)
+
+      {:error, %AdapterError{} = error} ->
+        {:error, error}
+
+      _invalid ->
+        {:error, AdapterError.new(:corrupt, :effect_sink_ambiguity)}
+    end
   end
 
   defp record_terminal(result, dispatched?, start_receipt, ledger_module, ledger) do
@@ -207,4 +374,9 @@ defmodule JidoCode.Factory.ToolGateway do
 
   defp adapter?(module),
     do: Code.ensure_loaded?(module) and function_exported?(module, :execute, 3)
+
+  defp valid_external_effect?(authorization, result) do
+    authorization.definition.idempotency_policy != :external_effect_id or
+      (result.status != :completed or is_binary(result.external_effect_id))
+  end
 end

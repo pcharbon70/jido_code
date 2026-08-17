@@ -63,20 +63,20 @@ Back to plan: [README](./README.md)
       - [x] 3.3.1.3 Subtask {#sah-p03-3-3-1-3} - Keep pre-admission rejections as the accepted concealed transient receipt unless a separate bounded rejection-audit protocol is later accepted.
       - [x] 3.3.1.4 Subtask {#sah-p03-3-3-1-4} - Prove persisted authorization explains the start decision but can never substitute for the immediate pre-effect revalidation.
 
-  - [ ] 3.4 Section - Enforce fencing and idempotency at every sink.
+  - [x] 3.4 Section - Enforce fencing and idempotency at every sink.
 
     This section rejects stale tokens and duplicate effects at the boundaries
     JidoCode owns.
 
-    - [ ] 3.4.1 Task {#sah-p03-fencing-sinks} [repo: jido_code] [after: {#sah-p03-invocation-commit}] - Enforce stale-fence and idempotency rejection.
+    - [x] 3.4.1 Task {#sah-p03-fencing-sinks} [repo: jido_code] [after: {#sah-p03-invocation-commit}] - Enforce stale-fence and idempotency rejection.
 
       This task closes the time-of-check to time-of-use window at every
       lease-governed sink.
 
-      - [ ] 3.4.1.1 Subtask {#sah-p03-3-4-1-1} - Require fencing checks before every graph command, sandbox mutation, tool execution, Git or provider write, artifact publication, and execution outcome; sinks receive and reject stale monotonic tokens.
-      - [ ] 3.4.1.2 Subtask {#sah-p03-3-4-1-2} - Derive idempotency identities from attempt, snapshot, fence, operation, and sequence so retries cannot duplicate effects.
-      - [ ] 3.4.1.3 Subtask {#sah-p03-3-4-1-3} - Accept stable effect IDs from external mutation adapters, reconcile ambiguous results before retry, and create new linked attempts for semantic retries rather than overwriting history.
-      - [ ] 3.4.1.4 Subtask {#sah-p03-3-4-1-4} - Keep model calls honestly at-least-once: record ambiguous outcomes when a response is irretrievable and permit only one recovered result to advance the workflow under an expected-revision transition.
+      - [x] 3.4.1.1 Subtask {#sah-p03-3-4-1-1} - Require fencing checks before every graph command, sandbox mutation, tool execution, Git or provider write, artifact publication, and execution outcome; sinks receive and reject stale monotonic tokens.
+      - [x] 3.4.1.2 Subtask {#sah-p03-3-4-1-2} - Derive idempotency identities from attempt, snapshot, fence, operation, and sequence so retries cannot duplicate effects.
+      - [x] 3.4.1.3 Subtask {#sah-p03-3-4-1-3} - Accept stable effect IDs from external mutation adapters, reconcile ambiguous results before retry, and create new linked attempts for semantic retries rather than overwriting history.
+      - [x] 3.4.1.4 Subtask {#sah-p03-3-4-1-4} - Keep model calls honestly at-least-once: record ambiguous outcomes when a response is irretrievable and permit only one recovered result to advance the workflow under an expected-revision transition.
 
   - [ ] 3.5 Section - Phase 3 Integration Tests.
 
