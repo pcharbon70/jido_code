@@ -302,6 +302,26 @@ defmodule JidoCode.Knowledge do
 
   def verify_execution_artifact(artifact, options \\ []), do: Artifact.verify(artifact, options)
 
+  def sandbox_instance_identity(attempt_iri, tier, image_digest, fencing_token)
+      when tier in [:restricted_beam, :container_sandbox, :micro_vm, :dedicated_host] and
+             is_binary(image_digest) and is_integer(fencing_token) and fencing_token > 0 do
+    with :ok <- ResourceIdentity.validate(attempt_iri),
+         true <- Regex.match?(~r/^sha256:[a-f0-9]{64}$/, image_digest) do
+      ResourceIdentity.deterministic(
+        :sandbox_instance,
+        Enum.join(
+          [attempt_iri, Atom.to_string(tier), image_digest, Integer.to_string(fencing_token)],
+          "\n"
+        )
+      )
+    else
+      _invalid -> {:error, Error.new(:invalid_input, :sandbox_instance_identity)}
+    end
+  end
+
+  def sandbox_instance_identity(_attempt_iri, _tier, _image_digest, _fencing_token),
+    do: {:error, Error.new(:invalid_input, :sandbox_instance_identity)}
+
   def finalize_execution_run(attempt, resolution, lease, attributes, options \\ []),
     do: Provenance.finalize_command(attempt, resolution, lease, attributes, options)
 
