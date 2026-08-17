@@ -2,11 +2,16 @@
 
 ## Status
 
-This receipt is being assembled with the Harness Phase 3 implementation. The
-current candidate is merge-pending; HG3 remains blocked until every section is
-complete, the hostile-input, race, replay, and full regression matrices pass,
-clean-checkout CI passes, and the pull request merges. Phase 4 is not authorized
-from this document yet.
+This receipt records the Harness Phase 3 candidate verified locally and
+accepted after pull request merge on 2026-08-17. The closed tool catalog,
+deterministic policy governor, invocation-before-effect commit, fenced effect
+journal, and complete hostile-input, race, and replay matrices are accepted at
+the merged baseline.
+
+HG3 is accepted at merged candidate
+`779afa09763c3d0fb698e4d29b83d99d654fd88e` after pull request #30 passed
+clean-checkout CI and merged on 2026-08-17. Phase 4 is authorized from that
+exact baseline.
 
 ## Candidate Provenance
 
@@ -18,8 +23,8 @@ from this document yet.
 | Section 3.2 | `31cd7cb` - govern tool action proposals |
 | Section 3.3 | `206cd12` - commit tool invocations before effects |
 | Section 3.4 | `c50aab4` - fence and deduplicate governed effects |
-| Section 3.5 | This section's exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
+| Section 3.5 | `010d6d6` - certify Phase 3 tool monitor candidate |
+| Merged candidate | `779afa09763c3d0fb698e4d29b83d99d654fd88e` |
 
 ## Closed Tool Catalog
 
@@ -150,8 +155,7 @@ death after the durable start but before current-state revalidation produced no
 effect or outcome; replay with the same effect identity dispatched once and
 recorded exactly one terminal outcome.
 
-No merge acceptance is claimed by this receipt yet. Clean-checkout CI, the PR
-merge, and the full merged-candidate SHA remain external closure evidence. The
+Pull request #30 passed clean-checkout CI and merged on 2026-08-17. The
 in-process `EffectJournal` is the reference implementation used by the matrix;
 production external sinks must implement the same atomic claim/reconcile port
 with their durable idempotency store and stable external effect IDs.
@@ -172,7 +176,10 @@ with their durable idempotency store and stable external effect IDs.
 
 ## Gate HG3
 
-HG3 is merge-pending and remains blocked. It reopens—or remains blocked—if any
-host-controlled effect can bypass the reference monitor, any effect sink
-accepts a stale fence, or any proposal or tool input shape remains open. These
-reopening conditions remain in force regardless of checklist state.
+HG3 is accepted at merged candidate
+`779afa09763c3d0fb698e4d29b83d99d654fd88e`, pinned in this receipt and the
+Harness Phase 3 plan. Harness Phase 4 is authorized from that baseline. HG3
+reopens if any host-controlled effect can bypass the reference monitor, any
+effect sink accepts a stale fence, or any proposal or tool input shape remains
+open. These reopening conditions remain in force regardless of checklist
+state.
