@@ -17,6 +17,7 @@ request merges. Phase 5 is not authorized from this document yet.
 | Section 4.1 | This section's exact commit is recorded by Git history |
 | Section 4.2 | This section's exact commit is recorded by Git history |
 | Section 4.3 | This section's exact commit is recorded by Git history |
+| Section 4.4 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Tiered Production Sandbox
@@ -113,6 +114,35 @@ safe metadata; bodies and headers do not cross back into the general harness
 result. Real DNS, audit, and transport adapters remain deployment integrations
 and must preserve IP-pinned TLS and streaming response limits.
 
+## Hostile Repository And Exhaustion Hardening
+
+The closed tier table treats package and Git hooks, workflows, build scripts,
+and generated binaries as microVM workloads. A session records its authorized
+workload, and every command must repeat that exact class and select a
+server-approved command name. The hostile matrix attempts every such workload
+through the restricted BEAM, gVisor, and dedicated-host sessions and proves
+the supervisor rejects the downgrade, cancels the attempt, destroys the
+environment, and removes the session. The matching microVM executions retain
+all no-network, no-host, no-credential, unprivileged profile controls.
+
+Attested execution observations now carry a closed six-field usage record.
+The supervisor checks CPU time, peak memory, process count, disk, output, and
+wall time against the request ceilings. Across every tier, each over-limit
+case terminates and destroys its session while the supervisor continues to
+admit a later valid attempt. Missing, extra, negative, or non-integer usage is
+treated as a corrupt adapter boundary. Collection byte counts, artifact count,
+and aggregate candidate bytes are also bounded before capture; any failure
+still proceeds to destruction.
+
+Hostile broker probes cover SSRF, link-local metadata access, redirect DNS
+rebinding, and credential canaries. The credential broker rejects canary
+material in connector payloads before vault checkout, while restricted data
+cannot enter an egress transport. A stateful adapter fixture proves markers
+exist only within one attempt and are removed by destroy before a subsequent
+attempt is provisioned. The suite validates the supervisor contracts and
+adapters' required observations; production isolation still depends on the
+deployed adapters enforcing their attested kernel or hypervisor limits.
+
 ## Verification Record
 
 | Command or gate | Result |
@@ -121,6 +151,7 @@ and must preserve IP-pinned TLS and streaming response limits.
 | Affected Phase 8 sandbox and provenance suites | 6 tests, 0 failures |
 | `phase_h04_credential_broker_test.exs` | 7 tests, 0 failures |
 | `phase_h04_egress_broker_test.exs` | 10 tests, 0 failures |
+| `phase_h04_hostile_hardening_test.exs` | 6 tests, 0 failures; 24 tier-by-limit exhaustion cases plus hostile matrices |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 

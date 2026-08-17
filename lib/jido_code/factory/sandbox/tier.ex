@@ -11,8 +11,13 @@ defmodule JidoCode.Factory.Sandbox.Tier do
     build: :micro_vm,
     test: :micro_vm,
     hook: :micro_vm,
+    package_hook: :micro_vm,
+    git_hook: :micro_vm,
+    workflow: :micro_vm,
+    build_script: :micro_vm,
     compiler: :micro_vm,
     native_tool: :micro_vm,
+    generated_binary: :micro_vm,
     unknown_high_risk: :dedicated_host
   }
 

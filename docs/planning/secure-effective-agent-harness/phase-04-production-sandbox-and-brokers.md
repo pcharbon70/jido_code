@@ -65,20 +65,20 @@ Back to plan: [README](./README.md)
       - [x] 4.3.1.3 Subtask {#sah-p04-4-3-1-3} - Block loopback, private, link-local, and cloud-metadata ranges, unsafe URL schemes, uncontrolled DNS, and arbitrary package registries; support controlled mirrors and explicitly approved destinations only.
       - [x] 4.3.1.4 Subtask {#sah-p04-4-3-1-4} - Make incompatible builds fail visibly rather than receive unrestricted egress, and record egress decisions as bounded audit observations.
 
-  - [ ] 4.4 Section - Harden against hostile repositories and exhaustion.
+  - [x] 4.4 Section - Harden against hostile repositories and exhaustion.
 
     This section proves the boundary against the attack classes the research
     enumerates.
 
-    - [ ] 4.4.1 Task {#sah-p04-hostile-hardening} [repo: jido_code] [after: {#sah-p04-egress-broker}] - Exercise hostile repositories and resource exhaustion.
+    - [x] 4.4.1 Task {#sah-p04-hostile-hardening} [repo: jido_code] [after: {#sah-p04-egress-broker}] - Exercise hostile repositories and resource exhaustion.
 
       This task validates containment before any real delegated or
       publication workload runs.
 
-      - [ ] 4.4.1.1 Subtask {#sah-p04-4-4-1-1} - Exercise malicious package hooks, Git hooks, workflows, build scripts, and generated binaries against every isolation tier.
-      - [ ] 4.4.1.2 Subtask {#sah-p04-4-4-1-2} - Exercise metadata-service, SSRF, DNS-rebinding, redirect, and canary-secret exfiltration attempts against the egress broker and credential boundary.
-      - [ ] 4.4.1.3 Subtask {#sah-p04-4-4-1-3} - Exercise CPU, memory, process, disk, output, and time exhaustion against sandbox limits and prove supervisor stability and bounded artifact capture.
-      - [ ] 4.4.1.4 Subtask {#sah-p04-4-4-1-4} - Prove sandbox destruction after capture and no persistence or escape across attempts.
+      - [x] 4.4.1.1 Subtask {#sah-p04-4-4-1-1} - Exercise malicious package hooks, Git hooks, workflows, build scripts, and generated binaries against every isolation tier.
+      - [x] 4.4.1.2 Subtask {#sah-p04-4-4-1-2} - Exercise metadata-service, SSRF, DNS-rebinding, redirect, and canary-secret exfiltration attempts against the egress broker and credential boundary.
+      - [x] 4.4.1.3 Subtask {#sah-p04-4-4-1-3} - Exercise CPU, memory, process, disk, output, and time exhaustion against sandbox limits and prove supervisor stability and bounded artifact capture.
+      - [x] 4.4.1.4 Subtask {#sah-p04-4-4-1-4} - Prove sandbox destruction after capture and no persistence or escape across attempts.
 
   - [ ] 4.5 Section - Phase 4 Integration Tests.
 
