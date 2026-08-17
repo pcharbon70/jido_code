@@ -54,4 +54,7 @@ jobs:
           MIX_ENV: prod
           # Asset compilation loads runtime config but never starts a server.
           SECRET_KEY_BASE: "${{ github.sha }}${{ github.sha }}"
+          # CI-only value satisfying the prod operator-token validation;
+          # never a real credential.
+          JIDO_CODE_OPERATOR_TOKEN: "ci-only-asset-build-token"
         run: mix assets.build
