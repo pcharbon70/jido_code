@@ -35,27 +35,27 @@ Back to plan: [README](./README.md)
       - [x] 2.1.1.3 Subtask {#sah-p02-2-1-1-3} - Implement just-in-time retrieval tools for large data and lossy compaction that creates an explicitly linked summary without replacing source observations.
       - [x] 2.1.1.4 Subtask {#sah-p02-2-1-1-4} - Record content digests, classification labels, and per-item provenance into the manifest within the accepted bounds.
 
-  - [ ] 2.2 Section - Pin ReqLLM and implement the model-interaction port.
+  - [x] 2.2 Section - Pin ReqLLM and implement the model-interaction port.
 
     This section isolates provider normalization behind one port so JidoCode
     owns every cross-call decision.
 
-    - [ ] 2.2.1 Task {#sah-p02-reqllm-pin} [repo: jido_code] [after: {#sah-p02-context-compiler}] - Pin and prove the ReqLLM dependency.
+    - [x] 2.2.1 Task {#sah-p02-reqllm-pin} [repo: jido_code] [after: {#sah-p02-context-compiler}] - Pin and prove the ReqLLM dependency.
 
       This task turns a moving provider dependency into a reviewed,
       reproducible pin.
 
-      - [ ] 2.2.1.1 Subtask {#sah-p02-2-2-1-1} - Select a released ReqLLM version or exact reviewed commit, record its digest, and prove compatibility under JidoCode's pinned Req, Elixir, and OTP versions including a Req compatibility spike if the lock requires it.
-      - [ ] 2.2.1.2 Subtask {#sah-p02-2-2-1-2} - Complete dependency, security, license, and fixture review and record results in the phase receipt.
+      - [x] 2.2.1.1 Subtask {#sah-p02-2-2-1-1} - Select a released ReqLLM version or exact reviewed commit, record its digest, and prove compatibility under JidoCode's pinned Req, Elixir, and OTP versions including a Req compatibility spike if the lock requires it.
+      - [x] 2.2.1.2 Subtask {#sah-p02-2-2-1-2} - Complete dependency, security, license, and fixture review and record results in the phase receipt.
 
-    - [ ] 2.2.2 Task {#sah-p02-model-port} [repo: jido_code] [after: {#sah-p02-reqllm-pin}] - Implement the model-interaction port and ReqLLM adapter.
+    - [x] 2.2.2 Task {#sah-p02-model-port} [repo: jido_code] [after: {#sah-p02-reqllm-pin}] - Implement the model-interaction port and ReqLLM adapter.
 
       This task keeps runtime agents, web modules, and Jido processes away
       from provider calls and from ReqLLM's execution helpers.
 
-      - [ ] 2.2.2.1 Subtask {#sah-p02-2-2-2-1} - Define the `model_interaction` port covering one buffered call or stream, normalized response, usage, tool calls, errors, and call metadata.
-      - [ ] 2.2.2.2 Subtask {#sah-p02-2-2-2-2} - Implement the ReqLLM integrations adapter depending only on stable public functions, never on tool-execution helpers or provider-internal modules.
-      - [ ] 2.2.2.3 Subtask {#sah-p02-2-2-2-3} - Route every call through the Factory model gateway so runtime agents never reach ReqLLM directly.
+      - [x] 2.2.2.1 Subtask {#sah-p02-2-2-2-1} - Define the `model_interaction` port covering one buffered call or stream, normalized response, usage, tool calls, errors, and call metadata.
+      - [x] 2.2.2.2 Subtask {#sah-p02-2-2-2-2} - Implement the ReqLLM integrations adapter depending only on stable public functions, never on tool-execution helpers or provider-internal modules.
+      - [x] 2.2.2.3 Subtask {#sah-p02-2-2-2-3} - Route every call through the Factory model gateway so runtime agents never reach ReqLLM directly.
 
   - [ ] 2.3 Section - Implement the hardened buffered API-key profile.
 
