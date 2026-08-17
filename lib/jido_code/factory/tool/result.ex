@@ -15,7 +15,7 @@ defmodule JidoCode.Factory.Tool.Result do
     :artifact_iris,
     :redaction
   ]
-  defstruct @enforce_keys
+  defstruct @enforce_keys ++ [external_effect_id: nil]
 
   @type t :: %__MODULE__{}
 
@@ -31,8 +31,14 @@ defmodule JidoCode.Factory.Tool.Result do
          true <- byte_size(:erlang.term_to_binary(usage, [:deterministic])) <= 4_096,
          :ok <- resources(attributes[:artifact_iris]),
          redaction when redaction in [:none, :applied, :fully_redacted] <- attributes[:redaction],
+         :ok <- external_effect_id(attributes[:external_effect_id]),
          false <- secret?(stdout) or secret?(stderr) do
-      {:ok, struct!(__MODULE__, Map.take(attributes, @enforce_keys))}
+      values =
+        attributes
+        |> Map.take(@enforce_keys)
+        |> Map.put(:external_effect_id, attributes[:external_effect_id])
+
+      {:ok, struct!(__MODULE__, values)}
     else
       _invalid -> {:error, AdapterError.new(:corrupt, :tool_result)}
     end
@@ -53,6 +59,16 @@ defmodule JidoCode.Factory.Tool.Result do
   end
 
   defp resources(_values), do: :error
+
+  defp external_effect_id(nil), do: :ok
+
+  defp external_effect_id(value) when is_binary(value) do
+    if byte_size(value) in 1..256 and not Regex.match?(~r/[\x00-\x1F\x7F]/u, value),
+      do: :ok,
+      else: :error
+  end
+
+  defp external_effect_id(_value), do: :error
 
   defp secret?(value) do
     Regex.match?(

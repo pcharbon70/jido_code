@@ -11,6 +11,10 @@ defmodule JidoCode.Factory.Model.Outcome do
   alias JidoCode.Factory.Model.Response
   alias JidoCode.Factory.Model.StreamResult
 
+  @ambiguous_operations ~w[
+    model_gateway_generate model_gateway_stream req_llm_generate req_llm_stream req_llm_model
+  ]a
+
   @spec attributes(
           {:ok, Response.t()} | {:error, AdapterError.t()} | StreamResult.t(),
           Request.t()
@@ -42,6 +46,9 @@ defmodule JidoCode.Factory.Model.Outcome do
     }
   end
 
-  defp failure_status(%AdapterError{kind: :timeout}), do: :timed_out
+  defp failure_status(%AdapterError{kind: kind, operation: operation})
+       when kind in [:timeout, :unavailable] and operation in @ambiguous_operations,
+       do: :ambiguous
+
   defp failure_status(%AdapterError{}), do: :failed
 end
