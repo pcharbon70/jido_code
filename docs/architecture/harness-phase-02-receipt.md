@@ -14,7 +14,8 @@ is not authorized from this document yet.
 | --- | --- |
 | Phase baseline and merged HG1 | `850b9a7` - pin the Phase 1 merged candidate and close HG1 |
 | Section 2.1 | `43b84e0` - compile revision-pinned model context |
-| Section 2.2 | This section's exact commit is recorded by Git history |
+| Section 2.2 | `8f035e1` - add governed ReqLLM model gateway |
+| Section 2.3 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## ReqLLM Dependency Review
@@ -70,6 +71,51 @@ and Phase 2.4 adds single-view streaming fixtures.
   profile, context-manifest, provider, model, and deadline identities. Secret
   bytes and provider sessions are absent from this contract.
 
+## Hardened Buffered Profile
+
+The only enabled buffered profile is exact and has no fallback:
+
+| Field | Accepted value |
+| --- | --- |
+| Access mode | `host_api` |
+| Provider/model | `openai` / `gpt-4.1-mini` |
+| Server-owned endpoint | `https://api.openai.com/v1` |
+| Credential class | `static_reusable`, fetched per call from the explicit `CredentialReference` |
+| Billing mode | `metered_api` |
+| Provider retention/training | Explicit residual external contractual posture |
+| Provider prompt cache | Explicit provider-managed residual posture; no cache key supplied |
+| Effect-bearing structured output | Disabled because the locked catalog does not mark this model strict-JSON capable |
+| Cost enforcement | Observed post-dispatch, normalized to integer micro-USD `cost_units` where exposed |
+
+The gateway validates the request/profile match and caller option allowlist
+before credential release, revalidates graph-owned authority before release and
+again immediately before dispatch, and never selects another profile after a
+denial. The adapter independently validates the hardened dispatch and exact
+catalog model before invoking ReqLLM.
+
+The admitted ReqLLM option set supplies only the broker result as `api_key`,
+sets application cache to `nil`, `max_retries: 0`, finite receive/total/stream
+idle/metadata timeouts, `json_repair: false`, strict final validation,
+metadata-only telemetry, `provider_options: [store: false]`, empty tools, and
+`tool_choice: :none`. It omits alternate base URLs, request/Finch hooks,
+fixtures, custom providers, arbitrary provider options, previous response IDs,
+prompt-cache keys, and output-repair callbacks. `config/config.exs` disables
+dotenv loading in both ReqLLM and LLMDB and disables telemetry payload capture.
+
+The pinned OpenAI Responses encoder conformance fixture produces `store: false`
+with no `tools`, `previous_response_id`, or `prompt_cache_key`. The selected
+catalog model is not a deep-research model, so the reviewed ReqLLM 1.20.0
+auto-native-tool path is not reached. Any returned tool call is resolved without
+JSON repair, its retained raw JSON is decoded independently and compared with
+ReqLLM's projection, then rejected by the JidoCode semantic policy because Phase
+2 has no authorized tool effects. Cache-hit markers and repair or legacy
+coercion diagnostics are rejected.
+
+Successful responses carry bounded invocation/profile/context provenance,
+redacted call metadata, observed usage and cost, and a helper projection that
+matches the Phase 1 `RecordModelInvocationOutcome` attribute contract. Failures
+produce only stable adapter kind/operation diagnostics.
+
 ## Section 2.2 Verification Record
 
 | Command or gate | Result |
@@ -78,6 +124,7 @@ and Phase 2.4 adds single-view streaming fixtures.
 | `mix architecture.check` | Pass |
 | `mix hex.audit` | Pass; no retired packages |
 | `phase_h02_model_gateway_test.exs` | 6 tests, 0 failures |
+| `phase_h02_buffered_profile_test.exs` | 9 tests, 0 failures |
 
 ## Gate HG2
 

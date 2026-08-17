@@ -2,6 +2,9 @@ defmodule JidoCode.Factory.Harness.PhaseH02ModelGatewayTest do
   use ExUnit.Case, async: true
 
   alias JidoCode.Factory.AdapterError
+  alias JidoCode.Factory.CredentialReference
+  alias JidoCode.Factory.Model.BufferedProfile
+  alias JidoCode.Factory.Model.Dispatch
   alias JidoCode.Factory.Model.Request
   alias JidoCode.Factory.Model.Response
   alias JidoCode.Factory.Model.Stream
@@ -9,7 +12,9 @@ defmodule JidoCode.Factory.Harness.PhaseH02ModelGatewayTest do
   alias JidoCode.Integrations.ReqLLM, as: ReqLLMAdapter
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.TestSupport.FakeModelInteraction
+  alias JidoCode.TestSupport.FakeModelAuthority
   alias JidoCode.TestSupport.FakeReqLLMClient
+  alias JidoCode.TestSupport.FakeSecretProvider
 
   test "pins a released ReqLLM compatible with the locked Req and catalog" do
     assert Application.spec(:req_llm, :vsn) |> to_string() == "1.20.0"
@@ -45,15 +50,15 @@ defmodule JidoCode.Factory.Harness.PhaseH02ModelGatewayTest do
       stream_result: {:ok, handle}
     }
 
-    assert {:ok, gateway} = ModelGateway.new(FakeModelInteraction, adapter)
+    assert {:ok, gateway} = gateway(FakeModelInteraction, adapter)
     assert {:ok, ^response} = ModelGateway.generate(gateway, request)
-    assert_received {:model_generate, ^request}
+    assert_received {:model_generate, %Dispatch{request: ^request}}
 
     assert {:ok, %Stream{invocation_iri: invocation_iri, handle: ^handle}} =
              ModelGateway.stream(gateway, request)
 
     assert invocation_iri == request.invocation_iri
-    assert_received {:model_stream, ^request}
+    assert_received {:model_stream, %Dispatch{request: ^request}}
   end
 
   test "normalizes public ReqLLM response projections without executing tool helpers" do
@@ -62,7 +67,7 @@ defmodule JidoCode.Factory.Harness.PhaseH02ModelGatewayTest do
 
     assert {:ok, adapter} = ReqLLMAdapter.new(client: FakeReqLLMClient)
     assert {:ok, request} = Request.new(request_attributes())
-    assert {:ok, gateway} = ModelGateway.new(ReqLLMAdapter, adapter)
+    assert {:ok, gateway} = gateway(ReqLLMAdapter, adapter)
 
     assert {:ok,
             %Response{
@@ -82,13 +87,14 @@ defmodule JidoCode.Factory.Harness.PhaseH02ModelGatewayTest do
 
     assert {:ok, adapter} = ReqLLMAdapter.new(client: FakeReqLLMClient)
     assert {:ok, request} = Request.new(request_attributes())
+    assert {:ok, gateway} = gateway(ReqLLMAdapter, adapter)
 
     assert {:error,
             %AdapterError{
               kind: :unauthorized,
               operation: :req_llm_generate,
               message: "external adapter operation failed"
-            }} = ReqLLMAdapter.generate(adapter, request)
+            }} = ModelGateway.generate(gateway, request)
   end
 
   test "keeps direct ReqLLM calls inside the integrations adapter" do
@@ -127,7 +133,8 @@ defmodule JidoCode.Factory.Harness.PhaseH02ModelGatewayTest do
         tool_calls: [],
         finish_reason: :stop,
         usage: %{input_tokens: 12, output_tokens: 3},
-        call_metadata: %{response_id: "response-1", model: "gpt-4.1-mini"}
+        call_metadata: %{response_id: "response-1", model: "gpt-4.1-mini"},
+        provenance: %{profile: "fixture"}
       })
 
     response
@@ -150,5 +157,42 @@ defmodule JidoCode.Factory.Harness.PhaseH02ModelGatewayTest do
   defp deterministic!(kind, seed) do
     {:ok, iri} = ResourceIdentity.deterministic(kind, seed)
     iri
+  end
+
+  defp gateway(adapter_module, adapter) do
+    {:ok, profile} = profile()
+
+    ModelGateway.new(adapter_module, adapter,
+      profile: profile,
+      secret_provider: {FakeSecretProvider, %{owner: self(), result: {:ok, "broker-key"}}},
+      authority: {FakeModelAuthority, %{owner: self(), results: %{}}}
+    )
+  end
+
+  defp profile do
+    profile_iri = deterministic!(:model_access_profile, "gateway-profile")
+    credential_iri = deterministic!(:knowledge_assertion, "gateway-credential")
+
+    {:ok, reference} =
+      CredentialReference.new(%{
+        iri: credential_iri,
+        provider: "openai",
+        key: "fixture-openai-key"
+      })
+
+    BufferedProfile.new(
+      %{
+        profile_iri: profile_iri,
+        credential_reference_iri: credential_iri,
+        provider: "openai",
+        model: "gpt-4.1-mini",
+        endpoint: "https://api.openai.com/v1",
+        access_mode: :host_api,
+        credential_class: :static_reusable,
+        billing_mode: :metered_api,
+        readiness: [:credential_available, :authenticated, :model_available, :policy_allowed]
+      },
+      reference
+    )
   end
 end

@@ -57,22 +57,22 @@ Back to plan: [README](./README.md)
       - [x] 2.2.2.2 Subtask {#sah-p02-2-2-2-2} - Implement the ReqLLM integrations adapter depending only on stable public functions, never on tool-execution helpers or provider-internal modules.
       - [x] 2.2.2.3 Subtask {#sah-p02-2-2-2-3} - Route every call through the Factory model gateway so runtime agents never reach ReqLLM directly.
 
-  - [ ] 2.3 Section - Implement the hardened buffered API-key profile.
+  - [x] 2.3 Section - Implement the hardened buffered API-key profile.
 
     This section launches the most controlled access path first with every
     adapter hardening from the research enforced.
 
-    - [ ] 2.3.1 Task {#sah-p02-buffered-profile} [repo: jido_code] [after: {#sah-p02-model-port}] - Enforce the strict buffered-profile contract.
+    - [x] 2.3.1 Task {#sah-p02-buffered-profile} [repo: jido_code] [after: {#sah-p02-model-port}] - Enforce the strict buffered-profile contract.
 
       This task proves the gateway refuses every ambient, caching, retry,
       repair, and native-effect path before dispatch.
 
-      - [ ] 2.3.1.1 Subtask {#sah-p02-2-3-1-1} - Enforce the exact allowlisted model and server-owned endpoint, per-call credentials from the credential broker with an adapter precondition failing before ReqLLM is called when the broker result is missing, and no application-global keys, dotenv discovery, or ambient credential paths reached.
-      - [ ] 2.3.1.2 Subtask {#sah-p02-2-3-1-2} - Disable the ReqLLM application response cache and serialized contexts, set `max_retries: 0` so Factory reauthorizes every retry, set finite receive, total, stream-idle, and metadata timeouts, and force the provider `store` request field false where applicable.
-      - [ ] 2.3.1.3 Subtask {#sah-p02-2-3-1-3} - Disable JSON and output repair in both structured generation and `ReqLLM.ToolCall.resolve/3`, reject any repair or legacy-coercion diagnostic, independently validate retained raw tool arguments before transformed values are trusted, and run a second JidoCode schema and semantic authorization pass.
-      - [ ] 2.3.1.4 Subtask {#sah-p02-2-3-1-4} - Prove with fixture and wire conformance tests that the final encoded request contains no provider-executed tools, no auto-injected native tool from model metadata, and no arbitrary base URL, HTTP hooks, custom providers, or provider options; disable deep-research or auto-tool model categories.
-      - [ ] 2.3.1.5 Subtask {#sah-p02-2-3-1-5} - Restrict effect-bearing structured output to models with proven strict JSON behavior and keep provider contractual retention and caching posture as explicit residual profile data.
-      - [ ] 2.3.1.6 Subtask {#sah-p02-2-3-1-6} - Disable telemetry payload capture, bound error normalization, and record bounded invocation provenance, observed usage and cost with enforcement class, and outcomes through the Phase 1 command protocol.
+      - [x] 2.3.1.1 Subtask {#sah-p02-2-3-1-1} - Enforce the exact allowlisted model and server-owned endpoint, per-call credentials from the credential broker with an adapter precondition failing before ReqLLM is called when the broker result is missing, and no application-global keys, dotenv discovery, or ambient credential paths reached.
+      - [x] 2.3.1.2 Subtask {#sah-p02-2-3-1-2} - Disable the ReqLLM application response cache and serialized contexts, set `max_retries: 0` so Factory reauthorizes every retry, set finite receive, total, stream-idle, and metadata timeouts, and force the provider `store` request field false where applicable.
+      - [x] 2.3.1.3 Subtask {#sah-p02-2-3-1-3} - Disable JSON and output repair in both structured generation and `ReqLLM.ToolCall.resolve/3`, reject any repair or legacy-coercion diagnostic, independently validate retained raw tool arguments before transformed values are trusted, and run a second JidoCode schema and semantic authorization pass.
+      - [x] 2.3.1.4 Subtask {#sah-p02-2-3-1-4} - Prove with fixture and wire conformance tests that the final encoded request contains no provider-executed tools, no auto-injected native tool from model metadata, and no arbitrary base URL, HTTP hooks, custom providers, or provider options; disable deep-research or auto-tool model categories.
+      - [x] 2.3.1.5 Subtask {#sah-p02-2-3-1-5} - Restrict effect-bearing structured output to models with proven strict JSON behavior and keep provider contractual retention and caching posture as explicit residual profile data.
+      - [x] 2.3.1.6 Subtask {#sah-p02-2-3-1-6} - Disable telemetry payload capture, bound error normalization, and record bounded invocation provenance, observed usage and cost with enforcement class, and outcomes through the Phase 1 command protocol.
 
   - [ ] 2.4 Section - Implement the streaming contract.
 

@@ -8,12 +8,12 @@ defmodule JidoCode.Factory.Ports.ModelInteraction do
   """
 
   alias JidoCode.Factory.AdapterError
-  alias JidoCode.Factory.Model.Request
+  alias JidoCode.Factory.Model.Dispatch
   alias JidoCode.Factory.Model.Response
 
-  @callback generate(adapter :: term(), Request.t()) ::
+  @callback generate(adapter :: term(), Dispatch.t()) ::
               {:ok, Response.t()} | {:error, AdapterError.t()}
 
-  @callback stream(adapter :: term(), Request.t()) ::
+  @callback stream(adapter :: term(), Dispatch.t()) ::
               {:ok, handle :: term()} | {:error, AdapterError.t()}
 end

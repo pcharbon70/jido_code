@@ -17,7 +17,8 @@ defmodule JidoCode.Factory.Model.Response do
     :tool_calls,
     :finish_reason,
     :usage,
-    :call_metadata
+    :call_metadata,
+    :provenance
   ]
   defstruct @enforce_keys
 
@@ -42,7 +43,9 @@ defmodule JidoCode.Factory.Model.Response do
          usage when is_map(usage) or is_nil(usage) <- attributes[:usage],
          true <- bounded?(usage, 16_384),
          call_metadata when is_map(call_metadata) <- attributes[:call_metadata],
-         true <- bounded?(call_metadata, 32_768) do
+         true <- bounded?(call_metadata, 32_768),
+         provenance when is_map(provenance) <- attributes[:provenance],
+         true <- bounded?(provenance, 16_384) do
       {:ok,
        %__MODULE__{
          type: type,
@@ -51,7 +54,8 @@ defmodule JidoCode.Factory.Model.Response do
          tool_calls: tool_calls,
          finish_reason: finish_reason,
          usage: usage,
-         call_metadata: call_metadata
+         call_metadata: call_metadata,
+         provenance: provenance
        }}
     else
       _invalid -> invalid()
