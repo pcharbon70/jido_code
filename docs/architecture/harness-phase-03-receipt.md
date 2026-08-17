@@ -17,7 +17,8 @@ from this document yet.
 | Section 3.1 | `c2a61e1` - publish closed tool catalog |
 | Section 3.2 | `31cd7cb` - govern tool action proposals |
 | Section 3.3 | `206cd12` - commit tool invocations before effects |
-| Section 3.4 | This section's exact commit is recorded by Git history |
+| Section 3.4 | `c50aab4` - fence and deduplicate governed effects |
+| Section 3.5 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Closed Tool Catalog
@@ -131,6 +132,30 @@ to precede dispatch remain `failed`. The recovery arbiter admits exactly one
 result under the expected revision; identical replay is idempotent and a
 different result or stale revision conflicts.
 
+## Integration Evidence And Known Limitations
+
+The closed-shape matrix mutates every catalog call with unknown and missing
+properties and verifies that rejection stays within the definition's safe
+error vocabulary before any adapter message. Hostile fixtures cover traversal,
+absolute and non-normalized paths, shell metacharacters in registered-command
+selectors, and an unauthorized publication destination. The repository path
+guard walks each component without following symlinks and returns an
+inspection-safe opaque path only for an existing authorized file or an absent
+authorized creation target.
+
+Revocation-generation change, lease expiry, and monotonic-fence supersession
+were each introduced between accepted start and dispatch. All three produced a
+bounded rejected no-effect outcome and zero adapter effects. A forced process
+death after the durable start but before current-state revalidation produced no
+effect or outcome; replay with the same effect identity dispatched once and
+recorded exactly one terminal outcome.
+
+No merge acceptance is claimed by this receipt yet. Clean-checkout CI, the PR
+merge, and the full merged-candidate SHA remain external closure evidence. The
+in-process `EffectJournal` is the reference implementation used by the matrix;
+production external sinks must implement the same atomic claim/reconcile port
+with their durable idempotency store and stable external effect IDs.
+
 ## Verification Record
 
 | Command or gate | Result |
@@ -139,9 +164,11 @@ different result or stale revision conflicts.
 | `phase_h03_policy_governor_test.exs` | 8 tests, 0 failures |
 | `phase_h03_fencing_idempotency_test.exs` | 9 tests, 0 failures |
 | `phase_h03_tool_gateway_test.exs` | 8 tests, 0 failures |
-| Phase H03 harness through Section 3.4 | 33 tests, 0 failures |
+| `phase_h03_integration_test.exs` | 6 tests, 0 failures |
+| Phase H03 harness through Section 3.5 | 39 tests, 0 failures |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
+| `mix precommit` | 442 tests, 0 failures; pass |
 
 ## Gate HG3
 

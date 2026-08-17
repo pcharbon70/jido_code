@@ -83,15 +83,15 @@ Back to plan: [README](./README.md)
     This final section proves complete mediation under race, replay, and
     hostile-input conditions.
 
-    - [ ] 3.5.1 Task {#sah-p03-integration} [repo: jido_code] [after: {#sah-p03-fencing-sinks}] - Execute the reference-monitor matrices.
+    - [x] 3.5.1 Task {#sah-p03-integration} [repo: jido_code] [after: {#sah-p03-fencing-sinks}] - Execute the reference-monitor matrices.
 
       This task certifies the tool boundary before production sandboxes are
       authorized.
 
-      - [ ] 3.5.1.1 Subtask {#sah-p03-3-5-1-1} - Prove every catalog tool validates closed schemas, rejects malformed and scope-expanding arguments without an effect, and returns its safe error vocabulary.
-      - [ ] 3.5.1.2 Subtask {#sah-p03-3-5-1-2} - Race authorization revocation, lease expiry, and fence supersession against effect dispatch; prove 100 percent stale-token rejection and no-effect outcomes for race-time denials.
-      - [ ] 3.5.1.3 Subtask {#sah-p03-3-5-1-3} - Replay idempotent starts and outcomes, kill processes between commit and effect, and prove no duplicate effects and exactly one terminal outcome.
-      - [ ] 3.5.1.4 Subtask {#sah-p03-3-5-1-4} - Run hostile-input fixtures (path traversal, symlink, shell injection, unauthorized destinations) plus prior suites, architecture scans, and `mix precommit`.
+      - [x] 3.5.1.1 Subtask {#sah-p03-3-5-1-1} - Prove every catalog tool validates closed schemas, rejects malformed and scope-expanding arguments without an effect, and returns its safe error vocabulary.
+      - [x] 3.5.1.2 Subtask {#sah-p03-3-5-1-2} - Race authorization revocation, lease expiry, and fence supersession against effect dispatch; prove 100 percent stale-token rejection and no-effect outcomes for race-time denials.
+      - [x] 3.5.1.3 Subtask {#sah-p03-3-5-1-3} - Replay idempotent starts and outcomes, kill processes between commit and effect, and prove no duplicate effects and exactly one terminal outcome.
+      - [x] 3.5.1.4 Subtask {#sah-p03-3-5-1-4} - Run hostile-input fixtures (path traversal, symlink, shell injection, unauthorized destinations) plus prior suites, architecture scans, and `mix precommit`.
 
     - [ ] 3.5.2 Task {#sah-p03-phase-receipt} [repo: jido_code] [after: {#sah-p03-integration}] - Publish the Phase 3 tool-monitor receipt.
 
@@ -99,7 +99,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/harness-phase-03-receipt.md` and authorizes Phase 4
       only from the pinned merged baseline.
 
-      - [ ] 3.5.2.1 Subtask {#sah-p03-3-5-2-1} - Record catalog versions and schema digests, capability derivation rules, sink inventory with fence checks, and the candidate commit.
-      - [ ] 3.5.2.2 Subtask {#sah-p03-3-5-2-2} - Attach validation, race, replay, and hostile-input results with known limitations.
-      - [ ] 3.5.2.3 Subtask {#sah-p03-3-5-2-3} - Keep HG3 blocked while any host-controlled effect can bypass the monitor, any sink accepts a stale fence, or any proposal shape stays open.
+      - [x] 3.5.2.1 Subtask {#sah-p03-3-5-2-1} - Record catalog versions and schema digests, capability derivation rules, sink inventory with fence checks, and the candidate commit.
+      - [x] 3.5.2.2 Subtask {#sah-p03-3-5-2-2} - Attach validation, race, replay, and hostile-input results with known limitations.
+      - [x] 3.5.2.3 Subtask {#sah-p03-3-5-2-3} - Keep HG3 blocked while any host-controlled effect can bypass the monitor, any sink accepts a stale fence, or any proposal shape stays open.
       - [ ] 3.5.2.4 Subtask {#sah-p03-3-5-2-4} - Pin the merged candidate commit before authorizing Phase 4.
