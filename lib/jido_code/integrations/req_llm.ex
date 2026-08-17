@@ -13,7 +13,9 @@ defmodule JidoCode.Integrations.ReqLLM do
   alias JidoCode.Factory.Model.Dispatch
   alias JidoCode.Factory.Model.Response
   alias JidoCode.Factory.Model.StreamEvent, as: ModelStreamEvent
+  alias JidoCode.Factory.Model.SubscriptionProfile
   alias JidoCode.Factory.Model.Usage
+  alias JidoCode.Integrations.OAuthFileLease
 
   @derive {Inspect, only: []}
   @enforce_keys [:client]
@@ -42,15 +44,17 @@ defmodule JidoCode.Integrations.ReqLLM do
   def generate(%__MODULE__{} = adapter, %Dispatch{} = dispatch) do
     with :ok <- validate_dispatch(dispatch),
          {:ok, _model} <- validate_catalog_model(dispatch) do
-      case adapter.client.generate_text(
-             Dispatch.model_spec(dispatch),
-             dispatch.request.messages,
-             dispatch.options
-           ) do
-        {:ok, %ReqLLM.Response{} = response} -> normalize(response, dispatch)
-        {:error, error} -> {:error, normalize_error(error, :req_llm_generate)}
-        _invalid -> {:error, AdapterError.new(:corrupt, :req_llm_generate)}
-      end
+      with_credential_lock(dispatch, fn ->
+        case adapter.client.generate_text(
+               Dispatch.model_spec(dispatch),
+               dispatch.request.messages,
+               dispatch.options
+             ) do
+          {:ok, %ReqLLM.Response{} = response} -> normalize(response, dispatch)
+          {:error, error} -> {:error, normalize_error(error, :req_llm_generate)}
+          _invalid -> {:error, AdapterError.new(:corrupt, :req_llm_generate)}
+        end
+      end)
     end
   rescue
     _error -> {:error, AdapterError.new(:unavailable, :req_llm_generate)}
@@ -63,15 +67,17 @@ defmodule JidoCode.Integrations.ReqLLM do
   def stream(%__MODULE__{} = adapter, %Dispatch{} = dispatch) do
     with :ok <- validate_dispatch(dispatch),
          {:ok, _model} <- validate_catalog_model(dispatch) do
-      case adapter.client.stream_text(
-             Dispatch.model_spec(dispatch),
-             dispatch.request.messages,
-             dispatch.options
-           ) do
-        {:ok, %ReqLLM.StreamResponse{} = response} -> {:ok, response}
-        {:error, error} -> {:error, normalize_error(error, :req_llm_stream)}
-        _invalid -> {:error, AdapterError.new(:corrupt, :req_llm_stream)}
-      end
+      with_credential_lock(dispatch, fn ->
+        case adapter.client.stream_text(
+               Dispatch.model_spec(dispatch),
+               dispatch.request.messages,
+               dispatch.options
+             ) do
+          {:ok, %ReqLLM.StreamResponse{} = response} -> {:ok, response}
+          {:error, error} -> {:error, normalize_error(error, :req_llm_stream)}
+          _invalid -> {:error, AdapterError.new(:corrupt, :req_llm_stream)}
+        end
+      end)
     end
   rescue
     _error -> {:error, AdapterError.new(:unavailable, :req_llm_stream)}
@@ -102,7 +108,8 @@ defmodule JidoCode.Integrations.ReqLLM do
   def close(_adapter, _handle), do: :ok
 
   defp normalize(response, dispatch) do
-    with :ok <- reject_cache_hit(response),
+    with :ok <- validate_response_identity(response, dispatch),
+         :ok <- reject_cache_hit(response),
          :ok <- reject_repairs(response),
          :ok <- validate_no_tool_calls(response) do
       classification = ReqLLM.Response.classify(response)
@@ -120,11 +127,31 @@ defmodule JidoCode.Integrations.ReqLLM do
     end
   end
 
+  defp validate_response_identity(%ReqLLM.Response{model: model}, dispatch) do
+    if model == dispatch.profile.model,
+      do: :ok,
+      else: {:error, AdapterError.new(:corrupt, :req_llm_response_model)}
+  end
+
   defp validate_dispatch(%Dispatch{} = dispatch) do
     if Dispatch.valid?(dispatch),
       do: :ok,
       else: {:error, AdapterError.new(:unauthorized, :req_llm_dispatch)}
   end
+
+  defp with_credential_lock(
+         %Dispatch{
+           profile: %SubscriptionProfile{
+             credential_source: :oauth_file,
+             oauth_file_reference: reference
+           }
+         },
+         function
+       ) do
+    OAuthFileLease.with_lock(reference, function)
+  end
+
+  defp with_credential_lock(%Dispatch{}, function), do: function.()
 
   defp validate_catalog_model(dispatch) do
     case ReqLLM.model(Dispatch.model_spec(dispatch)) do
@@ -254,6 +281,7 @@ defmodule JidoCode.Integrations.ReqLLM do
       provider_cache_posture: dispatch.profile.provider_cache_posture,
       structured_effects: dispatch.profile.structured_effects,
       cost_enforcement: dispatch.profile.cost_enforcement,
+      recovery_mode: Map.get(dispatch.profile, :recovery_mode, :new_interaction_from_graph),
       cost_unit: :micro_usd
     }
   end

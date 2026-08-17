@@ -8,8 +8,8 @@ defmodule JidoCode.Factory.ModelGateway do
   """
 
   alias JidoCode.Factory.AdapterError
-  alias JidoCode.Factory.Model.BufferedProfile
   alias JidoCode.Factory.Model.Dispatch
+  alias JidoCode.Factory.Model.Profile
   alias JidoCode.Factory.Model.Request
   alias JidoCode.Factory.Model.Response
   alias JidoCode.Factory.Model.Stream
@@ -33,7 +33,8 @@ defmodule JidoCode.Factory.ModelGateway do
 
   def new(adapter_module, adapter, options) when is_atom(adapter_module) and is_list(options) do
     with true <- adapter?(adapter_module),
-         %BufferedProfile{} = profile <- Keyword.get(options, :profile),
+         profile <- Keyword.get(options, :profile),
+         true <- Profile.valid?(profile),
          {secret_module, secret_provider} when is_atom(secret_module) <-
            Keyword.get(options, :secret_provider),
          true <- secret_provider?(secret_module),

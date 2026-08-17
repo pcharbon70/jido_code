@@ -4,24 +4,28 @@ defmodule JidoCode.Factory.ModelAuthority do
   @behaviour JidoCode.Factory.Ports.ModelAuthority
 
   alias JidoCode.Factory.AdapterError
-  alias JidoCode.Factory.Model.BufferedProfile
+  alias JidoCode.Factory.Model.Profile
   alias JidoCode.Factory.Model.Request
 
   @stages ~w[before_credential_release before_dispatch]a
 
   @impl true
-  def authorize(options, stage, %BufferedProfile{} = profile, %Request{} = request)
+  def authorize(options, stage, profile, %Request{} = request)
       when is_list(options) and stage in @stages do
-    case Keyword.get(options, :validator) do
-      validator when is_function(validator, 3) ->
-        case validator.(stage, profile, request) do
-          :ok -> :ok
-          {:error, %AdapterError{} = error} -> {:error, error}
-          _other -> denied(stage)
-        end
+    if Profile.valid?(profile) do
+      case Keyword.get(options, :validator) do
+        validator when is_function(validator, 3) ->
+          case validator.(stage, profile, request) do
+            :ok -> :ok
+            {:error, %AdapterError{} = error} -> {:error, error}
+            _other -> denied(stage)
+          end
 
-      _missing ->
-        {:error, AdapterError.new(:unavailable, stage)}
+        _missing ->
+          {:error, AdapterError.new(:unavailable, stage)}
+      end
+    else
+      denied(stage)
     end
   rescue
     _error -> {:error, AdapterError.new(:unavailable, stage)}

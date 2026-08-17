@@ -16,7 +16,8 @@ is not authorized from this document yet.
 | Section 2.1 | `43b84e0` - compile revision-pinned model context |
 | Section 2.2 | `8f035e1` - add governed ReqLLM model gateway |
 | Section 2.3 | `09d5c75` - harden buffered model profile |
-| Section 2.4 | This section's exact commit is recorded by Git history |
+| Section 2.4 | `7ff236f` - supervise model response streams |
+| Section 2.5 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## ReqLLM Dependency Review
@@ -144,6 +145,42 @@ replace the first committed result; the result projects to the Phase 1 outcome
 attributes, whose existing invocation sequence and graph revision guards make
 the durable winner unique.
 
+## Host-Controlled Subscription Profiles
+
+The candidate pins three ReqLLM 1.20.0 subscription contracts without a
+provider, model, endpoint, access-mode, credential-class, or billing fallback:
+
+| Contract | Exact provider/model | Credential sources | Release boundary |
+| --- | --- | --- | --- |
+| `req_llm-1.20.0/openai-codex-oauth/1` | `openai_codex:gpt-5.3-codex` | Explicit access token or enrolled OAuth file | Token expires within one hour; OAuth file is developer-local only |
+| `req_llm-1.20.0/anthropic-subscription/1` | `anthropic:claude-sonnet-4-5-20250929` | Explicit access token or enrolled OAuth file | Token expires within one hour; OAuth file is developer-local only |
+| `req_llm-1.20.0/github-copilot/1` | `github_copilot:gpt-4o-mini` | Explicit token or developer-local `gh auth token` | `gh` output is supplied explicitly in ReqLLM token mode |
+
+Every profile requires graph-owned provider-terms evidence and a consented live
+verification IRI before enrollment. Live provider calls remain opt-in behind
+the explicit `JIDO_CODE_LIVE_SUBSCRIPTION_TESTS=1`, `consent: :granted`, and
+`live_test: true` gate; the default test suite contacts no provider and consumes
+no subscription usage. Acceptance of provider terms and live verification are
+operator-owned release evidence, not assertions made by this candidate.
+
+OAuth file enrollment accepts only an explicit absolute regular file outside
+the supplied repository, store, and sandbox roots. It rejects symlinks in the
+file or any path component, mismatched ownership, and group/world permissions,
+and revalidates those invariants at every credential release. ReqLLM is the sole
+refresh owner for this developer-local mode, while a node-visible exclusive
+lease rejects overlapping refresh attempts. Managed and multi-user file-backed
+OAuth remain blocked until a dedicated broker can own refresh and supply a
+short-lived access token. Current-directory and ambient OAuth discovery are not
+admitted dispatch paths.
+
+OpenAI Codex dispatch forces `store: false`, SSE, and no reusable WebSocket
+session. GitHub Copilot dispatch forces explicit token mode. All subscription
+profiles retain the buffered profile's no-cache, zero-retry, bounded-timeout,
+metadata-only-telemetry, no-repair, and no-tool controls. Provider response and
+conversation identifiers are bounded external call metadata only; they are
+never sent as continuation options, and recovery is recorded as a new explicit
+interaction reconstructed from graph state.
+
 ## Section 2.2 Verification Record
 
 | Command or gate | Result |
@@ -154,6 +191,8 @@ the durable winner unique.
 | `phase_h02_model_gateway_test.exs` | 6 tests, 0 failures |
 | `phase_h02_buffered_profile_test.exs` | 9 tests, 0 failures |
 | `phase_h02_streaming_test.exs` | 6 tests, 0 failures |
+| `phase_h02_subscription_profile_test.exs` | 11 tests, 0 failures |
+| Complete Phase H02 harness through Section 2.5 | 37 tests, 0 failures |
 
 ## Gate HG2
 

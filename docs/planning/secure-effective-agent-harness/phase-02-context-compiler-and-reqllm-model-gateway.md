@@ -88,20 +88,20 @@ Back to plan: [README](./README.md)
       - [x] 2.4.1.2 Subtask {#sah-p02-2-4-1-2} - Own enumeration in one supervised stream-consumer task that closes the retained response in an `after` block on success, error, early stop, and cancellation, and never materializes a second view.
       - [x] 2.4.1.3 Subtask {#sah-p02-2-4-1-3} - On committed cancellation or lease loss, have a separate coordinator close the stream, wait a finite interval, and forcibly terminate the consumer, with revision and sequence guards allowing exactly one completed, cancelled, timed-out, or failed outcome to win.
 
-  - [ ] 2.5 Section - Implement host-controlled subscription profiles.
+  - [x] 2.5 Section - Implement host-controlled subscription profiles.
 
     This section extends OAuth and subscription access without ambient
     discovery and with explicit enrollment.
 
-    - [ ] 2.5.1 Task {#sah-p02-subscription-profiles} [repo: jido_code] [after: {#sah-p02-streaming}] - Add reviewed OAuth/subscription access paths.
+    - [x] 2.5.1 Task {#sah-p02-subscription-profiles} [repo: jido_code] [after: {#sah-p02-streaming}] - Add reviewed OAuth/subscription access paths.
 
       This task gives subscription developers host-controlled mediation
       where providers support it, under pinned integration contracts.
 
-      - [ ] 2.5.1.1 Subtask {#sah-p02-2-5-1-1} - Enroll explicit short-lived access tokens, developer-local credential adapters wrapping `gh auth token`, and explicitly enrolled OAuth files that live outside the repository, store, and sandbox, are non-symlinked, permission-checked, and owner-verified, with default current-directory discovery disabled.
-      - [ ] 2.5.1.2 Subtask {#sah-p02-2-5-1-2} - Limit direct file-backed OAuth refresh to explicit developer-local profiles; block managed or multi-user deployments until a dedicated broker owns refresh and supplies access tokens, and prevent one profile from letting ReqLLM and a provider CLI refresh the same credential file concurrently.
-      - [ ] 2.5.1.3 Subtask {#sah-p02-2-5-1-3} - Pin each subscription path (OpenAI Codex OAuth, Anthropic subscription compatibility, GitHub Copilot tokens) as a version-sensitive integration contract with consent-gated live tests and provider-terms review before release.
-      - [ ] 2.5.1.4 Subtask {#sah-p02-2-5-1-4} - Keep provider conversation and response IDs as external references only; recovery always starts another explicit interaction from graph state.
+      - [x] 2.5.1.1 Subtask {#sah-p02-2-5-1-1} - Enroll explicit short-lived access tokens, developer-local credential adapters wrapping `gh auth token`, and explicitly enrolled OAuth files that live outside the repository, store, and sandbox, are non-symlinked, permission-checked, and owner-verified, with default current-directory discovery disabled.
+      - [x] 2.5.1.2 Subtask {#sah-p02-2-5-1-2} - Limit direct file-backed OAuth refresh to explicit developer-local profiles; block managed or multi-user deployments until a dedicated broker owns refresh and supplies access tokens, and prevent one profile from letting ReqLLM and a provider CLI refresh the same credential file concurrently.
+      - [x] 2.5.1.3 Subtask {#sah-p02-2-5-1-3} - Pin each subscription path (OpenAI Codex OAuth, Anthropic subscription compatibility, GitHub Copilot tokens) as a version-sensitive integration contract with consent-gated live tests and provider-terms review before release.
+      - [x] 2.5.1.4 Subtask {#sah-p02-2-5-1-4} - Keep provider conversation and response IDs as external references only; recovery always starts another explicit interaction from graph state.
 
   - [ ] 2.6 Section - Phase 2 Integration Tests.
 
