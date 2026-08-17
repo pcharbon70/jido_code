@@ -15,6 +15,7 @@ request merges. Phase 5 is not authorized from this document yet.
 | Phase baseline and merged HG3 closure | `2b7d5478dcc39df14e39ff3cede400c8f98fd1cc` |
 | Accepted Phase 3 candidate | `779afa09763c3d0fb698e4d29b83d99d654fd88e` |
 | Section 4.1 | This section's exact commit is recorded by Git history |
+| Section 4.2 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Tiered Production Sandbox
@@ -54,12 +55,40 @@ profile, and limits digests. Execution finalization turns that bounded
 observation into the existing `SandboxInstance` graph shape and sandbox
 activity provenance without recording provider handles or local paths.
 
+## Credential Broker
+
+Credential release is serialized through a broker that rechecks the live
+actor and delegation, repository and provider, active lease and fence,
+attempt, invocation, profile and credential revisions, revocation generation,
+and expiry at its linearization point. A request must match the policy's exact
+operation and audience and can request only a non-empty subset of its scopes.
+The resulting permit binds those facts, the trusted connector identity, and
+the credential class without containing credential bytes or the vault key.
+
+Only provider-native restrictions, proven token exchange, or an attaching
+proxy may claim normal credential attenuation. A managed delegated CLI must
+use the broker helper and is serialized by the broker so refresh ownership and
+checkout cannot race. A developer-local CLI reference requires explicit
+consent, sends only the reference IRI to an existing CLI session, never checks
+out bytes, and cannot make a managed-fleet claim.
+
+Material moves directly from the vault/helper callback into a digest-pinned,
+trusted direct-delivery connector callback within the broker process. The
+caller receives only a bounded safe result, the opaque permit, and the
+restrictions actually enforced. Single-use permits are consumed before
+checkout and remain consumed on downstream ambiguity. Repository payloads and
+connector results are bounded and rejected if they contain credential-shaped
+keys or secret material. The abstract ports define this trust boundary; real
+vault and provider connectors remain deployment integrations and must retain
+equivalent process and OS isolation.
+
 ## Verification Record
 
 | Command or gate | Result |
 | --- | --- |
 | `phase_h04_sandbox_tiers_test.exs` | 8 tests, 0 failures |
 | Affected Phase 8 sandbox and provenance suites | 6 tests, 0 failures |
+| `phase_h04_credential_broker_test.exs` | 7 tests, 0 failures |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 

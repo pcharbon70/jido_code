@@ -34,21 +34,21 @@ Back to plan: [README](./README.md)
       - [x] 4.1.1.4 Subtask {#sah-p04-4-1-1-4} - Capture artifacts without creating an undeclared blob store: small classified text under accepted RDF literal limits, large or binary candidates as provider-owned immutable URIs with media type, byte count, and digest, retained for the verifier and accepted retention period before destruction.
       - [x] 4.1.1.5 Subtask {#sah-p04-4-1-1-5} - Record `SandboxInstance` lifecycle observations with image, limits, and attempt identity through the execution reporting commands.
 
-  - [ ] 4.2 Section - Implement the credential broker.
+  - [x] 4.2 Section - Implement the credential broker.
 
     This section makes credential release a linearizable, scoped, auditable
     decision that never exposes material to untrusted code.
 
-    - [ ] 4.2.1 Task {#sah-p04-credential-broker} [repo: jido_code] [after: {#sah-p04-sandbox-tiers}] - Implement brokered credential release.
+    - [x] 4.2.1 Task {#sah-p04-credential-broker} [repo: jido_code] [after: {#sah-p04-sandbox-tiers}] - Implement brokered credential release.
 
       This task separates secret material from prompts, agent state,
       worktrees, sandboxes, tool arguments, graph literals, and telemetry.
 
-      - [ ] 4.2.1.1 Subtask {#sah-p04-4-2-1-1} - Authorize release of a graph-held `CredentialReference` against actor and delegated identity, repository and provider, exact operation and audience, minimum scopes, release expiry and optional single use, attempt, lease, and fencing token, and trusted adapter identity.
-      - [ ] 4.2.1.2 Subtask {#sah-p04-4-2-1-2} - Record credential class and the restrictions the provider or proxy actually enforces; describe attenuation only for proven exchanges or credential-attaching proxies.
-      - [ ] 4.2.1.3 Subtask {#sah-p04-4-2-1-3} - Deliver material directly to the trusted connector, never to the model or a host-controlled general sandbox; recheck profile and credential revisions, owner and delegation, revocation generation, and invocation identity at the linearization point and issue one release permit.
-      - [ ] 4.2.1.4 Subtask {#sah-p04-4-2-1-4} - For developer-local CLI use, record only an opaque reference to the existing CLI login under explicit consent, copy no token bytes anywhere, and keep this mode ineligible for managed fleet claims.
-      - [ ] 4.2.1.5 Subtask {#sah-p04-4-2-1-5} - Keep managed delegated-CLI credentials in a broker or helper that repository tool descendants cannot read, copy, or invoke, with refresh ownership serialized per credential and no writable shared cache in the untrusted process tree.
+      - [x] 4.2.1.1 Subtask {#sah-p04-4-2-1-1} - Authorize release of a graph-held `CredentialReference` against actor and delegated identity, repository and provider, exact operation and audience, minimum scopes, release expiry and optional single use, attempt, lease, and fencing token, and trusted adapter identity.
+      - [x] 4.2.1.2 Subtask {#sah-p04-4-2-1-2} - Record credential class and the restrictions the provider or proxy actually enforces; describe attenuation only for proven exchanges or credential-attaching proxies.
+      - [x] 4.2.1.3 Subtask {#sah-p04-4-2-1-3} - Deliver material directly to the trusted connector, never to the model or a host-controlled general sandbox; recheck profile and credential revisions, owner and delegation, revocation generation, and invocation identity at the linearization point and issue one release permit.
+      - [x] 4.2.1.4 Subtask {#sah-p04-4-2-1-4} - For developer-local CLI use, record only an opaque reference to the existing CLI login under explicit consent, copy no token bytes anywhere, and keep this mode ineligible for managed fleet claims.
+      - [x] 4.2.1.5 Subtask {#sah-p04-4-2-1-5} - Keep managed delegated-CLI credentials in a broker or helper that repository tool descendants cannot read, copy, or invoke, with refresh ownership serialized per credential and no writable shared cache in the untrusted process tree.
 
   - [ ] 4.3 Section - Implement the egress broker.
 
