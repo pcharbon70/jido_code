@@ -15,7 +15,8 @@ from this document yet.
 | Phase baseline and merged HG2 closure | `3be8e017849a56da286e143eb9d61c638caaaf5e` |
 | Accepted Phase 2 candidate | `49453d05fe72c45431420c05591f89d4ff09f0a8` |
 | Section 3.1 | `c2a61e1` - publish closed tool catalog |
-| Section 3.2 | This section's exact commit is recorded by Git history |
+| Section 3.2 | `31cd7cb` - govern tool action proposals |
+| Section 3.3 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Closed Tool Catalog
@@ -80,13 +81,34 @@ resource ceilings, and approval evidence. It repeats the same decision
 immediately before effect. The returned explanation contains no reusable token;
 a live capability and current facts are always required for revalidation.
 
+## Invocation-Before-Effect Commit
+
+`JidoCode.Factory.ToolGateway` admits a closed proposal, constructs a bounded
+request, and requires an accepted durable start receipt before it can call an
+adapter. The Factory-owned Knowledge ledger uses only the public
+`JidoCode.Knowledge` facade: one accepted start command contains the durable
+`ActionProposal`, `ToolInvocation`, authorization provenance, and audit
+metadata; one accepted outcome command records the bounded terminal status and
+result. Neither command receives raw arguments, and receipt inspection conceals
+the opaque invocation context.
+
+Pre-admission rejection creates no start, outcome, or effect. After a committed
+start, the gateway fetches current facts and repeats exact reference-monitor
+validation. A race-time denial records a rejected no-effect outcome. Adapter
+errors and corrupt results become a single safe failed outcome; a failed start
+prevents dispatch, and an unavailable outcome commit is returned explicitly.
+The durable authorization digest explains why the start was admitted but is not
+accepted as effect authority: dispatch still requires the live capability and
+immediate current-state revalidation.
+
 ## Verification Record
 
 | Command or gate | Result |
 | --- | --- |
 | `phase_h03_tool_catalog_test.exs` | 8 tests, 0 failures |
 | `phase_h03_policy_governor_test.exs` | 8 tests, 0 failures |
-| Phase H03 harness through Section 3.2 | 16 tests, 0 failures |
+| `phase_h03_tool_gateway_test.exs` | 7 tests, 0 failures |
+| Phase H03 harness through Section 3.3 | 23 tests, 0 failures |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 

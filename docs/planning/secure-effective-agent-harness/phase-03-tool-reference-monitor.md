@@ -48,20 +48,20 @@ Back to plan: [README](./README.md)
       - [x] 3.2.1.3 Subtask {#sah-p03-3-2-1-3} - Keep execution capabilities free of decision, acceptance, ontology, security-policy, durable-memory, verification, and publication authority.
       - [x] 3.2.1.4 Subtask {#sah-p03-3-2-1-4} - Revalidate current policy, revisions, capability, and fence immediately before every effect; a race-time denial after an admitted start becomes an authorized no-effect outcome.
 
-  - [ ] 3.3 Section - Implement invocation-before-effect commits.
+  - [x] 3.3 Section - Implement invocation-before-effect commits.
 
     This section records why each start was admitted and every bounded
     outcome through the accepted Knowledge facade.
 
-    - [ ] 3.3.1 Task {#sah-p03-invocation-commit} [repo: jido_code] [after: {#sah-p03-action-proposals}] - Commit starts and outcomes around every effect.
+    - [x] 3.3.1 Task {#sah-p03-invocation-commit} [repo: jido_code] [after: {#sah-p03-action-proposals}] - Commit starts and outcomes around every effect.
 
       This task makes authorization provenance durable without becoming
       reusable effect authority.
 
-      - [ ] 3.3.1.1 Subtask {#sah-p03-3-3-1-1} - Atomically write the bounded classified proposal digest, started invocation, command authorization provenance, and audit in one commit through `RecordToolInvocationStart` and the accepted writer.
-      - [ ] 3.3.1.2 Subtask {#sah-p03-3-3-1-2} - Record the bounded outcome through the same facade after the effect, with digests and status, and never persist raw secret-bearing arguments.
-      - [ ] 3.3.1.3 Subtask {#sah-p03-3-3-1-3} - Keep pre-admission rejections as the accepted concealed transient receipt unless a separate bounded rejection-audit protocol is later accepted.
-      - [ ] 3.3.1.4 Subtask {#sah-p03-3-3-1-4} - Prove persisted authorization explains the start decision but can never substitute for the immediate pre-effect revalidation.
+      - [x] 3.3.1.1 Subtask {#sah-p03-3-3-1-1} - Atomically write the bounded classified proposal digest, started invocation, command authorization provenance, and audit in one commit through `RecordToolInvocationStart` and the accepted writer.
+      - [x] 3.3.1.2 Subtask {#sah-p03-3-3-1-2} - Record the bounded outcome through the same facade after the effect, with digests and status, and never persist raw secret-bearing arguments.
+      - [x] 3.3.1.3 Subtask {#sah-p03-3-3-1-3} - Keep pre-admission rejections as the accepted concealed transient receipt unless a separate bounded rejection-audit protocol is later accepted.
+      - [x] 3.3.1.4 Subtask {#sah-p03-3-3-1-4} - Prove persisted authorization explains the start decision but can never substitute for the immediate pre-effect revalidation.
 
   - [ ] 3.4 Section - Enforce fencing and idempotency at every sink.
 
