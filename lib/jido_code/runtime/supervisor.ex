@@ -11,6 +11,7 @@ defmodule JidoCode.Runtime.Supervisor do
   def init(_options) do
     children = [
       JidoCode.Runtime.JidoInstance,
+      JidoCode.Runtime.JidoHarness.RunRegistry,
       {Registry, keys: :unique, name: JidoCode.Runtime.AttemptRegistry},
       {DynamicSupervisor,
        name: JidoCode.Runtime.AttemptSupervisor,

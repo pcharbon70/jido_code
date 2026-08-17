@@ -5,7 +5,7 @@ defmodule JidoCode.MixProject do
     [
       app: :jido_code,
       version: "0.1.0",
-      elixir: "~> 1.18",
+      elixir: "~> 1.19",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -54,6 +54,11 @@ defmodule JidoCode.MixProject do
       {:decimal, "~> 3.1", override: true},
       {:rdf, "~> 2.1"},
       {:jido, "== 2.3.2"},
+      # JidoHarness 2.0 is not released on Hex. The reviewed source is pinned
+      # exactly; its archive digest is enforced by the adoption contract.
+      {:jido_harness,
+       git: "https://github.com/agentjido/jido_harness.git",
+       ref: "e41fc1651282469f2db4219a48d9f7feef1b0dbc"},
       {:req_llm, "== 1.20.0"},
       {:triple_store,
        git: "https://github.com/pcharbon70/triple_store.git",
