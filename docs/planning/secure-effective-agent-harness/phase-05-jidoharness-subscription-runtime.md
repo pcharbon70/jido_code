@@ -34,20 +34,20 @@ Back to plan: [README](./README.md)
       - [x] 5.1.1.3 Subtask {#sah-p05-5-1-1-3} - Require disabled, memory-only, or separately owned journals inaccessible to tool descendants, with per-record and total retention bounds and propagation through every nested process; disposable disk journals remain developer-local opt-in only and are disclosed.
       - [x] 5.1.1.4 Subtask {#sah-p05-5-1-1-4} - Require verified deny-all-tools and bounded-tool profiles with conformance tests; an empty tool list must mean no tools, not a missing flag.
 
-  - [ ] 5.2 Section - Implement the delegated runtime adapter.
+  - [x] 5.2 Section - Implement the delegated runtime adapter.
 
     This section maps one Harness run or session turn to one delegated
     execution activity with disposable references.
 
-    - [ ] 5.2.1 Task {#sah-p05-harness-adapter} [repo: jido_code] [after: {#sah-p05-adoption-gates}] - Implement `JidoCode.Runtime.JidoHarnessAdapter` and run registry.
+    - [x] 5.2.1 Task {#sah-p05-harness-adapter} [repo: jido_code] [after: {#sah-p05-adoption-gates}] - Implement `JidoCode.Runtime.JidoHarnessAdapter` and run registry.
 
       This task keeps JidoHarness behind the execution-runtime port and out
       of Knowledge and model-port dependencies.
 
-      - [ ] 5.2.1.1 Subtask {#sah-p05-5-2-1-1} - Implement the adapter against the existing execution-runtime port so one Harness run or session turn is a delegated execution activity inside one graph-authorized attempt.
-      - [ ] 5.2.1.2 Subtask {#sah-p05-5-2-1-2} - Keep an ephemeral run registry valid only within one BEAM lifetime; run IDs, session IDs, provider session IDs, event cursors, process IDs, and journals are never required for restart recovery.
-      - [ ] 5.2.1.3 Subtask {#sah-p05-5-2-1-3} - Map Harness lifecycle and normalized terminal results to graph attempts; treat missing CLI processes after restart as runtime diagnostics classified through the accepted transition vocabulary (recover, supersede, propagated cancellation, abandon, retry-later), never an invented `crashed` state.
-      - [ ] 5.2.1.4 Subtask {#sah-p05-5-2-1-4} - Record the delegated run, CLI and provider versions, bounded normalized lifecycle observations, final workspace digest, candidate diff, and artifacts; keep CLI event records observations rather than proof of complete tool mediation, and never adopt provider-internal context claims.
+      - [x] 5.2.1.1 Subtask {#sah-p05-5-2-1-1} - Implement the adapter against the existing execution-runtime port so one Harness run or session turn is a delegated execution activity inside one graph-authorized attempt.
+      - [x] 5.2.1.2 Subtask {#sah-p05-5-2-1-2} - Keep an ephemeral run registry valid only within one BEAM lifetime; run IDs, session IDs, provider session IDs, event cursors, process IDs, and journals are never required for restart recovery.
+      - [x] 5.2.1.3 Subtask {#sah-p05-5-2-1-3} - Map Harness lifecycle and normalized terminal results to graph attempts; treat missing CLI processes after restart as runtime diagnostics classified through the accepted transition vocabulary (recover, supersede, propagated cancellation, abandon, retry-later), never an invented `crashed` state.
+      - [x] 5.2.1.4 Subtask {#sah-p05-5-2-1-4} - Record the delegated run, CLI and provider versions, bounded normalized lifecycle observations, final workspace digest, candidate diff, and artifacts; keep CLI event records observations rather than proof of complete tool mediation, and never adopt provider-internal context claims.
 
   - [ ] 5.3 Section - Implement developer-local delegated mode.
 
