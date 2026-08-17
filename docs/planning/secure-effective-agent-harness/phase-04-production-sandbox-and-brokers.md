@@ -50,20 +50,20 @@ Back to plan: [README](./README.md)
       - [x] 4.2.1.4 Subtask {#sah-p04-4-2-1-4} - For developer-local CLI use, record only an opaque reference to the existing CLI login under explicit consent, copy no token bytes anywhere, and keep this mode ineligible for managed fleet claims.
       - [x] 4.2.1.5 Subtask {#sah-p04-4-2-1-5} - Keep managed delegated-CLI credentials in a broker or helper that repository tool descendants cannot read, copy, or invoke, with refresh ownership serialized per credential and no writable shared cache in the untrusted process tree.
 
-  - [ ] 4.3 Section - Implement the egress broker.
+  - [x] 4.3 Section - Implement the egress broker.
 
     This section makes network access an explicit, authenticated, bounded
     policy decision.
 
-    - [ ] 4.3.1 Task {#sah-p04-egress-broker} [repo: jido_code] [after: {#sah-p04-credential-broker}] - Implement default-deny brokered egress.
+    - [x] 4.3.1 Task {#sah-p04-egress-broker} [repo: jido_code] [after: {#sah-p04-credential-broker}] - Implement default-deny brokered egress.
 
       This task removes arbitrary network reachability from injected or
       compromised workloads.
 
-      - [ ] 4.3.1.1 Subtask {#sah-p04-4-3-1-1} - Deny network access by default and require authenticated broker passage for all required traffic.
-      - [ ] 4.3.1.2 Subtask {#sah-p04-4-3-1-2} - Enforce destination, method, protocol, data classification, byte, redirect, and rate policy at the broker, evaluating both integrity and confidentiality axes.
-      - [ ] 4.3.1.3 Subtask {#sah-p04-4-3-1-3} - Block loopback, private, link-local, and cloud-metadata ranges, unsafe URL schemes, uncontrolled DNS, and arbitrary package registries; support controlled mirrors and explicitly approved destinations only.
-      - [ ] 4.3.1.4 Subtask {#sah-p04-4-3-1-4} - Make incompatible builds fail visibly rather than receive unrestricted egress, and record egress decisions as bounded audit observations.
+      - [x] 4.3.1.1 Subtask {#sah-p04-4-3-1-1} - Deny network access by default and require authenticated broker passage for all required traffic.
+      - [x] 4.3.1.2 Subtask {#sah-p04-4-3-1-2} - Enforce destination, method, protocol, data classification, byte, redirect, and rate policy at the broker, evaluating both integrity and confidentiality axes.
+      - [x] 4.3.1.3 Subtask {#sah-p04-4-3-1-3} - Block loopback, private, link-local, and cloud-metadata ranges, unsafe URL schemes, uncontrolled DNS, and arbitrary package registries; support controlled mirrors and explicitly approved destinations only.
+      - [x] 4.3.1.4 Subtask {#sah-p04-4-3-1-4} - Make incompatible builds fail visibly rather than receive unrestricted egress, and record egress decisions as bounded audit observations.
 
   - [ ] 4.4 Section - Harden against hostile repositories and exhaustion.
 

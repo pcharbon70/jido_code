@@ -16,6 +16,7 @@ request merges. Phase 5 is not authorized from this document yet.
 | Accepted Phase 3 candidate | `779afa09763c3d0fb698e4d29b83d99d654fd88e` |
 | Section 4.1 | This section's exact commit is recorded by Git history |
 | Section 4.2 | This section's exact commit is recorded by Git history |
+| Section 4.3 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## Tiered Production Sandbox
@@ -82,6 +83,36 @@ keys or secret material. The abstract ports define this trust boundary; real
 vault and provider connectors remain deployment integrations and must retain
 equivalent process and OS isolation.
 
+## Egress Broker
+
+Network remains disabled in every sandbox profile. Required traffic passes
+through a serialized broker with an exact, revisioned policy bound to the
+attempt, invocation, active lease, and fencing token. The broker rechecks that
+authority and expiry for every hop. Policies admit only explicit HTTPS host,
+port, and path-prefix destinations, exact methods, closed integrity and
+confidentiality classes, request and response byte ceilings, redirect limits,
+and per-policy request rates. Package traffic additionally requires a
+destination classified as a controlled mirror; incompatible builds receive a
+stable visible denial instead of broader network access.
+
+The broker rejects URL user information, fragments, path encoding and
+traversal, non-HTTPS schemes, destination changes not separately allowlisted,
+and untrusted resolver identities. Its controlled resolver must return only
+public addresses: loopback, private, shared, link-local, metadata-capable,
+documentation, multicast, reserved, and non-global IPv6 ranges fail closed.
+The trusted transport receives the selected IP separately from the TLS server
+name, preventing a second hostname lookup from turning policy approval into a
+DNS-rebinding bypass. Every redirect repeats destination, DNS, classification,
+rate, and authority checks.
+
+An allow or deny decision is written through a required audit port before any
+transport call. Audit observations contain a destination digest and bounded
+classification and byte metadata, never the URL query or body. Audit failure
+is fail-closed. The response port is byte-capped and may return only bounded
+safe metadata; bodies and headers do not cross back into the general harness
+result. Real DNS, audit, and transport adapters remain deployment integrations
+and must preserve IP-pinned TLS and streaming response limits.
+
 ## Verification Record
 
 | Command or gate | Result |
@@ -89,6 +120,7 @@ equivalent process and OS isolation.
 | `phase_h04_sandbox_tiers_test.exs` | 8 tests, 0 failures |
 | Affected Phase 8 sandbox and provenance suites | 6 tests, 0 failures |
 | `phase_h04_credential_broker_test.exs` | 7 tests, 0 failures |
+| `phase_h04_egress_broker_test.exs` | 10 tests, 0 failures |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 
