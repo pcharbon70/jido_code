@@ -20,20 +20,20 @@ Back to plan: [README](./README.md)
   call a brokered, pinned, recorded interaction before tools or sandboxes
   exist.
 
-  - [ ] 2.1 Section - Implement the revision-pinned context compiler.
+  - [x] 2.1 Section - Implement the revision-pinned context compiler.
 
     This section assembles host context exclusively through reviewed
     queries so the manifest is reproducible and authorized.
 
-    - [ ] 2.1.1 Task {#sah-p02-context-compiler} [repo: jido_code] [after: {#sah-p01-phase-receipt}] - Compile bounded context manifests from reviewed queries.
+    - [x] 2.1.1 Task {#sah-p02-context-compiler} [repo: jido_code] [after: {#sah-p01-phase-receipt}] - Compile bounded context manifests from reviewed queries.
 
       This task produces the exact context package every model invocation
       receives, with ordering, digests, and recorded omissions.
 
-      - [ ] 2.1.1.1 Subtask {#sah-p02-2-1-1-1} - Implement the recommended context order (system contract and role, lease-derived authority summary, task and acceptance criteria, policy and repository metadata, selected graph resources and source excerpts, stable tool definitions, recent structured observations, current objective and checklist) as a deterministic compiler.
-      - [ ] 2.1.1.2 Subtask {#sah-p02-2-1-1-2} - Resolve every item through reviewed catalog queries pinned to repository, snapshot, analysis profile, and graph revisions, and never substitute a branch tip or nearby index for the requested commit.
-      - [ ] 2.1.1.3 Subtask {#sah-p02-2-1-1-3} - Implement just-in-time retrieval tools for large data and lossy compaction that creates an explicitly linked summary without replacing source observations.
-      - [ ] 2.1.1.4 Subtask {#sah-p02-2-1-1-4} - Record content digests, classification labels, and per-item provenance into the manifest within the accepted bounds.
+      - [x] 2.1.1.1 Subtask {#sah-p02-2-1-1-1} - Implement the recommended context order (system contract and role, lease-derived authority summary, task and acceptance criteria, policy and repository metadata, selected graph resources and source excerpts, stable tool definitions, recent structured observations, current objective and checklist) as a deterministic compiler.
+      - [x] 2.1.1.2 Subtask {#sah-p02-2-1-1-2} - Resolve every item through reviewed catalog queries pinned to repository, snapshot, analysis profile, and graph revisions, and never substitute a branch tip or nearby index for the requested commit.
+      - [x] 2.1.1.3 Subtask {#sah-p02-2-1-1-3} - Implement just-in-time retrieval tools for large data and lossy compaction that creates an explicitly linked summary without replacing source observations.
+      - [x] 2.1.1.4 Subtask {#sah-p02-2-1-1-4} - Record content digests, classification labels, and per-item provenance into the manifest within the accepted bounds.
 
   - [ ] 2.2 Section - Pin ReqLLM and implement the model-interaction port.
 

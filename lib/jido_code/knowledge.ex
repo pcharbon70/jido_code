@@ -58,6 +58,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Reasoning.Service, as: ReasoningService
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.StoreServer
+  alias JidoCode.Knowledge.QueryCatalog
   alias JidoCode.Knowledge.QueryRunner
   alias JidoCode.Knowledge.Queries.ExecutionRecovery
   alias JidoCode.Knowledge.Projection
@@ -87,6 +88,8 @@ defmodule JidoCode.Knowledge do
 
   def query(name, version, parameters, %AuthorityContext{} = authority, scope_iri, options),
     do: QueryRunner.execute(name, version, parameters, authority, scope_iri, options)
+
+  def reviewed_query(name, version), do: QueryCatalog.fetch(name, version)
 
   def discover_cross_graph_insights(
         name,
