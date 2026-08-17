@@ -2,11 +2,15 @@
 
 ## Status
 
-This receipt is being assembled with the Harness Phase 2 implementation.
-The current candidate is merge-pending; HG2 remains blocked until every
-section is complete, the full conformance matrix and `mix precommit` pass from
-the candidate, clean-checkout CI passes, and the pull request merges. Phase 3
-is not authorized from this document yet.
+This receipt records the Harness Phase 2 candidate verified locally and
+accepted after pull request merge on 2026-08-17. The context compiler, governed
+ReqLLM gateway, hardened buffered and subscription profiles, supervised stream
+consumer, and complete conformance matrix are accepted at the merged baseline.
+
+HG2 is accepted at merged candidate
+`49453d05fe72c45431420c05591f89d4ff09f0a8` after pull request #28 passed
+clean-checkout CI and merged on 2026-08-17. Phase 3 is authorized from that
+exact baseline.
 
 ## Candidate Provenance
 
@@ -19,7 +23,7 @@ is not authorized from this document yet.
 | Section 2.4 | `7ff236f` - supervise model response streams |
 | Section 2.5 | `779ad56` - add host-controlled subscription profiles |
 | Section 2.6 | This receipt and its integration certification; exact commit recorded by Git history |
-| Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
+| Merged candidate | `49453d05fe72c45431420c05591f89d4ff09f0a8` |
 
 ## ReqLLM Dependency Review
 
@@ -214,7 +218,7 @@ endpoint, access-mode, credential-class, or billing-mode fallback.
 | Phase H01 regression files | 49 tests, 0 failures |
 | `mix precommit` (compile, architecture, dependency cleanup, format, full suite) | Pass; 403 tests, 0 failures |
 
-## Known Limits At Merge-Pending Candidate
+## Known Limits At Accepted Candidate
 
 - No live provider call was made while assembling this receipt. Subscription
   release remains conditional on explicit operator consent, accepted
@@ -225,16 +229,18 @@ endpoint, access-mode, credential-class, or billing-mode fallback.
   subscription accounting remain explicit external residuals; JidoCode
   disables its own cache and records observed cost but does not claim hard
   subscription-budget enforcement.
-- Clean-checkout CI and the merge commit are not local evidence. HG2 and Phase 3
-  remain blocked until the pull request passes CI, merges, and this receipt is
-  updated with the full merge-commit SHA.
+- Subscription profiles remain subject to their recorded provider-contract and
+  live-verification evidence after merge; a later violation reopens HG2 under
+  the gate conditions below.
 
 ## Gate HG2
 
-HG2 is merge-pending and remains blocked. It reopens—or remains blocked—if any
-model dispatch can bypass the credential broker or Factory gateway, any ReqLLM
-cache or hidden retry path survives, any provider-executed effect can be
-auto-injected, streaming can emit more than one terminal outcome or leak a
-response, or any profile silently falls back across provider, model, access
-mode, credential class, or billing mode. These reopening conditions remain in
-force regardless of checklist state.
+HG2 is accepted at merged candidate
+`49453d05fe72c45431420c05591f89d4ff09f0a8`, pinned in this receipt and the
+Harness Phase 2 plan. Harness Phase 3 is authorized from that baseline. Any
+model dispatch that can bypass the credential broker or Factory gateway, any
+surviving ReqLLM cache or hidden retry path, any provider-executed effect that
+can be auto-injected, any stream that can emit more than one terminal outcome
+or leak a response, or any profile that silently falls back across provider,
+model, access mode, credential class, or billing mode reopens HG2. These
+reopening conditions remain in force regardless of checklist state.
