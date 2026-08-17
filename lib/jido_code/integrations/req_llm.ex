@@ -12,6 +12,8 @@ defmodule JidoCode.Integrations.ReqLLM do
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Factory.Model.Dispatch
   alias JidoCode.Factory.Model.Response
+  alias JidoCode.Factory.Model.StreamEvent, as: ModelStreamEvent
+  alias JidoCode.Factory.Model.Usage
 
   @derive {Inspect, only: []}
   @enforce_keys [:client]
@@ -78,6 +80,27 @@ defmodule JidoCode.Integrations.ReqLLM do
   def stream(_adapter, _dispatch),
     do: {:error, AdapterError.new(:invalid_input, :req_llm_stream)}
 
+  @impl true
+  def events(%__MODULE__{}, %ReqLLM.StreamResponse{} = response) do
+    response
+    |> ReqLLM.StreamResponse.events()
+    |> Stream.map(&normalize_stream_event/1)
+    |> Stream.reject(&is_nil/1)
+  end
+
+  def events(_adapter, _handle), do: [stream_event!(:error, :invalid_stream)]
+
+  @impl true
+  def close(%__MODULE__{}, %ReqLLM.StreamResponse{} = response) do
+    ReqLLM.StreamResponse.close(response)
+  rescue
+    _error -> :ok
+  catch
+    _kind, _reason -> :ok
+  end
+
+  def close(_adapter, _handle), do: :ok
+
   defp normalize(response, dispatch) do
     with :ok <- reject_cache_hit(response),
          :ok <- reject_repairs(response),
@@ -90,7 +113,7 @@ defmodule JidoCode.Integrations.ReqLLM do
         thinking: classification.thinking,
         tool_calls: classification.tool_calls,
         finish_reason: classification.finish_reason,
-        usage: normalize_usage(ReqLLM.Response.usage(response)),
+        usage: Usage.normalize(ReqLLM.Response.usage(response)),
         call_metadata: ReqLLM.Response.call_metadata(response),
         provenance: provenance(dispatch)
       })
@@ -173,30 +196,50 @@ defmodule JidoCode.Integrations.ReqLLM do
     end
   end
 
-  defp normalize_usage(nil), do: %{}
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: :start, data: data}),
+    do: stream_event!(:start, safe_start(data))
 
-  defp normalize_usage(usage) when is_map(usage) do
-    %{}
-    |> put_nonnegative_integer(:input_tokens, value(usage, :input_tokens))
-    |> put_nonnegative_integer(:output_tokens, value(usage, :output_tokens))
-    |> put_cost_units(value(usage, :total_cost))
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: :text_delta, data: text})
+       when is_binary(text),
+       do: stream_event!(:text_delta, text)
+
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: type})
+       when type in [:tool_call_start, :tool_call_delta],
+       do: stream_event!(type, :partial)
+
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: :tool_call}),
+    do: stream_event!(:tool_call, :complete)
+
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: :usage, data: usage}),
+    do: stream_event!(:usage, Usage.normalize(usage))
+
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: type, data: data})
+       when type in [:finish, :cancelled] do
+    stream_event!(type, %{finish_reason: finish_reason(data)})
   end
 
-  defp normalize_usage(_usage), do: %{}
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: :error}),
+    do: stream_event!(:error, :provider_error)
 
-  defp put_nonnegative_integer(map, _key, nil), do: map
+  defp normalize_stream_event(%ReqLLM.StreamEvent{type: type})
+       when type in [:tool_result, :source, :file, :output_item, :provider_event],
+       do: stream_event!(:policy_violation, :provider_output)
 
-  defp put_nonnegative_integer(map, key, value) when is_integer(value) and value >= 0,
-    do: Map.put(map, key, value)
+  defp normalize_stream_event(%ReqLLM.StreamEvent{}), do: nil
 
-  defp put_nonnegative_integer(map, _key, _value), do: map
+  defp safe_start(%{model: %{id: id, provider: provider}})
+       when is_binary(id) and is_atom(provider),
+       do: %{model: id, provider: provider}
 
-  defp put_cost_units(map, value) when is_number(value) and value >= 0,
-    do: Map.put(map, :cost_units, round(value * 1_000_000))
+  defp safe_start(_data), do: %{}
 
-  defp put_cost_units(map, _value), do: map
+  defp finish_reason(%{finish_reason: reason}) when is_atom(reason), do: reason
+  defp finish_reason(_data), do: :unknown
 
-  defp value(map, key), do: Map.get(map, key, Map.get(map, Atom.to_string(key)))
+  defp stream_event!(type, data) do
+    {:ok, event} = ModelStreamEvent.new(type, data)
+    event
+  end
 
   defp provenance(dispatch) do
     %{

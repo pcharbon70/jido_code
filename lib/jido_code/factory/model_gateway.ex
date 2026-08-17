@@ -76,9 +76,22 @@ defmodule JidoCode.Factory.ModelGateway do
   def stream(%__MODULE__{} = gateway, %Request{} = request) do
     with {:ok, dispatch} <- prepare_dispatch(gateway, request) do
       case gateway.adapter_module.stream(gateway.adapter, dispatch) do
-        {:ok, handle} -> {:ok, Stream.new(request.invocation_iri, handle)}
-        {:error, %AdapterError{} = error} -> {:error, error}
-        _invalid -> {:error, AdapterError.new(:corrupt, :model_gateway_stream)}
+        {:ok, handle} ->
+          {:ok,
+           Stream.new(
+             request.invocation_iri,
+             handle,
+             gateway.adapter_module,
+             gateway.adapter,
+             gateway.profile,
+             request
+           )}
+
+        {:error, %AdapterError{} = error} ->
+          {:error, error}
+
+        _invalid ->
+          {:error, AdapterError.new(:corrupt, :model_gateway_stream)}
       end
     end
   rescue

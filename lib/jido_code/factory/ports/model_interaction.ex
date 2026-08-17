@@ -16,4 +16,8 @@ defmodule JidoCode.Factory.Ports.ModelInteraction do
 
   @callback stream(adapter :: term(), Dispatch.t()) ::
               {:ok, handle :: term()} | {:error, AdapterError.t()}
+
+  @callback events(adapter :: term(), handle :: term()) :: Enumerable.t()
+
+  @callback close(adapter :: term(), handle :: term()) :: :ok
 end

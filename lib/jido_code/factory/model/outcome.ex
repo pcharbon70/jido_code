@@ -9,8 +9,12 @@ defmodule JidoCode.Factory.Model.Outcome do
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Factory.Model.Request
   alias JidoCode.Factory.Model.Response
+  alias JidoCode.Factory.Model.StreamResult
 
-  @spec attributes({:ok, Response.t()} | {:error, AdapterError.t()}, Request.t()) :: map()
+  @spec attributes(
+          {:ok, Response.t()} | {:error, AdapterError.t()} | StreamResult.t(),
+          Request.t()
+        ) :: map()
   def attributes({:ok, %Response{} = response}, %Request{}) do
     %{
       status: :completed,
@@ -26,6 +30,15 @@ defmodule JidoCode.Factory.Model.Outcome do
       model_call_ref: nil,
       usage: %{},
       diagnostic: "gateway=buffered;error=#{error.kind};operation=#{error.operation}"
+    }
+  end
+
+  def attributes(%StreamResult{} = result, %Request{}) do
+    %{
+      status: result.status,
+      model_call_ref: nil,
+      usage: result.usage,
+      diagnostic: result.diagnostic
     }
   end
 

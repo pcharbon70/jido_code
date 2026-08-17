@@ -74,19 +74,19 @@ Back to plan: [README](./README.md)
       - [x] 2.3.1.5 Subtask {#sah-p02-2-3-1-5} - Restrict effect-bearing structured output to models with proven strict JSON behavior and keep provider contractual retention and caching posture as explicit residual profile data.
       - [x] 2.3.1.6 Subtask {#sah-p02-2-3-1-6} - Disable telemetry payload capture, bound error normalization, and record bounded invocation provenance, observed usage and cost with enforcement class, and outcomes through the Phase 1 command protocol.
 
-  - [ ] 2.4 Section - Implement the streaming contract.
+  - [x] 2.4 Section - Implement the streaming contract.
 
     This section enables streaming only after buffered conformance, with one
     supervised consumer and exactly one terminal outcome.
 
-    - [ ] 2.4.1 Task {#sah-p02-streaming} [repo: jido_code] [after: {#sah-p02-buffered-profile}] - Implement supervised stream consumption.
+    - [x] 2.4.1 Task {#sah-p02-streaming} [repo: jido_code] [after: {#sah-p02-buffered-profile}] - Implement supervised stream consumption.
 
       This task keeps partial deltas from becoming tool executions and
       cancellation from leaking responses.
 
-      - [ ] 2.4.1.1 Subtask {#sah-p02-2-4-1-1} - Choose one `ReqLLM.StreamResponse` view, retain the response handle, wait for complete assembled tool calls and one terminal event, and never execute a tool from a partial delta.
-      - [ ] 2.4.1.2 Subtask {#sah-p02-2-4-1-2} - Own enumeration in one supervised stream-consumer task that closes the retained response in an `after` block on success, error, early stop, and cancellation, and never materializes a second view.
-      - [ ] 2.4.1.3 Subtask {#sah-p02-2-4-1-3} - On committed cancellation or lease loss, have a separate coordinator close the stream, wait a finite interval, and forcibly terminate the consumer, with revision and sequence guards allowing exactly one completed, cancelled, timed-out, or failed outcome to win.
+      - [x] 2.4.1.1 Subtask {#sah-p02-2-4-1-1} - Choose one `ReqLLM.StreamResponse` view, retain the response handle, wait for complete assembled tool calls and one terminal event, and never execute a tool from a partial delta.
+      - [x] 2.4.1.2 Subtask {#sah-p02-2-4-1-2} - Own enumeration in one supervised stream-consumer task that closes the retained response in an `after` block on success, error, early stop, and cancellation, and never materializes a second view.
+      - [x] 2.4.1.3 Subtask {#sah-p02-2-4-1-3} - On committed cancellation or lease loss, have a separate coordinator close the stream, wait a finite interval, and forcibly terminate the consumer, with revision and sequence guards allowing exactly one completed, cancelled, timed-out, or failed outcome to win.
 
   - [ ] 2.5 Section - Implement host-controlled subscription profiles.
 

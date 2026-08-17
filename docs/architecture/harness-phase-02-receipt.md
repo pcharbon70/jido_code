@@ -15,7 +15,8 @@ is not authorized from this document yet.
 | Phase baseline and merged HG1 | `850b9a7` - pin the Phase 1 merged candidate and close HG1 |
 | Section 2.1 | `43b84e0` - compile revision-pinned model context |
 | Section 2.2 | `8f035e1` - add governed ReqLLM model gateway |
-| Section 2.3 | This section's exact commit is recorded by Git history |
+| Section 2.3 | `09d5c75` - harden buffered model profile |
+| Section 2.4 | This section's exact commit is recorded by Git history |
 | Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
 
 ## ReqLLM Dependency Review
@@ -116,6 +117,33 @@ redacted call metadata, observed usage and cost, and a helper projection that
 matches the Phase 1 `RecordModelInvocationOutcome` attribute contract. Failures
 produce only stable adapter kind/operation diagnostics.
 
+## Supervised Streaming Contract
+
+The ReqLLM adapter chooses only `ReqLLM.StreamResponse.events/1`; no other
+chunk, token, classifier, or materialization view is created. The opaque
+response handle remains attached to the Factory stream contract. One task under
+`JidoCode.Factory.Model.StreamSupervisor` owns the complete enumeration and
+closes the handle in an `after` block for success, provider error, malformed
+events, and cooperative cancellation.
+
+The integration projects only bounded Factory events. Text deltas may be sent
+to a subscriber while the outcome remains open. Reasoning deltas are discarded,
+partial tool start/argument events are never published, and a complete tool call
+is considered only after ReqLLM emits its assembled terminal projection. Because
+Phase 2 authorizes no tools, any partial, complete, provider-executed, or
+provider-native tool/output event fails the stream policy without exposing tool
+arguments.
+
+A separate `StreamCoordinator` commits the first completed, cancelled,
+timed-out, or failed `StreamResult`. A committed cancellation or lease loss
+closes the response from the coordinator, waits a finite grace interval, then
+terminates an unresponsive supervised consumer. The request deadline, profile
+total timeout, and profile metadata timeout cap materialization. Duplicate,
+missing, or post-terminal events fail closed. Later competing results cannot
+replace the first committed result; the result projects to the Phase 1 outcome
+attributes, whose existing invocation sequence and graph revision guards make
+the durable winner unique.
+
 ## Section 2.2 Verification Record
 
 | Command or gate | Result |
@@ -125,6 +153,7 @@ produce only stable adapter kind/operation diagnostics.
 | `mix hex.audit` | Pass; no retired packages |
 | `phase_h02_model_gateway_test.exs` | 6 tests, 0 failures |
 | `phase_h02_buffered_profile_test.exs` | 9 tests, 0 failures |
+| `phase_h02_streaming_test.exs` | 6 tests, 0 failures |
 
 ## Gate HG2
 
