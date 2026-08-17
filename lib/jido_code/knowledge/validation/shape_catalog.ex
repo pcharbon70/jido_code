@@ -11,8 +11,9 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       RepositoryFactory SoftwareRepository RepositoryLocator ManagementEnrollment Actor Agent Scope
     ],
     factory_policy: ~w[
-      DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope Decision
-      StateTransition RepositoryCohort GraphRevisionReference
+      DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope
+      Decision StateTransition RepositoryCohort GraphRevisionReference CredentialReference
+      ModelAccessProfile HarnessProfile ToolDefinitionRevision
     ],
     observation_batch: ~w[
       ObservationActivity ObservationBatch RepositorySnapshot SourceArtifact Claim Finding
@@ -22,12 +23,12 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     repository_control: ~w[
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
       GraphRevisionReference ReconciliationActivity ReconciliationInput Gap ControlProposal
-      EligibilityReceipt InteractionSession Message Instruction DecisionFollowUp
+      EligibilityReceipt InteractionSession Message Instruction DecisionFollowUp ApprovalRequest
     ],
     run_attempt: ~w[
       ExecutionAttempt ExecutionContext ToolInvocation Patch VerificationActivity Artifact
       InteractionSession Message Instruction StateTransition Decision GraphRevisionReference
-      MigrationActivity Finding
+      MigrationActivity Finding ContextManifest ModelInvocation ActionProposal SandboxInstance
     ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity

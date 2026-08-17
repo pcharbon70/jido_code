@@ -33,6 +33,9 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     decision-follow-up follow-up-goal follow-up-task decision-reconciliation
     knowledge-assertion adoption-activity knowledge-state-transition knowledge-evolution-activity
     reasoning-activity reasoning-validation-report insight-proposal learning-measurement
+    model-access-profile model-access-revocation harness-profile tool-definition-revision
+    context-manifest model-invocation model-invocation-event action-proposal sandbox-instance
+    approval-request
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

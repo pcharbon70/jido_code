@@ -56,6 +56,9 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     consideredEvidence causedBy followUpGoal followUpTask followUpKind confirmation
     riskClass knowledgeClassification sourceClaim hasFinding hasFailure policyOutcome
     relatedSymbol applicableLesson reasoningProfile validatedResource
+    accessMode credentialReference credentialClass billingMode readinessState
+    usesModelAccessProfile manifestOf hasContextManifest proposalOf sandboxOf
+    evidenceReference
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i
@@ -550,6 +553,256 @@ defmodule JidoCode.Knowledge.Validation.Validator do
       )
   end
 
+  defp shape_issues(@jf <> "ModelAccessProfile", subject, index, graph) do
+    required_iris = [
+      @jf <> "accessMode",
+      @jf <> "credentialReference",
+      @jf <> "credentialClass",
+      @jf <> "billingMode"
+    ]
+
+    Enum.flat_map(required_iris, fn predicate ->
+      cardinality(index, subject, predicate, 1, 1, "ModelAccessProfileShape", graph) ++
+        node_kind(index, subject, predicate, :iri, "ModelAccessProfileShape", graph)
+    end) ++
+      cardinality(
+        index,
+        subject,
+        @jf <> "revocationGeneration",
+        1,
+        nil,
+        "ModelAccessProfileShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "revocationGeneration",
+        RDF.XSD.NonNegativeInteger,
+        "ModelAccessProfileShape",
+        graph
+      ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "accessMode",
+        ~w[HostApi HostSubscription DelegatedCli],
+        "ModelAccessProfileShape",
+        graph
+      ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "credentialClass",
+        ~w[StaticReusable ShortLivedBearer WorkloadExchange AttachingProxy],
+        "ModelAccessProfileShape",
+        graph
+      ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "billingMode",
+        ~w[MeteredApi Subscription Unknown],
+        "ModelAccessProfileShape",
+        graph
+      ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "readinessState",
+        ~w[
+          Installed CredentialAvailable Authenticated ModelAvailable SandboxReady PolicyAllowed
+          LiveVerified
+        ],
+        "ModelAccessProfileShape",
+        graph
+      )
+  end
+
+  defp shape_issues(@jf <> "HarnessProfile", subject, index, graph) do
+    cardinality(
+      index,
+      subject,
+      @jf <> "usesModelAccessProfile",
+      1,
+      1,
+      "HarnessProfileShape",
+      graph
+    ) ++
+      node_kind(
+        index,
+        subject,
+        @jf <> "usesModelAccessProfile",
+        :iri,
+        "HarnessProfileShape",
+        graph
+      ) ++
+      Enum.flat_map(
+        ~w[version workflowVersion promptTemplateVersion toolCatalogVersion policyRevision budgetProfile],
+        fn local ->
+          cardinality(index, subject, @jf <> local, 1, 1, "HarnessProfileShape", graph) ++
+            datatype(index, subject, @jf <> local, RDF.XSD.String, "HarnessProfileShape", graph)
+        end
+      )
+  end
+
+  defp shape_issues(@jf <> "ToolDefinitionRevision", subject, index, graph) do
+    Enum.flat_map(
+      ~w[toolName toolVersion inputSchemaDigest outputSchemaDigest adapterDigest],
+      fn local ->
+        cardinality(index, subject, @jf <> local, 1, 1, "ToolDefinitionRevisionShape", graph) ++
+          datatype(
+            index,
+            subject,
+            @jf <> local,
+            RDF.XSD.String,
+            "ToolDefinitionRevisionShape",
+            graph
+          )
+      end
+    ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "effectClass",
+        ~w[Read Write External Publish],
+        "ToolDefinitionRevisionShape",
+        graph
+      )
+  end
+
+  defp shape_issues(@jf <> "ApprovalRequest", subject, index, graph) do
+    cardinality(index, subject, @jf <> "actionDigest", 1, 1, "ApprovalRequestShape", graph) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "actionDigest",
+        RDF.XSD.String,
+        "ApprovalRequestShape",
+        graph
+      ) ++
+      cardinality(
+        index,
+        subject,
+        @jf <> "approvalExpiresAt",
+        1,
+        1,
+        "ApprovalRequestShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "approvalExpiresAt",
+        RDF.XSD.DateTime,
+        "ApprovalRequestShape",
+        graph
+      ) ++
+      node_kind(index, subject, @jf <> "evidenceReference", :iri, "ApprovalRequestShape", graph)
+  end
+
+  defp shape_issues(@jf <> "ContextManifest", subject, index, graph) do
+    Enum.flat_map([@jf <> "manifestOf", @jf <> "manifestDigest"], fn predicate ->
+      cardinality(index, subject, predicate, 1, 1, "ContextManifestShape", graph) ++
+        if predicate == @jf <> "manifestOf",
+          do: node_kind(index, subject, predicate, :iri, "ContextManifestShape", graph),
+          else: datatype(index, subject, predicate, RDF.XSD.String, "ContextManifestShape", graph)
+    end) ++
+      cardinality(index, subject, @jf <> "manifestIndex", 1, 1, "ContextManifestShape", graph) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "manifestIndex",
+        RDF.XSD.NonNegativeInteger,
+        "ContextManifestShape",
+        graph
+      ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "manifestKind",
+        ~w[HostContext DelegatedInput],
+        "ContextManifestShape",
+        graph
+      ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "reconstructionState",
+        ~w[Exact Partial Unavailable],
+        "ContextManifestShape",
+        graph
+      )
+  end
+
+  defp shape_issues(@jf <> "ModelInvocation", subject, index, graph) do
+    Enum.flat_map([@jf <> "usesModelAccessProfile", @jf <> "attempts"], fn predicate ->
+      cardinality(index, subject, predicate, 1, 1, "ModelInvocationShape", graph) ++
+        node_kind(index, subject, predicate, :iri, "ModelInvocationShape", graph)
+    end) ++
+      cardinality(
+        index,
+        subject,
+        @jf <> "invocationSequence",
+        1,
+        1,
+        "ModelInvocationShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "invocationSequence",
+        RDF.XSD.NonNegativeInteger,
+        "ModelInvocationShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "modelVersion",
+        RDF.XSD.String,
+        "ModelInvocationShape",
+        graph
+      )
+  end
+
+  defp shape_issues(@jf <> "ActionProposal", subject, index, graph) do
+    cardinality(index, subject, @jf <> "proposalOf", 1, 1, "ActionProposalShape", graph) ++
+      node_kind(index, subject, @jf <> "proposalOf", :iri, "ActionProposalShape", graph) ++
+      cardinality(index, subject, @jf <> "proposalDigest", 1, 1, "ActionProposalShape", graph) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "proposalDigest",
+        RDF.XSD.String,
+        "ActionProposalShape",
+        graph
+      )
+  end
+
+  defp shape_issues(@jf <> "SandboxInstance", subject, index, graph) do
+    cardinality(index, subject, @jf <> "sandboxOf", 1, 1, "SandboxInstanceShape", graph) ++
+      node_kind(index, subject, @jf <> "sandboxOf", :iri, "SandboxInstanceShape", graph) ++
+      cardinality(index, subject, @jf <> "imageDigest", 1, 1, "SandboxInstanceShape", graph) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "imageDigest",
+        RDF.XSD.String,
+        "SandboxInstanceShape",
+        graph
+      ) ++
+      concept_values(
+        index,
+        subject,
+        @jf <> "isolationTier",
+        ~w[RestrictedBeam ContainerSandbox MicroVm DedicatedHost],
+        "SandboxInstanceShape",
+        graph
+      )
+  end
+
   defp shape_issues(_class, _subject, _index, _graph), do: []
 
   defp epistemic_issues(index, subject, graph) do
@@ -926,6 +1179,38 @@ defmodule JidoCode.Knowledge.Validation.Validator do
 
   defp values(index, subject, predicate) do
     index |> Map.get(RDF.iri(subject), %{}) |> Map.get(RDF.iri(predicate), [])
+  end
+
+  defp concept_values(index, subject, predicate, allowed, shape, graph) do
+    index
+    |> values(subject, predicate)
+    |> Enum.flat_map(fn
+      %RDF.IRI{value: "https://jido.run/ontology/concept/" <> local} ->
+        if local in allowed,
+          do: [],
+          else: [
+            issue(
+              subject,
+              shape,
+              predicate,
+              "controlled_concept",
+              "predicate value is outside the controlled concept scheme",
+              graph
+            )
+          ]
+
+      _invalid ->
+        [
+          issue(
+            subject,
+            shape,
+            predicate,
+            "controlled_concept",
+            "predicate value must be a controlled concept IRI",
+            graph
+          )
+        ]
+    end)
   end
 
   defp report(change, issues) do

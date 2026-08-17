@@ -358,6 +358,8 @@ defmodule JidoCode.Knowledge.Phase08RecoverySecurityIntegrationTest do
         lease_mode: :current,
         terminal_sequence: failed.attempt_resolution.current_revision,
         tool_invocation_iris: [invocation.iri],
+        model_invocation_iris: [],
+        model_invocation_outcome_iris: [],
         artifact_iris: [],
         required_event_iris: [],
         sandbox_activities: [secret_activity],

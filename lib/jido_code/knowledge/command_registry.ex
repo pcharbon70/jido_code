@@ -340,6 +340,53 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   }
   @version_1_7 Map.merge(@version_1_6, @phase_09_evidence_commands)
 
+  @harness_contract_version "1.8.0"
+  @phase_h01_contract_commands %{
+    "EnrollModelAccessProfile" => %{
+      owner: :runtime,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [:profile_absent, :credential_reference_known]
+    },
+    "RevokeModelAccessProfile" => %{
+      owner: :runtime,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [:profile_known, :revocation_generation_monotonic]
+    },
+    "AdoptHarnessProfile" => %{
+      owner: :runtime,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [:harness_profile_absent, :model_access_profile_known]
+    },
+    "PublishToolDefinition" => %{
+      owner: :runtime,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [:tool_definition_absent, :supply_chain_digest_exact]
+    },
+    "CreateApprovalRequest" => %{
+      owner: :runtime,
+      capability: :harness,
+      graph_families: [:repository_control],
+      preconditions: [:approval_absent, :action_digest_bound, :evidence_present]
+    },
+    "RecordModelInvocationStart" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :invocation_absent, :manifest_bound]
+    },
+    "RecordModelInvocationOutcome" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:attempt_current, :current_fence, :outcome_absent]
+    }
+  }
+  @version_1_8 Map.merge(@version_1_7, @phase_h01_contract_commands)
+
   @spec version() :: String.t()
   def version, do: @version
 
@@ -348,6 +395,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
 
   @spec knowledge_version() :: String.t()
   def knowledge_version, do: @knowledge_version
+
+  @spec harness_contract_version() :: String.t()
+  def harness_contract_version, do: @harness_contract_version
 
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
@@ -361,6 +411,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@scheduling_version), do: @version_1_5 |> Map.keys() |> Enum.sort()
   def names(@execution_version), do: @version_1_6 |> Map.keys() |> Enum.sort()
   def names(@knowledge_version), do: @version_1_7 |> Map.keys() |> Enum.sort()
+  def names(@harness_contract_version), do: @version_1_8 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -435,6 +486,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_1_7, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @knowledge_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @harness_contract_version) when is_binary(name) do
+    case Map.fetch(@version_1_8, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @harness_contract_version})}
 
       :error ->
         invalid(:command_type)

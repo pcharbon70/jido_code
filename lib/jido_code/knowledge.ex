@@ -15,10 +15,14 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Control.CapabilityRegistry
   alias JidoCode.Knowledge.Control.Cohort
   alias JidoCode.Knowledge.Control.GovernanceProjection
+  alias JidoCode.Knowledge.Control.ModelAccessProfile
+  alias JidoCode.Knowledge.Control.HarnessProfile
   alias JidoCode.Knowledge.Control.Obligation
   alias JidoCode.Knowledge.Control.Policy
+  alias JidoCode.Knowledge.Control.ApprovalRequest
   alias JidoCode.Knowledge.Control.Reconciliation
   alias JidoCode.Knowledge.Control.ReconciliationPackage
+  alias JidoCode.Knowledge.Control.ToolDefinition
   alias JidoCode.Knowledge.Control.ReconciliationProjection
   alias JidoCode.Knowledge.Control.WorkGraph
   alias JidoCode.Knowledge.Control.WorkProjection
@@ -28,6 +32,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Attempt
   alias JidoCode.Knowledge.Execution.AttemptProjection
   alias JidoCode.Knowledge.Execution.Artifact
+  alias JidoCode.Knowledge.Execution.ActionProposal
+  alias JidoCode.Knowledge.Execution.ContextManifest
+  alias JidoCode.Knowledge.Execution.ModelInvocation
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
   alias JidoCode.Knowledge.Decision.GoalOutcome
@@ -241,6 +248,42 @@ defmodule JidoCode.Knowledge do
         )
 
   def tool_invocation(attempt, attributes), do: ToolInvocation.new(attempt, attributes)
+
+  def model_access_profile(attributes), do: ModelAccessProfile.new(attributes)
+
+  def enroll_model_access_profile(profile, attributes, options \\ []),
+    do: ModelAccessProfile.enroll_command(profile, attributes, options)
+
+  def revoke_model_access_profile(profile, expected_generation, attributes, options \\ []),
+    do: ModelAccessProfile.revoke_command(profile, expected_generation, attributes, options)
+
+  def harness_profile(attributes), do: HarnessProfile.new(attributes)
+
+  def adopt_harness_profile(profile, attributes, options \\ []),
+    do: HarnessProfile.adopt_command(profile, attributes, options)
+
+  def tool_definition(attributes), do: ToolDefinition.new(attributes)
+
+  def publish_tool_definition(definition, attributes, options \\ []),
+    do: ToolDefinition.publish_command(definition, attributes, options)
+
+  def approval_request(attributes), do: ApprovalRequest.new(attributes)
+
+  def create_approval_request(request, attributes, options \\ []),
+    do: ApprovalRequest.create_command(request, attributes, options)
+
+  def context_manifest(attempt_iri, attributes), do: ContextManifest.new(attempt_iri, attributes)
+
+  def model_invocation(attempt, attributes), do: ModelInvocation.new(attempt, attributes)
+
+  def start_model_invocation(invocation, attempt, resolution, lease, attributes, options \\ []),
+    do: ModelInvocation.start_command(invocation, attempt, resolution, lease, attributes, options)
+
+  def record_model_outcome(invocation, attempt, resolution, lease, attributes, options \\ []),
+    do:
+      ModelInvocation.outcome_command(invocation, attempt, resolution, lease, attributes, options)
+
+  def action_proposal(attributes), do: ActionProposal.new(attributes)
 
   def start_tool_invocation(invocation, attempt, resolution, lease, attributes, options \\ []),
     do: ToolInvocation.start_command(invocation, attempt, resolution, lease, attributes, options)
