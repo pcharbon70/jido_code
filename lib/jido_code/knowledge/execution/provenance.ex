@@ -192,23 +192,69 @@ defmodule JidoCode.Knowledge.Execution.Provenance do
                  "\n"
                )
              ) do
-        current = [
-          {iri, @rdf_type, RDF.iri(@prov <> "Activity")},
-          {iri, @jf <> "attempts", RDF.iri(attempt.iri)},
-          {iri, @jf <> "sandboxOperation",
-           RDF.iri(@concept <> Macro.camelize(to_string(operation)))},
-          {iri, @jf <> "outcomeClass", RDF.iri(@concept <> Macro.camelize(to_string(outcome)))},
-          {iri, @jf <> "providerRef", RDF.XSD.String.new(provider)},
-          {iri, @jf <> "detailsDigest", RDF.XSD.String.new(digest(details))},
-          {iri, @prov <> "endedAtTime", RDF.XSD.DateTime.new(occurred_at)}
-        ]
+        with {:ok, instance} <- sandbox_instance_statements(attempt, operation, details) do
+          current =
+            [
+              {iri, @rdf_type, RDF.iri(@prov <> "Activity")},
+              {iri, @jf <> "attempts", RDF.iri(attempt.iri)},
+              {iri, @jf <> "sandboxOperation",
+               RDF.iri(@concept <> Macro.camelize(to_string(operation)))},
+              {iri, @jf <> "outcomeClass",
+               RDF.iri(@concept <> Macro.camelize(to_string(outcome)))},
+              {iri, @jf <> "providerRef", RDF.XSD.String.new(provider)},
+              {iri, @jf <> "detailsDigest", RDF.XSD.String.new(digest(details))},
+              {iri, @prov <> "endedAtTime", RDF.XSD.DateTime.new(occurred_at)}
+            ] ++ instance
 
-        {:cont, {:ok, statements ++ current, iris ++ [iri]}}
+          {:cont, {:ok, statements ++ current, iris ++ [iri]}}
+        else
+          _invalid -> {:halt, invalid(:sandbox_provenance)}
+        end
       else
         _invalid -> {:halt, invalid(:sandbox_provenance)}
       end
     end)
   end
+
+  defp sandbox_instance_statements(_attempt, operation, _details) when operation != :provision,
+    do: {:ok, []}
+
+  defp sandbox_instance_statements(attempt, :provision, details) do
+    case details do
+      %{
+        instance_iri: instance_iri,
+        isolation_tier: tier,
+        image_digest: image_digest,
+        profile_digest: profile_digest,
+        limits_digest: limits_digest
+      } ->
+        with :ok <- ResourceIdentity.validate(instance_iri),
+             true <- tier in [:restricted_beam, :container_sandbox, :micro_vm, :dedicated_host],
+             true <- Enum.all?([image_digest, profile_digest, limits_digest], &sha256?/1) do
+          {:ok,
+           [
+             {instance_iri, @rdf_type, RDF.iri(@jf <> "SandboxInstance")},
+             {instance_iri, @jf <> "sandboxOf", RDF.iri(attempt.iri)},
+             {instance_iri, @jf <> "imageDigest", RDF.XSD.String.new(image_digest)},
+             {instance_iri, @jf <> "isolationTier",
+              RDF.iri(@concept <> sandbox_tier_concept(tier))},
+             {instance_iri, @jf <> "profileDigest", RDF.XSD.String.new(profile_digest)},
+             {instance_iri, @jf <> "limitsDigest", RDF.XSD.String.new(limits_digest)}
+           ]}
+        else
+          _invalid -> :error
+        end
+
+      _legacy_activity ->
+        {:ok, []}
+    end
+  end
+
+  defp sandbox_tier_concept(:restricted_beam), do: "RestrictedBeam"
+  defp sandbox_tier_concept(:container_sandbox), do: "ContainerSandbox"
+  defp sandbox_tier_concept(:micro_vm), do: "MicroVm"
+  defp sandbox_tier_concept(:dedicated_host), do: "DedicatedHost"
+  defp sha256?(value), do: is_binary(value) and Regex.match?(~r/^sha256:[a-f0-9]{64}$/, value)
 
   defp guards(attempt, resolution, lease, attributes) do
     required =

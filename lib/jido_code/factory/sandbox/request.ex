@@ -45,26 +45,35 @@ defmodule JidoCode.Factory.Sandbox.Request do
 
   def new(_attributes), do: invalid(:sandbox_request)
 
-  defp limits(%{
+  defp limits(
+         %{
+           cpu_ms: cpu,
+           memory_bytes: memory,
+           disk_bytes: disk,
+           timeout_ms: timeout,
+           output_bytes: output,
+           network: network
+         } = values
+       )
+       when cpu in 1..3_600_000 and memory in 1..17_179_869_184 and
+              disk in 1..107_374_182_400 and timeout in 1..3_600_000 and
+              output in 1..10_485_760 and network in [:deny, :allowlisted] do
+    process_count = Map.get(values, :process_count, 64)
+
+    if process_count in 1..4_096 do
+      {:ok,
+       %{
          cpu_ms: cpu,
          memory_bytes: memory,
+         process_count: process_count,
          disk_bytes: disk,
          timeout_ms: timeout,
          output_bytes: output,
          network: network
-       })
-       when cpu in 1..3_600_000 and memory in 1..17_179_869_184 and
-              disk in 1..107_374_182_400 and timeout in 1..3_600_000 and
-              output in 1..10_485_760 and network in [:deny, :allowlisted] do
-    {:ok,
-     %{
-       cpu_ms: cpu,
-       memory_bytes: memory,
-       disk_bytes: disk,
-       timeout_ms: timeout,
-       output_bytes: output,
-       network: network
-     }}
+       }}
+    else
+      :error
+    end
   end
 
   defp limits(_limits), do: :error

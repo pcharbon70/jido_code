@@ -18,21 +18,21 @@ Back to plan: [README](./README.md)
   This phase ensures that even a fully compromised model cannot reach host
   filesystems, ambient credentials, or unapproved networks.
 
-  - [ ] 4.1 Section - Implement tiered sandbox supervision.
+  - [x] 4.1 Section - Implement tiered sandbox supervision.
 
     This section matches isolation cost to provable risk with immutable
     images and bounded artifact capture.
 
-    - [ ] 4.1.1 Task {#sah-p04-sandbox-tiers} [repo: jido_code] [after: {#sah-p03-phase-receipt}] - Implement the sandbox supervisor and isolation tiers.
+    - [x] 4.1.1 Task {#sah-p04-sandbox-tiers} [repo: jido_code] [after: {#sah-p03-phase-receipt}] - Implement the sandbox supervisor and isolation tiers.
 
       This task keeps the memory sandbox for tests only and makes
       production isolation a real boundary.
 
-      - [ ] 4.1.1.1 Subtask {#sah-p04-4-1-1-1} - Implement the tier table: restricted BEAM worker for read-only analysis, strong container or gVisor-style sandbox for non-executing transformation, Firecracker-style microVM for builds, tests, hooks, compilers, and native tools, and a dedicated secret-free microVM host for unknown high-risk workloads.
-      - [ ] 4.1.1.2 Subtask {#sah-p04-4-1-1-2} - Enforce ephemeral unprivileged environments with read-only base images and copy-on-write workspaces, no host filesystem, Docker socket, devices, or ambient credentials, dropped capabilities, `no_new_privs`, restrictive system-call policy, and CPU, memory, process, disk, output, and wall-time limits.
-      - [ ] 4.1.1.3 Subtask {#sah-p04-4-1-1-3} - Keep network disabled by default, mount only explicit workspace and artifact paths, pin sandbox image and tool digests, and destroy the environment after bounded artifact capture.
-      - [ ] 4.1.1.4 Subtask {#sah-p04-4-1-1-4} - Capture artifacts without creating an undeclared blob store: small classified text under accepted RDF literal limits, large or binary candidates as provider-owned immutable URIs with media type, byte count, and digest, retained for the verifier and accepted retention period before destruction.
-      - [ ] 4.1.1.5 Subtask {#sah-p04-4-1-1-5} - Record `SandboxInstance` lifecycle observations with image, limits, and attempt identity through the execution reporting commands.
+      - [x] 4.1.1.1 Subtask {#sah-p04-4-1-1-1} - Implement the tier table: restricted BEAM worker for read-only analysis, strong container or gVisor-style sandbox for non-executing transformation, Firecracker-style microVM for builds, tests, hooks, compilers, and native tools, and a dedicated secret-free microVM host for unknown high-risk workloads.
+      - [x] 4.1.1.2 Subtask {#sah-p04-4-1-1-2} - Enforce ephemeral unprivileged environments with read-only base images and copy-on-write workspaces, no host filesystem, Docker socket, devices, or ambient credentials, dropped capabilities, `no_new_privs`, restrictive system-call policy, and CPU, memory, process, disk, output, and wall-time limits.
+      - [x] 4.1.1.3 Subtask {#sah-p04-4-1-1-3} - Keep network disabled by default, mount only explicit workspace and artifact paths, pin sandbox image and tool digests, and destroy the environment after bounded artifact capture.
+      - [x] 4.1.1.4 Subtask {#sah-p04-4-1-1-4} - Capture artifacts without creating an undeclared blob store: small classified text under accepted RDF literal limits, large or binary candidates as provider-owned immutable URIs with media type, byte count, and digest, retained for the verifier and accepted retention period before destruction.
+      - [x] 4.1.1.5 Subtask {#sah-p04-4-1-1-5} - Record `SandboxInstance` lifecycle observations with image, limits, and attempt identity through the execution reporting commands.
 
   - [ ] 4.2 Section - Implement the credential broker.
 
