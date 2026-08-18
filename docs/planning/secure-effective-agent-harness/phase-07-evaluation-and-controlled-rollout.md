@@ -47,19 +47,19 @@ Back to plan: [README](./README.md)
       - [x] 7.2.1.3 Subtask {#sah-p07-7-2-1-3} - Require the independent fresh-checkout verifier plus verifier-owned or hidden checks for executable correctness; fresh or private tasks additionally receive two blinded independent reviewers with a third resolving disagreement under the pinned rubric.
       - [x] 7.2.1.4 Subtask {#sah-p07-7-2-1-4} - Keep LLM judges advisory only, and also report pass-at-one, repeated-run consistency, separately labelled pass-at-k, unauthorized-effect and stale-fence rejection rates, provenance completeness, verifier reproducibility, retrieval recall and token cost, recovery success, cost and latency per correct accepted outcome, review time and override rate, and post-publication CI, revert, incident, and regression rates.
 
-  - [ ] 7.3 Section - Build the adversarial security suite.
+  - [x] 7.3 Section - Build the adversarial security suite.
 
     This section attacks utility and security together, distinguishing safe
     failure from violating success.
 
-    - [ ] 7.3.1 Task {#sah-p07-adversarial} [repo: jido_code] [after: {#sah-p07-metrics}] - Implement the release adversarial suite.
+    - [x] 7.3.1 Task {#sah-p07-adversarial} [repo: jido_code] [after: {#sah-p07-metrics}] - Implement the release adversarial suite.
 
       This task provides the zero-bypass evidence the rollout gates require.
 
-      - [ ] 7.3.1.1 Subtask {#sah-p07-7-3-1-1} - Cover instruction injection through source comments, documentation, issue titles, branch names, paths, compiler output, and test logs, each checking task utility and security outcome.
-      - [ ] 7.3.1.2 Subtask {#sah-p07-7-3-1-2} - Cover path traversal, symlink, hard-link, and shell injection; malicious hooks, workflows, and build scripts; metadata-service, SSRF, DNS-rebinding, and redirect attacks; and fake credentials plus canary secrets outside authorized scope.
-      - [ ] 7.3.1.3 Subtask {#sah-p07-7-3-1-3} - Cover memory poisoning and delayed cross-attempt retrieval; malicious CLI project settings, extensions, skills, and cached provider context; provider login-cache theft, argv prompt inspection, journal disclosure, and cross-actor credential reuse; and malicious MCP-style tool descriptions and changed schemas.
-      - [ ] 7.3.1.4 Subtask {#sah-p07-7-3-1-4} - Cover stale worker, approval race, branch movement, and duplicate-effect races; test deletion, skip configuration, verifier manipulation, and forged results; resource exhaustion, persistence, and sandbox escape; and cross-repository or cross-tenant access.
+      - [x] 7.3.1.1 Subtask {#sah-p07-7-3-1-1} - Cover instruction injection through source comments, documentation, issue titles, branch names, paths, compiler output, and test logs, each checking task utility and security outcome.
+      - [x] 7.3.1.2 Subtask {#sah-p07-7-3-1-2} - Cover path traversal, symlink, hard-link, and shell injection; malicious hooks, workflows, and build scripts; metadata-service, SSRF, DNS-rebinding, and redirect attacks; and fake credentials plus canary secrets outside authorized scope.
+      - [x] 7.3.1.3 Subtask {#sah-p07-7-3-1-3} - Cover memory poisoning and delayed cross-attempt retrieval; malicious CLI project settings, extensions, skills, and cached provider context; provider login-cache theft, argv prompt inspection, journal disclosure, and cross-actor credential reuse; and malicious MCP-style tool descriptions and changed schemas.
+      - [x] 7.3.1.4 Subtask {#sah-p07-7-3-1-4} - Cover stale worker, approval race, branch movement, and duplicate-effect races; test deletion, skip configuration, verifier manipulation, and forged results; resource exhaustion, persistence, and sandbox escape; and cross-repository or cross-tenant access.
 
   - [ ] 7.4 Section - Implement rollout stages and graduation gates.
 
