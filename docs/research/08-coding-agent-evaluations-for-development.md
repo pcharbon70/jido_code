@@ -168,6 +168,96 @@ comparison. Terminal-Bench results and AnalysisBench both demonstrate that
 agent architecture can materially change performance independently of the
 underlying model [CB09, AN01].
 
+### What JidoCode is actually evaluating
+
+The first and most immediate evaluation subject is JidoCode's own harness, but
+the evaluation program must not stop at harness conformance. The product claim
+is about coding-agent configurations operating through that harness. Depending
+on the experiment, the target may be one component or the complete deployed
+system.
+
+Every run should declare its target mode and the target-tuple fields allowed to
+change:
+
+| Target mode | Primary subject | Held fixed for a controlled comparison | Typical question |
+| --- | --- | --- | --- |
+| Harness evaluation | JidoCode product/harness revision, protocol, policy monitor, brokers, sandbox, recovery, and evidence bindings | deterministic model fixture, corpus, oracle, tool contracts, and environment | Did a harness change preserve its contracts and security boundaries? |
+| Model evaluation | model identifier or snapshot | JidoCode revision, harness profile, prompts, tools, corpus, budget, and graders | Does a model change improve capability without weakening safety or reliability? |
+| Agent-profile evaluation | model, scaffold, prompts, context/memory policy, tools, or budgets as a declared treatment | frozen corpus, task assignments, environment, oracle, and statistical plan | Which complete agent configuration performs better under the same conditions? |
+| End-to-end evaluation | the exact configuration proposed for deployment | frozen catalog, corpus, assignments, rubric, evaluator, and release protocol | Is this model/harness/tool/policy tuple eligible for a particular rollout stage? |
+| Evaluator-health evaluation | task, oracle, verifier, grader, judge, human rubric, or aggregation revision | reference, alternate-correct, negative-control, mutation, and perturbation cases | Can the measurement system distinguish success, failure, gaming, and uncertainty reliably? |
+| Production evaluation | one deployed profile and rollout cohort | observation protocol, contemporaneous baseline or matched tasks, and outcome definitions | Does the profile improve real work without unacceptable defects, burden, cost, or incidents? |
+
+The target mode is not inferred from the track name. It is recorded in the
+`EvaluationProfile` and `EvaluationTarget`, and the run pins every component
+revision. A harness-only comparison holds the model and other inputs fixed. A
+model-only comparison holds the harness and scaffold fixed. If several fields
+change, the result applies to that new agent profile and must not be attributed
+to one component without a separate experiment.
+
+### Required JidoCode evaluation layers
+
+JidoCode should develop evidence through four complementary assurance layers.
+These are evaluation scopes, distinct from the evidence-quality layers later
+in this report.
+
+| Layer | What is under evaluation | Required questions | Primary development use |
+| --- | --- | --- | --- |
+| 1. Harness conformance and security | JidoCode harness contracts and enforcement boundaries | Are capabilities, access profiles, fencing, credentials, egress, sandboxing, cancellation, recovery, evidence binding, and publication authority enforced under success, failure, replay, race, and attack? | deterministic T0 checks on every relevant change; contract and adversarial regression suites |
+| 2. Harness-enabled agent capability | an agent profile operating through the harness | Can it edit/test code, retrieve current context, review changes, analyze repositories, recover from faults, and produce evidence-backed outputs without unauthorized effects? | T1 PR smoke tests and broader T2 capability/regression runs |
+| 3. End-to-end rollout profile | the complete model/harness/prompt/tool/context/sandbox/verifier configuration proposed for use | Does the exact profile meet utility, security, reproducibility, accepted-precision, critical-failure, cost, and human-oversight gates for the requested stage? | T3 security and T4 release evaluation, followed by governed advance/hold/rollback decisions and T5 shadow/pilot monitoring |
+| 4. Evaluation-system health | the tasks, hidden oracles, tests, graders, judges, reviewers, adjudication, and statistics used by the other layers | Do references and alternate solutions pass, negative controls fail correctly, mutations expose weak tests, judges remain calibrated, humans agree sufficiently, leakage stays bounded, and aggregates retain exact denominators? | continuous meta-evaluation; a failed evaluator-health gate invalidates or qualifies results from the affected layers |
+
+Layer 1 answers whether the harness behaves as designed; it does not show that
+agents can accomplish representative engineering work. Layer 2 answers bounded
+capability questions; it does not authorize deployment. Layer 3 evaluates the
+actual product configuration and is the only layer that can supply candidate
+rollout evidence. Layer 4 determines whether the measuring instruments used by
+all three are healthy enough for their results to be believed.
+
+The layers should normally compose in order:
+
+```text
+harness conformance/security
+            |
+            v
+harness-enabled capability
+            |
+            v
+end-to-end rollout profile ------> production outcomes
+            ^                              |
+            |                              v
+      evaluator health <---------- incidents and regressions
+```
+
+Passing a later layer never waives an earlier-layer failure. A profile that
+solves tasks while escaping the sandbox fails. A conformant harness with no
+demonstrated coding capability is not useful rollout evidence. A strong
+aggregate produced by a leaking or mutation-insensitive oracle is invalid.
+
+### Avoiding circular self-evaluation
+
+The harness may orchestrate an evaluation, but it must not be the sole judge
+of its own correctness. Harness-focused evaluation should therefore use:
+
+- deterministic model and tool fixtures for exact protocol and fault tests;
+- verifier-owned hidden checks and prohibited-effect canaries outside the
+  evaluated agent's authority;
+- fresh-checkout or separately reconstructed outcome verification;
+- independent artifact digests and state observations rather than agent or
+  harness self-reports;
+- evaluator-health controls that deliberately introduce known good, bad,
+  malformed, stale, replayed, and adversarial cases; and
+- a governed decision actor distinct from the execution actor before evidence
+  can affect rollout state.
+
+When the complete stack, including the harness, is the target, truth-producing
+checks must cross an independent boundary. When one evaluator component is the
+target, another calibrated mechanism or blinded human adjudication establishes
+the reference. This does not require a completely separate product, but it
+does require independent ownership, inputs, and authority for the fact being
+tested.
+
 ### Capability, regression, and gate suites
 
 These suites have different purposes and should not be collapsed:
