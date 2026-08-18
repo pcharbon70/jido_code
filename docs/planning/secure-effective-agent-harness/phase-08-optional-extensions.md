@@ -48,18 +48,18 @@ Back to plan: [README](./README.md)
       - [x] 8.2.1.2 Subtask {#sah-p08-8-2-1-2} - Route all remote results through independent verification and governed decisions; remote claims are never accepted output.
       - [x] 8.2.1.3 Subtask {#sah-p08-8-2-1-3} - Record remote agent identity, protocol versions, and capability receipts in the attempt provenance.
 
-  - [ ] 8.3 Section - Govern selective multi-agent execution.
+  - [x] 8.3 Section - Govern selective multi-agent execution.
 
     This section allows parallelism only where independence is proven.
 
-    - [ ] 8.3.1 Task {#sah-p08-multi-agent} [repo: jido_code] [after: {#sah-p08-remote-agents}] - Specify and gate multi-agent work.
+    - [x] 8.3.1 Task {#sah-p08-multi-agent} [repo: jido_code] [after: {#sah-p08-remote-agents}] - Specify and gate multi-agent work.
 
       This task converts multi-agent gains into graph work contracts without
       free-form agent chatter.
 
-      - [ ] 8.3.1.1 Subtask {#sah-p08-8-3-1-1} - Enable multi-agent execution only for task classes where Phase 7 evaluation shows advantage: independent research branches, disjoint write sets, unboundable single-worker context, specialized isolated tools, or diversity that improves verified success enough to justify cost.
-      - [ ] 8.3.1.2 Subtask {#sah-p08-8-3-1-2} - Give each worker a separate graph task, context manifest, lease, capability, budget, and output schema, returning bounded outputs to the Factory coordinator.
-      - [ ] 8.3.1.3 Subtask {#sah-p08-8-3-1-3} - Measure conflicts, duplicated work, merge failures, elapsed time, and final correctness against the single-agent baseline before any class graduates.
+      - [x] 8.3.1.1 Subtask {#sah-p08-8-3-1-1} - Enable multi-agent execution only for task classes where Phase 7 evaluation shows advantage: independent research branches, disjoint write sets, unboundable single-worker context, specialized isolated tools, or diversity that improves verified success enough to justify cost.
+      - [x] 8.3.1.2 Subtask {#sah-p08-8-3-1-2} - Give each worker a separate graph task, context manifest, lease, capability, budget, and output schema, returning bounded outputs to the Factory coordinator.
+      - [x] 8.3.1.3 Subtask {#sah-p08-8-3-1-3} - Measure conflicts, duplicated work, merge failures, elapsed time, and final correctness against the single-agent baseline before any class graduates.
 
   - [ ] 8.4 Section - Govern autonomous merge as a separate decision.
 
