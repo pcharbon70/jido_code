@@ -20,21 +20,21 @@ Back to plan: [README](./README.md)
   retention, security, and legacy-migration contracts agree about every byte
   JidoCode stores or omits.
 
-  - [ ] 1.1 Section - Reconcile current durable content and total-memory scope.
+  - [x] 1.1 Section - Reconcile current durable content and total-memory scope.
 
     This section inventories existing execution content and defines the exact
     boundary of observable, authorized memory.
 
-    - [ ] 1.1.1 Task {#tam-p01-contract-reconciliation} [repo: jido_code] - Accept the total-memory boundary and reconcile existing content classifications.
+    - [x] 1.1.1 Task {#tam-p01-contract-reconciliation} [repo: jido_code] - Accept the total-memory boundary and reconcile existing content classifications.
 
       This task replaces ambiguous prose with one authoritative classification
       and capture contract.
 
-      - [ ] 1.1.1.1 Subtask - Inventory persisted `Instruction.content`, interaction messages, model outcomes, tool stdout/stderr, embedded artifacts, command-receipt commitments, exports, and backup derivatives.
-      - [ ] 1.1.1.2 Subtask - Decide and document when an instruction is a prompt representation, when tool output is raw or normalized, and where each authorized representation may reside.
-      - [ ] 1.1.1.3 Subtask - Define total memory as complete accounting of eligible observable events, explicitly excluding secret values, provider-private state, hidden reasoning, and unavailable events.
-      - [ ] 1.1.1.4 Subtask - Require every expected body to record a capture result even when content is omitted, unavailable, redacted, failed, expired, or erased.
-      - [ ] 1.1.1.5 Subtask - Tag legacy runs with their actual protocol and reconstruction limits without rewriting closed history or claiming nonexistent completeness.
+      - [x] 1.1.1.1 Subtask - Inventory persisted `Instruction.content`, interaction messages, model outcomes, tool stdout/stderr, embedded artifacts, command-receipt commitments, exports, and backup derivatives.
+      - [x] 1.1.1.2 Subtask - Decide and document when an instruction is a prompt representation, when tool output is raw or normalized, and where each authorized representation may reside.
+      - [x] 1.1.1.3 Subtask - Define total memory as complete accounting of eligible observable events, explicitly excluding secret values, provider-private state, hidden reasoning, and unavailable events.
+      - [x] 1.1.1.4 Subtask - Require every expected body to record a capture result even when content is omitted, unavailable, redacted, failed, expired, or erased.
+      - [x] 1.1.1.5 Subtask - Tag legacy runs with their actual protocol and reconstruction limits without rewriting closed history or claiming nonexistent completeness.
 
   - [ ] 1.2 Section - Ratify memory graph families, resources, and writers.
 
