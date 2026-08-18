@@ -34,6 +34,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Artifact
   alias JidoCode.Knowledge.Execution.ActionProposal
   alias JidoCode.Knowledge.Execution.ContextManifest
+  alias JidoCode.Knowledge.Execution.Graph, as: ExecutionGraph
   alias JidoCode.Knowledge.Execution.ModelInvocation
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
@@ -76,6 +77,36 @@ defmodule JidoCode.Knowledge do
 
   def command_status(%CommandEnvelope{} = envelope, options \\ []),
     do: Writer.command_status(envelope, options)
+
+  @doc "Returns whether a value is the accepted verification-evidence command contract."
+  @spec verification_evidence_command?(term()) :: boolean()
+  def verification_evidence_command?(%CommandEnvelope{
+        command_type: "RecordVerificationEvidence",
+        command_version: "1.7.0"
+      }),
+      do: true
+
+  def verification_evidence_command?(_command), do: false
+
+  @doc "Returns whether a value is the accepted external-observation command contract."
+  @spec observation_command?(term()) :: boolean()
+  def observation_command?(%CommandEnvelope{
+        command_type: "RecordObservationBatch",
+        command_version: "1.1.0"
+      }),
+      do: true
+
+  def observation_command?(_command), do: false
+
+  @doc "Returns whether a value is the accepted goal-outcome command contract."
+  @spec goal_outcome_command?(term()) :: boolean()
+  def goal_outcome_command?(%CommandEnvelope{
+        command_type: "DecideGoalOutcome",
+        command_version: "1.7.0"
+      }),
+      do: true
+
+  def goal_outcome_command?(_command), do: false
 
   def subscribe_changes(scope_iri), do: ChangeFeed.subscribe(scope_iri)
   def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
@@ -423,6 +454,8 @@ defmodule JidoCode.Knowledge do
         repository: repository_iri,
         revision: snapshot_iri
       })
+
+  def run_graph_identity(attempt_iri), do: ExecutionGraph.run_graph(attempt_iri)
 
   def validate_resource_identity(iri), do: ResourceIdentity.validate(iri)
   def validate_graph_identity(iri), do: GraphRegistry.identify(iri)
