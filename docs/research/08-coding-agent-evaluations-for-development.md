@@ -1558,6 +1558,179 @@ immutable trial results, never contain only a mutable summary.
   an explicit compatibility rule; and
 - rollout decisions consume only evidence admitted for that exact stage.
 
+### Evaluation graph topology recommendation
+
+Evaluation should be a first-class graph domain, but it should not be one
+large mutable named graph. A single bucket would mix definitions, observations,
+derived statistics, and rollout authority even though those records have
+different writers, retention, disclosure, and closure rules. JidoCode should
+instead add a governed evaluation graph family and continue using the accepted
+evidence, control, derived, and security-audit boundaries for the parts that
+already belong there.
+
+The proposed topology is:
+
+| Graph family | Contents | Lifecycle and authority |
+| --- | --- | --- |
+| `evaluation_catalog` | versioned profiles, target tuples, corpus manifests, task manifests, slice definitions, rubric/oracle references, and frozen statistical plans | one immutable, complete graph per catalog release; a new release supersedes rather than edits an old one; no rollout authority |
+| `evaluation_run` | one frozen evaluation run plus its trial assignments, task-level observations, execution-attempt links, infrastructure status, and content-addressed artifact references | mutable only while building, then closed as complete or incomplete; a closed run never reopens; no acceptance authority |
+| existing `evidence` | admitted grader results, blinded human grades, adjudications, evaluator-health findings, aggregate results, and proposed claims that cite exact closed trials | append/supersede under the evidence writer; recording evidence cannot advance a gate |
+| existing `repository_control` and `factory_policy` | scheduled evaluation work, gate requirements, compatibility rules, waivers, and accepted rollout transitions | authoritative workflow and policy state; only the governed decision boundary may change rollout state |
+| existing `derived` | dashboards, comparisons, cached slices, trend projections, and rebuildable metric views | disposable and reproducible; never a source of acceptance authority |
+| existing `security_audit` | protected-corpus access, invalidation, attempted oracle disclosure, overrides, quarantine, and policy decisions | append-only audit history |
+
+The catalog and run families are lifecycle boundaries, not graphs per ordinary
+entity. A catalog release contains many `EvaluationProfile`, `CorpusRevision`,
+and `EvaluationTask` resources. An evaluation-run graph contains all
+`EvaluationTrial` resources for one frozen run. A trial does not receive its own
+named graph. This keeps graph counts bounded while preserving atomic closure,
+retention, and comparison boundaries.
+
+The intended flow is:
+
+```text
+evaluation catalog + policy
+             |
+             v
+      evaluation run  ------> content-addressed artifacts
+             |
+             v
+       admitted evidence ----> derived metrics and dashboards
+             |
+             v
+       governed decision ----> repository control / rollout stage
+             ^
+             |
+ production outcomes --------> incident-derived regression tasks
+```
+
+The graph registry addition should be explicit and versioned. A candidate
+registry contract is:
+
+| Family | Scope inputs | Mutability | Writer capability | Completeness | Retention |
+| --- | --- | --- | --- | --- | --- |
+| `evaluation_catalog` | catalog identity, catalog revision | immutable | `evaluation_catalog_writer` | complete | evaluation definition history |
+| `evaluation_run` | evaluation-run identity | closeable | `evaluation_run_writer` | building, then complete or incomplete | evaluation run history |
+
+`evaluation_catalog` may reference factory catalog/policy and pinned source
+revisions. `evaluation_run` may reference its catalog, factory policy, pinned
+source revisions, and execution-attempt graphs. Evidence may reference both
+evaluation families; control may reference their admitted evidence; derived
+and security-audit graphs may reference all of them. Evaluation graphs must
+not link directly to memory or cause a control transition. This prevents
+holdout contamination and prevents a raw score from becoming authority.
+
+Because the current `GraphRegistry` and ontology release are closed and
+digest-pinned, these families must be admitted through a reviewed registry,
+ontology, operational-shape, query-catalog, command, migration, and release
+revision. Creating an ad hoc named graph with one of these labels is not an
+implementation of this recommendation.
+
+### Evaluation ontology and placement rules
+
+The candidate [Jido evaluation ontology](../../priv/ontology/evaluation/1.0.0/README.md)
+defines the resource types, relationships, controlled concepts, graph-family
+contracts, and SHACL shapes needed to represent this topology. It imports the
+accepted Jido Factory `1.0.0` vocabulary instead of modifying that immutable
+release. Promotion into the operational ontology remains a separate reviewed
+release decision.
+
+The ontology observes the following placement rules:
+
+- catalog graphs hold definitions and protected-artifact references, never
+  hidden tests, expected patches, secrets, or raw oracle content;
+- run graphs hold trial observations and digests/references to large outputs,
+  never mutable summary-only scores;
+- an admitted `AggregateResult` identifies its analysis revision, frozen
+  inclusion digest, exact contributing trial IRIs, numerator, denominator,
+  estimate, and interval where applicable;
+- a `GraderResult`, `HumanGrade`, or `Adjudication` can support or contradict a
+  claim but cannot create an accepted claim or rollout transition;
+- a `RolloutDecision` is a specialization of the governed decision resource
+  and must cite admitted evidence, an authority, the prior stage, and its
+  disposition;
+- production signals first enter through the appropriate observation boundary
+  and become evaluation evidence only after provenance and eligibility checks;
+  and
+- no evaluation resource automatically becomes memory. Incident-derived
+  lessons and regression tasks require explicit review and adoption.
+
+Protected tasks and oracles need a two-part representation. The graph contains
+a capability-gated `ProtectedArtifactReference` with a content digest, artifact
+role, and access-policy revision. The protected store contains the bytes. The
+agent-facing projection exposes only the task material authorized for that
+trial. Oracle retrieval, canary access, and attempted disclosure are recorded
+in the security-audit graph.
+
+### What the evaluation graph enables
+
+Making these records queryable as a governed graph provides more than a score
+store:
+
+- **Reproducibility:** trace any metric or decision to the exact target,
+  catalog, corpus, task, trial, evaluator, environment, artifact, and analysis
+  revisions.
+- **Comparable experiments:** compare two target profiles on the same frozen
+  assignments and budgets without pooling incompatible routes or revisions.
+- **Immutable denominators:** recompute an aggregate from its contributing
+  trials and detect omitted failures, selective reruns, or edited summaries.
+- **Staleness propagation:** identify which evidence and rollout gates must be
+  rerun after a model, prompt, tool, verifier, corpus, rubric, or policy change.
+- **Coverage accounting:** find unmeasured combinations of repository,
+  language, task class, risk, authority, attack family, and rollout stage.
+- **Evaluator governance:** monitor flake, mutation sensitivity, judge-human
+  disagreement, calibration, leakage, and reference/negative-control health.
+- **Decision reconstruction:** answer which evidence and policy revisions
+  supported the current rollout stage at the decision transaction time.
+- **Production learning:** join later CI failures, reverts, incidents,
+  overrides, and review burden back to the profile and run that supported
+  deployment, without rewriting the historical evaluation.
+
+Example governed queries include:
+
+- which required risk/language/task slices lack an eligible sealed task;
+- which candidate and baseline runs used the same catalog, assignments, and
+  budgets;
+- which accepted outcomes lack fresh-checkout reproducibility or complete
+  provenance;
+- which aggregate contains an infrastructure-invalid or subsequently
+  invalidated trial;
+- which target-tuple changes make the current gate evidence stale;
+- which production incidents have not yet produced a confidential regression
+  task; and
+- which evaluator revision exceeds its calibrated disagreement or mutation
+  threshold.
+
+### Use during development and evaluation cycles
+
+1. **Design:** create a new immutable catalog revision containing the target
+   profile, task/corpus revisions, oracle and rubric references, slice
+   requirements, budgets, exclusions, and preregistered statistical plan.
+   Coverage queries expose missing cases before a candidate is run.
+2. **Pull request:** select T0/T1 tasks from the changed components and risk
+   links, freeze candidate and baseline run plans, and record every trial,
+   including malformed, timed-out, unsafe, and infrastructure-invalid
+   outcomes. Fast comparisons can block a regression without granting rollout
+   authority.
+3. **Nightly/security:** run repeated and adversarial trials, evaluator
+   self-tests, judge calibration, mutation checks, and drift slices. Derived
+   graphs provide inexpensive dashboards while closed trial graphs remain the
+   reproducible source observations.
+4. **Release:** close the run, admit independently verified executable and
+   human evidence, compute aggregates from the frozen inclusion set, and have
+   the governed decision command recheck the exact catalog, run, evidence,
+   policy, and control revisions before advancing, holding, or rolling back.
+5. **Production:** relate shadow/pilot outcomes, review time, CI, reverts, and
+   incidents to the deployed profile and decision. An escaped failure creates
+   a new confidential task/corpus revision; prior results remain historical
+   and implicated evidence is marked stale, contradicted, or invalidated
+   rather than edited.
+
+This separation lets JidoCode say independently that a result was observed,
+that it was admitted as evidence, and that a governed authority considered it
+sufficient for a particular rollout stage. Those are deliberately different
+claims.
+
 ## Rollout gate matrix
 
 The existing numeric Phase 7 gates remain the controlling plan until changed
