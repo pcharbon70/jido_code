@@ -20,20 +20,20 @@ Back to plan: [README](./README.md)
   specification and evidence before implementation, and none is a
   prerequisite for a useful single-agent repository factory.
 
-  - [ ] 8.1 Section - Govern MCP tool transport.
+  - [x] 8.1 Section - Govern MCP tool transport.
 
     This section treats MCP as a reviewable tool source, never as an
     authority or runtime replacement.
 
-    - [ ] 8.1.1 Task {#sah-p08-mcp} [repo: jido_code] [after: {#sah-p07-phase-receipt}] - Specify and gate the MCP adapter.
+    - [x] 8.1.1 Task {#sah-p08-mcp} [repo: jido_code] [after: {#sah-p07-phase-receipt}] - Specify and gate the MCP adapter.
 
       This task keeps third-party tool descriptions and servers from
       silently modifying the trusted execution surface.
 
-      - [ ] 8.1.1.1 Subtask {#sah-p08-8-1-1-1} - Require an accepted adapter specification pinning protocol, server package, server identity, and descriptor digests, namespacing tools by configured server identity.
-      - [ ] 8.1.1.2 Subtask {#sah-p08-8-1-1-2} - Treat tool descriptions, annotations, schemas, and results as untrusted; apply closed schemas, capabilities, budgets, and approvals through the Phase 3 monitor.
-      - [ ] 8.1.1.3 Subtask {#sah-p08-8-1-1-3} - Forbid token passthrough, validate token audience, implement redirect, PKCE, issuer, and scope controls, prevent SSRF and redirect rebinding during discovery, sandbox local or stdio servers separately, and reauthorize immediately before every call.
-      - [ ] 8.1.1.4 Subtask {#sah-p08-8-1-1-4} - Store remote handles as external references and treat remote completion as an observation requiring local verification and decision.
+      - [x] 8.1.1.1 Subtask {#sah-p08-8-1-1-1} - Require an accepted adapter specification pinning protocol, server package, server identity, and descriptor digests, namespacing tools by configured server identity.
+      - [x] 8.1.1.2 Subtask {#sah-p08-8-1-1-2} - Treat tool descriptions, annotations, schemas, and results as untrusted; apply closed schemas, capabilities, budgets, and approvals through the Phase 3 monitor.
+      - [x] 8.1.1.3 Subtask {#sah-p08-8-1-1-3} - Forbid token passthrough, validate token audience, implement redirect, PKCE, issuer, and scope controls, prevent SSRF and redirect rebinding during discovery, sandbox local or stdio servers separately, and reauthorize immediately before every call.
+      - [x] 8.1.1.4 Subtask {#sah-p08-8-1-1-4} - Store remote handles as external references and treat remote completion as an observation requiring local verification and decision.
 
   - [ ] 8.2 Section - Govern remote-agent delegation.
 
