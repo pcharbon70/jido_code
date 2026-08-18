@@ -2,11 +2,11 @@
 
 ## Status
 
-This receipt records the Harness Phase 8 candidate verified locally on
-2026-08-18. Merge is pending. HG8 and the harness plan remain open until this
-implementation pull request passes clean-checkout CI, merges, and the full
-merge-commit SHA is pinned here and in the Phase 8 plan. No optional extension
-ships runtime-enabled in this candidate.
+This receipt records the Harness Phase 8 candidate verified locally and
+accepted after pull request merge on 2026-08-18. Pull request #43 passed
+clean-checkout CI and merged on 2026-08-18. The harness plan is complete at
+that exact baseline. No optional extension ships runtime-enabled in this
+candidate.
 
 ## Candidate Provenance
 
@@ -18,8 +18,8 @@ ships runtime-enabled in this candidate.
 | Section 8.2 | `7bcfe4c5f91c1263b19194a76f98bdd0d5a9c245` |
 | Section 8.3 | `ec9628231f26d05745fdbb44e426b9df795d162f` |
 | Section 8.4 | `f7a8598ae0621d4afecd5e2e9484b2dd37180544` |
-| Section 8.5 and receipt | Merge-pending branch tip |
-| Merged candidate | Pending clean-checkout CI and merge |
+| Section 8.5 and receipt | `10a388733ce894cda5df199feb274545c9c2920a` |
+| Merged candidate | `35275337031c5c085c4060801fe67079ec00be18` |
 
 ## Contract Revisions
 
@@ -135,7 +135,7 @@ is rerun by `mix precommit`.
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 | `mix precommit` | 589 tests, 0 failures; pass |
-| Implementation pull request clean-checkout CI | Pending |
+| Pull request #43 clean-checkout CI | Pass; merged 2026-08-18 |
 
 ## Known Limitations
 
@@ -150,13 +150,13 @@ must enter through the pinned contracts without weakening them.
 
 ## Gate HG8
 
-HG8 remains merge-pending. It is accepted only at the merged candidate after
-clean-checkout CI passes and the merge SHA and date are pinned. The harness plan
-remains open. HG8 reopens if any extension is reachable without its accepted
-specification, pinned digests, evidence, and required monitor; if disabled
-extensions change base authorization, fencing, or verification; if remote or
-multi-agent claims bypass independent verification and governed decision; or
-if autonomous merge authority exists without its separate accepted ADR,
-release gate, production shadow, pull-request evidence, rollback evidence, and
-human-merge transition. These reopening conditions remain in force regardless
-of checklist state.
+HG8 is accepted at merged candidate
+`35275337031c5c085c4060801fe67079ec00be18`, pinned in this receipt and the
+Harness Phase 8 plan. The harness plan is complete at that baseline. HG8
+reopens if any extension is reachable without its accepted specification,
+pinned digests, evidence, and required monitor; if disabled extensions change
+base authorization, fencing, or verification; if remote or multi-agent claims
+bypass independent verification and governed decision; or if autonomous merge
+authority exists without its separate accepted ADR, release gate, production
+shadow, pull-request evidence, rollback evidence, and human-merge transition.
+These reopening conditions remain in force regardless of checklist state.
