@@ -13,7 +13,7 @@ from measured outcomes.
 
 Back to plan: [README](./README.md)
 
-- [ ] 7 Phase - Let evidence, not confidence, set the autonomy boundary.
+- [x] 7 Phase - Let evidence, not confidence, set the autonomy boundary.
 
   This phase pins corpora, metrics, adjudication, and gates so every later
   authority increase is justified and reversible.
@@ -74,7 +74,7 @@ Back to plan: [README](./README.md)
       - [x] 7.4.1.3 Subtask {#sah-p07-7-4-1-3} - Require at least 300 fresh or private eligible tasks across at least 10 repositories, accepted precision of at least 95 percent with the Wilson lower bound at least 90 percent, zero critical false acceptances, and fresh-checkout reproducibility for every accepted patch before automatic pull-request publication.
       - [x] 7.4.1.4 Subtask {#sah-p07-7-4-1-4} - Keep single-operator profiles at shadow stage until an independently authenticated and granted decision actor satisfies actor-separation policy, and implement immediate disablement on secret exposure, sandbox escape, evidence mismatch, or protected-branch mutation.
 
-  - [ ] 7.5 Section - Phase 7 Integration Tests.
+  - [x] 7.5 Section - Phase 7 Integration Tests.
 
     This final section proves the evaluation machinery itself is sound.
 
@@ -87,7 +87,7 @@ Back to plan: [README](./README.md)
       - [x] 7.5.1.3 Subtask {#sah-p07-7-5-1-3} - Prove graduation cannot advance without its recorded evidence, and that stage authority limits hold in the coordinator, not only in policy text.
       - [x] 7.5.1.4 Subtask {#sah-p07-7-5-1-4} - Rerun prior phases, architecture scans, and `mix precommit`.
 
-    - [ ] 7.5.2 Task {#sah-p07-phase-receipt} [repo: jido_code] [after: {#sah-p07-integration}] - Publish the Phase 7 evaluation-and-rollout receipt.
+    - [x] 7.5.2 Task {#sah-p07-phase-receipt} [repo: jido_code] [after: {#sah-p07-integration}] - Publish the Phase 7 evaluation-and-rollout receipt.
 
       This task records the evaluation evidence in
       `docs/architecture/harness-phase-07-receipt.md` and authorizes Phase 8
@@ -96,4 +96,4 @@ Back to plan: [README](./README.md)
       - [x] 7.5.2.1 Subtask {#sah-p07-7-5-2-1} - Record track harness, metric pipeline, adversarial suite, and rollout-gate revisions plus the candidate commit.
       - [x] 7.5.2.2 Subtask {#sah-p07-7-5-2-2} - Attach reproducibility, scenario-coverage, and graduation-machinery results with known limitations.
       - [x] 7.5.2.3 Subtask {#sah-p07-7-5-2-3} - Keep HG7 blocked while any metric can be computed outside its pinned profile or any stage can advance without recorded evidence.
-      - [ ] 7.5.2.4 Subtask {#sah-p07-7-5-2-4} - Pin the merged candidate commit before authorizing Phase 8.
+      - [x] 7.5.2.4 Subtask {#sah-p07-7-5-2-4} - Pin the merged candidate commit before authorizing Phase 8.
