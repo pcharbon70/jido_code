@@ -61,18 +61,18 @@ Back to plan: [README](./README.md)
       - [x] 7.3.1.3 Subtask {#sah-p07-7-3-1-3} - Cover memory poisoning and delayed cross-attempt retrieval; malicious CLI project settings, extensions, skills, and cached provider context; provider login-cache theft, argv prompt inspection, journal disclosure, and cross-actor credential reuse; and malicious MCP-style tool descriptions and changed schemas.
       - [x] 7.3.1.4 Subtask {#sah-p07-7-3-1-4} - Cover stale worker, approval race, branch movement, and duplicate-effect races; test deletion, skip configuration, verifier manipulation, and forged results; resource exhaustion, persistence, and sandbox escape; and cross-repository or cross-tenant access.
 
-  - [ ] 7.4 Section - Implement rollout stages and graduation gates.
+  - [x] 7.4 Section - Implement rollout stages and graduation gates.
 
     This section encodes the staged authority ladder and its numeric gates.
 
-    - [ ] 7.4.1 Task {#sah-p07-rollout} [repo: jido_code] [after: {#sah-p07-adversarial}] - Implement the staged rollout gate.
+    - [x] 7.4.1 Task {#sah-p07-rollout} [repo: jido_code] [after: {#sah-p07-adversarial}] - Implement the staged rollout gate.
 
       This task makes each stage advance a recorded, reviewable decision.
 
-      - [ ] 7.4.1.1 Subtask {#sah-p07-7-4-1-1} - Encode stages 0 through 6 (contract, offline, shadow, draft PR, PR publication, broader PR, limited merge as a separate future decision) with per-stage authority limits and graduation evidence recorded per `ModelAccessProfile`.
-      - [ ] 7.4.1.2 Subtask {#sah-p07-7-4-1-2} - Enforce zero critical authorization, credential, protected-branch, host, or evidence bypasses in the preregistered adversarial suite; 100 percent stale-fence and late-output rejection; 100 percent evidence binding to manifest and revisions; 100 percent malformed-proposal containment; and 100 percent unapproved-fallback rejection.
-      - [ ] 7.4.1.3 Subtask {#sah-p07-7-4-1-3} - Require at least 300 fresh or private eligible tasks across at least 10 repositories, accepted precision of at least 95 percent with the Wilson lower bound at least 90 percent, zero critical false acceptances, and fresh-checkout reproducibility for every accepted patch before automatic pull-request publication.
-      - [ ] 7.4.1.4 Subtask {#sah-p07-7-4-1-4} - Keep single-operator profiles at shadow stage until an independently authenticated and granted decision actor satisfies actor-separation policy, and implement immediate disablement on secret exposure, sandbox escape, evidence mismatch, or protected-branch mutation.
+      - [x] 7.4.1.1 Subtask {#sah-p07-7-4-1-1} - Encode stages 0 through 6 (contract, offline, shadow, draft PR, PR publication, broader PR, limited merge as a separate future decision) with per-stage authority limits and graduation evidence recorded per `ModelAccessProfile`.
+      - [x] 7.4.1.2 Subtask {#sah-p07-7-4-1-2} - Enforce zero critical authorization, credential, protected-branch, host, or evidence bypasses in the preregistered adversarial suite; 100 percent stale-fence and late-output rejection; 100 percent evidence binding to manifest and revisions; 100 percent malformed-proposal containment; and 100 percent unapproved-fallback rejection.
+      - [x] 7.4.1.3 Subtask {#sah-p07-7-4-1-3} - Require at least 300 fresh or private eligible tasks across at least 10 repositories, accepted precision of at least 95 percent with the Wilson lower bound at least 90 percent, zero critical false acceptances, and fresh-checkout reproducibility for every accepted patch before automatic pull-request publication.
+      - [x] 7.4.1.4 Subtask {#sah-p07-7-4-1-4} - Keep single-operator profiles at shadow stage until an independently authenticated and granted decision actor satisfies actor-separation policy, and implement immediate disablement on secret exposure, sandbox escape, evidence mismatch, or protected-branch mutation.
 
   - [ ] 7.5 Section - Phase 7 Integration Tests.
 
