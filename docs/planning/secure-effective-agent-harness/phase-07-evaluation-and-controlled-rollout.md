@@ -78,14 +78,14 @@ Back to plan: [README](./README.md)
 
     This final section proves the evaluation machinery itself is sound.
 
-    - [ ] 7.5.1 Task {#sah-p07-integration} [repo: jido_code] [after: {#sah-p07-rollout}] - Execute the evaluation-infrastructure matrices.
+    - [x] 7.5.1 Task {#sah-p07-integration} [repo: jido_code] [after: {#sah-p07-rollout}] - Execute the evaluation-infrastructure matrices.
 
       This task certifies the gates before any stage advance is claimed.
 
-      - [ ] 7.5.1.1 Subtask {#sah-p07-7-5-1-1} - Prove pinned corpora reproduce identical slices, intervals, and gate verdicts across reruns, and that changing adjudication creates a new profile version requiring a rerun.
-      - [ ] 7.5.1.2 Subtask {#sah-p07-7-5-1-2} - Prove every adversarial scenario reports utility and security outcomes separately and that safe failure is distinguishable from violating success.
-      - [ ] 7.5.1.3 Subtask {#sah-p07-7-5-1-3} - Prove graduation cannot advance without its recorded evidence, and that stage authority limits hold in the coordinator, not only in policy text.
-      - [ ] 7.5.1.4 Subtask {#sah-p07-7-5-1-4} - Rerun prior phases, architecture scans, and `mix precommit`.
+      - [x] 7.5.1.1 Subtask {#sah-p07-7-5-1-1} - Prove pinned corpora reproduce identical slices, intervals, and gate verdicts across reruns, and that changing adjudication creates a new profile version requiring a rerun.
+      - [x] 7.5.1.2 Subtask {#sah-p07-7-5-1-2} - Prove every adversarial scenario reports utility and security outcomes separately and that safe failure is distinguishable from violating success.
+      - [x] 7.5.1.3 Subtask {#sah-p07-7-5-1-3} - Prove graduation cannot advance without its recorded evidence, and that stage authority limits hold in the coordinator, not only in policy text.
+      - [x] 7.5.1.4 Subtask {#sah-p07-7-5-1-4} - Rerun prior phases, architecture scans, and `mix precommit`.
 
     - [ ] 7.5.2 Task {#sah-p07-phase-receipt} [repo: jido_code] [after: {#sah-p07-integration}] - Publish the Phase 7 evaluation-and-rollout receipt.
 
@@ -93,7 +93,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/harness-phase-07-receipt.md` and authorizes Phase 8
       only from the pinned merged baseline.
 
-      - [ ] 7.5.2.1 Subtask {#sah-p07-7-5-2-1} - Record track harness, metric pipeline, adversarial suite, and rollout-gate revisions plus the candidate commit.
-      - [ ] 7.5.2.2 Subtask {#sah-p07-7-5-2-2} - Attach reproducibility, scenario-coverage, and graduation-machinery results with known limitations.
-      - [ ] 7.5.2.3 Subtask {#sah-p07-7-5-2-3} - Keep HG7 blocked while any metric can be computed outside its pinned profile or any stage can advance without recorded evidence.
+      - [x] 7.5.2.1 Subtask {#sah-p07-7-5-2-1} - Record track harness, metric pipeline, adversarial suite, and rollout-gate revisions plus the candidate commit.
+      - [x] 7.5.2.2 Subtask {#sah-p07-7-5-2-2} - Attach reproducibility, scenario-coverage, and graduation-machinery results with known limitations.
+      - [x] 7.5.2.3 Subtask {#sah-p07-7-5-2-3} - Keep HG7 blocked while any metric can be computed outside its pinned profile or any stage can advance without recorded evidence.
       - [ ] 7.5.2.4 Subtask {#sah-p07-7-5-2-4} - Pin the merged candidate commit before authorizing Phase 8.

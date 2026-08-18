@@ -142,7 +142,9 @@ defmodule JidoCode.Factory.Evaluation.Metrics do
     do: trials |> Enum.map(& &1.trial_id) |> Enum.uniq() |> length() == length(trials)
 
   defp bound?(trial, profile) do
-    trial.track == profile.track and
+    trial.profile_revision == profile.revision and
+      trial.corpus_revision == profile.corpus_revision and
+      trial.track == profile.track and
       trial.slices.model == profile.target.model_identifier and
       trial.slices.access_mode == profile.target.access_mode and
       trial.slices.authentication_kind == profile.target.authentication_kind and

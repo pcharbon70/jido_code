@@ -5,6 +5,7 @@ defmodule JidoCode.Factory.Evaluation.Rollout.Decision do
   alias JidoCode.Factory.Evaluation.Rollout.Stage
 
   @enforce_keys [
+    :recording_receipt_iri,
     :evidence_iri,
     :model_access_profile_iri,
     :profile_revision,
@@ -30,6 +31,7 @@ defmodule JidoCode.Factory.Evaluation.Rollout.Decision do
     actions = if status == :disabled, do: [], else: Stage.actions(authorized_stage)
 
     frozen = %{
+      recording_receipt_iri: evidence.recording_receipt_iri,
       evidence_iri: evidence.evidence_iri,
       model_access_profile_iri: evidence.model_access_profile_iri,
       profile_revision: evidence.profile_revision,

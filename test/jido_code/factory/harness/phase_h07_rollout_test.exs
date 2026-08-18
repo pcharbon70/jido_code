@@ -152,7 +152,15 @@ defmodule JidoCode.Factory.Harness.PhaseH07RolloutTest do
     assert {:ok, evidence} = Evidence.new(attributes)
     assert evidence.digest =~ ~r/^[a-f0-9]{64}$/
 
-    assert {:error, %{operation: :rollout_evidence}} =
+    nonconsecutive = %{
+      attributes
+      | requested_stage: 5,
+        recording_receipt: recording_receipt(3, 5)
+    }
+
+    assert {:error, %{operation: :rollout_evidence}} = Evidence.new(nonconsecutive)
+
+    assert {:error, %{operation: :rollout_recording_receipt}} =
              Evidence.new(%{attributes | requested_stage: 5})
 
     assert {:error, %{operation: :rollout_evidence}} =
@@ -161,12 +169,25 @@ defmodule JidoCode.Factory.Harness.PhaseH07RolloutTest do
 
   defp evidence!(overrides \\ %{}) do
     attributes = Map.merge(evidence_attributes(), overrides)
+
+    attributes =
+      if Map.has_key?(overrides, :recording_receipt) do
+        attributes
+      else
+        Map.put(
+          attributes,
+          :recording_receipt,
+          recording_receipt(attributes.current_stage, attributes.requested_stage)
+        )
+      end
+
     {:ok, evidence} = Evidence.new(attributes)
     evidence
   end
 
   defp evidence_attributes do
     %{
+      recording_receipt: recording_receipt(3, 4),
       evidence_iri: iri("evidence/rollout"),
       model_access_profile_iri: iri("profile/model-access"),
       profile_revision: @profile,
@@ -239,6 +260,19 @@ defmodule JidoCode.Factory.Harness.PhaseH07RolloutTest do
       evidence_binding: 1.0,
       malformed_proposal_containment: 1.0,
       unapproved_fallback_rejection: 1.0
+    }
+  end
+
+  defp recording_receipt(current_stage, requested_stage) do
+    %{
+      iri: iri("receipt/rollout-evidence"),
+      command_type: "RecordVerificationEvidence",
+      outcome: :committed,
+      evidence_iri: iri("evidence/rollout"),
+      model_access_profile_iri: iri("profile/model-access"),
+      profile_revision: @profile,
+      current_stage: current_stage,
+      requested_stage: requested_stage
     }
   end
 

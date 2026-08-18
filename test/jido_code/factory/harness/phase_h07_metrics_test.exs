@@ -204,6 +204,8 @@ defmodule JidoCode.Factory.Harness.PhaseH07MetricsTest do
     %{
       trial_id: trial_id,
       task_iri: iri(task_path),
+      profile_revision: "profile-1",
+      corpus_revision: "corpus-1",
       track: :fresh_private_issues,
       independent_run_index: index,
       eligible?: true,

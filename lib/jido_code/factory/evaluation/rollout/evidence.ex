@@ -8,6 +8,7 @@ defmodule JidoCode.Factory.Evaluation.Rollout.Evidence do
   alias JidoCode.Knowledge
 
   @enforce_keys [
+    :recording_receipt_iri,
     :evidence_iri,
     :model_access_profile_iri,
     :profile_revision,
@@ -48,7 +49,10 @@ defmodule JidoCode.Factory.Evaluation.Rollout.Evidence do
 
   @spec new(map()) :: {:ok, t()} | {:error, AdapterError.t()}
   def new(attributes) when is_map(attributes) do
-    with true <- Enum.sort(Map.keys(attributes)) == Enum.sort(@enforce_keys -- [:digest]),
+    input_keys = (@enforce_keys -- [:digest, :recording_receipt_iri]) ++ [:recording_receipt]
+
+    with true <- Enum.sort(Map.keys(attributes)) == Enum.sort(input_keys),
+         {:ok, recording_receipt} <- recording_receipt(attributes.recording_receipt, attributes),
          :ok <- resource(attributes.evidence_iri),
          :ok <- resource(attributes.model_access_profile_iri),
          true <- text?(attributes.profile_revision, 256),
@@ -63,7 +67,7 @@ defmodule JidoCode.Factory.Evaluation.Rollout.Evidence do
          true <- bounded_count?(attributes.eligible_tasks),
          true <- bounded_count?(attributes.repository_count),
          true <- bounded_count?(attributes.accepted_patches),
-         true <- attributes.eligible_tasks == aggregate.counts.eligible,
+         true <- attributes.eligible_tasks == aggregate.task_count,
          true <- attributes.accepted_patches == aggregate.counts.accepted,
          true <- is_boolean(attributes.all_accepted_reproducible?),
          {:ok, security_rates} <- security_rates(attributes.security_rates),
@@ -75,6 +79,8 @@ defmodule JidoCode.Factory.Evaluation.Rollout.Evidence do
          :ok <- optional_resource(attributes.future_merge_decision_iri) do
       frozen =
         attributes
+        |> Map.drop([:recording_receipt])
+        |> Map.put(:recording_receipt_iri, recording_receipt.iri)
         |> Map.put(:security_rates, security_rates)
         |> Map.put(:incidents, incidents)
 
@@ -88,6 +94,34 @@ defmodule JidoCode.Factory.Evaluation.Rollout.Evidence do
   end
 
   def new(_attributes), do: invalid(:rollout_evidence)
+
+  defp recording_receipt(
+         %{
+           iri: iri,
+           command_type: "RecordVerificationEvidence",
+           outcome: outcome,
+           evidence_iri: evidence_iri,
+           model_access_profile_iri: profile_iri,
+           profile_revision: profile_revision,
+           current_stage: current_stage,
+           requested_stage: requested_stage
+         } = receipt,
+         attributes
+       )
+       when outcome in [:committed, :already_committed] do
+    with :ok <- resource(iri),
+         true <- evidence_iri == attributes.evidence_iri,
+         true <- profile_iri == attributes.model_access_profile_iri,
+         true <- profile_revision == attributes.profile_revision,
+         true <- current_stage == attributes.current_stage,
+         true <- requested_stage == attributes.requested_stage do
+      {:ok, receipt}
+    else
+      _invalid -> invalid(:rollout_recording_receipt)
+    end
+  end
+
+  defp recording_receipt(_receipt, _attributes), do: invalid(:rollout_recording_receipt)
 
   defp security_rates(value) when is_map(value) do
     with true <- Enum.sort(Map.keys(value)) == Enum.sort(@security_keys),

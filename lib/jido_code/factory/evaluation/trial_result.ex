@@ -9,6 +9,8 @@ defmodule JidoCode.Factory.Evaluation.TrialResult do
   @enforce_keys [
     :trial_id,
     :task_iri,
+    :profile_revision,
+    :corpus_revision,
     :track,
     :independent_run_index,
     :eligible?,
@@ -89,6 +91,8 @@ defmodule JidoCode.Factory.Evaluation.TrialResult do
     with true <- Enum.sort(Map.keys(attributes)) == Enum.sort(@enforce_keys),
          true <- text?(attributes.trial_id, 256),
          :ok <- resource(attributes.task_iri),
+         true <- text?(attributes.profile_revision, 256),
+         true <- text?(attributes.corpus_revision, 256),
          {:ok, _track} <- Track.fetch(attributes.track),
          index when is_integer(index) and index in 1..50 <- attributes.independent_run_index,
          true <- Enum.all?(@boolean_fields, &is_boolean(attributes[&1])),
