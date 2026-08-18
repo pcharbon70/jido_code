@@ -34,6 +34,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Artifact
   alias JidoCode.Knowledge.Execution.ActionProposal
   alias JidoCode.Knowledge.Execution.ContextManifest
+  alias JidoCode.Knowledge.Execution.Graph, as: ExecutionGraph
   alias JidoCode.Knowledge.Execution.ModelInvocation
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
@@ -433,6 +434,8 @@ defmodule JidoCode.Knowledge do
         repository: repository_iri,
         revision: snapshot_iri
       })
+
+  def run_graph_identity(attempt_iri), do: ExecutionGraph.run_graph(attempt_iri)
 
   def validate_resource_identity(iri), do: ResourceIdentity.validate(iri)
   def validate_graph_identity(iri), do: GraphRegistry.identify(iri)

@@ -63,19 +63,19 @@ Back to plan: [README](./README.md)
       - [x] 6.3.1.3 Subtask {#sah-p06-6-3-1-3} - Immediately before the approved effect, recheck approver authorization, revocation, policy, current revisions, capability, lease, fence, destination, and artifact availability; the invocation-before-effect command atomically records the invocation and consumes the approval.
       - [x] 6.3.1.4 Subtask {#sah-p06-6-3-1-4} - Leave an ambiguous delivery unresolved with bounded reconciliation observations; permit redelivery only under a proven idempotent contract with no terminal outcome, commit exactly one terminal outcome, and require a new invocation, linked attempt, and approval for any semantic retry.
 
-  - [ ] 6.4 Section - Implement publication as separate work.
+  - [x] 6.4 Section - Implement publication as separate work.
 
     This section ensures acceptance justifies proposing publication but never
     performs it.
 
-    - [ ] 6.4.1 Task {#sah-p06-publication} [repo: jido_code] [after: {#sah-p06-approval}] - Implement the publication task and trusted adapter.
+    - [x] 6.4.1 Task {#sah-p06-publication} [repo: jido_code] [after: {#sah-p06-approval}] - Implement the publication task and trusted adapter.
 
       This task keeps branch protection, review, and rapid revocation in
       the loop at launch.
 
-      - [ ] 6.4.1.1 Subtask {#sah-p06-6-4-1-1} - Model opening or updating a bot branch or pull request as a new task with independent eligibility, authorization, lease, fence, and execution attempt recorded in `run/{publication_attempt}`.
-      - [ ] 6.4.1.2 Subtask {#sah-p06-6-4-1-2} - Implement the trusted provider adapter with expected-old-object compare-and-swap, non-fast-forward rejection, and reliance on provider branch and ruleset protection, claiming narrower Git credential scope only where the provider demonstrably supports it.
-      - [ ] 6.4.1.3 Subtask {#sah-p06-6-4-1-3} - Keep all publication limited to bot branches and pull requests with no protected-branch merge authority.
+      - [x] 6.4.1.1 Subtask {#sah-p06-6-4-1-1} - Model opening or updating a bot branch or pull request as a new task with independent eligibility, authorization, lease, fence, and execution attempt recorded in `run/{publication_attempt}`.
+      - [x] 6.4.1.2 Subtask {#sah-p06-6-4-1-2} - Implement the trusted provider adapter with expected-old-object compare-and-swap, non-fast-forward rejection, and reliance on provider branch and ruleset protection, claiming narrower Git credential scope only where the provider demonstrably supports it.
+      - [x] 6.4.1.3 Subtask {#sah-p06-6-4-1-3} - Keep all publication limited to bot branches and pull requests with no protected-branch merge authority.
 
   - [ ] 6.5 Section - Implement external observation and the final-goal decision.
 
