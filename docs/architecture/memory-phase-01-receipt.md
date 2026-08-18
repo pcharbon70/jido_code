@@ -2,11 +2,11 @@
 
 ## Status
 
-This receipt records the Memory Phase 1 candidate verified locally on
-2026-08-18. Merge is pending. MG1 remains open until this implementation pull
-request passes clean-checkout CI, merges, and the full merge-commit SHA and
-merge date are pinned here and in the Phase 1 plan. Phase 2 is not authorized
-from the merge-pending branch tip.
+This receipt records the Memory Phase 1 candidate verified locally and
+accepted after pull request merge on 2026-08-18. Pull request #48 passed
+clean-checkout CI and merged on 2026-08-18 as
+`f65b25ef3410dd5bad8da9fcd4b07b99a6acc2b2`. MG1 is accepted, and Phase 2 is
+authorized only from that exact merged baseline.
 
 ## Candidate Provenance
 
@@ -17,8 +17,8 @@ from the merge-pending branch tip.
 | Section 1.2 | `797f7dca32724f816bed43db725284740fffa272` - ratify total memory graph topology |
 | Section 1.3 | `253ec7c6b45c4532e2851d054e02301d3b5fc0d7` - govern total memory data lifecycle |
 | Section 1.4 | `0342ff7d4440aec4f4beb633c23799e17290fd33` - establish total memory guardrails |
-| Section 1.5 and receipt | Merge-pending branch tip |
-| Merged candidate | Pending clean-checkout CI and merge |
+| Section 1.5 and receipt | `a2ff588afc0ea6b0698c9bb3bfecef9e7311f391` - verify total memory Phase 1 contracts |
+| Merged candidate | `f65b25ef3410dd5bad8da9fcd4b07b99a6acc2b2` |
 
 ## Contract Pins
 
@@ -111,7 +111,7 @@ remain disabled until their owning MG2-MG6 gate is accepted.
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 | `mix precommit` | 621 tests, 0 failures; pass |
-| Implementation pull request clean-checkout CI | Pending |
+| Pull request #48 clean-checkout CI | Pass; merged 2026-08-18 |
 
 ## Known Limitations
 
@@ -132,10 +132,11 @@ remain disabled until their owning MG2-MG6 gate is accepted.
 
 ## Gate MG1
 
-MG1 remains merge-pending. It is accepted only at the merged candidate after
-clean-checkout CI passes and the merge SHA and date are pinned. Phase 2 remains
-blocked. MG1 reopens if any stored content is ambiguously classified, any
-family lacks a closed contract, or any retained content can become authority;
+MG1 is accepted at merged candidate
+`f65b25ef3410dd5bad8da9fcd4b07b99a6acc2b2`, pinned in this receipt and the
+Phase 1 plan. Phase 2 is authorized only from that exact baseline. MG1 reopens
+if any stored content is ambiguously classified, any family lacks a closed
+contract, or any retained content can become authority;
 if a secret value, provider-private state, or hidden reasoning becomes durable;
 if archive, removal, erasure, hold, or legacy completeness is reported more
 strongly than achieved; if authorization occurs only after candidate

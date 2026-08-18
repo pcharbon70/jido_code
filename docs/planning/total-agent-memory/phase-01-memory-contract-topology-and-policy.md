@@ -14,7 +14,7 @@ explicit before new capture begins.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Ratify complete evidence and selective memory as executable architecture.
+- [x] 1 Phase - Ratify complete evidence and selective memory as executable architecture.
 
   This phase establishes MG1 by ensuring the ontology, data policy, topology,
   retention, security, and legacy-migration contracts agree about every byte
@@ -87,7 +87,7 @@ Back to plan: [README](./README.md)
       - [x] 1.4.1.5 Subtask - Define the Phase 6 benchmark corpus and relative capture, query, backup, restore, and rebuild acceptance thresholds that determine graph-native versus vault storage.
       - [x] 1.4.1.6 Subtask - Keep every new writer, query, profile, index, and content gateway disabled until its owning phase gate is accepted.
 
-  - [ ] 1.5 Section - Phase 1 Integration Tests.
+  - [x] 1.5 Section - Phase 1 Integration Tests.
 
     This final section proves the reconciled contract is internally consistent
     and closes MG1 from a merged candidate.
@@ -103,7 +103,7 @@ Back to plan: [README](./README.md)
       - [x] 1.5.1.4 Subtask - Prove archive, removal, erasure, hold, legacy-run, and receipt-commitment states are reported honestly.
       - [x] 1.5.1.5 Subtask - Run prior graph/harness suites, architecture scans, and `mix precommit`.
 
-    - [ ] 1.5.2 Task {#tam-p01-phase-receipt} [repo: jido_code] [after: {#tam-p01-integration}] - Publish the Phase 1 memory-contract receipt.
+    - [x] 1.5.2 Task {#tam-p01-phase-receipt} [repo: jido_code] [after: {#tam-p01-integration}] - Publish the Phase 1 memory-contract receipt.
 
       This task records the ratified boundary in
       `docs/architecture/memory-phase-01-receipt.md` and authorizes segmented
@@ -112,4 +112,4 @@ Back to plan: [README](./README.md)
       - [x] 1.5.2.1 Subtask - Record ontology, registry, policy, profile, capacity, migration, and threat revisions plus the candidate commit.
       - [x] 1.5.2.2 Subtask - Attach classification, topology, retention, compatibility, and adversarial evidence with known limitations.
       - [x] 1.5.2.3 Subtask - Keep MG1 blocked if any stored content is ambiguously classified, any family lacks a closed contract, or any retained content can become authority.
-      - [ ] 1.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 2.
+      - [x] 1.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 2.
