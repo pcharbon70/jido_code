@@ -32,20 +32,20 @@ Back to plan: [README](./README.md)
       - [x] 7.1.1.3 Subtask {#sah-p07-7-1-1-3} - Report every result sliced by repository, language, task class, risk, model, access mode, authentication kind, billing mode, adapter revisions, CLI version, harness profile, and tool version, never pooling access modes without separate reporting.
       - [x] 7.1.1.4 Subtask {#sah-p07-7-1-1-4} - Use multiple fresh independent executions with confidence intervals for stochastic claims; never assume provider seed control.
 
-  - [ ] 7.2 Section - Implement primary metrics and correctness adjudication.
+  - [x] 7.2 Section - Implement primary metrics and correctness adjudication.
 
     This section defines success mathematically and keeps humans as the
     correctness oracle where it matters.
 
-    - [ ] 7.2.1 Task {#sah-p07-metrics} [repo: jido_code] [after: {#sah-p07-eval-tracks}] - Implement the metric and adjudication pipeline.
+    - [x] 7.2.1 Task {#sah-p07-metrics} [repo: jido_code] [after: {#sah-p07-eval-tracks}] - Implement the metric and adjudication pipeline.
 
       This task prevents an abstaining or self-grading system from looking
       successful.
 
-      - [ ] 7.2.1.1 Subtask {#sah-p07-7-2-1-1} - Implement Correct Accepted Yield, accepted precision, critical false-acceptance incidence, acceptance coverage, attempt coverage, tool-proposal schema validity, and malformed-proposal containment.
-      - [ ] 7.2.1.2 Subtask {#sah-p07-7-2-1-2} - Fix two-sided 95 percent Wilson score intervals for binary proportion gates and preregistered stratified bootstrap for continuous metrics; report patch approval and final-goal satisfaction separately.
-      - [ ] 7.2.1.3 Subtask {#sah-p07-7-2-1-3} - Require the independent fresh-checkout verifier plus verifier-owned or hidden checks for executable correctness; fresh or private tasks additionally receive two blinded independent reviewers with a third resolving disagreement under the pinned rubric.
-      - [ ] 7.2.1.4 Subtask {#sah-p07-7-2-1-4} - Keep LLM judges advisory only, and also report pass-at-one, repeated-run consistency, separately labelled pass-at-k, unauthorized-effect and stale-fence rejection rates, provenance completeness, verifier reproducibility, retrieval recall and token cost, recovery success, cost and latency per correct accepted outcome, review time and override rate, and post-publication CI, revert, incident, and regression rates.
+      - [x] 7.2.1.1 Subtask {#sah-p07-7-2-1-1} - Implement Correct Accepted Yield, accepted precision, critical false-acceptance incidence, acceptance coverage, attempt coverage, tool-proposal schema validity, and malformed-proposal containment.
+      - [x] 7.2.1.2 Subtask {#sah-p07-7-2-1-2} - Fix two-sided 95 percent Wilson score intervals for binary proportion gates and preregistered stratified bootstrap for continuous metrics; report patch approval and final-goal satisfaction separately.
+      - [x] 7.2.1.3 Subtask {#sah-p07-7-2-1-3} - Require the independent fresh-checkout verifier plus verifier-owned or hidden checks for executable correctness; fresh or private tasks additionally receive two blinded independent reviewers with a third resolving disagreement under the pinned rubric.
+      - [x] 7.2.1.4 Subtask {#sah-p07-7-2-1-4} - Keep LLM judges advisory only, and also report pass-at-one, repeated-run consistency, separately labelled pass-at-k, unauthorized-effect and stale-fence rejection rates, provenance completeness, verifier reproducibility, retrieval recall and token cost, recovery success, cost and latency per correct accepted outcome, review time and override rate, and post-publication CI, revert, incident, and regression rates.
 
   - [ ] 7.3 Section - Build the adversarial security suite.
 
