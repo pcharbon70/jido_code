@@ -14,7 +14,7 @@ default.
 
 Back to plan: [README](./README.md)
 
-- [ ] 8 Phase - Add reach only when evaluation proves it is worth its risk.
+- [x] 8 Phase - Add reach only when evaluation proves it is worth its risk.
 
   This phase is intentionally gated: every task requires its own accepted
   specification and evidence before implementation, and none is a
@@ -74,7 +74,7 @@ Back to plan: [README](./README.md)
       - [x] 8.4.1.1 Subtask {#sah-p08-8-4-1-1} - Record the blocker: autonomous merge requires a separate accepted ADR, release gate, and production shadow plus pull-request evidence.
       - [x] 8.4.1.2 Subtask {#sah-p08-8-4-1-2} - Restrict any future pilot to reversible, low-risk task classes with immediate-disablement triggers and human merge retained until the gate passes.
 
-  - [ ] 8.5 Section - Phase 8 Integration Tests.
+  - [x] 8.5 Section - Phase 8 Integration Tests.
 
     This final section proves each extension obeys its gate and the base
     harness is unaffected when they are disabled.
@@ -89,7 +89,7 @@ Back to plan: [README](./README.md)
       - [x] 8.5.1.3 Subtask {#sah-p08-8-5-1-3} - Prove the harness operates identically with every extension disabled and no dormant code path affects authorization, fencing, or verification.
       - [x] 8.5.1.4 Subtask {#sah-p08-8-5-1-4} - Record which extensions shipped enabled, which remain gated, and their evidence links.
 
-    - [ ] 8.5.2 Task {#sah-p08-phase-receipt} [repo: jido_code] [after: {#sah-p08-integration}] - Publish the Phase 8 extensions receipt.
+    - [x] 8.5.2 Task {#sah-p08-phase-receipt} [repo: jido_code] [after: {#sah-p08-integration}] - Publish the Phase 8 extensions receipt.
 
       This task records the extension posture in
       `docs/architecture/harness-phase-08-receipt.md` and closes the
@@ -98,4 +98,4 @@ Back to plan: [README](./README.md)
       - [x] 8.5.2.1 Subtask {#sah-p08-8-5-2-1} - Record each extension's gate status, specification references, digests, and the candidate commit.
       - [x] 8.5.2.2 Subtask {#sah-p08-8-5-2-2} - Attach extension-gate and disabled-harness results with known limitations.
       - [x] 8.5.2.3 Subtask {#sah-p08-8-5-2-3} - Keep HG8 and the plan open while any extension is reachable without its accepted specification or evidence.
-      - [ ] 8.5.2.4 Subtask {#sah-p08-8-5-2-4} - Pin the merged candidate commit and close the harness plan.
+      - [x] 8.5.2.4 Subtask {#sah-p08-8-5-2-4} - Pin the merged candidate commit and close the harness plan.
