@@ -36,22 +36,22 @@ Back to plan: [README](./README.md)
       - [x] 1.1.1.4 Subtask - Require every expected body to record a capture result even when content is omitted, unavailable, redacted, failed, expired, or erased.
       - [x] 1.1.1.5 Subtask - Tag legacy runs with their actual protocol and reconstruction limits without rewriting closed history or claiming nonexistent completeness.
 
-  - [ ] 1.2 Section - Ratify memory graph families, resources, and writers.
+  - [x] 1.2 Section - Ratify memory graph families, resources, and writers.
 
     This section extends the closed topology with narrowly scoped families
     whose lifecycle cannot grant control, evidence, decision, or knowledge
     authority.
 
-    - [ ] 1.2.1 Task {#tam-p01-memory-topology} [repo: jido_code] [after: {#tam-p01-contract-reconciliation}] - Publish the memory ontology and graph-topology contract.
+    - [x] 1.2.1 Task {#tam-p01-memory-topology} [repo: jido_code] [after: {#tam-p01-contract-reconciliation}] - Publish the memory ontology and graph-topology contract.
 
       This task assigns every new resource an exact graph family, writer,
       scope, lifecycle, retention class, and permitted link direction.
 
-      - [ ] 1.2.1.1 Subtask - Add `run_event_segment` scoped by attempt and segment, writable only by `execution_writer`, closeable once, and immutable after closure.
-      - [ ] 1.2.1.2 Subtask - Add repository-scoped `experience` and `content_lifecycle` families with dedicated writers and append/supersede lifecycles.
-      - [ ] 1.2.1.3 Subtask - Register `episode_content` as a disabled, content-writer-only family for bounded encrypted chunks, unavailable until MG6.
-      - [ ] 1.2.1.4 Subtask - Define shapes for capture manifests, segment manifests, content captures, cases, procedures, artifact claims, retrieval activities, lifecycle activities, and access permits.
-      - [ ] 1.2.1.5 Subtask - Version graph identities, predicates, writer capabilities, allowed links, completeness, topology, and migration compatibility; unknown families and terms remain denied.
+      - [x] 1.2.1.1 Subtask - Add `run_event_segment` scoped by attempt and segment, writable only by `execution_writer`, closeable once, and immutable after closure.
+      - [x] 1.2.1.2 Subtask - Add repository-scoped `experience` and `content_lifecycle` families with dedicated writers and append/supersede lifecycles.
+      - [x] 1.2.1.3 Subtask - Register `episode_content` as a disabled, content-writer-only family for bounded encrypted chunks, unavailable until MG6.
+      - [x] 1.2.1.4 Subtask - Define shapes for capture manifests, segment manifests, content captures, cases, procedures, artifact claims, retrieval activities, lifecycle activities, and access permits.
+      - [x] 1.2.1.5 Subtask - Version graph identities, predicates, writer capabilities, allowed links, completeness, topology, and migration compatibility; unknown families and terms remain denied.
 
   - [ ] 1.3 Section - Define capture, retention, archive, and erasure policy.
 

@@ -1,0 +1,26 @@
+{
+  "canonical_nquads_sha256": "aeca46ef9ba27e5ca5021c0f2cd25b7b47ce16a9d6c92e4a45a58009d13a1f30",
+  "compatibility": "additive-from-1.0.0",
+  "graph_iri": "https://jido.run/graph/ontology/1.1.0",
+  "imports": [
+    "https://jido.run/ontology/factory/1.0.0",
+    "http://purl.org/dc/terms/",
+    "http://spdx.org/rdf/terms",
+    "http://www.w3.org/2004/02/skos/core",
+    "http://www.w3.org/ns/prov-o"
+  ],
+  "ontology_iri": "https://jido.run/ontology/factory/1.1.0",
+  "package_sha256": "3450ebcc85cfaa08087a2941ab0a9a5e536606d15b88865a045427150ba6d039",
+  "released_on": "2026-08-18",
+  "resource_namespace": "https://jido.run/id/",
+  "shape_version": "1.1.0",
+  "shapes_iri": "https://jido.run/ontology/shapes/1.1.0",
+  "sources": {
+    "RELEASE.md": "e086d8311b997ee779b9f1f3faaf4fc989de3d08bd88b96c6489a7378260ec5d",
+    "memory.ttl": "e9c55990d43aaad7a22fe0a1b2d5cab6c9b6872bc472aeccd2798e5c41c70f2d",
+    "release.ttl": "0572f3fc0723e3faa9f63d391a6cff460b1acf44cfa5073c4e8014e3ef35a8a7",
+    "shapes.ttl": "ba3a663b7b6fd8493b5c9dede4811ee8dbb96f6ab5c6e22d6f95b8a149dc6f3c"
+  },
+  "term_namespace": "https://jido.run/ontology/factory#",
+  "version": "1.1.0"
+}

@@ -1,0 +1,110 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/factory/1.1.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://jido.run/ontology/factory/1.1.0> ;
+  owl:versionInfo "1.1.0" ;
+  owl:imports <https://jido.run/ontology/factory/1.0.0> ;
+  rdfs:label "Jido Factory memory contract" ;
+  rdfs:comment "Additive memory vocabulary. Registration does not enable a graph family or grant write, retrieval, content-access, evidence, decision, or knowledge authority." .
+
+# Memory resources
+jf:CaptureManifest a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "capture manifest" .
+jf:SegmentManifest a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "segment manifest" .
+jf:ContentCapture a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "content capture" .
+jf:ExperienceCase a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "experience case" .
+jf:ProcedureRevision a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "procedure revision" .
+jf:ArtifactClaim a owl:Class ; rdfs:subClassOf jf:Claim ; rdfs:label "artifact claim" .
+jf:RetrievalActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "retrieval activity" .
+jf:MemoryUseAssessment a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "memory use assessment" .
+jf:ContentLifecycleActivity a owl:Class ; rdfs:subClassOf prov:Activity ; rdfs:label "content lifecycle activity" .
+jf:ContentAccessPermit a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "content access permit" .
+jf:EpisodeContent a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "episode content" .
+jf:ContentChunk a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "encrypted content chunk" .
+
+# Capture and segment relationships
+jf:hasCapture a owl:ObjectProperty ; rdfs:domain jf:CaptureManifest ; rdfs:range jf:ContentCapture .
+jf:expectedBody a owl:ObjectProperty ; rdfs:domain jf:CaptureManifest .
+jf:capturedBody a owl:ObjectProperty ; rdfs:domain jf:ContentCapture .
+jf:sourceEvent a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:predecessorSegment a owl:ObjectProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range jf:SegmentManifest .
+jf:segmentOf a owl:ObjectProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range jf:ExecutionAttempt .
+jf:hasContentObject a owl:ObjectProperty ; rdfs:domain jf:ContentCapture ; rdfs:range jf:EpisodeContent .
+jf:hasChunk a owl:ObjectProperty ; rdfs:domain jf:EpisodeContent ; rdfs:range jf:ContentChunk .
+
+# Case, procedure, claim, and retrieval relationships
+jf:caseSource a owl:ObjectProperty ; rdfs:domain jf:ExperienceCase .
+jf:procedureSource a owl:ObjectProperty ; rdfs:domain jf:ProcedureRevision ; rdfs:range jf:ExperienceCase .
+jf:claimArtifact a owl:ObjectProperty ; rdfs:domain jf:ArtifactClaim ; rdfs:range jf:Artifact .
+jf:retrievalSource a owl:ObjectProperty ; rdfs:domain jf:RetrievalActivity .
+jf:assessesRetrieval a owl:ObjectProperty ; rdfs:domain jf:MemoryUseAssessment ; rdfs:range jf:RetrievalActivity .
+
+# Lifecycle and access relationships
+jf:lifecycleSubject a owl:ObjectProperty ; rdfs:domain jf:ContentLifecycleActivity ; rdfs:range jf:EpisodeContent .
+jf:permitContent a owl:ObjectProperty ; rdfs:domain jf:ContentAccessPermit ; rdfs:range jf:EpisodeContent .
+jf:permitActor a owl:ObjectProperty ; rdfs:domain jf:ContentAccessPermit ; rdfs:range jf:Actor .
+jf:keyReference a owl:ObjectProperty ; rdfs:domain jf:EpisodeContent ; rdfs:range jf:CredentialReference .
+
+# Closed-vocabulary properties
+jf:captureProfile a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:captureOutcome a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:contentRepresentation a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:storageLocation a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:availabilityState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:retentionState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:holdState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:contentClassification a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:caseOutcome a owl:ObjectProperty ; rdfs:domain jf:ExperienceCase ; rdfs:range skos:Concept .
+jf:procedureState a owl:ObjectProperty ; rdfs:domain jf:ProcedureRevision ; rdfs:range skos:Concept .
+jf:claimFreshness a owl:ObjectProperty ; rdfs:domain jf:ArtifactClaim ; rdfs:range skos:Concept .
+jf:lifecycleAction a owl:ObjectProperty ; rdfs:domain jf:ContentLifecycleActivity ; rdfs:range skos:Concept .
+
+# Bounded literals
+jf:memoryProtocolVersion a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:capturePolicyRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:segmentIndex a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:nonNegativeInteger .
+jf:sequenceStart a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:nonNegativeInteger .
+jf:sequenceEnd a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:nonNegativeInteger .
+jf:eventCount a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:nonNegativeInteger .
+jf:segmentRootDigest a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:string .
+jf:applicabilityDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:retrievalPurpose a owl:DatatypeProperty ; rdfs:domain jf:RetrievalActivity ; rdfs:range xsd:string .
+jf:effectiveAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime .
+jf:permitPurpose a owl:DatatypeProperty ; rdfs:domain jf:ContentAccessPermit ; rdfs:range xsd:string .
+jf:expiresAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime .
+jf:consumedAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime .
+jf:ciphertext a owl:DatatypeProperty ; rdfs:domain jf:ContentChunk ; rdfs:range xsd:base64Binary .
+jf:chunkIndex a owl:DatatypeProperty ; rdfs:domain jf:ContentChunk ; rdfs:range xsd:nonNegativeInteger .
+jf:chunkCount a owl:DatatypeProperty ; rdfs:domain jf:EpisodeContent ; rdfs:range xsd:nonNegativeInteger .
+jf:byteCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:encryptionAlgorithm a owl:DatatypeProperty ; rdfs:domain jf:EpisodeContent ; rdfs:range xsd:string .
+
+# New graph kinds
+jfc:RunEventSegmentGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "run event segment" .
+jfc:ExperienceGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "experience" .
+jfc:ContentLifecycleGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "content lifecycle" .
+jfc:EpisodeContentGraph a skos:Concept ; skos:inScheme jfc:GraphKindScheme ; skos:prefLabel "episode content" .
+
+# Capture profiles
+jfc:CaptureProfileScheme a skos:ConceptScheme ; skos:prefLabel "capture profile" .
+jfc:SemanticHistory a skos:Concept ; skos:inScheme jfc:CaptureProfileScheme ; skos:prefLabel "semantic history" .
+jfc:DiagnosticCapture a skos:Concept ; skos:inScheme jfc:CaptureProfileScheme ; skos:prefLabel "diagnostic capture" .
+jfc:ProjectTotalHistory a skos:Concept ; skos:inScheme jfc:CaptureProfileScheme ; skos:prefLabel "project total history" .
+jfc:IncidentHold a skos:Concept ; skos:inScheme jfc:CaptureProfileScheme ; skos:prefLabel "incident hold" .
+
+# Capture outcomes
+jfc:CaptureOutcomeScheme a skos:ConceptScheme ; skos:prefLabel "capture outcome" .
+jfc:Captured a skos:Concept ; skos:inScheme jfc:CaptureOutcomeScheme ; skos:prefLabel "captured" .
+jfc:Omitted a skos:Concept ; skos:inScheme jfc:CaptureOutcomeScheme ; skos:prefLabel "omitted" .
+jfc:Unavailable a skos:Concept ; skos:inScheme jfc:CaptureOutcomeScheme ; skos:prefLabel "unavailable" .
+jfc:Redacted a skos:Concept ; skos:inScheme jfc:CaptureOutcomeScheme ; skos:prefLabel "redacted" .
+jfc:CaptureFailed a skos:Concept ; skos:inScheme jfc:CaptureOutcomeScheme ; skos:prefLabel "failed" .
+jfc:Expired a skos:Concept ; skos:inScheme jfc:CaptureOutcomeScheme ; skos:prefLabel "expired" .
+jfc:Erased a skos:Concept ; skos:inScheme jfc:CaptureOutcomeScheme ; skos:prefLabel "erased" .

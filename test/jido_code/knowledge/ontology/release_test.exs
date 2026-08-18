@@ -8,21 +8,21 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Writer
 
-  @graph "https://jido.run/graph/ontology/1.0.0"
-  @canonical_sha "fe260c98204872ace7369728c4db13696f76c724cc5f06b4bfe7bf5b18569e41"
-  @package_sha "5ce8be304d026d5eeaaf3693caceee6dc675e4325089f33e1e3f8b73535c5903"
+  @graph "https://jido.run/graph/ontology/1.1.0"
+  @canonical_sha "aeca46ef9ba27e5ca5021c0f2cd25b7b47ce16a9d6c92e4a45a58009d13a1f30"
+  @package_sha "3450ebcc85cfaa08087a2941ab0a9a5e536606d15b88865a045427150ba6d039"
 
   test "verifies and canonicalizes the immutable ontology package deterministically" do
     assert {:ok, manifest} = Release.verify()
-    assert manifest.version == "1.0.0"
-    assert manifest.shape_version == "1.0.0"
+    assert manifest.version == "1.1.0"
+    assert manifest.shape_version == "1.1.0"
     assert manifest.graph_iri == @graph
     assert manifest.package_sha256 == @package_sha
     assert manifest.canonical_nquads_sha256 == @canonical_sha
 
     assert {:ok, dataset} = Release.dataset()
     assert RDF.Dataset.graph_names(dataset) == [RDF.iri(@graph)]
-    assert length(RDF.Dataset.quads(dataset)) == 971
+    assert length(RDF.Dataset.quads(dataset)) == 1_474
 
     assert {:ok, first} = Release.canonical_nquads()
     assert {:ok, second} = Release.canonical_nquads()
@@ -31,7 +31,15 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
     assert {:ok, checksum} = Release.checksum()
     assert checksum.package_sha256 == @package_sha
     assert checksum.canonical_nquads_sha256 == @canonical_sha
-    assert checksum.quad_count == 971
+    assert checksum.quad_count == 1_474
+  end
+
+  test "retains deterministic read compatibility for the immutable 1.0.0 release" do
+    assert Release.versions() == ["1.1.0", "1.0.0"]
+    assert {:ok, legacy} = Release.verify("1.0.0")
+    assert legacy.version == "1.0.0"
+    assert legacy.shape_version == "1.0.0"
+    assert legacy.graph_iri == "https://jido.run/graph/ontology/1.0.0"
   end
 
   test "rejects changed sources before parsing or loading" do
@@ -59,7 +67,7 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
     assert loaded.graph_iri == @graph
     assert loaded.receipt.dataset_revision == 1
 
-    assert {:ok, %{@graph => 971}} =
+    assert {:ok, %{@graph => 1_474}} =
              StoreServer.request(server, {:graph_counts, [@graph]})
 
     assert {:ok, replayed} = Release.load(store_server: server, writer: writer)

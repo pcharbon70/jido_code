@@ -1,8 +1,9 @@
 defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
   @moduledoc false
 
-  @version "1.0.0"
-  @ontology_version "1.0.0"
+  @version "1.1.0"
+  @ontology_version "1.1.0"
+  @known_versions MapSet.new([{"1.0.0", "1.0.0"}, {@ontology_version, @version}])
   @jf "https://jido.run/ontology/factory#"
 
   @allowed_classes %{
@@ -29,6 +30,21 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       ExecutionAttempt ExecutionContext ToolInvocation Patch VerificationActivity Artifact
       InteractionSession Message Instruction StateTransition Decision GraphRevisionReference
       MigrationActivity Finding ContextManifest ModelInvocation ActionProposal SandboxInstance
+      CaptureManifest
+    ],
+    run_event_segment: ~w[
+      SegmentManifest ContentCapture ToolInvocation Artifact ContextManifest ModelInvocation
+      ActionProposal Finding
+    ],
+    experience: ~w[
+      ExperienceCase ProcedureRevision ArtifactClaim RetrievalActivity MemoryUseAssessment
+      GraphRevisionReference MigrationActivity
+    ],
+    content_lifecycle: ~w[
+      ContentLifecycleActivity ContentAccessPermit GraphRevisionReference MigrationActivity
+    ],
+    episode_content: ~w[
+      EpisodeContent ContentChunk
     ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity
@@ -55,7 +71,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
 
   @spec known_versions?(String.t(), String.t()) :: boolean()
   def known_versions?(ontology_version, shape_version) do
-    ontology_version == @ontology_version and shape_version == @version
+    MapSet.member?(@known_versions, {ontology_version, shape_version})
   end
 
   @spec allowed_class?(atom(), String.t()) :: boolean()

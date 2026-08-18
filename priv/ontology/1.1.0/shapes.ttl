@@ -1,0 +1,151 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/shapes/1.1.0>
+  a sh:ShapesGraph ;
+  jf:shapeVersion "1.1.0" ;
+  rdfs:comment "Additive closed memory resource shapes. Executable graph-family placement remains in ShapeCatalog 1.1.0." .
+
+jfs:CaptureManifestShape
+  a sh:NodeShape ;
+  sh:targetClass jf:CaptureManifest ;
+  sh:property jfs:MemoryProtocolVersionProperty,
+    jfs:CaptureProfileProperty,
+    jfs:CapturePolicyRevisionProperty,
+    jfs:ExpectedBodyProperty,
+    jfs:HasCaptureProperty .
+
+jfs:SegmentManifestShape
+  a sh:NodeShape ;
+  sh:targetClass jf:SegmentManifest ;
+  sh:property jfs:SegmentOfProperty,
+    jfs:SegmentIndexProperty,
+    jfs:SequenceStartProperty,
+    jfs:SequenceEndProperty,
+    jfs:EventCountProperty,
+    jfs:SegmentRootDigestProperty .
+
+jfs:ContentCaptureShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ContentCapture ;
+  sh:property jfs:CapturedBodyProperty,
+    jfs:CaptureOutcomeProperty,
+    jfs:ContentRepresentationProperty,
+    jfs:StorageLocationProperty,
+    jfs:AvailabilityStateProperty,
+    jfs:RetentionStateProperty,
+    jfs:HoldStateProperty,
+    jfs:ContentClassificationProperty .
+
+jfs:ExperienceCaseShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ExperienceCase ;
+  sh:property jfs:CaseSourceProperty,
+    jfs:CaseOutcomeProperty,
+    jfs:ApplicabilityDigestProperty,
+    jfs:RecordedAtProperty .
+
+jfs:ProcedureRevisionShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ProcedureRevision ;
+  sh:property jfs:ProcedureSourceProperty,
+    jfs:ProcedureStateProperty,
+    jfs:ApplicabilityDigestProperty,
+    jfs:RecordedAtProperty .
+
+jfs:ArtifactClaimShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ArtifactClaim ;
+  sh:property jfs:ClaimArtifactProperty,
+    jfs:ClaimFreshnessProperty,
+    jfs:RecordedAtProperty .
+
+jfs:RetrievalActivityShape
+  a sh:NodeShape ;
+  sh:targetClass jf:RetrievalActivity ;
+  sh:property jfs:RetrievalPurposeProperty,
+    jfs:EffectiveAtProperty,
+    jfs:RetrievalSourceProperty,
+    jfs:AssociatedActorProperty .
+
+jfs:ContentLifecycleActivityShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ContentLifecycleActivity ;
+  sh:property jfs:LifecycleSubjectProperty,
+    jfs:LifecycleActionProperty,
+    jfs:RecordedAtProperty,
+    jfs:AssociatedActorProperty .
+
+jfs:ContentAccessPermitShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ContentAccessPermit ;
+  sh:property jfs:PermitContentProperty,
+    jfs:PermitActorProperty,
+    jfs:PermitPurposeProperty,
+    jfs:ExpiresAtProperty .
+
+jfs:EpisodeContentShape
+  a sh:NodeShape ;
+  sh:targetClass jf:EpisodeContent ;
+  sh:property jfs:ContentDigestProperty,
+    jfs:ByteCountProperty,
+    jfs:ChunkCountProperty,
+    jfs:EncryptionAlgorithmProperty,
+    jfs:KeyReferenceProperty,
+    jfs:HasChunkProperty .
+
+jfs:ContentChunkShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ContentChunk ;
+  sh:property jfs:ChunkIndexProperty,
+    jfs:CiphertextProperty .
+
+jfs:MemoryProtocolVersionProperty a sh:PropertyShape ; sh:path jf:memoryProtocolVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:CaptureProfileProperty a sh:PropertyShape ; sh:path jf:captureProfile ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CapturePolicyRevisionProperty a sh:PropertyShape ; sh:path jf:capturePolicyRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ExpectedBodyProperty a sh:PropertyShape ; sh:path jf:expectedBody ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+jfs:HasCaptureProperty a sh:PropertyShape ; sh:path jf:hasCapture ; sh:minCount 1 ; sh:class jf:ContentCapture .
+jfs:SegmentOfProperty a sh:PropertyShape ; sh:path jf:segmentOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SegmentIndexProperty a sh:PropertyShape ; sh:path jf:segmentIndex ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SequenceStartProperty a sh:PropertyShape ; sh:path jf:sequenceStart ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SequenceEndProperty a sh:PropertyShape ; sh:path jf:sequenceEnd ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:EventCountProperty a sh:PropertyShape ; sh:path jf:eventCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SegmentRootDigestProperty a sh:PropertyShape ; sh:path jf:segmentRootDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:CapturedBodyProperty a sh:PropertyShape ; sh:path jf:capturedBody ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CaptureOutcomeProperty a sh:PropertyShape ; sh:path jf:captureOutcome ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ContentRepresentationProperty a sh:PropertyShape ; sh:path jf:contentRepresentation ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:StorageLocationProperty a sh:PropertyShape ; sh:path jf:storageLocation ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:AvailabilityStateProperty a sh:PropertyShape ; sh:path jf:availabilityState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:RetentionStateProperty a sh:PropertyShape ; sh:path jf:retentionState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:HoldStateProperty a sh:PropertyShape ; sh:path jf:holdState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ContentClassificationProperty a sh:PropertyShape ; sh:path jf:contentClassification ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CaseSourceProperty a sh:PropertyShape ; sh:path jf:caseSource ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+jfs:CaseOutcomeProperty a sh:PropertyShape ; sh:path jf:caseOutcome ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ApplicabilityDigestProperty a sh:PropertyShape ; sh:path jf:applicabilityDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ProcedureSourceProperty a sh:PropertyShape ; sh:path jf:procedureSource ; sh:minCount 1 ; sh:class jf:ExperienceCase .
+jfs:ProcedureStateProperty a sh:PropertyShape ; sh:path jf:procedureState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ClaimArtifactProperty a sh:PropertyShape ; sh:path jf:claimArtifact ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ClaimFreshnessProperty a sh:PropertyShape ; sh:path jf:claimFreshness ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:RetrievalPurposeProperty a sh:PropertyShape ; sh:path jf:retrievalPurpose ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:EffectiveAtProperty a sh:PropertyShape ; sh:path jf:effectiveAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:RetrievalSourceProperty a sh:PropertyShape ; sh:path jf:retrievalSource ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+jfs:AssociatedActorProperty a sh:PropertyShape ; sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:LifecycleSubjectProperty a sh:PropertyShape ; sh:path jf:lifecycleSubject ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jf:EpisodeContent .
+jfs:LifecycleActionProperty a sh:PropertyShape ; sh:path jf:lifecycleAction ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:PermitContentProperty a sh:PropertyShape ; sh:path jf:permitContent ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jf:EpisodeContent .
+jfs:PermitActorProperty a sh:PropertyShape ; sh:path jf:permitActor ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:PermitPurposeProperty a sh:PropertyShape ; sh:path jf:permitPurpose ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ExpiresAtProperty a sh:PropertyShape ; sh:path jf:expiresAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:ContentDigestProperty a sh:PropertyShape ; sh:path jf:contentDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ByteCountProperty a sh:PropertyShape ; sh:path jf:byteCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ChunkCountProperty a sh:PropertyShape ; sh:path jf:chunkCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:EncryptionAlgorithmProperty a sh:PropertyShape ; sh:path jf:encryptionAlgorithm ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:KeyReferenceProperty a sh:PropertyShape ; sh:path jf:keyReference ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:HasChunkProperty a sh:PropertyShape ; sh:path jf:hasChunk ; sh:minCount 1 ; sh:class jf:ContentChunk .
+jfs:ChunkIndexProperty a sh:PropertyShape ; sh:path jf:chunkIndex ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:CiphertextProperty a sh:PropertyShape ; sh:path jf:ciphertext ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:base64Binary .

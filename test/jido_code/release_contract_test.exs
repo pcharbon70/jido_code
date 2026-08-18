@@ -8,9 +8,10 @@ defmodule JidoCode.ReleaseContractTest do
     manifest = ReleaseContract.manifest()
 
     assert manifest.application == "0.1.0"
-    assert manifest.ontology == "1.0.0"
-    assert manifest.shapes == "1.0.0"
+    assert manifest.ontology == "1.1.0"
+    assert manifest.shapes == "1.1.0"
     assert manifest.query_catalog == "1.7.0"
+    assert manifest.graph_registry == "2.0.0"
     assert manifest.store_schema == 1
     assert manifest.backend_schema == 2
     assert String.starts_with?(manifest.runtime_contract, "jido:2.3.2/")
