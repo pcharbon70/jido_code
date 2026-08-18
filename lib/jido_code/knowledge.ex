@@ -77,6 +77,16 @@ defmodule JidoCode.Knowledge do
   def command_status(%CommandEnvelope{} = envelope, options \\ []),
     do: Writer.command_status(envelope, options)
 
+  @doc "Returns whether a value is the accepted verification-evidence command contract."
+  @spec verification_evidence_command?(term()) :: boolean()
+  def verification_evidence_command?(%CommandEnvelope{
+        command_type: "RecordVerificationEvidence",
+        command_version: "1.7.0"
+      }),
+      do: true
+
+  def verification_evidence_command?(_command), do: false
+
   def subscribe_changes(scope_iri), do: ChangeFeed.subscribe(scope_iri)
   def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
 

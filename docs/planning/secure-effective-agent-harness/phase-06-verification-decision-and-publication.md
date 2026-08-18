@@ -32,21 +32,21 @@ Back to plan: [README](./README.md)
       - [x] 6.1.1.2 Subtask {#sah-p06-6-1-1-2} - Bind the verifier's immutable inputs: closed run graph IRI and revision, completeness state and accepted reference sets through the terminal sequence, attempt, lease, and fence identity, exact source and control graph revisions, base commit and snapshot digest, candidate artifact and patch digests with media type and byte count, verification environment digest, policy and rubric revisions, and independently authorized evaluator identity and capability.
       - [x] 6.1.1.3 Subtask {#sah-p06-6-1-1-3} - Let an incomplete closed run yield only unavailable or inconclusive assessments unless policy explicitly names the missing classes; it can never support accepting evidence as though provenance were complete.
 
-  - [ ] 6.2 Section - Implement the independent fresh-checkout verifier.
+  - [x] 6.2 Section - Implement the independent fresh-checkout verifier.
 
     This section reconstructs candidates from first principles and emits
     evidence, never acceptance.
 
-    - [ ] 6.2.1 Task {#sah-p06-verifier} [repo: jido_code] [after: {#sah-p06-verification-admission}] - Implement fresh-checkout verification.
+    - [x] 6.2.1 Task {#sah-p06-verifier} [repo: jido_code] [after: {#sah-p06-verification-admission}] - Implement fresh-checkout verification.
 
       This task detects hidden executor state, overfit patches, and
       candidate-authored test bypass.
 
-      - [ ] 6.2.1.1 Subtask {#sah-p06-6-2-1-1} - Create a fresh checkout at the exact base commit, apply the complete candidate patch including new and binary artifacts, and confirm no executor-only state is required.
-      - [ ] 6.2.1.2 Subtask {#sah-p06-6-2-1-2} - Enforce changed-path, patch-size, and capability policy and reject unauthorized changes to verification, policy, or protected workflow configuration.
-      - [ ] 6.2.1.3 Subtask {#sah-p06-6-2-1-3} - Run formatting, compilation, static analysis, type checks, and repository regression tests, plus verifier-owned issue tests, hidden tests, and security checks where applicable, repeating unstable tests only under a fixed flake policy.
-      - [ ] 6.2.1.4 Subtask {#sah-p06-6-2-1-4} - Accept candidate-authored tests as evidence only when proven to fail on base, pass with the candidate, express a stated requirement, and not replace independent checks.
-      - [ ] 6.2.1.5 Subtask {#sah-p06-6-2-1-5} - Record exact environment, command, result, output, and workspace digests, and emit structured evidence and findings through the accepted evidence commands, never an acceptance mutation.
+      - [x] 6.2.1.1 Subtask {#sah-p06-6-2-1-1} - Create a fresh checkout at the exact base commit, apply the complete candidate patch including new and binary artifacts, and confirm no executor-only state is required.
+      - [x] 6.2.1.2 Subtask {#sah-p06-6-2-1-2} - Enforce changed-path, patch-size, and capability policy and reject unauthorized changes to verification, policy, or protected workflow configuration.
+      - [x] 6.2.1.3 Subtask {#sah-p06-6-2-1-3} - Run formatting, compilation, static analysis, type checks, and repository regression tests, plus verifier-owned issue tests, hidden tests, and security checks where applicable, repeating unstable tests only under a fixed flake policy.
+      - [x] 6.2.1.4 Subtask {#sah-p06-6-2-1-4} - Accept candidate-authored tests as evidence only when proven to fail on base, pass with the candidate, express a stated requirement, and not replace independent checks.
+      - [x] 6.2.1.5 Subtask {#sah-p06-6-2-1-5} - Record exact environment, command, result, output, and workspace digests, and emit structured evidence and findings through the accepted evidence commands, never an acceptance mutation.
 
   - [ ] 6.3 Section - Implement digest-bound single-use approval.
 
