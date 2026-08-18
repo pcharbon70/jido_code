@@ -12,6 +12,11 @@ defmodule JidoCode.Factory.Approval.Gateway do
   alias JidoCode.Factory.Approval.Outcome
   alias JidoCode.Factory.Approval.Request
 
+  @contract_version "1.0.0"
+
+  @spec contract_version() :: String.t()
+  def contract_version, do: @contract_version
+
   @spec execute(Request.t(), keyword()) :: {:ok, Outcome.t()} | {:error, AdapterError.t()}
   def execute(%Request{} = request, options) when is_list(options) do
     with {:ok, current, now} <- current(options),

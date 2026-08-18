@@ -96,15 +96,15 @@ Back to plan: [README](./README.md)
     This final section proves authority separation across the whole
     candidate-to-outcome chain.
 
-    - [ ] 6.6.1 Task {#sah-p06-integration} [repo: jido_code] [after: {#sah-p06-final-goal}] - Execute the verification, approval, and publication matrices.
+    - [x] 6.6.1 Task {#sah-p06-integration} [repo: jido_code] [after: {#sah-p06-final-goal}] - Execute the verification, approval, and publication matrices.
 
       This task certifies governed outcomes before any rollout stage beyond
       shadow is considered.
 
-      - [ ] 6.6.1.1 Subtask {#sah-p06-6-6-1-1} - Prove verification refuses open or incomplete runs, reproduces accepted candidates from fresh checkouts, and emits evidence that cannot mutate acceptance state.
-      - [ ] 6.6.1.2 Subtask {#sah-p06-6-6-1-2} - Prove approvals fail on digest mismatch, replay, expiry, approver revocation, and missing actor separation, and that consumption is atomic with the recorded invocation.
-      - [ ] 6.6.1.3 Subtask {#sah-p06-6-6-1-3} - Prove publication runs as a separate attempt with its own lease and fence, CAS rejects stale branches, and no path merges into protected branches.
-      - [ ] 6.6.1.4 Subtask {#sah-p06-6-6-1-4} - Prove goal satisfaction requires external observation, post-change verification, and a governed decision; executor success alone never satisfies a goal. Rerun prior suites, architecture scans, and `mix precommit`.
+      - [x] 6.6.1.1 Subtask {#sah-p06-6-6-1-1} - Prove verification refuses open or incomplete runs, reproduces accepted candidates from fresh checkouts, and emits evidence that cannot mutate acceptance state.
+      - [x] 6.6.1.2 Subtask {#sah-p06-6-6-1-2} - Prove approvals fail on digest mismatch, replay, expiry, approver revocation, and missing actor separation, and that consumption is atomic with the recorded invocation.
+      - [x] 6.6.1.3 Subtask {#sah-p06-6-6-1-3} - Prove publication runs as a separate attempt with its own lease and fence, CAS rejects stale branches, and no path merges into protected branches.
+      - [x] 6.6.1.4 Subtask {#sah-p06-6-6-1-4} - Prove goal satisfaction requires external observation, post-change verification, and a governed decision; executor success alone never satisfies a goal. Rerun prior suites, architecture scans, and `mix precommit`.
 
     - [ ] 6.6.2 Task {#sah-p06-phase-receipt} [repo: jido_code] [after: {#sah-p06-integration}] - Publish the Phase 6 verification-decision receipt.
 
@@ -112,7 +112,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/harness-phase-06-receipt.md` and authorizes Phase 7
       only from the pinned merged baseline.
 
-      - [ ] 6.6.2.1 Subtask {#sah-p06-6-6-2-1} - Record verifier, approval, publication, and decision contract revisions plus the candidate commit.
-      - [ ] 6.6.2.2 Subtask {#sah-p06-6-6-2-2} - Attach fresh-checkout reproduction, approval attack, publication CAS, and final-goal results with known limitations.
-      - [ ] 6.6.2.3 Subtask {#sah-p06-6-6-2-3} - Keep HG6 blocked while any executor can verify itself, any approval can be replayed, or any outcome can bypass the decision service.
+      - [x] 6.6.2.1 Subtask {#sah-p06-6-6-2-1} - Record verifier, approval, publication, and decision contract revisions plus the candidate commit.
+      - [x] 6.6.2.2 Subtask {#sah-p06-6-6-2-2} - Attach fresh-checkout reproduction, approval attack, publication CAS, and final-goal results with known limitations.
+      - [x] 6.6.2.3 Subtask {#sah-p06-6-6-2-3} - Keep HG6 blocked while any executor can verify itself, any approval can be replayed, or any outcome can bypass the decision service.
       - [ ] 6.6.2.4 Subtask {#sah-p06-6-6-2-4} - Pin the merged candidate commit before authorizing Phase 7.

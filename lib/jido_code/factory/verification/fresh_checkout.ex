@@ -15,6 +15,10 @@ defmodule JidoCode.Factory.Verification.FreshCheckout do
 
   @statuses ~w[passed failed skipped timeout]a
   @digest ~r/^[a-f0-9]{64}$/
+  @contract_version "1.0.0"
+
+  @spec contract_version() :: String.t()
+  def contract_version, do: @contract_version
 
   @spec verify(Admission.t(), Policy.t(), module(), term(), keyword()) ::
           {:ok, Evidence.t()} | {:error, AdapterError.t()}

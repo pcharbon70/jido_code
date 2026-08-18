@@ -36,6 +36,7 @@ defmodule JidoCode.TestSupport.FakeApprovalLedger do
           outcome: :committed,
           status: :consumed,
           approval_iri: approval_iri,
+          consumption_iri: "https://jido.run/id/approval-consumption/" <> request.action_digest,
           invocation_iri: request.invocation_iri,
           invocation_recorded?: true,
           approval_consumed?: true,

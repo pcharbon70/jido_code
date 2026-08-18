@@ -12,6 +12,10 @@ defmodule JidoCode.Factory.Publication.OutcomeCoordinator do
   alias JidoCode.Knowledge
 
   @dispositions ~w[accept reject defer waive supersede request_more]a
+  @contract_version "1.0.0"
+
+  @spec contract_version() :: String.t()
+  def contract_version, do: @contract_version
 
   @spec decide(Result.t(), map(), module(), term(), module(), term(), keyword()) ::
           {:ok, GoalOutcome.t()} | {:error, AdapterError.t()}

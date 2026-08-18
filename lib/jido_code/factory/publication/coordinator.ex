@@ -5,6 +5,11 @@ defmodule JidoCode.Factory.Publication.Coordinator do
   alias JidoCode.Factory.Publication.Request
   alias JidoCode.Factory.Publication.Result
 
+  @contract_version "1.0.0"
+
+  @spec contract_version() :: String.t()
+  def contract_version, do: @contract_version
+
   @spec publish(Request.t(), map(), module(), term(), keyword()) ::
           {:ok, Result.t()} | {:error, AdapterError.t()}
   def publish(request, current, adapter, adapter_state, options \\ [])

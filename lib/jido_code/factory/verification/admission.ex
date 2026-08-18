@@ -50,6 +50,10 @@ defmodule JidoCode.Factory.Verification.Admission do
   @max_references 500
   @max_artifacts 100
   @digest_fields [:base_snapshot_digest, :patch_digest, :verification_environment_digest]
+  @contract_version "1.0.0"
+
+  @spec contract_version() :: String.t()
+  def contract_version, do: @contract_version
 
   @spec admit(map()) :: {:ok, t()} | {:error, AdapterError.t()}
   def admit(attributes) when is_map(attributes) do
