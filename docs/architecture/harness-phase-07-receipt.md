@@ -2,10 +2,10 @@
 
 ## Status
 
-This receipt records the Harness Phase 7 candidate verified locally on
-2026-08-18. Merge is pending. Phase 8 is not authorized until this
-implementation pull request passes clean-checkout CI, merges, and the full
-merge-commit SHA is pinned here and in the Phase 7 plan.
+This receipt records the Harness Phase 7 candidate verified locally and
+accepted after pull request merge on 2026-08-18. Pull request #40 passed
+clean-checkout CI and merged on 2026-08-18. Phase 8 is authorized from that
+exact baseline.
 
 ## Candidate Provenance
 
@@ -17,8 +17,8 @@ merge-commit SHA is pinned here and in the Phase 7 plan.
 | Section 7.2 | `cb4d90a726249aabce9ef5615630df5f61272d18` |
 | Section 7.3 | `ad20e72370719ad436504f2c86c64a31ff89df4c` |
 | Section 7.4 | `87918a59978454e44b5c7614ad3a1e02a532441b` |
-| Section 7.5 and receipt | Merge-pending branch tip |
-| Merged candidate | Pending clean-checkout CI and merge |
+| Section 7.5 and receipt | `b38dcd0e8cc53f5c811713db46be0f1f23a7ca70` |
+| Merged candidate | `c8e5fc54642319149311921866104a2b642c0c2f` |
 
 ## Contract Revisions
 
@@ -120,7 +120,7 @@ decision.
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 | `mix precommit` | 562 tests, 0 failures; pass |
-| Implementation pull request clean-checkout CI | Pending |
+| Pull request #40 clean-checkout CI | Pass; merged 2026-08-18 |
 
 ## Known Limitations
 
@@ -134,8 +134,9 @@ project the committed receipt without weakening its exact bindings.
 
 ## Gate HG7
 
-HG7 remains merge-pending. It is accepted only at the merged candidate after
-clean-checkout CI passes and the merge SHA and date are pinned. Phase 8 remains
-unauthorized. HG7 reopens if any metric can be computed outside its pinned
-profile or any stage can advance without recorded evidence. These reopening
-conditions remain in force regardless of checklist state.
+HG7 is accepted at merged candidate
+`c8e5fc54642319149311921866104a2b642c0c2f`, pinned in this receipt and the
+Harness Phase 7 plan. Harness Phase 8 is authorized from that baseline. HG7
+reopens if any metric can be computed outside its pinned profile or any stage
+can advance without recorded evidence. These reopening conditions remain in
+force regardless of checklist state.
