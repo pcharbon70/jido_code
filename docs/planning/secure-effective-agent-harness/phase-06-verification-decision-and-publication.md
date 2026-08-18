@@ -48,20 +48,20 @@ Back to plan: [README](./README.md)
       - [x] 6.2.1.4 Subtask {#sah-p06-6-2-1-4} - Accept candidate-authored tests as evidence only when proven to fail on base, pass with the candidate, express a stated requirement, and not replace independent checks.
       - [x] 6.2.1.5 Subtask {#sah-p06-6-2-1-5} - Record exact environment, command, result, output, and workspace digests, and emit structured evidence and findings through the accepted evidence commands, never an acceptance mutation.
 
-  - [ ] 6.3 Section - Implement digest-bound single-use approval.
+  - [x] 6.3 Section - Implement digest-bound single-use approval.
 
     This section makes human review resistant to substitution, replay, and
     time-of-check races.
 
-    - [ ] 6.3.1 Task {#sah-p06-approval} [repo: jido_code] [after: {#sah-p06-verifier}] - Implement high-risk approval requests.
+    - [x] 6.3.1 Task {#sah-p06-approval} [repo: jido_code] [after: {#sah-p06-verifier}] - Implement high-risk approval requests.
 
       This task binds each approval to an immutable action digest and one
       authenticated consumable act.
 
-      - [ ] 6.3.1.1 Subtask {#sah-p06-6-3-1-1} - Create `ApprovalRequest` resources binding an immutable digest of exact action and normalized arguments, patch and base revision, tool, model, sandbox, policy, and context versions, capability and fencing token, external destination and egressed data, evidence set, reversibility, and approval expiry.
-      - [ ] 6.3.1.2 Subtask {#sah-p06-6-3-1-2} - Bind the authenticated approver, delegated scope, and single-use approval identity, and require an approver distinct from the execution actor whenever accepted policy demands separation.
-      - [ ] 6.3.1.3 Subtask {#sah-p06-6-3-1-3} - Immediately before the approved effect, recheck approver authorization, revocation, policy, current revisions, capability, lease, fence, destination, and artifact availability; the invocation-before-effect command atomically records the invocation and consumes the approval.
-      - [ ] 6.3.1.4 Subtask {#sah-p06-6-3-1-4} - Leave an ambiguous delivery unresolved with bounded reconciliation observations; permit redelivery only under a proven idempotent contract with no terminal outcome, commit exactly one terminal outcome, and require a new invocation, linked attempt, and approval for any semantic retry.
+      - [x] 6.3.1.1 Subtask {#sah-p06-6-3-1-1} - Create `ApprovalRequest` resources binding an immutable digest of exact action and normalized arguments, patch and base revision, tool, model, sandbox, policy, and context versions, capability and fencing token, external destination and egressed data, evidence set, reversibility, and approval expiry.
+      - [x] 6.3.1.2 Subtask {#sah-p06-6-3-1-2} - Bind the authenticated approver, delegated scope, and single-use approval identity, and require an approver distinct from the execution actor whenever accepted policy demands separation.
+      - [x] 6.3.1.3 Subtask {#sah-p06-6-3-1-3} - Immediately before the approved effect, recheck approver authorization, revocation, policy, current revisions, capability, lease, fence, destination, and artifact availability; the invocation-before-effect command atomically records the invocation and consumes the approval.
+      - [x] 6.3.1.4 Subtask {#sah-p06-6-3-1-4} - Leave an ambiguous delivery unresolved with bounded reconciliation observations; permit redelivery only under a proven idempotent contract with no terminal outcome, commit exactly one terminal outcome, and require a new invocation, linked attempt, and approval for any semantic retry.
 
   - [ ] 6.4 Section - Implement publication as separate work.
 
