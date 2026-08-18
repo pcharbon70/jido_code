@@ -61,18 +61,18 @@ Back to plan: [README](./README.md)
       - [x] 8.3.1.2 Subtask {#sah-p08-8-3-1-2} - Give each worker a separate graph task, context manifest, lease, capability, budget, and output schema, returning bounded outputs to the Factory coordinator.
       - [x] 8.3.1.3 Subtask {#sah-p08-8-3-1-3} - Measure conflicts, duplicated work, merge failures, elapsed time, and final correctness against the single-agent baseline before any class graduates.
 
-  - [ ] 8.4 Section - Govern autonomous merge as a separate decision.
+  - [x] 8.4 Section - Govern autonomous merge as a separate decision.
 
     This section keeps human merge authority until a future accepted
     decision changes it.
 
-    - [ ] 8.4.1 Task {#sah-p08-autonomous-merge} [repo: jido_code] [after: {#sah-p08-multi-agent}] - Keep autonomous merge blocked pending its own ADR.
+    - [x] 8.4.1 Task {#sah-p08-autonomous-merge} [repo: jido_code] [after: {#sah-p08-multi-agent}] - Keep autonomous merge blocked pending its own ADR.
 
       This task ensures merge authority is a deliberate product and
       security decision with production evidence.
 
-      - [ ] 8.4.1.1 Subtask {#sah-p08-8-4-1-1} - Record the blocker: autonomous merge requires a separate accepted ADR, release gate, and production shadow plus pull-request evidence.
-      - [ ] 8.4.1.2 Subtask {#sah-p08-8-4-1-2} - Restrict any future pilot to reversible, low-risk task classes with immediate-disablement triggers and human merge retained until the gate passes.
+      - [x] 8.4.1.1 Subtask {#sah-p08-8-4-1-1} - Record the blocker: autonomous merge requires a separate accepted ADR, release gate, and production shadow plus pull-request evidence.
+      - [x] 8.4.1.2 Subtask {#sah-p08-8-4-1-2} - Restrict any future pilot to reversible, low-risk task classes with immediate-disablement triggers and human merge retained until the gate passes.
 
   - [ ] 8.5 Section - Phase 8 Integration Tests.
 
