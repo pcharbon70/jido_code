@@ -14,7 +14,7 @@ later final-goal decision.
 
 Back to plan: [README](./README.md)
 
-- [ ] 6 Phase - Convert candidates into governed outcomes without executor self-acceptance.
+- [x] 6 Phase - Convert candidates into governed outcomes without executor self-acceptance.
 
   This phase proves runtime success alone can never satisfy a goal and
   every external effect carries independent authority.
@@ -91,7 +91,7 @@ Back to plan: [README](./README.md)
       - [x] 6.5.1.2 Subtask {#sah-p06-6-5-1-2} - Run post-change verification against the observed external revision and feed the resulting evidence to the decision service.
       - [x] 6.5.1.3 Subtask {#sah-p06-6-5-1-3} - Record the later `FinalGoal` decision under the accepted decision contract with actor separation, evidence references, and dispositions (accept, reject, defer, waive, supersede, or request more evidence).
 
-  - [ ] 6.6 Section - Phase 6 Integration Tests.
+  - [x] 6.6 Section - Phase 6 Integration Tests.
 
     This final section proves authority separation across the whole
     candidate-to-outcome chain.
@@ -106,7 +106,7 @@ Back to plan: [README](./README.md)
       - [x] 6.6.1.3 Subtask {#sah-p06-6-6-1-3} - Prove publication runs as a separate attempt with its own lease and fence, CAS rejects stale branches, and no path merges into protected branches.
       - [x] 6.6.1.4 Subtask {#sah-p06-6-6-1-4} - Prove goal satisfaction requires external observation, post-change verification, and a governed decision; executor success alone never satisfies a goal. Rerun prior suites, architecture scans, and `mix precommit`.
 
-    - [ ] 6.6.2 Task {#sah-p06-phase-receipt} [repo: jido_code] [after: {#sah-p06-integration}] - Publish the Phase 6 verification-decision receipt.
+    - [x] 6.6.2 Task {#sah-p06-phase-receipt} [repo: jido_code] [after: {#sah-p06-integration}] - Publish the Phase 6 verification-decision receipt.
 
       This task records the outcome evidence in
       `docs/architecture/harness-phase-06-receipt.md` and authorizes Phase 7
@@ -115,4 +115,4 @@ Back to plan: [README](./README.md)
       - [x] 6.6.2.1 Subtask {#sah-p06-6-6-2-1} - Record verifier, approval, publication, and decision contract revisions plus the candidate commit.
       - [x] 6.6.2.2 Subtask {#sah-p06-6-6-2-2} - Attach fresh-checkout reproduction, approval attack, publication CAS, and final-goal results with known limitations.
       - [x] 6.6.2.3 Subtask {#sah-p06-6-6-2-3} - Keep HG6 blocked while any executor can verify itself, any approval can be replayed, or any outcome can bypass the decision service.
-      - [ ] 6.6.2.4 Subtask {#sah-p06-6-6-2-4} - Pin the merged candidate commit before authorizing Phase 7.
+      - [x] 6.6.2.4 Subtask {#sah-p06-6-6-2-4} - Pin the merged candidate commit before authorizing Phase 7.

@@ -2,10 +2,10 @@
 
 ## Status
 
-This receipt records the Harness Phase 6 candidate verified locally on
-2026-08-18. Merge is pending. Phase 7 is not authorized until this
-implementation pull request passes clean-checkout CI, merges, and the full
-merge-commit SHA is pinned here and in the Phase 6 plan.
+This receipt records the Harness Phase 6 candidate verified locally and
+accepted after pull request merge on 2026-08-18. Pull request #38 passed
+clean-checkout CI and merged on 2026-08-18. Phase 7 is authorized from that
+exact baseline.
 
 ## Candidate Provenance
 
@@ -13,13 +13,13 @@ merge-commit SHA is pinned here and in the Phase 6 plan.
 | --- | --- |
 | Phase baseline and merged HG5 closure | `768216c7e787d3fb6c451f6ad2773486bf342c4d` |
 | Accepted Phase 5 candidate | `c9fc2dd625bab2385fed5fa3203c4cb6d0f38f22` |
-| Section 6.1 | `ce8488d` |
-| Section 6.2 | `8b5b24c` |
-| Section 6.3 | `3434627` |
-| Section 6.4 | `52ec8f2` |
-| Section 6.5 | `3b7e5d9` |
-| Section 6.6 and receipt | Merge-pending branch tip |
-| Merged candidate | Pending clean-checkout CI and merge |
+| Section 6.1 | `ce8488d09716f0ed4edd0d9ffa5e7e1ca197286a` |
+| Section 6.2 | `8b5b24c4aad593ec5401af16f85f3f7eaf524d54` |
+| Section 6.3 | `34346276b31a1f2a958682884741f83fe848794c` |
+| Section 6.4 | `52ec8f292826cb214ab50131d7de40de56d16a47` |
+| Section 6.5 | `3b7e5d91eeebcd2bdb2e335dd3a89c34eed4566a` |
+| Section 6.6 and receipt | `065d279b5a51d1b711815551bd2d108b32216682` |
+| Merged candidate | `d00624e407826ca322c52557714ca20b1ba94518` |
 
 ## Contract Revisions
 
@@ -106,7 +106,7 @@ revision mismatch cannot bypass the decision service.
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 | `mix precommit` | 532 tests, 0 failures; pass |
-| Implementation pull request clean-checkout CI | Pending |
+| Pull request #38 clean-checkout CI | Pass; merged 2026-08-18 |
 
 ## Known Limitations
 
@@ -119,8 +119,9 @@ phase.
 
 ## Gate HG6
 
-HG6 remains merge-pending. It is accepted only at the merged candidate after
-clean-checkout CI passes and the merge SHA and date are pinned. Phase 7 remains
-unauthorized. HG6 reopens if any executor can verify itself, any approval can
-be replayed, or any outcome can bypass the decision service. These reopening
-conditions remain in force regardless of checklist state.
+HG6 is accepted at merged candidate
+`d00624e407826ca322c52557714ca20b1ba94518`, pinned in this receipt and the
+Harness Phase 6 plan. Harness Phase 7 is authorized from that baseline. HG6
+reopens if any executor can verify itself, any approval can be replayed, or any
+outcome can bypass the decision service. These reopening conditions remain in
+force regardless of checklist state.
