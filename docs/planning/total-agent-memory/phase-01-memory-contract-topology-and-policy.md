@@ -70,22 +70,22 @@ Back to plan: [README](./README.md)
       - [x] 1.3.1.5 Subtask - Keep immutable semantic shells longer than payloads and prohibit selective mutation of closed run graphs.
       - [x] 1.3.1.6 Subtask - Forbid new plaintext-sensitive receipt commitments; require ciphertext commitments or protected keyed commitments where equality is an accepted purpose.
 
-  - [ ] 1.4 Section - Define compatibility, threat, and capacity gates.
+  - [x] 1.4 Section - Define compatibility, threat, and capacity gates.
 
     This section provides the migration and adversarial rules that every later
     phase inherits.
 
-    - [ ] 1.4.1 Task {#tam-p01-memory-guardrails} [repo: jido_code] [after: {#tam-p01-content-policy}] - Publish migration, security, and benchmark guardrails.
+    - [x] 1.4.1 Task {#tam-p01-memory-guardrails} [repo: jido_code] [after: {#tam-p01-content-policy}] - Publish migration, security, and benchmark guardrails.
 
       This task prevents the new protocol from weakening accepted run closure,
       authorization, privacy, or store bounds.
 
-      - [ ] 1.4.1.1 Subtask - Require open legacy attempts to close or become governed abandoned attempts before segmented execution is activated; preserve dual-read projections for closed legacy runs.
-      - [ ] 1.4.1.2 Subtask - Add threats for persistent poisoning, delayed prompt injection, cross-scope retrieval, stale procedures, false causality, context overload, secret capture, and incomplete erasure.
-      - [ ] 1.4.1.3 Subtask - Require authorization before candidate generation and bind index partitions to repository/tenant, actor scope, purpose, data ceiling, effective-time generation, and erasure generation.
-      - [ ] 1.4.1.4 Subtask - Pin segment and payload capacity profiles below the existing 10,000-quad snapshot, 1,000-addition, 100-guard, 16-target-graph, and command-payload ceilings with reserved closure headroom.
-      - [ ] 1.4.1.5 Subtask - Define the Phase 6 benchmark corpus and relative capture, query, backup, restore, and rebuild acceptance thresholds that determine graph-native versus vault storage.
-      - [ ] 1.4.1.6 Subtask - Keep every new writer, query, profile, index, and content gateway disabled until its owning phase gate is accepted.
+      - [x] 1.4.1.1 Subtask - Require open legacy attempts to close or become governed abandoned attempts before segmented execution is activated; preserve dual-read projections for closed legacy runs.
+      - [x] 1.4.1.2 Subtask - Add threats for persistent poisoning, delayed prompt injection, cross-scope retrieval, stale procedures, false causality, context overload, secret capture, and incomplete erasure.
+      - [x] 1.4.1.3 Subtask - Require authorization before candidate generation and bind index partitions to repository/tenant, actor scope, purpose, data ceiling, effective-time generation, and erasure generation.
+      - [x] 1.4.1.4 Subtask - Pin segment and payload capacity profiles below the existing 10,000-quad snapshot, 1,000-addition, 100-guard, 16-target-graph, and command-payload ceilings with reserved closure headroom.
+      - [x] 1.4.1.5 Subtask - Define the Phase 6 benchmark corpus and relative capture, query, backup, restore, and rebuild acceptance thresholds that determine graph-native versus vault storage.
+      - [x] 1.4.1.6 Subtask - Keep every new writer, query, profile, index, and content gateway disabled until its owning phase gate is accepted.
 
   - [ ] 1.5 Section - Phase 1 Integration Tests.
 

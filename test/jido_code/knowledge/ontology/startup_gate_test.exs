@@ -25,6 +25,20 @@ defmodule JidoCode.Knowledge.Ontology.StartupGateTest do
     assert StoreServer.summary(second.server).dataset_revision == 1
   end
 
+  test "reopens the immutable legacy ontology for dual-read projections", %{config: config} do
+    first = start_substrate!(config)
+
+    assert {:ok, %{version: "1.0.0"}} =
+             Release.load(version: "1.0.0", store_server: first.server, writer: first.writer)
+
+    stop_process(first.writer)
+    stop_process(first.server)
+
+    second = start_substrate!(config)
+    assert StoreServer.summary(second.server).ready?
+    assert StoreServer.summary(second.server).dataset_revision == 1
+  end
+
   test "blocks startup when a semantic dataset contains an unregistered graph", %{config: config} do
     first = start_substrate!(config)
     assert {:ok, _loaded} = Release.load(store_server: first.server, writer: first.writer)
@@ -37,6 +51,30 @@ defmodule JidoCode.Knowledge.Ontology.StartupGateTest do
              TripleStore.update(raw_store, """
              INSERT DATA {
                GRAPH <https://jido.run/graph/unregistered/data> {
+                 <https://jido.run/id/resource/invalid>
+                   <https://jido.run/ontology/factory#displayId> "invalid" .
+               }
+             }
+             """)
+
+    :ok = TripleStore.close(raw_store)
+    second = start_store!(config)
+    summary = await_health(second, :incompatible)
+    refute summary.ready?
+    assert summary.failure.operation == :required_graph_migration
+  end
+
+  test "blocks startup when only an unknown ontology release is present", %{config: config} do
+    first = start_substrate!(config)
+    stop_process(first.writer)
+    stop_process(first.server)
+
+    {:ok, raw_store} = TripleStore.open(Config.active_store_path(config), schema: :quad)
+
+    assert {:ok, 1} =
+             TripleStore.update(raw_store, """
+             INSERT DATA {
+               GRAPH <https://jido.run/graph/ontology/9.9.9> {
                  <https://jido.run/id/resource/invalid>
                    <https://jido.run/ontology/factory#displayId> "invalid" .
                }
