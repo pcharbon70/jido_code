@@ -88,6 +88,26 @@ defmodule JidoCode.Knowledge do
 
   def verification_evidence_command?(_command), do: false
 
+  @doc "Returns whether a value is the accepted external-observation command contract."
+  @spec observation_command?(term()) :: boolean()
+  def observation_command?(%CommandEnvelope{
+        command_type: "RecordObservationBatch",
+        command_version: "1.1.0"
+      }),
+      do: true
+
+  def observation_command?(_command), do: false
+
+  @doc "Returns whether a value is the accepted goal-outcome command contract."
+  @spec goal_outcome_command?(term()) :: boolean()
+  def goal_outcome_command?(%CommandEnvelope{
+        command_type: "DecideGoalOutcome",
+        command_version: "1.7.0"
+      }),
+      do: true
+
+  def goal_outcome_command?(_command), do: false
+
   def subscribe_changes(scope_iri), do: ChangeFeed.subscribe(scope_iri)
   def bootstrap(attributes, options \\ []), do: Writer.bootstrap(attributes, options)
 

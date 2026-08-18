@@ -77,19 +77,19 @@ Back to plan: [README](./README.md)
       - [x] 6.4.1.2 Subtask {#sah-p06-6-4-1-2} - Implement the trusted provider adapter with expected-old-object compare-and-swap, non-fast-forward rejection, and reliance on provider branch and ruleset protection, claiming narrower Git credential scope only where the provider demonstrably supports it.
       - [x] 6.4.1.3 Subtask {#sah-p06-6-4-1-3} - Keep all publication limited to bot branches and pull requests with no protected-branch merge authority.
 
-  - [ ] 6.5 Section - Implement external observation and the final-goal decision.
+  - [x] 6.5 Section - Implement external observation and the final-goal decision.
 
     This section closes the loop from published change to governed goal
     outcome.
 
-    - [ ] 6.5.1 Task {#sah-p06-final-goal} [repo: jido_code] [after: {#sah-p06-publication}] - Observe external state and decide goal outcomes.
+    - [x] 6.5.1 Task {#sah-p06-final-goal} [repo: jido_code] [after: {#sah-p06-publication}] - Observe external state and decide goal outcomes.
 
       This task makes goal satisfaction an observed, evidenced, decided
       fact rather than an execution claim.
 
-      - [ ] 6.5.1.1 Subtask {#sah-p06-6-5-1-1} - Observe the resulting external state after publication through the accepted observation commands, linking provider events back to the publication attempt.
-      - [ ] 6.5.1.2 Subtask {#sah-p06-6-5-1-2} - Run post-change verification against the observed external revision and feed the resulting evidence to the decision service.
-      - [ ] 6.5.1.3 Subtask {#sah-p06-6-5-1-3} - Record the later `FinalGoal` decision under the accepted decision contract with actor separation, evidence references, and dispositions (accept, reject, defer, waive, supersede, or request more evidence).
+      - [x] 6.5.1.1 Subtask {#sah-p06-6-5-1-1} - Observe the resulting external state after publication through the accepted observation commands, linking provider events back to the publication attempt.
+      - [x] 6.5.1.2 Subtask {#sah-p06-6-5-1-2} - Run post-change verification against the observed external revision and feed the resulting evidence to the decision service.
+      - [x] 6.5.1.3 Subtask {#sah-p06-6-5-1-3} - Record the later `FinalGoal` decision under the accepted decision contract with actor separation, evidence references, and dispositions (accept, reject, defer, waive, supersede, or request more evidence).
 
   - [ ] 6.6 Section - Phase 6 Integration Tests.
 
