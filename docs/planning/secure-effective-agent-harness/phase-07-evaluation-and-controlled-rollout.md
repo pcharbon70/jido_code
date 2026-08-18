@@ -18,19 +18,19 @@ Back to plan: [README](./README.md)
   This phase pins corpora, metrics, adjudication, and gates so every later
   authority increase is justified and reversible.
 
-  - [ ] 7.1 Section - Build the evaluation tracks and pinned corpora.
+  - [x] 7.1 Section - Build the evaluation tracks and pinned corpora.
 
     This section treats each capability claim as a reproducible experiment.
 
-    - [ ] 7.1.1 Task {#sah-p07-eval-tracks} [repo: jido_code] [after: {#sah-p06-phase-receipt}] - Implement the evaluation track harness.
+    - [x] 7.1.1 Task {#sah-p07-eval-tracks} [repo: jido_code] [after: {#sah-p06-phase-receipt}] - Implement the evaluation track harness.
 
       This task pins task corpora and revisions per track so results are
       comparable across time.
 
-      - [ ] 7.1.1.1 Subtask {#sah-p07-7-1-1-1} - Implement tracks for access-profile conformance, ReqLLM provider contract, JidoHarness CLI contract, harness conformance, editing reliability, retrieval, SWE-bench Verified, fresh and private issues, terminal workload, flaky-test corpus, production shadow, and pull-request pilot.
-      - [ ] 7.1.1.2 Subtask {#sah-p07-7-1-1-2} - Pin each evaluation profile's task corpus and revisions, acceptance stage, correctness oracle, verifier policy, human-review rubric, reviewer independence, disagreement procedure, and statistical method.
-      - [ ] 7.1.1.3 Subtask {#sah-p07-7-1-1-3} - Report every result sliced by repository, language, task class, risk, model, access mode, authentication kind, billing mode, adapter revisions, CLI version, harness profile, and tool version, never pooling access modes without separate reporting.
-      - [ ] 7.1.1.4 Subtask {#sah-p07-7-1-1-4} - Use multiple fresh independent executions with confidence intervals for stochastic claims; never assume provider seed control.
+      - [x] 7.1.1.1 Subtask {#sah-p07-7-1-1-1} - Implement tracks for access-profile conformance, ReqLLM provider contract, JidoHarness CLI contract, harness conformance, editing reliability, retrieval, SWE-bench Verified, fresh and private issues, terminal workload, flaky-test corpus, production shadow, and pull-request pilot.
+      - [x] 7.1.1.2 Subtask {#sah-p07-7-1-1-2} - Pin each evaluation profile's task corpus and revisions, acceptance stage, correctness oracle, verifier policy, human-review rubric, reviewer independence, disagreement procedure, and statistical method.
+      - [x] 7.1.1.3 Subtask {#sah-p07-7-1-1-3} - Report every result sliced by repository, language, task class, risk, model, access mode, authentication kind, billing mode, adapter revisions, CLI version, harness profile, and tool version, never pooling access modes without separate reporting.
+      - [x] 7.1.1.4 Subtask {#sah-p07-7-1-1-4} - Use multiple fresh independent executions with confidence intervals for stochastic claims; never assume provider seed control.
 
   - [ ] 7.2 Section - Implement primary metrics and correctness adjudication.
 
