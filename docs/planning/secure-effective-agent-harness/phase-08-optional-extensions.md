@@ -35,18 +35,18 @@ Back to plan: [README](./README.md)
       - [x] 8.1.1.3 Subtask {#sah-p08-8-1-1-3} - Forbid token passthrough, validate token audience, implement redirect, PKCE, issuer, and scope controls, prevent SSRF and redirect rebinding during discovery, sandbox local or stdio servers separately, and reauthorize immediately before every call.
       - [x] 8.1.1.4 Subtask {#sah-p08-8-1-1-4} - Store remote handles as external references and treat remote completion as an observation requiring local verification and decision.
 
-  - [ ] 8.2 Section - Govern remote-agent delegation.
+  - [x] 8.2 Section - Govern remote-agent delegation.
 
     This section maps remote work onto local governed attempts.
 
-    - [ ] 8.2.1 Task {#sah-p08-remote-agents} [repo: jido_code] [after: {#sah-p08-mcp}] - Specify and gate remote-agent delegation.
+    - [x] 8.2.1 Task {#sah-p08-remote-agents} [repo: jido_code] [after: {#sah-p08-mcp}] - Specify and gate remote-agent delegation.
 
       This task keeps independently operated agents inside the same
       capability and verification boundary as local work.
 
-      - [ ] 8.2.1.1 Subtask {#sah-p08-8-2-1-1} - Require each remote task to map to a local delegated attempt with bounded capability and its own lease and fence.
-      - [ ] 8.2.1.2 Subtask {#sah-p08-8-2-1-2} - Route all remote results through independent verification and governed decisions; remote claims are never accepted output.
-      - [ ] 8.2.1.3 Subtask {#sah-p08-8-2-1-3} - Record remote agent identity, protocol versions, and capability receipts in the attempt provenance.
+      - [x] 8.2.1.1 Subtask {#sah-p08-8-2-1-1} - Require each remote task to map to a local delegated attempt with bounded capability and its own lease and fence.
+      - [x] 8.2.1.2 Subtask {#sah-p08-8-2-1-2} - Route all remote results through independent verification and governed decisions; remote claims are never accepted output.
+      - [x] 8.2.1.3 Subtask {#sah-p08-8-2-1-3} - Record remote agent identity, protocol versions, and capability receipts in the attempt provenance.
 
   - [ ] 8.3 Section - Govern selective multi-agent execution.
 
