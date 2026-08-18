@@ -7,6 +7,7 @@ defmodule JidoCode.Knowledge.Retention.Receipt do
     :checksum,
     :affected_graph_count,
     :archived_resource_count,
+    :removed_resource_count,
     :erased_resource_count,
     :removal_count,
     :dataset_revision,

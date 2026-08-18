@@ -11,8 +11,10 @@ defmodule JidoCode.Knowledge.Ontology.Release do
   alias JidoCode.Knowledge.WriteBatch
   alias JidoCode.Knowledge.Writer
 
-  @current_version "1.0.0"
-  @versions [@current_version]
+  @current_version "1.1.0"
+  @versions [@current_version, "1.0.0"]
+  @base_versions %{"1.1.0" => "1.0.0"}
+  @inherited_sources ~w[factory.ttl policy-terms.ttl shapes.ttl work-states.ttl]
   @max_artifact_bytes 1_000_000
   @required_manifest_keys ~w[
     canonical_nquads_sha256
@@ -59,8 +61,10 @@ defmodule JidoCode.Knowledge.Ontology.Release do
   @spec dataset(String.t(), keyword()) :: {:ok, RDF.Dataset.t()} | {:error, Error.t()}
   def dataset(version \\ @current_version, options \\ []) do
     with {:ok, manifest} <- manifest(version, options),
-         :ok <- verify_sources(manifest, version, options) do
-      parse_sources(manifest, version, options)
+         :ok <- verify_sources(manifest, version, options),
+         {:ok, inherited} <- inherited_dataset(version),
+         {:ok, current} <- parse_sources(manifest, version, options) do
+      {:ok, RDF.Dataset.add(inherited, current)}
     end
   end
 
@@ -240,6 +244,39 @@ defmodule JidoCode.Knowledge.Ontology.Release do
     end)
   rescue
     _error -> {:error, Error.new(:corrupt, :parse_ontology_sources)}
+  end
+
+  defp inherited_dataset(version) do
+    case Map.fetch(@base_versions, version) do
+      :error ->
+        {:ok, RDF.Dataset.new()}
+
+      {:ok, base_version} ->
+        with {:ok, _verified} <- verify(base_version),
+             {:ok, base_manifest} <- manifest(base_version),
+             {:ok, base} <-
+               parse_selected_sources(base_manifest, base_version, @inherited_sources) do
+          graph_iri = RDF.iri("https://jido.run/graph/ontology/#{version}")
+
+          inherited =
+            base
+            |> RDF.Dataset.quads()
+            |> Enum.map(fn {subject, predicate, object, _graph} ->
+              RDF.quad(subject, predicate, object, graph_iri)
+            end)
+            |> RDF.Dataset.new()
+
+          {:ok, inherited}
+        end
+    end
+  end
+
+  defp parse_selected_sources(manifest, version, source_names) do
+    selected =
+      manifest
+      |> Map.update!("sources", &Map.take(&1, source_names))
+
+    parse_sources(selected, version, [])
   end
 
   defp verify_canonical_digest(canonical, manifest) do

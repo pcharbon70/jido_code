@@ -10,7 +10,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
   alias JidoCode.Knowledge.ResourceIdentity
 
   @base "https://jido.run/graph/"
-  @revision "1.0.0"
+  @revision "2.0.0"
 
   @families %{
     ontology: %{
@@ -41,6 +41,8 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :observation_batch,
         :source_revision,
         :repository_control,
+        :experience,
+        :content_lifecycle,
         :security_audit,
         :derived
       ]
@@ -74,8 +76,11 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :source_revision,
         :repository_control,
         :run_attempt,
+        :run_event_segment,
         :evidence,
         :memory,
+        :experience,
+        :content_lifecycle,
         :derived
       ]
     },
@@ -92,6 +97,28 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :source_revision,
         :repository_control,
         :run_attempt,
+        :run_event_segment,
+        :evidence,
+        :memory,
+        :derived
+      ]
+    },
+    run_event_segment: %{
+      required_scopes: [:attempt, :segment],
+      capability: :execution_writer,
+      mutability: :closeable,
+      completeness: :building,
+      retention: :run_history,
+      enabled: false,
+      allowed_links: [
+        :factory_catalog,
+        :factory_policy,
+        :observation_batch,
+        :source_revision,
+        :repository_control,
+        :run_attempt,
+        :run_event_segment,
+        :episode_content,
         :evidence,
         :memory,
         :derived
@@ -109,6 +136,8 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :source_revision,
         :repository_control,
         :run_attempt,
+        :run_event_segment,
+        :experience,
         :evidence
       ]
     },
@@ -125,9 +154,63 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :source_revision,
         :repository_control,
         :run_attempt,
+        :run_event_segment,
         :evidence,
         :memory,
+        :experience,
         :derived
+      ]
+    },
+    experience: %{
+      required_scopes: [:repository],
+      capability: :experience_writer,
+      mutability: :append_supersede,
+      completeness: :complete,
+      retention: :experience_history,
+      enabled: false,
+      allowed_links: [
+        :factory_policy,
+        :observation_batch,
+        :source_revision,
+        :repository_control,
+        :run_attempt,
+        :run_event_segment,
+        :evidence,
+        :memory,
+        :experience,
+        :derived
+      ]
+    },
+    content_lifecycle: %{
+      required_scopes: [:repository],
+      capability: :content_lifecycle_writer,
+      mutability: :append_supersede,
+      completeness: :complete,
+      retention: :content_lifecycle,
+      enabled: false,
+      allowed_links: [
+        :factory_policy,
+        :repository_control,
+        :run_attempt,
+        :run_event_segment,
+        :experience,
+        :content_lifecycle,
+        :episode_content,
+        :security_audit
+      ]
+    },
+    episode_content: %{
+      required_scopes: [:repository, :content],
+      capability: :content_writer,
+      mutability: :immutable,
+      completeness: :complete,
+      retention: :governed_content,
+      enabled: false,
+      allowed_links: [
+        :run_attempt,
+        :run_event_segment,
+        :content_lifecycle,
+        :episode_content
       ]
     },
     security_audit: %{
@@ -144,8 +227,12 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :source_revision,
         :repository_control,
         :run_attempt,
+        :run_event_segment,
         :evidence,
         :memory,
+        :experience,
+        :content_lifecycle,
+        :episode_content,
         :security_audit,
         :derived
       ]
@@ -165,8 +252,12 @@ defmodule JidoCode.Knowledge.GraphRegistry do
           source_revision: true,
           repository_control: true,
           run_attempt: true,
+          run_event_segment: true,
           evidence: true,
           memory: true,
+          experience: true,
+          content_lifecycle: true,
+          episode_content: true,
           security_audit: true,
           derived: true
         })
@@ -182,8 +273,11 @@ defmodule JidoCode.Knowledge.GraphRegistry do
   @spec fetch(atom()) :: {:ok, map()} | {:error, Error.t()}
   def fetch(family) when is_atom(family) do
     case Map.fetch(@families, family) do
-      {:ok, contract} -> {:ok, Map.put(contract, :family, family)}
-      :error -> invalid(:graph_family)
+      {:ok, contract} ->
+        {:ok, contract |> Map.put_new(:enabled, true) |> Map.put(:family, family)}
+
+      :error ->
+        invalid(:graph_family)
     end
   end
 
@@ -221,6 +315,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
   def validate_target(graph_iri, capability) when is_atom(capability) do
     with {:ok, family} <- identify(graph_iri),
          {:ok, contract} <- fetch(family),
+         true <- contract.enabled,
          true <- contract.capability == capability do
       {:ok, contract}
     else
@@ -234,6 +329,9 @@ defmodule JidoCode.Knowledge.GraphRegistry do
   @spec write_allowed?(atom(), :create | :append | :close | :replace, map() | nil) :: boolean()
   def write_allowed?(family, operation, existing_metadata \\ nil) do
     case {Map.get(@families, family), operation, existing_metadata} do
+      {%{enabled: false}, _operation, _metadata} ->
+        false
+
       {%{mutability: :immutable}, :create, nil} ->
         true
 
@@ -276,8 +374,12 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       :source_revision -> ok_concept("SourceGraph")
       :repository_control -> ok_concept("ControlGraph")
       :run_attempt -> ok_concept("RunGraph")
+      :run_event_segment -> ok_concept("RunEventSegmentGraph")
       :evidence -> ok_concept("EvidenceGraph")
       :memory -> ok_concept("MemoryGraph")
+      :experience -> ok_concept("ExperienceGraph")
+      :content_lifecycle -> ok_concept("ContentLifecycleGraph")
+      :episode_content -> ok_concept("EpisodeContentGraph")
       :security_audit -> ok_concept("SecurityAuditGraph")
       :derived -> ok_concept("DerivedGraph")
       _unknown -> invalid(:graph_family)
@@ -309,12 +411,31 @@ defmodule JidoCode.Knowledge.GraphRegistry do
     with {:ok, token} <- ResourceIdentity.graph_token(attempt), do: {:ok, "run/#{token}"}
   end
 
+  defp graph_suffix(:run_event_segment, %{attempt: attempt, segment: segment})
+       when is_integer(segment) and segment >= 0 and segment <= 999_999 do
+    with {:ok, token} <- ResourceIdentity.graph_token(attempt) do
+      {:ok, "run/#{token}/segment/#{segment}"}
+    end
+  end
+
   defp graph_suffix(:evidence, %{repository: repository}) do
     one_resource_suffix("repo", repository, "evidence")
   end
 
   defp graph_suffix(:memory, %{repository: repository}) do
     one_resource_suffix("repo", repository, "memory")
+  end
+
+  defp graph_suffix(:experience, %{repository: repository}) do
+    one_resource_suffix("repo", repository, "experience")
+  end
+
+  defp graph_suffix(:content_lifecycle, %{repository: repository}) do
+    one_resource_suffix("repo", repository, "content-lifecycle")
+  end
+
+  defp graph_suffix(:episode_content, %{repository: repository, content: content}) do
+    two_resource_suffix("repo", repository, "content", content)
   end
 
   defp graph_suffix(:security_audit, %{period: period}) when is_binary(period) do
@@ -369,8 +490,21 @@ defmodule JidoCode.Knowledge.GraphRegistry do
     do: scoped_iri?(iri, ~r|^repo/[a-f0-9]{32}/control$|)
 
   defp family_iri?(:run_attempt, iri), do: scoped_iri?(iri, ~r|^run/[a-f0-9]{32}$|)
+
+  defp family_iri?(:run_event_segment, iri),
+    do: scoped_iri?(iri, ~r/^run\/[a-f0-9]{32}\/segment\/(?:0|[1-9][0-9]{0,5})$/)
+
   defp family_iri?(:evidence, iri), do: scoped_iri?(iri, ~r|^repo/[a-f0-9]{32}/evidence$|)
   defp family_iri?(:memory, iri), do: scoped_iri?(iri, ~r|^repo/[a-f0-9]{32}/memory$|)
+
+  defp family_iri?(:experience, iri),
+    do: scoped_iri?(iri, ~r|^repo/[a-f0-9]{32}/experience$|)
+
+  defp family_iri?(:content_lifecycle, iri),
+    do: scoped_iri?(iri, ~r|^repo/[a-f0-9]{32}/content-lifecycle$|)
+
+  defp family_iri?(:episode_content, iri),
+    do: scoped_iri?(iri, ~r|^repo/[a-f0-9]{32}/content/[a-f0-9]{32}$|)
 
   defp family_iri?(:security_audit, iri),
     do: scoped_iri?(iri, ~r/^security\/audit\/\d{4}-(?:0[1-9]|1[0-2])$/)

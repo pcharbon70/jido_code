@@ -18,10 +18,7 @@ defmodule JidoCode.Knowledge.Ontology.StartupGate do
   end
 
   defp verify_summary(store, summary) do
-    ontology_graph =
-      "https://jido.run/graph/ontology/#{ShapeCatalog.ontology_version()}"
-
-    if Map.has_key?(summary, RDF.iri(ontology_graph)) do
+    if Enum.any?(Map.keys(summary), &ontology_graph?/1) do
       summary
       |> Map.keys()
       |> Enum.reject(&substrate_graph?/1)
@@ -34,9 +31,9 @@ defmodule JidoCode.Knowledge.Ontology.StartupGate do
   defp verify_graph(store, %RDF.IRI{} = graph) do
     graph_iri = RDF.IRI.to_string(graph)
 
-    with {:ok, _family} <- GraphRegistry.identify(graph_iri),
+    with {:ok, family} <- GraphRegistry.identify(graph_iri),
          {:ok, metadata} when is_map(metadata) <- GraphMetadata.read(store, graph_iri),
-         true <- current_version?(metadata),
+         true <- recognized_version?(family, graph_iri, metadata),
          true <- complete_enough?(metadata) do
       {:cont, :ok}
     else
@@ -55,10 +52,19 @@ defmodule JidoCode.Knowledge.Ontology.StartupGate do
 
   defp substrate_graph?(_graph), do: false
 
-  defp current_version?(metadata) do
-    metadata.ontology_version ==
-      "https://jido.run/ontology/release/#{ShapeCatalog.ontology_version()}"
+  defp recognized_version?(family, graph_iri, metadata) do
+    with "https://jido.run/ontology/release/" <> version <- metadata.ontology_version do
+      ShapeCatalog.known_versions?(version, version) and
+        (family != :ontology or graph_iri == "https://jido.run/graph/ontology/#{version}")
+    else
+      _invalid -> false
+    end
   end
+
+  defp ontology_graph?(%RDF.IRI{} = graph),
+    do: match?({:ok, :ontology}, GraphRegistry.identify(graph))
+
+  defp ontology_graph?(_graph), do: false
 
   defp complete_enough?(%{family: :run_attempt, completeness_state: state}),
     do: state in [:building, :complete]

@@ -64,6 +64,14 @@ required, must itself use the semantic command pipeline.
 | Lease replay or confused deputy | actor/scope binding, idempotency, revision guards, fencing | accepted transition history and recovery scan | Phase 7 and 8 suites |
 | Tool or sandbox escape | typed ports, effect policy, sandbox ownership, no durable worktree authority | cancel, quarantine artifacts, recover from graph | Phase 8 suites |
 | Backup disclosure or erased-data reintroduction | trusted paths, access controls, checksums, lineage and erasure manifests | isolated restore validation and derived rebuild | Phase 10 recovery tests |
+| Persistent memory poisoning | source-linked memory remains untrusted and cannot grant authority | invalidate the source and rebuild disposable derivatives | MG3 adversarial suite |
+| Delayed prompt injection in retained content | retrieved history is structurally non-instructional with bounded sinks | quarantine the source and rebuild affected packets/indexes | MG3 adversarial suite |
+| Cross-scope memory retrieval | authorization-bound repository/tenant/actor/purpose/time/erasure partitions before candidate generation | revoke the partition and rebuild indexes from authorized graph truth | MG3 scope matrix |
+| Stale remembered procedures | exact effective-time, source revision, applicability, and freshness checks | supersede or invalidate the procedure and reassess influenced attempts | MG5 procedure suite |
+| False causal memory | typed temporal lineage; later associations cannot fabricate earlier attempt identity | challenge the claim and recompute source-linked projections | MG4 lineage suite |
+| Memory context overload | hard item, graph, byte, token, time, guard, and command budgets | truncate with explicit omissions and preserve direct recovery handles | MG3 budget suite |
+| Secret capture in memory | forbidden-content policy and structural non-placement for secret values/private reasoning | block retrieval first, then execute classified erasure without overstating external deletion | MG1 and MG6 secret canaries |
+| Incomplete erasure across derivatives | generation-bound indexes, derivative inventory, restore floors, and key lifecycle | keep erasure pending and restore blocked until every required derivative is accounted | MG6 erasure/restore suite |
 
 ## Residual Risk And Release Blocks
 

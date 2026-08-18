@@ -53,7 +53,7 @@ defmodule JidoCode.Knowledge.Retention.MaintenanceIntegrationTest do
       ],
       roots: [],
       legal_holds: [],
-      legal_erase: [],
+      legal_erase: [fixture.observation_batch],
       dataset_revision: summary.dataset_revision,
       graph_revisions: %{
         fixture.observation_graph =>
@@ -63,7 +63,7 @@ defmodule JidoCode.Knowledge.Retention.MaintenanceIntegrationTest do
       actor_iri: fixture.actor,
       activity_iri: Phase04Fixture.local!(:activity, 990),
       audit_graph_iri: audit_graph,
-      rationale: "Archive expired observation batch",
+      rationale: "Erase observation batch under accepted legal request",
       validation_report_iri: Phase04Fixture.local!(:activity, 991)
     }
 
@@ -87,7 +87,9 @@ defmodule JidoCode.Knowledge.Retention.MaintenanceIntegrationTest do
 
     assert receipt.integrity_status == :ok
     assert receipt.removal_count == length(removable)
-    assert receipt.archived_resource_count == 1
+    assert receipt.archived_resource_count == 0
+    assert receipt.removed_resource_count == 0
+    assert receipt.erased_resource_count == 1
     assert is_binary(receipt.checkpoint_artifact_id)
     assert StoreServer.summary(fixture.store_server).ready?
 

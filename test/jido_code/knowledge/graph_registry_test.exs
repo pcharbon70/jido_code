@@ -10,7 +10,15 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
     {:ok, batch} = ResourceIdentity.local(:activity, 100, <<0::80>>)
     {:ok, revision} = ResourceIdentity.git_object(:sha1, String.duplicate("a", 40))
     {:ok, attempt} = ResourceIdentity.local(:attempt, 200, <<1::80>>)
-    %{repository: repository, batch: batch, revision: revision, attempt: attempt}
+    {:ok, content} = ResourceIdentity.local(:claim, 300, <<2::80>>)
+
+    %{
+      repository: repository,
+      batch: batch,
+      revision: revision,
+      attempt: attempt,
+      content: content
+    }
   end
 
   test "constructs and recognizes every registered graph family", ids do
@@ -22,8 +30,12 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
       source_revision: %{repository: ids.repository, revision: ids.revision},
       repository_control: %{repository: ids.repository},
       run_attempt: %{attempt: ids.attempt},
+      run_event_segment: %{attempt: ids.attempt, segment: 0},
       evidence: %{repository: ids.repository},
       memory: %{repository: ids.repository},
+      experience: %{repository: ids.repository},
+      content_lifecycle: %{repository: ids.repository},
+      episode_content: %{repository: ids.repository, content: ids.content},
       security_audit: %{period: "2026-07"},
       derived: %{rule_set: "eligibility-v1", revision: 7}
     ]
@@ -38,10 +50,11 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
       assert is_atom(contract.capability)
       assert is_atom(contract.mutability)
       assert is_atom(contract.retention)
+      assert is_boolean(contract.enabled)
     end)
   end
 
-  test "enforces writer capabilities, lifecycle, and cross-family links" do
+  test "enforces writer capabilities, lifecycle, and cross-family links", ids do
     assert {:ok, catalog} = GraphRegistry.graph_iri(:factory_catalog, %{})
     assert {:ok, _contract} = GraphRegistry.validate_target(catalog, :catalog_writer)
 
@@ -56,6 +69,19 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
 
     assert GraphRegistry.allowed_link?(:repository_control, :evidence)
     refute GraphRegistry.allowed_link?(:observation_batch, :repository_control)
+
+    assert {:ok, segment} =
+             GraphRegistry.graph_iri(:run_event_segment, %{
+               attempt: ids.attempt,
+               segment: 0
+             })
+
+    assert {:error, %Error{kind: :unauthorized}} =
+             GraphRegistry.validate_target(segment, :execution_writer)
+
+    refute GraphRegistry.write_allowed?(:run_event_segment, :create, nil)
+    assert GraphRegistry.allowed_link?(:run_attempt, :run_event_segment)
+    refute GraphRegistry.allowed_link?(:episode_content, :memory)
   end
 
   test "rejects unknown graphs and malformed scope maps", ids do

@@ -34,7 +34,7 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
     SELECT ?predicate ?object WHERE {
       GRAPH {{graph}} {
-        <https://jido.run/ontology/release/1.0.0> ?predicate ?object .
+        {{graph}} ?predicate ?object .
       }
     }
     LIMIT {{row_limit}}
