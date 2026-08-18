@@ -92,16 +92,16 @@ Back to plan: [README](./README.md)
     This final section proves the reconciled contract is internally consistent
     and closes MG1 from a merged candidate.
 
-    - [ ] 1.5.1 Task {#tam-p01-integration} [repo: jido_code] [after: {#tam-p01-memory-guardrails}] - Execute the memory-contract conformance suite.
+    - [x] 1.5.1 Task {#tam-p01-integration} [repo: jido_code] [after: {#tam-p01-memory-guardrails}] - Execute the memory-contract conformance suite.
 
       This task validates topology, policy, compatibility, retention, and
       threat fixtures against the real dataset.
 
-      - [ ] 1.5.1.1 Subtask - Prove every current durable literal is classified consistently across ontology, `DataPolicy`, command validation, projections, exports, retention, and backup.
-      - [ ] 1.5.1.2 Subtask - Prove each new family accepts only its writer, scope, predicates, lifecycle transitions, and allowed link directions.
-      - [ ] 1.5.1.3 Subtask - Prove secret values, hidden reasoning, unauthorized prompts, unknown profiles, and cross-scope content cannot enter durable graphs.
-      - [ ] 1.5.1.4 Subtask - Prove archive, removal, erasure, hold, legacy-run, and receipt-commitment states are reported honestly.
-      - [ ] 1.5.1.5 Subtask - Run prior graph/harness suites, architecture scans, and `mix precommit`.
+      - [x] 1.5.1.1 Subtask - Prove every current durable literal is classified consistently across ontology, `DataPolicy`, command validation, projections, exports, retention, and backup.
+      - [x] 1.5.1.2 Subtask - Prove each new family accepts only its writer, scope, predicates, lifecycle transitions, and allowed link directions.
+      - [x] 1.5.1.3 Subtask - Prove secret values, hidden reasoning, unauthorized prompts, unknown profiles, and cross-scope content cannot enter durable graphs.
+      - [x] 1.5.1.4 Subtask - Prove archive, removal, erasure, hold, legacy-run, and receipt-commitment states are reported honestly.
+      - [x] 1.5.1.5 Subtask - Run prior graph/harness suites, architecture scans, and `mix precommit`.
 
     - [ ] 1.5.2 Task {#tam-p01-phase-receipt} [repo: jido_code] [after: {#tam-p01-integration}] - Publish the Phase 1 memory-contract receipt.
 
@@ -109,7 +109,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/memory-phase-01-receipt.md` and authorizes segmented
       accounting only from the pinned merged baseline.
 
-      - [ ] 1.5.2.1 Subtask - Record ontology, registry, policy, profile, capacity, migration, and threat revisions plus the candidate commit.
-      - [ ] 1.5.2.2 Subtask - Attach classification, topology, retention, compatibility, and adversarial evidence with known limitations.
-      - [ ] 1.5.2.3 Subtask - Keep MG1 blocked if any stored content is ambiguously classified, any family lacks a closed contract, or any retained content can become authority.
+      - [x] 1.5.2.1 Subtask - Record ontology, registry, policy, profile, capacity, migration, and threat revisions plus the candidate commit.
+      - [x] 1.5.2.2 Subtask - Attach classification, topology, retention, compatibility, and adversarial evidence with known limitations.
+      - [x] 1.5.2.3 Subtask - Keep MG1 blocked if any stored content is ambiguously classified, any family lacks a closed contract, or any retained content can become authority.
       - [ ] 1.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 2.

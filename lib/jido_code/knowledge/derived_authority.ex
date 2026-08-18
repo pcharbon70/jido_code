@@ -20,7 +20,7 @@ defmodule JidoCode.Knowledge.DerivedAuthority do
       Keyword.get(
         options,
         :ontology_version,
-        "https://jido.run/ontology/release/#{ShapeCatalog.ontology_version()}"
+        Map.get(metadata, :ontology_version)
       )
 
     expected_rule_set = Keyword.get(options, :rule_set, Map.get(metadata, :rule_set))
@@ -34,6 +34,8 @@ defmodule JidoCode.Knowledge.DerivedAuthority do
         cond do
           Map.get(metadata, :invalidation_state) == :invalidated -> :invalidated
           Map.get(metadata, :invalidation_state) == :incompatible -> :incompatible
+          not recognized_ontology?(Map.get(metadata, :ontology_version)) -> :incompatible
+          not recognized_ontology?(expected_ontology) -> :incompatible
           Map.get(metadata, :ontology_version) != expected_ontology -> :incompatible
           Map.get(metadata, :rule_set) != expected_rule_set -> :incompatible
           Map.get(metadata, :invalidation_state) == :stale -> :stale
@@ -175,4 +177,9 @@ defmodule JidoCode.Knowledge.DerivedAuthority do
       _missing_or_invalid -> {:error, Error.new(:invalid_input, :derived_graph_rebuild)}
     end
   end
+
+  defp recognized_ontology?("https://jido.run/ontology/release/" <> version),
+    do: ShapeCatalog.known_versions?(version, version)
+
+  defp recognized_ontology?(_version), do: false
 end
