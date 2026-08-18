@@ -1,0 +1,756 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix jfe: <https://jido.run/ontology/evaluation#> .
+@prefix jfec: <https://jido.run/ontology/evaluation/concept/> .
+@prefix jfes: <https://jido.run/ontology/evaluation/shapes#> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/evaluation/shapes/1.0.0>
+  a sh:ShapesGraph ;
+  owl:imports <https://jido.run/ontology/shapes/1.0.0> ;
+  jf:shapeVersion "1.0.0" ;
+  rdfs:comment "Candidate closed-world constraints for Jido evaluation catalog, run, evidence, aggregate, decision, and protected-reference resources. Operational admission also applies the imported factory shapes and executable registry contract." .
+
+# Reusable property shapes
+
+jfes:RevisionProperty a sh:PropertyShape ; sh:path jfe:revision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ; sh:maxLength 256 .
+jfes:ContentDigestProperty a sh:PropertyShape ; sh:path jf:contentDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfes:TrackProperty a sh:PropertyShape ; sh:path jfe:track ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationTrack ; sh:nodeKind sh:IRI .
+jfes:GeneratedAtProperty a sh:PropertyShape ; sh:path prov:generatedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfes:EndedAtProperty a sh:PropertyShape ; sh:path prov:endedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfes:EligibleAsEvidenceProperty a sh:PropertyShape ; sh:path jfe:eligibleAsEvidence ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+
+# Graph family contract and graph metadata shapes
+
+jfes:GraphFamilyContractShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:GraphFamilyContract ;
+  sh:property jfes:FamilyNameProperty,
+    jfes:ScopeKeyProperty,
+    jfes:GraphIriTemplateProperty,
+    jfes:WriterCapabilityNameProperty,
+    jfes:MutabilityProperty,
+    jfes:DefaultCompletenessProperty,
+    jfes:RetentionPolicyProperty,
+    jfes:GraphKindValueProperty,
+    jfes:AllowedLinkGraphKindProperty .
+
+jfes:FamilyNameProperty a sh:PropertyShape ; sh:path jfe:familyName ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:ScopeKeyProperty a sh:PropertyShape ; sh:path jfe:scopeKey ; sh:minCount 1 ; sh:datatype xsd:string .
+jfes:GraphIriTemplateProperty a sh:PropertyShape ; sh:path jfe:graphIriTemplate ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:WriterCapabilityNameProperty a sh:PropertyShape ; sh:path jfe:writerCapabilityName ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:MutabilityProperty a sh:PropertyShape ; sh:path jfe:mutability ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:DefaultCompletenessProperty a sh:PropertyShape ; sh:path jfe:defaultCompleteness ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:RetentionPolicyProperty a sh:PropertyShape ; sh:path jfe:retentionPolicy ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:GraphKindValueProperty a sh:PropertyShape ; sh:path jfe:graphKindValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:AllowedLinkGraphKindProperty a sh:PropertyShape ; sh:path jfe:allowsLinkToGraphKind ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+
+jfes:GraphPlacementRuleShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:GraphPlacementRule ;
+  sh:property jfes:PlacedClassProperty,
+    jfes:AllowedGraphKindProperty,
+    jfes:CanonicalGraphKindProperty,
+    jfes:PlacementReasonProperty .
+
+jfes:PlacedClassProperty a sh:PropertyShape ; sh:path jfe:placedClass ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+jfes:AllowedGraphKindProperty a sh:PropertyShape ; sh:path jfe:allowedGraphKind ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+jfes:CanonicalGraphKindProperty a sh:PropertyShape ; sh:path jfe:canonicalGraphKind ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:PlacementReasonProperty a sh:PropertyShape ; sh:path jfe:placementReason ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+
+jfes:EvaluationCatalogFamilyContractShape
+  a sh:NodeShape ;
+  sh:targetNode jfe:EvaluationCatalogFamilyContract ;
+  sh:property jfes:CatalogFamilyNameProperty,
+    jfes:CatalogWriterCapabilityProperty,
+    jfes:CatalogMutabilityProperty,
+    jfes:CatalogDefaultCompletenessProperty,
+    jfes:CatalogGraphKindValueProperty .
+
+jfes:CatalogFamilyNameProperty a sh:PropertyShape ; sh:path jfe:familyName ; sh:hasValue "evaluation_catalog" .
+jfes:CatalogWriterCapabilityProperty a sh:PropertyShape ; sh:path jfe:writerCapabilityName ; sh:hasValue "evaluation_catalog_writer" .
+jfes:CatalogMutabilityProperty a sh:PropertyShape ; sh:path jfe:mutability ; sh:hasValue jfec:Immutable .
+jfes:CatalogDefaultCompletenessProperty a sh:PropertyShape ; sh:path jfe:defaultCompleteness ; sh:hasValue jfc:Complete .
+jfes:CatalogGraphKindValueProperty a sh:PropertyShape ; sh:path jfe:graphKindValue ; sh:hasValue jfec:EvaluationCatalogGraph .
+
+jfes:EvaluationRunFamilyContractShape
+  a sh:NodeShape ;
+  sh:targetNode jfe:EvaluationRunFamilyContract ;
+  sh:property jfes:RunFamilyNameProperty,
+    jfes:RunWriterCapabilityProperty,
+    jfes:RunMutabilityProperty,
+    jfes:RunDefaultCompletenessProperty,
+    jfes:RunGraphKindValueProperty .
+
+jfes:RunFamilyNameProperty a sh:PropertyShape ; sh:path jfe:familyName ; sh:hasValue "evaluation_run" .
+jfes:RunWriterCapabilityProperty a sh:PropertyShape ; sh:path jfe:writerCapabilityName ; sh:hasValue "evaluation_run_writer" .
+jfes:RunMutabilityProperty a sh:PropertyShape ; sh:path jfe:mutability ; sh:hasValue jfec:Closeable .
+jfes:RunDefaultCompletenessProperty a sh:PropertyShape ; sh:path jfe:defaultCompleteness ; sh:hasValue jfc:Building .
+jfes:RunGraphKindValueProperty a sh:PropertyShape ; sh:path jfe:graphKindValue ; sh:hasValue jfec:EvaluationRunGraph .
+
+jfes:EvaluationCatalogGraphShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationCatalogGraph ;
+  sh:node jfs:NamedGraphShape ;
+  sh:property jfes:CatalogGraphKindProperty,
+    jfes:ClosedGraphLifecycleProperty,
+    jfes:CompleteGraphProperty,
+    jfes:CatalogRevisionProperty,
+    jfes:ContentDigestProperty,
+    jfes:ContainsDefinitionProperty .
+
+jfes:CatalogGraphKindProperty a sh:PropertyShape ; sh:path jf:graphKind ; sh:hasValue jfec:EvaluationCatalogGraph .
+jfes:ClosedGraphLifecycleProperty a sh:PropertyShape ; sh:path jf:lifecycleState ; sh:hasValue jfc:Closed .
+jfes:CompleteGraphProperty a sh:PropertyShape ; sh:path jf:completenessState ; sh:hasValue jfc:Complete .
+jfes:CatalogRevisionProperty a sh:PropertyShape ; sh:path jfe:catalogRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:ContainsDefinitionProperty a sh:PropertyShape ; sh:path jfe:containsDefinition ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+
+jfes:EvaluationRunGraphShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationRunGraph ;
+  sh:node jfs:NamedGraphShape ;
+  sh:property jfes:RunGraphKindProperty,
+    jfes:RunGraphLifecycleProperty,
+    jfes:RunGraphCompletenessProperty,
+    jfes:DescribesRunProperty ;
+  sh:sparql jfes:RunGraphStateConstraint .
+
+jfes:RunGraphKindProperty a sh:PropertyShape ; sh:path jf:graphKind ; sh:hasValue jfec:EvaluationRunGraph .
+jfes:RunGraphLifecycleProperty a sh:PropertyShape ; sh:path jf:lifecycleState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:RunGraphCompletenessProperty a sh:PropertyShape ; sh:path jf:completenessState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:DescribesRunProperty a sh:PropertyShape ; sh:path jfe:describesRun ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationRun ; sh:nodeKind sh:IRI .
+
+# Catalog definition shapes
+
+jfes:EvaluationProfileShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationProfile ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty,
+    jfes:TrackProperty,
+    jfes:UsesTargetProperty,
+    jfes:UsesCorpusProperty,
+    jfes:UsesOracleProperty,
+    jfes:UsesRubricProperty,
+    jfes:UsesVerifierPolicyProperty,
+    jfes:UsesReviewerPolicyProperty,
+    jfes:UsesStatisticalPlanProperty,
+    jfes:RequiresSliceProperty,
+    jfes:AcceptanceStageProperty,
+    jfes:TrialsPerTaskProperty .
+
+jfes:UsesTargetProperty a sh:PropertyShape ; sh:path jfe:usesTarget ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationTarget ; sh:nodeKind sh:IRI .
+jfes:UsesCorpusProperty a sh:PropertyShape ; sh:path jfe:usesCorpus ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:CorpusRevision ; sh:nodeKind sh:IRI .
+jfes:UsesOracleProperty a sh:PropertyShape ; sh:path jfe:usesOracle ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:OracleRevision ; sh:nodeKind sh:IRI .
+jfes:UsesRubricProperty a sh:PropertyShape ; sh:path jfe:usesRubric ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:RubricRevision ; sh:nodeKind sh:IRI .
+jfes:UsesVerifierPolicyProperty a sh:PropertyShape ; sh:path jfe:usesVerifierPolicy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:VerifierPolicyRevision ; sh:nodeKind sh:IRI .
+jfes:UsesReviewerPolicyProperty a sh:PropertyShape ; sh:path jfe:usesReviewerPolicy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:ReviewerPolicy ; sh:nodeKind sh:IRI .
+jfes:UsesStatisticalPlanProperty a sh:PropertyShape ; sh:path jfe:usesStatisticalPlan ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:StatisticalPlan ; sh:nodeKind sh:IRI .
+jfes:RequiresSliceProperty a sh:PropertyShape ; sh:path jfe:requiresSlice ; sh:minCount 1 ; sh:class jfe:EvaluationSliceDefinition ; sh:nodeKind sh:IRI .
+jfes:AcceptanceStageProperty a sh:PropertyShape ; sh:path jfe:acceptanceStage ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:maxInclusive 6 .
+jfes:TrialsPerTaskProperty a sh:PropertyShape ; sh:path jfe:trialsPerTask ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:positiveInteger ; sh:minInclusive 2 ; sh:maxInclusive 50 .
+
+jfes:EvaluationTargetShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationTarget ;
+  sh:property jfes:ProductRevisionProperty,
+    jfes:ModelProviderProperty,
+    jfes:ModelIdentifierProperty,
+    jfes:ModelSnapshotProperty,
+    jfes:InferenceParametersDigestProperty,
+    jfes:AccessModeProperty,
+    jfes:AuthenticationKindProperty,
+    jfes:BillingModeProperty,
+    jfes:AccessProfileRevisionProperty,
+    jfes:AdapterRevisionsDigestProperty,
+    jfes:CliVersionProperty,
+    jfes:HarnessProfileRevisionProperty,
+    jfes:ToolVersionsDigestProperty,
+    jfes:SandboxDigestProperty,
+    jfes:ContextPolicyRevisionProperty,
+    jfes:MemoryPolicyRevisionProperty,
+    jfes:VerifierRevisionProperty,
+    jfes:GraderRevisionProperty .
+
+jfes:ProductRevisionProperty a sh:PropertyShape ; sh:path jfe:productRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:ModelProviderProperty a sh:PropertyShape ; sh:path jfe:modelProvider ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:ModelIdentifierProperty a sh:PropertyShape ; sh:path jfe:modelIdentifier ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:ModelSnapshotProperty a sh:PropertyShape ; sh:path jfe:modelSnapshot ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:InferenceParametersDigestProperty a sh:PropertyShape ; sh:path jfe:inferenceParametersDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfes:AccessModeProperty a sh:PropertyShape ; sh:path jfe:accessMode ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:AccessModeValues01 .
+jfes:AuthenticationKindProperty a sh:PropertyShape ; sh:path jfe:authenticationKind ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:AuthenticationKindValues01 .
+jfes:BillingModeProperty a sh:PropertyShape ; sh:path jfe:billingMode ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:BillingModeValues01 .
+jfes:AccessProfileRevisionProperty a sh:PropertyShape ; sh:path jfe:accessProfileRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:AdapterRevisionsDigestProperty a sh:PropertyShape ; sh:path jfe:adapterRevisionsDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfes:CliVersionProperty a sh:PropertyShape ; sh:path jfe:cliVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:HarnessProfileRevisionProperty a sh:PropertyShape ; sh:path jfe:harnessProfileRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:ToolVersionsDigestProperty a sh:PropertyShape ; sh:path jfe:toolVersionsDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfes:SandboxDigestProperty a sh:PropertyShape ; sh:path jfe:sandboxDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfes:ContextPolicyRevisionProperty a sh:PropertyShape ; sh:path jfe:contextPolicyRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:MemoryPolicyRevisionProperty a sh:PropertyShape ; sh:path jfe:memoryPolicyRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:VerifierRevisionProperty a sh:PropertyShape ; sh:path jfe:verifierRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:GraderRevisionProperty a sh:PropertyShape ; sh:path jfe:graderRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+
+jfes:CorpusRevisionShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:CorpusRevision ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty,
+    jfes:TrackProperty,
+    jfes:ContainsTaskProperty .
+
+jfes:ContainsTaskProperty a sh:PropertyShape ; sh:path jfe:containsTask ; sh:minCount 1 ; sh:class jfe:EvaluationTask ; sh:nodeKind sh:IRI .
+
+jfes:EvaluationTaskShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationTask ;
+  sh:property jfes:RevisionProperty,
+    jfes:TaskRepositoryProperty,
+    jfes:SourceRevisionGraphProperty,
+    jfes:TaskClassProperty,
+    jfes:TaskRiskProperty,
+    jfes:TaskPartitionProperty,
+    jfes:FreshPrivateProperty,
+    jfes:UsesOracleProperty,
+    jfes:TaskManifestDigestProperty .
+
+jfes:TaskRepositoryProperty a sh:PropertyShape ; sh:path jfe:taskRepository ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jf:SoftwareRepository ; sh:nodeKind sh:IRI .
+jfes:SourceRevisionGraphProperty a sh:PropertyShape ; sh:path jfe:sourceRevisionGraph ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jf:NamedGraph ; sh:nodeKind sh:IRI .
+jfes:TaskClassProperty a sh:PropertyShape ; sh:path jfe:taskClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:TaskClassValues01 .
+jfes:TaskRiskProperty a sh:PropertyShape ; sh:path jfe:taskRisk ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:RiskValues01 .
+jfes:TaskPartitionProperty a sh:PropertyShape ; sh:path jfe:taskPartition ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:PartitionValues01 .
+jfes:FreshPrivateProperty a sh:PropertyShape ; sh:path jfe:freshPrivate ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfes:TaskManifestDigestProperty a sh:PropertyShape ; sh:path jfe:taskManifestDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+
+jfes:OracleRevisionShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:OracleRevision ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty,
+    jfes:ProtectedArtifactProperty .
+
+jfes:ProtectedArtifactProperty a sh:PropertyShape ; sh:path jfe:protectedArtifact ; sh:minCount 1 ; sh:class jfe:ProtectedArtifactReference ; sh:nodeKind sh:IRI .
+
+jfes:RubricRevisionShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:RubricRevision ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty .
+
+jfes:VerifierPolicyRevisionShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:VerifierPolicyRevision ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty .
+
+jfes:ReviewerPolicyShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:ReviewerPolicy ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty,
+    jfes:IndependentReviewerCountProperty,
+    jfes:BlindedReviewRequiredProperty,
+    jfes:ResolverRequiredProperty,
+    jfes:DisagreementProcedureRevisionProperty ;
+  sh:sparql jfes:ReviewerPolicyConsistencyConstraint .
+
+jfes:IndependentReviewerCountProperty a sh:PropertyShape ; sh:path jfe:independentReviewerCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:maxInclusive 2 .
+jfes:BlindedReviewRequiredProperty a sh:PropertyShape ; sh:path jfe:blindedReviewRequired ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfes:ResolverRequiredProperty a sh:PropertyShape ; sh:path jfe:resolverRequired ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfes:DisagreementProcedureRevisionProperty a sh:PropertyShape ; sh:path jfe:disagreementProcedureRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+
+jfes:StatisticalPlanShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:StatisticalPlan ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty,
+    jfes:BinaryIntervalMethodProperty,
+    jfes:ContinuousIntervalMethodProperty,
+    jfes:BootstrapRevisionProperty,
+    jfes:StratifiesByProperty .
+
+jfes:BinaryIntervalMethodProperty a sh:PropertyShape ; sh:path jfe:binaryIntervalMethod ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue jfec:Wilson95 ; sh:nodeKind sh:IRI .
+jfes:ContinuousIntervalMethodProperty a sh:PropertyShape ; sh:path jfe:continuousIntervalMethod ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue jfec:StratifiedBootstrap ; sh:nodeKind sh:IRI .
+jfes:BootstrapRevisionProperty a sh:PropertyShape ; sh:path jfe:bootstrapRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:StratifiesByProperty a sh:PropertyShape ; sh:path jfe:stratifiesBy ; sh:minCount 1 ; sh:class jfe:EvaluationSliceDefinition ; sh:nodeKind sh:IRI .
+
+jfes:ProtectedArtifactReferenceShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:ProtectedArtifactReference ;
+  sh:closed true ;
+  sh:ignoredProperties jfes:ProtectedArtifactIgnoredProperties ;
+  sh:property jfes:ContentDigestProperty,
+    jfes:ArtifactRoleProperty,
+    jfes:AccessPolicyRevisionProperty .
+
+jfes:ProtectedArtifactIgnoredProperties rdf:first rdf:type ; rdf:rest rdf:nil .
+jfes:ArtifactRoleProperty a sh:PropertyShape ; sh:path jfe:artifactRole ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:ArtifactRoleValues01 .
+jfes:AccessPolicyRevisionProperty a sh:PropertyShape ; sh:path jfe:accessPolicyRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+
+# Run and trial shapes
+
+jfes:EvaluationRunShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationRun ;
+  sh:property jfes:RevisionProperty,
+    jfes:ContentDigestProperty,
+    jfes:UsesProfileProperty,
+    jfes:UsesCorpusProperty,
+    jfes:UsesTargetProperty,
+    jfes:FrozenAtProperty,
+    jfes:RunStatusProperty,
+    jfes:ProviderSeedControlProperty,
+    jfes:AssignedTrialProperty .
+
+jfes:UsesProfileProperty a sh:PropertyShape ; sh:path jfe:usesProfile ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationProfile ; sh:nodeKind sh:IRI .
+jfes:FrozenAtProperty a sh:PropertyShape ; sh:path jfe:frozenAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfes:RunStatusProperty a sh:PropertyShape ; sh:path jfe:runStatus ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:RunStatusValues01 .
+jfes:ProviderSeedControlProperty a sh:PropertyShape ; sh:path jfe:providerSeedControl ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfes:AssignedTrialProperty a sh:PropertyShape ; sh:path jfe:assignedTrial ; sh:minCount 1 ; sh:class jfe:EvaluationTrial ; sh:nodeKind sh:IRI .
+
+jfes:EvaluationTrialShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationTrial ;
+  sh:property jfes:ContentDigestProperty,
+    jfes:InEvaluationRunProperty,
+    jfes:EvaluatesTaskProperty,
+    jfes:UsesProfileProperty,
+    jfes:IndependentRunIndexProperty,
+    jfes:TrialStatusProperty,
+    jfes:ExecutionAttemptProperty .
+
+jfes:InEvaluationRunProperty a sh:PropertyShape ; sh:path jfe:inEvaluationRun ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationRun ; sh:nodeKind sh:IRI .
+jfes:EvaluatesTaskProperty a sh:PropertyShape ; sh:path jfe:evaluatesTask ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationTask ; sh:nodeKind sh:IRI .
+jfes:IndependentRunIndexProperty a sh:PropertyShape ; sh:path jfe:independentRunIndex ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:positiveInteger ; sh:minInclusive 1 ; sh:maxInclusive 50 .
+jfes:TrialStatusProperty a sh:PropertyShape ; sh:path jfe:trialStatus ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:TrialStatusValues01 .
+jfes:ExecutionAttemptProperty a sh:PropertyShape ; sh:path jfe:executionAttempt ; sh:maxCount 1 ; sh:class jf:ExecutionAttempt ; sh:nodeKind sh:IRI .
+
+jfes:TrialObservationShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:TrialObservation ;
+  sh:property jfes:OfTrialProperty,
+    jfes:OutcomeProperty,
+    jfes:ObservedAtProperty,
+    jfes:ProvenanceCompleteProperty,
+    jfes:EligibleAsEvidenceProperty .
+
+jfes:OfTrialProperty a sh:PropertyShape ; sh:path jfe:ofTrial ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationTrial ; sh:nodeKind sh:IRI .
+jfes:OutcomeProperty a sh:PropertyShape ; sh:path jfe:outcome ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:TrialOutcomeValues01 .
+jfes:ObservedAtProperty a sh:PropertyShape ; sh:path jfe:observedAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfes:ProvenanceCompleteProperty a sh:PropertyShape ; sh:path jfe:provenanceComplete ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+
+# Evidence, grading, aggregation, and decision shapes
+
+jfes:GraderResultShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:GraderResult ;
+  sh:property jfes:GradesTrialProperty,
+    jfes:UsesGraderProperty,
+    jfes:GraderRevisionProperty,
+    jfes:ResultStatusProperty,
+    jfes:InputDigestProperty,
+    jfes:OutputDigestProperty,
+    jfes:GeneratedAtProperty,
+    jfes:EligibleAsEvidenceProperty ;
+  sh:sparql jfes:NoMeasurementAuthorityConstraint .
+
+jfes:GradesTrialProperty a sh:PropertyShape ; sh:path jfe:gradesTrial ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationTrial ; sh:nodeKind sh:IRI .
+jfes:UsesGraderProperty a sh:PropertyShape ; sh:path jfe:usesGrader ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:Grader ; sh:nodeKind sh:IRI .
+jfes:ResultStatusProperty a sh:PropertyShape ; sh:path jfe:resultStatus ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:GradeVerdictValues01 .
+jfes:InputDigestProperty a sh:PropertyShape ; sh:path jfe:inputDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfes:OutputDigestProperty a sh:PropertyShape ; sh:path jfe:outputDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+
+jfes:ReviewFindingShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:ReviewFinding ;
+  sh:node jfs:ClaimShape ;
+  sh:property jfes:ReportedInTrialProperty,
+    jfes:EvaluatedSourceRevisionGraphProperty,
+    jfes:FindingFileProperty,
+    jfes:FindingStartLineProperty,
+    jfes:FindingEndLineProperty,
+    jfes:FindingCategoryProperty,
+    jfes:FindingSeverityProperty,
+    jfes:ClaimTextProperty,
+    jfes:ImpactProperty,
+    jfes:EvidenceReferenceProperty,
+    jfes:ConfidenceValueProperty,
+    jfes:MatchStateProperty ;
+  sh:sparql jfes:FindingLocationConstraint,
+    jfes:CriticalFindingReproductionConstraint,
+    jfes:NoMeasurementAuthorityConstraint .
+
+jfes:ReportedInTrialProperty a sh:PropertyShape ; sh:path jfe:reportedInTrial ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationTrial ; sh:nodeKind sh:IRI .
+jfes:EvaluatedSourceRevisionGraphProperty a sh:PropertyShape ; sh:path jfe:evaluatedSourceRevisionGraph ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jf:NamedGraph ; sh:nodeKind sh:IRI .
+jfes:FindingFileProperty a sh:PropertyShape ; sh:path jfe:findingFile ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:FindingStartLineProperty a sh:PropertyShape ; sh:path jfe:findingStartLine ; sh:maxCount 1 ; sh:datatype xsd:positiveInteger .
+jfes:FindingEndLineProperty a sh:PropertyShape ; sh:path jfe:findingEndLine ; sh:maxCount 1 ; sh:datatype xsd:positiveInteger .
+jfes:FindingCategoryProperty a sh:PropertyShape ; sh:path jfe:findingCategory ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:ReviewFindingCategory ; sh:nodeKind sh:IRI .
+jfes:FindingSeverityProperty a sh:PropertyShape ; sh:path jfe:findingSeverity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:FindingSeverityValues01 .
+jfes:ClaimTextProperty a sh:PropertyShape ; sh:path jfe:claimText ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:ImpactProperty a sh:PropertyShape ; sh:path jfe:impact ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:EvidenceReferenceProperty a sh:PropertyShape ; sh:path jfe:evidenceReference ; sh:minCount 1 ; sh:class prov:Entity ; sh:nodeKind sh:IRI .
+jfes:ConfidenceValueProperty a sh:PropertyShape ; sh:path jf:confidenceValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 .
+jfes:MatchStateProperty a sh:PropertyShape ; sh:path jfe:matchState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:FindingMatchStateValues01 .
+
+jfes:AnalysisClaimShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:AnalysisClaim ;
+  sh:node jfs:ClaimShape ;
+  sh:property jfes:ReportedInTrialProperty,
+    jfes:EvaluatedSourceRevisionGraphProperty,
+    jfes:ClaimTypeProperty,
+    jfes:PolarityProperty,
+    jfes:InferenceKindProperty,
+    jfes:ClaimTextProperty,
+    jfes:EvidenceReferenceProperty,
+    jfes:ConfidenceValueProperty ;
+  sh:sparql jfes:NoMeasurementAuthorityConstraint .
+
+jfes:ClaimTypeProperty a sh:PropertyShape ; sh:path jfe:claimType ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:AnalysisClaimType ; sh:nodeKind sh:IRI .
+jfes:PolarityProperty a sh:PropertyShape ; sh:path jfe:polarity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:ClaimPolarityValues01 .
+jfes:InferenceKindProperty a sh:PropertyShape ; sh:path jfe:inferenceKind ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:InferenceKindValues01 .
+
+jfes:HumanGradeShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:HumanGrade ;
+  sh:property jfes:GradesTrialProperty,
+    jfes:ReviewerProperty,
+    jfes:UsesRubricProperty,
+    jfes:BlindedProperty,
+    jfes:ResultStatusProperty,
+    jfes:GeneratedAtProperty ;
+  sh:sparql jfes:NoMeasurementAuthorityConstraint .
+
+jfes:ReviewerProperty a sh:PropertyShape ; sh:path jfe:reviewer ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jf:Actor ; sh:nodeKind sh:IRI .
+jfes:BlindedProperty a sh:PropertyShape ; sh:path jfe:blinded ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue true .
+
+jfes:AdjudicationShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:Adjudication ;
+  sh:property jfes:AdjudicatesTrialProperty,
+    jfes:ConsideredResultProperty,
+    jfes:AdjudicationVerdictProperty,
+    jfes:AdjudicatorProperty,
+    jfes:EndedAtProperty ;
+  sh:sparql jfes:NoMeasurementAuthorityConstraint .
+
+jfes:AdjudicatesTrialProperty a sh:PropertyShape ; sh:path jfe:adjudicatesTrial ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationTrial ; sh:nodeKind sh:IRI .
+jfes:ConsideredResultProperty a sh:PropertyShape ; sh:path jfe:consideredResult ; sh:minCount 1 ; sh:class prov:Entity ; sh:nodeKind sh:IRI .
+jfes:AdjudicationVerdictProperty a sh:PropertyShape ; sh:path jfe:adjudicationVerdict ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:AdjudicatorProperty a sh:PropertyShape ; sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+
+jfes:MetricObservationShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:MetricObservation ;
+  sh:property jfes:MetricProperty,
+    jfes:MetricValueProperty,
+    jfes:NumeratorProperty,
+    jfes:DenominatorProperty,
+    jfes:IntervalLowerProperty,
+    jfes:IntervalUpperProperty ;
+  sh:sparql jfes:MetricBoundsConstraint,
+    jfes:NoMeasurementAuthorityConstraint .
+
+jfes:MetricProperty a sh:PropertyShape ; sh:path jfe:metric ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:MetricDefinition ; sh:nodeKind sh:IRI .
+jfes:MetricValueProperty a sh:PropertyShape ; sh:path jfe:metricValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal .
+jfes:NumeratorProperty a sh:PropertyShape ; sh:path jfe:numerator ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfes:DenominatorProperty a sh:PropertyShape ; sh:path jfe:denominator ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfes:IntervalLowerProperty a sh:PropertyShape ; sh:path jfe:intervalLower ; sh:maxCount 1 ; sh:datatype xsd:decimal .
+jfes:IntervalUpperProperty a sh:PropertyShape ; sh:path jfe:intervalUpper ; sh:maxCount 1 ; sh:datatype xsd:decimal .
+
+jfes:EvaluatorHealthShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluatorHealth ;
+  sh:property jfes:MeasuresEvaluatorProperty,
+    jfes:ContainsMetricProperty,
+    jfes:GeneratedAtProperty ;
+  sh:sparql jfes:NoMeasurementAuthorityConstraint .
+
+jfes:MeasuresEvaluatorProperty a sh:PropertyShape ; sh:path jfe:measuresEvaluator ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:Evaluator ; sh:nodeKind sh:IRI .
+
+jfes:AggregateResultShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:AggregateResult ;
+  sh:property jfes:AggregatesRunProperty,
+    jfes:IncludesTrialProperty,
+    jfes:AnalysisRevisionProperty,
+    jfes:FrozenInclusionDigestProperty,
+    jfes:ContainsMetricProperty,
+    jfes:GeneratedAtProperty ;
+  sh:sparql jfes:NoMeasurementAuthorityConstraint .
+
+jfes:AggregatesRunProperty a sh:PropertyShape ; sh:path jfe:aggregatesRun ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationRun ; sh:nodeKind sh:IRI .
+jfes:IncludesTrialProperty a sh:PropertyShape ; sh:path jfe:includesTrial ; sh:minCount 1 ; sh:class jfe:EvaluationTrial ; sh:nodeKind sh:IRI .
+jfes:AnalysisRevisionProperty a sh:PropertyShape ; sh:path jfe:analysisRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfes:FrozenInclusionDigestProperty a sh:PropertyShape ; sh:path jfe:frozenInclusionDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfes:ContainsMetricProperty a sh:PropertyShape ; sh:path jfe:containsMetric ; sh:minCount 1 ; sh:class jfe:MetricObservation ; sh:nodeKind sh:IRI .
+
+jfes:EvaluationEvidenceBundleShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:EvaluationEvidenceBundle ;
+  sh:node jfs:EvidenceShape ;
+  sh:property jfes:AdmittedFromRunProperty ;
+  sh:sparql jfes:EvidenceSupportOrContradictionConstraint .
+
+jfes:AdmittedFromRunProperty a sh:PropertyShape ; sh:path jfe:admittedFromRun ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationRun ; sh:nodeKind sh:IRI .
+
+jfes:RolloutDecisionShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:RolloutDecision ;
+  sh:node jfs:DecisionShape ;
+  sh:property jfes:DecisionAuthorityProperty,
+    jfes:AdmittedEvidenceProperty,
+    jfes:FromStageProperty,
+    jfes:ToStageProperty,
+    jfes:RolloutDispositionProperty,
+    jfes:GeneratedAtProperty .
+
+jfes:DecisionAuthorityProperty a sh:PropertyShape ; sh:path jf:decisionAuthority ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfes:AdmittedEvidenceProperty a sh:PropertyShape ; sh:path jfe:admittedEvidence ; sh:minCount 1 ; sh:class jf:EvidenceBundle ; sh:nodeKind sh:IRI .
+jfes:FromStageProperty a sh:PropertyShape ; sh:path jfe:fromStage ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:maxInclusive 6 .
+jfes:ToStageProperty a sh:PropertyShape ; sh:path jfe:toStage ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:maxInclusive 6 .
+jfes:RolloutDispositionProperty a sh:PropertyShape ; sh:path jfe:rolloutDisposition ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:RolloutDispositionValues01 .
+
+jfes:ProductionOutcomeShape
+  a sh:NodeShape ;
+  sh:targetClass jfe:ProductionOutcome ;
+  sh:property jfes:ObservedForProfileProperty,
+    jfes:DerivedFromDecisionProperty,
+    jfes:ProductionSignalProperty,
+    jfes:ObservedAtProperty .
+
+jfes:ObservedForProfileProperty a sh:PropertyShape ; sh:path jfe:observedForProfile ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:EvaluationProfile ; sh:nodeKind sh:IRI .
+jfes:DerivedFromDecisionProperty a sh:PropertyShape ; sh:path jfe:derivedFromDecision ; sh:minCount 1 ; sh:maxCount 1 ; sh:class jfe:RolloutDecision ; sh:nodeKind sh:IRI .
+jfes:ProductionSignalProperty a sh:PropertyShape ; sh:path jfe:productionSignal ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in jfes:ProductionSignalValues01 .
+
+# Closed controlled-value lists
+
+jfes:FindingSeverityValues01 rdf:first jfec:SeverityLow ; rdf:rest jfes:FindingSeverityValues02 .
+jfes:FindingSeverityValues02 rdf:first jfec:SeverityMedium ; rdf:rest jfes:FindingSeverityValues03 .
+jfes:FindingSeverityValues03 rdf:first jfec:SeverityHigh ; rdf:rest jfes:FindingSeverityValues04 .
+jfes:FindingSeverityValues04 rdf:first jfec:SeverityCritical ; rdf:rest rdf:nil .
+
+jfes:FindingMatchStateValues01 rdf:first jfec:FindingProposed ; rdf:rest jfes:FindingMatchStateValues02 .
+jfes:FindingMatchStateValues02 rdf:first jfec:FindingMatched ; rdf:rest jfes:FindingMatchStateValues03 .
+jfes:FindingMatchStateValues03 rdf:first jfec:FindingUnmatched ; rdf:rest jfes:FindingMatchStateValues04 .
+jfes:FindingMatchStateValues04 rdf:first jfec:FindingDuplicate ; rdf:rest jfes:FindingMatchStateValues05 .
+jfes:FindingMatchStateValues05 rdf:first jfec:FindingDisputed ; rdf:rest jfes:FindingMatchStateValues06 .
+jfes:FindingMatchStateValues06 rdf:first jfec:FindingAdjudicated ; rdf:rest rdf:nil .
+
+jfes:ClaimPolarityValues01 rdf:first jfec:PositivePolarity ; rdf:rest jfes:ClaimPolarityValues02 .
+jfes:ClaimPolarityValues02 rdf:first jfec:NegativePolarity ; rdf:rest jfes:ClaimPolarityValues03 .
+jfes:ClaimPolarityValues03 rdf:first jfec:UnknownPolarity ; rdf:rest rdf:nil .
+
+jfes:InferenceKindValues01 rdf:first jfec:DirectInference ; rdf:rest jfes:InferenceKindValues02 .
+jfes:InferenceKindValues02 rdf:first jfec:DerivedInference ; rdf:rest jfes:InferenceKindValues03 .
+jfes:InferenceKindValues03 rdf:first jfec:HypothesisInference ; rdf:rest jfes:InferenceKindValues04 .
+jfes:InferenceKindValues04 rdf:first jfec:RecommendationInference ; rdf:rest rdf:nil .
+
+jfes:AccessModeValues01 rdf:first jfec:HostApi ; rdf:rest jfes:AccessModeValues02 .
+jfes:AccessModeValues02 rdf:first jfec:HostSubscription ; rdf:rest jfes:AccessModeValues03 .
+jfes:AccessModeValues03 rdf:first jfec:DelegatedCli ; rdf:rest rdf:nil .
+
+jfes:AuthenticationKindValues01 rdf:first jfec:ApiKey ; rdf:rest jfes:AuthenticationKindValues02 .
+jfes:AuthenticationKindValues02 rdf:first jfec:OauthSubscription ; rdf:rest jfes:AuthenticationKindValues03 .
+jfes:AuthenticationKindValues03 rdf:first jfec:DelegatedLocal ; rdf:rest jfes:AuthenticationKindValues04 .
+jfes:AuthenticationKindValues04 rdf:first jfec:WorkloadIdentity ; rdf:rest rdf:nil .
+
+jfes:BillingModeValues01 rdf:first jfec:HostBilled ; rdf:rest jfes:BillingModeValues02 .
+jfes:BillingModeValues02 rdf:first jfec:Subscription ; rdf:rest jfes:BillingModeValues03 .
+jfes:BillingModeValues03 rdf:first jfec:LocalTrust ; rdf:rest jfes:BillingModeValues04 .
+jfes:BillingModeValues04 rdf:first jfec:ProviderBilled ; rdf:rest rdf:nil .
+
+jfes:TaskClassValues01 rdf:first jfec:BugTask ; rdf:rest jfes:TaskClassValues02 .
+jfes:TaskClassValues02 rdf:first jfec:FeatureTask ; rdf:rest jfes:TaskClassValues03 .
+jfes:TaskClassValues03 rdf:first jfec:RefactorTask ; rdf:rest jfes:TaskClassValues04 .
+jfes:TaskClassValues04 rdf:first jfec:TestTask ; rdf:rest jfes:TaskClassValues05 .
+jfes:TaskClassValues05 rdf:first jfec:MigrationTask ; rdf:rest jfes:TaskClassValues06 .
+jfes:TaskClassValues06 rdf:first jfec:DependencyTask ; rdf:rest jfes:TaskClassValues07 .
+jfes:TaskClassValues07 rdf:first jfec:RetrievalTask ; rdf:rest jfes:TaskClassValues08 .
+jfes:TaskClassValues08 rdf:first jfec:TerminalTask ; rdf:rest jfes:TaskClassValues09 .
+jfes:TaskClassValues09 rdf:first jfec:ShadowTask ; rdf:rest rdf:nil .
+
+jfes:RiskValues01 rdf:first jfec:RiskLow ; rdf:rest jfes:RiskValues02 .
+jfes:RiskValues02 rdf:first jfec:RiskMedium ; rdf:rest jfes:RiskValues03 .
+jfes:RiskValues03 rdf:first jfec:RiskHigh ; rdf:rest jfes:RiskValues04 .
+jfes:RiskValues04 rdf:first jfec:RiskCritical ; rdf:rest rdf:nil .
+
+jfes:PartitionValues01 rdf:first jfec:DevelopmentPartition ; rdf:rest jfes:PartitionValues02 .
+jfes:PartitionValues02 rdf:first jfec:ValidationPartition ; rdf:rest jfes:PartitionValues03 .
+jfes:PartitionValues03 rdf:first jfec:SealedPartition ; rdf:rest jfes:PartitionValues04 .
+jfes:PartitionValues04 rdf:first jfec:RedTeamPartition ; rdf:rest jfes:PartitionValues05 .
+jfes:PartitionValues05 rdf:first jfec:CanaryPartition ; rdf:rest jfes:PartitionValues06 .
+jfes:PartitionValues06 rdf:first jfec:ShadowPartition ; rdf:rest rdf:nil .
+
+jfes:ArtifactRoleValues01 rdf:first jfec:TaskInputArtifact ; rdf:rest jfes:ArtifactRoleValues02 .
+jfes:ArtifactRoleValues02 rdf:first jfec:HiddenOracleArtifact ; rdf:rest jfes:ArtifactRoleValues03 .
+jfes:ArtifactRoleValues03 rdf:first jfec:ReferencePatchArtifact ; rdf:rest jfes:ArtifactRoleValues04 .
+jfes:ArtifactRoleValues04 rdf:first jfec:CandidatePatchArtifact ; rdf:rest jfes:ArtifactRoleValues05 .
+jfes:ArtifactRoleValues05 rdf:first jfec:TrialTranscriptArtifact ; rdf:rest jfes:ArtifactRoleValues06 .
+jfes:ArtifactRoleValues06 rdf:first jfec:VerificationOutputArtifact ; rdf:rest rdf:nil .
+
+jfes:RunStatusValues01 rdf:first jfec:RunFrozen ; rdf:rest jfes:RunStatusValues02 .
+jfes:RunStatusValues02 rdf:first jfec:RunExecuting ; rdf:rest jfes:RunStatusValues03 .
+jfes:RunStatusValues03 rdf:first jfec:RunComplete ; rdf:rest jfes:RunStatusValues04 .
+jfes:RunStatusValues04 rdf:first jfec:RunIncomplete ; rdf:rest jfes:RunStatusValues05 .
+jfes:RunStatusValues05 rdf:first jfec:RunInvalidated ; rdf:rest rdf:nil .
+
+jfes:TrialStatusValues01 rdf:first jfec:TrialAssigned ; rdf:rest jfes:TrialStatusValues02 .
+jfes:TrialStatusValues02 rdf:first jfec:TrialRunning ; rdf:rest jfes:TrialStatusValues03 .
+jfes:TrialStatusValues03 rdf:first jfec:TrialComplete ; rdf:rest jfes:TrialStatusValues04 .
+jfes:TrialStatusValues04 rdf:first jfec:TrialIncomplete ; rdf:rest jfes:TrialStatusValues05 .
+jfes:TrialStatusValues05 rdf:first jfec:TrialInvalidated ; rdf:rest rdf:nil .
+
+jfes:TrialOutcomeValues01 rdf:first jfec:TrialCorrect ; rdf:rest jfes:TrialOutcomeValues02 .
+jfes:TrialOutcomeValues02 rdf:first jfec:TrialIncorrect ; rdf:rest jfes:TrialOutcomeValues03 .
+jfes:TrialOutcomeValues03 rdf:first jfec:TrialInconclusive ; rdf:rest jfes:TrialOutcomeValues04 .
+jfes:TrialOutcomeValues04 rdf:first jfec:TrialInfrastructureInvalid ; rdf:rest jfes:TrialOutcomeValues05 .
+jfes:TrialOutcomeValues05 rdf:first jfec:TrialUnsafe ; rdf:rest jfes:TrialOutcomeValues06 .
+jfes:TrialOutcomeValues06 rdf:first jfec:TrialTimedOut ; rdf:rest jfes:TrialOutcomeValues07 .
+jfes:TrialOutcomeValues07 rdf:first jfec:TrialMalformed ; rdf:rest rdf:nil .
+
+jfes:GradeVerdictValues01 rdf:first jfec:GradeCorrect ; rdf:rest jfes:GradeVerdictValues02 .
+jfes:GradeVerdictValues02 rdf:first jfec:GradeIncorrect ; rdf:rest jfes:GradeVerdictValues03 .
+jfes:GradeVerdictValues03 rdf:first jfec:GradeInconclusive ; rdf:rest rdf:nil .
+
+jfes:RolloutDispositionValues01 rdf:first jfec:Advance ; rdf:rest jfes:RolloutDispositionValues02 .
+jfes:RolloutDispositionValues02 rdf:first jfec:Hold ; rdf:rest jfes:RolloutDispositionValues03 .
+jfes:RolloutDispositionValues03 rdf:first jfec:Rollback ; rdf:rest jfes:RolloutDispositionValues04 .
+jfes:RolloutDispositionValues04 rdf:first jfec:Disable ; rdf:rest rdf:nil .
+
+jfes:ProductionSignalValues01 rdf:first jfec:PostPublicationCIPassed ; rdf:rest jfes:ProductionSignalValues02 .
+jfes:ProductionSignalValues02 rdf:first jfec:PostPublicationCIFailed ; rdf:rest jfes:ProductionSignalValues03 .
+jfes:ProductionSignalValues03 rdf:first jfec:Reverted ; rdf:rest jfes:ProductionSignalValues04 .
+jfes:ProductionSignalValues04 rdf:first jfec:Incident ; rdf:rest jfes:ProductionSignalValues05 .
+jfes:ProductionSignalValues05 rdf:first jfec:Regression ; rdf:rest jfes:ProductionSignalValues06 .
+jfes:ProductionSignalValues06 rdf:first jfec:HumanOverride ; rdf:rest rdf:nil .
+
+# Cross-resource authority constraints
+
+jfes:RunGraphStateConstraint
+  a sh:SPARQLConstraint ;
+  sh:message "An open evaluation-run graph must be building; a closed run must be complete or incomplete." ;
+  sh:select """
+    SELECT $this
+    WHERE {
+      $this <https://jido.run/ontology/factory#lifecycleState> ?lifecycle ;
+            <https://jido.run/ontology/factory#completenessState> ?completeness .
+      FILTER (
+        (?lifecycle = <https://jido.run/ontology/concept/Open> &&
+          ?completeness != <https://jido.run/ontology/concept/Building>) ||
+        (?lifecycle = <https://jido.run/ontology/concept/Closed> &&
+          ?completeness NOT IN (
+            <https://jido.run/ontology/concept/Complete>,
+            <https://jido.run/ontology/concept/Incomplete>
+          ))
+      )
+    }
+  """ .
+
+jfes:ReviewerPolicyConsistencyConstraint
+  a sh:SPARQLConstraint ;
+  sh:message "Reviewer policy must use either no resolver-backed reviewers or two blinded reviewers with a resolver." ;
+  sh:select """
+    SELECT $this
+    WHERE {
+      $this <https://jido.run/ontology/evaluation#independentReviewerCount> ?count ;
+            <https://jido.run/ontology/evaluation#blindedReviewRequired> ?blinded ;
+            <https://jido.run/ontology/evaluation#resolverRequired> ?resolver .
+      FILTER (
+        !(
+          (?count = 0 && ?resolver = false) ||
+          (?count = 2 && ?blinded = true && ?resolver = true)
+        )
+      )
+    }
+  """ .
+
+jfes:FindingLocationConstraint
+  a sh:SPARQLConstraint ;
+  sh:message "Review line coordinates must be paired, ordered, and attached to a file." ;
+  sh:select """
+    SELECT $this
+    WHERE {
+      OPTIONAL { $this <https://jido.run/ontology/evaluation#findingFile> ?file }
+      OPTIONAL { $this <https://jido.run/ontology/evaluation#findingStartLine> ?start }
+      OPTIONAL { $this <https://jido.run/ontology/evaluation#findingEndLine> ?end }
+      FILTER (
+        (BOUND(?start) != BOUND(?end)) ||
+        ((BOUND(?start) || BOUND(?end)) && !BOUND(?file)) ||
+        (BOUND(?start) && BOUND(?end) && ?end < ?start)
+      )
+    }
+  """ .
+
+jfes:CriticalFindingReproductionConstraint
+  a sh:SPARQLConstraint ;
+  sh:message "A critical review finding requires an executable reproduction artifact." ;
+  sh:select """
+    SELECT $this
+    WHERE {
+      $this <https://jido.run/ontology/evaluation#findingSeverity>
+        <https://jido.run/ontology/evaluation/concept/SeverityCritical> .
+      FILTER NOT EXISTS {
+        $this <https://jido.run/ontology/evaluation#reproductionArtifact> ?artifact .
+      }
+    }
+  """ .
+
+jfes:MetricBoundsConstraint
+  a sh:SPARQLConstraint ;
+  sh:message "Metric counts and confidence bounds must be paired and internally consistent." ;
+  sh:select """
+    SELECT $this
+    WHERE {
+      $this <https://jido.run/ontology/evaluation#metricValue> ?estimate .
+      OPTIONAL { $this <https://jido.run/ontology/evaluation#numerator> ?numerator }
+      OPTIONAL { $this <https://jido.run/ontology/evaluation#denominator> ?denominator }
+      OPTIONAL { $this <https://jido.run/ontology/evaluation#intervalLower> ?lower }
+      OPTIONAL { $this <https://jido.run/ontology/evaluation#intervalUpper> ?upper }
+      FILTER (
+        (BOUND(?numerator) != BOUND(?denominator)) ||
+        (BOUND(?numerator) && BOUND(?denominator) && ?numerator > ?denominator) ||
+        (BOUND(?lower) != BOUND(?upper)) ||
+        (BOUND(?lower) && BOUND(?upper) &&
+          (?lower > ?estimate || ?estimate > ?upper))
+      )
+    }
+  """ .
+
+jfes:NoMeasurementAuthorityConstraint
+  a sh:SPARQLConstraint ;
+  sh:message "Evaluation measurements cannot carry decision or transition authority." ;
+  sh:select """
+    SELECT $this
+    WHERE {
+      $this ?authorityPredicate ?value .
+      VALUES ?authorityPredicate {
+        <https://jido.run/ontology/factory#accepts>
+        <https://jido.run/ontology/factory#rejects>
+        <https://jido.run/ontology/factory#waives>
+        <https://jido.run/ontology/factory#transitionSubject>
+        <https://jido.run/ontology/evaluation#rolloutDisposition>
+      }
+    }
+  """ .
+
+jfes:EvidenceSupportOrContradictionConstraint
+  a sh:SPARQLConstraint ;
+  sh:message "An evaluation evidence bundle must support or contradict at least one resource." ;
+  sh:select """
+    SELECT $this
+    WHERE {
+      FILTER NOT EXISTS {
+        { $this <https://jido.run/ontology/factory#supports> ?resource }
+        UNION
+        { $this <https://jido.run/ontology/factory#contradicts> ?resource }
+      }
+    }
+  """ .

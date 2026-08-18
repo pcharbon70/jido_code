@@ -1,0 +1,796 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix jfe: <https://jido.run/ontology/evaluation#> .
+@prefix jfec: <https://jido.run/ontology/evaluation/concept/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/evaluation/1.0.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://jido.run/ontology/evaluation/1.0.0> ;
+  owl:versionInfo "1.0.0" ;
+  owl:imports <https://jido.run/ontology/factory/1.0.0> ,
+    <http://www.w3.org/ns/prov-o> ,
+    <http://www.w3.org/2004/02/skos/core> ,
+    <http://purl.org/dc/terms/> ;
+  dcterms:issued "2026-08-18"^^xsd:date ;
+  dcterms:title "Jido coding-agent evaluation graph ontology" ;
+  rdfs:comment "Candidate vocabulary for immutable evaluation definitions, closeable evaluation runs, admitted evidence, governed rollout decisions, and production outcomes. Importing this ontology does not register a graph family or grant write authority." .
+
+# Graph topology and registry contracts
+
+jfe:GraphFamilyContract a owl:Class ;
+  rdfs:subClassOf prov:Plan ;
+  rdfs:label "graph family contract" ;
+  rdfs:comment "Declarative proposal for a graph family. The executable GraphRegistry remains the authority after an explicit release." .
+
+jfe:GraphPlacementRule a owl:Class ;
+  rdfs:subClassOf prov:Plan ;
+  rdfs:label "graph placement rule" ;
+  rdfs:comment "Declares the candidate named-graph kinds in which a resource class may be asserted. Operational class placement remains an executable shape-catalog decision." .
+
+jfe:EvaluationCatalogGraph a owl:Class ;
+  rdfs:subClassOf jf:NamedGraph ;
+  rdfs:label "evaluation catalog graph" ;
+  rdfs:comment "An immutable graph containing one versioned release of evaluation definitions and protected-artifact references." .
+
+jfe:EvaluationRunGraph a owl:Class ;
+  rdfs:subClassOf jf:NamedGraph ;
+  rdfs:label "evaluation run graph" ;
+  rdfs:comment "A graph containing one frozen evaluation run and its trials; it is appendable while building and immutable after closure." .
+
+jfe:familyName a owl:DatatypeProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range xsd:string ;
+  rdfs:label "family name" .
+
+jfe:scopeKey a owl:DatatypeProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range xsd:string ;
+  rdfs:label "scope key" .
+
+jfe:graphIriTemplate a owl:DatatypeProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range xsd:string ;
+  rdfs:label "graph IRI template" .
+
+jfe:writerCapabilityName a owl:DatatypeProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range xsd:string ;
+  rdfs:label "writer capability name" .
+
+jfe:mutability a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range skos:Concept ;
+  rdfs:label "mutability" .
+
+jfe:defaultCompleteness a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range skos:Concept ;
+  rdfs:label "default completeness" .
+
+jfe:retentionPolicy a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range skos:Concept ;
+  rdfs:label "retention policy" .
+
+jfe:graphKindValue a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range skos:Concept ;
+  rdfs:label "graph kind value" .
+
+jfe:allowsLinkToGraphKind a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphFamilyContract ;
+  rdfs:range skos:Concept ;
+  rdfs:label "allows link to graph kind" .
+
+jfe:placedClass a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphPlacementRule ;
+  rdfs:range owl:Class ;
+  rdfs:label "placed class" .
+
+jfe:allowedGraphKind a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphPlacementRule ;
+  rdfs:range skos:Concept ;
+  rdfs:label "allowed graph kind" .
+
+jfe:canonicalGraphKind a owl:ObjectProperty ;
+  rdfs:domain jfe:GraphPlacementRule ;
+  rdfs:range skos:Concept ;
+  rdfs:label "canonical graph kind" .
+
+jfe:placementReason a owl:DatatypeProperty ;
+  rdfs:domain jfe:GraphPlacementRule ;
+  rdfs:range xsd:string ;
+  rdfs:label "placement reason" .
+
+jfe:catalogRevision a owl:DatatypeProperty ;
+  rdfs:domain jfe:EvaluationCatalogGraph ;
+  rdfs:range xsd:string ;
+  rdfs:label "catalog revision" .
+
+jfe:containsDefinition a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationCatalogGraph ;
+  rdfs:range jfe:EvaluationDefinition ;
+  rdfs:subPropertyOf prov:hadMember ;
+  rdfs:label "contains definition" .
+
+jfe:describesRun a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationRunGraph ;
+  rdfs:range jfe:EvaluationRun ;
+  rdfs:label "describes run" .
+
+jfe:EvaluationCatalogFamilyContract
+  a jfe:GraphFamilyContract ;
+  jfe:familyName "evaluation_catalog" ;
+  jfe:scopeKey "catalog" , "revision" ;
+  jfe:graphIriTemplate "evaluation/catalog/{catalog-token}/{revision-token}" ;
+  jfe:writerCapabilityName "evaluation_catalog_writer" ;
+  jfe:mutability jfec:Immutable ;
+  jfe:defaultCompleteness jfc:Complete ;
+  jfe:retentionPolicy jfec:EvaluationDefinitionHistory ;
+  jfe:graphKindValue jfec:EvaluationCatalogGraph ;
+  jfe:allowsLinkToGraphKind jfc:FactoryCatalogGraph ,
+    jfc:FactoryPolicyGraph ,
+    jfc:SourceGraph ;
+  rdfs:comment "One graph per catalog release, not one graph per profile, corpus, or task." .
+
+jfe:EvaluationRunFamilyContract
+  a jfe:GraphFamilyContract ;
+  jfe:familyName "evaluation_run" ;
+  jfe:scopeKey "run" ;
+  jfe:graphIriTemplate "evaluation/run/{run-token}" ;
+  jfe:writerCapabilityName "evaluation_run_writer" ;
+  jfe:mutability jfec:Closeable ;
+  jfe:defaultCompleteness jfc:Building ;
+  jfe:retentionPolicy jfec:EvaluationRunHistory ;
+  jfe:graphKindValue jfec:EvaluationRunGraph ;
+  jfe:allowsLinkToGraphKind jfec:EvaluationCatalogGraph ,
+    jfc:FactoryPolicyGraph ,
+    jfc:SourceGraph ,
+    jfc:RunGraph ;
+  rdfs:comment "One graph per frozen evaluation run; all trial resources for that run share the graph." .
+
+jfe:CatalogDefinitionPlacement
+  a jfe:GraphPlacementRule ;
+  jfe:placedClass jfe:EvaluationDefinition , jfe:ProtectedArtifactReference ;
+  jfe:allowedGraphKind jfec:EvaluationCatalogGraph ;
+  jfe:canonicalGraphKind jfec:EvaluationCatalogGraph ;
+  jfe:placementReason "Versioned definitions and protected references close atomically with their catalog release." .
+
+jfe:RunObservationPlacement
+  a jfe:GraphPlacementRule ;
+  jfe:placedClass jfe:EvaluationRun , jfe:EvaluationTrial , jfe:TrialObservation ;
+  jfe:allowedGraphKind jfec:EvaluationRunGraph ;
+  jfe:canonicalGraphKind jfec:EvaluationRunGraph ;
+  jfe:placementReason "Raw trial assignments and observations share the lifecycle of one closeable evaluation run." .
+
+jfe:ReviewAnalysisPlacement
+  a jfe:GraphPlacementRule ;
+  jfe:placedClass jfe:ReviewFinding , jfe:AnalysisClaim ;
+  jfe:allowedGraphKind jfec:EvaluationRunGraph , jfc:EvidenceGraph ;
+  jfe:canonicalGraphKind jfc:EvidenceGraph ;
+  jfe:placementReason "Agent proposals originate in the run; only admitted and provenance-complete findings or claims become evidence." .
+
+jfe:EvaluationEvidencePlacement
+  a jfe:GraphPlacementRule ;
+  jfe:placedClass jfe:GraderResult ,
+    jfe:HumanGrade ,
+    jfe:Adjudication ,
+    jfe:EvaluatorHealth ,
+    jfe:MetricObservation ,
+    jfe:AggregateResult ,
+    jfe:EvaluationEvidenceBundle ,
+    jfe:ProductionOutcome ;
+  jfe:allowedGraphKind jfc:EvidenceGraph ;
+  jfe:canonicalGraphKind jfc:EvidenceGraph ;
+  jfe:placementReason "Only admitted evaluation measurements and production outcomes belong to the authoritative evidence history." .
+
+jfe:RolloutDecisionPlacement
+  a jfe:GraphPlacementRule ;
+  jfe:placedClass jfe:RolloutDecision ;
+  jfe:allowedGraphKind jfc:EvidenceGraph ;
+  jfe:canonicalGraphKind jfc:EvidenceGraph ;
+  jfe:placementReason "The immutable decision and claim disposition live in evidence; accepted state transitions remain in repository control." .
+
+# Core evaluation resources
+
+jfe:EvaluationDefinition a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "evaluation definition" .
+
+jfe:EvaluationProfile a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition ;
+  rdfs:label "evaluation profile" ;
+  rdfs:comment "A revision-pinned target, corpus, oracle, rubric, slice, budget, and statistical contract." .
+
+jfe:EvaluationTarget a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition ;
+  rdfs:label "evaluation target" ;
+  rdfs:comment "The complete system-under-evaluation tuple rather than a model label alone." .
+
+jfe:CorpusRevision a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, prov:Collection ;
+  rdfs:label "corpus revision" .
+
+jfe:EvaluationTask a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, jf:Task ;
+  rdfs:label "evaluation task" .
+
+jfe:OracleRevision a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition ;
+  rdfs:label "oracle revision" .
+
+jfe:RubricRevision a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition ;
+  rdfs:label "rubric revision" .
+
+jfe:EvaluationPolicyRevision a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, prov:Plan ;
+  rdfs:label "evaluation policy revision" .
+
+jfe:VerifierPolicyRevision a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationPolicyRevision ;
+  rdfs:label "verifier policy revision" .
+
+jfe:ReviewerPolicy a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationPolicyRevision ;
+  rdfs:label "reviewer policy" .
+
+jfe:StatisticalPlan a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, prov:Plan ;
+  rdfs:label "statistical plan" .
+
+jfe:EvaluationSliceDefinition a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition ;
+  rdfs:label "evaluation slice definition" .
+
+jfe:EvaluationTrack a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, skos:Concept ;
+  rdfs:label "evaluation track" .
+
+jfe:MetricDefinition a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, skos:Concept ;
+  rdfs:label "metric definition" .
+
+jfe:ReviewFindingCategory a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, skos:Concept ;
+  rdfs:label "review finding category" .
+
+jfe:AnalysisClaimType a owl:Class ;
+  rdfs:subClassOf jfe:EvaluationDefinition, skos:Concept ;
+  rdfs:label "analysis claim type" .
+
+jfe:ProtectedArtifactReference a owl:Class ;
+  rdfs:subClassOf jf:Artifact ;
+  rdfs:label "protected artifact reference" ;
+  rdfs:comment "A capability-gated digest and policy reference. Hidden tests, expected patches, secrets, and oracle bytes are not graph literals." .
+
+jfe:EvaluationRun a owl:Class ;
+  rdfs:subClassOf prov:Activity ;
+  rdfs:label "evaluation run" ;
+  rdfs:comment "A frozen candidate, catalog, assignment, budget, and analysis protocol executed as one evaluation unit." .
+
+jfe:EvaluationTrial a owl:Class ;
+  rdfs:subClassOf prov:Activity ;
+  rdfs:label "evaluation trial" ;
+  rdfs:comment "One independent execution of one task under one profile; it is a resource inside an evaluation-run graph, not a named graph." .
+
+jfe:TrialObservation a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "trial observation" .
+
+jfe:Evaluator a owl:Class ;
+  rdfs:subClassOf prov:Agent ;
+  rdfs:label "evaluator" .
+
+jfe:Grader a owl:Class ;
+  rdfs:subClassOf jfe:Evaluator, prov:SoftwareAgent ;
+  rdfs:label "grader" .
+
+jfe:GraderResult a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "grader result" ;
+  rdfs:comment "A measurement that may be admitted as evidence; it cannot itself accept a claim or advance rollout." .
+
+jfe:ReviewFinding a owl:Class ;
+  rdfs:subClassOf jf:Finding ;
+  rdfs:label "review finding" .
+
+jfe:AnalysisClaim a owl:Class ;
+  rdfs:subClassOf jf:Claim ;
+  rdfs:label "analysis claim" .
+
+jfe:HumanGrade a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "human grade" .
+
+jfe:Adjudication a owl:Class ;
+  rdfs:subClassOf prov:Activity ;
+  rdfs:label "adjudication" .
+
+jfe:EvaluatorHealth a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "evaluator health" .
+
+jfe:MetricObservation a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "metric observation" .
+
+jfe:AggregateResult a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "aggregate result" ;
+  rdfs:comment "A reproducible aggregate with an immutable inclusion set and exact contributing trials." .
+
+jfe:EvaluationEvidenceBundle a owl:Class ;
+  rdfs:subClassOf jf:EvidenceBundle ;
+  rdfs:label "evaluation evidence bundle" .
+
+jfe:RolloutDecision a owl:Class ;
+  rdfs:subClassOf jf:Decision ;
+  rdfs:label "rollout decision" ;
+  rdfs:comment "A governed decision that considers admitted evidence. Evaluation results do not instantiate this decision implicitly." .
+
+jfe:ProductionOutcome a owl:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "production outcome" .
+
+# Definition and target relationships
+
+jfe:revision a owl:DatatypeProperty ;
+  rdfs:range xsd:string ;
+  rdfs:label "revision" .
+
+jfe:track a owl:ObjectProperty ;
+  rdfs:range jfe:EvaluationTrack ;
+  rdfs:label "evaluation track" .
+
+jfe:usesProfile a owl:ObjectProperty ;
+  rdfs:range jfe:EvaluationProfile ;
+  rdfs:label "uses profile" .
+
+jfe:usesTarget a owl:ObjectProperty ;
+  rdfs:range jfe:EvaluationTarget ;
+  rdfs:label "uses target" .
+
+jfe:usesCorpus a owl:ObjectProperty ;
+  rdfs:range jfe:CorpusRevision ;
+  rdfs:label "uses corpus" .
+
+jfe:usesOracle a owl:ObjectProperty ;
+  rdfs:range jfe:OracleRevision ;
+  rdfs:label "uses oracle" .
+
+jfe:usesRubric a owl:ObjectProperty ;
+  rdfs:range jfe:RubricRevision ;
+  rdfs:label "uses rubric" .
+
+jfe:usesVerifierPolicy a owl:ObjectProperty ;
+  rdfs:range jfe:VerifierPolicyRevision ;
+  rdfs:label "uses verifier policy" .
+
+jfe:usesReviewerPolicy a owl:ObjectProperty ;
+  rdfs:range jfe:ReviewerPolicy ;
+  rdfs:label "uses reviewer policy" .
+
+jfe:usesStatisticalPlan a owl:ObjectProperty ;
+  rdfs:range jfe:StatisticalPlan ;
+  rdfs:label "uses statistical plan" .
+
+jfe:requiresSlice a owl:ObjectProperty ;
+  rdfs:range jfe:EvaluationSliceDefinition ;
+  rdfs:label "requires slice" .
+
+jfe:acceptanceStage a owl:DatatypeProperty ;
+  rdfs:domain jfe:EvaluationProfile ;
+  rdfs:range xsd:nonNegativeInteger ;
+  rdfs:label "acceptance stage" .
+
+jfe:trialsPerTask a owl:DatatypeProperty ;
+  rdfs:domain jfe:EvaluationProfile ;
+  rdfs:range xsd:positiveInteger ;
+  rdfs:label "trials per task" .
+
+jfe:independentReviewerCount a owl:DatatypeProperty ;
+  rdfs:domain jfe:ReviewerPolicy ;
+  rdfs:range xsd:nonNegativeInteger ;
+  rdfs:label "independent reviewer count" .
+
+jfe:blindedReviewRequired a owl:DatatypeProperty ;
+  rdfs:domain jfe:ReviewerPolicy ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "blinded review required" .
+
+jfe:resolverRequired a owl:DatatypeProperty ;
+  rdfs:domain jfe:ReviewerPolicy ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "resolver required" .
+
+jfe:disagreementProcedureRevision a owl:DatatypeProperty ;
+  rdfs:domain jfe:ReviewerPolicy ;
+  rdfs:range xsd:string ;
+  rdfs:label "disagreement procedure revision" .
+
+jfe:binaryIntervalMethod a owl:ObjectProperty ;
+  rdfs:domain jfe:StatisticalPlan ;
+  rdfs:range skos:Concept ;
+  rdfs:label "binary interval method" .
+
+jfe:continuousIntervalMethod a owl:ObjectProperty ;
+  rdfs:domain jfe:StatisticalPlan ;
+  rdfs:range skos:Concept ;
+  rdfs:label "continuous interval method" .
+
+jfe:bootstrapRevision a owl:DatatypeProperty ;
+  rdfs:domain jfe:StatisticalPlan ;
+  rdfs:range xsd:string ;
+  rdfs:label "bootstrap revision" .
+
+jfe:stratifiesBy a owl:ObjectProperty ;
+  rdfs:domain jfe:StatisticalPlan ;
+  rdfs:range jfe:EvaluationSliceDefinition ;
+  rdfs:label "stratifies by" .
+
+jfe:productRevision a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "product revision" .
+jfe:modelProvider a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "model provider" .
+jfe:modelIdentifier a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "model identifier" .
+jfe:modelSnapshot a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "model snapshot" .
+jfe:inferenceParametersDigest a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "inference parameters digest" .
+jfe:accessMode a owl:ObjectProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range skos:Concept ; rdfs:label "access mode" .
+jfe:authenticationKind a owl:ObjectProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range skos:Concept ; rdfs:label "authentication kind" .
+jfe:billingMode a owl:ObjectProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range skos:Concept ; rdfs:label "billing mode" .
+jfe:accessProfileRevision a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "access profile revision" .
+jfe:adapterRevisionsDigest a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "adapter revisions digest" .
+jfe:cliVersion a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "CLI version" .
+jfe:harnessProfileRevision a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "harness profile revision" .
+jfe:toolVersionsDigest a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "tool versions digest" .
+jfe:sandboxDigest a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "sandbox digest" .
+jfe:contextPolicyRevision a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "context policy revision" .
+jfe:memoryPolicyRevision a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "memory policy revision" .
+jfe:verifierRevision a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTarget ; rdfs:range xsd:string ; rdfs:label "verifier revision" .
+jfe:graderRevision a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "grader revision" .
+
+jfe:containsTask a owl:ObjectProperty ;
+  rdfs:domain jfe:CorpusRevision ;
+  rdfs:range jfe:EvaluationTask ;
+  rdfs:subPropertyOf prov:hadMember ;
+  rdfs:label "contains task" .
+
+jfe:taskRepository a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationTask ;
+  rdfs:range jf:SoftwareRepository ;
+  rdfs:label "task repository" .
+
+jfe:sourceRevisionGraph a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationTask ;
+  rdfs:range jf:NamedGraph ;
+  rdfs:label "source revision graph" .
+
+jfe:taskClass a owl:ObjectProperty ; rdfs:domain jfe:EvaluationTask ; rdfs:range skos:Concept ; rdfs:label "task class" .
+jfe:taskRisk a owl:ObjectProperty ; rdfs:domain jfe:EvaluationTask ; rdfs:range skos:Concept ; rdfs:label "task risk" .
+jfe:taskPartition a owl:ObjectProperty ; rdfs:domain jfe:EvaluationTask ; rdfs:range skos:Concept ; rdfs:label "task partition" .
+jfe:freshPrivate a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTask ; rdfs:range xsd:boolean ; rdfs:label "fresh and private" .
+jfe:taskManifestDigest a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationTask ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "task manifest digest" .
+
+jfe:protectedArtifact a owl:ObjectProperty ;
+  rdfs:range jfe:ProtectedArtifactReference ;
+  rdfs:label "protected artifact" .
+
+jfe:artifactRole a owl:ObjectProperty ;
+  rdfs:domain jfe:ProtectedArtifactReference ;
+  rdfs:range skos:Concept ;
+  rdfs:label "artifact role" .
+
+jfe:accessPolicyRevision a owl:DatatypeProperty ;
+  rdfs:domain jfe:ProtectedArtifactReference ;
+  rdfs:range xsd:string ;
+  rdfs:label "access policy revision" .
+
+# Run, trial, grading, and aggregation relationships
+
+jfe:assignedTrial a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationRun ;
+  rdfs:range jfe:EvaluationTrial ;
+  rdfs:label "assigned trial" .
+
+jfe:runStatus a owl:ObjectProperty ; rdfs:domain jfe:EvaluationRun ; rdfs:range skos:Concept ; rdfs:label "run status" .
+jfe:frozenAt a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationRun ; rdfs:range xsd:dateTime ; rdfs:label "frozen at" .
+jfe:providerSeedControl a owl:DatatypeProperty ; rdfs:domain jfe:EvaluationRun ; rdfs:range xsd:boolean ; rdfs:label "provider seed control" .
+
+jfe:inEvaluationRun a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationTrial ;
+  rdfs:range jfe:EvaluationRun ;
+  rdfs:label "in evaluation run" .
+
+jfe:evaluatesTask a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationTrial ;
+  rdfs:range jfe:EvaluationTask ;
+  rdfs:label "evaluates task" .
+
+jfe:independentRunIndex a owl:DatatypeProperty ;
+  rdfs:domain jfe:EvaluationTrial ;
+  rdfs:range xsd:positiveInteger ;
+  rdfs:label "independent run index" .
+
+jfe:trialStatus a owl:ObjectProperty ; rdfs:domain jfe:EvaluationTrial ; rdfs:range skos:Concept ; rdfs:label "trial status" .
+
+jfe:executionAttempt a owl:ObjectProperty ;
+  rdfs:domain jfe:EvaluationTrial ;
+  rdfs:range jf:ExecutionAttempt ;
+  rdfs:label "execution attempt" .
+
+jfe:ofTrial a owl:ObjectProperty ;
+  rdfs:domain jfe:TrialObservation ;
+  rdfs:range jfe:EvaluationTrial ;
+  rdfs:label "of trial" .
+
+jfe:outcome a owl:ObjectProperty ; rdfs:domain jfe:TrialObservation ; rdfs:range skos:Concept ; rdfs:label "outcome" .
+jfe:observedAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime ; rdfs:label "observed at" .
+jfe:provenanceComplete a owl:DatatypeProperty ; rdfs:domain jfe:TrialObservation ; rdfs:range xsd:boolean ; rdfs:label "provenance complete" .
+jfe:eligibleAsEvidence a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "eligible as evidence" .
+jfe:outcomeReason a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "outcome reason" .
+jfe:referencesArtifact a owl:ObjectProperty ; rdfs:range jf:Artifact ; rdfs:label "references artifact" .
+
+jfe:gradesTrial a owl:ObjectProperty ; rdfs:range jfe:EvaluationTrial ; rdfs:label "grades trial" .
+jfe:usesGrader a owl:ObjectProperty ; rdfs:range jfe:Grader ; rdfs:label "uses grader" .
+jfe:gradedArtifact a owl:ObjectProperty ; rdfs:range jf:Artifact ; rdfs:label "graded artifact" .
+jfe:resultStatus a owl:ObjectProperty ; rdfs:range skos:Concept ; rdfs:label "result status" .
+jfe:inputDigest a owl:DatatypeProperty ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "input digest" .
+jfe:outputDigest a owl:DatatypeProperty ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "output digest" .
+
+jfe:reviewer a owl:ObjectProperty ; rdfs:range jf:Actor ; rdfs:label "reviewer" .
+jfe:blinded a owl:DatatypeProperty ; rdfs:domain jfe:HumanGrade ; rdfs:range xsd:boolean ; rdfs:label "blinded" .
+
+jfe:reportedInTrial a owl:ObjectProperty ; rdfs:range jfe:EvaluationTrial ; rdfs:label "reported in trial" .
+jfe:evaluatedSourceRevisionGraph a owl:ObjectProperty ; rdfs:range jf:NamedGraph ; rdfs:label "evaluated source revision graph" .
+jfe:findingFile a owl:DatatypeProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range xsd:string ; rdfs:label "finding file" .
+jfe:findingStartLine a owl:DatatypeProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range xsd:positiveInteger ; rdfs:label "finding start line" .
+jfe:findingEndLine a owl:DatatypeProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range xsd:positiveInteger ; rdfs:label "finding end line" .
+jfe:findingCategory a owl:ObjectProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range jfe:ReviewFindingCategory ; rdfs:label "finding category" .
+jfe:findingSeverity a owl:ObjectProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range skos:Concept ; rdfs:label "finding severity" .
+jfe:claimText a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "claim text" .
+jfe:precondition a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "precondition" .
+jfe:impact a owl:DatatypeProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range xsd:string ; rdfs:label "impact" .
+jfe:evidenceReference a owl:ObjectProperty ; rdfs:range prov:Entity ; rdfs:label "evidence reference" .
+jfe:reproductionArtifact a owl:ObjectProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range jf:Artifact ; rdfs:label "reproduction artifact" .
+jfe:remediation a owl:DatatypeProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range xsd:string ; rdfs:label "remediation" .
+jfe:abstentionReason a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "abstention reason" .
+jfe:relatedFinding a owl:ObjectProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range jfe:ReviewFinding ; rdfs:label "related finding" .
+jfe:matchState a owl:ObjectProperty ; rdfs:domain jfe:ReviewFinding ; rdfs:range skos:Concept ; rdfs:label "match state" .
+
+jfe:claimType a owl:ObjectProperty ; rdfs:domain jfe:AnalysisClaim ; rdfs:range jfe:AnalysisClaimType ; rdfs:label "claim type" .
+jfe:polarity a owl:ObjectProperty ; rdfs:domain jfe:AnalysisClaim ; rdfs:range skos:Concept ; rdfs:label "polarity" .
+jfe:inferenceKind a owl:ObjectProperty ; rdfs:domain jfe:AnalysisClaim ; rdfs:range skos:Concept ; rdfs:label "inference kind" .
+jfe:temporalScope a owl:DatatypeProperty ; rdfs:domain jfe:AnalysisClaim ; rdfs:range xsd:string ; rdfs:label "temporal scope" .
+jfe:contradictingEvidenceReference a owl:ObjectProperty ; rdfs:domain jfe:AnalysisClaim ; rdfs:range prov:Entity ; rdfs:label "contradicting evidence reference" .
+jfe:relatedClaim a owl:ObjectProperty ; rdfs:domain jfe:AnalysisClaim ; rdfs:range jfe:AnalysisClaim ; rdfs:label "related claim" .
+
+jfe:adjudicatesTrial a owl:ObjectProperty ; rdfs:domain jfe:Adjudication ; rdfs:range jfe:EvaluationTrial ; rdfs:label "adjudicates trial" .
+jfe:consideredResult a owl:ObjectProperty ; rdfs:domain jfe:Adjudication ; rdfs:range prov:Entity ; rdfs:label "considered result" .
+jfe:adjudicationVerdict a owl:ObjectProperty ; rdfs:domain jfe:Adjudication ; rdfs:range skos:Concept ; rdfs:label "adjudication verdict" .
+
+jfe:measuresEvaluator a owl:ObjectProperty ; rdfs:domain jfe:EvaluatorHealth ; rdfs:range jfe:Evaluator ; rdfs:label "measures evaluator" .
+jfe:containsMetric a owl:ObjectProperty ; rdfs:range jfe:MetricObservation ; rdfs:label "contains metric" .
+jfe:metric a owl:ObjectProperty ; rdfs:domain jfe:MetricObservation ; rdfs:range jfe:MetricDefinition ; rdfs:label "metric" .
+jfe:metricValue a owl:DatatypeProperty ; rdfs:domain jfe:MetricObservation ; rdfs:range xsd:decimal ; rdfs:label "metric value" .
+jfe:numerator a owl:DatatypeProperty ; rdfs:domain jfe:MetricObservation ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "numerator" .
+jfe:denominator a owl:DatatypeProperty ; rdfs:domain jfe:MetricObservation ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "denominator" .
+jfe:intervalLower a owl:DatatypeProperty ; rdfs:domain jfe:MetricObservation ; rdfs:range xsd:decimal ; rdfs:label "interval lower bound" .
+jfe:intervalUpper a owl:DatatypeProperty ; rdfs:domain jfe:MetricObservation ; rdfs:range xsd:decimal ; rdfs:label "interval upper bound" .
+jfe:slice a owl:ObjectProperty ; rdfs:domain jfe:MetricObservation ; rdfs:range jfe:EvaluationSliceDefinition ; rdfs:label "slice" .
+
+jfe:aggregatesRun a owl:ObjectProperty ; rdfs:domain jfe:AggregateResult ; rdfs:range jfe:EvaluationRun ; rdfs:label "aggregates run" .
+jfe:includesTrial a owl:ObjectProperty ; rdfs:domain jfe:AggregateResult ; rdfs:range jfe:EvaluationTrial ; rdfs:label "includes trial" .
+jfe:analysisRevision a owl:DatatypeProperty ; rdfs:domain jfe:AggregateResult ; rdfs:range xsd:string ; rdfs:label "analysis revision" .
+jfe:frozenInclusionDigest a owl:DatatypeProperty ; rdfs:domain jfe:AggregateResult ; rdfs:subPropertyOf jf:contentDigest ; rdfs:range xsd:string ; rdfs:label "frozen inclusion digest" .
+
+jfe:admittedFromRun a owl:ObjectProperty ; rdfs:domain jfe:EvaluationEvidenceBundle ; rdfs:range jfe:EvaluationRun ; rdfs:label "admitted from run" .
+jfe:admittedEvidence a owl:ObjectProperty ; rdfs:domain jfe:RolloutDecision ; rdfs:range jf:EvidenceBundle ; rdfs:label "admitted evidence" .
+jfe:fromStage a owl:DatatypeProperty ; rdfs:domain jfe:RolloutDecision ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "from stage" .
+jfe:toStage a owl:DatatypeProperty ; rdfs:domain jfe:RolloutDecision ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "to stage" .
+jfe:rolloutDisposition a owl:ObjectProperty ; rdfs:domain jfe:RolloutDecision ; rdfs:range skos:Concept ; rdfs:label "rollout disposition" .
+
+jfe:observedForProfile a owl:ObjectProperty ; rdfs:domain jfe:ProductionOutcome ; rdfs:range jfe:EvaluationProfile ; rdfs:label "observed for profile" .
+jfe:derivedFromDecision a owl:ObjectProperty ; rdfs:domain jfe:ProductionOutcome ; rdfs:range jfe:RolloutDecision ; rdfs:subPropertyOf prov:wasDerivedFrom ; rdfs:label "derived from decision" .
+jfe:productionSignal a owl:ObjectProperty ; rdfs:domain jfe:ProductionOutcome ; rdfs:range skos:Concept ; rdfs:label "production signal" .
+jfe:createsRegressionTask a owl:ObjectProperty ; rdfs:domain jfe:ProductionOutcome ; rdfs:range jfe:EvaluationTask ; rdfs:label "creates regression task" .
+
+# Controlled concepts
+
+jfec:EvaluationGraphKindScheme a skos:ConceptScheme ; skos:prefLabel "evaluation graph kind" .
+jfec:EvaluationCatalogGraph a skos:Concept ; skos:inScheme jfec:EvaluationGraphKindScheme ; skos:broader jfc:FactoryCatalogGraph ; skos:prefLabel "evaluation catalog" .
+jfec:EvaluationRunGraph a skos:Concept ; skos:inScheme jfec:EvaluationGraphKindScheme ; skos:broader jfc:RunGraph ; skos:prefLabel "evaluation run" .
+
+jfec:GraphMutabilityScheme a skos:ConceptScheme ; skos:prefLabel "graph mutability" .
+jfec:Immutable a skos:Concept ; skos:inScheme jfec:GraphMutabilityScheme ; skos:prefLabel "immutable" .
+jfec:Closeable a skos:Concept ; skos:inScheme jfec:GraphMutabilityScheme ; skos:prefLabel "closeable" .
+
+jfec:EvaluationRetentionScheme a skos:ConceptScheme ; skos:prefLabel "evaluation retention" .
+jfec:EvaluationDefinitionHistory a skos:Concept ; skos:inScheme jfec:EvaluationRetentionScheme ; skos:prefLabel "evaluation definition history" .
+jfec:EvaluationRunHistory a skos:Concept ; skos:inScheme jfec:EvaluationRetentionScheme ; skos:prefLabel "evaluation run history" .
+
+jfec:EvaluationTrackScheme a skos:ConceptScheme ; skos:prefLabel "evaluation track" .
+jfec:H7Contract a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-CONTRACT" ; skos:prefLabel "contract" .
+jfec:H7Edit a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-EDIT" ; skos:prefLabel "editing" .
+jfec:H7Retrieve a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-RETRIEVE" ; skos:prefLabel "retrieval" .
+jfec:H7Review a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-REVIEW" ; skos:prefLabel "review" .
+jfec:H7Analyze a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-ANALYZE" ; skos:prefLabel "analysis" .
+jfec:H7Oracle a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-ORACLE" ; skos:prefLabel "oracle" .
+jfec:H7Security a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-SECURITY" ; skos:prefLabel "security" .
+jfec:H7Reliability a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-RELIABILITY" ; skos:prefLabel "reliability" .
+jfec:H7Interop a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-INTEROP" ; skos:prefLabel "interoperability" .
+jfec:H7Shadow a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "H7-SHADOW" ; skos:prefLabel "shadow and pilot" .
+
+jfec:AccessProfileConformance a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "access_profile_conformance" ; skos:prefLabel "access profile conformance" .
+jfec:ReqLlmProviderContract a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "req_llm_provider_contract" ; skos:prefLabel "ReqLLM provider contract" .
+jfec:JidoHarnessCliContract a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "jido_harness_cli_contract" ; skos:prefLabel "JidoHarness CLI contract" .
+jfec:HarnessConformance a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "harness_conformance" ; skos:prefLabel "harness conformance" .
+jfec:EditingReliability a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "editing_reliability" ; skos:prefLabel "editing reliability" .
+jfec:Retrieval a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "retrieval" ; skos:prefLabel "retrieval" .
+jfec:SweBenchVerified a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "swe_bench_verified" ; skos:prefLabel "SWE-bench Verified" .
+jfec:FreshPrivateIssues a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "fresh_private_issues" ; skos:prefLabel "fresh private issues" .
+jfec:TerminalWorkload a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "terminal_workload" ; skos:prefLabel "terminal workload" .
+jfec:FlakyTest a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "flaky_test" ; skos:prefLabel "flaky test" .
+jfec:ProductionShadow a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "production_shadow" ; skos:prefLabel "production shadow" .
+jfec:PullRequestPilot a jfe:EvaluationTrack ; skos:inScheme jfec:EvaluationTrackScheme ; skos:notation "pull_request_pilot" ; skos:prefLabel "pull request pilot" .
+
+jfec:TargetAccessModeScheme a skos:ConceptScheme ; skos:prefLabel "evaluation target access mode" .
+jfec:HostApi a skos:Concept ; skos:inScheme jfec:TargetAccessModeScheme ; skos:prefLabel "host API" .
+jfec:HostSubscription a skos:Concept ; skos:inScheme jfec:TargetAccessModeScheme ; skos:prefLabel "host subscription" .
+jfec:DelegatedCli a skos:Concept ; skos:inScheme jfec:TargetAccessModeScheme ; skos:prefLabel "delegated CLI" .
+
+jfec:AuthenticationKindScheme a skos:ConceptScheme ; skos:prefLabel "evaluation authentication kind" .
+jfec:ApiKey a skos:Concept ; skos:inScheme jfec:AuthenticationKindScheme ; skos:prefLabel "API key" .
+jfec:OauthSubscription a skos:Concept ; skos:inScheme jfec:AuthenticationKindScheme ; skos:prefLabel "OAuth subscription" .
+jfec:DelegatedLocal a skos:Concept ; skos:inScheme jfec:AuthenticationKindScheme ; skos:prefLabel "delegated local" .
+jfec:WorkloadIdentity a skos:Concept ; skos:inScheme jfec:AuthenticationKindScheme ; skos:prefLabel "workload identity" .
+
+jfec:BillingModeScheme a skos:ConceptScheme ; skos:prefLabel "evaluation billing mode" .
+jfec:HostBilled a skos:Concept ; skos:inScheme jfec:BillingModeScheme ; skos:prefLabel "host billed" .
+jfec:Subscription a skos:Concept ; skos:inScheme jfec:BillingModeScheme ; skos:prefLabel "subscription" .
+jfec:LocalTrust a skos:Concept ; skos:inScheme jfec:BillingModeScheme ; skos:prefLabel "local trust" .
+jfec:ProviderBilled a skos:Concept ; skos:inScheme jfec:BillingModeScheme ; skos:prefLabel "provider billed" .
+
+jfec:EvaluationTaskClassScheme a skos:ConceptScheme ; skos:prefLabel "evaluation task class" .
+jfec:BugTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "bug" .
+jfec:FeatureTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "feature" .
+jfec:RefactorTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "refactor" .
+jfec:TestTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "test" .
+jfec:MigrationTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "migration" .
+jfec:DependencyTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "dependency" .
+jfec:RetrievalTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "retrieval" .
+jfec:TerminalTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "terminal" .
+jfec:ShadowTask a skos:Concept ; skos:inScheme jfec:EvaluationTaskClassScheme ; skos:prefLabel "shadow" .
+
+jfec:EvaluationRiskScheme a skos:ConceptScheme ; skos:prefLabel "evaluation risk" .
+jfec:RiskLow a skos:Concept ; skos:inScheme jfec:EvaluationRiskScheme ; skos:prefLabel "low" .
+jfec:RiskMedium a skos:Concept ; skos:inScheme jfec:EvaluationRiskScheme ; skos:prefLabel "medium" .
+jfec:RiskHigh a skos:Concept ; skos:inScheme jfec:EvaluationRiskScheme ; skos:prefLabel "high" .
+jfec:RiskCritical a skos:Concept ; skos:inScheme jfec:EvaluationRiskScheme ; skos:prefLabel "critical" .
+
+jfec:CorpusPartitionScheme a skos:ConceptScheme ; skos:prefLabel "corpus partition" .
+jfec:DevelopmentPartition a skos:Concept ; skos:inScheme jfec:CorpusPartitionScheme ; skos:prefLabel "development" .
+jfec:ValidationPartition a skos:Concept ; skos:inScheme jfec:CorpusPartitionScheme ; skos:prefLabel "validation" .
+jfec:SealedPartition a skos:Concept ; skos:inScheme jfec:CorpusPartitionScheme ; skos:prefLabel "sealed" .
+jfec:RedTeamPartition a skos:Concept ; skos:inScheme jfec:CorpusPartitionScheme ; skos:prefLabel "red team" .
+jfec:CanaryPartition a skos:Concept ; skos:inScheme jfec:CorpusPartitionScheme ; skos:prefLabel "canary" .
+jfec:ShadowPartition a skos:Concept ; skos:inScheme jfec:CorpusPartitionScheme ; skos:prefLabel "shadow" .
+
+jfec:EvaluationRunStatusScheme a skos:ConceptScheme ; skos:prefLabel "evaluation run status" .
+jfec:RunFrozen a skos:Concept ; skos:inScheme jfec:EvaluationRunStatusScheme ; skos:prefLabel "frozen" .
+jfec:RunExecuting a skos:Concept ; skos:inScheme jfec:EvaluationRunStatusScheme ; skos:prefLabel "executing" .
+jfec:RunComplete a skos:Concept ; skos:inScheme jfec:EvaluationRunStatusScheme ; skos:prefLabel "complete" .
+jfec:RunIncomplete a skos:Concept ; skos:inScheme jfec:EvaluationRunStatusScheme ; skos:prefLabel "incomplete" .
+jfec:RunInvalidated a skos:Concept ; skos:inScheme jfec:EvaluationRunStatusScheme ; skos:prefLabel "invalidated" .
+
+jfec:EvaluationTrialStatusScheme a skos:ConceptScheme ; skos:prefLabel "evaluation trial status" .
+jfec:TrialAssigned a skos:Concept ; skos:inScheme jfec:EvaluationTrialStatusScheme ; skos:prefLabel "assigned" .
+jfec:TrialRunning a skos:Concept ; skos:inScheme jfec:EvaluationTrialStatusScheme ; skos:prefLabel "running" .
+jfec:TrialComplete a skos:Concept ; skos:inScheme jfec:EvaluationTrialStatusScheme ; skos:prefLabel "complete" .
+jfec:TrialIncomplete a skos:Concept ; skos:inScheme jfec:EvaluationTrialStatusScheme ; skos:prefLabel "incomplete" .
+jfec:TrialInvalidated a skos:Concept ; skos:inScheme jfec:EvaluationTrialStatusScheme ; skos:prefLabel "invalidated" .
+
+jfec:TrialOutcomeScheme a skos:ConceptScheme ; skos:prefLabel "evaluation trial outcome" .
+jfec:TrialCorrect a skos:Concept ; skos:inScheme jfec:TrialOutcomeScheme ; skos:prefLabel "correct" .
+jfec:TrialIncorrect a skos:Concept ; skos:inScheme jfec:TrialOutcomeScheme ; skos:prefLabel "incorrect" .
+jfec:TrialInconclusive a skos:Concept ; skos:inScheme jfec:TrialOutcomeScheme ; skos:prefLabel "inconclusive" .
+jfec:TrialInfrastructureInvalid a skos:Concept ; skos:inScheme jfec:TrialOutcomeScheme ; skos:prefLabel "infrastructure invalid" .
+jfec:TrialUnsafe a skos:Concept ; skos:inScheme jfec:TrialOutcomeScheme ; skos:prefLabel "unsafe" .
+jfec:TrialTimedOut a skos:Concept ; skos:inScheme jfec:TrialOutcomeScheme ; skos:prefLabel "timed out" .
+jfec:TrialMalformed a skos:Concept ; skos:inScheme jfec:TrialOutcomeScheme ; skos:prefLabel "malformed" .
+
+jfec:GradeVerdictScheme a skos:ConceptScheme ; skos:prefLabel "grade verdict" .
+jfec:GradeCorrect a skos:Concept ; skos:inScheme jfec:GradeVerdictScheme ; skos:prefLabel "correct" .
+jfec:GradeIncorrect a skos:Concept ; skos:inScheme jfec:GradeVerdictScheme ; skos:prefLabel "incorrect" .
+jfec:GradeInconclusive a skos:Concept ; skos:inScheme jfec:GradeVerdictScheme ; skos:prefLabel "inconclusive" .
+
+jfec:ReviewFindingCategoryScheme a skos:ConceptScheme ; skos:prefLabel "review finding category" .
+jfec:LocalLogicFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "local logic" .
+jfec:CrossFileContractFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "cross-file contract" .
+jfec:ConcurrencyFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "concurrency and OTP" .
+jfec:SecurityAuthorityFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "security and authority" .
+jfec:DataMigrationFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "data and migration" .
+jfec:PerformanceResourceFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "performance and resource" .
+jfec:PhoenixLiveViewFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "Phoenix and LiveView" .
+jfec:TestQualityFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "test quality" .
+jfec:RequirementFitFinding a jfe:ReviewFindingCategory ; skos:inScheme jfec:ReviewFindingCategoryScheme ; skos:prefLabel "requirement fit" .
+
+jfec:ReviewSeverityScheme a skos:ConceptScheme ; skos:prefLabel "review finding severity" .
+jfec:SeverityLow a skos:Concept ; skos:inScheme jfec:ReviewSeverityScheme ; skos:prefLabel "low" .
+jfec:SeverityMedium a skos:Concept ; skos:inScheme jfec:ReviewSeverityScheme ; skos:prefLabel "medium" .
+jfec:SeverityHigh a skos:Concept ; skos:inScheme jfec:ReviewSeverityScheme ; skos:prefLabel "high" .
+jfec:SeverityCritical a skos:Concept ; skos:inScheme jfec:ReviewSeverityScheme ; skos:prefLabel "critical" .
+
+jfec:FindingMatchStateScheme a skos:ConceptScheme ; skos:prefLabel "review finding match state" .
+jfec:FindingProposed a skos:Concept ; skos:inScheme jfec:FindingMatchStateScheme ; skos:prefLabel "proposed" .
+jfec:FindingMatched a skos:Concept ; skos:inScheme jfec:FindingMatchStateScheme ; skos:prefLabel "matched" .
+jfec:FindingUnmatched a skos:Concept ; skos:inScheme jfec:FindingMatchStateScheme ; skos:prefLabel "unmatched" .
+jfec:FindingDuplicate a skos:Concept ; skos:inScheme jfec:FindingMatchStateScheme ; skos:prefLabel "duplicate" .
+jfec:FindingDisputed a skos:Concept ; skos:inScheme jfec:FindingMatchStateScheme ; skos:prefLabel "disputed" .
+jfec:FindingAdjudicated a skos:Concept ; skos:inScheme jfec:FindingMatchStateScheme ; skos:prefLabel "adjudicated" .
+
+jfec:AnalysisClaimTypeScheme a skos:ConceptScheme ; skos:prefLabel "analysis claim type" .
+jfec:RepositoryFactClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "repository fact" .
+jfec:ArchitectureClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "architecture" .
+jfec:DependencyImpactClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "dependency and impact" .
+jfec:FaultLocalizationClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "fault localization" .
+jfec:RootCauseClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "root cause" .
+jfec:SecurityThreatClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "security and threat" .
+jfec:TestGapClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "test gap" .
+jfec:ChangePlanClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "change plan" .
+jfec:IncidentAnalysisClaim a jfe:AnalysisClaimType ; skos:inScheme jfec:AnalysisClaimTypeScheme ; skos:prefLabel "incident analysis" .
+
+jfec:ClaimPolarityScheme a skos:ConceptScheme ; skos:prefLabel "analysis claim polarity" .
+jfec:PositivePolarity a skos:Concept ; skos:inScheme jfec:ClaimPolarityScheme ; skos:prefLabel "positive" .
+jfec:NegativePolarity a skos:Concept ; skos:inScheme jfec:ClaimPolarityScheme ; skos:prefLabel "negative" .
+jfec:UnknownPolarity a skos:Concept ; skos:inScheme jfec:ClaimPolarityScheme ; skos:prefLabel "unknown" .
+
+jfec:InferenceKindScheme a skos:ConceptScheme ; skos:prefLabel "analysis inference kind" .
+jfec:DirectInference a skos:Concept ; skos:inScheme jfec:InferenceKindScheme ; skos:prefLabel "direct" .
+jfec:DerivedInference a skos:Concept ; skos:inScheme jfec:InferenceKindScheme ; skos:prefLabel "derived" .
+jfec:HypothesisInference a skos:Concept ; skos:inScheme jfec:InferenceKindScheme ; skos:prefLabel "hypothesis" .
+jfec:RecommendationInference a skos:Concept ; skos:inScheme jfec:InferenceKindScheme ; skos:prefLabel "recommendation" .
+
+jfec:ArtifactRoleScheme a skos:ConceptScheme ; skos:prefLabel "evaluation artifact role" .
+jfec:TaskInputArtifact a skos:Concept ; skos:inScheme jfec:ArtifactRoleScheme ; skos:prefLabel "task input" .
+jfec:HiddenOracleArtifact a skos:Concept ; skos:inScheme jfec:ArtifactRoleScheme ; skos:prefLabel "hidden oracle" .
+jfec:ReferencePatchArtifact a skos:Concept ; skos:inScheme jfec:ArtifactRoleScheme ; skos:prefLabel "reference patch" .
+jfec:CandidatePatchArtifact a skos:Concept ; skos:inScheme jfec:ArtifactRoleScheme ; skos:prefLabel "candidate patch" .
+jfec:TrialTranscriptArtifact a skos:Concept ; skos:inScheme jfec:ArtifactRoleScheme ; skos:prefLabel "trial transcript" .
+jfec:VerificationOutputArtifact a skos:Concept ; skos:inScheme jfec:ArtifactRoleScheme ; skos:prefLabel "verification output" .
+
+jfec:EvaluationMetricScheme a skos:ConceptScheme ; skos:prefLabel "evaluation metric" .
+jfec:CorrectAcceptedYield a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "correct accepted yield" .
+jfec:AcceptedPrecision a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "accepted precision" .
+jfec:CriticalFalseAcceptance a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "critical false acceptance" .
+jfec:AttemptCoverage a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "attempt coverage" .
+jfec:PassAtOne a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "pass at one" .
+jfec:RepeatedRunConsistency a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "repeated-run consistency" .
+jfec:EvaluatorFlakeRate a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "evaluator flake rate" .
+jfec:MutationSensitivity a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "mutation sensitivity" .
+jfec:JudgeHumanDisagreement a jfe:MetricDefinition ; skos:inScheme jfec:EvaluationMetricScheme ; skos:prefLabel "judge-human disagreement" .
+
+jfec:StatisticalMethodScheme a skos:ConceptScheme ; skos:prefLabel "evaluation statistical method" .
+jfec:Wilson95 a skos:Concept ; skos:inScheme jfec:StatisticalMethodScheme ; skos:prefLabel "two-sided 95 percent Wilson interval" .
+jfec:StratifiedBootstrap a skos:Concept ; skos:inScheme jfec:StatisticalMethodScheme ; skos:prefLabel "stratified bootstrap" .
+
+jfec:RolloutDispositionScheme a skos:ConceptScheme ; skos:prefLabel "rollout disposition" .
+jfec:Advance a skos:Concept ; skos:inScheme jfec:RolloutDispositionScheme ; skos:prefLabel "advance" .
+jfec:Hold a skos:Concept ; skos:inScheme jfec:RolloutDispositionScheme ; skos:prefLabel "hold" .
+jfec:Rollback a skos:Concept ; skos:inScheme jfec:RolloutDispositionScheme ; skos:prefLabel "rollback" .
+jfec:Disable a skos:Concept ; skos:inScheme jfec:RolloutDispositionScheme ; skos:prefLabel "disable" .
+
+jfec:ProductionSignalScheme a skos:ConceptScheme ; skos:prefLabel "production signal" .
+jfec:PostPublicationCIPassed a skos:Concept ; skos:inScheme jfec:ProductionSignalScheme ; skos:prefLabel "post-publication CI passed" .
+jfec:PostPublicationCIFailed a skos:Concept ; skos:inScheme jfec:ProductionSignalScheme ; skos:prefLabel "post-publication CI failed" .
+jfec:Reverted a skos:Concept ; skos:inScheme jfec:ProductionSignalScheme ; skos:prefLabel "reverted" .
+jfec:Incident a skos:Concept ; skos:inScheme jfec:ProductionSignalScheme ; skos:prefLabel "incident" .
+jfec:Regression a skos:Concept ; skos:inScheme jfec:ProductionSignalScheme ; skos:prefLabel "regression" .
+jfec:HumanOverride a skos:Concept ; skos:inScheme jfec:ProductionSignalScheme ; skos:prefLabel "human override" .
+
+jfe:GraderResult rdfs:comment "No GraderResult, HumanGrade, Adjudication, AggregateResult, or MetricObservation has transition authority. A separate jfe:RolloutDecision must cite an admitted jf:EvidenceBundle and jf:decisionAuthority." .
