@@ -2,12 +2,11 @@
 
 ## Status
 
-This receipt is being assembled with the Harness Phase 5 implementation. The
-current candidate is merge-pending; HG5 remains blocked until every section is
-complete, the adoption, lifecycle, cancellation, containment, privacy,
-readiness, restart-recovery, and full regression matrices pass, clean-checkout
-CI passes, and the pull request merges. Phase 6 is not authorized from this
-document yet.
+This receipt records the Harness Phase 5 candidate verified locally and
+accepted after pull request merge on 2026-08-17. The adoption, lifecycle,
+cancellation, containment, privacy, readiness, restart-recovery, and full
+regression matrices passed; pull request #35 passed clean-checkout CI and
+merged on 2026-08-17. Phase 6 is authorized from that exact baseline.
 
 ## Candidate Provenance
 
@@ -19,8 +18,8 @@ document yet.
 | Section 5.2 | `faa3aea92008fae1cf087d4e72dd8bb8480b7f98` |
 | Section 5.3 | `bf4ab8e4afb5ff3637365bcbbb6dab5e9e85ac9b` |
 | Section 5.4 | `557c8f95cf5070d37d48cae6d92934eee5ea6eb8` |
-| Section 5.5 | This section's exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; full merge-commit SHA must be pinned after clean-checkout CI and merge |
+| Section 5.5 | `879c95069b6bdda2d70c5709719d502a83086f4d` |
+| Merged candidate | `c9fc2dd625bab2385fed5fa3203c4cb6d0f38f22` |
 
 ## Adoption Contract
 
@@ -126,7 +125,8 @@ manager, but they do not provide a production Firecracker deployment, a
 provider credential helper, or real subscription login. No billable live
 smoke was run. Managed delegated execution remains blocked until the Phase 4
 credential-helper or attaching-proxy boundary is proven for the provider.
-Clean-checkout CI and the merged commit remain the final candidate evidence.
+Pull request #35's clean-checkout CI and merged commit are the final candidate
+evidence.
 
 ## Verification Record
 
@@ -141,11 +141,14 @@ Clean-checkout CI and the merged commit remain the final candidate evidence.
 | Phase 1 through Phase 5 harness regression suites | 192 tests, 0 failures |
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
-| `mix precommit` | 505 tests, 0 failures; pass on the merge-pending candidate tree |
+| `mix precommit` | 505 tests, 0 failures; pass |
+| Pull request #35 clean-checkout CI | Pass; merged 2026-08-17 |
 
 ## Gate HG5
 
-HG5 is merge-pending and remains blocked. It reopens—or remains blocked—while
-any adapter lacks a cancellation bound, any journal or prompt can leak, or any
-late output can enter durable state. These reopening conditions remain in
-force regardless of checklist state.
+HG5 is accepted at merged candidate
+`c9fc2dd625bab2385fed5fa3203c4cb6d0f38f22`, pinned in this receipt and the
+Harness Phase 5 plan. Harness Phase 6 is authorized from that baseline. HG5
+reopens if any adapter lacks a cancellation bound, any journal or prompt can
+leak, or any late output can enter durable state. These reopening conditions
+remain in force regardless of checklist state.

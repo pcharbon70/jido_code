@@ -13,7 +13,7 @@ one graph-authorized attempt, with proven containment and cancellation.
 
 Back to plan: [README](./README.md)
 
-- [ ] 5 Phase - Treat subscription CLIs as delegated execution, never as a second model port.
+- [x] 5 Phase - Treat subscription CLIs as delegated execution, never as a second model port.
 
   This phase gives subscription developers first-class access while keeping
   coarse-grained authority, credential isolation, and disposable runtime
@@ -79,7 +79,7 @@ Back to plan: [README](./README.md)
       - [x] 5.4.1.3 Subtask {#sah-p05-5-4-1-3} - Reject any late event, diff, artifact, callback, or result by the current-fence check so nothing enters durable graph state or triggers an external JidoCode effect after expiry.
       - [x] 5.4.1.4 Subtask {#sah-p05-5-4-1-4} - Add non-billable readiness discovery and consent-gated live smoke tests per supported subscription profile, reporting authentication evidence without claiming actor identity.
 
-  - [ ] 5.5 Section - Phase 5 Integration Tests.
+  - [x] 5.5 Section - Phase 5 Integration Tests.
 
     This final section proves delegated containment, recovery, and honest
     capability reporting.
@@ -94,7 +94,7 @@ Back to plan: [README](./README.md)
       - [x] 5.5.1.3 Subtask {#sah-p05-5-5-1-3} - Prove journal privacy under the accepted profile, prompt non-exposure in argv, and zero subscription credential, prompt, journal, or cross-actor canary leakage in the profile adversarial suite.
       - [x] 5.5.1.4 Subtask {#sah-p05-5-5-1-4} - Rerun prior phases, architecture scans, and `mix precommit`.
 
-    - [ ] 5.5.2 Task {#sah-p05-phase-receipt} [repo: jido_code] [after: {#sah-p05-integration}] - Publish the Phase 5 delegated-runtime receipt.
+    - [x] 5.5.2 Task {#sah-p05-phase-receipt} [repo: jido_code] [after: {#sah-p05-integration}] - Publish the Phase 5 delegated-runtime receipt.
 
       This task records the runtime evidence in
       `docs/architecture/harness-phase-05-receipt.md` and authorizes Phase 6
@@ -103,4 +103,4 @@ Back to plan: [README](./README.md)
       - [x] 5.5.2.1 Subtask {#sah-p05-5-5-2-1} - Record the pinned JidoHarness revision, enabled adapters with cancellation proofs, profile labels, and the candidate commit.
       - [x] 5.5.2.2 Subtask {#sah-p05-5-5-2-2} - Attach lifecycle, cancellation, privacy, readiness, and restart-recovery results with known limitations.
       - [x] 5.5.2.3 Subtask {#sah-p05-5-5-2-3} - Keep HG5 blocked while any adapter lacks a cancellation bound, any journal or prompt can leak, or any late output can enter durable state.
-      - [ ] 5.5.2.4 Subtask {#sah-p05-5-5-2-4} - Pin the merged candidate commit before authorizing Phase 6.
+      - [x] 5.5.2.4 Subtask {#sah-p05-5-5-2-4} - Pin the merged candidate commit before authorizing Phase 6.
