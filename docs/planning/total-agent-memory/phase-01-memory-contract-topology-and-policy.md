@@ -53,22 +53,22 @@ Back to plan: [README](./README.md)
       - [x] 1.2.1.4 Subtask - Define shapes for capture manifests, segment manifests, content captures, cases, procedures, artifact claims, retrieval activities, lifecycle activities, and access permits.
       - [x] 1.2.1.5 Subtask - Version graph identities, predicates, writer capabilities, allowed links, completeness, topology, and migration compatibility; unknown families and terms remain denied.
 
-  - [ ] 1.3 Section - Define capture, retention, archive, and erasure policy.
+  - [x] 1.3 Section - Define capture, retention, archive, and erasure policy.
 
     This section makes content representation, availability, retention, hold,
     and deletion independent dimensions governed by purpose and classification.
 
-    - [ ] 1.3.1 Task {#tam-p01-content-policy} [repo: jido_code] [after: {#tam-p01-memory-topology}] - Implement the shared memory data-policy contract.
+    - [x] 1.3.1 Task {#tam-p01-content-policy} [repo: jido_code] [after: {#tam-p01-memory-topology}] - Implement the shared memory data-policy contract.
 
       This task ensures semantic accounting does not silently authorize broader
       retention or reuse.
 
-      - [ ] 1.3.1.1 Subtask - Define `semantic_history`, `diagnostic_capture`, `project_total_history`, and `incident_hold`; register only `semantic_history` as enabled.
-      - [ ] 1.3.1.2 Subtask - Extend `Security.DataPolicy` for every accepted graph family, representation, output sink, export, provider-egress rule, and Personal-data restriction.
-      - [ ] 1.3.1.3 Subtask - Model capture outcome, representation, storage location, availability tier, retention/erasure state, and hold state as orthogonal closed vocabularies.
-      - [ ] 1.3.1.4 Subtask - Define `archive` as queryable cold retention and distinguish it from removal, expiry, cryptographic erasure, physical deletion, and unverifiable external deletion.
-      - [ ] 1.3.1.5 Subtask - Keep immutable semantic shells longer than payloads and prohibit selective mutation of closed run graphs.
-      - [ ] 1.3.1.6 Subtask - Forbid new plaintext-sensitive receipt commitments; require ciphertext commitments or protected keyed commitments where equality is an accepted purpose.
+      - [x] 1.3.1.1 Subtask - Define `semantic_history`, `diagnostic_capture`, `project_total_history`, and `incident_hold`; register only `semantic_history` as enabled.
+      - [x] 1.3.1.2 Subtask - Extend `Security.DataPolicy` for every accepted graph family, representation, output sink, export, provider-egress rule, and Personal-data restriction.
+      - [x] 1.3.1.3 Subtask - Model capture outcome, representation, storage location, availability tier, retention/erasure state, and hold state as orthogonal closed vocabularies.
+      - [x] 1.3.1.4 Subtask - Define `archive` as queryable cold retention and distinguish it from removal, expiry, cryptographic erasure, physical deletion, and unverifiable external deletion.
+      - [x] 1.3.1.5 Subtask - Keep immutable semantic shells longer than payloads and prohibit selective mutation of closed run graphs.
+      - [x] 1.3.1.6 Subtask - Forbid new plaintext-sensitive receipt commitments; require ciphertext commitments or protected keyed commitments where equality is an accepted purpose.
 
   - [ ] 1.4 Section - Define compatibility, threat, and capacity gates.
 

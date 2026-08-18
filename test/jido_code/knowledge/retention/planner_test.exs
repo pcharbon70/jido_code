@@ -22,6 +22,9 @@ defmodule JidoCode.Knowledge.Retention.PlannerTest do
           :goal,
           :policy,
           :audit,
+          :capture_manifest,
+          :content_capture,
+          :episode_content,
           :derived_cache
         ] do
       assert {:ok, _class} = Policy.class_for_resource(kind)
@@ -72,12 +75,27 @@ defmodule JidoCode.Knowledge.Retention.PlannerTest do
              Planner.plan(snapshot([old, inferred], audit, legal_erase: [old.iri]))
 
     assert plan.erase == [old.iri]
-    assert inferred.iri in plan.archive
+    assert plan.archive == []
+    assert inferred.iri in plan.remove
     assert plan.rebuild_graphs == [derived]
     assert Enum.sort(plan.affected_graphs) == Enum.sort([audit, observations, derived])
     assert length(plan.removals) == 2
     assert byte_size(plan.checksum) == 64
     assert Enum.any?(plan.audit_additions, &quad_mentions?(&1, old.iri))
+  end
+
+  test "refuses to report archive while no queryable cold tier exists" do
+    repository = iri("repository/archive-unavailable")
+
+    observations =
+      graph!(:observation_batch, %{repository: repository, batch: iri("batch/archive")})
+
+    audit = graph!(:security_audit, %{period: "2026-08"})
+    expired = resource("batch/archive", observations, :observation_batch, [], 100)
+
+    assert {:error, error} = Planner.plan(snapshot([expired], audit, []))
+    assert error.kind == :unavailable
+    assert error.operation == :retention_archive_unavailable
   end
 
   defp snapshot(resources, audit, overrides) do

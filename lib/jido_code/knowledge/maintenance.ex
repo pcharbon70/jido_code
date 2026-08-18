@@ -155,6 +155,7 @@ defmodule JidoCode.Knowledge.Maintenance do
          checksum: plan.checksum,
          affected_graph_count: length(plan.affected_graphs),
          archived_resource_count: length(plan.archive),
+         removed_resource_count: length(plan.remove),
          erased_resource_count: length(plan.erase),
          removal_count: write_receipt.removals_count,
          dataset_revision: write_receipt.dataset_revision,

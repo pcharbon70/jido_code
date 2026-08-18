@@ -21,6 +21,7 @@ defmodule JidoCode.Knowledge.Retention.Planner do
            reachable(normalized.resources, normalized.roots ++ normalized.legal_holds),
          :ok <- reject_held_erasure(normalized.legal_erase, normalized.legal_holds, reachable),
          {:ok, classified} <- classify(normalized, reachable),
+         :ok <- reject_unavailable_archive(classified),
          {:ok, plan} <- build_plan(normalized, classified) do
       {:ok, plan}
     end
@@ -117,7 +118,7 @@ defmodule JidoCode.Knowledge.Retention.Planner do
   end
 
   defp build_plan(snapshot, classified) do
-    removed = classified.archive ++ classified.remove ++ classified.erase
+    removed = classified.remove ++ classified.erase
     removals = removed |> Enum.flat_map(& &1.quads) |> Enum.uniq()
 
     if length(removals) <= @max_removals do
@@ -141,7 +142,8 @@ defmodule JidoCode.Knowledge.Retention.Planner do
            dataset_revision: snapshot.dataset_revision,
            graph_revisions: Map.take(snapshot.graph_revisions, target_graphs),
            retain: iris(classified.retain),
-           archive: iris(classified.archive ++ classified.remove),
+           archive: iris(classified.archive),
+           remove: iris(classified.remove),
            erase: iris(classified.erase),
            rebuild_graphs: rebuild_graphs,
            removals: removals,
@@ -186,10 +188,11 @@ defmodule JidoCode.Knowledge.Retention.Planner do
       count_quad(activity, "minimumRestoreRevision", snapshot.dataset_revision + 1, graph),
       count_quad(
         activity,
-        "archivedResourceCount",
-        length(classified.archive ++ classified.remove),
+        "archiveEligibleResourceCount",
+        length(classified.archive),
         graph
       ),
+      count_quad(activity, "removedResourceCount", length(classified.remove), graph),
       count_quad(activity, "erasedResourceCount", length(classified.erase), graph)
     ]
 
@@ -261,6 +264,13 @@ defmodule JidoCode.Knowledge.Retention.Planner do
   end
 
   defp empty_classes, do: %{retain: [], archive: [], remove: [], erase: []}
+
+  defp reject_unavailable_archive(%{archive: []}), do: :ok
+
+  defp reject_unavailable_archive(_classified) do
+    {:error, Error.new(:unavailable, :retention_archive_unavailable)}
+  end
+
   defp iris(resources), do: resources |> Enum.map(& &1.iri) |> Enum.sort()
   defp quad_graph({_, _, _, %RDF.IRI{value: graph}}), do: graph
 
