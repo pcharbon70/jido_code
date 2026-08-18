@@ -19,18 +19,18 @@ Back to plan: [README](./README.md)
   This phase proves runtime success alone can never satisfy a goal and
   every external effect carries independent authority.
 
-  - [ ] 6.1 Section - Bind verification admission to closed runs.
+  - [x] 6.1 Section - Bind verification admission to closed runs.
 
     This section makes run completeness a precondition of evidence rather
     than an assumption.
 
-    - [ ] 6.1.1 Task {#sah-p06-verification-admission} [repo: jido_code] [after: {#sah-p05-phase-receipt}] - Admit verification only from exact closed runs.
+    - [x] 6.1.1 Task {#sah-p06-verification-admission} [repo: jido_code] [after: {#sah-p05-phase-receipt}] - Admit verification only from exact closed runs.
 
       This task freezes the immutable input every verifier works from.
 
-      - [ ] 6.1.1.1 Subtask {#sah-p06-6-1-1-1} - Require a committed `FinalizeExecutionRun` receipt for the exact attempt before any verification activity.
-      - [ ] 6.1.1.2 Subtask {#sah-p06-6-1-1-2} - Bind the verifier's immutable inputs: closed run graph IRI and revision, completeness state and accepted reference sets through the terminal sequence, attempt, lease, and fence identity, exact source and control graph revisions, base commit and snapshot digest, candidate artifact and patch digests with media type and byte count, verification environment digest, policy and rubric revisions, and independently authorized evaluator identity and capability.
-      - [ ] 6.1.1.3 Subtask {#sah-p06-6-1-1-3} - Let an incomplete closed run yield only unavailable or inconclusive assessments unless policy explicitly names the missing classes; it can never support accepting evidence as though provenance were complete.
+      - [x] 6.1.1.1 Subtask {#sah-p06-6-1-1-1} - Require a committed `FinalizeExecutionRun` receipt for the exact attempt before any verification activity.
+      - [x] 6.1.1.2 Subtask {#sah-p06-6-1-1-2} - Bind the verifier's immutable inputs: closed run graph IRI and revision, completeness state and accepted reference sets through the terminal sequence, attempt, lease, and fence identity, exact source and control graph revisions, base commit and snapshot digest, candidate artifact and patch digests with media type and byte count, verification environment digest, policy and rubric revisions, and independently authorized evaluator identity and capability.
+      - [x] 6.1.1.3 Subtask {#sah-p06-6-1-1-3} - Let an incomplete closed run yield only unavailable or inconclusive assessments unless policy explicitly names the missing classes; it can never support accepting evidence as though provenance were complete.
 
   - [ ] 6.2 Section - Implement the independent fresh-checkout verifier.
 
