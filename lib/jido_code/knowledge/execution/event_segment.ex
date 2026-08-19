@@ -39,7 +39,8 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
                 :event_set_digest,
                 :content_root_digest,
                 :root_digest,
-                :completeness
+                :completeness,
+                :ambiguous_effect_iris
               ]
 
   @type t :: %__MODULE__{}
@@ -112,7 +113,8 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
         event_set_digest: nil,
         content_root_digest: nil,
         root_digest: nil,
-        completeness: nil
+        completeness: nil,
+        ambiguous_effect_iris: []
       }
 
       {:ok, segment, opening_statements(segment, event)}
@@ -338,6 +340,7 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
       event_digest = digest_events(segment.events)
       content_digest = digest_set(segment.content_capture_iris)
       carried = Enum.sort(attributes[:carried_effect_iris] || [])
+      ambiguous = Enum.sort(attributes[:ambiguous_effect_iris] || [])
 
       root =
         digest_term({
@@ -350,6 +353,7 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
           event_digest,
           content_digest,
           carried,
+          ambiguous,
           completeness
         })
 
@@ -361,6 +365,7 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
            content_root_digest: content_digest,
            root_digest: root,
            carried_effect_iris: carried,
+           ambiguous_effect_iris: ambiguous,
            completeness: completeness
        }}
     else
@@ -537,7 +542,9 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
         segment.iri,
         @jf <> "predecessorRootDigest",
         segment.predecessor_root_digest
-      ) ++ event_statements(event) ++ head_statements(segment)
+      ) ++
+      refs(segment.iri, @jf <> "carriedOpenEffect", segment.carried_effect_iris) ++
+      event_statements(event) ++ head_statements(segment)
   end
 
   @spec closure_statements(t()) :: [tuple()]
@@ -553,6 +560,9 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
     ] ++
       Enum.map(segment.carried_effect_iris, fn iri ->
         {segment.iri, @jf <> "carriedOpenEffect", RDF.iri(iri)}
+      end) ++
+      Enum.map(segment.ambiguous_effect_iris, fn iri ->
+        {segment.iri, @jf <> "ambiguousOpenEffect", RDF.iri(iri)}
       end)
   end
 
@@ -571,6 +581,32 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
   @spec successor_guard(t()) :: tuple()
   def successor_guard(%__MODULE__{} = segment),
     do: {:predicate_absent, segment.graph_iri, segment.head_iri, @jf <> "hasSuccessor"}
+
+  @spec valid_root?(t()) :: boolean()
+  def valid_root?(%__MODULE__{lifecycle_state: :closed} = segment) do
+    event_digest = digest_events(segment.events)
+    content_digest = digest_set(segment.content_capture_iris)
+
+    root =
+      digest_term({
+        @protocol,
+        segment.attempt_iri,
+        segment.index,
+        segment.sequence_start,
+        segment.sequence_end,
+        segment.predecessor_root_digest,
+        event_digest,
+        content_digest,
+        segment.carried_effect_iris,
+        segment.ambiguous_effect_iris,
+        segment.completeness
+      })
+
+    segment.event_set_digest == event_digest and segment.content_root_digest == content_digest and
+      segment.root_digest == root
+  end
+
+  def valid_root?(_segment), do: false
 
   defp event(attempt_iri, segment_iri, graph_iri, sequence, predecessor, attributes) do
     with event_type when event_type in @event_types <- attributes[:event_type],

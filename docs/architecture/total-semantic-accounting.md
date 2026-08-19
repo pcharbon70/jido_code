@@ -81,3 +81,37 @@ before they can enter an attempt. Verification, decisions, publication,
 deployment, incidents, and delayed review remain in their existing accepted
 families; a segment event may link them under a validated family/role pair but
 does not move or promote them.
+
+## Segmented Finalization And Recovery
+
+`FinalizeExecutionRun` `2.0.0` accepts only an ordered list of recomputable
+closed segment roots. The chain must begin at segment and sequence zero, every
+inclusive range must meet the next range without a gap, every predecessor IRI
+and root must match, every event must appear in exactly one segment, the last
+event must be the named terminal sequence, and the closed capture manifest must
+provide its exact completeness root. Mutated digests, extra/unsegmented events,
+missing roots, late events, or a terminal observation outside the chain fail
+closed.
+
+All started effects must have a recorded outcome, a recorded cancellation, or
+remain in the final segment's explicit ambiguous set. Ambiguity, provider
+unavailability, capture failure, cancellation ambiguity, and bounded-limit
+termination produce explicit incomplete finalization; none is promoted to a
+complete run. The run root commits the ordered segment roots, terminal
+sequence, capture root, resolved/ambiguous effects, reasons, and achieved
+completeness before the run graph closes.
+
+Restart recovery scans persisted segment metadata and immutable edges to derive
+the sole open segment, sole head without a successor, next sequence, carried
+and newly opened effects, and recorded resource/idempotency identities. It
+does not accept caller-supplied head state. An atomic closure is therefore
+observed wholly open or wholly closed after a crash. Heads in closed graphs are
+never returned as resumable, and restore has no authority to append to or
+reopen them.
+
+Projection is explicitly dual-protocol. Closed and open legacy `1.x` runs keep
+their `bounded_observable_subset` claim, stored-representation reconstruction,
+and empty segment-root fields. Validated `2.0.0` runs expose segmented roots,
+terminal sequence, run-root digest, achieved completeness, and incomplete
+reasons under `total_expected_event_accounting`. Neither projection rewrites
+legacy history.

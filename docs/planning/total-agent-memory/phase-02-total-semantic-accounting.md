@@ -69,22 +69,22 @@ Back to plan: [README](./README.md)
       - [x] 2.3.1.5 Subtask - Keep verification, decisions, publication, deployment, incidents, and delayed review in their accepted families while linking them to immutable attempts.
       - [x] 2.3.1.6 Subtask - Preserve capability, approval, effect-journal, invocation-before-dispatch, and stale-fence invariants from the harness.
 
-  - [ ] 2.4 Section - Extend finalization and recovery across segments.
+  - [x] 2.4 Section - Extend finalization and recovery across segments.
 
     This section proves a run is complete only from bounded closed roots and
     reconstructs safe continuation after failure.
 
-    - [ ] 2.4.1 Task {#tam-p02-segmented-finalization} [repo: jido_code] [after: {#tam-p02-execution-events}] - Implement segmented closure, projection, and recovery.
+    - [x] 2.4.1 Task {#tam-p02-segmented-finalization} [repo: jido_code] [after: {#tam-p02-execution-events}] - Implement segmented closure, projection, and recovery.
 
       This task prevents missing, duplicated, unresolved, or unsegmented events
       from passing finalization.
 
-      - [ ] 2.4.1.1 Subtask - Revise `FinalizeExecutionRun` to consume ordered segment roots, prove contiguous ranges from zero through the terminal sequence, and verify immutable root/content digests.
-      - [ ] 2.4.1.2 Subtask - Reject events outside a closed segment and require all open effects to be closed, cancelled, or explicitly ambiguous.
-      - [ ] 2.4.1.3 Subtask - Preserve explicit incomplete finalization for unavailable providers, failed capture, cancellation ambiguity, and bounded-limit termination.
-      - [ ] 2.4.1.4 Subtask - Recover active heads, segment state, open effects, idempotency, and continuation authority entirely from graph state.
-      - [ ] 2.4.1.5 Subtask - Add dual legacy/segmented projections with explicit protocol and completeness fields.
-      - [ ] 2.4.1.6 Subtask - Reject late events after segment or run closure and prevent restore from reopening closed history.
+      - [x] 2.4.1.1 Subtask - Revise `FinalizeExecutionRun` to consume ordered segment roots, prove contiguous ranges from zero through the terminal sequence, and verify immutable root/content digests.
+      - [x] 2.4.1.2 Subtask - Reject events outside a closed segment and require all open effects to be closed, cancelled, or explicitly ambiguous.
+      - [x] 2.4.1.3 Subtask - Preserve explicit incomplete finalization for unavailable providers, failed capture, cancellation ambiguity, and bounded-limit termination.
+      - [x] 2.4.1.4 Subtask - Recover active heads, segment state, open effects, idempotency, and continuation authority entirely from graph state.
+      - [x] 2.4.1.5 Subtask - Add dual legacy/segmented projections with explicit protocol and completeness fields.
+      - [x] 2.4.1.6 Subtask - Reject late events after segment or run closure and prevent restore from reopening closed history.
 
   - [ ] 2.5 Section - Phase 2 Integration Tests.
 
