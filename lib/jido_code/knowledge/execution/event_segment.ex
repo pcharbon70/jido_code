@@ -572,6 +572,11 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
          role when role in @roles <- attributes[:role],
          :ok <- resources(attributes[:resource_iris] || []),
          :ok <- resources(attributes[:content_capture_iris] || []),
+         :ok <-
+           capture_statements(
+             attributes[:capture_statements] || [],
+             attributes[:content_capture_iris] || []
+           ),
          :ok <- resources(attributes[:opens_effect_iris] || []),
          :ok <- resources(attributes[:closes_effect_iris] || []),
          true <-
@@ -592,6 +597,7 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
          role: role,
          resource_iris: Enum.sort(Enum.uniq(attributes[:resource_iris] || [])),
          content_capture_iris: Enum.sort(Enum.uniq(attributes[:content_capture_iris] || [])),
+         capture_statements: attributes[:capture_statements] || [],
          opens_effect_iris: Enum.sort(Enum.uniq(attributes[:opens_effect_iris] || [])),
          closes_effect_iris: Enum.sort(Enum.uniq(attributes[:closes_effect_iris] || [])),
          occurred_at: attributes[:occurred_at],
@@ -619,7 +625,8 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
       refs(event.iri, @jf <> "accountsResource", event.resource_iris) ++
       refs(event.iri, @jf <> "hasCapture", event.content_capture_iris) ++
       refs(event.iri, @jf <> "opensEffect", event.opens_effect_iris) ++
-      refs(event.iri, @jf <> "closesEffect", event.closes_effect_iris)
+      refs(event.iri, @jf <> "closesEffect", event.closes_effect_iris) ++
+      event.capture_statements
   end
 
   defp head_statements(segment) do
@@ -784,6 +791,28 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
   end
 
   defp resources(_values), do: invalid(:event_resources)
+
+  defp capture_statements(statements, capture_iris)
+       when is_list(statements) and length(statements) <= 500 do
+    allowed = MapSet.new(capture_iris)
+
+    if Enum.all?(statements, fn statement ->
+         case RDF.Triple.new(statement) do
+           {%RDF.IRI{value: subject}, _, _} = triple ->
+             MapSet.member?(allowed, subject) and RDF.Triple.valid?(triple) and
+               not RDF.Triple.has_bnode?(triple)
+
+           _invalid ->
+             false
+         end
+       end),
+       do: :ok,
+       else: invalid(:capture_statements)
+  rescue
+    _error -> invalid(:capture_statements)
+  end
+
+  defp capture_statements(_statements, _capture_iris), do: invalid(:capture_statements)
 
   defp refs(subject, predicate, values),
     do: Enum.map(values, &{subject, predicate, RDF.iri(&1)})

@@ -35,22 +35,22 @@ Back to plan: [README](./README.md)
       - [x] 2.1.1.5 Subtask - Atomically close one segment, append its root to the attempt, and optionally open the next segment with explicit carried effects.
       - [x] 2.1.1.6 Subtask - Stop before any pinned limit and create a governed continuation attempt rather than an unfinalizable segment or root graph.
 
-  - [ ] 2.2 Section - Implement capture manifests and content-state accounting.
+  - [x] 2.2 Section - Implement capture manifests and content-state accounting.
 
     This section records what content was expected, what representation exists,
     where it resides, and why anything is absent.
 
-    - [ ] 2.2.1 Task {#tam-p02-capture-state} [repo: jido_code] [after: {#tam-p02-event-segments}] - Implement episode and per-body capture contracts.
+    - [x] 2.2.1 Task {#tam-p02-capture-state} [repo: jido_code] [after: {#tam-p02-event-segments}] - Implement episode and per-body capture contracts.
 
       This task makes total accounting complete even when exact content is
       forbidden or unavailable.
 
-      - [ ] 2.2.1.1 Subtask - Add `EpisodeCaptureManifest` with profile, expected event/body classes, policy, purpose, limits, and completeness roots.
-      - [ ] 2.2.1.2 Subtask - Add immutable `ContentCapture` shells owned by one event role and bound to opaque content identity, classification, purpose, policy, and initial state dimensions.
-      - [ ] 2.2.1.3 Subtask - Record captured, omitted-by-policy, unavailable-at-source, and capture-failed outcomes for every expected body.
-      - [ ] 2.2.1.4 Subtask - Record exact, deterministically redacted, normalized, commitment-only, or absent representations without treating a digest as replayable content.
-      - [ ] 2.2.1.5 Subtask - Bind redaction receipts, limitations, allowed uses, retention class, reconstruction status, and external-provider availability.
-      - [ ] 2.2.1.6 Subtask - Make missing capture entries a closure error rather than silently treating absence as omission.
+      - [x] 2.2.1.1 Subtask - Add `EpisodeCaptureManifest` with profile, expected event/body classes, policy, purpose, limits, and completeness roots.
+      - [x] 2.2.1.2 Subtask - Add immutable `ContentCapture` shells owned by one event role and bound to opaque content identity, classification, purpose, policy, and initial state dimensions.
+      - [x] 2.2.1.3 Subtask - Record captured, omitted-by-policy, unavailable-at-source, and capture-failed outcomes for every expected body.
+      - [x] 2.2.1.4 Subtask - Record exact, deterministically redacted, normalized, commitment-only, or absent representations without treating a digest as replayable content.
+      - [x] 2.2.1.5 Subtask - Bind redaction receipts, limitations, allowed uses, retention class, reconstruction status, and external-provider availability.
+      - [x] 2.2.1.6 Subtask - Make missing capture entries a closure error rather than silently treating absence as omission.
 
   - [ ] 2.3 Section - Move execution events onto immutable successors.
 

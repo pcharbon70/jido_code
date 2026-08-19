@@ -126,7 +126,7 @@ defmodule JidoCode.Security.DataPolicy do
     },
     prompt: %{graphs: [], representations: [], outputs: [], provider_egress: []},
     prompt_representation: %{
-      graphs: [:run_attempt],
+      graphs: [:run_attempt, :run_event_segment],
       representations: [:normalized_text, :digest, :legacy_unkeyed_digest],
       outputs: [:authorized_ui, :audit],
       provider_egress: []
@@ -144,8 +144,14 @@ defmodule JidoCode.Security.DataPolicy do
       provider_egress: []
     },
     tool_output: %{
-      graphs: [:run_attempt],
-      representations: [:exact_text, :digest, :external_reference, :legacy_unkeyed_digest],
+      graphs: [:run_attempt, :run_event_segment],
+      representations: [
+        :exact_text,
+        :normalized_text,
+        :digest,
+        :external_reference,
+        :legacy_unkeyed_digest
+      ],
       outputs: [:bounded_artifact],
       provider_egress: []
     },

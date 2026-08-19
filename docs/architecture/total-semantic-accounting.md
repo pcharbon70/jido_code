@@ -29,3 +29,30 @@ must close before the event limit. At the attempt segment/root limit,
 continuation requires a new deterministic attempt bound to an explicit
 continuation authority and the predecessor segment root; the protocol never
 creates an unfinalizable oversized segment or attempt root.
+
+## Episode And Body Capture Accounting
+
+`CaptureManifest` `2.0.0` is created in the run root in the same atomic
+`RecordExecutionAttempt` batch as segment zero and its sequence-zero head. It
+pins the enabled profile and purpose, data-policy revision, expected event and
+body classes, exact opaque body identities, protocol limits, and an expected
+root commitment. A diagnostic or project-total profile cannot enter this path.
+
+Every expected body is owned by exactly one source-event role and receives one
+immutable `ContentCapture` shell in that event's segment. The shell separately
+records capture outcome, representation, location, availability, retention,
+hold, classification, purpose, policy, reconstruction, provider availability,
+allowed uses, limitations, retention class, and any redaction receipt. The
+accepted outcomes are `captured`, `omitted_by_policy`,
+`unavailable_at_source`, and `capture_failed`; the representation is
+independently `exact`, `deterministically_redacted`, `normalized`,
+`commitment_only`, or `absent`.
+
+Consistency checks do not collapse those dimensions. A digest-only capture is
+not replayable even when it remains available; an absent body must say why and
+cannot claim reconstruction; redacted content requires its receipt; external
+availability is reported only for an external location; and semantic-history
+policy still rejects exact tool output, raw prompts, and secret values.
+Manifest closure compares the exact expected and captured body sets and commits
+a completeness root. Missing, duplicate, foreign, or unlisted shells are a
+closure conflict rather than an inferred omission.
