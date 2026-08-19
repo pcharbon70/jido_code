@@ -18,22 +18,22 @@ Back to plan: [README](./README.md)
   This phase establishes MG2 by making sequence, causality, capture state,
   completeness, and omission mechanically provable.
 
-  - [ ] 2.1 Section - Implement the event-head and bounded-segment protocol.
+  - [x] 2.1 Section - Implement the event-head and bounded-segment protocol.
 
     This section gives every new execution event one conflict-safe position in
     a bounded immutable sequence.
 
-    - [ ] 2.1.1 Task {#tam-p02-event-segments} [repo: jido_code] [after: {#tam-p01-phase-receipt}] - Implement predecessor-chained event segments.
+    - [x] 2.1.1 Task {#tam-p02-event-segments} [repo: jido_code] [after: {#tam-p01-phase-receipt}] - Implement predecessor-chained event segments.
 
       This task makes semantic attempt order independent of wall clocks and
       caller-selected sequence values.
 
-      - [ ] 2.1.1.1 Subtask - Revise `RecordExecutionAttempt` `2.0.0` to create the capture manifest, first segment, and sequence-zero event head atomically with run/control transitions.
-      - [ ] 2.1.1.2 Subtask - Require every event command to consume the exact active head and append one deterministic contiguous successor; concurrent uses of one predecessor conflict.
-      - [ ] 2.1.1.3 Subtask - Define segment roots, inclusive ranges, predecessor roots, ordered event-set digests, content-root digests, and carried open-effect sets.
-      - [ ] 2.1.1.4 Subtask - Implement `CloseEventSegment` with independent exact typed-set, sequence-gap, start/outcome, and unlisted-resource validation.
-      - [ ] 2.1.1.5 Subtask - Atomically close one segment, append its root to the attempt, and optionally open the next segment with explicit carried effects.
-      - [ ] 2.1.1.6 Subtask - Stop before any pinned limit and create a governed continuation attempt rather than an unfinalizable segment or root graph.
+      - [x] 2.1.1.1 Subtask - Revise `RecordExecutionAttempt` `2.0.0` to create the capture manifest, first segment, and sequence-zero event head atomically with run/control transitions.
+      - [x] 2.1.1.2 Subtask - Require every event command to consume the exact active head and append one deterministic contiguous successor; concurrent uses of one predecessor conflict.
+      - [x] 2.1.1.3 Subtask - Define segment roots, inclusive ranges, predecessor roots, ordered event-set digests, content-root digests, and carried open-effect sets.
+      - [x] 2.1.1.4 Subtask - Implement `CloseEventSegment` with independent exact typed-set, sequence-gap, start/outcome, and unlisted-resource validation.
+      - [x] 2.1.1.5 Subtask - Atomically close one segment, append its root to the attempt, and optionally open the next segment with explicit carried effects.
+      - [x] 2.1.1.6 Subtask - Stop before any pinned limit and create a governed continuation attempt rather than an unfinalizable segment or root graph.
 
   - [ ] 2.2 Section - Implement capture manifests and content-state accounting.
 
