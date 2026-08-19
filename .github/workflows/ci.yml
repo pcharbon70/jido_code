@@ -23,6 +23,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config
 
       - uses: erlef/setup-beam@v1
+        id: beam
         with:
           otp-version: "28.3.1"
           elixir-version: "1.19.5"
@@ -36,10 +37,28 @@ jobs:
           node-version: "24.3.0"
           cache: npm
 
+      - name: Restore Beam dependency and build cache
+        id: beam_cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            deps
+            _build/test
+            _build/prod
+          key: beam-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-rust-1.92.0-rocksdb-cmake-3.5-${{ hashFiles('mix.lock', 'mix.exs') }}
+          restore-keys: |
+            beam-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-rust-1.92.0-rocksdb-cmake-3.5-
+
+      - name: Report Beam cache status
+        run: echo "Beam cache exact hit - ${{ steps.beam_cache.outputs.cache-hit }}" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install dependencies
         run: |
-          mix deps.get
+          mix deps.get --check-locked
           npm ci
+
+      - name: Clean application build artifacts
+        run: mix clean
 
       - name: Verify application
         run: mix precommit
