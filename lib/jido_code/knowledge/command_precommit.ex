@@ -36,6 +36,13 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     consideredEvidence causedBy followUpGoal followUpTask followUpKind confirmation
     riskClass knowledgeClassification sourceClaim hasFinding hasFailure policyOutcome
     relatedSymbol applicableLesson reasoningProfile validatedResource
+    hasEventSegment activeSegment headEvent consumesHead hasSuccessor eventPredecessor
+    eventPredecessorHead accountsResource opensEffect closesEffect carriedOpenEffect
+    ambiguousOpenEffect cancelledEffect ambiguousEffect captureManifest hasCapture expectedBody
+    capturedBody sourceEvent redactionReceipt outcomeOf effectJournal providerSource attributedBy
+    relatedEvent acceptedGraph captureProfile captureOutcome contentRepresentation storageLocation
+    availabilityState retentionState holdState contentClassification reconstructionStatus
+    externalProviderAvailability captureCompleteness
   ])
   @max_guards 100
 

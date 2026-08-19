@@ -22,6 +22,44 @@ defmodule JidoCode.Knowledge.Execution.Graph do
           {:ok, map()} | {:error, Error.t()}
   def create_target(graph_iri, owner_scope, activity, created_at, additions)
       when is_list(additions) do
+    create_run_target(
+      graph_iri,
+      owner_scope,
+      activity,
+      created_at,
+      additions,
+      "https://jido.run/ontology/release/1.0.0"
+    )
+  end
+
+  def create_target(_graph, _scope, _activity, _created_at, _additions),
+    do: invalid(:execution_graph_create)
+
+  @spec create_segmented_run_target(String.t(), String.t(), String.t(), DateTime.t(), list()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def create_segmented_run_target(graph_iri, owner_scope, activity, created_at, additions)
+      when is_list(additions) do
+    create_run_target(
+      graph_iri,
+      owner_scope,
+      activity,
+      created_at,
+      additions,
+      "https://jido.run/ontology/release/1.2.0"
+    )
+  end
+
+  def create_segmented_run_target(_graph, _scope, _activity, _created_at, _additions),
+    do: invalid(:execution_graph_create)
+
+  defp create_run_target(
+         graph_iri,
+         owner_scope,
+         activity,
+         created_at,
+         additions,
+         ontology_version
+       ) do
     with {:ok, :run_attempt} <- GraphRegistry.identify(graph_iri),
          :ok <- ResourceIdentity.validate(owner_scope),
          :ok <- ResourceIdentity.validate(activity),
@@ -29,7 +67,7 @@ defmodule JidoCode.Knowledge.Execution.Graph do
          {:ok, metadata} <-
            GraphMetadata.new(graph_iri, %{
              owner_scope: owner_scope,
-             ontology_version: "https://jido.run/ontology/release/1.0.0",
+             ontology_version: ontology_version,
              creation_activity: activity,
              created_at: created_at,
              lifecycle_state: :open,
@@ -53,9 +91,6 @@ defmodule JidoCode.Knowledge.Execution.Graph do
       _invalid -> invalid(:execution_graph_create)
     end
   end
-
-  def create_target(_graph, _scope, _activity, _created_at, _additions),
-    do: invalid(:execution_graph_create)
 
   @spec create_segment_target(
           String.t(),
@@ -90,7 +125,7 @@ defmodule JidoCode.Knowledge.Execution.Graph do
          {:ok, metadata} <-
            GraphMetadata.new(graph_iri, %{
              owner_scope: owner_scope,
-             ontology_version: "https://jido.run/ontology/release/1.1.0",
+             ontology_version: "https://jido.run/ontology/release/1.2.0",
              creation_activity: activity,
              created_at: created_at,
              lifecycle_state: :open,

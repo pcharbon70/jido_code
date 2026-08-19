@@ -91,17 +91,17 @@ Back to plan: [README](./README.md)
     This final section proves total semantic accounting under concurrency,
     failure, restart, and protocol bounds.
 
-    - [ ] 2.5.1 Task {#tam-p02-integration} [repo: jido_code] [after: {#tam-p02-segmented-finalization}] - Execute the segmented-accounting integration matrix.
+    - [x] 2.5.1 Task {#tam-p02-integration} [repo: jido_code] [after: {#tam-p02-segmented-finalization}] - Execute the segmented-accounting integration matrix.
 
       This task exercises the real command pipeline and TripleStore across
       complete and incomplete attempts.
 
-      - [ ] 2.5.1.1 Subtask - Record attempts spanning one and multiple segments with model, tool, message, artifact, cancellation, and terminal events.
-      - [ ] 2.5.1.2 Subtask - Exercise concurrent head consumption, replay, sequence gaps, duplicate outcomes, unlisted resources, carried effects, and closure-limit edges.
-      - [ ] 2.5.1.3 Subtask - Prove 100% content-state accounting for expected classes and rejection of unsegmented resources.
-      - [ ] 2.5.1.4 Subtask - Crash and restart before event commit, after start commit, during segment closure, and before run finalization.
-      - [ ] 2.5.1.5 Subtask - Verify legacy closed runs remain readable and unchanged while new attempts require `2.0.0`.
-      - [ ] 2.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
+      - [x] 2.5.1.1 Subtask - Record attempts spanning one and multiple segments with model, tool, message, artifact, cancellation, and terminal events.
+      - [x] 2.5.1.2 Subtask - Exercise concurrent head consumption, replay, sequence gaps, duplicate outcomes, unlisted resources, carried effects, and closure-limit edges.
+      - [x] 2.5.1.3 Subtask - Prove 100% content-state accounting for expected classes and rejection of unsegmented resources.
+      - [x] 2.5.1.4 Subtask - Crash and restart before event commit, after start commit, during segment closure, and before run finalization.
+      - [x] 2.5.1.5 Subtask - Verify legacy closed runs remain readable and unchanged while new attempts require `2.0.0`.
+      - [x] 2.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
     - [ ] 2.5.2 Task {#tam-p02-phase-receipt} [repo: jido_code] [after: {#tam-p02-integration}] - Publish the Phase 2 semantic-accounting receipt.
 
@@ -109,7 +109,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/memory-phase-02-receipt.md` and binds MG2 to the
       exact merged candidate.
 
-      - [ ] 2.5.2.1 Subtask - Record command, shape, segment-limit, digest, capture-profile, fixture, and compatibility revisions.
-      - [ ] 2.5.2.2 Subtask - Attach concurrency, closure, completeness, restart, and legacy-read evidence.
-      - [ ] 2.5.2.3 Subtask - Keep MG2 blocked if an expected event can disappear, a closed segment can mutate, or a content body lacks an explicit state.
+      - [x] 2.5.2.1 Subtask - Record command, shape, segment-limit, digest, capture-profile, fixture, and compatibility revisions.
+      - [x] 2.5.2.2 Subtask - Attach concurrency, closure, completeness, restart, and legacy-read evidence.
+      - [x] 2.5.2.3 Subtask - Keep MG2 blocked if an expected event can disappear, a closed segment can mutate, or a content body lacks an explicit state.
       - [ ] 2.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 3.

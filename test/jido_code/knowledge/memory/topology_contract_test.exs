@@ -71,9 +71,10 @@ defmodule JidoCode.Knowledge.Memory.TopologyContractTest do
   end
 
   test "admits memory classes only in their declared graph families" do
-    assert ShapeCatalog.version() == "1.1.0"
+    assert ShapeCatalog.version() == "1.2.0"
     assert ShapeCatalog.known_versions?("1.0.0", "1.0.0")
     assert ShapeCatalog.known_versions?("1.1.0", "1.1.0")
+    assert ShapeCatalog.known_versions?("1.2.0", "1.2.0")
     refute ShapeCatalog.known_versions?("1.1.0", "1.0.0")
 
     assert ShapeCatalog.allowed_class?(:run_attempt, @jf <> "CaptureManifest")

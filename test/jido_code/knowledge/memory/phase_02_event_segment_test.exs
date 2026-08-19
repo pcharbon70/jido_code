@@ -168,7 +168,7 @@ defmodule JidoCode.Knowledge.Memory.Phase02EventSegmentTest do
 
     assert target.family == :run_event_segment
     assert target.operation == :create
-    assert target.metadata.ontology_version == "https://jido.run/ontology/release/1.1.0"
+    assert target.metadata.ontology_version == "https://jido.run/ontology/release/1.2.0"
 
     attributes = %{
       command_iri: command,

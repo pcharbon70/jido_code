@@ -59,6 +59,13 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     accessMode credentialReference credentialClass billingMode readinessState
     usesModelAccessProfile manifestOf hasContextManifest proposalOf sandboxOf
     evidenceReference
+    hasEventSegment activeSegment headEvent consumesHead hasSuccessor eventPredecessor
+    eventPredecessorHead accountsResource opensEffect closesEffect carriedOpenEffect
+    ambiguousOpenEffect cancelledEffect ambiguousEffect captureManifest hasCapture expectedBody
+    capturedBody sourceEvent redactionReceipt outcomeOf effectJournal providerSource attributedBy
+    relatedEvent acceptedGraph captureProfile captureOutcome contentRepresentation storageLocation
+    availabilityState retentionState holdState contentClassification reconstructionStatus
+    externalProviderAvailability captureCompleteness
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i
@@ -202,7 +209,7 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     end
   end
 
-  defp completeness_allowed?(:run_attempt, state),
+  defp completeness_allowed?(family, state) when family in [:run_attempt, :run_event_segment],
     do: state in [:building, :complete, :incomplete]
 
   defp completeness_allowed?(_family, state), do: state == :complete

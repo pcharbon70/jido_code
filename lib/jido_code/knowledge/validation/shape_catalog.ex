@@ -1,9 +1,13 @@
 defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
   @moduledoc false
 
-  @version "1.1.0"
-  @ontology_version "1.1.0"
-  @known_versions MapSet.new([{"1.0.0", "1.0.0"}, {@ontology_version, @version}])
+  @version "1.2.0"
+  @ontology_version "1.2.0"
+  @known_versions MapSet.new([
+                    {"1.0.0", "1.0.0"},
+                    {"1.1.0", "1.1.0"},
+                    {@ontology_version, @version}
+                  ])
   @jf "https://jido.run/ontology/factory#"
 
   @allowed_classes %{
@@ -36,7 +40,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       SegmentManifest ContentCapture ToolInvocation Artifact ContextManifest ModelInvocation
       ActionProposal Finding ModelInvocationOutcome ToolInvocationOutcome StateTransition Message
       SandboxEvent CancellationObservation RetryObservation TerminalObservation
-      ProviderObservation LifecycleObservation
+      ProviderObservation LifecycleObservation ModelInvocationStart ToolInvocationStart
+      AttemptTransitionObservation NormalizedActionProposal ExecutionArtifactObservation
     ],
     experience: ~w[
       ExperienceCase ProcedureRevision ArtifactClaim RetrievalActivity MemoryUseAssessment

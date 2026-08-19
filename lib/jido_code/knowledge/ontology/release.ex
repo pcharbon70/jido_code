@@ -11,10 +11,13 @@ defmodule JidoCode.Knowledge.Ontology.Release do
   alias JidoCode.Knowledge.WriteBatch
   alias JidoCode.Knowledge.Writer
 
-  @current_version "1.1.0"
-  @versions [@current_version, "1.0.0"]
-  @base_versions %{"1.1.0" => "1.0.0"}
-  @inherited_sources ~w[factory.ttl policy-terms.ttl shapes.ttl work-states.ttl]
+  @current_version "1.2.0"
+  @versions [@current_version, "1.1.0", "1.0.0"]
+  @base_versions %{"1.2.0" => "1.1.0", "1.1.0" => "1.0.0"}
+  @schema_sources %{
+    "1.0.0" => ~w[factory.ttl policy-terms.ttl shapes.ttl work-states.ttl],
+    "1.1.0" => ~w[memory.ttl shapes.ttl]
+  }
   @max_artifact_bytes 1_000_000
   @required_manifest_keys ~w[
     canonical_nquads_sha256
@@ -253,9 +256,7 @@ defmodule JidoCode.Knowledge.Ontology.Release do
 
       {:ok, base_version} ->
         with {:ok, _verified} <- verify(base_version),
-             {:ok, base_manifest} <- manifest(base_version),
-             {:ok, base} <-
-               parse_selected_sources(base_manifest, base_version, @inherited_sources) do
+             {:ok, base} <- schema_dataset(base_version) do
           graph_iri = RDF.iri("https://jido.run/graph/ontology/#{version}")
 
           inherited =
@@ -268,6 +269,15 @@ defmodule JidoCode.Knowledge.Ontology.Release do
 
           {:ok, inherited}
         end
+    end
+  end
+
+  defp schema_dataset(version) do
+    with {:ok, manifest} <- manifest(version),
+         {:ok, current} <-
+           parse_selected_sources(manifest, version, Map.fetch!(@schema_sources, version)),
+         {:ok, inherited} <- inherited_dataset(version) do
+      {:ok, RDF.Dataset.add(inherited, current)}
     end
   end
 

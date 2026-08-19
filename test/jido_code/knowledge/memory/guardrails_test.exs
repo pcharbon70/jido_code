@@ -122,7 +122,6 @@ defmodule JidoCode.Knowledge.Memory.GuardrailsTest do
              ])
 
     assert Guardrails.disabled_features() == %{
-             run_event_segment_writer: :MG2,
              history_queries: :MG3,
              retrieval_index: :MG3,
              experience_writer: :MG4,

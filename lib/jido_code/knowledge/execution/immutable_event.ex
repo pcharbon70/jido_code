@@ -50,18 +50,38 @@ defmodule JidoCode.Knowledge.Execution.ImmutableEvent do
   @jf "https://jido.run/ontology/factory#"
   @concept "https://jido.run/ontology/concept/"
   @definitions %{
-    model_start: %{command: "RecordModelInvocationStart", role: :start, class: "ModelInvocation"},
+    model_start: %{
+      command: "RecordModelInvocationStart",
+      role: :start,
+      class: "ModelInvocationStart"
+    },
     model_outcome: %{
       command: "RecordModelInvocationOutcome",
       role: :outcome,
       class: "ModelInvocationOutcome"
     },
-    tool_start: %{command: "RecordToolInvocationStart", role: :start, class: "ToolInvocation"},
+    tool_start: %{
+      command: "RecordToolInvocationStart",
+      role: :start,
+      class: "ToolInvocationStart"
+    },
     tool_outcome: %{command: "RecordToolOutcome", role: :outcome, class: "ToolInvocationOutcome"},
-    transition: %{command: "RecordAttemptTransition", role: :transition, class: "StateTransition"},
-    proposal: %{command: "RecordActionProposal", role: :observation, class: "ActionProposal"},
+    transition: %{
+      command: "RecordAttemptTransition",
+      role: :transition,
+      class: "AttemptTransitionObservation"
+    },
+    proposal: %{
+      command: "RecordActionProposal",
+      role: :observation,
+      class: "NormalizedActionProposal"
+    },
     sandbox: %{command: "RecordSandboxEvent", role: :observation, class: "SandboxEvent"},
-    artifact: %{command: "RecordExecutionArtifact", role: :artifact, class: "Artifact"},
+    artifact: %{
+      command: "RecordExecutionArtifact",
+      role: :artifact,
+      class: "ExecutionArtifactObservation"
+    },
     message: %{command: "RecordExecutionMessage", role: :message, class: "Message"},
     cancellation: %{
       command: "RecordCancellationObservation",

@@ -28,7 +28,10 @@ defmodule JidoCode.Knowledge.Memory.Phase01IntegrationTest do
     {:ok, config} = Config.for_test(Path.join(root, "store"))
 
     first = start_substrate!(config)
-    assert {:ok, loaded} = Release.load(store_server: first.server, writer: first.writer)
+
+    assert {:ok, loaded} =
+             Release.load(version: "1.1.0", store_server: first.server, writer: first.writer)
+
     assert loaded.version == "1.1.0"
 
     assert {:ok, %{"https://jido.run/graph/ontology/1.1.0" => 1_474}} =

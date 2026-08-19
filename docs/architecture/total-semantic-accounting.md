@@ -15,6 +15,11 @@ candidate. `GraphRegistry` `2.1.0` keeps experience, content lifecycle, and
 episode content disabled. Legacy command versions cannot target the segment
 family, and closed segment graphs cannot accept late events.
 
+Factory ontology and operational shapes `1.2.0` additively pin the immutable
+event, head, segment-root, capture-accounting, and finalization vocabulary.
+New segmented writes require that exact pair; immutable `1.0.0` and `1.1.0`
+pairs remain readable and are never rewritten.
+
 Each closure independently checks the exact event set, per-type sets,
 accounted resources, content-capture identities, contiguous inclusive range,
 and effect starts/outcomes. It commits an ordered event-set digest, content
