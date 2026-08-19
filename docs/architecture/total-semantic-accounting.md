@@ -56,3 +56,28 @@ policy still rejects exact tool output, raw prompts, and secret values.
 Manifest closure compares the exact expected and captured body sets and commits
 a completeness root. Missing, duplicate, foreign, or unlisted shells are a
 closure conflict rather than an inferred omission.
+
+## Immutable Execution Resources
+
+Every command `2.0.0` runtime observation consumes the same segment head.
+Model and tool starts and outcomes are separate deterministic resources; each
+binds the attempt, lease, fence, context manifest/revision, resource revision,
+semantic digest, predecessor head, and occurrence time. An outcome names its
+exact start and closes that effect. It never adds a result property to mutate
+the start resource.
+
+New tool starts resolve only as `RecordToolInvocationStart`. The legacy
+`RecordToolInvocation` name remains resolvable on the `1.6.0`/`1.8.0` history
+lines but is absent from command line `2.0.0`. Before dispatch, a tool start
+must bind a current capability, approval request, and effect journal. Missing
+bindings, a stale fence, an inexact context, a reused start, an outcome without
+a start, or `dispatch_state: dispatched` fails closed.
+
+Attempt transitions, normalized proposals, sandbox events, artifacts,
+messages, cancellation, retry, terminal, provider, and lifecycle observations
+use the same sequence. Provider observations retain a provider-source identity
+and contiguous source order and require an explicit attribution resource
+before they can enter an attempt. Verification, decisions, publication,
+deployment, incidents, and delayed review remain in their existing accepted
+families; a segment event may link them under a validated family/role pair but
+does not move or promote them.

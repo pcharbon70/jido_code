@@ -76,10 +76,10 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
                segment: 0
              })
 
-    assert {:error, %Error{kind: :unauthorized}} =
+    assert {:ok, %{family: :run_event_segment}} =
              GraphRegistry.validate_target(segment, :execution_writer)
 
-    refute GraphRegistry.write_allowed?(:run_event_segment, :create, nil)
+    assert GraphRegistry.write_allowed?(:run_event_segment, :create, nil)
     assert GraphRegistry.allowed_link?(:run_attempt, :run_event_segment)
     refute GraphRegistry.allowed_link?(:episode_content, :memory)
   end

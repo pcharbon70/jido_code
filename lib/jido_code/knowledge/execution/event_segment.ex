@@ -293,7 +293,12 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
              ],
          {:ok, command} <-
            CommandEnvelope.new(
-             envelope("RecordExecutionEvent", command_attributes, [target], guards),
+             envelope(
+               event_attributes[:command_type] || "RecordExecutionEvent",
+               command_attributes,
+               [target],
+               guards
+             ),
              options
            ) do
       {:ok, %{segment: next, command: command}}
@@ -571,6 +576,11 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
     with event_type when event_type in @event_types <- attributes[:event_type],
          role when role in @roles <- attributes[:role],
          :ok <- resources(attributes[:resource_iris] || []),
+         :ok <-
+           resource_statements(
+             attributes[:resource_statements] || [],
+             attributes[:resource_iris] || []
+           ),
          :ok <- resources(attributes[:content_capture_iris] || []),
          :ok <-
            capture_statements(
@@ -596,6 +606,7 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
          event_type: event_type,
          role: role,
          resource_iris: Enum.sort(Enum.uniq(attributes[:resource_iris] || [])),
+         resource_statements: attributes[:resource_statements] || [],
          content_capture_iris: Enum.sort(Enum.uniq(attributes[:content_capture_iris] || [])),
          capture_statements: attributes[:capture_statements] || [],
          opens_effect_iris: Enum.sort(Enum.uniq(attributes[:opens_effect_iris] || [])),
@@ -626,7 +637,7 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
       refs(event.iri, @jf <> "hasCapture", event.content_capture_iris) ++
       refs(event.iri, @jf <> "opensEffect", event.opens_effect_iris) ++
       refs(event.iri, @jf <> "closesEffect", event.closes_effect_iris) ++
-      event.capture_statements
+      event.resource_statements ++ event.capture_statements
   end
 
   defp head_statements(segment) do
@@ -791,6 +802,29 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
   end
 
   defp resources(_values), do: invalid(:event_resources)
+
+  defp resource_statements(statements, resource_iris)
+       when is_list(statements) and length(statements) <= 500 do
+    allowed = MapSet.new(resource_iris)
+
+    if Enum.all?(statements, fn statement ->
+         case RDF.Triple.new(statement) do
+           {%RDF.IRI{value: subject}, _, _} = triple ->
+             MapSet.member?(allowed, subject) and RDF.Triple.valid?(triple) and
+               not RDF.Triple.has_bnode?(triple)
+
+           _invalid ->
+             false
+         end
+       end),
+       do: :ok,
+       else: invalid(:event_resource_statements)
+  rescue
+    _error -> invalid(:event_resource_statements)
+  end
+
+  defp resource_statements(_statements, _resource_iris),
+    do: invalid(:event_resource_statements)
 
   defp capture_statements(statements, capture_iris)
        when is_list(statements) and length(statements) <= 500 do

@@ -34,7 +34,9 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     run_event_segment: ~w[
       SegmentManifest ContentCapture ToolInvocation Artifact ContextManifest ModelInvocation
-      ActionProposal Finding
+      ActionProposal Finding ModelInvocationOutcome ToolInvocationOutcome StateTransition Message
+      SandboxEvent CancellationObservation RetryObservation TerminalObservation
+      ProviderObservation LifecycleObservation
     ],
     experience: ~w[
       ExperienceCase ProcedureRevision ArtifactClaim RetrievalActivity MemoryUseAssessment

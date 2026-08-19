@@ -388,6 +388,12 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   }
   @version_1_8 Map.merge(@version_1_7, @phase_h01_contract_commands)
 
+  @segmented_event_command %{
+    owner: :runtime,
+    capability: :execution,
+    graph_families: [:run_event_segment],
+    preconditions: [:attempt_current, :current_fence, :exact_event_head]
+  }
   @segmented_execution_commands %{
     "RecordExecutionAttempt" => %{
       owner: :runtime,
@@ -407,6 +413,60 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       graph_families: [:run_attempt, :run_event_segment],
       preconditions: [:attempt_current, :current_fence, :exact_event_head]
     },
+    "RecordModelInvocationStart" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_event_segment],
+      preconditions: [:attempt_current, :current_fence, :exact_event_head, :context_exact]
+    },
+    "RecordModelInvocationOutcome" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_event_segment],
+      preconditions: [:attempt_current, :current_fence, :exact_event_head, :start_known]
+    },
+    "RecordToolInvocationStart" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_event_segment],
+      preconditions: [
+        :attempt_current,
+        :current_fence,
+        :exact_event_head,
+        :capability_current,
+        :approval_current,
+        :effect_journal_bound,
+        :before_dispatch
+      ]
+    },
+    "RecordToolOutcome" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_event_segment],
+      preconditions: [:attempt_current, :current_fence, :exact_event_head, :start_known]
+    },
+    "RecordAttemptTransition" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:transition_current])),
+    "RecordActionProposal" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:proposal_normalized])),
+    "RecordSandboxEvent" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:sandbox_authorized])),
+    "RecordExecutionArtifact" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:artifact_policy_allowed])),
+    "RecordExecutionMessage" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:message_normalized])),
+    "RecordCancellationObservation" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:cancellation_current])),
+    "RecordRetryObservation" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:retry_authorized])),
+    "RecordTerminalObservation" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:terminal_state_current])),
+    "RecordProviderObservation" =>
+      Map.update!(@segmented_event_command, :preconditions, fn values ->
+        values ++ [:provider_source_order_exact, :attribution_exact]
+      end),
+    "RecordLifecycleObservation" =>
+      Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:lifecycle_source_exact])),
     "CloseEventSegment" => %{
       owner: :runtime,
       capability: :execution,
@@ -423,7 +483,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
 
-  @version_2_0 Map.merge(@version_1_8, @segmented_execution_commands)
+  @version_2_0 @version_1_8
+               |> Map.delete("RecordToolInvocation")
+               |> Map.merge(@segmented_execution_commands)
 
   @spec version() :: String.t()
   def version, do: @version

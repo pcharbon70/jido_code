@@ -52,22 +52,22 @@ Back to plan: [README](./README.md)
       - [x] 2.2.1.5 Subtask - Bind redaction receipts, limitations, allowed uses, retention class, reconstruction status, and external-provider availability.
       - [x] 2.2.1.6 Subtask - Make missing capture entries a closure error rather than silently treating absence as omission.
 
-  - [ ] 2.3 Section - Move execution events onto immutable successors.
+  - [x] 2.3 Section - Move execution events onto immutable successors.
 
     This section applies the shared event sequence to model calls, tools,
     messages, transitions, artifacts, and lifecycle observations.
 
-    - [ ] 2.3.1 Task {#tam-p02-execution-events} [repo: jido_code] [after: {#tam-p02-capture-state}] - Implement event-type-specific `2.0.0` execution commands.
+    - [x] 2.3.1 Task {#tam-p02-execution-events} [repo: jido_code] [after: {#tam-p02-capture-state}] - Implement event-type-specific `2.0.0` execution commands.
 
       This task removes cross-segment subject mutation while preserving current
       authorization and fencing.
 
-      - [ ] 2.3.1.1 Subtask - Represent model and tool starts and outcomes as separate immutable resources linked by exact attempt, lease, fence, context, tool/model revision, and event predecessor.
-      - [ ] 2.3.1.2 Subtask - Rename new tool starts to `RecordToolInvocationStart` while retaining legacy command resolution for historical reads only.
-      - [ ] 2.3.1.3 Subtask - Put attempt transitions, normalized proposals, sandbox events, artifacts, messages, cancellation, retry, and terminal observations onto the same attempt sequence.
-      - [ ] 2.3.1.4 Subtask - Keep provider observations in their source ordering and permit later attributed associations without fabricating task or attempt identity.
-      - [ ] 2.3.1.5 Subtask - Keep verification, decisions, publication, deployment, incidents, and delayed review in their accepted families while linking them to immutable attempts.
-      - [ ] 2.3.1.6 Subtask - Preserve capability, approval, effect-journal, invocation-before-dispatch, and stale-fence invariants from the harness.
+      - [x] 2.3.1.1 Subtask - Represent model and tool starts and outcomes as separate immutable resources linked by exact attempt, lease, fence, context, tool/model revision, and event predecessor.
+      - [x] 2.3.1.2 Subtask - Rename new tool starts to `RecordToolInvocationStart` while retaining legacy command resolution for historical reads only.
+      - [x] 2.3.1.3 Subtask - Put attempt transitions, normalized proposals, sandbox events, artifacts, messages, cancellation, retry, and terminal observations onto the same attempt sequence.
+      - [x] 2.3.1.4 Subtask - Keep provider observations in their source ordering and permit later attributed associations without fabricating task or attempt identity.
+      - [x] 2.3.1.5 Subtask - Keep verification, decisions, publication, deployment, incidents, and delayed review in their accepted families while linking them to immutable attempts.
+      - [x] 2.3.1.6 Subtask - Preserve capability, approval, effect-journal, invocation-before-dispatch, and stale-fence invariants from the harness.
 
   - [ ] 2.4 Section - Extend finalization and recovery across segments.
 
