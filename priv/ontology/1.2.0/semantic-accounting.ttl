@@ -1,0 +1,86 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/factory/1.2.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://jido.run/ontology/factory/1.2.0> ;
+  owl:versionInfo "1.2.0" ;
+  owl:imports <https://jido.run/ontology/factory/1.1.0> ;
+  rdfs:label "Jido Factory total semantic accounting contract" ;
+  rdfs:comment "Additive immutable segmented-execution vocabulary. Terms do not grant authority or enable later memory graph families." .
+
+# Immutable runtime resources
+jf:ModelInvocationStart a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:ModelInvocationOutcome a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:ToolInvocationStart a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:ToolInvocationOutcome a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:AttemptTransitionObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:NormalizedActionProposal a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:SandboxEvent a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:ExecutionArtifactObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:CancellationObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:RetryObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:TerminalObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:ProviderObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:LifecycleObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+
+# Segment, sequence, effect, and capture relationships
+jf:hasEventSegment a owl:ObjectProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range jf:SegmentManifest .
+jf:activeSegment a owl:ObjectProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range jf:SegmentManifest .
+jf:headEvent a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:consumesHead a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:hasSuccessor a owl:ObjectProperty ; rdfs:domain prov:Entity ; rdfs:range prov:Entity .
+jf:eventPredecessor a owl:ObjectProperty ; rdfs:domain prov:Entity ; rdfs:range prov:Entity .
+jf:eventPredecessorHead a owl:ObjectProperty ; rdfs:domain prov:Entity ; rdfs:range prov:Entity .
+jf:accountsResource a owl:ObjectProperty ; rdfs:domain prov:Entity ; rdfs:range prov:Entity .
+jf:opensEffect a owl:ObjectProperty ; rdfs:domain prov:Entity ; rdfs:range prov:Entity .
+jf:closesEffect a owl:ObjectProperty ; rdfs:domain prov:Entity ; rdfs:range prov:Entity .
+jf:carriedOpenEffect a owl:ObjectProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range prov:Entity .
+jf:ambiguousOpenEffect a owl:ObjectProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range prov:Entity .
+jf:cancelledEffect a owl:ObjectProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range prov:Entity .
+jf:ambiguousEffect a owl:ObjectProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range prov:Entity .
+jf:captureManifest a owl:ObjectProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range jf:CaptureManifest .
+jf:redactionReceipt a owl:ObjectProperty ; rdfs:domain jf:ContentCapture ; rdfs:range prov:Entity .
+jf:outcomeOf a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:effectJournal a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:providerSource a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:attributedBy a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:relatedEvent a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:acceptedGraph a owl:ObjectProperty ; rdfs:range jf:NamedGraph .
+
+# Bounded sequence, root, capture, and runtime literals
+jf:eventSequence a owl:DatatypeProperty ; rdfs:domain prov:Entity ; rdfs:range xsd:nonNegativeInteger .
+jf:headSequence a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:eventKind a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:eventRole a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:eventSetDigest a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:string .
+jf:contentRootDigest a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:string .
+jf:predecessorRootDigest a owl:DatatypeProperty ; rdfs:domain jf:SegmentManifest ; rdfs:range xsd:string .
+jf:orderedSegmentRoot a owl:DatatypeProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range xsd:string .
+jf:runRootDigest a owl:DatatypeProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range xsd:string .
+jf:terminalSequence a owl:DatatypeProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range xsd:nonNegativeInteger .
+jf:captureCompletenessRoot a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:completenessRootDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:expectedRootDigest a owl:DatatypeProperty ; rdfs:domain jf:CaptureManifest ; rdfs:range xsd:string .
+jf:captureLimitsDigest a owl:DatatypeProperty ; rdfs:domain jf:CaptureManifest ; rdfs:range xsd:string .
+jf:opaqueContentIdentity a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:representationDigest a owl:DatatypeProperty ; rdfs:domain jf:ContentCapture ; rdfs:range xsd:string .
+jf:bodyRole a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:bodyClass a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:expectedBodyClass a owl:DatatypeProperty ; rdfs:domain jf:CaptureManifest ; rdfs:range xsd:string .
+jf:expectedEventClass a owl:DatatypeProperty ; rdfs:domain jf:CaptureManifest ; rdfs:range xsd:string .
+jf:capturePurpose a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:captureCompleteness a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:reconstructionStatus a owl:ObjectProperty ; rdfs:domain jf:ContentCapture ; rdfs:range skos:Concept .
+jf:externalProviderAvailability a owl:ObjectProperty ; rdfs:domain jf:ContentCapture ; rdfs:range skos:Concept .
+jf:allowedUse a owl:DatatypeProperty ; rdfs:domain jf:ContentCapture ; rdfs:range xsd:string .
+jf:contextRevision a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:resourceRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:semanticDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sourceOrder a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:relatedEventRole a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:incompleteReason a owl:DatatypeProperty ; rdfs:domain jf:ExecutionAttempt ; rdfs:range xsd:string .

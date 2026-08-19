@@ -45,6 +45,11 @@ No value in one dimension implies a value in another. In particular,
 must name the achieved erasure class rather than hide an unverifiable external
 copy.
 
+The MG2 semantic-history path now admits normalized or commitment-only tool
+accounting in `run_event_segment`; it still rejects exact raw tool bodies.
+Prompt-representation shells may record omission or a digest in the segment,
+but the exact assembled prompt remains forbidden.
+
 ## Archive And Removal
 
 `archive` means queryable cold retention. It is not deletion from the active

@@ -1,0 +1,91 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/shapes/1.2.0>
+  a sh:ShapesGraph ;
+  jf:shapeVersion "1.2.0" ;
+  rdfs:comment "Additive structural shapes for immutable segmented execution. Exact sets, roots, causality, fencing, and capture accounting are also enforced by the bounded command validator." .
+
+jfs:ImmutableExecutionEventShape
+  a sh:NodeShape ;
+  sh:targetClass jf:ModelInvocationStart,
+    jf:ModelInvocationOutcome,
+    jf:ToolInvocationStart,
+    jf:ToolInvocationOutcome,
+    jf:AttemptTransitionObservation,
+    jf:NormalizedActionProposal,
+    jf:SandboxEvent,
+    jf:ExecutionArtifactObservation,
+    jf:CancellationObservation,
+    jf:RetryObservation,
+    jf:TerminalObservation,
+    jf:ProviderObservation,
+    jf:LifecycleObservation ;
+  sh:property jfs:AttemptsProperty,
+    jfs:ValidForProperty,
+    jfs:FencingTokenProperty,
+    jfs:ContextManifestProperty,
+    jfs:ContextRevisionProperty,
+    jfs:PredecessorHeadProperty,
+    jfs:ResourceRevisionProperty,
+    jfs:SemanticDigestProperty,
+    jfs:GeneratedAtProperty .
+
+jfs:EventHeadShape
+  a sh:NodeShape ;
+  sh:targetSubjectsOf jf:headEvent ;
+  sh:property jfs:HeadEventProperty, jfs:HeadSequenceProperty .
+
+jfs:ClosedSegmentAccountingShape
+  a sh:NodeShape ;
+  sh:targetSubjectsOf jf:eventSetDigest ;
+  sh:class jf:SegmentManifest ;
+  sh:property jfs:SequenceEndProperty,
+    jfs:EventCountProperty,
+    jfs:EventSetDigestProperty,
+    jfs:ContentRootDigestProperty,
+    jfs:SegmentRootDigestProperty .
+
+jfs:ClosedCaptureManifestShape
+  a sh:NodeShape ;
+  sh:targetSubjectsOf jf:completenessRootDigest ;
+  sh:class jf:CaptureManifest ;
+  sh:property jfs:CaptureCompletenessProperty, jfs:CompletenessRootProperty .
+
+jfs:FinalizedSegmentedRunShape
+  a sh:NodeShape ;
+  sh:targetSubjectsOf jf:runRootDigest ;
+  sh:class jf:ExecutionAttempt ;
+  sh:property jfs:ProtocolProperty,
+    jfs:OrderedSegmentRootProperty,
+    jfs:TerminalSequenceProperty,
+    jfs:CaptureCompletenessRootProperty,
+    jfs:RunRootProperty .
+
+jfs:AttemptsProperty a sh:PropertyShape ; sh:path jf:attempts ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ValidForProperty a sh:PropertyShape ; sh:path jf:validFor ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:FencingTokenProperty a sh:PropertyShape ; sh:path jf:fencingToken ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ContextManifestProperty a sh:PropertyShape ; sh:path jf:hasContextManifest ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ContextRevisionProperty a sh:PropertyShape ; sh:path jf:contextRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:PredecessorHeadProperty a sh:PropertyShape ; sh:path jf:eventPredecessorHead ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ResourceRevisionProperty a sh:PropertyShape ; sh:path jf:resourceRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:SemanticDigestProperty a sh:PropertyShape ; sh:path jf:semanticDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:GeneratedAtProperty a sh:PropertyShape ; sh:path prov:generatedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:HeadEventProperty a sh:PropertyShape ; sh:path jf:headEvent ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:HeadSequenceProperty a sh:PropertyShape ; sh:path jf:headSequence ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SequenceEndProperty a sh:PropertyShape ; sh:path jf:sequenceEnd ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:EventCountProperty a sh:PropertyShape ; sh:path jf:eventCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:EventSetDigestProperty a sh:PropertyShape ; sh:path jf:eventSetDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ContentRootDigestProperty a sh:PropertyShape ; sh:path jf:contentRootDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:SegmentRootDigestProperty a sh:PropertyShape ; sh:path jf:segmentRootDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:CaptureCompletenessProperty a sh:PropertyShape ; sh:path jf:captureCompleteness ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CompletenessRootProperty a sh:PropertyShape ; sh:path jf:completenessRootDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ProtocolProperty a sh:PropertyShape ; sh:path jf:memoryProtocolVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:OrderedSegmentRootProperty a sh:PropertyShape ; sh:path jf:orderedSegmentRoot ; sh:minCount 1 ; sh:datatype xsd:string .
+jfs:TerminalSequenceProperty a sh:PropertyShape ; sh:path jf:terminalSequence ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:CaptureCompletenessRootProperty a sh:PropertyShape ; sh:path jf:captureCompletenessRoot ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:RunRootProperty a sh:PropertyShape ; sh:path jf:runRootDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .

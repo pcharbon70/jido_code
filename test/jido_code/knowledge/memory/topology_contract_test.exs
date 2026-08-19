@@ -15,7 +15,7 @@ defmodule JidoCode.Knowledge.Memory.TopologyContractTest do
     %{repository: repository, attempt: attempt, content: content}
   end
 
-  test "registers exact disabled contracts for every future memory family", ids do
+  test "registers the MG2 segment family and keeps later memory families disabled", ids do
     expected = %{
       run_event_segment: %{
         scopes: %{attempt: ids.attempt, segment: 12},
@@ -47,28 +47,34 @@ defmodule JidoCode.Knowledge.Memory.TopologyContractTest do
       }
     }
 
-    assert GraphRegistry.revision() == "2.0.0"
+    assert GraphRegistry.revision() == "2.1.0"
 
     Enum.each(expected, fn {family, expected_contract} ->
       assert {:ok, graph} = GraphRegistry.graph_iri(family, expected_contract.scopes)
       assert {:ok, ^family} = GraphRegistry.identify(graph)
       assert {:ok, contract} = GraphRegistry.fetch(family)
-      refute contract.enabled
+      assert contract.enabled == (family == :run_event_segment)
       assert contract.capability == expected_contract.capability
       assert contract.mutability == expected_contract.mutability
       assert contract.completeness == expected_contract.completeness
       assert contract.retention == expected_contract.retention
-      refute GraphRegistry.write_allowed?(family, :create)
+      assert GraphRegistry.write_allowed?(family, :create) == (family == :run_event_segment)
 
-      assert {:error, %Error{kind: :unauthorized}} =
-               GraphRegistry.validate_target(graph, expected_contract.capability)
+      if family == :run_event_segment do
+        assert {:ok, %{family: :run_event_segment}} =
+                 GraphRegistry.validate_target(graph, expected_contract.capability)
+      else
+        assert {:error, %Error{kind: :unauthorized}} =
+                 GraphRegistry.validate_target(graph, expected_contract.capability)
+      end
     end)
   end
 
   test "admits memory classes only in their declared graph families" do
-    assert ShapeCatalog.version() == "1.1.0"
+    assert ShapeCatalog.version() == "1.2.0"
     assert ShapeCatalog.known_versions?("1.0.0", "1.0.0")
     assert ShapeCatalog.known_versions?("1.1.0", "1.1.0")
+    assert ShapeCatalog.known_versions?("1.2.0", "1.2.0")
     refute ShapeCatalog.known_versions?("1.1.0", "1.0.0")
 
     assert ShapeCatalog.allowed_class?(:run_attempt, @jf <> "CaptureManifest")

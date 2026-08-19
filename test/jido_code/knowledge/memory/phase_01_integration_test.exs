@@ -18,7 +18,7 @@ defmodule JidoCode.Knowledge.Memory.Phase01IntegrationTest do
   alias JidoCode.Knowledge.Writer
   alias JidoCode.Security.DataPolicy
 
-  @future_families ~w[run_event_segment experience content_lifecycle episode_content]a
+  @future_families ~w[experience content_lifecycle episode_content]a
   @command_versions ~w[1.0.0 1.1.0 1.2.0 1.3.0 1.4.0 1.5.0 1.6.0 1.7.0 1.8.0]
   @jf "https://jido.run/ontology/factory#"
 
@@ -28,7 +28,10 @@ defmodule JidoCode.Knowledge.Memory.Phase01IntegrationTest do
     {:ok, config} = Config.for_test(Path.join(root, "store"))
 
     first = start_substrate!(config)
-    assert {:ok, loaded} = Release.load(store_server: first.server, writer: first.writer)
+
+    assert {:ok, loaded} =
+             Release.load(version: "1.1.0", store_server: first.server, writer: first.writer)
+
     assert loaded.version == "1.1.0"
 
     assert {:ok, %{"https://jido.run/graph/ontology/1.1.0" => 1_474}} =
@@ -82,13 +85,12 @@ defmodule JidoCode.Knowledge.Memory.Phase01IntegrationTest do
     refute DataPolicy.provider_egress_allowed?(:export_derivative, :approved)
   end
 
-  test "future families are closed, shaped, retention-covered, and unreachable by current commands" do
+  test "post-MG1 families remain closed and unreachable by legacy commands" do
     {:ok, repository} = ResourceIdentity.repository("memory-phase-01")
     {:ok, attempt} = ResourceIdentity.local(:attempt, 1_000, <<1::80>>)
     {:ok, content} = ResourceIdentity.local(:claim, 1_001, <<2::80>>)
 
     families = %{
-      run_event_segment: %{attempt: attempt, segment: 0},
       experience: %{repository: repository},
       content_lifecycle: %{repository: repository},
       episode_content: %{repository: repository, content: content}
@@ -110,6 +112,15 @@ defmodule JidoCode.Knowledge.Memory.Phase01IntegrationTest do
         refute GraphRegistry.write_allowed?(family, operation, %{lifecycle_state: :open})
       end
     end)
+
+    assert {:ok, segment_graph} =
+             GraphRegistry.graph_iri(:run_event_segment, %{attempt: attempt, segment: 0})
+
+    assert {:ok, %{enabled: true}} = GraphRegistry.fetch(:run_event_segment)
+    assert GraphRegistry.write_allowed?(:run_event_segment, :create)
+
+    assert {:ok, %{family: :run_event_segment}} =
+             GraphRegistry.validate_target(segment_graph, :execution_writer)
 
     assert ShapeCatalog.allowed_class?(:run_event_segment, @jf <> "SegmentManifest")
     assert ShapeCatalog.allowed_class?(:experience, @jf <> "ExperienceCase")

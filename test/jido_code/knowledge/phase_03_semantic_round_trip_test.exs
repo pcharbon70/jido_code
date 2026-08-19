@@ -19,7 +19,7 @@ defmodule JidoCode.Knowledge.Phase03SemanticRoundTripTest do
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
   @rdf_subject "http://www.w3.org/1999/02/22-rdf-syntax-ns#subject"
   @prov_generated "http://www.w3.org/ns/prov#wasGeneratedBy"
-  @ontology_graph "https://jido.run/graph/ontology/1.1.0"
+  @ontology_graph "https://jido.run/graph/ontology/1.2.0"
 
   setup context do
     root = unique_root(context)
@@ -333,7 +333,7 @@ defmodule JidoCode.Knowledge.Phase03SemanticRoundTripTest do
     assert semantically_equal?(stored, expected)
 
     assert length(RDF.Graph.triples(RDF.Dataset.graph(dataset, RDF.iri(@ontology_graph)))) ==
-             1_474
+             1_783
   end
 
   defp assert_fixture_links!(dataset, fixture) do

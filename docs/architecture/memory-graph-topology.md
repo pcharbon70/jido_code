@@ -7,17 +7,18 @@ the immutable `1.0.0` release. `GraphRegistry` `2.0.0` is the executable closed
 topology. Both `1.0.0` and `1.1.0` ontology/shape pairs remain recognized for
 honest legacy reads; mixed pairs and unknown versions are rejected.
 
-All four new graph families are registered with `enabled: false`. Registration
-allows deterministic identity, shape, topology, migration, and policy review;
-it does not allow graph creation or mutation. `validate_target/2` and
-`write_allowed?/3` both reject a disabled family even when the caller presents
-the future writer capability.
+`GraphRegistry` `2.1.0` activates `run_event_segment` only for the Phase 2 MG2
+candidate. `experience`, `content_lifecycle`, and `episode_content` remain
+registered with `enabled: false`. Registration alone allows deterministic
+identity, shape, topology, migration, and policy review; it does not allow
+graph creation or mutation. `validate_target/2` and `write_allowed?/3` reject
+each disabled family even when the caller presents its future capability.
 
 ## Closed Family Contracts
 
 | Family | Scope and identity | Future writer | Lifecycle | Completeness | Retention | Owning gate |
 | --- | --- | --- | --- | --- | --- | --- |
-| `run_event_segment` | attempt plus integer segment `0..999999`; `/run/{attempt-token}/segment/{index}` | `execution_writer` | create, append, close once; immutable after closure | building then complete/incomplete | `run_history` | MG2 |
+| `run_event_segment` | attempt plus integer segment `0..999999`; `/run/{attempt-token}/segment/{index}` | `execution_writer`; enabled only through commands `2.0.0` | create, append, close once; immutable after closure | building then complete/incomplete | `run_history` | MG2 candidate |
 | `experience` | repository; `/repo/{repository-token}/experience` | `experience_writer` | append/supersede | complete | `experience_history` | MG4 |
 | `content_lifecycle` | repository; `/repo/{repository-token}/content-lifecycle` | `content_lifecycle_writer` | append/supersede | complete | `content_lifecycle` | MG6 |
 | `episode_content` | repository plus content identity; `/repo/{repository-token}/content/{content-token}` | `content_writer` | immutable create | complete | `governed_content` | MG6 |

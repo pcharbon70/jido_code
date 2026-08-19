@@ -70,9 +70,11 @@ representations and explicit references. Closed history is never rewritten to
 add capture outcomes, remove an old literal, or pretend an unavailable event
 was observed.
 
-New `2.0.0` segmented execution remains disabled until MG2. Until then, this
-document and its executable inventory resolve meaning but do not widen runtime
-capture.
+New `2.0.0` segmented execution is active only in the MG2 candidate command
+line. Legacy `1.x` commands cannot target event-segment graphs. The profile
+still widens no exact-content access: semantic capture shells are eligible,
+while diagnostic/project-total bodies and episode-content storage remain
+disabled.
 
 ## Sensitive Commitments
 

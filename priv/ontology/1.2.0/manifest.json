@@ -1,0 +1,25 @@
+{
+  "canonical_nquads_sha256": "631bd63fbe3e79f8b320aa5290062ab54d2c5cdfeb60185d00f94141a9bc62a5",
+  "compatibility": "additive-from-1.1.0",
+  "graph_iri": "https://jido.run/graph/ontology/1.2.0",
+  "imports": [
+    "https://jido.run/ontology/factory/1.1.0",
+    "http://purl.org/dc/terms/",
+    "http://www.w3.org/2004/02/skos/core",
+    "http://www.w3.org/ns/prov-o"
+  ],
+  "ontology_iri": "https://jido.run/ontology/factory/1.2.0",
+  "package_sha256": "d4d7568c264bdac5d879186966c08889920615018ee6bec8e815f5e3d839b2b2",
+  "released_on": "2026-08-19",
+  "resource_namespace": "https://jido.run/id/",
+  "shape_version": "1.2.0",
+  "shapes_iri": "https://jido.run/ontology/shapes/1.2.0",
+  "sources": {
+    "RELEASE.md": "dfdf76b0430db02172534efa60a794bd23de82bab163a88d26b3bf9404784176",
+    "release.ttl": "45008bc2f8e2e8b672b0b91f2e742c6a90a211fb90ffead25e2a4ccbbbc667dd",
+    "semantic-accounting.ttl": "020d42051552c7afd334288b6fe695959832a175b5ac71f678ecdd66a0feb1d0",
+    "shapes.ttl": "3baa6a48b632a4d5dd13d31477fb977e518834f7b97870d8e23007a82b817425"
+  },
+  "term_namespace": "https://jido.run/ontology/factory#",
+  "version": "1.2.0"
+}

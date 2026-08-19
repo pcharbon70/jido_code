@@ -36,6 +36,13 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     consideredEvidence causedBy followUpGoal followUpTask followUpKind confirmation
     riskClass knowledgeClassification sourceClaim hasFinding hasFailure policyOutcome
     relatedSymbol applicableLesson reasoningProfile validatedResource
+    hasEventSegment activeSegment headEvent consumesHead hasSuccessor eventPredecessor
+    eventPredecessorHead accountsResource opensEffect closesEffect carriedOpenEffect
+    ambiguousOpenEffect cancelledEffect ambiguousEffect captureManifest hasCapture expectedBody
+    capturedBody sourceEvent redactionReceipt outcomeOf effectJournal providerSource attributedBy
+    relatedEvent acceptedGraph captureProfile captureOutcome contentRepresentation storageLocation
+    availabilityState retentionState holdState contentClassification reconstructionStatus
+    externalProviderAvailability captureCompleteness
   ])
   @max_guards 100
 
@@ -151,6 +158,14 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
 
   defp guard_satisfied?({:triple_absent, graph, subject, predicate, object}, dataset) do
     not guard_satisfied?({:triple_present, graph, subject, predicate, object}, dataset)
+  end
+
+  defp guard_satisfied?({:predicate_absent, graph, subject, predicate}, dataset) do
+    not Enum.any?(graph_quads(dataset, graph), fn {stored_subject, stored_predicate, _, _} ->
+      term_equal?(stored_subject, subject) and term_equal?(stored_predicate, predicate)
+    end)
+  rescue
+    _error -> false
   end
 
   defp guard_satisfied?({:object_absent, graph, predicate, object}, dataset) do

@@ -73,7 +73,7 @@ storage or accepts and proves a superseding encrypted-vault ADR.
 
 ## Disabled Posture
 
-The segmented writer stays disabled until MG2; history queries and retrieval
+The segmented writer is activated only by the MG2 candidate; history queries and retrieval
 indexes until MG3; the experience writer until MG4; and diagnostic/project
 capture, lifecycle/content writers, episode content, and the content gateway
 until MG6. Listing an owning gate is not evidence that the gate has passed.

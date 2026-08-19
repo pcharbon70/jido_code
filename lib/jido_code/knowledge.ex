@@ -34,10 +34,13 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Artifact
   alias JidoCode.Knowledge.Execution.ActionProposal
   alias JidoCode.Knowledge.Execution.ContextManifest
+  alias JidoCode.Knowledge.Execution.EventSegment
   alias JidoCode.Knowledge.Execution.Graph, as: ExecutionGraph
+  alias JidoCode.Knowledge.Execution.ImmutableEvent
   alias JidoCode.Knowledge.Execution.ModelInvocation
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
+  alias JidoCode.Knowledge.Execution.SegmentedRun
   alias JidoCode.Knowledge.Decision.GoalOutcome
   alias JidoCode.Knowledge.Decision.Projection, as: DecisionProjection
   alias JidoCode.Knowledge.Evidence.Bundle, as: EvidenceBundle
@@ -47,6 +50,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Evidence.VerificationActivity
   alias JidoCode.Knowledge.Evidence.VerificationMethod
   alias JidoCode.Knowledge.Memory.Adoption, as: KnowledgeAdoption
+  alias JidoCode.Knowledge.Memory.CaptureManifest
+  alias JidoCode.Knowledge.Memory.ContentCapture
   alias JidoCode.Knowledge.Memory.Assertion, as: KnowledgeAssertion
   alias JidoCode.Knowledge.Memory.Evolution, as: KnowledgeEvolution
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
@@ -259,6 +264,55 @@ defmodule JidoCode.Knowledge do
   def project_interaction(result, context), do: InteractionProjection.build(result, context)
 
   def execution_attempt(context, attributes), do: Attempt.new(context, attributes)
+
+  def capture_manifest(attempt_iri, attributes),
+    do: CaptureManifest.new(attempt_iri, attributes)
+
+  def content_capture(manifest, body_iri, attributes),
+    do: ContentCapture.new(manifest, body_iri, attributes)
+
+  def open_event_segment(attempt_iri, attributes),
+    do: EventSegment.open(attempt_iri, attributes)
+
+  def start_segmented_execution_attempt(
+        segment,
+        opening_statements,
+        attempt_targets,
+        manifest,
+        attributes,
+        options \\ []
+      ) do
+    with {:ok, targets} <- CaptureManifest.attach_to_run_targets(manifest, attempt_targets) do
+      EventSegment.start_attempt_command(
+        segment,
+        opening_statements,
+        targets,
+        manifest.iri,
+        attributes,
+        options
+      )
+    end
+  end
+
+  def record_execution_event(event, segment, attributes, options \\ []),
+    do: ImmutableEvent.record_command(event, segment, attributes, options)
+
+  def immutable_execution_event(authority, attributes),
+    do: ImmutableEvent.new(authority, attributes)
+
+  def close_event_segment(segment, closure, attributes, options \\ []),
+    do: EventSegment.close_command(segment, closure, attributes, options)
+
+  def finalize_segmented_run(attempt_iri, segments, manifest, attributes),
+    do: SegmentedRun.finalize(attempt_iri, segments, manifest, attributes)
+
+  def finalize_segmented_run_command(run, metadata, attributes, options \\ []),
+    do: SegmentedRun.finalize_command(run, metadata, attributes, options)
+
+  def recover_segmented_run(dataset, attempt_iri),
+    do: SegmentedRun.recover(dataset, attempt_iri)
+
+  def project_segmented_run(run), do: SegmentedRun.project(run)
 
   def start_execution_attempt(attempt, context, lease, resolutions, attributes, options \\ []),
     do: Attempt.start_command(attempt, context, lease, resolutions, attributes, options)
