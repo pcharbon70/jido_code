@@ -31,7 +31,7 @@ the declared treatment and the other relevant fields are held fixed. If the
 model, tools, context policy, and prompt all change, the result applies to a new
 agent profile; it does not establish that the wording caused the improvement.
 
-The evidence supports eight conclusions:
+The evidence supports nine conclusions:
 
 1. **Define success before editing prompts.** Turn expected behavior into
    executable checks, structured rubrics, negative cases, and safety
@@ -62,16 +62,22 @@ The evidence supports eight conclusions:
 8. **Learn continuously without contaminating the test.** Triage production
    failures, adjudicate their cause, add them to a development or confidential
    regression corpus, and periodically create a new sealed test revision.
+9. **Separate reusable prompt assets from their evaluation.** Common prompt
+   families, immutable component revisions, and composed bundle revisions
+   warrant a governed prompt catalog once they become operational resources.
+   Their trials, grades, and promotion evidence still belong to the shared
+   evaluation/evidence topology; there is no context-free prompt score.
 
 For JidoCode, the immediate goal is not an autonomous prompt-rewriting service.
-It is a reproducible prompt experiment lane inside the existing evaluation
-catalog/run/evidence topology. Prompt optimizers may propose immutable
-candidates. They may not read sealed truth, mutate production prompts, weaken
-security controls, grade themselves authoritatively, or advance a rollout gate.
+It is a reusable, immutable prompt-asset model plus a reproducible prompt
+experiment lane inside the existing evaluation catalog/run/evidence topology.
+Prompt optimizers may propose new component and bundle revisions. They may not
+read sealed truth, mutate accepted prompts in place, weaken security controls,
+grade themselves authoritatively, or advance a rollout gate.
 
 ## Scope and research questions
 
-This report answers seven questions:
+This report answers eight questions:
 
 1. What is a prompt when instructions are assembled dynamically around tools,
    retrieved context, repository policy, and conversation state?
@@ -87,6 +93,8 @@ This report answers seven questions:
    evaluation, shadow operation, and controlled rollout?
 7. How should prompt revisions and their evidence fit JidoCode's existing
    evaluation graph and security boundaries?
+8. How can common prompt components remain reusable and evolutive without
+   mutable aliases, hidden consumer drift, or correlated regressions?
 
 The report covers discrete natural-language prompts and compound agent prompt
 programs. It does not cover continuous/soft prompt tuning in model weights
@@ -134,12 +142,15 @@ should adopt the method, not depend on that legacy platform.
 | --- | --- |
 | Prompt source | Human-readable instruction/template material before rendering |
 | Prompt component | One role message, policy block, example set, tool description, schema, or reusable partial |
-| Prompt bundle | The immutable set of components and assembly rules proposed as one treatment |
+| Prompt component revision | One immutable, content-addressed revision of a prompt component |
+| Prompt bundle | The conceptual set of components and assembly rules used as one treatment |
+| Prompt bundle revision | An immutable, ordered dependency closure of exact component, compiler, and rendering-policy revisions |
 | Prompt compiler | Code that selects, orders, escapes, truncates, and renders prompt components |
 | Rendered prompt | The concrete provider request for one trial, including authorized dynamic inputs |
 | Context policy | Rules selecting repository, retrieval, memory, and conversation material |
-| Prompt candidate | One immutable bundle revision proposed for comparison |
-| Prompt family | Candidates intended to implement the same behavioral specification |
+| Prompt candidate | One immutable component or bundle revision proposed for comparison |
+| Prompt family | Stable logical identity for revisions intended to implement the same behavioral specification; not a mutable content alias |
+| Prompt deployment binding | Governed mapping from an operational profile to one exact accepted bundle revision for new executions |
 | Semantic variant | A meaning-preserving paraphrase, format, order, or benign input perturbation |
 | Development set | Optimizer-visible examples used for diagnosis and candidate generation |
 | Validation set | Held-out examples used to select among candidates and tune stopping rules |
@@ -220,6 +231,62 @@ safety and regression gates:
 This contract prevents a common failure: rewriting prose until a few examples
 look better without agreeing on what behavior should improve. It also lets
 different prompt implementations compete against the same outcome contract.
+
+### Reusable and evolutive prompt assets
+
+JidoCode should reuse common prompt material, but **reuse must mean composition
+and evolution must mean a new immutable revision**. A shared mutable string
+would make historical runs irreproducible and let one edit silently change
+many agent profiles.
+
+The intended model is:
+
+```text
+PromptFamily (stable logical identity)
+  |-- PromptComponentRevision v1
+  |-- PromptComponentRevision v2 --derivedFrom--> v1
+  `-- PromptComponentRevision v3 --derivedFrom--> v2
+                                |
+                                v
+             PromptBundleRevision (exact ordered closure)
+                                |
+              +-----------------+-----------------+
+              |                                   |
+       EvaluationTarget                 governed deployment binding
+       pins exact revision              selects exact accepted revision
+```
+
+`derivedFrom` records provenance, not improvement. `supersedes` may express an
+intended successor, but it does not rewrite or invalidate the older revision.
+Every evaluation target and execution record must resolve to exact component,
+bundle, compiler, example, and rendering-policy revisions. Mutable selectors
+such as `latest` are forbidden in historical evidence; an operational binding
+may choose a revision for a new attempt only if the attempt immediately freezes
+and records the resolved revision.
+
+Useful composition layers are:
+
+1. **Locked authority, security, and disclosure components.** These are shared
+   only where their semantics and enforcement boundary are genuinely common.
+2. **Shared evidence, verification, and communication contracts.** Examples
+   include claim provenance, uncertainty, and output-shape requirements.
+3. **Profile-specific behavior.** Coding, review, repository analysis, and
+   judging need different objectives and failure policies.
+4. **Task and dynamic context.** User input, retrieved source, memory, tool
+   results, and repository data remain trial-specific and untrusted.
+
+Do not replace those layers with one global mega-prompt. A highly connected
+component has a larger correlated-failure and regression blast radius. Its
+reuse should be earned by a stable behavior contract, explicit ownership,
+declared compatibility, reverse-dependency queries, and consumer-specific
+evaluation.
+
+An optimizer such as GEPA may create a candidate component revision and
+candidate bundle revisions for intended consumers. It cannot mutate the common
+ancestor or cause every consumer to adopt the candidate. Adoption is explicit:
+construct a new bundle revision for each intended profile, evaluate that
+bundle in context, and promote only the accepted bindings. Old bundles remain
+bit-identical and available for reproduction and rollback.
 
 ### Prompt changes versus system changes
 
@@ -1345,10 +1412,12 @@ The following matrix is the minimum tracking view for each prompt family:
 | `P-EVAL-16` | task/oracle defect | references, alternates, negatives, mutation | evaluator-health acceptance | appeal/adjudication rate | repair new task revision; invalidate affected aggregate |
 | `P-EVAL-17` | production metric gaming | offline outcome inspection and countermetrics | no single proxy authorizes rollout | quality, harm, and long-term countermetrics | change objective; add guardrails; rollback |
 | `P-EVAL-18` | unauthorized self-modification | prompt-digest and command checks | only reviewed immutable candidate admitted | unexpected digest/config event | reject/quarantine; restore pinned bundle; audit authority path |
+| `P-EVAL-19` | shared-component regression or partial adoption | reverse-dependency diff and per-consumer paired smoke runs | intended and tested consumer closures match; every scoped consumer passes its gates | correlated failures or binding divergence across profiles | hold affected consumers on prior bundles; narrow promotion; repair component; rerun fan-out |
 
-Each row should have an owner, current prompt revision, corpus revision, last
-run, exact numerator/denominator, interval, status, reopening condition, and
-linked remediation. A green aggregate never suppresses a red critical row.
+Each row should have an owner, exact component and bundle revisions, intended
+and tested consumer closures where applicable, corpus revision, last run, exact
+numerator/denominator, interval, status, reopening condition, and linked
+remediation. A green aggregate never suppresses a red critical row.
 
 ## Security and threat model for prompt improvement
 
@@ -1382,6 +1451,7 @@ harness makes forbidden effects impossible or fail-closed.
 | Malicious repository/dependency/content | indirect instructions in code, docs, issues, tool output | richer context creates more attack surface | label untrusted data, isolate instruction channels, sanitize tool output, capability enforcement |
 | Prompt extractor | requests system instructions, examples, canaries, or secrets | valuable optimized prompt may contain proprietary logic | assume prompt can leak; keep secrets/oracles out; minimize content; leakage tests |
 | Poisoned examples or retrieval | attacker supplies demonstration that changes policy | retrieved few-shot policy may amplify one item | provenance, allowlists, diversity, poisoning tests, immutable indexes |
+| Shared prompt component | one flawed or compromised revision is proposed across many profiles | reuse creates correlated failures and a large adoption blast radius | immutable revisions, locked layers, reverse-dependency closure, per-consumer evaluation, scoped promotion, exact rollback |
 | Automatic optimizer | searches for grader quirks or removes “costly” constraints | objective omits real safety/product dimensions | locked components, constrained objective, attempt ledger, human semantic review |
 | Model judge | rewards verbosity, self-family style, or injected evaluator commands | target learns judge-specific surface features | calibration, swaps, style controls, alternate judges, humans, deterministic oracles |
 | Prompt author | knowingly or accidentally tunes to sealed cases | repeated manual edits leak test information | access separation, immutable partitions, test rotation, audit of candidate history |
@@ -1398,50 +1468,71 @@ impact.
 
 ## Graph and ontology implications
 
-### Keep prompt evaluation in the existing evaluation graph family
+### Separate prompt assets, not prompt evaluation
 
-Prompt information does not need an independent mutable “prompt score graph.”
-A prompt candidate is a treatment inside the same governed evaluation model as
-model, harness, tool, and context changes:
+Prompt evaluation does not need an independent mutable “prompt score graph.” A
+prompt candidate is one treatment inside the same governed evaluation model as
+model, harness, tool, and context changes. A score for a prompt alone would be
+misleading because the measured object is always a complete
+`EvaluationTarget`.
+
+Reusable prompt assets do have a lifecycle distinct from evaluation
+definitions. Once JidoCode operationalizes common components and bundles, a
+separate immutable `prompt_catalog` graph family is justified. It indexes
+stable prompt families, immutable component and bundle revisions, compilers,
+compatibility declarations, ownership, lineage, and protected content
+references. It does **not** contain trials, grades, aggregate scores, or rollout
+authority.
 
 ```text
-immutable prompt bundle definition
-              |
-              v
-EvaluationTarget -> EvaluationProfile -> EvaluationRun
-                                         |
-                                         v
-                                  EvaluationTrial
-                                         |
-                                         v
-                GraderResult / HumanGrade / EvaluatorHealth
-                                         |
-                                         v
-                                  AggregateResult
-                                         |
-                                         v
-                            governed RolloutDecision
-                                         |
-                                         v
-                                ProductionOutcome
+prompt_catalog
+  PromptFamily -> PromptComponentRevision -> PromptBundleRevision
+                                                 |
+                                                 | exact revision/digest
+                                                 v
+evaluation_catalog                       EvaluationTarget/Profile
+  tasks, metrics, graders, plans                   |
+                                                  v
+evaluation_run                              Run -> Trial
+                                                  |
+                                                  v
+evidence                         Grade -> Aggregate -> proposed claim
+                                                  |
+                                                  v
+repository_control / factory_policy       governed deployment binding
+                                                  |
+                                                  v
+                                          ProductionOutcome
 ```
 
 Use:
 
-- `evaluation_catalog` for immutable prompt-bundle definitions or protected
-  references, evaluation targets, profiles, task partitions, metrics, and
-  statistical plans;
-- `evaluation_run` for frozen assignments, trials, prompt-render digests,
-  observations, and artifact references;
+- a future `prompt_catalog` for reusable immutable prompt-family, component,
+  bundle, compiler, compatibility, ownership, and lineage resources;
+- `evaluation_catalog` for evaluation targets that bind exact prompt-bundle
+  revisions, plus profiles, task partitions, metrics, graders, and statistical
+  plans;
+- `evaluation_run` for frozen assignments, trials, resolved prompt and render
+  digests, observations, and artifact references;
 - existing `evidence` for admitted grades, health results, aggregates, and
   proposed claims;
-- existing `derived` for dashboards and prompt comparisons;
-- existing `repository_control`/`factory_policy` for accepted prompt promotion
-  and rollback; and
-- existing `security_audit` for protected-corpus access, extraction,
-  tampering, invalidation, and overrides.
+- existing `derived` for reverse-dependency views, coverage matrices,
+  dashboards, staleness projections, and prompt comparisons;
+- existing `repository_control`/`factory_policy` for scoped prompt promotion,
+  exact operational bindings, and rollback; and
+- existing `security_audit` for protected-prompt access, extraction,
+  unauthorized mutation, corpus access, tampering, invalidation, and overrides.
 
-This preserves the authority invariant: a prompt score cannot deploy a prompt.
+This preserves two authority invariants: a prompt score cannot deploy a prompt,
+and publishing a reusable component cannot cause its consumers to adopt it.
+The catalog describes available immutable revisions; a separate governed
+decision changes an operational binding.
+
+Until `prompt_catalog` completes the normal ontology, graph-registry, shape,
+writer, query, and falsification gates, version-controlled prompt sources and
+content-addressed protected artifacts remain authoritative. An evaluation
+catalog may bind their exact references, but it should not become a second,
+mutable prompt library.
 
 ### Candidate ontology gap
 
@@ -1449,34 +1540,53 @@ The current candidate evaluation ontology already represents
 `EvaluationProfile`, `EvaluationTarget`, `EvaluationRun`, `EvaluationTrial`,
 `GraderResult`, `HumanGrade`, `EvaluatorHealth`, `MetricObservation`,
 `AggregateResult`, `RolloutDecision`, and `ProductionOutcome`. The research
-target tuple names prompt digests, but
+target tuple names prompt digests, but the candidate defines neither a prompt
+catalog graph family nor first-class prompt assets, and
 [`EvaluationTarget`](../../priv/ontology/evaluation/1.0.0/evaluation.ttl)
 currently has no explicit first-class prompt fields.
 
-A future immutable ontology release—not an edit to accepted `1.0.0`—should
-consider:
+A future reviewed prompt ontology plus a compatible immutable evaluation
+release—not an in-place edit to the existing candidate or accepted factory
+`1.0.0`—should consider:
 
 | Proposed term | Purpose |
 | --- | --- |
-| `PromptBundleRevision` | immutable definition/reference for one prompt treatment |
-| `PromptComponentRevision` | typed source, partial, example, schema, or tool-description component |
+| `PromptCatalogGraphContract` | immutable-and-complete graph family contract with a dedicated writer and catalog revision |
+| `PromptFamily` | stable logical identity and behavior-contract reference without mutable prompt content |
+| `PromptComponentRevision` | immutable typed policy, source, partial, example, schema, or tool-description component |
+| `PromptBundleRevision` | immutable ordered closure of exact components, compiler, demonstrations, and rendering policy |
 | `PromptCompilerRevision` | assembly, role, ordering, escaping, and rendering code revision |
 | `DemonstrationSetRevision` | immutable example identities, order/selection policy, and digest |
+| `hasComponentRevision` / `componentPosition` | express exact composition and deterministic order without resolving aliases |
+| `promptContentDigest` | bind content identity while allowing protected bytes to remain outside the graph |
 | `promptBundleDigest` | bind an `EvaluationTarget` to the exact bundle |
 | `promptCompilerRevision` | bind the renderer/compiler |
 | `demonstrationSetDigest` | bind examples without exposing protected bytes |
 | `renderingPolicyRevision` | bind role/order/escape/truncation behavior |
 | `baselinePromptTarget` | explicit paired baseline relationship |
-| `derivedFromPrompt` | candidate lineage without implying superiority |
+| `derivedFromPrompt` | candidate lineage without implying improvement or adoption |
+| `supersedesPrompt` | intended succession without rewriting or invalidating history |
+| `createdByOptimizationRun` | connect a candidate to GEPA or another bounded generation run |
 | `optimizationMethodRevision` | optimizer algorithm/generator identity |
+| `PromptDeploymentBinding` | governed control-graph mapping from one operational profile to an exact accepted bundle and rollback revision |
 
-Operational shapes should require exactly one prompt-bundle binding for prompt
-experiments, reject unresolved mutable aliases, and keep protected/raw prompt
-bytes out of graph literals. A rendered-prompt digest belongs to the trial
-observation because dynamic task context differs per trial.
+Prompt-catalog shapes should require one immutable identity and digest per
+revision, deterministic bundle composition, declared owners and locked
+components, and closed references to exact revisions. They should reject a
+mutable `current` or `latest` content pointer. Evaluation shapes should require
+exactly one prompt-bundle binding for prompt experiments. Control shapes should
+make deployment bindings scoped, decision-backed, and reversible. A binding
+may select a revision for a new attempt, but the attempt records the resolved
+revision immediately.
 
-Do not add these terms directly to the immutable
-`priv/ontology/evaluation/1.0.0` candidate. They require the same reviewed
+Protected/raw prompt bytes remain outside broadly queryable graph literals.
+The graph stores minimum digests and capability-gated artifact references. A
+rendered-prompt digest belongs to the trial observation because authorized
+dynamic context differs per trial.
+
+Do not add these terms directly to the current
+`priv/ontology/evaluation/1.0.0` candidate or rewrite the accepted factory
+ontology. A prompt catalog and its evaluation links require the same reviewed
 ontology, SHACL, graph-registry, writer-capability, query, migration, and
 falsification process described in
 [the evaluation ontology README](../../priv/ontology/evaluation/1.0.0/README.md).
@@ -1484,6 +1594,12 @@ falsification process described in
 ### Queries this representation enables
 
 - which prompt bundle was actually rendered for a disputed trial;
+- which bundle revisions consume a component revision and which operational
+  profiles bind those bundles;
+- which candidate bundles would be affected if a new common-component revision
+  were adopted;
+- which models, tools, compilers, and profile slices have evaluated a given
+  prompt revision, without inventing a universal prompt score;
 - which results are stale after a component, compiler, example, model, tool, or
   context-policy change;
 - which candidates were evaluated against the same assignments and budget;
@@ -1497,12 +1613,35 @@ falsification process described in
 - which incident-derived cases have entered a regression corpus; and
 - which deployed prompt lacks a valid rollback revision.
 
+### Fan-out evaluation for shared changes
+
+Publishing a new common-component revision does not alter any existing bundle.
+Adoption constructs new candidate bundle revisions for an explicit consumer
+set. The reverse-dependency closure determines evaluation scope; it does not
+grant adoption authority.
+
+| Proposed change | Required evaluation before adoption |
+| --- | --- |
+| Leaf component used by one bundle | component contract checks plus that bundle's paired prompt suite |
+| Shared behavioral component | component checks plus paired capability, robustness, and regression runs for every intended consumer profile |
+| Locked authority/security/disclosure component | owner authorization, adversarial/security gates, every intended consumer, independent review, and sealed confirmation |
+| Prompt compiler, ordering, escaping, or truncation policy | every bundle whose rendered closure can change, including render digests and injection controls |
+| Demonstration set or selection policy | every consuming profile, order/selection perturbations, leakage and partition checks |
+| Deployment-binding change only | verify the candidate already has valid evidence for that exact profile and preserve an exact rollback binding |
+| Optimizer-generated candidate not selected for adoption | development/validation evidence and lineage only; no production fan-out or control transition |
+
+The evidence view should record the intended-consumer closure, tested-consumer
+closure, uncovered consumers, exact baseline/candidate pairs, and adoption
+scope. A shared candidate cannot be called generally improved because it wins
+on one consumer. Uncovered or materially regressed consumers remain on their
+previous immutable bundle.
+
 ## Recommended development and CI cadence
 
 | Tier | Trigger and budget | Prompt checks | Decision |
 | --- | --- | --- | --- |
-| T0 deterministic | every prompt/compiler PR; seconds/minutes | rendering snapshots/digests, schema, precedence, escaping, locked-component diff, ontology/manifest validation | block malformed or unauthorized change |
-| T1 prompt smoke | relevant PR; minutes | small positive/negative/regression pairs, one clean injection control, baseline comparison | block obvious regression; no rollout authority |
+| T0 deterministic | every prompt/compiler PR; seconds/minutes | rendering snapshots/digests, schema, precedence, escaping, locked-component diff, exact dependency and reverse-consumer closure, ontology/manifest validation | block malformed, unresolved, or unauthorized change |
+| T1 prompt smoke | relevant PR and each intended consumer of a shared revision; minutes | small positive/negative/regression pairs, one clean injection control, paired baseline comparison | block obvious consumer regression; no rollout authority |
 | T2 nightly | scheduled; hours | broader capability, repeated trials, semantic variants, cost, judge health, prompt-family slices | alert/block candidate promotion |
 | T3 security | scheduled and candidate; hours/day | direct/indirect injection, extraction, poisoning, evaluator manipulation, resource/fault cases | any critical violation blocks |
 | T4 release | frozen candidate; independent | sealed tasks, paired baseline, preregistered statistics, blinded human review, full evaluator health | supplies evidence to governed decision |
@@ -1516,11 +1655,13 @@ on every edit.
 
 ```yaml
 prompt_family: repository_analysis
-candidate_revision: sha256:...
-baseline_revision: sha256:...
+prompt_catalog_revision: sha256:...
+candidate_bundle_revision: sha256:...
+baseline_bundle_revision: sha256:...
 behavior_contract_revision: ...
 
 treatment:
+  changed_component_revisions: [...]
   editable_components: [...]
   locked_components: [...]
   prompt_compiler_revision: ...
@@ -1528,6 +1669,9 @@ treatment:
   context_policy_revision: ...
   tool_schema_digest: ...
   output_schema_revision: ...
+  intended_consumer_profiles: [...]
+  reverse_dependency_closure_digest: ...
+  uncovered_consumers: []
 
 hypothesis:
   primary_endpoint: ...
@@ -1563,6 +1707,8 @@ result:
 governance:
   semantic_diff_reviewers: [...]
   security_review_required: true
+  promotion_scope: [...]
+  candidate_deployment_binding: ...
   rollback_revision: ...
   disposition: proposed
 ```
@@ -1576,13 +1722,16 @@ protected prompts, or sealed oracle content.
 
 - inventory prompt families, compilers, examples, tool descriptions, and
   output schemas;
+- identify genuinely reusable components and every current consumer rather
+  than extracting a global mega-prompt by default;
 - identify owners and authority-sensitive components;
-- content-address current production bundles;
+- content-address current production components and bundle closures;
 - define behavior contracts and rollback revisions; and
 - make renderer output deterministic for fixed inputs where possible.
 
-Exit evidence: every operational prompt can be traced to an immutable bundle,
-compiler, model/profile, and owner.
+Exit evidence: every operational prompt can be traced to an immutable component
+and bundle closure, compiler, model/profile, owner, consumer set, and rollback
+revision.
 
 ### Phase P1: Prompt test fixtures
 
@@ -1611,15 +1760,19 @@ affected prompt result.
 
 ### Phase P3: Governed prompt experiments
 
+- introduce the reviewed `prompt_catalog` graph family only after its ontology,
+  SHACL, registry, writer, query, migration, and falsification gates pass;
 - model prompt bundles as explicit treatments in evaluation profiles;
+- require exact component resolution and reverse-consumer closure for shared
+  changes;
 - add paired baseline/candidate execution;
 - require semantic diff and locked-component review;
 - record every attempted candidate and optimizer budget;
 - freeze validation and sealed-run protocols; and
 - integrate prompt-specific staleness and rollback.
 
-Exit evidence: no score or optimizer output can directly change an operational
-prompt.
+Exit evidence: no score, catalog publication, or optimizer output can directly
+change an operational prompt or silently update a consumer.
 
 ### Phase P4: Optional automatic optimization
 
@@ -1677,18 +1830,26 @@ and production evidence at exact revisions.
     surface as the repository's evidence system.
 20. Silently rewriting historical prompt revisions, scores, or corpus
     membership.
+21. Treating one global mega-prompt as reusable architecture without measuring
+    its correlated-failure and regression blast radius.
+22. Resolving `latest` or another mutable prompt alias inside an evaluation,
+    execution record, evidence claim, or rollback target.
+23. Calling a shared component generally improved because one consuming profile
+    won, while other intended consumers remain untested or regressed.
 
 ## Final recommendation
 
 JidoCode should build the measurement system before adding automatic prompt
 search. The near-term sequence is:
 
-1. content-address prompt bundles and compilers;
+1. content-address prompt families, components, bundle closures, and compilers;
 2. define behavior contracts and explicit success vectors;
 3. establish development/validation/sealed/regression/judge partitions;
 4. build deterministic outcome graders and evaluator-health checks;
 5. compare prompt candidates with paired, repeated, robustness-aware runs;
-6. represent candidates and results in the existing governed evaluation graph;
+6. keep reusable prompt assets in a future immutable `prompt_catalog`, while
+   representing their targets and results in the existing governed evaluation
+   and evidence topology;
 7. require human semantic diff, security gates, and independent sealed
    confirmation; and
 8. learn from shadow/pilot outcomes through reviewed regression-corpus updates.
