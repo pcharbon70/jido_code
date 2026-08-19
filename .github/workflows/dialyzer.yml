@@ -1,0 +1,103 @@
+name: Dialyzer
+
+on:
+  pull_request:
+    paths:
+      - "lib/**/*.ex"
+      - "config/**/*.exs"
+      - "mix.exs"
+      - "mix.lock"
+      - ".dialyzer_ignore.exs"
+      - ".github/workflows/dialyzer.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/**/*.ex"
+      - "config/**/*.exs"
+      - "mix.exs"
+      - "mix.lock"
+      - ".dialyzer_ignore.exs"
+      - ".github/workflows/dialyzer.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  dialyzer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      MIX_ENV: dev
+      ERLANG_ROCKSDB_OPTS: -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native build prerequisites
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config
+
+      - uses: erlef/setup-beam@v1
+        id: beam
+        with:
+          otp-version: "28.3.1"
+          elixir-version: "1.19.5"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.92.0"
+
+      - name: Restore Dialyzer build cache
+        id: dialyzer_build_cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            deps
+            _build/dev
+          key: dialyzer-build-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-rust-1.92.0-rocksdb-cmake-3.5-${{ hashFiles('mix.lock', 'mix.exs') }}
+          restore-keys: |
+            dialyzer-build-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-rust-1.92.0-rocksdb-cmake-3.5-
+
+      - name: Install locked development dependencies
+        run: mix deps.get --only dev --check-locked
+
+      - name: Compile application for Dialyzer
+        run: |
+          mix clean --only dev
+          mix compile --warnings-as-errors
+
+      - name: Save Dialyzer build cache
+        if: steps.dialyzer_build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            deps
+            _build/dev
+          key: dialyzer-build-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-rust-1.92.0-rocksdb-cmake-3.5-${{ hashFiles('mix.lock', 'mix.exs') }}
+
+      - name: Restore Dialyzer PLT cache
+        id: dialyzer_plt_cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: priv/plts
+          key: dialyzer-plt-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-dev-${{ hashFiles('mix.lock', 'mix.exs') }}
+          restore-keys: |
+            dialyzer-plt-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-dev-
+
+      - name: Report Dialyzer cache status
+        run: |
+          echo "Dialyzer build cache exact hit - ${{ steps.dialyzer_build_cache.outputs.cache-hit }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Dialyzer PLT cache exact hit - ${{ steps.dialyzer_plt_cache.outputs.cache-hit }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build Dialyzer PLTs
+        if: steps.dialyzer_plt_cache.outputs.cache-hit != 'true'
+        run: mix dialyzer --plt --no-compile
+
+      - name: Save Dialyzer PLT cache
+        if: steps.dialyzer_plt_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: priv/plts
+          key: dialyzer-plt-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-dev-${{ hashFiles('mix.lock', 'mix.exs') }}
+
+      - name: Analyze application
+        run: mix dialyzer --no-compile --format github --format dialyxir --list-unused-filters

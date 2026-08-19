@@ -11,7 +11,13 @@ defmodule JidoCode.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/project.plt"},
+        plt_core_path: "priv/plts/core.plt",
+        plt_add_apps: [:mix],
+        ignore_warnings: ".dialyzer_ignore.exs"
+      ]
     ]
   end
 
@@ -46,6 +52,13 @@ defmodule JidoCode.MixProject do
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.1.0"},
+      # Dialyxir 1.4.7 predates OTP 28's opaque comparison warning formats.
+      # Pin the upstream formatter support until it is included in a Hex release.
+      {:dialyxir,
+       git: "https://github.com/jeremyjh/dialyxir.git",
+       ref: "3553678f4d69281ac6db61034bcf35bcb30cfd78",
+       only: [:dev, :test],
+       runtime: false},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:salad_ui, "~> 1.0.0-beta.3"},
