@@ -13,7 +13,7 @@ new execution attempt.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Account for every expected execution event without claiming unauthorized recall.
+- [x] 2 Phase - Account for every expected execution event without claiming unauthorized recall.
 
   This phase establishes MG2 by making sequence, causality, capture state,
   completeness, and omission mechanically provable.
@@ -86,7 +86,7 @@ Back to plan: [README](./README.md)
       - [x] 2.4.1.5 Subtask - Add dual legacy/segmented projections with explicit protocol and completeness fields.
       - [x] 2.4.1.6 Subtask - Reject late events after segment or run closure and prevent restore from reopening closed history.
 
-  - [ ] 2.5 Section - Phase 2 Integration Tests.
+  - [x] 2.5 Section - Phase 2 Integration Tests.
 
     This final section proves total semantic accounting under concurrency,
     failure, restart, and protocol bounds.
@@ -103,7 +103,7 @@ Back to plan: [README](./README.md)
       - [x] 2.5.1.5 Subtask - Verify legacy closed runs remain readable and unchanged while new attempts require `2.0.0`.
       - [x] 2.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
-    - [ ] 2.5.2 Task {#tam-p02-phase-receipt} [repo: jido_code] [after: {#tam-p02-integration}] - Publish the Phase 2 semantic-accounting receipt.
+    - [x] 2.5.2 Task {#tam-p02-phase-receipt} [repo: jido_code] [after: {#tam-p02-integration}] - Publish the Phase 2 semantic-accounting receipt.
 
       This task records the segmented protocol in
       `docs/architecture/memory-phase-02-receipt.md` and binds MG2 to the
@@ -112,4 +112,4 @@ Back to plan: [README](./README.md)
       - [x] 2.5.2.1 Subtask - Record command, shape, segment-limit, digest, capture-profile, fixture, and compatibility revisions.
       - [x] 2.5.2.2 Subtask - Attach concurrency, closure, completeness, restart, and legacy-read evidence.
       - [x] 2.5.2.3 Subtask - Keep MG2 blocked if an expected event can disappear, a closed segment can mutate, or a content body lacks an explicit state.
-      - [ ] 2.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 3.
+      - [x] 2.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 3.

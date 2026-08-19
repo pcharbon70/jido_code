@@ -2,10 +2,11 @@
 
 ## Status
 
-This receipt records the Memory Phase 2 candidate verified locally on
-2026-08-19. Acceptance remains merge-pending until the implementation pull
-request passes clean-checkout CI and its full merge commit is pinned here.
-Phase 3 is not authorized from an unmerged branch or an unpinned candidate.
+This receipt records the Memory Phase 2 candidate verified locally and
+accepted after pull request merge on 2026-08-19. Pull request #50 passed
+clean-checkout CI and merged on 2026-08-19 as
+`87e2c002973bdb030f5be90e7818ab1ecd6d5bac`. MG2 is accepted, and Phase 3 is
+authorized only from that exact merged baseline.
 
 ## Candidate Provenance
 
@@ -17,8 +18,8 @@ Phase 3 is not authorized from an unmerged branch or an unpinned candidate.
 | Section 2.2 | `d63749eae1741ae620dd1fbffebd751dc61b7b26` - account for segmented episode content |
 | Section 2.3 | `1d2433023c02bde07b3e42db98f3a6a02205f3bc` - sequence immutable execution events |
 | Section 2.4 | `ebeee150dad5d7aa3f2d27e4fb359849af7e00bf` - finalize and recover segmented runs |
-| Section 2.5 and receipt | This commit; merge-pending |
-| Merged candidate | Merge-pending |
+| Section 2.5 and receipt | `0a971b356cd879439e79b4ea6fdaca9142c9d490` - verify total semantic accounting |
+| Merged candidate | `87e2c002973bdb030f5be90e7818ab1ecd6d5bac` |
 
 ## Contract Pins
 
@@ -102,7 +103,7 @@ packages are unchanged.
 | `mix compile --warnings-as-errors` | Pass |
 | `mix architecture.check` | Pass |
 | `mix precommit` | 647 tests, 0 failures; pass |
-| Pull request clean-checkout CI | Merge-pending |
+| Pull request #50 clean-checkout CI | Pass; merged 2026-08-19 |
 
 ## Known Limitations
 
@@ -121,10 +122,9 @@ packages are unchanged.
 
 ## Gate MG2
 
-MG2 remains merge-pending. It becomes accepted only after clean-checkout CI
-passes, the pull request merges, and the full merge commit and merge date are
-pinned in this receipt and the Phase 2 plan. Phase 3 is authorized only from
-that exact merged baseline.
+MG2 is accepted at merged candidate
+`87e2c002973bdb030f5be90e7818ab1ecd6d5bac`, pinned in this receipt and the
+Phase 2 plan. Phase 3 is authorized only from that exact baseline.
 
 MG2 reopens if any expected event can disappear; if one predecessor can gain
 multiple accepted successors; if a closed segment or finalized run can mutate
