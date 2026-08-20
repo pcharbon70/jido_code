@@ -88,17 +88,28 @@ defmodule JidoCode.Knowledge.Memory.Phase03RetrievalAuthorizationTest do
     assert started.open_effect_iris == [start.iri]
 
     selected = resource(:knowledge_assertion, "selected")
+    ignored = resource(:knowledge_assertion, "ignored")
     omitted = resource(:knowledge_assertion, "omitted")
 
-    assert {:ok, outcome} =
-             RetrievalActivity.outcome(start, %{
-               occurred_at: DateTime.add(@now, 1, :second),
-               packet_digest: String.duplicate("a", 64),
-               selected_iris: [selected],
-               omitted_iris: [omitted],
-               opened_iris: [selected],
-               unavailable_iris: []
-             })
+    outcome_attributes = %{
+      occurred_at: DateTime.add(@now, 1, :second),
+      packet_digest: String.duplicate("a", 64),
+      selected_iris: [selected, ignored],
+      omitted_iris: [omitted],
+      opened_iris: [selected],
+      unavailable_iris: [],
+      followed_iris: [selected],
+      contradicted_iris: [selected],
+      ignored_iris: [ignored]
+    }
+
+    assert {:ok, outcome} = RetrievalActivity.outcome(start, outcome_attributes)
+    assert outcome.followed_iris == [selected]
+    assert outcome.contradicted_iris == [selected]
+    assert outcome.ignored_iris == [ignored]
+
+    assert {:error, %{kind: :invalid_input}} =
+             RetrievalActivity.outcome(start, Map.put(outcome_attributes, :useful?, true))
 
     assert {:ok, %{segment: finished, command: outcome_command}} =
              RetrievalActivity.record_command(outcome, started, command_attributes(started, 2),

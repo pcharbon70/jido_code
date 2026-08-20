@@ -25,7 +25,10 @@ defmodule JidoCode.Knowledge.Memory.RetrievalActivity do
                 selected_iris: [],
                 omitted_iris: [],
                 opened_iris: [],
-                unavailable_iris: []
+                unavailable_iris: [],
+                followed_iris: [],
+                contradicted_iris: [],
+                ignored_iris: []
               ]
 
   @type t :: %__MODULE__{}
@@ -57,15 +60,29 @@ defmodule JidoCode.Knowledge.Memory.RetrievalActivity do
 
   @spec outcome(t(), map()) :: {:ok, t()} | {:error, Error.t()}
   def outcome(%__MODULE__{kind: :start} = start, attributes) when is_map(attributes) do
-    with digest when is_binary(digest) <- attributes[:packet_digest],
+    allowed_keys = ~w[
+      packet_digest occurred_at selected_iris omitted_iris opened_iris unavailable_iris
+      followed_iris contradicted_iris ignored_iris
+    ]a
+
+    with true <- MapSet.subset?(MapSet.new(Map.keys(attributes)), MapSet.new(allowed_keys)),
+         digest when is_binary(digest) <- attributes[:packet_digest],
          true <- Regex.match?(@digest64, digest),
          %DateTime{} = occurred_at <- attributes[:occurred_at],
          true <- DateTime.compare(occurred_at, start.occurred_at) in [:eq, :gt],
-         {:ok, selected} <- commitments(attributes[:selected_iris]),
-         {:ok, omitted} <- commitments(attributes[:omitted_iris]),
-         {:ok, opened} <- commitments(attributes[:opened_iris]),
-         {:ok, unavailable} <- commitments(attributes[:unavailable_iris]),
+         {:ok, selected} <- commitments(attributes[:selected_iris] || []),
+         {:ok, omitted} <- commitments(attributes[:omitted_iris] || []),
+         {:ok, opened} <- commitments(attributes[:opened_iris] || []),
+         {:ok, unavailable} <- commitments(attributes[:unavailable_iris] || []),
+         {:ok, followed} <- commitments(attributes[:followed_iris] || []),
+         {:ok, contradicted} <- commitments(attributes[:contradicted_iris] || []),
+         {:ok, ignored} <- commitments(attributes[:ignored_iris] || []),
          true <- MapSet.disjoint?(MapSet.new(selected), MapSet.new(unavailable)),
+         true <- MapSet.subset?(MapSet.new(opened), MapSet.new(selected)),
+         true <- MapSet.subset?(MapSet.new(followed), MapSet.new(selected)),
+         true <- MapSet.subset?(MapSet.new(contradicted), MapSet.new(selected)),
+         true <- MapSet.subset?(MapSet.new(ignored), MapSet.new(selected)),
+         true <- MapSet.disjoint?(MapSet.new(followed), MapSet.new(ignored)),
          {:ok, iri} <-
            ResourceIdentity.deterministic(
              :memory_retrieval_activity,
@@ -86,7 +103,10 @@ defmodule JidoCode.Knowledge.Memory.RetrievalActivity do
          selected_iris: selected,
          omitted_iris: omitted,
          opened_iris: opened,
-         unavailable_iris: unavailable
+         unavailable_iris: unavailable,
+         followed_iris: followed,
+         contradicted_iris: contradicted,
+         ignored_iris: ignored
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
@@ -123,7 +143,10 @@ defmodule JidoCode.Knowledge.Memory.RetrievalActivity do
       refs(activity.iri, "selectedMemory", activity.selected_iris) ++
       refs(activity.iri, "omittedMemory", activity.omitted_iris) ++
       refs(activity.iri, "openedMemory", activity.opened_iris) ++
-      refs(activity.iri, "unavailableMemory", activity.unavailable_iris)
+      refs(activity.iri, "unavailableMemory", activity.unavailable_iris) ++
+      refs(activity.iri, "followedMemory", activity.followed_iris) ++
+      refs(activity.iri, "contradictedMemory", activity.contradicted_iris) ++
+      refs(activity.iri, "ignoredMemory", activity.ignored_iris)
   end
 
   @spec event_attributes(t()) :: map()

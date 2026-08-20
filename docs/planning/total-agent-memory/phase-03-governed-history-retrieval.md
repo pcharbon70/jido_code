@@ -67,20 +67,20 @@ Back to plan: [README](./README.md)
       - [x] 3.3.1.5 Subtask - Assemble bounded items containing selection reason, source IRI, temporal scope, trust, evidence strength, freshness, limitations, contradiction, applicability, and an authorized recovery handle.
       - [x] 3.3.1.6 Subtask - Mark every payload as non-instructional data and prohibit it from adding tools, capabilities, policy, credentials, destinations, approvals, or durable writes.
 
-  - [ ] 3.4 Section - Integrate memory retrieval with the harness.
+  - [x] 3.4 Section - Integrate memory retrieval with the harness.
 
     This section places governed evidence packets into context without changing
     model/tool authority or accepting self-reported utility.
 
-    - [ ] 3.4.1 Task {#tam-p03-harness-retrieval} [repo: jido_code] [after: {#tam-p03-retrieval-pipeline}] - Extend context compilation and retrieval observability.
+    - [x] 3.4.1 Task {#tam-p03-harness-retrieval} [repo: jido_code] [after: {#tam-p03-retrieval-pipeline}] - Extend context compilation and retrieval observability.
 
       This task makes memory influence attributable, bounded, and removable.
 
-      - [ ] 3.4.1.1 Subtask - Add evidence-packet items to `ContextManifest` with exact digest, source, classification, trust, and reconstruction state.
-      - [ ] 3.4.1.2 Subtask - Keep packet text structurally separate from system/task instructions and preserve epistemic labels through serialization.
-      - [ ] 3.4.1.3 Subtask - Record supplied, budget-omitted, opened, followed, contradicted, and ignored status without treating the model's claim of usefulness as evidence.
-      - [ ] 3.4.1.4 Subtask - Support a strict no-memory mode producing bit-identical base authorization and tool behavior.
-      - [ ] 3.4.1.5 Subtask - Emit bounded retrieval latency, cost, truncation, source-availability, and index-rebuild metrics without payload values.
+      - [x] 3.4.1.1 Subtask - Add evidence-packet items to `ContextManifest` with exact digest, source, classification, trust, and reconstruction state.
+      - [x] 3.4.1.2 Subtask - Keep packet text structurally separate from system/task instructions and preserve epistemic labels through serialization.
+      - [x] 3.4.1.3 Subtask - Record supplied, budget-omitted, opened, followed, contradicted, and ignored status without treating the model's claim of usefulness as evidence.
+      - [x] 3.4.1.4 Subtask - Support a strict no-memory mode producing bit-identical base authorization and tool behavior.
+      - [x] 3.4.1.5 Subtask - Emit bounded retrieval latency, cost, truncation, source-availability, and index-rebuild metrics without payload values.
 
   - [ ] 3.5 Section - Phase 3 Integration Tests.
 

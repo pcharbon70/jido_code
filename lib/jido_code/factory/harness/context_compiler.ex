@@ -11,6 +11,7 @@ defmodule JidoCode.Factory.Harness.ContextCompiler do
 
   alias JidoCode.Knowledge
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.Memory.EvidencePacket
 
   @section_order ~w[
     system_contract authority_summary task policy_repository graph_resource
@@ -86,6 +87,78 @@ defmodule JidoCode.Factory.Harness.ContextCompiler do
   end
 
   def compile(_attributes, _options), do: invalid(:compile_model_context)
+
+  @doc """
+  Compiles ordinary context and, when supplied, appends a structurally separate
+  non-instructional evidence packet. Disabled mode delegates directly to
+  `compile/2`, preserving bit-identical context, authorization, and tool input.
+  """
+  @spec compile_with_memory(map(), :disabled | nil | EvidencePacket.t(), keyword()) ::
+          {:ok, t()} | {:error, Error.t()}
+  def compile_with_memory(attributes, memory, options \\ [])
+
+  def compile_with_memory(attributes, memory, options) when memory in [:disabled, nil],
+    do: compile(attributes, options)
+
+  def compile_with_memory(attributes, %EvidencePacket{} = packet, options)
+      when is_map(attributes) and is_list(options) do
+    with {:ok, base} <- compile(attributes, options),
+         {:ok, memory_items, memory_omissions} <-
+           memory_items(packet, attributes.budget.max_item_bytes),
+         {:ok, source_graphs} <- merge_source_graphs(base.manifest.source_graphs, memory_items),
+         serialized <- serialize_with_memory(base, packet, memory_items),
+         true <- byte_size(serialized) <= attributes.budget.max_bytes,
+         true <- token_estimate(serialized) <= attributes.budget.max_tokens,
+         true <- length(base.items) + length(memory_items) <= attributes.budget.max_items,
+         digest <- sha256(serialized),
+         omissions <- base.omissions ++ packet_omissions(packet) ++ memory_omissions,
+         {:ok, manifest} <-
+           Knowledge.context_manifest(attributes.attempt_iri, %{
+             index: attributes.manifest_index,
+             digest: digest,
+             kind: :host_context,
+             reconstruction: if(omissions == [], do: :exact, else: :partial),
+             source_graphs: source_graphs,
+             items: base.manifest.items ++ Enum.map(memory_items, &memory_manifest_item/1),
+             serialized_bytes: byte_size(serialized),
+             estimated_tokens: token_estimate(serialized),
+             omissions: Enum.map(omissions, &manifest_omission/1),
+             missing_classes: if(omissions == [], do: nil, else: [:retention_gap]),
+             retrieval_commitment: %{
+               request_iri: packet.request_iri,
+               packet_iri: packet.iri,
+               packet_digest: packet.digest,
+               partition_digest: packet.partition_digest,
+               query_version: packet.query_version,
+               ranking_version: packet.ranking_version,
+               index_version: packet.index_version
+             }
+           }) do
+      {:ok,
+       %__MODULE__{
+         manifest: manifest,
+         items: base.items ++ memory_items,
+         serialized: serialized,
+         digest: digest,
+         omissions: omissions,
+         retrievals: base.retrievals ++ Enum.map(memory_items, & &1.recovery_handle),
+         revision_pins:
+           Map.put(base.revision_pins, :memory_evidence_packet, %{
+             iri: packet.iri,
+             digest: packet.digest,
+             partition_digest: packet.partition_digest
+           })
+       }}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _invalid -> invalid(:compile_memory_context)
+    end
+  rescue
+    _error -> invalid(:compile_memory_context)
+  end
+
+  def compile_with_memory(_attributes, _memory, _options),
+    do: invalid(:compile_memory_context)
 
   @spec section_order() :: [atom()]
   def section_order, do: @section_order
@@ -426,6 +499,131 @@ defmodule JidoCode.Factory.Harness.ContextCompiler do
       classification: item.classification,
       provenance_digest: item.provenance_digest
     }
+  end
+
+  defp memory_items(packet, max_item_bytes) do
+    packet.items
+    |> Enum.reduce_while({:ok, [], []}, fn item, {:ok, items, omissions} ->
+      case memory_item(item, packet.digest, max_item_bytes) do
+        {:ok, memory_item, nil} ->
+          {:cont, {:ok, [memory_item | items], omissions}}
+
+        {:ok, memory_item, omission} ->
+          {:cont, {:ok, [memory_item | items], [omission | omissions]}}
+
+        {:error, %Error{} = error} ->
+          {:halt, {:error, error}}
+      end
+    end)
+    |> case do
+      {:ok, items, omissions} -> {:ok, Enum.reverse(items), Enum.reverse(omissions)}
+      error -> error
+    end
+  end
+
+  defp memory_item(item, packet_digest, max_item_bytes) do
+    full_content =
+      canonical_json(%{
+        boundary: :non_instructional_evidence_data,
+        authority: false,
+        evidence: item
+      })
+
+    {content, summarized?, omission} =
+      if byte_size(full_content) <= max_item_bytes do
+        {full_content, false, nil}
+      else
+        summary =
+          canonical_json(%{
+            boundary: :non_instructional_evidence_data,
+            authority: false,
+            evidence: %{
+              iri: item.iri,
+              source_iri: item.source_iri,
+              original_digest: sha256(full_content),
+              recovery_handle: item.recovery_handle,
+              payload_omitted: true
+            }
+          })
+
+        {summary, true, %{kind: :memory_evidence, item_iri: item.iri, reason: :item_budget}}
+      end
+
+    if byte_size(content) <= max_item_bytes do
+      {:ok,
+       %{
+         kind: :memory_evidence,
+         item_iri: item.iri,
+         source_iri: item.source_iri,
+         classification: item.classification,
+         trust: item.trust,
+         reconstruction:
+           if(item.recovery_handle.exact_content_permit_required?,
+             do: :recoverable_reference,
+             else: :semantic_only
+           ),
+         packet_digest: packet_digest,
+         content: content,
+         digest: sha256(content),
+         bytes: byte_size(content),
+         provenance_digest: digest_term(item.recovery_handle),
+         summarized?: summarized?,
+         recovery_handle: item.recovery_handle
+       }, omission}
+    else
+      invalid(:compile_memory_item)
+    end
+  end
+
+  defp merge_source_graphs(base_graphs, memory_items) do
+    references =
+      base_graphs ++
+        Enum.map(memory_items, fn item ->
+          {item.recovery_handle.graph_iri, item.recovery_handle.graph_revision}
+        end)
+
+    grouped = Enum.group_by(references, &elem(&1, 0), &elem(&1, 1))
+
+    if Enum.all?(grouped, fn {_graph, revisions} -> length(Enum.uniq(revisions)) == 1 end) do
+      {:ok, references |> Enum.uniq() |> Enum.sort()}
+    else
+      {:error, Error.new(:stale_precondition, :compile_memory_graph_revisions)}
+    end
+  end
+
+  defp serialize_with_memory(base, packet, memory_items) do
+    canonical_json(%{
+      contract: "jido-code-context/1.1.0",
+      instruction_context: Jason.decode!(base.serialized),
+      memory_evidence: %{
+        boundary: :non_instructional_data,
+        authority: false,
+        packet_iri: packet.iri,
+        packet_digest: packet.digest,
+        items: Enum.map(memory_items, &Jason.decode!(&1.content))
+      }
+    })
+  end
+
+  defp memory_manifest_item(item) do
+    %{
+      iri: item.item_iri,
+      digest: item.digest,
+      bytes: item.bytes,
+      classification: item.classification,
+      provenance_digest: item.provenance_digest,
+      kind: :memory_evidence,
+      source_iri: item.source_iri,
+      trust: item.trust,
+      reconstruction: item.reconstruction,
+      packet_digest: item.packet_digest
+    }
+  end
+
+  defp packet_omissions(packet) do
+    Enum.map(packet.omissions, fn omission ->
+      %{kind: :memory_evidence, item_iri: omission.iri, reason: omission.reason}
+    end)
   end
 
   defp manifest_omission(omission),

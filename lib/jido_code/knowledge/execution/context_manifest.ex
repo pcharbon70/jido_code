@@ -11,6 +11,7 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.ResourceIdentity
+  alias JidoCode.Security.DataPolicy
 
   @enforce_keys [:iri, :attempt_iri, :index, :digest, :kind, :reconstruction]
   defstruct @enforce_keys ++
@@ -47,7 +48,10 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   @missing_reconstruction_classes ~w[
     raw_prompt raw_response raw_tool_output provider_session retention_gap
   ]a
-  @classifications ~w[public internal confidential]a
+  @classifications DataPolicy.classifications() --
+                     ~w[secret_value prompt encrypted_content backup_derivative]a
+  @memory_trust ~w[verified accepted asserted observed untrusted]a
+  @memory_reconstruction ~w[semantic_only recoverable_reference unavailable]a
 
   @spec new(String.t(), map()) :: {:ok, t()} | {:error, Error.t()}
   def new(attempt_iri, attributes) when is_binary(attempt_iri) and is_map(attributes) do
@@ -149,21 +153,30 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
 
   defp item_statements(manifest) do
     Enum.map(manifest.items, fn item ->
-      {manifest.iri, @jf <> "manifestItem",
-       RDF.XSD.String.new(
-         Enum.join(
-           [
-             item.iri,
-             item.digest,
-             Integer.to_string(item.bytes),
-             to_string(Map.get(item, :classification, :internal)),
-             Map.get(item, :provenance_digest, item.digest)
-           ],
-           "|"
-         )
-       )}
+      fields =
+        [
+          item.iri,
+          item.digest,
+          Integer.to_string(item.bytes),
+          to_string(Map.get(item, :classification, :internal)),
+          Map.get(item, :provenance_digest, item.digest)
+        ] ++ memory_item_fields(item)
+
+      {manifest.iri, @jf <> "manifestItem", RDF.XSD.String.new(Enum.join(fields, "|"))}
     end)
   end
+
+  defp memory_item_fields(%{kind: :memory_evidence} = item) do
+    [
+      "memory_evidence",
+      item.source_iri,
+      to_string(item.trust),
+      to_string(item.reconstruction),
+      item.packet_digest
+    ]
+  end
+
+  defp memory_item_fields(_item), do: []
 
   defp omission_statements(manifest) do
     Enum.map(manifest.omissions, fn omission ->
@@ -221,14 +234,7 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
 
   defp items(values) when is_list(values) do
     if length(values) <= @max_items and
-         Enum.all?(values, fn item ->
-           is_map(item) and is_binary(item[:iri]) and
-             ResourceIdentity.validate(item.iri) == :ok and
-             is_binary(item[:digest]) and Regex.match?(@digest64, item.digest) and
-             is_integer(item[:bytes]) and item.bytes in 1..@max_item_bytes and
-             Map.get(item, :classification, :internal) in @classifications and
-             provenance_digest?(Map.get(item, :provenance_digest, item.digest))
-         end),
+         Enum.all?(values, &valid_item?/1),
        do: {:ok, values},
        else: invalid(:context_manifest_items)
   rescue
@@ -236,6 +242,24 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   end
 
   defp items(_values), do: invalid(:context_manifest_items)
+
+  defp valid_item?(item) when is_map(item) do
+    is_binary(item[:iri]) and ResourceIdentity.validate(item.iri) == :ok and
+      is_binary(item[:digest]) and Regex.match?(@digest64, item.digest) and
+      is_integer(item[:bytes]) and item.bytes in 1..@max_item_bytes and
+      Map.get(item, :classification, :internal) in @classifications and
+      provenance_digest?(Map.get(item, :provenance_digest, item.digest)) and
+      valid_memory_item?(item)
+  end
+
+  defp valid_item?(_item), do: false
+
+  defp valid_memory_item?(%{kind: :memory_evidence} = item) do
+    ResourceIdentity.validate(item[:source_iri]) == :ok and item[:trust] in @memory_trust and
+      item[:reconstruction] in @memory_reconstruction and provenance_digest?(item[:packet_digest])
+  end
+
+  defp valid_memory_item?(item), do: not Map.has_key?(item, :kind)
 
   defp totals(source_graphs, items, attributes) do
     serialized = attributes[:serialized_bytes] || 0

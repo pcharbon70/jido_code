@@ -44,6 +44,8 @@ defmodule JidoCode.Knowledge.Memory.RetrievalRequest do
   @trust_levels ~w[verified accepted asserted observed untrusted]a
   @purposes ~w[managed_continuity failure_recovery incident_response evaluation dataset_construction]a
   @classifications DataPolicy.classifications()
+  @forbidden_retrieval_classifications ~w[secret_value prompt encrypted_content backup_derivative]a
+  @retrievable_classifications @classifications -- @forbidden_retrieval_classifications
   @query_version QueryCatalog.history_version()
   @budget_limits %{
     item_limit: 100,
@@ -66,9 +68,10 @@ defmodule JidoCode.Knowledge.Memory.RetrievalRequest do
            attributes[:plan_phase],
          true <- safe_text?(plan_phase),
          %DateTime{} = effective_at <- attributes[:effective_at],
-         data_ceiling when data_ceiling in @classifications <- attributes[:data_ceiling],
+         data_ceiling when data_ceiling in @retrievable_classifications <-
+           attributes[:data_ceiling],
          {:ok, classifications} <-
-           closed_atoms(attributes[:allowed_classifications], @classifications, false),
+           closed_atoms(attributes[:allowed_classifications], @retrievable_classifications, false),
          true <- data_ceiling in classifications,
          {:ok, categories} <- closed_atoms(attributes[:categories], @categories, false),
          {:ok, trust_levels} <- closed_atoms(attributes[:trust_levels], @trust_levels, false),
