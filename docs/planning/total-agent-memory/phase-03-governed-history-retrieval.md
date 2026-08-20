@@ -87,17 +87,17 @@ Back to plan: [README](./README.md)
     This final section proves authorized, temporal, bounded retrieval and safe
     harness use.
 
-    - [ ] 3.5.1 Task {#tam-p03-integration} [repo: jido_code] [after: {#tam-p03-harness-retrieval}] - Execute the governed-retrieval matrix.
+    - [x] 3.5.1 Task {#tam-p03-integration} [repo: jido_code] [after: {#tam-p03-harness-retrieval}] - Execute the governed-retrieval matrix.
 
       This task validates history queries and evidence packets against
       adversarial multi-scope data.
 
-      - [ ] 3.5.1.1 Subtask - Prove exact timeline, failure, lineage, rationale, and capture-completeness results at current and historical cutoffs.
-      - [ ] 3.5.1.2 Subtask - Prove zero cross-repository, tenant, actor, purpose, provider-profile, or future-data candidate generation.
-      - [ ] 3.5.1.3 Subtask - Exercise stale, contradicted, erased, held, poisoned, malformed, oversized, and unavailable memories.
-      - [ ] 3.5.1.4 Subtask - Delete and rebuild every disposable index and prove graph truth and deterministic eligible results remain unchanged.
-      - [ ] 3.5.1.5 Subtask - Compare no-memory, recent-context, full-eligible, lexical, graph, and hybrid packets under identical budgets.
-      - [ ] 3.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
+      - [x] 3.5.1.1 Subtask - Prove exact timeline, failure, lineage, rationale, and capture-completeness results at current and historical cutoffs.
+      - [x] 3.5.1.2 Subtask - Prove zero cross-repository, tenant, actor, purpose, provider-profile, or future-data candidate generation.
+      - [x] 3.5.1.3 Subtask - Exercise stale, contradicted, erased, held, poisoned, malformed, oversized, and unavailable memories.
+      - [x] 3.5.1.4 Subtask - Delete and rebuild every disposable index and prove graph truth and deterministic eligible results remain unchanged.
+      - [x] 3.5.1.5 Subtask - Compare no-memory, recent-context, full-eligible, lexical, graph, and hybrid packets under identical budgets.
+      - [x] 3.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
     - [ ] 3.5.2 Task {#tam-p03-phase-receipt} [repo: jido_code] [after: {#tam-p03-integration}] - Publish the Phase 3 governed-retrieval receipt.
 
@@ -105,7 +105,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/memory-phase-03-receipt.md` and binds MG3 to the
       merged candidate.
 
-      - [ ] 3.5.2.1 Subtask - Record query, ranker, index, packet, profile, corpus, and candidate revisions.
-      - [ ] 3.5.2.2 Subtask - Attach temporal, scope, budget, poisoning, rebuild, and ablation results.
-      - [ ] 3.5.2.3 Subtask - Keep MG3 blocked if filtering occurs only after search, a packet can grant authority, or future/ineligible evidence is returned.
+      - [x] 3.5.2.1 Subtask - Record query, ranker, index, packet, profile, corpus, and candidate revisions.
+      - [x] 3.5.2.2 Subtask - Attach temporal, scope, budget, poisoning, rebuild, and ablation results.
+      - [x] 3.5.2.3 Subtask - Keep MG3 blocked if filtering occurs only after search, a packet can grant authority, or future/ineligible evidence is returned.
       - [ ] 3.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 4.

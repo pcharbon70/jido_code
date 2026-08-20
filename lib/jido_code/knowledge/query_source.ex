@@ -996,35 +996,31 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:attempt_capture_completeness) do
     """
-    SELECT ?manifest ?expectedBody ?event ?eventKind ?bodyClass ?bodyRole ?capture
+    SELECT ?segment ?expectedBody ?event ?eventKind ?sourceEvent ?bodyRole ?capture
            ?outcome ?representation ?location ?availability ?retention ?hold ?classification
            ?purpose ?reconstruction ?providerAvailability ?allowedUse ?limitation ?digest
-           ?completeness ?completenessRoot WHERE {
+           WHERE {
       GRAPH {{graph}} {
-        {{resource}} <#{@jf}captureManifest> ?manifest .
-        ?manifest <#{@jf}expectedBody> ?expectedBody .
-        ?expectedBody <#{@jf}sourceEvent> ?event ;
-                      <#{@jf}eventKind> ?eventKind ;
-                      <#{@jf}bodyClass> ?bodyClass ;
-                      <#{@jf}bodyRole> ?bodyRole .
-        OPTIONAL { ?manifest <#{@jf}captureCompleteness> ?completeness }
-        OPTIONAL { ?manifest <#{@jf}completenessRootDigest> ?completenessRoot }
-        OPTIONAL {
-          ?capture <#{@jf}capturedBody> ?expectedBody ;
-                   <#{@jf}captureOutcome> ?outcome ;
-                   <#{@jf}contentRepresentation> ?representation ;
-                   <#{@jf}storageLocation> ?location ;
-                   <#{@jf}availabilityState> ?availability ;
-                   <#{@jf}retentionState> ?retention ;
-                   <#{@jf}holdState> ?hold ;
-                   <#{@jf}contentClassification> ?classification ;
-                   <#{@jf}capturePurpose> ?purpose ;
-                   <#{@jf}reconstructionStatus> ?reconstruction ;
-                   <#{@jf}externalProviderAvailability> ?providerAvailability .
-          OPTIONAL { ?capture <#{@jf}allowedUse> ?allowedUse }
-          OPTIONAL { ?capture <#{@jf}limitation> ?limitation }
-          OPTIONAL { ?capture <#{@jf}representationDigest> ?digest }
-        }
+        ?segment <#{@jf}segmentOf> {{resource}} .
+        ?event <#{@jf}segmentOf> ?segment ;
+               <#{@jf}eventKind> ?eventKind ;
+               <#{@jf}hasCapture> ?capture .
+        ?capture <#{@jf}capturedBody> ?expectedBody ;
+                 <#{@jf}sourceEvent> ?sourceEvent ;
+                 <#{@jf}bodyRole> ?bodyRole ;
+                 <#{@jf}captureOutcome> ?outcome ;
+                 <#{@jf}contentRepresentation> ?representation ;
+                 <#{@jf}storageLocation> ?location ;
+                 <#{@jf}availabilityState> ?availability ;
+                 <#{@jf}retentionState> ?retention ;
+                 <#{@jf}holdState> ?hold ;
+                 <#{@jf}contentClassification> ?classification ;
+                 <#{@jf}capturePurpose> ?purpose ;
+                 <#{@jf}reconstructionStatus> ?reconstruction ;
+                 <#{@jf}externalProviderAvailability> ?providerAvailability .
+        OPTIONAL { ?capture <#{@jf}allowedUse> ?allowedUse }
+        OPTIONAL { ?capture <#{@jf}limitation> ?limitation }
+        OPTIONAL { ?capture <#{@jf}representationDigest> ?digest }
       }
     }
     ORDER BY ?expectedBody ?allowedUse ?limitation
@@ -1035,7 +1031,7 @@ defmodule JidoCode.Knowledge.QuerySource do
   def fetch(:task_attempt_lineage) do
     """
     SELECT ?attempt ?lease ?fence ?transition ?state ?validFrom ?validTo ?retryOf
-           ?cancellation ?outcome ?originIri ?sourceRevision WHERE {
+           ?cancellation ?outcome WHERE {
       GRAPH {{graph}} {
         ?lease a <#{@jf}Lease> ;
                <#{@jf}leasesTask> {{resource}} ;
@@ -1049,7 +1045,6 @@ defmodule JidoCode.Knowledge.QuerySource do
         OPTIONAL { ?attempt <#{@jf}retryOf> ?retryOf }
         OPTIONAL { ?attempt <#{@jf}cancellationRequest> ?cancellation }
         OPTIONAL { ?attempt <#{@jf}outcomeClass> ?outcome }
-        BIND({{graph}} AS ?originIri)
       }
     }
     ORDER BY ?fence ?attempt ?transition
@@ -1062,8 +1057,7 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:exact_failure_occurrences) do
     """
-    SELECT ?repository ?segment ?event ?sequence ?eventKind ?role ?occurred ?signature
-           ?resource ?sourceGraph WHERE {
+    SELECT ?segment ?event ?sequence ?eventKind ?role ?occurred ?resource WHERE {
       GRAPH {{graph}} {
         ?segment <#{@jf}segmentOf> ?attempt .
         ?event <#{@jf}segmentOf> ?segment ;
@@ -1074,9 +1068,6 @@ defmodule JidoCode.Knowledge.QuerySource do
         ?resource <#{@jf}semanticDigest> {{signature}} ;
                   <#{@prov}generatedAtTime> ?occurred .
         FILTER(?occurred <= {{instant}})
-        BIND({{resource}} AS ?repository)
-        BIND({{signature}} AS ?signature)
-        BIND({{graph}} AS ?sourceGraph)
       }
     }
     ORDER BY ?occurred ?sequence ?event
@@ -1090,23 +1081,23 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:incident_linkage) do
     relation = "<#{@jf}incidentLink>"
-    lineage_query(relation, "BIND(#{relation} AS ?relation)")
+    lineage_query("?relation", "FILTER(?relation = #{relation})")
   end
 
   def fetch(:why_does_this_exist) do
     """
-    SELECT ?resource ?relation ?source ?recorded ?classification ?sourceGraph WHERE {
+    SELECT ?relation ?source ?resourceRecorded ?recorded ?classification WHERE {
       GRAPH {{graph}} {
         {
           {{resource}} ?relation ?source .
         } UNION {
           ?source ?relation {{resource}} .
         }
+        {{resource}} <#{@jf}recordedAt> ?resourceRecorded .
         OPTIONAL { ?source <#{@jf}recordedAt> ?recorded }
         OPTIONAL { ?source <#{@prov}generatedAtTime> ?recorded }
         OPTIONAL { ?source <#{@jf}contentClassification> ?classification }
-        FILTER(!BOUND(?recorded) || ?recorded <= {{instant}})
-        BIND({{graph}} AS ?sourceGraph)
+        FILTER(?resourceRecorded <= {{instant}})
       }
     }
     ORDER BY ?recorded ?relation ?source
@@ -1429,7 +1420,7 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
     SELECT ?segment ?segmentIndex ?segmentStart ?segmentEnd ?segmentRoot ?completeness
            ?event ?sequence ?eventKind ?role ?predecessor ?sourceEvent ?sourceOrder
-           ?resource ?capture ?occurred ?sourceGraph WHERE {
+           ?resource ?capture ?occurred WHERE {
       GRAPH {{graph}} {
         ?segment <#{@jf}segmentOf> {{resource}} .
         #{manifest}
@@ -1444,7 +1435,6 @@ defmodule JidoCode.Knowledge.QuerySource do
         OPTIONAL { ?event <#{@jf}accountsResource> ?resource }
         OPTIONAL { ?event <#{@jf}hasCapture> ?capture }
         OPTIONAL { ?resource <#{@prov}generatedAtTime> ?occurred }
-        BIND({{graph}} AS ?sourceGraph)
       }
     }
     ORDER BY ?sequence ?event ?resource ?capture
@@ -1454,7 +1444,7 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   defp lineage_query(relation_pattern, relation_binding) do
     """
-    SELECT ?resource ?relation ?related ?recorded ?classification ?sourceGraph WHERE {
+    SELECT ?resource ?relation ?related ?resourceRecorded ?recorded ?classification WHERE {
       GRAPH {{graph}} {
         {
           {{resource}} #{relation_pattern} ?related .
@@ -1463,11 +1453,11 @@ defmodule JidoCode.Knowledge.QuerySource do
           ?related #{relation_pattern} {{resource}} .
           #{relation_binding}
         }
+        {{resource}} <#{@jf}recordedAt> ?resourceRecorded .
         OPTIONAL { ?related <#{@jf}recordedAt> ?recorded }
         OPTIONAL { ?related <#{@prov}generatedAtTime> ?recorded }
         OPTIONAL { ?related <#{@jf}contentClassification> ?classification }
-        FILTER(!BOUND(?recorded) || ?recorded <= {{instant}})
-        BIND({{graph}} AS ?sourceGraph)
+        FILTER(?resourceRecorded <= {{instant}})
       }
     }
     ORDER BY ?recorded ?relation ?related

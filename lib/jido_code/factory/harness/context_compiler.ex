@@ -11,7 +11,6 @@ defmodule JidoCode.Factory.Harness.ContextCompiler do
 
   alias JidoCode.Knowledge
   alias JidoCode.Knowledge.Error
-  alias JidoCode.Knowledge.Memory.EvidencePacket
 
   @section_order ~w[
     system_contract authority_summary task policy_repository graph_resource
@@ -93,16 +92,17 @@ defmodule JidoCode.Factory.Harness.ContextCompiler do
   non-instructional evidence packet. Disabled mode delegates directly to
   `compile/2`, preserving bit-identical context, authorization, and tool input.
   """
-  @spec compile_with_memory(map(), :disabled | nil | EvidencePacket.t(), keyword()) ::
+  @spec compile_with_memory(map(), :disabled | nil | map(), keyword()) ::
           {:ok, t()} | {:error, Error.t()}
   def compile_with_memory(attributes, memory, options \\ [])
 
   def compile_with_memory(attributes, memory, options) when memory in [:disabled, nil],
     do: compile(attributes, options)
 
-  def compile_with_memory(attributes, %EvidencePacket{} = packet, options)
+  def compile_with_memory(attributes, packet, options)
       when is_map(attributes) and is_list(options) do
-    with {:ok, base} <- compile(attributes, options),
+    with true <- Knowledge.memory_evidence_packet?(packet),
+         {:ok, base} <- compile(attributes, options),
          {:ok, memory_items, memory_omissions} <-
            memory_items(packet, attributes.budget.max_item_bytes),
          {:ok, source_graphs} <- merge_source_graphs(base.manifest.source_graphs, memory_items),

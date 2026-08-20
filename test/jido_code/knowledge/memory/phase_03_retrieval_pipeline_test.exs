@@ -80,6 +80,7 @@ defmodule JidoCode.Knowledge.Memory.Phase03RetrievalPipelineTest do
     assert packet.partition_digest == request.partition.partition_digest
     assert packet.ranking_version == RetrievalRanker.revision()
     assert packet.index_version == RetrievalIndex.revision()
+    assert packet.revision == EvidencePacket.revision()
     assert packet.usage.items == 1
 
     assert [item] = packet.items
@@ -183,7 +184,9 @@ defmodule JidoCode.Knowledge.Memory.Phase03RetrievalPipelineTest do
       partition_digest: request.partition.partition_digest,
       repository_iri: request.repository_iri,
       tenant_iri: request.tenant_iri,
+      actor_iri: request.actor_iri,
       actor_scope_iri: request.actor_scope_iri,
+      provider_profile_iri: request.provider_profile_iri,
       purpose: request.purpose,
       classification: :internal,
       category: :attempt_history,

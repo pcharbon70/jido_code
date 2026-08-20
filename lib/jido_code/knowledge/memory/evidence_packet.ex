@@ -13,6 +13,7 @@ defmodule JidoCode.Knowledge.Memory.EvidencePacket do
   alias JidoCode.Knowledge.Memory.RetrievalRequest
   alias JidoCode.Knowledge.ResourceIdentity
 
+  @revision "1.0.0"
   @enforce_keys [
     :iri,
     :digest,
@@ -26,13 +27,15 @@ defmodule JidoCode.Knowledge.Memory.EvidencePacket do
     :usage,
     :non_authoritative?
   ]
-  defstruct @enforce_keys
+  defstruct @enforce_keys ++ [revision: @revision]
 
   @type t :: %__MODULE__{}
   @forbidden_keys ~w[
     instruction system_instruction tool tools capability capabilities credential credentials
     policy approval destination durable_write write_authority command authorization
   ]
+  @spec revision() :: String.t()
+  def revision, do: @revision
 
   @spec build(RetrievalRequest.t(), [map()]) :: {:ok, t()} | {:error, Error.t()}
   def build(%RetrievalRequest{} = request, ranked) when is_list(ranked) do
@@ -44,6 +47,7 @@ defmodule JidoCode.Knowledge.Memory.EvidencePacket do
              request.iri,
              request.partition.partition_digest,
              request.query_version,
+             @revision,
              RetrievalRanker.revision(),
              RetrievalIndex.revision(),
              items,
@@ -57,6 +61,7 @@ defmodule JidoCode.Knowledge.Memory.EvidencePacket do
          digest: digest,
          request_iri: request.iri,
          partition_digest: request.partition.partition_digest,
+         revision: @revision,
          query_version: request.query_version,
          ranking_version: RetrievalRanker.revision(),
          index_version: RetrievalIndex.revision(),

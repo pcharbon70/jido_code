@@ -14,6 +14,10 @@ defmodule JidoCode.Knowledge.Memory.CandidateAccess do
 
   @channels ~w[exact_identifier lexical temporal_graph failure_signature recency current_state dense]a
   @max_candidates 1_000
+  @revision "1.0.0"
+
+  @spec revision() :: String.t()
+  def revision, do: @revision
 
   @spec generate(RetrievalRequest.t(), atom(), (map() -> {:ok, [map()]})) ::
           {:ok, map()} | {:error, Error.t()}
@@ -23,7 +27,9 @@ defmodule JidoCode.Knowledge.Memory.CandidateAccess do
       partition_digest: request.partition.partition_digest,
       repository_iri: request.repository_iri,
       tenant_iri: request.tenant_iri,
+      actor_iri: request.actor_iri,
       actor_scope_iri: request.actor_scope_iri,
+      provider_profile_iri: request.provider_profile_iri,
       purpose: request.purpose,
       data_ceiling: request.data_ceiling,
       effective_at: request.effective_at,
@@ -62,18 +68,24 @@ defmodule JidoCode.Knowledge.Memory.CandidateAccess do
     candidate.partition_digest == request.partition.partition_digest and
       candidate.repository_iri == request.repository_iri and
       candidate.tenant_iri == request.tenant_iri and
+      candidate.actor_iri == request.actor_iri and
       candidate.actor_scope_iri == request.actor_scope_iri and
+      candidate.provider_profile_iri == request.provider_profile_iri and
       candidate.purpose == request.purpose and
       candidate.classification in request.allowed_classifications and
       candidate.category in request.categories and candidate.trust in request.trust_levels and
       DateTime.compare(candidate.recorded_at, request.effective_at) in [:lt, :eq] and
       candidate.available? and not candidate.erased? and not candidate.invalidated? and
-      candidate.compatible?
+      candidate.compatible? and not Map.get(candidate, :stale?, false) and
+      not Map.get(candidate, :poisoned?, false) and
+      (not Map.get(candidate, :held?, false) or Map.get(candidate, :hold_authorized?, false))
   end
 
   defp valid_candidate?(candidate) when is_map(candidate) do
     ResourceIdentity.validate(candidate[:iri]) == :ok and
       ResourceIdentity.validate(candidate[:source_iri]) == :ok and
+      ResourceIdentity.validate(candidate[:actor_iri]) == :ok and
+      ResourceIdentity.validate(candidate[:provider_profile_iri]) == :ok and
       match?({:ok, _family}, GraphRegistry.identify(candidate[:source_graph_iri])) and
       is_integer(candidate[:source_revision]) and candidate.source_revision >= 0 and
       is_binary(candidate[:partition_digest]) and match?(%DateTime{}, candidate[:recorded_at]) and
@@ -93,7 +105,9 @@ defmodule JidoCode.Knowledge.Memory.CandidateAccess do
     |> add(:partition, candidate.partition_digest != request.partition.partition_digest)
     |> add(:scope, candidate.repository_iri != request.repository_iri)
     |> add(:scope, candidate.tenant_iri != request.tenant_iri)
+    |> add(:scope, candidate.actor_iri != request.actor_iri)
     |> add(:scope, candidate.actor_scope_iri != request.actor_scope_iri)
+    |> add(:provider_profile, candidate.provider_profile_iri != request.provider_profile_iri)
     |> add(:purpose, candidate.purpose != request.purpose)
     |> add(:classification, candidate.classification not in request.allowed_classifications)
     |> add(:category, candidate.category not in request.categories)
@@ -103,6 +117,12 @@ defmodule JidoCode.Knowledge.Memory.CandidateAccess do
     |> add(:erased, candidate.erased?)
     |> add(:invalidated, candidate.invalidated?)
     |> add(:incompatible, not candidate.compatible?)
+    |> add(:stale, Map.get(candidate, :stale?, false))
+    |> add(:poisoned, Map.get(candidate, :poisoned?, false))
+    |> add(
+      :held,
+      Map.get(candidate, :held?, false) and not Map.get(candidate, :hold_authorized?, false)
+    )
   end
 
   defp add(values, _reason, false), do: values

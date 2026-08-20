@@ -53,7 +53,7 @@ defmodule JidoCode.Knowledge.Memory.Phase03HistoryCatalogTest do
       {:ok, definition} = QueryCatalog.fetch(name, QueryCatalog.history_version())
       assert definition.parameters.sequence_start.max == 1_000_000
       assert definition.parameters.sequence_end.max == 1_000_000
-      assert String.contains?(definition.source, "?sourceGraph")
+      assert String.contains?(definition.source, "GRAPH {{graph}}")
     end
   end
 
