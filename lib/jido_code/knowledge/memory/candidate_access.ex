@@ -12,7 +12,7 @@ defmodule JidoCode.Knowledge.Memory.CandidateAccess do
   alias JidoCode.Knowledge.Memory.RetrievalRequest
   alias JidoCode.Knowledge.ResourceIdentity
 
-  @channels ~w[exact_identifier lexical temporal_graph failure_signature recency current_state]a
+  @channels ~w[exact_identifier lexical temporal_graph failure_signature recency current_state dense]a
   @max_candidates 1_000
 
   @spec generate(RetrievalRequest.t(), atom(), (map() -> {:ok, [map()]})) ::

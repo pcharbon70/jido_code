@@ -57,6 +57,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
   alias JidoCode.Knowledge.Memory.CandidateAccess
+  alias JidoCode.Knowledge.Memory.RetrievalIndex
+  alias JidoCode.Knowledge.Memory.RetrievalPipeline
   alias JidoCode.Knowledge.Memory.RetrievalActivity
   alias JidoCode.Knowledge.Memory.RetrievalRequest
   alias JidoCode.Knowledge.Memory.StateTransition, as: KnowledgeStateTransition
@@ -467,6 +469,15 @@ defmodule JidoCode.Knowledge do
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)
+
+  def build_memory_retrieval_index(request, channel, generator),
+    do: RetrievalIndex.build(request, channel, generator)
+
+  def lookup_memory_retrieval_index(index, request),
+    do: RetrievalIndex.lookup(index, request)
+
+  def retrieve_memory(request, generators),
+    do: RetrievalPipeline.retrieve(request, generators)
 
   def start_memory_retrieval(request, occurred_at),
     do: RetrievalActivity.start(request, occurred_at)

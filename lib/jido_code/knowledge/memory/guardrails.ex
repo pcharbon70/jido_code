@@ -135,8 +135,6 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   ]
 
   @disabled_features %{
-    history_queries: :MG3,
-    retrieval_index: :MG3,
     experience_writer: :MG4,
     diagnostic_capture: :MG6,
     project_total_history: :MG6,
@@ -277,6 +275,7 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
 
   @spec feature_enabled?(atom()) :: boolean()
   def feature_enabled?(:run_event_segment_writer), do: true
+  def feature_enabled?(feature) when feature in [:history_queries, :retrieval_index], do: true
   def feature_enabled?(_feature), do: false
 
   defp terminal_legacy_attempt?(attempt) when is_map(attempt) do

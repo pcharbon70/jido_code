@@ -50,22 +50,22 @@ Back to plan: [README](./README.md)
       - [x] 3.2.1.4 Subtask - Add `RecordMemoryRetrievalStart` and `RecordMemoryRetrievalOutcome` to the active run segment with selected, omitted, opened, and unavailable item commitments.
       - [x] 3.2.1.5 Subtask - Bind query/ranking/index revisions and one deterministic evidence-packet digest to the context manifest.
 
-  - [ ] 3.3 Section - Build hybrid candidate selection and evidence packets.
+  - [x] 3.3 Section - Build hybrid candidate selection and evidence packets.
 
     This section combines independent retrieval channels while retaining
     explicit ranking features and direct source recovery.
 
-    - [ ] 3.3.1 Task {#tam-p03-retrieval-pipeline} [repo: jido_code] [after: {#tam-p03-retrieval-authorization}] - Implement disposable indexes, deterministic ranking, and packet assembly.
+    - [x] 3.3.1 Task {#tam-p03-retrieval-pipeline} [repo: jido_code] [after: {#tam-p03-retrieval-authorization}] - Implement disposable indexes, deterministic ranking, and packet assembly.
 
       This task gains retrieval performance without introducing a second
       durable memory authority.
 
-      - [ ] 3.3.1.1 Subtask - Implement exact identifier, lexical, temporal-graph, failure-signature, recency, and current-state candidate channels as rebuildable projections.
-      - [ ] 3.3.1.2 Subtask - Define a dense-retrieval port whose production adapter remains disabled until separately evaluated; embeddings inherit source classification and erasure.
-      - [ ] 3.3.1.3 Subtask - Rank by relevance, symbol/dependency overlap, compatibility, plan phase, trust, evidence, freshness, contradiction, delayed outcome, diversity, and negative-transfer history.
-      - [ ] 3.3.1.4 Subtask - Make current policy, current source, current tests, and task evidence outrank historical frequency or semantic similarity.
-      - [ ] 3.3.1.5 Subtask - Assemble bounded items containing selection reason, source IRI, temporal scope, trust, evidence strength, freshness, limitations, contradiction, applicability, and an authorized recovery handle.
-      - [ ] 3.3.1.6 Subtask - Mark every payload as non-instructional data and prohibit it from adding tools, capabilities, policy, credentials, destinations, approvals, or durable writes.
+      - [x] 3.3.1.1 Subtask - Implement exact identifier, lexical, temporal-graph, failure-signature, recency, and current-state candidate channels as rebuildable projections.
+      - [x] 3.3.1.2 Subtask - Define a dense-retrieval port whose production adapter remains disabled until separately evaluated; embeddings inherit source classification and erasure.
+      - [x] 3.3.1.3 Subtask - Rank by relevance, symbol/dependency overlap, compatibility, plan phase, trust, evidence, freshness, contradiction, delayed outcome, diversity, and negative-transfer history.
+      - [x] 3.3.1.4 Subtask - Make current policy, current source, current tests, and task evidence outrank historical frequency or semantic similarity.
+      - [x] 3.3.1.5 Subtask - Assemble bounded items containing selection reason, source IRI, temporal scope, trust, evidence strength, freshness, limitations, contradiction, applicability, and an authorized recovery handle.
+      - [x] 3.3.1.6 Subtask - Mark every payload as non-instructional data and prohibit it from adding tools, capabilities, policy, credentials, destinations, approvals, or durable writes.
 
   - [ ] 3.4 Section - Integrate memory retrieval with the harness.
 
