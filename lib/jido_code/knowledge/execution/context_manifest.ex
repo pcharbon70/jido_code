@@ -21,7 +21,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
                 :estimated_tokens,
                 :omissions,
                 :unavailable_fields,
-                :missing_classes
+                :missing_classes,
+                :retrieval_commitment
               ]
 
   @type t :: %__MODULE__{}
@@ -64,6 +65,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
          {:ok, omissions} <- omissions(attributes[:omissions]),
          :ok <- unavailable_fields(kind, attributes[:unavailable_fields]),
          :ok <- missing_classes(reconstruction, attributes[:missing_classes]),
+         {:ok, retrieval_commitment} <-
+           retrieval_commitment(attributes[:retrieval_commitment]),
          {:ok, iri} <-
            ResourceIdentity.deterministic(
              :context_manifest,
@@ -83,7 +86,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
          estimated_tokens: attributes[:estimated_tokens] || 0,
          omissions: omissions || [],
          unavailable_fields: attributes[:unavailable_fields] || [],
-         missing_classes: attributes[:missing_classes] || []
+         missing_classes: attributes[:missing_classes] || [],
+         retrieval_commitment: retrieval_commitment
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
@@ -116,7 +120,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
       item_statements(manifest) ++
       omission_statements(manifest) ++
       unavailable_field_statements(manifest) ++
-      missing_class_statements(manifest)
+      missing_class_statements(manifest) ++
+      retrieval_commitment_statements(manifest)
   end
 
   @spec first_manifest_iri(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
@@ -177,6 +182,22 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
     Enum.map(manifest.missing_classes, fn class ->
       {manifest.iri, @jf <> "reconstructionMissing", RDF.XSD.String.new(class)}
     end)
+  end
+
+  defp retrieval_commitment_statements(%{retrieval_commitment: nil}), do: []
+
+  defp retrieval_commitment_statements(%{retrieval_commitment: commitment} = manifest) do
+    [
+      {manifest.iri, @jf <> "memoryRetrievalRequest", RDF.iri(commitment.request_iri)},
+      {manifest.iri, @jf <> "evidencePacket", RDF.iri(commitment.packet_iri)},
+      {manifest.iri, @jf <> "evidencePacketDigest", RDF.XSD.String.new(commitment.packet_digest)},
+      {manifest.iri, @jf <> "candidatePartitionDigest",
+       RDF.XSD.String.new(commitment.partition_digest)},
+      {manifest.iri, @jf <> "memoryQueryVersion", RDF.XSD.String.new(commitment.query_version)},
+      {manifest.iri, @jf <> "memoryRankingVersion",
+       RDF.XSD.String.new(commitment.ranking_version)},
+      {manifest.iri, @jf <> "memoryIndexVersion", RDF.XSD.String.new(commitment.index_version)}
+    ]
   end
 
   defp source_graphs(nil), do: {:ok, nil}
@@ -297,6 +318,30 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   end
 
   defp missing_classes(_reconstruction, _values), do: invalid(:context_manifest_missing)
+
+  defp retrieval_commitment(nil), do: {:ok, nil}
+
+  defp retrieval_commitment(commitment) when is_map(commitment) do
+    resource_fields = ~w[request_iri packet_iri]a
+    digest_fields = ~w[packet_digest partition_digest]a
+    version_fields = ~w[query_version ranking_version index_version]a
+
+    if Enum.all?(resource_fields, &(ResourceIdentity.validate(commitment[&1]) == :ok)) and
+         Enum.all?(digest_fields, &provenance_digest?(commitment[&1])) and
+         Enum.all?(version_fields, fn field ->
+           value = commitment[field]
+
+           is_binary(value) and byte_size(value) in 1..64 and
+             not Regex.match?(~r/[\x00-\x1F\x7F]/u, value)
+         end) do
+      {:ok, Map.take(commitment, resource_fields ++ digest_fields ++ version_fields)}
+    else
+      invalid(:context_manifest_retrieval_commitment)
+    end
+  end
+
+  defp retrieval_commitment(_commitment),
+    do: invalid(:context_manifest_retrieval_commitment)
 
   defp provenance_digest?(value),
     do: is_binary(value) and Regex.match?(@digest64, value)

@@ -467,6 +467,14 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       end),
     "RecordLifecycleObservation" =>
       Map.update!(@segmented_event_command, :preconditions, &(&1 ++ [:lifecycle_source_exact])),
+    "RecordMemoryRetrievalStart" =>
+      Map.update!(@segmented_event_command, :preconditions, fn values ->
+        values ++ [:retrieval_authorized, :partition_exact, :before_candidate_generation]
+      end),
+    "RecordMemoryRetrievalOutcome" =>
+      Map.update!(@segmented_event_command, :preconditions, fn values ->
+        values ++ [:retrieval_start_known, :packet_commitment_exact]
+      end),
     "CloseEventSegment" => %{
       owner: :runtime,
       capability: :execution,

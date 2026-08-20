@@ -34,21 +34,21 @@ Back to plan: [README](./README.md)
       - [x] 3.1.1.4 Subtask - Return query/graph revisions, scope, completeness, truncation, classifications, source time, valid time, and direct evidence references.
       - [x] 3.1.1.5 Subtask - Keep raw retained content behind a separate access permit rather than embedding it in ordinary query results.
 
-  - [ ] 3.2 Section - Authorize retrieval before candidate generation.
+  - [x] 3.2 Section - Authorize retrieval before candidate generation.
 
     This section treats memory retrieval as a governed model-influencing
     effect.
 
-    - [ ] 3.2.1 Task {#tam-p03-retrieval-authorization} [repo: jido_code] [after: {#tam-p03-history-queries}] - Implement retrieval requests, activities, and packet commitments.
+    - [x] 3.2.1 Task {#tam-p03-retrieval-authorization} [repo: jido_code] [after: {#tam-p03-history-queries}] - Implement retrieval requests, activities, and packet commitments.
 
       This task ensures unauthorized candidates are never inspected by a
       shared index.
 
-      - [ ] 3.2.1.1 Subtask - Define a closed request containing actor, repository/tenant, task, purpose, plan phase, effective-time cutoff, provider profile, data ceiling, allowed categories/trust, and item/graph/byte/token/time budgets.
-      - [ ] 3.2.1.2 Subtask - Require authorization scope and erasure generation to participate in every first-stage index key or ACL-aware candidate lookup.
-      - [ ] 3.2.1.3 Subtask - Exclude erased, unavailable, invalidated, future-ineligible, unauthorized, and incompatible records before ranking.
-      - [ ] 3.2.1.4 Subtask - Add `RecordMemoryRetrievalStart` and `RecordMemoryRetrievalOutcome` to the active run segment with selected, omitted, opened, and unavailable item commitments.
-      - [ ] 3.2.1.5 Subtask - Bind query/ranking/index revisions and one deterministic evidence-packet digest to the context manifest.
+      - [x] 3.2.1.1 Subtask - Define a closed request containing actor, repository/tenant, task, purpose, plan phase, effective-time cutoff, provider profile, data ceiling, allowed categories/trust, and item/graph/byte/token/time budgets.
+      - [x] 3.2.1.2 Subtask - Require authorization scope and erasure generation to participate in every first-stage index key or ACL-aware candidate lookup.
+      - [x] 3.2.1.3 Subtask - Exclude erased, unavailable, invalidated, future-ineligible, unauthorized, and incompatible records before ranking.
+      - [x] 3.2.1.4 Subtask - Add `RecordMemoryRetrievalStart` and `RecordMemoryRetrievalOutcome` to the active run segment with selected, omitted, opened, and unavailable item commitments.
+      - [x] 3.2.1.5 Subtask - Bind query/ranking/index revisions and one deterministic evidence-packet digest to the context manifest.
 
   - [ ] 3.3 Section - Build hybrid candidate selection and evidence packets.
 

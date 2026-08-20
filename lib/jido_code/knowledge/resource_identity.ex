@@ -36,7 +36,8 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     model-access-profile model-access-revocation harness-profile tool-definition-revision
     context-manifest model-invocation model-invocation-event action-proposal sandbox-instance
     approval-request event-segment execution-event execution-event-head capture-manifest
-    content-body content-capture segment-closure continuation-authority
+    content-body content-capture segment-closure continuation-authority memory-retrieval-request
+    memory-retrieval-activity memory-evidence-packet
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
