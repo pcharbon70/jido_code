@@ -38,7 +38,8 @@ defmodule JidoCode.Knowledge.QueryCatalogTest do
     end
 
     assert {:error, %{kind: :invalid_input}} = QueryCatalog.fetch(:unknown, "1.0.0")
-    assert {:error, %{kind: :invalid_input}} = QueryCatalog.fetch(:graph_metadata, "2.0.0")
+    assert {:ok, %{version: "2.0.0"}} = QueryCatalog.fetch(:graph_metadata, "2.0.0")
+    assert {:error, %{kind: :invalid_input}} = QueryCatalog.fetch(:graph_metadata, "2.1.0")
   end
 
   test "typed binding rejects undeclared input and SPARQL injection", %{fixture: fixture} do

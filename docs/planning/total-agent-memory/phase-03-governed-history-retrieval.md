@@ -18,21 +18,21 @@ Back to plan: [README](./README.md)
   This phase establishes MG3 by proving every retrieved item is scoped,
   temporally eligible, source-linked, bounded, and non-authoritative.
 
-  - [ ] 3.1 Section - Publish bounded historical query products.
+  - [x] 3.1 Section - Publish bounded historical query products.
 
     This section exposes semantic questions over attempts and repository
     history without raw SPARQL or transcript search.
 
-    - [ ] 3.1.1 Task {#tam-p03-history-queries} [repo: jido_code] [after: {#tam-p02-phase-receipt}] - Extend reviewed query catalog `2.0.0` with history lenses.
+    - [x] 3.1.1 Task {#tam-p03-history-queries} [repo: jido_code] [after: {#tam-p02-phase-receipt}] - Extend reviewed query catalog `2.0.0` with history lenses.
 
       This task provides stable bounded products with exact scope and
       completeness metadata.
 
-      - [ ] 3.1.1.1 Subtask - Add `attempt_timeline`, `attempt_capture_completeness`, `task_attempt_lineage`, and exact segment/event-range projections.
-      - [ ] 3.1.1.2 Subtask - Add `exact_failure_occurrences`, issue/change/test lineage, incident linkage, and `why_does_this_exist` queries.
-      - [ ] 3.1.1.3 Subtask - Support current and historical effective-time lenses without admitting future review, patch, incident, or association evidence.
-      - [ ] 3.1.1.4 Subtask - Return query/graph revisions, scope, completeness, truncation, classifications, source time, valid time, and direct evidence references.
-      - [ ] 3.1.1.5 Subtask - Keep raw retained content behind a separate access permit rather than embedding it in ordinary query results.
+      - [x] 3.1.1.1 Subtask - Add `attempt_timeline`, `attempt_capture_completeness`, `task_attempt_lineage`, and exact segment/event-range projections.
+      - [x] 3.1.1.2 Subtask - Add `exact_failure_occurrences`, issue/change/test lineage, incident linkage, and `why_does_this_exist` queries.
+      - [x] 3.1.1.3 Subtask - Support current and historical effective-time lenses without admitting future review, patch, incident, or association evidence.
+      - [x] 3.1.1.4 Subtask - Return query/graph revisions, scope, completeness, truncation, classifications, source time, valid time, and direct evidence references.
+      - [x] 3.1.1.5 Subtask - Keep raw retained content behind a separate access permit rather than embedding it in ordinary query results.
 
   - [ ] 3.2 Section - Authorize retrieval before candidate generation.
 

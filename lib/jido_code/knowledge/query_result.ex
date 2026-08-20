@@ -7,6 +7,7 @@ defmodule JidoCode.Knowledge.QueryResult do
            only: [
              :query_name,
              :query_version,
+             :scope_iri,
              :dataset_revision,
              :graph_revisions,
              :ontology_version,
@@ -35,7 +36,7 @@ defmodule JidoCode.Knowledge.QueryResult do
     :evaluated_at,
     :data
   ]
-  defstruct @enforce_keys
+  defstruct @enforce_keys ++ [:scope_iri]
 
   @type t :: %__MODULE__{}
 end

@@ -173,6 +173,7 @@ defmodule JidoCode.Knowledge.QueryExecution do
     %QueryResult{
       query_name: request.query_name,
       query_version: request.query_version,
+      scope_iri: request.scope_iri,
       dataset_revision: substrate.dataset_revision,
       graph_revisions: snapshot.graph_revisions,
       ontology_version: single_or_unknown(ontology_versions),

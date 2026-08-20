@@ -19,6 +19,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @scheduling_version "1.5.0"
   @execution_version "1.6.0"
   @knowledge_version "1.7.0"
+  @history_version "2.0.0"
   @versions [
     @version,
     @repository_version,
@@ -27,7 +28,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @reconciliation_version,
     @scheduling_version,
     @execution_version,
-    @knowledge_version
+    @knowledge_version,
+    @history_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -62,6 +64,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec knowledge_version() :: String.t()
   def knowledge_version, do: @knowledge_version
+
+  @spec history_version() :: String.t()
+  def history_version, do: @history_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -387,6 +392,21 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           decision_specifications(resource) ++
           memory_specifications(resource) ++
           insight_specifications(resource)
+
+      @history_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource) ++
+          history_specifications(resource)
     end
   end
 
@@ -1347,6 +1367,110 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :declared
       )
     end)
+  end
+
+  defp history_specifications(resource) do
+    instant = Map.put(resource, :instant, %{type: :datetime, required: true})
+
+    range =
+      resource
+      |> Map.put(:sequence_start, %{type: :non_negative_integer, required: true, max: 1_000_000})
+      |> Map.put(:sequence_end, %{type: :non_negative_integer, required: true, max: 1_000_000})
+
+    failure =
+      instant
+      |> Map.put(:signature, %{type: :literal, required: true, max_bytes: 512})
+
+    [
+      spec(
+        :attempt_capture_completeness,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :table,
+        "Read the explicit capture state of every expected body for one attempt.",
+        :product,
+        :declared
+      ),
+      spec(
+        :task_attempt_lineage,
+        :select,
+        resource,
+        :execution,
+        [:repository_control],
+        :timeline,
+        "Read attempt, retry, lease, and outcome lineage for one task.",
+        :product,
+        :declared
+      ),
+      spec(
+        :attempt_event_range,
+        :select,
+        range,
+        :execution,
+        [:run_event_segment],
+        :timeline,
+        "Read an exact bounded event range from one immutable attempt segment.",
+        :product,
+        :declared
+      ),
+      spec(
+        :segment_event_range,
+        :select,
+        range,
+        :execution,
+        [:run_event_segment],
+        :timeline,
+        "Read one segment manifest and its exact bounded event range.",
+        :product,
+        :declared
+      ),
+      spec(
+        :exact_failure_occurrences,
+        :select,
+        failure,
+        :execution,
+        [:run_event_segment],
+        :timeline,
+        "Read exact failure-signature occurrences no later than an effective-time cutoff.",
+        :product,
+        :declared
+      ),
+      spec(
+        :issue_change_test_lineage,
+        :select,
+        instant,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read source-linked issue, change, test, review, and incident lineage.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :incident_linkage,
+        :select,
+        instant,
+        :evidence,
+        [:evidence],
+        :timeline,
+        "Read bounded incident associations that existed by an effective-time cutoff.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :why_does_this_exist,
+        :select,
+        instant,
+        :source,
+        [:source_revision],
+        :timeline,
+        "Trace a source resource to its issue, change, decision, evidence, and provenance anchors.",
+        :product,
+        :open_world
+      )
+    ]
   end
 
   defp spec(
