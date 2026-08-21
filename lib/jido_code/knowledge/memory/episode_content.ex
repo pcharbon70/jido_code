@@ -19,6 +19,11 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
     :media_type,
     :representation,
     :key_reference_iri,
+    :key_generation,
+    :encryption_algorithm,
+    :nonce,
+    :authentication_tag,
+    :aad_digest,
     :chunks,
     :byte_count,
     :ciphertext_digest,
@@ -46,6 +51,11 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
          true <- media_type?(attributes[:media_type]),
          true <- attributes[:representation] == :ciphertext,
          true <- attributes[:encrypted_before_command?] == true,
+         true <- positive_integer?(attributes[:key_generation]),
+         true <- attributes[:encryption_algorithm] == :aes_256_gcm,
+         true <- fixed_binary?(attributes[:nonce], 12),
+         true <- fixed_binary?(attributes[:authentication_tag], 16),
+         true <- digest?(attributes[:aad_digest]),
          %DateTime{} = closed_at <- attributes[:closed_at],
          {:ok, iri} <- identity(attributes),
          {:ok, chunks} <- build_chunks(iri, attributes[:ciphertext_chunks], attributes),
@@ -69,6 +79,11 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
          media_type: attributes.media_type,
          representation: :ciphertext,
          key_reference_iri: attributes.key_reference_iri,
+         key_generation: attributes.key_generation,
+         encryption_algorithm: attributes.encryption_algorithm,
+         nonce: attributes.nonce,
+         authentication_tag: attributes.authentication_tag,
+         aad_digest: attributes.aad_digest,
          chunks: chunks,
          byte_count: byte_count,
          ciphertext_digest: ciphertext_digest,
@@ -98,6 +113,13 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
       {content.iri, @jf <> "mediaType", RDF.XSD.String.new(content.media_type)},
       {content.iri, @jf <> "representation", RDF.iri(@concept <> "Ciphertext")},
       {content.iri, @jf <> "keyReference", RDF.iri(content.key_reference_iri)},
+      {content.iri, @jf <> "keyGeneration",
+       RDF.XSD.NonNegativeInteger.new(content.key_generation)},
+      {content.iri, @jf <> "encryptionAlgorithm", RDF.XSD.String.new("AES-256-GCM")},
+      {content.iri, @jf <> "encryptionNonce", RDF.XSD.String.new(Base.encode64(content.nonce))},
+      {content.iri, @jf <> "authenticationTag",
+       RDF.XSD.String.new(Base.encode64(content.authentication_tag))},
+      {content.iri, @jf <> "authenticatedContextDigest", RDF.XSD.String.new(content.aad_digest)},
       {content.iri, @jf <> "byteCount", RDF.XSD.NonNegativeInteger.new(content.byte_count)},
       {content.iri, @jf <> "ciphertextDigest", RDF.XSD.String.new(content.ciphertext_digest)},
       {content.iri, @jf <> "completenessRootDigest",
@@ -180,6 +202,11 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
           attributes.classification,
           attributes.media_type,
           attributes.key_reference_iri,
+          attributes.key_generation,
+          attributes.encryption_algorithm,
+          attributes.nonce,
+          attributes.authentication_tag,
+          attributes.aad_digest,
           attributes.source_event_iri
         ]
 
@@ -197,5 +224,8 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
     do: is_binary(value) and byte_size(value) in 3..128 and String.contains?(value, "/")
 
   defp non_negative_integer?(value), do: is_integer(value) and value >= 0
+  defp positive_integer?(value), do: is_integer(value) and value > 0
+  defp fixed_binary?(value, size), do: is_binary(value) and byte_size(value) == size
+  defp digest?(value), do: is_binary(value) and Regex.match?(~r/^[a-f0-9]{64}$/, value)
   defp digest(value), do: :crypto.hash(:sha256, value) |> Base.encode16(case: :lower)
 end

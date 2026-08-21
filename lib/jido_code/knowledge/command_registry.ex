@@ -594,6 +594,24 @@ defmodule JidoCode.Knowledge.CommandRegistry do
         :content_segment_complete,
         :immutable_target_absent
       ]
+    },
+    "AuthorizeContentAccess" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:authorization_current, :content_current, :permit_absent]
+    },
+    "ConsumeContentAccess" => %{
+      owner: :runtime,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:permit_current, :authorization_rechecked, :single_use]
+    },
+    "RecordContentAccessOutcome" => %{
+      owner: :runtime,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:permit_consumed, :outcome_absent, :audit_contains_no_released_bytes]
     }
   }
   @version_2_3 Map.merge(@version_2_2, @content_commands)

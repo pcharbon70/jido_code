@@ -35,22 +35,22 @@ Back to plan: [README](./README.md)
       - [x] 6.1.1.5 Subtask - Benchmark the Phase 1 corpus across capture, retrieval, backup, restore, retention, erasure, index rebuild, and storage growth.
       - [x] 6.1.1.6 Subtask - Produce a signed benchmark decision against every pinned acceptance threshold.
 
-  - [ ] 6.2 Section - Implement encryption and single-use content access.
+  - [x] 6.2 Section - Implement encryption and single-use content access.
 
     This section makes decryption and release a separately authorized,
     consumed, and reported effect.
 
-    - [ ] 6.2.1 Task {#tam-p06-content-access} [repo: jido_code] [after: {#tam-p06-graph-content}] - Implement the content cipher, gateway, and permit protocol.
+    - [x] 6.2.1 Task {#tam-p06-content-access} [repo: jido_code] [after: {#tam-p06-graph-content}] - Implement the content cipher, gateway, and permit protocol.
 
       This task ensures exact content is never released merely because
       retrieval found it.
 
-      - [ ] 6.2.1.1 Subtask - Define a key-provider-backed envelope-encryption port with per-tenant/per-object keys, rotation, revocation, and cryptographic erasure.
-      - [ ] 6.2.1.2 Subtask - Add `AuthorizeContentAccess` binding actor, purpose, task/scope, reviewed query, parameters, content version, representation, byte range, sink, destination, method, expiry, and data ceiling.
-      - [ ] 6.2.1.3 Subtask - For agent context, additionally bind attempt, lease, fence, context/model invocation, and model-access profile.
-      - [ ] 6.2.1.4 Subtask - Add `ConsumeContentAccess` with immediate rechecks of current authorization, revocation, lifecycle, hold policy, version, sink, destination, and single-use state.
-      - [ ] 6.2.1.5 Subtask - Release only the committed representation and range, then record released, denied, unavailable, failed, or ambiguous outcome and bounded byte count.
-      - [ ] 6.2.1.6 Subtask - Treat a crash after permit consumption as attributable ambiguous access; audit stores commitments and selected IRIs, never released bytes.
+      - [x] 6.2.1.1 Subtask - Define a key-provider-backed envelope-encryption port with per-tenant/per-object keys, rotation, revocation, and cryptographic erasure.
+      - [x] 6.2.1.2 Subtask - Add `AuthorizeContentAccess` binding actor, purpose, task/scope, reviewed query, parameters, content version, representation, byte range, sink, destination, method, expiry, and data ceiling.
+      - [x] 6.2.1.3 Subtask - For agent context, additionally bind attempt, lease, fence, context/model invocation, and model-access profile.
+      - [x] 6.2.1.4 Subtask - Add `ConsumeContentAccess` with immediate rechecks of current authorization, revocation, lifecycle, hold policy, version, sink, destination, and single-use state.
+      - [x] 6.2.1.5 Subtask - Release only the committed representation and range, then record released, denied, unavailable, failed, or ambiguous outcome and bounded byte count.
+      - [x] 6.2.1.6 Subtask - Treat a crash after permit consumption as attributable ambiguous access; audit stores commitments and selected IRIs, never released bytes.
 
   - [ ] 6.3 Section - Implement content lifecycle, hold, and erasure.
 

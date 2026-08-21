@@ -63,6 +63,10 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.CaseRetrieval
   alias JidoCode.Knowledge.Memory.EvidencePacket
   alias JidoCode.Knowledge.Memory.ContentBenchmark
+  alias JidoCode.Knowledge.Memory.ContentAccessCommand
+  alias JidoCode.Knowledge.Memory.ContentAccessPermit
+  alias JidoCode.Knowledge.Memory.ContentCipher
+  alias JidoCode.Knowledge.Memory.ContentGateway
   alias JidoCode.Knowledge.Memory.EpisodeContent
   alias JidoCode.Knowledge.Memory.EpisodeContentCommand
   alias JidoCode.Knowledge.Memory.ExperienceCase
@@ -599,6 +603,30 @@ defmodule JidoCode.Knowledge do
     do: ContentBenchmark.measure(baseline, measured, integrity)
 
   def decide_content_storage(metrics, signer), do: ContentBenchmark.decide(metrics, signer)
+
+  def encrypt_content(provider, server, tenant, object, plaintext, attributes, options \\ []),
+    do: ContentCipher.encrypt(provider, server, tenant, object, plaintext, attributes, options)
+
+  def content_access_permit(attributes), do: ContentAccessPermit.new(attributes)
+
+  def authorize_content_access(permit, repository, revision, attributes, options \\ []),
+    do: ContentAccessCommand.authorize(permit, repository, revision, attributes, options)
+
+  def consume_content_access(permit, repository, revision, attributes, options \\ []),
+    do: ContentAccessCommand.consume(permit, repository, revision, attributes, options)
+
+  def record_content_access_outcome(
+        permit,
+        outcome,
+        repository,
+        revision,
+        attributes,
+        options \\ []
+      ),
+      do: ContentAccessCommand.outcome(permit, outcome, repository, revision, attributes, options)
+
+  def release_content(permit, encrypted, context, options),
+    do: ContentGateway.consume(permit, encrypted, context, options)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

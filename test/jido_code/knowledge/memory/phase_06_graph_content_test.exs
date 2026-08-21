@@ -23,7 +23,7 @@ defmodule JidoCode.Knowledge.Memory.Phase06GraphContentTest do
     assert Enum.map(content.chunks, & &1.index) == [0, 1]
     assert EpisodeContent.plaintext(content) == :unavailable
 
-    serialized = inspect(EpisodeContent.statements(content))
+    serialized = inspect(EpisodeContent.statements(content), limit: :infinity)
     refute String.contains?(serialized, plaintext)
     assert String.contains?(serialized, Base.encode64("ciphertext-0"))
 
@@ -128,6 +128,11 @@ defmodule JidoCode.Knowledge.Memory.Phase06GraphContentTest do
       media_type: "application/octet-stream",
       representation: :ciphertext,
       key_reference_iri: resource(:content_key_reference, "phase-6-content-key"),
+      key_generation: 1,
+      encryption_algorithm: :aes_256_gcm,
+      nonce: String.duplicate(<<1>>, 12),
+      authentication_tag: String.duplicate(<<2>>, 16),
+      aad_digest: digest("authenticated-context"),
       ciphertext_chunks: chunks,
       closed_at: @now,
       encrypted_before_command?: true
