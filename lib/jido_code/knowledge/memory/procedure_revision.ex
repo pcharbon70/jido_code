@@ -30,6 +30,7 @@ defmodule JidoCode.Knowledge.Memory.ProcedureRevision do
     :contradicting_case_iris,
     :delayed_outcomes,
     :last_validated_at,
+    :recorded_at,
     :transition,
     :non_authoritative?
   ]
@@ -116,6 +117,11 @@ defmodule JidoCode.Knowledge.Memory.ProcedureRevision do
       {procedure.iri, @jf <> "language", RDF.XSD.String.new(procedure.language)},
       {procedure.iri, @jf <> "framework", RDF.XSD.String.new(procedure.framework)},
       {procedure.iri, @jf <> "frameworkVersion", RDF.XSD.String.new(procedure.framework_version)},
+      {procedure.iri, @jf <> "environment",
+       RDF.XSD.String.new(procedure.applicability.environment)},
+      {procedure.iri, @jf <> "policyVersion",
+       RDF.XSD.String.new(procedure.applicability.policy_version)},
+      {procedure.iri, @jf <> "recordedAt", RDF.XSD.DateTime.new(procedure.recorded_at)},
       {procedure.iri, @jf <> "nonAuthoritative", RDF.XSD.Boolean.new(true)}
     ] ++
       literals(procedure, :task_phases, "taskPhase") ++
@@ -130,6 +136,9 @@ defmodule JidoCode.Knowledge.Memory.ProcedureRevision do
       literals(procedure, :exceptions, "exception") ++
       iris(procedure, :supporting_case_iris, "supports") ++
       iris(procedure, :contradicting_case_iris, "contradicts") ++
+      Enum.map(procedure.applicability.tool_versions, fn {tool, version} ->
+        {procedure.iri, @jf <> "toolVersion", RDF.XSD.String.new("#{tool}@#{version}")}
+      end) ++
       ProcedureTransition.statements(procedure.transition)
   end
 

@@ -449,7 +449,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           insight_specifications(resource) ++
           history_specifications(resource) ++
           experience_specifications(resource) ++
-          artifact_claim_specifications(resource)
+          artifact_claim_specifications(resource) ++
+          procedure_specifications(resource)
     end
   end
 
@@ -1634,6 +1635,78 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:evidence],
         :table,
         "Read historically failing or stale artifact claims without treating them as current.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp procedure_specifications(resource) do
+    instant = Map.put(resource, :instant, %{type: :datetime, required: true})
+
+    selection =
+      instant
+      |> Map.put(:task_phase, %{type: :literal, required: true, max_bytes: 64})
+      |> Map.put(:framework, %{type: :literal, required: true, max_bytes: 128})
+      |> Map.put(:framework_version, %{type: :literal, required: true, max_bytes: 128})
+      |> Map.put(:environment, %{type: :literal, required: true, max_bytes: 256})
+      |> Map.put(:policy_version, %{type: :literal, required: true, max_bytes: 128})
+      |> Map.put(:tool, %{type: :literal, required: true, max_bytes: 128})
+      |> Map.put(:procedure_limit, %{type: :non_negative_integer, required: true, max: 5})
+
+    [
+      spec(
+        :procedures_for_task,
+        :select,
+        selection,
+        :experience_writer,
+        [:experience],
+        :table,
+        "Read a few validated, current, phase-compatible procedures.",
+        :product,
+        :declared
+      ),
+      spec(
+        :procedure_evidence,
+        :select,
+        instant,
+        :experience_writer,
+        [:experience],
+        :timeline,
+        "Trace a procedure to supporting, contradicting, and validation evidence.",
+        :product,
+        :declared
+      ),
+      spec(
+        :procedure_contradictions,
+        :select,
+        instant,
+        :experience_writer,
+        [:experience],
+        :table,
+        "Read preserved procedure contradictions.",
+        :product,
+        :open_world
+      ),
+      spec(
+        :procedure_lifecycle,
+        :select,
+        instant,
+        :experience_writer,
+        [:experience],
+        :timeline,
+        "Read the append-only procedure lifecycle.",
+        :product,
+        :declared
+      ),
+      spec(
+        :procedure_use_outcomes,
+        :select,
+        instant,
+        :experience_writer,
+        [:experience],
+        :timeline,
+        "Read uses and later independent outcomes without self-assessment.",
         :product,
         :declared
       )

@@ -75,7 +75,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ProcedureAuthority
   alias JidoCode.Knowledge.Memory.ProcedureCommand
   alias JidoCode.Knowledge.Memory.ProcedureRevision
+  alias JidoCode.Knowledge.Memory.ProcedureRetrieval
   alias JidoCode.Knowledge.Memory.ProcedureTransition
+  alias JidoCode.Knowledge.Memory.ProcedureUseObservation
   alias JidoCode.Knowledge.Memory.ProcedureValidation
   alias JidoCode.Knowledge.Memory.CandidateFactOrSummary
   alias JidoCode.Knowledge.Memory.RetrievalIndex
@@ -573,6 +575,17 @@ defmodule JidoCode.Knowledge do
 
   def transition_procedure(procedure, transition, graph, revision, attributes, options \\ []),
     do: ProcedureCommand.transition(procedure, transition, graph, revision, attributes, options)
+
+  def retrieve_procedures(request, candidates),
+    do: ProcedureRetrieval.retrieve(request, candidates)
+
+  def evaluate_procedure_retrieval(result, baseline),
+    do: ProcedureRetrieval.evaluate(result, baseline)
+
+  def procedure_use_observation(attributes), do: ProcedureUseObservation.new(attributes)
+
+  def record_procedure_use(observation, graph, revision, attributes, options \\ []),
+    do: ProcedureUseObservation.record(observation, graph, revision, attributes, options)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

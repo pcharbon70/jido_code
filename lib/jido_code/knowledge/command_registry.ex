@@ -571,6 +571,12 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       capability: :experience_writer,
       graph_families: [:experience],
       preconditions: [:procedure_current, :unique_transition_successor]
+    },
+    "RecordProcedureUseObservation" => %{
+      owner: :runtime,
+      capability: :experience_writer,
+      graph_families: [:experience],
+      preconditions: [:retrieval_packet_exact, :procedure_selected, :assessment_pending]
     }
   }
   @version_2_2 @version_2_1

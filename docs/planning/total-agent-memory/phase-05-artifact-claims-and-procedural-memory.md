@@ -66,21 +66,21 @@ Back to plan: [README](./README.md)
       - [x] 5.3.1.4 Subtask - Permit `AdoptKnowledge` to accept precise propositions about a procedure only through existing evidence and decision contracts.
       - [x] 5.3.1.5 Subtask - Require a separate sanitized policy representation and authorized policy command before any procedure becomes executable control.
 
-  - [ ] 5.4 Section - Retrieve procedures by task phase and evidence.
+  - [x] 5.4 Section - Retrieve procedures by task phase and evidence.
 
     This section gives the harness a few compatible workflows while recording
     their use and current-world validation.
 
-    - [ ] 5.4.1 Task {#tam-p05-procedure-retrieval} [repo: jido_code] [after: {#tam-p05-procedure-validation}] - Implement phase-aware procedure products.
+    - [x] 5.4.1 Task {#tam-p05-procedure-retrieval} [repo: jido_code] [after: {#tam-p05-procedure-validation}] - Implement phase-aware procedure products.
 
       This task prevents stale or inapplicable procedures from dominating
       investigation, editing, migration, verification, or recovery.
 
-      - [ ] 5.4.1.1 Subtask - Add `procedures_for_task`, `procedure_evidence`, procedure contradiction, lifecycle, and use-outcome queries.
-      - [ ] 5.4.1.2 Subtask - Match investigation, localization, editing, migration, testing, verification, recovery, and incident phases separately.
-      - [ ] 5.4.1.3 Subtask - Require exact framework/version/tool/policy/environment compatibility and current evidence before selection.
-      - [ ] 5.4.1.4 Subtask - Return stop conditions, exceptions, failure history, freshness, and evidence alongside ordered steps.
-      - [ ] 5.4.1.5 Subtask - Record every use as a new observation and wait for independent assessment before updating lifecycle or ranking.
+      - [x] 5.4.1.1 Subtask - Add `procedures_for_task`, `procedure_evidence`, procedure contradiction, lifecycle, and use-outcome queries.
+      - [x] 5.4.1.2 Subtask - Match investigation, localization, editing, migration, testing, verification, recovery, and incident phases separately.
+      - [x] 5.4.1.3 Subtask - Require exact framework/version/tool/policy/environment compatibility and current evidence before selection.
+      - [x] 5.4.1.4 Subtask - Return stop conditions, exceptions, failure history, freshness, and evidence alongside ordered steps.
+      - [x] 5.4.1.5 Subtask - Record every use as a new observation and wait for independent assessment before updating lifecycle or ranking.
 
   - [ ] 5.5 Section - Phase 5 Integration Tests.
 
