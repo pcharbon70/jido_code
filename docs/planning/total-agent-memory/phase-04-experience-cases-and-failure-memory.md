@@ -87,16 +87,16 @@ Back to plan: [README](./README.md)
     This final section proves case construction, quarantine, retrieval,
     assessment, and invalidation against complete attempt lineage.
 
-    - [ ] 4.5.1 Task {#tam-p04-integration} [repo: jido_code] [after: {#tam-p04-memory-use-assessment}] - Execute the experience-case integration matrix.
+    - [x] 4.5.1 Task {#tam-p04-integration} [repo: jido_code] [after: {#tam-p04-memory-use-assessment}] - Execute the experience-case integration matrix.
 
       This task validates cases as useful but non-authoritative memory.
 
-      - [ ] 4.5.1.1 Subtask - Construct and retrieve success, failure, revert, flake, infrastructure, abandonment, and ambiguous cases.
-      - [ ] 4.5.1.2 Subtask - Reject unsupported summaries, injected instructions, cross-scope cases, future outcomes, missing lineage, and forged validation.
-      - [ ] 4.5.1.3 Subtask - Compare case retrieval with no-memory and ordinary lexical baselines under fixed models and budgets.
-      - [ ] 4.5.1.4 Subtask - Record useful and harmful assessments, then prove ranking/lifecycle changes preserve original history.
-      - [ ] 4.5.1.5 Subtask - Exercise replay, concurrent lifecycle transitions, invalidation, supersession, restart, and index rebuild.
-      - [ ] 4.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
+      - [x] 4.5.1.1 Subtask - Construct and retrieve success, failure, revert, flake, infrastructure, abandonment, and ambiguous cases.
+      - [x] 4.5.1.2 Subtask - Reject unsupported summaries, injected instructions, cross-scope cases, future outcomes, missing lineage, and forged validation.
+      - [x] 4.5.1.3 Subtask - Compare case retrieval with no-memory and ordinary lexical baselines under fixed models and budgets.
+      - [x] 4.5.1.4 Subtask - Record useful and harmful assessments, then prove ranking/lifecycle changes preserve original history.
+      - [x] 4.5.1.5 Subtask - Exercise replay, concurrent lifecycle transitions, invalidation, supersession, restart, and index rebuild.
+      - [x] 4.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
     - [ ] 4.5.2 Task {#tam-p04-phase-receipt} [repo: jido_code] [after: {#tam-p04-integration}] - Publish the Phase 4 experience-memory receipt.
 
@@ -104,7 +104,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/memory-phase-04-receipt.md` and binds MG4 to the
       merged candidate.
 
-      - [ ] 4.5.2.1 Subtask - Record case schema, command, query, ranker, quarantine, evaluator, and corpus revisions.
-      - [ ] 4.5.2.2 Subtask - Attach case-class, leakage, poisoning, retrieval, negative-transfer, and lifecycle evidence.
-      - [ ] 4.5.2.3 Subtask - Keep MG4 blocked if a case can hide lineage, cross scope, use future evidence, or gain authority from frequency.
+      - [x] 4.5.2.1 Subtask - Record case schema, command, query, ranker, quarantine, evaluator, and corpus revisions.
+      - [x] 4.5.2.2 Subtask - Attach case-class, leakage, poisoning, retrieval, negative-transfer, and lifecycle evidence.
+      - [x] 4.5.2.3 Subtask - Keep MG4 blocked if a case can hide lineage, cross scope, use future evidence, or gain authority from frequency.
       - [ ] 4.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 5.

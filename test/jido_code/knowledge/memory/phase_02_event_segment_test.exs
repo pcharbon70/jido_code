@@ -132,14 +132,14 @@ defmodule JidoCode.Knowledge.Memory.Phase02EventSegmentTest do
     assert continuation.authority_iri == authority
   end
 
-  test "activates only the MG2 segment writer and registers guarded 2.0 commands" do
-    assert GraphRegistry.revision() == "2.1.0"
+  test "keeps the MG2 segment writer active alongside later guarded writers" do
+    assert GraphRegistry.revision() == "2.2.0"
 
     assert {:ok, %{enabled: true, capability: :execution_writer}} =
              GraphRegistry.fetch(:run_event_segment)
 
     assert Guardrails.feature_enabled?(:run_event_segment_writer)
-    refute Guardrails.feature_enabled?(:experience_writer)
+    assert Guardrails.feature_enabled?(:experience_writer)
 
     assert CommandRegistry.segmented_execution_version() == "2.0.0"
 

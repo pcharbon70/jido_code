@@ -86,9 +86,7 @@ defmodule JidoCode.Knowledge.Memory.ExperienceSourceManifest do
       refs(manifest.iri, @jf <> "sourceEvent", manifest.source_event_iris) ++
       refs(manifest.iri, @jf <> "sourceArtifact", manifest.source_artifact_iris) ++
       refs(manifest.iri, @jf <> "evidenceSource", manifest.source_evidence_iris) ++
-      Enum.map(manifest.source_graph_revisions, fn {graph, revision} ->
-        {manifest.iri, @jf <> "sourceGraphRevision", RDF.XSD.String.new("#{graph}@#{revision}")}
-      end)
+      revision_statements(manifest.iri, manifest.source_graph_revisions)
   end
 
   defp resources(attributes, keys) do
@@ -126,6 +124,23 @@ defmodule JidoCode.Knowledge.Memory.ExperienceSourceManifest do
 
   defp refs(subject, predicate, values),
     do: Enum.map(values, &{subject, predicate, RDF.iri(&1)})
+
+  defp revision_statements(subject, revisions) do
+    Enum.flat_map(revisions, fn {graph, revision} ->
+      {:ok, reference} =
+        ResourceIdentity.deterministic(
+          :graph_revision_reference,
+          Enum.join([subject, graph, Integer.to_string(revision)], "\n")
+        )
+
+      [
+        {subject, @jf <> "sourceGraphRevision", RDF.iri(reference)},
+        {reference, @rdf_type, RDF.iri(@jf <> "GraphRevisionReference")},
+        {reference, @jf <> "sourceGraph", RDF.iri(graph)},
+        {reference, @jf <> "sourceRevisionNumber", RDF.XSD.NonNegativeInteger.new(revision)}
+      ]
+    end)
+  end
 
   defp invalid, do: {:error, Error.new(:invalid_input, :experience_source_manifest)}
 end

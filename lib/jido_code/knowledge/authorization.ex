@@ -44,7 +44,8 @@ defmodule JidoCode.Knowledge.Authorization do
     :source,
     :reasoner,
     :administrative,
-    :harness
+    :harness,
+    :experience_writer
   ]
 
   @spec authorize(CommandEnvelope.t(), map(), ChangeSet.t(), map()) ::

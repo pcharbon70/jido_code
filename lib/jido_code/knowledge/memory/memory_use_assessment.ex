@@ -140,9 +140,7 @@ defmodule JidoCode.Knowledge.Memory.MemoryUseAssessment do
       Enum.map(assessment.limitations, fn limitation ->
         {assessment.iri, @jf <> "limitation", RDF.XSD.String.new(limitation)}
       end) ++
-      Enum.map(assessment.source_graph_revisions, fn {graph, revision} ->
-        {assessment.iri, @jf <> "sourceGraphRevision", RDF.XSD.String.new("#{graph}@#{revision}")}
-      end)
+      revision_statements(assessment.iri, assessment.source_graph_revisions)
   end
 
   @spec record_command(t(), String.t(), non_neg_integer(), map(), keyword()) ::
@@ -273,6 +271,23 @@ defmodule JidoCode.Knowledge.Memory.MemoryUseAssessment do
 
   defp concept(value), do: RDF.iri(@concept <> Macro.camelize(to_string(value)))
   defp refs(subject, predicate, values), do: Enum.map(values, &{subject, predicate, RDF.iri(&1)})
+
+  defp revision_statements(subject, revisions) do
+    Enum.flat_map(revisions, fn {graph, revision} ->
+      {:ok, reference} =
+        ResourceIdentity.deterministic(
+          :graph_revision_reference,
+          Enum.join([subject, graph, Integer.to_string(revision)], "\n")
+        )
+
+      [
+        {subject, @jf <> "sourceGraphRevision", RDF.iri(reference)},
+        {reference, @rdf_type, RDF.iri(@jf <> "GraphRevisionReference")},
+        {reference, @jf <> "sourceGraph", RDF.iri(graph)},
+        {reference, @jf <> "sourceRevisionNumber", RDF.XSD.NonNegativeInteger.new(revision)}
+      ]
+    end)
+  end
 
   defp command_iri(assessment) do
     {:ok, iri} = ResourceIdentity.deterministic(:command_request, assessment.iri <> "\nrecord")
