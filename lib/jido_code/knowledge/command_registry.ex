@@ -553,7 +553,29 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       preconditions: [:claim_current, :artifact_revision_compared, :unique_transition_successor]
     }
   }
-  @version_2_2 Map.merge(@version_2_1, @artifact_claim_commands)
+  @procedure_commands %{
+    "ProposeProcedureRevision" => %{
+      owner: :learning,
+      capability: :experience_writer,
+      graph_families: [:experience],
+      preconditions: [:multiple_cases_or_expert_review, :quarantine_clear, :procedure_absent]
+    },
+    "ValidateProcedureRevision" => %{
+      owner: :evaluation,
+      capability: :experience_writer,
+      graph_families: [:experience],
+      preconditions: [:independent_executions, :applicability_exact, :current_evidence]
+    },
+    "TransitionProcedureRevision" => %{
+      owner: :evaluation,
+      capability: :experience_writer,
+      graph_families: [:experience],
+      preconditions: [:procedure_current, :unique_transition_successor]
+    }
+  }
+  @version_2_2 @version_2_1
+               |> Map.merge(@artifact_claim_commands)
+               |> Map.merge(@procedure_commands)
 
   @spec version() :: String.t()
   def version, do: @version

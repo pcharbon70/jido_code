@@ -72,8 +72,11 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.MemoryUseAssessment
   alias JidoCode.Knowledge.Memory.NegativeTransfer
   alias JidoCode.Knowledge.Memory.ProcedureInduction
+  alias JidoCode.Knowledge.Memory.ProcedureAuthority
+  alias JidoCode.Knowledge.Memory.ProcedureCommand
   alias JidoCode.Knowledge.Memory.ProcedureRevision
   alias JidoCode.Knowledge.Memory.ProcedureTransition
+  alias JidoCode.Knowledge.Memory.ProcedureValidation
   alias JidoCode.Knowledge.Memory.CandidateFactOrSummary
   alias JidoCode.Knowledge.Memory.RetrievalIndex
   alias JidoCode.Knowledge.Memory.RetrievalPipeline
@@ -552,6 +555,24 @@ defmodule JidoCode.Knowledge do
   def procedure_revision(attributes), do: ProcedureRevision.new(attributes)
   def procedure_transition(attributes), do: ProcedureTransition.new(attributes)
   def resolve_procedure_lifecycle(transitions), do: ProcedureTransition.resolve(transitions)
+
+  def validate_procedure(procedure, report, executions, attributes),
+    do: ProcedureValidation.validate(procedure, report, executions, attributes)
+
+  def evaluate_procedure_drift(procedure, current, transition, attributes),
+    do: ProcedureValidation.drift(procedure, current, transition, attributes)
+
+  def procedure_knowledge_proposition(procedure, validation, attributes),
+    do: ProcedureAuthority.knowledge_proposition(procedure, validation, attributes)
+
+  def procedure_policy_representation(procedure, validation, attributes),
+    do: ProcedureAuthority.sanitized_policy(procedure, validation, attributes)
+
+  def record_procedure_proposal(procedure, graph, revision, report, attributes, options \\ []),
+    do: ProcedureCommand.propose(procedure, graph, revision, report, attributes, options)
+
+  def transition_procedure(procedure, transition, graph, revision, attributes, options \\ []),
+    do: ProcedureCommand.transition(procedure, transition, graph, revision, attributes, options)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

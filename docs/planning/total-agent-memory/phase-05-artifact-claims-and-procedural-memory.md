@@ -50,21 +50,21 @@ Back to plan: [README](./README.md)
       - [x] 5.2.1.4 Subtask - Require multiple applicable cases or explicit expert review; success count alone never promotes a procedure.
       - [x] 5.2.1.5 Subtask - Quarantine secrets, prompt injection, over-generalization, missing preconditions, duplicate procedures, and benchmark leakage.
 
-  - [ ] 5.3 Section - Validate procedures and preserve authority boundaries.
+  - [x] 5.3 Section - Validate procedures and preserve authority boundaries.
 
     This section converts candidate guidance into measured procedural memory
     while keeping accepted propositions and executable policy separate.
 
-    - [ ] 5.3.1 Task {#tam-p05-procedure-validation} [repo: jido_code] [after: {#tam-p05-procedure-contract}] - Implement independent procedure validation and lifecycle.
+    - [x] 5.3.1 Task {#tam-p05-procedure-validation} [repo: jido_code] [after: {#tam-p05-procedure-contract}] - Implement independent procedure validation and lifecycle.
 
       This task requires current execution evidence before a procedure becomes
       validated.
 
-      - [ ] 5.3.1.1 Subtask - Validate procedures through independent executions under exact applicability, environment, tool, policy, and source revisions.
-      - [ ] 5.3.1.2 Subtask - Track success, failure, revert, incident, negative-transfer, and delayed-survival counts by applicability class.
-      - [ ] 5.3.1.3 Subtask - Mark procedures stale when framework, dependency, tool, policy, environment, or artifact preconditions drift.
-      - [ ] 5.3.1.4 Subtask - Permit `AdoptKnowledge` to accept precise propositions about a procedure only through existing evidence and decision contracts.
-      - [ ] 5.3.1.5 Subtask - Require a separate sanitized policy representation and authorized policy command before any procedure becomes executable control.
+      - [x] 5.3.1.1 Subtask - Validate procedures through independent executions under exact applicability, environment, tool, policy, and source revisions.
+      - [x] 5.3.1.2 Subtask - Track success, failure, revert, incident, negative-transfer, and delayed-survival counts by applicability class.
+      - [x] 5.3.1.3 Subtask - Mark procedures stale when framework, dependency, tool, policy, environment, or artifact preconditions drift.
+      - [x] 5.3.1.4 Subtask - Permit `AdoptKnowledge` to accept precise propositions about a procedure only through existing evidence and decision contracts.
+      - [x] 5.3.1.5 Subtask - Require a separate sanitized policy representation and authorized policy command before any procedure becomes executable control.
 
   - [ ] 5.4 Section - Retrieve procedures by task phase and evidence.
 
