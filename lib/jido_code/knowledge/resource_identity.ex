@@ -48,6 +48,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     cross-repository-audit cohort-partition local-memory-acceptance memory-dataset-manifest
     memory-dataset-row dataset-exclusion dataset-export-permit dataset-artifact
     dataset-lifecycle-transition dataset-external-copy training-boundary
+    memory-evaluation-run memory-release-decision memory-product-disable
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

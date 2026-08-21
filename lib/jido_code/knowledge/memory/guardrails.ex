@@ -10,7 +10,7 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Security.DataPolicy
 
-  @revision "1.4.0"
+  @revision "1.5.0"
   @legacy_protocol "1.x"
   @segmented_protocol "2.0.0"
   @terminal_states ~w[completed failed timed_out cancelled abandoned]a
@@ -285,7 +285,8 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
              :episode_content_writer,
              :content_gateway,
              :governed_dataset_construction,
-             :governed_dataset_export
+             :governed_dataset_export,
+             :memory_release_evaluation
            ],
       do: true
 

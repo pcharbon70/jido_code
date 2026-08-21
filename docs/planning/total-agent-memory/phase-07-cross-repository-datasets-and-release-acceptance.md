@@ -75,24 +75,24 @@ Back to plan: [README](./README.md)
       - [x] 7.3.1.5 Subtask - Limit this phase to evaluation and governed dataset exports; do not create fine-tuning jobs, checkpoints, model-registry records, or deployments.
       - [x] 7.3.1.6 Subtask - Require any future training effort to reference a pinned manifest and obtain its own implementation plan, evidence gates, and lifecycle controls.
 
-  - [ ] 7.4 Section - Run the memory evaluation and release program.
+  - [x] 7.4 Section - Run the memory evaluation and release program.
 
     This section demonstrates useful memory behavior against controlled
     baselines while measuring negative transfer, leakage, stale authority, and
     operational cost.
 
-    - [ ] 7.4.1 Task {#tam-p07-evaluation-release} [repo: jido_code] [after: {#tam-p07-dataset-export}] - Implement release evaluation and acceptance criteria.
+    - [x] 7.4.1 Task {#tam-p07-evaluation-release} [repo: jido_code] [after: {#tam-p07-dataset-export}] - Implement release evaluation and acceptance criteria.
 
       This task evaluates memory products through reproducible ablations and
       requires both positive utility and zero-tolerance governance outcomes
       before release.
 
-      - [ ] 7.4.1.1 Subtask - Run ablations for no memory, recent history, all eligible history, summaries, lexical retrieval, dense retrieval, graph retrieval, cases, procedures, hybrid retrieval, oracle retrieval, and stale or poisoned memory.
-      - [ ] 7.4.1.2 Subtask - Measure retrieval precision, recall, ranking quality, source completeness, authorization-denial correctness, invalidation latency, and retrieval cost.
-      - [ ] 7.4.1.3 Subtask - Measure task success, time to accepted patch, review burden, regression rate, recovery quality, token cost, and operator intervention.
-      - [ ] 7.4.1.4 Subtask - Measure negative transfer, procedure misuse, invalidation misses, hallucinated memory, poisoned-memory uptake, scope leakage, erasure misses, and temporal leakage.
-      - [ ] 7.4.1.5 Subtask - Require zero cross-scope leaks, secret leaks, accounting drift, missing sources, temporal violations, permit bypasses, stale-claim acceptance, erasure failures, and future-patch leakage.
-      - [ ] 7.4.1.6 Subtask - Require statistically supported benefit for at least one launch memory product, no critical false acceptance, and an immediate disable path for each launched product.
+      - [x] 7.4.1.1 Subtask - Run ablations for no memory, recent history, all eligible history, summaries, lexical retrieval, dense retrieval, graph retrieval, cases, procedures, hybrid retrieval, oracle retrieval, and stale or poisoned memory.
+      - [x] 7.4.1.2 Subtask - Measure retrieval precision, recall, ranking quality, source completeness, authorization-denial correctness, invalidation latency, and retrieval cost.
+      - [x] 7.4.1.3 Subtask - Measure task success, time to accepted patch, review burden, regression rate, recovery quality, token cost, and operator intervention.
+      - [x] 7.4.1.4 Subtask - Measure negative transfer, procedure misuse, invalidation misses, hallucinated memory, poisoned-memory uptake, scope leakage, erasure misses, and temporal leakage.
+      - [x] 7.4.1.5 Subtask - Require zero cross-scope leaks, secret leaks, accounting drift, missing sources, temporal violations, permit bypasses, stale-claim acceptance, erasure failures, and future-patch leakage.
+      - [x] 7.4.1.6 Subtask - Require statistically supported benefit for at least one launch memory product, no critical false acceptance, and an immediate disable path for each launched product.
 
   - [ ] 7.5 Section - Phase 7 Integration Tests.
 

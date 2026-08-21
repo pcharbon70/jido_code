@@ -61,6 +61,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     memory_dataset: ~w[
       MemoryDatasetManifest MemoryDatasetRow DatasetExclusion DatasetLifecycle
       DatasetExportPermit MemoryDatasetArtifact DatasetLifecycleTransition
+      MemoryEvaluationRun MemoryReleaseDecision MemoryProductDisable
       GraphRevisionReference MigrationActivity
     ],
     evidence: ~w[
