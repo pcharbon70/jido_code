@@ -52,22 +52,22 @@ Back to plan: [README](./README.md)
       - [x] 6.2.1.5 Subtask - Release only the committed representation and range, then record released, denied, unavailable, failed, or ambiguous outcome and bounded byte count.
       - [x] 6.2.1.6 Subtask - Treat a crash after permit consumption as attributable ambiguous access; audit stores commitments and selected IRIs, never released bytes.
 
-  - [ ] 6.3 Section - Implement content lifecycle, hold, and erasure.
+  - [x] 6.3 Section - Implement content lifecycle, hold, and erasure.
 
     This section tracks later availability and deletion without mutating
     immutable event or payload graphs.
 
-    - [ ] 6.3.1 Task {#tam-p06-content-lifecycle} [repo: jido_code] [after: {#tam-p06-content-access}] - Implement lifecycle activities and derivative cleanup.
+    - [x] 6.3.1 Task {#tam-p06-content-lifecycle} [repo: jido_code] [after: {#tam-p06-content-access}] - Implement lifecycle activities and derivative cleanup.
 
       This task prevents erased or unavailable content from being retrieved,
       restored, or misreported.
 
-      - [ ] 6.3.1.1 Subtask - Append active, cold, unavailable, provider-lost, expired-pending, erase-requested, crypto-erased, physically-deleted, externally-attested, and externally-unverifiable transitions.
-      - [ ] 6.3.1.2 Subtask - Implement case-specific place, review, and release hold commands with owner, approver, scope, purpose, affected objects, access policy, and review date.
-      - [ ] 6.3.1.3 Subtask - Block retrieval first, then inventory and remove bodies, lexical/dense indexes, summaries, cases, procedures, datasets, caches, exports, queued jobs, replicas, provider objects, and backup-restorable keys.
-      - [ ] 6.3.1.4 Subtask - Preserve only lawful non-sensitive shells and non-reversible tombstones; never claim unverifiable external deletion as erasure.
-      - [ ] 6.3.1.5 Subtask - Extend restore floors and backup manifests so erased content and keys cannot be reintroduced.
-      - [ ] 6.3.1.6 Subtask - Rebuild or invalidate every derived projection whose lineage includes removed content.
+      - [x] 6.3.1.1 Subtask - Append active, cold, unavailable, provider-lost, expired-pending, erase-requested, crypto-erased, physically-deleted, externally-attested, and externally-unverifiable transitions.
+      - [x] 6.3.1.2 Subtask - Implement case-specific place, review, and release hold commands with owner, approver, scope, purpose, affected objects, access policy, and review date.
+      - [x] 6.3.1.3 Subtask - Block retrieval first, then inventory and remove bodies, lexical/dense indexes, summaries, cases, procedures, datasets, caches, exports, queued jobs, replicas, provider objects, and backup-restorable keys.
+      - [x] 6.3.1.4 Subtask - Preserve only lawful non-sensitive shells and non-reversible tombstones; never claim unverifiable external deletion as erasure.
+      - [x] 6.3.1.5 Subtask - Extend restore floors and backup manifests so erased content and keys cannot be reintroduced.
+      - [x] 6.3.1.6 Subtask - Rebuild or invalidate every derived projection whose lineage includes removed content.
 
   - [ ] 6.4 Section - Resolve the storage decision and keep capture profiles gated.
 

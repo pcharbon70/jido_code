@@ -612,6 +612,40 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       capability: :content_lifecycle_writer,
       graph_families: [:content_lifecycle],
       preconditions: [:permit_consumed, :outcome_absent, :audit_contains_no_released_bytes]
+    },
+    "TransitionContentLifecycle" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:content_state_current, :unique_transition_successor]
+    },
+    "PlaceContentHold" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:case_scope_exact, :owner_and_approver_distinct, :hold_absent]
+    },
+    "ReviewContentHold" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:hold_current, :review_due, :unique_transition_successor]
+    },
+    "ReleaseContentHold" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:hold_release_pending, :approver_current, :unique_transition_successor]
+    },
+    "RecordContentErasure" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [
+        :retrieval_blocked_first,
+        :derivative_inventory_complete,
+        :restore_floor_advanced
+      ]
     }
   }
   @version_2_3 Map.merge(@version_2_2, @content_commands)

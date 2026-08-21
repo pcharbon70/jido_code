@@ -67,6 +67,12 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ContentAccessPermit
   alias JidoCode.Knowledge.Memory.ContentCipher
   alias JidoCode.Knowledge.Memory.ContentGateway
+  alias JidoCode.Knowledge.Memory.ContentBackupManifest
+  alias JidoCode.Knowledge.Memory.ContentErasurePlan
+  alias JidoCode.Knowledge.Memory.ContentHold
+  alias JidoCode.Knowledge.Memory.ContentLifecycleCommand
+  alias JidoCode.Knowledge.Memory.ContentLifecycleTransition
+  alias JidoCode.Knowledge.Memory.DerivativeCleanup
   alias JidoCode.Knowledge.Memory.EpisodeContent
   alias JidoCode.Knowledge.Memory.EpisodeContentCommand
   alias JidoCode.Knowledge.Memory.ExperienceCase
@@ -627,6 +633,29 @@ defmodule JidoCode.Knowledge do
 
   def release_content(permit, encrypted, context, options),
     do: ContentGateway.consume(permit, encrypted, context, options)
+
+  def content_lifecycle_transition(attributes), do: ContentLifecycleTransition.new(attributes)
+  def resolve_content_lifecycle(transitions), do: ContentLifecycleTransition.resolve(transitions)
+  def place_content_hold(attributes), do: ContentHold.place(attributes)
+  def review_content_hold(hold, attributes), do: ContentHold.review(hold, attributes)
+  def release_content_hold(hold, attributes), do: ContentHold.release(hold, attributes)
+  def plan_content_erasure(attributes), do: ContentErasurePlan.build(attributes)
+  def content_backup_manifest(attributes), do: ContentBackupManifest.new(attributes)
+
+  def content_restore_allowed?(manifest, restore),
+    do: ContentBackupManifest.restore_allowed?(manifest, restore)
+
+  def plan_content_derivative_cleanup(erased, projections),
+    do: DerivativeCleanup.plan(erased, projections)
+
+  def transition_content_lifecycle(transition, repository, revision, attributes, options \\ []),
+    do: ContentLifecycleCommand.transition(transition, repository, revision, attributes, options)
+
+  def record_content_hold(hold, repository, revision, attributes, options \\ []),
+    do: ContentLifecycleCommand.hold(hold, repository, revision, attributes, options)
+
+  def record_content_erasure(plan, repository, revision, attributes, options \\ []),
+    do: ContentLifecycleCommand.erasure(plan, repository, revision, attributes, options)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)
