@@ -40,6 +40,8 @@ defmodule JidoCode.Knowledge.Memory.ExperienceCase do
   ]
   defstruct @enforce_keys
 
+  @type t :: %__MODULE__{}
+
   @case_classes ~w[success failure revert flake infrastructure abandoned ambiguous]a
   @task_classes ~w[diagnosis implementation repair review migration evaluation incident]a
   @revision "1.0.0"

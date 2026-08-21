@@ -44,7 +44,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       AttemptTransitionObservation NormalizedActionProposal ExecutionArtifactObservation
     ],
     experience: ~w[
-      ExperienceCase ExperienceCaseTransition ProcedureRevision ArtifactClaim RetrievalActivity
+      ExperienceCase ExperienceCaseTransition ExperienceSourceManifest CandidateFactOrSummary
+      ExperienceQuarantineReport ProcedureRevision ArtifactClaim RetrievalActivity
       MemoryUseAssessment
       GraphRevisionReference MigrationActivity
     ],

@@ -18,6 +18,8 @@ defmodule JidoCode.Knowledge.Memory.ExperienceTransition do
   ]
   defstruct @enforce_keys
 
+  @type t :: %__MODULE__{}
+
   @states ~w[candidate validated stale invalidated superseded]a
   @edges %{
     candidate: ~w[validated stale invalidated superseded]a,

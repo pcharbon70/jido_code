@@ -38,6 +38,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     approval-request event-segment execution-event execution-event-head capture-manifest
     content-body content-capture segment-closure continuation-authority memory-retrieval-request
     memory-retrieval-activity memory-evidence-packet experience-case experience-transition
+    experience-source-manifest candidate-fact-or-summary experience-quarantine-report
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655

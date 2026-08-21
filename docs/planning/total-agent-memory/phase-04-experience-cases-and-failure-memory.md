@@ -34,21 +34,21 @@ Back to plan: [README](./README.md)
       - [x] 4.1.1.4 Subtask - Define candidate, validated, stale, invalidated, and superseded transitions in the `experience` family.
       - [x] 4.1.1.5 Subtask - Ensure case status never satisfies work, accepts evidence, adopts knowledge, or compiles policy.
 
-  - [ ] 4.2 Section - Construct and quarantine cases.
+  - [x] 4.2 Section - Construct and quarantine cases.
 
     This section combines deterministic extraction with bounded model proposals
     while treating both source content and generated summaries as untrusted.
 
-    - [ ] 4.2.1 Task {#tam-p04-case-construction} [repo: jido_code] [after: {#tam-p04-case-contract}] - Implement case proposal, validation, and quarantine commands.
+    - [x] 4.2.1 Task {#tam-p04-case-construction} [repo: jido_code] [after: {#tam-p04-case-contract}] - Implement case proposal, validation, and quarantine commands.
 
       This task prevents poisoning, leakage, and unsupported generalization
       during consolidation.
 
-      - [ ] 4.2.1.1 Subtask - Build deterministic failure signatures and case skeletons from closed runs plus exact time-bounded later evidence.
-      - [ ] 4.2.1.2 Subtask - Store model-generated summaries as `CandidateFactOrSummary` in `experience`, never as reasoner output or accepted knowledge.
-      - [ ] 4.2.1.3 Subtask - Quarantine embedded instructions, secrets, personal data, cross-scope references, unsupported claims, future leakage, suspicious triggers, and missing evidence.
-      - [ ] 4.2.1.4 Subtask - Require an independent actor and exact source/effective-time manifest before validation.
-      - [ ] 4.2.1.5 Subtask - Preserve contradictory and failed cases instead of consolidating only successful trajectories.
+      - [x] 4.2.1.1 Subtask - Build deterministic failure signatures and case skeletons from closed runs plus exact time-bounded later evidence.
+      - [x] 4.2.1.2 Subtask - Store model-generated summaries as `CandidateFactOrSummary` in `experience`, never as reasoner output or accepted knowledge.
+      - [x] 4.2.1.3 Subtask - Quarantine embedded instructions, secrets, personal data, cross-scope references, unsupported claims, future leakage, suspicious triggers, and missing evidence.
+      - [x] 4.2.1.4 Subtask - Require an independent actor and exact source/effective-time manifest before validation.
+      - [x] 4.2.1.5 Subtask - Preserve contradictory and failed cases instead of consolidating only successful trajectories.
 
   - [ ] 4.3 Section - Retrieve similar cases and failed interventions.
 
