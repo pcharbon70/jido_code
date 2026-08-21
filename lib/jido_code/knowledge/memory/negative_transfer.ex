@@ -52,8 +52,7 @@ defmodule JidoCode.Knowledge.Memory.NegativeTransfer do
          }}
       end
     else
-      {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid()
+      false -> invalid()
     end
   rescue
     _error -> invalid()
