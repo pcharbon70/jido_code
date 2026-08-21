@@ -57,23 +57,23 @@ Back to plan: [README](./README.md)
       - [x] 7.2.1.5 Subtask - Exclude secrets, personal data, provider-private fields, hidden reasoning, unresolved deletion requests, and payloads outside the manifest's allowed classifications.
       - [x] 7.2.1.6 Subtask - Give every dataset row exact source lineage and an identity that allows all derived copies to be found, invalidated, and removed.
 
-  - [ ] 7.3 Section - Export datasets while keeping model training separate.
+  - [x] 7.3 Section - Export datasets while keeping model training separate.
 
     This section governs dataset movement as a distinct lifecycle and makes
     clear that an approved dataset is not authorization to train or deploy a
     model.
 
-    - [ ] 7.3.1 Task {#tam-p07-dataset-export} [repo: jido_code] [after: {#tam-p07-dataset-construction}] - Implement dataset export permits and lineage.
+    - [x] 7.3.1 Task {#tam-p07-dataset-export} [repo: jido_code] [after: {#tam-p07-dataset-construction}] - Implement dataset export permits and lineage.
 
       This task exports only verified manifests to approved sinks while
       preserving revocation, invalidation, hold, and erasure obligations.
 
-      - [ ] 7.3.1.1 Subtask - Require an export permit naming the approved sink, exact manifest, row and byte limits, classifications, purpose, and expiry.
-      - [ ] 7.3.1.2 Subtask - Store dataset identity, digest, schema, row counts, source lineage, authorization, and availability state in the graph without making the graph a second payload store.
-      - [ ] 7.3.1.3 Subtask - Verify chronology, split isolation, deduplication, source completeness, class balance, and absence of forbidden content before release.
-      - [ ] 7.3.1.4 Subtask - Propagate erasure, hold, revocation, and source invalidation into dataset status and require deletion or quarantine of affected external copies.
-      - [ ] 7.3.1.5 Subtask - Limit this phase to evaluation and governed dataset exports; do not create fine-tuning jobs, checkpoints, model-registry records, or deployments.
-      - [ ] 7.3.1.6 Subtask - Require any future training effort to reference a pinned manifest and obtain its own implementation plan, evidence gates, and lifecycle controls.
+      - [x] 7.3.1.1 Subtask - Require an export permit naming the approved sink, exact manifest, row and byte limits, classifications, purpose, and expiry.
+      - [x] 7.3.1.2 Subtask - Store dataset identity, digest, schema, row counts, source lineage, authorization, and availability state in the graph without making the graph a second payload store.
+      - [x] 7.3.1.3 Subtask - Verify chronology, split isolation, deduplication, source completeness, class balance, and absence of forbidden content before release.
+      - [x] 7.3.1.4 Subtask - Propagate erasure, hold, revocation, and source invalidation into dataset status and require deletion or quarantine of affected external copies.
+      - [x] 7.3.1.5 Subtask - Limit this phase to evaluation and governed dataset exports; do not create fine-tuning jobs, checkpoints, model-registry records, or deployments.
+      - [x] 7.3.1.6 Subtask - Require any future training effort to reference a pinned manifest and obtain its own implementation plan, evidence gates, and lifecycle controls.
 
   - [ ] 7.4 Section - Run the memory evaluation and release program.
 
