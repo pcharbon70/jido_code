@@ -2,10 +2,11 @@
 
 ## Status
 
-This receipt records the Memory Phase 4 merge candidate verified locally on
-2026-08-21. MG4 remains merge-pending until the implementation pull request
-passes clean-checkout CI, merges, and the full merge commit is pinned here and
-in the Phase 4 plan. Phase 5 is not yet authorized.
+This receipt records the Memory Phase 4 candidate accepted on 2026-08-21 after
+the implementation and CI-remediation pull requests merged. Pull request #56
+passed clean-checkout verification and Dialyzer before merging as
+`48527f240c5145ebc8535d46dd8b622e4385f495`. MG4 is accepted, and Phase 5 is
+authorized only from that exact merged baseline.
 
 ## Candidate Provenance
 
@@ -18,7 +19,9 @@ in the Phase 4 plan. Phase 5 is not yet authorized.
 | Section 4.3 | `ffa742de5772fc50d064a1ba330f4e007cea9563` - retrieve applicable experience cases |
 | Section 4.4 | `9a7c0357e5f88372105f761598a8b48091c699ac` - assess experience case utility |
 | Section 4.5 and receipt | This commit; exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; not yet accepted |
+| Implementation merge | `5d0fa8bfda7524795ef77de499bc28d8941dc89a` - pull request #55 |
+| CI remediation | `11d60dcef388a24e972e8f6346f840fa058b086a` - patched Bandit and Dialyzer gates |
+| Accepted merged candidate | `48527f240c5145ebc8535d46dd8b622e4385f495` - pull request #56 |
 
 ## Contract Pins
 
@@ -91,7 +94,7 @@ same ordered lifecycle prefix and includes the committed terminal transition.
 | `mix architecture.check` | Pass |
 | Isolated release-contract and command-pipeline regression rerun | 4 tests, 0 failures |
 | `mix precommit` | 678 tests, 0 failures; pass |
-| Pull request clean-checkout CI | Merge-pending |
+| Pull request #56 clean-checkout CI and Dialyzer | Pass; merged 2026-08-21 |
 
 ## Known Limitations
 
@@ -107,9 +110,9 @@ same ordered lifecycle prefix and includes the committed terminal transition.
 
 ## Gate MG4
 
-MG4 remains merge-pending. It may be accepted only after clean-checkout CI and
-merge, by pinning the full merge-commit SHA here and in the Phase 4 plan. Phase
-5 remains unauthorized until then.
+MG4 is accepted at merged candidate
+`48527f240c5145ebc8535d46dd8b622e4385f495`, pinned in this receipt and the
+Phase 4 plan. Phase 5 is authorized only from that exact baseline.
 
 MG4 reopens if any case can omit exact attempt, event, artifact, evidence,
 verification, delayed-outcome, effective-time, repository, environment,
