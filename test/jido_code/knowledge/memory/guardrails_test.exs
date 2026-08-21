@@ -122,7 +122,11 @@ defmodule JidoCode.Knowledge.Memory.GuardrailsTest do
              ])
 
     assert Guardrails.disabled_features() == %{
+             automatic_dataset_export: :expiring_manifest_bound_export_permit,
+             broad_cohort_access: :explicit_cross_repository_authorization,
              diagnostic_capture: :superseding_privacy_contract,
+             model_deployment: :separate_accepted_implementation_plan,
+             model_training: :separate_accepted_implementation_plan,
              project_total_history: :accepted_diagnostic_evaluation
            }
 
@@ -133,6 +137,8 @@ defmodule JidoCode.Knowledge.Memory.GuardrailsTest do
     assert Guardrails.feature_enabled?(:content_lifecycle_writer)
     assert Guardrails.feature_enabled?(:episode_content_writer)
     assert Guardrails.feature_enabled?(:content_gateway)
+    assert Guardrails.feature_enabled?(:governed_dataset_construction)
+    assert Guardrails.feature_enabled?(:governed_dataset_export)
     refute Guardrails.feature_enabled?(:unknown_future_feature)
   end
 

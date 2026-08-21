@@ -2,10 +2,10 @@
 
 ## Status
 
-This receipt records the Memory Phase 6 merge candidate verified locally on
-2026-08-21. MG6 remains merge-pending until the implementation pull request
-passes clean-checkout CI, merges, and its full merge commit is pinned here and
-in the Phase 6 plan. Phase 7 is not yet authorized.
+This receipt records the accepted Memory Phase 6 merged candidate. Pull request
+#58 passed clean-checkout CI and Dialyzer, then merged on 2026-08-21 as
+`e27fce06e593c75a532390c231cb9ce0d4ed0c65`. MG6 is accepted at that pinned
+merged candidate and Phase 7 is authorized from that baseline.
 
 ## Candidate Provenance
 
@@ -18,7 +18,7 @@ in the Phase 6 plan. Phase 7 is not yet authorized.
 | Section 6.3 | `ccd337d` - enforce complete content lifecycle erasure |
 | Section 6.4 | `64f95f4` - select graph-native exact content storage |
 | Section 6.5 and receipt | This commit; exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; not yet accepted |
+| Merged candidate | `e27fce06e593c75a532390c231cb9ce0d4ed0c65`; PR #58, merged 2026-08-21 |
 
 ## Contract Pins
 
@@ -124,7 +124,7 @@ a JidoCode-controlled bucket is never relabeled as external authority.
 | `mix architecture.check` | Pass |
 | `mix precommit` | Pass; 712 tests, 0 failures, with architecture checks passed |
 | `mix dialyzer` | Pass; 177 existing warnings skipped by the checked-in ignore policy, no unignored warnings |
-| Pull request clean-checkout CI | Merge-pending |
+| Pull request clean-checkout CI | Pass; CI `verify` and `dialyzer` succeeded for PR #58 before merge |
 
 ## Known Limitations
 
@@ -143,9 +143,9 @@ a JidoCode-controlled bucket is never relabeled as external authority.
 
 ## Gate MG6
 
-MG6 remains merge-pending. It may be accepted only after clean-checkout CI and
-merge, by pinning the full merge-commit SHA here and in the Phase 6 plan. Phase
-7 remains unauthorized until then.
+MG6 is accepted at merged candidate
+`e27fce06e593c75a532390c231cb9ce0d4ed0c65` from 2026-08-21. Phase 7 is
+authorized only from this pinned baseline.
 
 MG6 reopens if plaintext, a secret value, provider-private state, hidden
 reasoning, or a plaintext-derived sensitive commitment enters durable content;

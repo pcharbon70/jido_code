@@ -7,7 +7,7 @@ defmodule JidoCode.Knowledge.Memory.Contract do
   memory protocol. It grants no capture, retrieval, or write capability.
   """
 
-  @revision "2.0.0"
+  @revision "2.1.0"
   @capture_outcomes ~w[captured omitted unavailable redacted failed expired erased]a
   @forbidden_content ~w[secret_value provider_private_state hidden_reasoning]a
 
@@ -62,8 +62,8 @@ defmodule JidoCode.Knowledge.Memory.Contract do
     },
     %{
       content_class: :export,
-      current_graphs: [],
-      current_representation: :external_exact_dataset_derivative,
+      current_graphs: [:memory_dataset],
+      current_representation: :external_reference_digest_and_lineage,
       classification: :export_derivative,
       semantic_history: :purpose_bound_export_only,
       limitation: :inherits_every_source_classification

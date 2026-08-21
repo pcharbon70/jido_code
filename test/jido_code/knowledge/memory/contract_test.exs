@@ -4,7 +4,7 @@ defmodule JidoCode.Knowledge.Memory.ContractTest do
   alias JidoCode.Knowledge.Memory.Contract
 
   test "inventories every current durable content and derivative class" do
-    assert Contract.revision() == "2.0.0"
+    assert Contract.revision() == "2.1.0"
 
     assert Contract.content_inventory()
            |> Enum.map(& &1.content_class)

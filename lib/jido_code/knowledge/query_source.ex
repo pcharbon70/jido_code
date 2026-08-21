@@ -1418,6 +1418,56 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:memory_dataset_manifest) do
+    """
+    SELECT ?cohort ?authorization ?purpose ?cutoff ?extractor ?query ?state WHERE {
+      GRAPH {{graph}} {
+        {{resource}} a <#{@jf}MemoryDatasetManifest> ; <#{@jf}cohort> ?cohort ;
+          <#{@jf}authorization> ?authorization ; <#{@jf}purpose> ?purpose ;
+          <#{@jf}effectiveCutoff> ?cutoff ; <#{@jf}extractorRevision> ?extractor ;
+          <#{@jf}queryRevision> ?query ; <#{@jf}datasetState> ?state .
+      }
+    }
+    ORDER BY ?cohort
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:memory_dataset_lineage) do
+    """
+    SELECT ?row ?source ?artifact ?externalArtifact ?availability WHERE {
+      GRAPH {{graph}} {
+        OPTIONAL {
+          ?row a <#{@jf}MemoryDatasetRow> ; <#{@jf}datasetManifest> {{resource}} ;
+               <#{@jf}sourceResource> ?source .
+        }
+        OPTIONAL {
+          ?artifact a <#{@jf}MemoryDatasetArtifact> ; <#{@jf}datasetManifest> {{resource}} ;
+                    <#{@jf}externalCopy> ?externalArtifact ;
+                    <#{@jf}availabilityState> ?availability .
+        }
+      }
+    }
+    ORDER BY ?row ?source ?artifact ?externalArtifact
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:memory_release_evaluation) do
+    """
+    SELECT ?evaluation ?digest ?decision ?accepted ?product WHERE {
+      GRAPH {{graph}} {
+        ?evaluation a <#{@jf}MemoryEvaluationRun> ; <#{@jf}datasetManifest> {{resource}} ;
+                    <#{@jf}evaluationDigest> ?digest ; <#{@jf}releaseDecision> ?decision ;
+                    <#{@jf}accepted> ?accepted .
+        OPTIONAL { ?evaluation <#{@jf}launchProduct> ?product }
+      }
+    }
+    ORDER BY ?evaluation ?product
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:evidence_by_goal),
     do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
 

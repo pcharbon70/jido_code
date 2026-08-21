@@ -58,6 +58,12 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     episode_content: ~w[
       EpisodeContent ContentChunk
     ],
+    memory_dataset: ~w[
+      MemoryDatasetManifest MemoryDatasetRow DatasetExclusion DatasetLifecycle
+      DatasetExportPermit MemoryDatasetArtifact DatasetLifecycleTransition
+      MemoryEvaluationRun MemoryReleaseDecision MemoryProductDisable
+      GraphRevisionReference MigrationActivity
+    ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity
       VerificationCheck EvidenceSufficiency ArtifactClaim ArtifactClaimTransition
@@ -69,6 +75,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     security_audit: ~w[
       AuthorizationGrant CredentialReference ValidationReport ValidationResult MigrationActivity
+      CrossRepositoryAudit
     ],
     derived: ~w[
       Claim Finding Contradiction GraphRevisionReference ValidationReport ValidationResult

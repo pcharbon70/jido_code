@@ -345,6 +345,10 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @experience_version "2.1.0"
   @procedure_version "2.2.0"
   @content_version "2.3.0"
+  @dataset_policy_version "2.4.0"
+  @dataset_version "2.5.0"
+  @dataset_export_version "2.6.0"
+  @memory_evaluation_version "2.7.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -650,6 +654,129 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   }
   @version_2_3 Map.merge(@version_2_2, @content_commands)
 
+  @dataset_policy_commands %{
+    "AuthorizeCrossRepositoryUse" => %{
+      owner: :evaluation,
+      capability: :dataset_policy_writer,
+      graph_families: [:factory_policy],
+      preconditions: [
+        :cohort_explicit,
+        :repository_and_actor_sets_exact,
+        :purpose_and_classes_exact,
+        :authorization_current
+      ]
+    },
+    "RecordCrossRepositoryAudit" => %{
+      owner: :evaluation,
+      capability: :dataset_policy_writer,
+      graph_families: [:security_audit],
+      preconditions: [:authorization_referenced, :protected_payload_absent]
+    },
+    "RevokeCrossRepositoryUse" => %{
+      owner: :evaluation,
+      capability: :dataset_policy_writer,
+      graph_families: [:factory_policy],
+      preconditions: [:authorization_current, :revocation_generation_monotonic]
+    }
+  }
+  @version_2_4 Map.merge(@version_2_3, @dataset_policy_commands)
+
+  @dataset_commands %{
+    "StoreMemoryDatasetManifest" => %{
+      owner: :evaluation,
+      capability: :dataset_writer,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :authorization_current,
+        :source_lineage_complete,
+        :chronology_verified,
+        :manifest_absent
+      ]
+    },
+    "RecordMemoryDatasetRows" => %{
+      owner: :evaluation,
+      capability: :dataset_writer,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :manifest_current,
+        :repository_split_isolated,
+        :deduplication_complete,
+        :forbidden_content_absent
+      ]
+    },
+    "InvalidateMemoryDatasetRows" => %{
+      owner: :evaluation,
+      capability: :dataset_writer,
+      graph_families: [:memory_dataset],
+      preconditions: [:source_invalidation_current, :lineage_exact]
+    }
+  }
+  @version_2_5 Map.merge(@version_2_4, @dataset_commands)
+
+  @dataset_export_commands %{
+    "AuthorizeMemoryDatasetExport" => %{
+      owner: :evaluation,
+      capability: :dataset_exporter,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :manifest_verified,
+        :authorization_current,
+        :sink_approved,
+        :export_permit_absent
+      ]
+    },
+    "RecordMemoryDatasetExport" => %{
+      owner: :evaluation,
+      capability: :dataset_exporter,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :export_permit_current,
+        :chronology_and_split_verified,
+        :forbidden_content_absent,
+        :payload_external
+      ]
+    },
+    "TransitionMemoryDatasetLifecycle" => %{
+      owner: :evaluation,
+      capability: :dataset_exporter,
+      graph_families: [:memory_dataset],
+      preconditions: [:dataset_state_current, :unique_transition_successor]
+    }
+  }
+  @version_2_6 Map.merge(@version_2_5, @dataset_export_commands)
+
+  @memory_evaluation_commands %{
+    "RecordMemoryEvaluation" => %{
+      owner: :evaluation,
+      capability: :memory_evaluator,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :manifest_pinned,
+        :all_ablations_complete,
+        :metric_contract_exact,
+        :evaluation_absent
+      ]
+    },
+    "DecideMemoryRelease" => %{
+      owner: :evaluation,
+      capability: :memory_evaluator,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :evaluation_current,
+        :zero_tolerance_metrics_pass,
+        :supported_benefit_present,
+        :disable_paths_complete
+      ]
+    },
+    "DisableMemoryProduct" => %{
+      owner: :evaluation,
+      capability: :memory_evaluator,
+      graph_families: [:factory_policy, :memory_dataset],
+      preconditions: [:product_launched, :disable_path_current]
+    }
+  }
+  @version_2_7 Map.merge(@version_2_6, @memory_evaluation_commands)
+
   @spec version() :: String.t()
   def version, do: @version
 
@@ -674,6 +801,18 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec content_version() :: String.t()
   def content_version, do: @content_version
 
+  @spec dataset_policy_version() :: String.t()
+  def dataset_policy_version, do: @dataset_policy_version
+
+  @spec dataset_version() :: String.t()
+  def dataset_version, do: @dataset_version
+
+  @spec dataset_export_version() :: String.t()
+  def dataset_export_version, do: @dataset_export_version
+
+  @spec memory_evaluation_version() :: String.t()
+  def memory_evaluation_version, do: @memory_evaluation_version
+
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
 
@@ -691,6 +830,10 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@experience_version), do: @version_2_1 |> Map.keys() |> Enum.sort()
   def names(@procedure_version), do: @version_2_2 |> Map.keys() |> Enum.sort()
   def names(@content_version), do: @version_2_3 |> Map.keys() |> Enum.sort()
+  def names(@dataset_policy_version), do: @version_2_4 |> Map.keys() |> Enum.sort()
+  def names(@dataset_version), do: @version_2_5 |> Map.keys() |> Enum.sort()
+  def names(@dataset_export_version), do: @version_2_6 |> Map.keys() |> Enum.sort()
+  def names(@memory_evaluation_version), do: @version_2_7 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -815,6 +958,46 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_2_3, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @content_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @dataset_policy_version) when is_binary(name) do
+    case Map.fetch(@version_2_4, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @dataset_policy_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @dataset_version) when is_binary(name) do
+    case Map.fetch(@version_2_5, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @dataset_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @dataset_export_version) when is_binary(name) do
+    case Map.fetch(@version_2_6, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @dataset_export_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @memory_evaluation_version) when is_binary(name) do
+    case Map.fetch(@version_2_7, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @memory_evaluation_version})}
 
       :error ->
         invalid(:command_type)

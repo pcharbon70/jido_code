@@ -10,7 +10,7 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Security.DataPolicy
 
-  @revision "1.3.0"
+  @revision "1.5.0"
   @legacy_protocol "1.x"
   @segmented_protocol "2.0.0"
   @terminal_states ~w[completed failed timed_out cancelled abandoned]a
@@ -136,7 +136,11 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
 
   @disabled_features %{
     diagnostic_capture: :superseding_privacy_contract,
-    project_total_history: :accepted_diagnostic_evaluation
+    project_total_history: :accepted_diagnostic_evaluation,
+    broad_cohort_access: :explicit_cross_repository_authorization,
+    automatic_dataset_export: :expiring_manifest_bound_export_permit,
+    model_training: :separate_accepted_implementation_plan,
+    model_deployment: :separate_accepted_implementation_plan
   }
 
   @spec revision() :: String.t()
@@ -279,7 +283,10 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
              :experience_writer,
              :content_lifecycle_writer,
              :episode_content_writer,
-             :content_gateway
+             :content_gateway,
+             :governed_dataset_construction,
+             :governed_dataset_export,
+             :memory_release_evaluation
            ],
       do: true
 

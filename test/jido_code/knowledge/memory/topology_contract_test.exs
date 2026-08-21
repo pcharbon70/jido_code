@@ -47,7 +47,7 @@ defmodule JidoCode.Knowledge.Memory.TopologyContractTest do
       }
     }
 
-    assert GraphRegistry.revision() == "2.3.0"
+    assert GraphRegistry.revision() == "2.4.0"
 
     Enum.each(expected, fn {family, expected_contract} ->
       assert {:ok, graph} = GraphRegistry.graph_iri(family, expected_contract.scopes)

@@ -13,7 +13,7 @@ through the predeclared benchmark and ADR decision.
 
 Back to plan: [README](./README.md)
 
-- [ ] 6 Phase - Make exact retained content recoverable, encrypted, purpose-bound, and erasable without creating another authority.
+- [x] 6 Phase - Make exact retained content recoverable, encrypted, purpose-bound, and erasable without creating another authority.
 
   This phase establishes MG6 while leaving high-retention capture profiles
   disabled by default.
@@ -86,7 +86,7 @@ Back to plan: [README](./README.md)
       - [x] 6.4.1.5 Subtask - Keep `diagnostic_capture` and `project_total_history` unregistered and runtime-disabled; future enablement requires a separate accepted policy/profile and evidence decision.
       - [x] 6.4.1.6 Subtask - Keep provider-owned governed artifacts available for eligible external content without treating a JidoCode-controlled bucket as external authority.
 
-  - [ ] 6.5 Section - Phase 6 Integration Tests.
+  - [x] 6.5 Section - Phase 6 Integration Tests.
 
     This final section proves exact-content storage and release under realistic
     volume, adversarial input, failure, backup, and erasure.
@@ -103,7 +103,7 @@ Back to plan: [README](./README.md)
       - [x] 6.5.1.5 Subtask - Rerun the accepted benchmark and publish reproducible capacity, latency, backup, restore, and rebuild evidence.
       - [x] 6.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
-    - [ ] 6.5.2 Task {#tam-p06-phase-receipt} [repo: jido_code] [after: {#tam-p06-integration}] - Publish the Phase 6 exact-content receipt.
+    - [x] 6.5.2 Task {#tam-p06-phase-receipt} [repo: jido_code] [after: {#tam-p06-integration}] - Publish the Phase 6 exact-content receipt.
 
       This task records the accepted storage branch in
       `docs/architecture/memory-phase-06-receipt.md` and binds MG6 to the
@@ -112,4 +112,4 @@ Back to plan: [README](./README.md)
       - [x] 6.5.2.1 Subtask - Record storage decision, ADR if applicable, graph/vault/cipher/key/gateway/profile revisions, benchmark digest, and candidate commit.
       - [x] 6.5.2.2 Subtask - Attach encryption, permit, lifecycle, erasure, restore, adversarial, and capacity evidence.
       - [x] 6.5.2.3 Subtask - Keep MG6 blocked if exact content can bypass a consumed permit, erasure can resurrect data, or a second store gains semantic authority.
-      - [ ] 6.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 7.
+      - [x] 6.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 7.

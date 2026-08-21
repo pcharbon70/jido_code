@@ -23,6 +23,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @experience_version "2.1.0"
   @procedure_version "2.2.0"
   @content_version "2.3.0"
+  @dataset_version "2.7.0"
   @versions [
     @version,
     @repository_version,
@@ -35,7 +36,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @history_version,
     @experience_version,
     @procedure_version,
-    @content_version
+    @content_version,
+    @dataset_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -82,6 +84,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec content_version() :: String.t()
   def content_version, do: @content_version
+
+  @spec dataset_version() :: String.t()
+  def dataset_version, do: @dataset_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -475,6 +480,26 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           artifact_claim_specifications(resource) ++
           procedure_specifications(resource) ++
           content_specifications(resource)
+
+      @dataset_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource) ++
+          history_specifications(resource) ++
+          experience_specifications(resource) ++
+          artifact_claim_specifications(resource) ++
+          procedure_specifications(resource) ++
+          content_specifications(resource) ++
+          dataset_specifications(resource)
     end
   end
 
@@ -1772,6 +1797,44 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :timeline,
         "Read permits, consumption, and byte-free exact-content outcomes.",
         :operational,
+        :declared
+      )
+    ]
+  end
+
+  defp dataset_specifications(resource) do
+    [
+      spec(
+        :memory_dataset_manifest,
+        :select,
+        resource,
+        :memory_evaluator,
+        [:memory_dataset],
+        :table,
+        "Read one governed dataset manifest and its pinned construction contract.",
+        :product,
+        :declared
+      ),
+      spec(
+        :memory_dataset_lineage,
+        :select,
+        resource,
+        :memory_evaluator,
+        [:memory_dataset],
+        :table,
+        "Read row and external-copy lineage for one governed dataset manifest.",
+        :product,
+        :declared
+      ),
+      spec(
+        :memory_release_evaluation,
+        :select,
+        resource,
+        :memory_evaluator,
+        [:memory_dataset],
+        :table,
+        "Read evaluation digest, decision, and disable ownership for one manifest.",
+        :product,
         :declared
       )
     ]
