@@ -44,8 +44,8 @@ defmodule JidoCode.Knowledge.Memory.Phase06GraphContentTest do
     assert definition.capability == :content_writer
 
     assert {:ok, contract} = GraphRegistry.fetch(:episode_content)
-    refute contract.enabled
-    refute GraphRegistry.write_allowed?(:episode_content, :create)
+    assert contract.enabled
+    assert GraphRegistry.write_allowed?(:episode_content, :create)
   end
 
   test "rejects malformed, reordered, oversized, mixed-policy, and plaintext-shaped chunks" do

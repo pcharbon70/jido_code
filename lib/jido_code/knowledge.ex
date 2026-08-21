@@ -72,6 +72,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ContentHold
   alias JidoCode.Knowledge.Memory.ContentLifecycleCommand
   alias JidoCode.Knowledge.Memory.ContentLifecycleTransition
+  alias JidoCode.Knowledge.Memory.ContentStorageDecision
   alias JidoCode.Knowledge.Memory.DerivativeCleanup
   alias JidoCode.Knowledge.Memory.EpisodeContent
   alias JidoCode.Knowledge.Memory.EpisodeContentCommand
@@ -656,6 +657,15 @@ defmodule JidoCode.Knowledge do
 
   def record_content_erasure(plan, repository, revision, attributes, options \\ []),
     do: ContentLifecycleCommand.erasure(plan, repository, revision, attributes, options)
+
+  def accept_content_storage(decision, verifier),
+    do: ContentStorageDecision.accept(decision, verifier)
+
+  def accept_content_vault(decision, adr, proof),
+    do: ContentStorageDecision.accept_vault(decision, adr, proof)
+
+  def provider_content_artifact_allowed?(attributes),
+    do: ContentStorageDecision.provider_artifact_allowed?(attributes)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

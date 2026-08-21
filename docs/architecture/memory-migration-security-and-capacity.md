@@ -71,9 +71,10 @@ failed threshold yields `vault_adr_required`; it does not itself authorize a
 vault. Exact content stays blocked until Phase 6 either accepts graph-native
 storage or accepts and proves a superseding encrypted-vault ADR.
 
-## Disabled Posture
+## Activation Posture
 
-The segmented writer is activated only by the MG2 candidate; history queries and retrieval
-indexes until MG3; the experience writer until MG4; and diagnostic/project
-capture, lifecycle/content writers, episode content, and the content gateway
-until MG6. Listing an owning gate is not evidence that the gate has passed.
+The segmented writer, governed history queries, experience writer, and the
+graph-native lifecycle/content writers and gateway are active through their
+versioned command lines. Phase 6 authorizes no vault. `diagnostic_capture` and
+`project_total_history` remain unregistered and runtime-disabled; their names
+and owning requirements grant no capture authority.

@@ -7,12 +7,12 @@ the immutable `1.0.0` release. `GraphRegistry` `2.0.0` is the executable closed
 topology. Both `1.0.0` and `1.1.0` ontology/shape pairs remain recognized for
 honest legacy reads; mixed pairs and unknown versions are rejected.
 
-`GraphRegistry` `2.1.0` activates `run_event_segment` only for the Phase 2 MG2
-candidate. `experience`, `content_lifecycle`, and `episode_content` remain
-registered with `enabled: false`. Registration alone allows deterministic
-identity, shape, topology, migration, and policy review; it does not allow
-graph creation or mutation. `validate_target/2` and `write_allowed?/3` reject
-each disabled family even when the caller presents its future capability.
+`GraphRegistry` `2.3.0` activates `run_event_segment`, `experience`,
+`content_lifecycle`, and `episode_content` through their accepted command
+lines. Phase 6 selected graph-native encrypted content after the pinned
+benchmark passed every mandatory threshold. Content remains inaccessible
+without the separately consumed gateway permit; graph-family activation alone
+does not grant release authority.
 
 ## Closed Family Contracts
 
@@ -43,7 +43,7 @@ directions fail closed.
 | `CaptureManifest` | `run_attempt` |
 | `SegmentManifest`, `ContentCapture` | `run_event_segment` |
 | `ExperienceCase`, `ProcedureRevision`, `ArtifactClaim`, `RetrievalActivity`, `MemoryUseAssessment` | `experience` |
-| `ContentLifecycleActivity`, `ContentAccessPermit` | `content_lifecycle` |
+| `ContentLifecycleActivity`, `ContentLifecycleTransition`, `ContentAccessPermit`, `ContentAccessActivity`, `ContentAccessOutcome`, `ContentHold`, `ContentErasurePlan` | `content_lifecycle` |
 | `EpisodeContent`, `ContentChunk` | `episode_content` |
 
 The ontology also defines the required capture, segment, case, procedure,

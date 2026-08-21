@@ -10,7 +10,7 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Security.DataPolicy
 
-  @revision "1.2.0"
+  @revision "1.3.0"
   @legacy_protocol "1.x"
   @segmented_protocol "2.0.0"
   @terminal_states ~w[completed failed timed_out cancelled abandoned]a
@@ -135,11 +135,8 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   ]
 
   @disabled_features %{
-    diagnostic_capture: :MG6,
-    project_total_history: :MG6,
-    content_lifecycle_writer: :MG6,
-    episode_content_writer: :MG6,
-    content_gateway: :MG6
+    diagnostic_capture: :superseding_privacy_contract,
+    project_total_history: :accepted_diagnostic_evaluation
   }
 
   @spec revision() :: String.t()
@@ -276,7 +273,14 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   def feature_enabled?(:run_event_segment_writer), do: true
 
   def feature_enabled?(feature)
-      when feature in [:history_queries, :retrieval_index, :experience_writer],
+      when feature in [
+             :history_queries,
+             :retrieval_index,
+             :experience_writer,
+             :content_lifecycle_writer,
+             :episode_content_writer,
+             :content_gateway
+           ],
       do: true
 
   def feature_enabled?(_feature), do: false

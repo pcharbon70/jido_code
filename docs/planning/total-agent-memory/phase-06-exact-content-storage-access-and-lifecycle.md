@@ -69,22 +69,22 @@ Back to plan: [README](./README.md)
       - [x] 6.3.1.5 Subtask - Extend restore floors and backup manifests so erased content and keys cannot be reintroduced.
       - [x] 6.3.1.6 Subtask - Rebuild or invalidate every derived projection whose lineage includes removed content.
 
-  - [ ] 6.4 Section - Resolve the storage decision and keep capture profiles gated.
+  - [x] 6.4 Section - Resolve the storage decision and keep capture profiles gated.
 
     This section deterministically selects graph-native content or a governed
     vault and records why broader capture remains disabled.
 
-    - [ ] 6.4.1 Task {#tam-p06-storage-decision} [repo: jido_code] [after: {#tam-p06-content-lifecycle}] - Apply the benchmark decision and finalize profile posture.
+    - [x] 6.4.1 Task {#tam-p06-storage-decision} [repo: jido_code] [after: {#tam-p06-content-lifecycle}] - Apply the benchmark decision and finalize profile posture.
 
       This task prevents convenience or storage pressure from creating an
       undeclared second source of truth.
 
-      - [ ] 6.4.1.1 Subtask - If every graph-native threshold passes, accept graph content and record that no vault is authorized.
-      - [ ] 6.4.1.2 Subtask - If any mandatory threshold fails, keep exact-content enablement blocked until a superseding ADR for an application-owned encrypted vault is accepted.
-      - [ ] 6.4.1.3 Subtask - Under the vault branch, implement inaccessible pending writes, graph activation, immutable ciphertext versions, orphan cleanup, backup consistency, content-gateway-only access, and graph-authoritative lifecycle.
-      - [ ] 6.4.1.4 Subtask - Prove either accepted branch satisfies identical authorization, encryption, integrity, retention, erasure, and recovery contracts before MG6 can close.
-      - [ ] 6.4.1.5 Subtask - Keep `diagnostic_capture` and `project_total_history` unregistered and runtime-disabled; future enablement requires a separate accepted policy/profile and evidence decision.
-      - [ ] 6.4.1.6 Subtask - Keep provider-owned governed artifacts available for eligible external content without treating a JidoCode-controlled bucket as external authority.
+      - [x] 6.4.1.1 Subtask - If every graph-native threshold passes, accept graph content and record that no vault is authorized.
+      - [x] 6.4.1.2 Subtask - If any mandatory threshold fails, keep exact-content enablement blocked until a superseding ADR for an application-owned encrypted vault is accepted.
+      - [x] 6.4.1.3 Subtask - Under the vault branch, implement inaccessible pending writes, graph activation, immutable ciphertext versions, orphan cleanup, backup consistency, content-gateway-only access, and graph-authoritative lifecycle.
+      - [x] 6.4.1.4 Subtask - Prove either accepted branch satisfies identical authorization, encryption, integrity, retention, erasure, and recovery contracts before MG6 can close.
+      - [x] 6.4.1.5 Subtask - Keep `diagnostic_capture` and `project_total_history` unregistered and runtime-disabled; future enablement requires a separate accepted policy/profile and evidence decision.
+      - [x] 6.4.1.6 Subtask - Keep provider-owned governed artifacts available for eligible external content without treating a JidoCode-controlled bucket as external authority.
 
   - [ ] 6.5 Section - Phase 6 Integration Tests.
 

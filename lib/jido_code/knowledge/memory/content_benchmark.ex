@@ -69,6 +69,24 @@ defmodule JidoCode.Knowledge.Memory.ContentBenchmark do
   def decide(_metrics, _signer),
     do: {:error, Error.new(:invalid_input, :content_benchmark_decision)}
 
+  def verify(decision, verifier) when is_map(decision) and is_function(verifier, 2) do
+    with signature when is_binary(signature) <- Base.decode64!(decision[:signature]),
+         true <- verifier.(decision[:signed_material], signature),
+         true <- decision[:metrics_digest] == digest_term(decision[:metrics]),
+         true <- decision[:corpus_digest] == Guardrails.benchmark_corpus_digest(),
+         true <- decision[:thresholds] == Guardrails.benchmark_thresholds(),
+         true <- decision[:decision] == Guardrails.storage_decision(decision[:metrics]) do
+      :ok
+    else
+      _invalid -> {:error, Error.new(:unauthorized, :content_benchmark_signature)}
+    end
+  rescue
+    _error -> {:error, Error.new(:unauthorized, :content_benchmark_signature)}
+  end
+
+  def verify(_decision, _verifier),
+    do: {:error, Error.new(:unauthorized, :content_benchmark_signature)}
+
   defp integrity_counts?(value) when is_map(value) do
     Enum.all?(~w[integrity_failures orphaned_objects unerased_objects]a, fn key ->
       count = value[key]
