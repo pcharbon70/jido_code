@@ -2,10 +2,10 @@
 
 ## Status
 
-This receipt records the Memory Phase 7 merge candidate verified locally on
-2026-08-21. MG7 remains merge-pending until the implementation pull request
-passes clean-checkout CI, merges, and its full merge commit is pinned here and
-in the Phase 7 plan. The total-agent-memory plan is not yet closed.
+This receipt records the accepted Memory Phase 7 merged candidate. Pull request
+#59 passed clean-checkout CI and Dialyzer, then merged on 2026-08-21 as
+`fb4716137c5bf5e6b6a8468cee171e32f83b7266`. MG7 is accepted at that pinned
+merged candidate and the total-agent-memory plan is closed.
 
 ## Candidate Provenance
 
@@ -18,7 +18,7 @@ in the Phase 7 plan. The total-agent-memory plan is not yet closed.
 | Section 7.3 | `5474165` - govern memory dataset exports and lifecycle |
 | Section 7.4 | `3df9edd` - gate memory release on governed evaluation |
 | Section 7.5 and receipt | This commit; exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; not yet accepted |
+| Merged candidate | `fb4716137c5bf5e6b6a8468cee171e32f83b7266`; PR #59, merged 2026-08-21 |
 
 ## Contract Pins
 
@@ -126,7 +126,7 @@ separate accepted implementation plan, evidence gates, and lifecycle controls.
 | `mix architecture.check` | Pass |
 | `mix precommit` | Pass; architecture checks and 731 tests, 0 failures |
 | `mix dialyzer` | Pass; 177 existing warnings skipped, 0 unignored errors, 0 unnecessary skips |
-| Pull request clean-checkout CI | Merge-pending |
+| Pull request clean-checkout CI | Pass; PR #59 `verify` and `dialyzer` succeeded before merge |
 
 ## Known Limitations
 
@@ -147,9 +147,10 @@ separate accepted implementation plan, evidence gates, and lifecycle controls.
 
 ## Gate MG7
 
-MG7 remains merge-pending. It may be accepted only after clean-checkout CI and
-merge, by pinning the full merge-commit SHA here and in the Phase 7 plan. The
-total-agent-memory plan remains open until then.
+MG7 is accepted at merged candidate
+`fb4716137c5bf5e6b6a8468cee171e32f83b7266`, merged on 2026-08-21 after pull
+request #59 passed clean-checkout CI and Dialyzer. The total-agent-memory plan
+is closed at that pinned baseline.
 
 MG7 reopens if any cohort operation lacks an explicit current repository set,
 actor set, purpose, allowed use, data class, cutoff, expiry, policy revision,
