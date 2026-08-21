@@ -1222,6 +1222,55 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:artifact_claims) do
+    """
+    SELECT ?claim ?snapshot ?artifact ?path ?symbol ?selector ?digest ?value ?command
+           ?environment ?evidence ?strength ?state ?revision ?checked WHERE {
+      GRAPH {{graph}} {
+        ?claim a <#{@jf}ArtifactClaim> ;
+               <#{@jf}about> {{resource}} ;
+               <#{@jf}sourceSnapshot> ?snapshot ;
+               <#{@jf}evaluatesArtifact> ?artifact ;
+               <#{@jf}path> ?path ;
+               <#{@jf}contentDigest> ?digest ;
+               <#{@jf}value> ?value ;
+               <#{@jf}verificationCommand> ?command ;
+               <#{@jf}verificationEnvironment> ?environment ;
+               <#{@jf}evidenceSource> ?evidence ;
+               <#{@jf}evidenceStrength> ?strength ;
+               <#{@jf}checkedAt> ?checked .
+        ?transition <#{@jf}transitionSubject> ?claim ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ;
+                    <#{@jf}recordedAt> ?transitionAt .
+        FILTER(?checked <= {{instant}} && ?transitionAt <= {{instant}})
+        OPTIONAL { ?claim <#{@jf}symbol> ?symbol }
+        OPTIONAL { ?claim <#{@jf}selector> ?selector }
+      }
+    }
+    ORDER BY ?claim DESC(?revision)
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:historical_test_risk) do
+    """
+    SELECT ?claim ?artifact ?path ?value ?strength ?state ?revision ?checked WHERE {
+      GRAPH {{graph}} {
+        ?claim a <#{@jf}ArtifactClaim> ; <#{@jf}about> {{resource}} ;
+               <#{@jf}evaluatesArtifact> ?artifact ; <#{@jf}path> ?path ;
+               <#{@jf}value> ?value ; <#{@jf}evidenceStrength> ?strength ;
+               <#{@jf}checkedAt> ?checked .
+        ?transition <#{@jf}transitionSubject> ?claim ; <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ; <#{@jf}recordedAt> ?recorded .
+        FILTER(?checked <= {{instant}} && ?recorded <= {{instant}})
+      }
+    }
+    ORDER BY DESC(?revision) ?claim
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:evidence_by_goal),
     do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
 

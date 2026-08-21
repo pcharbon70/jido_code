@@ -21,6 +21,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @knowledge_version "1.7.0"
   @history_version "2.0.0"
   @experience_version "2.1.0"
+  @procedure_version "2.2.0"
   @versions [
     @version,
     @repository_version,
@@ -31,7 +32,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @execution_version,
     @knowledge_version,
     @history_version,
-    @experience_version
+    @experience_version,
+    @procedure_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -72,6 +74,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec experience_version() :: String.t()
   def experience_version, do: @experience_version
+
+  @spec procedure_version() :: String.t()
+  def procedure_version, do: @procedure_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -428,6 +433,23 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           insight_specifications(resource) ++
           history_specifications(resource) ++
           experience_specifications(resource)
+
+      @procedure_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource) ++
+          history_specifications(resource) ++
+          experience_specifications(resource) ++
+          artifact_claim_specifications(resource)
     end
   end
 
@@ -1583,6 +1605,35 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:experience],
         :table,
         "Read harmful or suspicious memory-use outcomes without rewriting their cases.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp artifact_claim_specifications(resource) do
+    instant = Map.put(resource, :instant, %{type: :datetime, required: true})
+
+    [
+      spec(
+        :artifact_claims,
+        :select,
+        instant,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read artifact claims with exact evidence strength and freshness history.",
+        :product,
+        :declared
+      ),
+      spec(
+        :historical_test_risk,
+        :select,
+        instant,
+        :evidence,
+        [:evidence],
+        :table,
+        "Read historically failing or stale artifact claims without treating them as current.",
         :product,
         :declared
       )

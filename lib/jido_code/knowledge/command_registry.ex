@@ -343,6 +343,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @harness_contract_version "1.8.0"
   @segmented_execution_version "2.0.0"
   @experience_version "2.1.0"
+  @procedure_version "2.2.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -534,6 +535,25 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
   @version_2_1 Map.merge(@version_2_0, @experience_commands)
+  @artifact_claim_commands %{
+    "RecordArtifactClaim" => %{
+      owner: :evaluation,
+      capability: :evidence,
+      graph_families: [:evidence],
+      preconditions: [
+        :independent_evidence,
+        :artifact_revision_exact,
+        :runtime_success_insufficient
+      ]
+    },
+    "TransitionArtifactClaim" => %{
+      owner: :evaluation,
+      capability: :evidence,
+      graph_families: [:evidence],
+      preconditions: [:claim_current, :artifact_revision_compared, :unique_transition_successor]
+    }
+  }
+  @version_2_2 Map.merge(@version_2_1, @artifact_claim_commands)
 
   @spec version() :: String.t()
   def version, do: @version
@@ -553,6 +573,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec experience_version() :: String.t()
   def experience_version, do: @experience_version
 
+  @spec procedure_version() :: String.t()
+  def procedure_version, do: @procedure_version
+
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
 
@@ -568,6 +591,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@harness_contract_version), do: @version_1_8 |> Map.keys() |> Enum.sort()
   def names(@segmented_execution_version), do: @version_2_0 |> Map.keys() |> Enum.sort()
   def names(@experience_version), do: @version_2_1 |> Map.keys() |> Enum.sort()
+  def names(@procedure_version), do: @version_2_2 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -672,6 +696,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_2_1, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @experience_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @procedure_version) when is_binary(name) do
+    case Map.fetch(@version_2_2, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @procedure_version})}
 
       :error ->
         invalid(:command_type)

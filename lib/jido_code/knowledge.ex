@@ -57,6 +57,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
   alias JidoCode.Knowledge.Memory.CandidateAccess
+  alias JidoCode.Knowledge.Memory.ArtifactClaim
+  alias JidoCode.Knowledge.Memory.ArtifactClaimCommand
+  alias JidoCode.Knowledge.Memory.ArtifactClaimTransition
   alias JidoCode.Knowledge.Memory.CaseRetrieval
   alias JidoCode.Knowledge.Memory.EvidencePacket
   alias JidoCode.Knowledge.Memory.ExperienceCase
@@ -519,6 +522,24 @@ defmodule JidoCode.Knowledge do
 
   def evaluate_negative_transfer(experience, assessments, transition, attributes),
     do: NegativeTransfer.evaluate(experience, assessments, transition, attributes)
+
+  def artifact_claim(attributes), do: ArtifactClaim.new(attributes)
+  def artifact_claim_transition(attributes), do: ArtifactClaimTransition.new(attributes)
+
+  def resolve_artifact_claim_lifecycle(transitions),
+    do: ArtifactClaimTransition.resolve(transitions)
+
+  def artifact_claim_current?(claim, current, transitions \\ nil),
+    do: ArtifactClaim.current?(claim, current, transitions)
+
+  def evaluate_artifact_claim_drift(claim, current, transition, attributes),
+    do: ArtifactClaim.drift_transition(claim, current, transition, attributes)
+
+  def record_artifact_claim(claim, graph, revision, attributes, options \\ []),
+    do: ArtifactClaimCommand.record(claim, graph, revision, attributes, options)
+
+  def transition_artifact_claim(claim, transition, graph, revision, attributes, options \\ []),
+    do: ArtifactClaimCommand.transition(claim, transition, graph, revision, attributes, options)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

@@ -18,21 +18,21 @@ Back to plan: [README](./README.md)
   This phase establishes MG5 by separating evidence strength, freshness,
   procedural usefulness, accepted knowledge, and executable control.
 
-  - [ ] 5.1 Section - Implement artifact-grounded claims and freshness.
+  - [x] 5.1 Section - Implement artifact-grounded claims and freshness.
 
     This section binds behavior claims to exact content and lets later changes
     make them stale without erasing history.
 
-    - [ ] 5.1.1 Task {#tam-p05-artifact-claims} [repo: jido_code] [after: {#tam-p04-phase-receipt}] - Implement `ArtifactClaim` and freshness transitions.
+    - [x] 5.1.1 Task {#tam-p05-artifact-claims} [repo: jido_code] [after: {#tam-p04-phase-receipt}] - Implement `ArtifactClaim` and freshness transitions.
 
       This task makes historical verification precise about source,
       environment, evidence, and time.
 
-      - [ ] 5.1.1.1 Subtask - Bind claim, repository/revision, artifact, path/symbol/selector, content digest, verification command/environment, evidence reference/strength, and valid/checked times.
-      - [ ] 5.1.1.2 Subtask - Record claims only through evidence-writer commands and prohibit claim creation from runtime success alone.
-      - [ ] 5.1.1.3 Subtask - Append fresh, stale, contradicted, invalidated, and superseded states when source hashes, symbols, tools, environments, or evidence change.
-      - [ ] 5.1.1.4 Subtask - Add `artifact_claims` and `historical_test_risk` queries with exact current-revision comparison.
-      - [ ] 5.1.1.5 Subtask - Exclude stale claims from current retrieval while preserving historical visibility and original evidence strength.
+      - [x] 5.1.1.1 Subtask - Bind claim, repository/revision, artifact, path/symbol/selector, content digest, verification command/environment, evidence reference/strength, and valid/checked times.
+      - [x] 5.1.1.2 Subtask - Record claims only through evidence-writer commands and prohibit claim creation from runtime success alone.
+      - [x] 5.1.1.3 Subtask - Append fresh, stale, contradicted, invalidated, and superseded states when source hashes, symbols, tools, environments, or evidence change.
+      - [x] 5.1.1.4 Subtask - Add `artifact_claims` and `historical_test_risk` queries with exact current-revision comparison.
+      - [x] 5.1.1.5 Subtask - Exclude stale claims from current retrieval while preserving historical visibility and original evidence strength.
 
   - [ ] 5.2 Section - Define and induce candidate procedures.
 
