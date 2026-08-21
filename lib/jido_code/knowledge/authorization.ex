@@ -48,7 +48,8 @@ defmodule JidoCode.Knowledge.Authorization do
     :experience_writer,
     :content_writer,
     :content_lifecycle_writer,
-    :dataset_policy_writer
+    :dataset_policy_writer,
+    :dataset_writer
   ]
 
   @spec authorize(CommandEnvelope.t(), map(), ChangeSet.t(), map()) ::

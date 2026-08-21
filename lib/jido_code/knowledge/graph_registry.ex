@@ -10,7 +10,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
   alias JidoCode.Knowledge.ResourceIdentity
 
   @base "https://jido.run/graph/"
-  @revision "2.3.0"
+  @revision "2.4.0"
 
   @families %{
     ontology: %{
@@ -43,6 +43,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :repository_control,
         :experience,
         :content_lifecycle,
+        :memory_dataset,
         :security_audit,
         :derived
       ]
@@ -81,6 +82,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :memory,
         :experience,
         :content_lifecycle,
+        :memory_dataset,
         :derived
       ]
     },
@@ -213,6 +215,27 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :episode_content
       ]
     },
+    memory_dataset: %{
+      required_scopes: [:cohort, :dataset],
+      capability: :dataset_writer,
+      mutability: :append_supersede,
+      completeness: :complete,
+      retention: :dataset_lifecycle,
+      enabled: true,
+      allowed_links: [
+        :factory_policy,
+        :source_revision,
+        :run_attempt,
+        :run_event_segment,
+        :evidence,
+        :memory,
+        :experience,
+        :content_lifecycle,
+        :episode_content,
+        :memory_dataset,
+        :security_audit
+      ]
+    },
     security_audit: %{
       required_scopes: [:period],
       capability: :security_auditor,
@@ -233,6 +256,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
         :experience,
         :content_lifecycle,
         :episode_content,
+        :memory_dataset,
         :security_audit,
         :derived
       ]
@@ -258,6 +282,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
           experience: true,
           content_lifecycle: true,
           episode_content: true,
+          memory_dataset: true,
           security_audit: true,
           derived: true
         })
@@ -380,6 +405,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       :experience -> ok_concept("ExperienceGraph")
       :content_lifecycle -> ok_concept("ContentLifecycleGraph")
       :episode_content -> ok_concept("EpisodeContentGraph")
+      :memory_dataset -> ok_concept("MemoryDatasetGraph")
       :security_audit -> ok_concept("SecurityAuditGraph")
       :derived -> ok_concept("DerivedGraph")
       _unknown -> invalid(:graph_family)
@@ -436,6 +462,10 @@ defmodule JidoCode.Knowledge.GraphRegistry do
 
   defp graph_suffix(:episode_content, %{repository: repository, content: content}) do
     two_resource_suffix("repo", repository, "content", content)
+  end
+
+  defp graph_suffix(:memory_dataset, %{cohort: cohort, dataset: dataset}) do
+    two_resource_suffix("cohort", cohort, "dataset", dataset)
   end
 
   defp graph_suffix(:security_audit, %{period: period}) when is_binary(period) do
@@ -505,6 +535,9 @@ defmodule JidoCode.Knowledge.GraphRegistry do
 
   defp family_iri?(:episode_content, iri),
     do: scoped_iri?(iri, ~r|^repo/[a-f0-9]{32}/content/[a-f0-9]{32}$|)
+
+  defp family_iri?(:memory_dataset, iri),
+    do: scoped_iri?(iri, ~r|^cohort/[a-f0-9]{32}/dataset/[a-f0-9]{32}$|)
 
   defp family_iri?(:security_audit, iri),
     do: scoped_iri?(iri, ~r/^security\/audit\/\d{4}-(?:0[1-9]|1[0-2])$/)

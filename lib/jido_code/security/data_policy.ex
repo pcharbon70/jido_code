@@ -6,7 +6,7 @@ defmodule JidoCode.Security.DataPolicy do
 
   alias JidoCode.Knowledge.GraphRegistry
 
-  @revision "2.0.0"
+  @revision "2.1.0"
 
   @classifications [
     :public,
@@ -71,7 +71,7 @@ defmodule JidoCode.Security.DataPolicy do
       ontology_graph catalog_graph policy_graph observation_graph source_graph control_graph
       run_graph run_event_segment_graph evidence_graph memory_graph experience_graph
       content_lifecycle_graph episode_content_graph security_audit_graph derived_graph
-      governed_artifact external_provider omitted
+      memory_dataset_graph governed_artifact external_provider omitted
     ]a,
     availability: ~w[available cold pending unavailable failed]a,
     retention: ~w[
@@ -198,7 +198,7 @@ defmodule JidoCode.Security.DataPolicy do
       provider_egress: []
     },
     export_derivative: %{
-      graphs: [],
+      graphs: [:memory_dataset],
       representations: [:external_reference, :digest],
       outputs: [:authorized_audit],
       provider_egress: []
@@ -216,7 +216,7 @@ defmodule JidoCode.Security.DataPolicy do
       provider_egress: []
     },
     audit: %{
-      graphs: [:security_audit],
+      graphs: [:security_audit, :memory_dataset],
       representations: [:semantic_metadata, :normalized_text, :digest, :external_reference],
       outputs: [:authorized_audit],
       provider_egress: []

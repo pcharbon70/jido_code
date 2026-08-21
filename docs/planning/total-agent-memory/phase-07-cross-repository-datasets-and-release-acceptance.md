@@ -39,23 +39,23 @@ Back to plan: [README](./README.md)
       - [x] 7.1.1.4 Subtask - Deny exact content, prompt-derived content, personal data, and confidential content unless each class is expressly covered by the authorization.
       - [x] 7.1.1.5 Subtask - Audit every cross-repository query, export, omission, denial, revocation, and expiry without copying protected payloads into the audit record.
 
-  - [ ] 7.2 Section - Build chronological governed datasets.
+  - [x] 7.2 Section - Build chronological governed datasets.
 
     This section produces reproducible evaluation datasets whose examples
     contain only information available at their declared historical cutoff.
 
-    - [ ] 7.2.1 Task {#tam-p07-dataset-construction} [repo: jido_code] [after: {#tam-p07-cross-repository-policy}] - Implement governed dataset construction.
+    - [x] 7.2.1 Task {#tam-p07-dataset-construction} [repo: jido_code] [after: {#tam-p07-cross-repository-policy}] - Implement governed dataset construction.
 
       This task materializes dataset manifests and rows with source-complete
       lineage, temporal correctness, leakage controls, and removable
       derivatives.
 
-      - [ ] 7.2.1.1 Subtask - Define `MemoryDatasetManifest` with purpose, authorization, source graphs, source resources, cutoff, classifications, extractor revision, query revision, split policy, erasure generation, and exact-content states.
-      - [ ] 7.2.1.2 Subtask - Construct examples chronologically, excluding eventual patches, later reviews, delayed incident findings, post-cutoff outcomes, and any other future evidence.
-      - [ ] 7.2.1.3 Subtask - Split at repository level and deduplicate by repository, task, patch, incident, and semantic overlap so related examples cannot cross evaluation boundaries.
-      - [ ] 7.2.1.4 Subtask - Balance successful changes, failures, reverts, flakes, infrastructure incidents, and ambiguous outcomes without relabeling uncertainty as success or failure.
-      - [ ] 7.2.1.5 Subtask - Exclude secrets, personal data, provider-private fields, hidden reasoning, unresolved deletion requests, and payloads outside the manifest's allowed classifications.
-      - [ ] 7.2.1.6 Subtask - Give every dataset row exact source lineage and an identity that allows all derived copies to be found, invalidated, and removed.
+      - [x] 7.2.1.1 Subtask - Define `MemoryDatasetManifest` with purpose, authorization, source graphs, source resources, cutoff, classifications, extractor revision, query revision, split policy, erasure generation, and exact-content states.
+      - [x] 7.2.1.2 Subtask - Construct examples chronologically, excluding eventual patches, later reviews, delayed incident findings, post-cutoff outcomes, and any other future evidence.
+      - [x] 7.2.1.3 Subtask - Split at repository level and deduplicate by repository, task, patch, incident, and semantic overlap so related examples cannot cross evaluation boundaries.
+      - [x] 7.2.1.4 Subtask - Balance successful changes, failures, reverts, flakes, infrastructure incidents, and ambiguous outcomes without relabeling uncertainty as success or failure.
+      - [x] 7.2.1.5 Subtask - Exclude secrets, personal data, provider-private fields, hidden reasoning, unresolved deletion requests, and payloads outside the manifest's allowed classifications.
+      - [x] 7.2.1.6 Subtask - Give every dataset row exact source lineage and an identity that allows all derived copies to be found, invalidated, and removed.
 
   - [ ] 7.3 Section - Export datasets while keeping model training separate.
 

@@ -13,6 +13,7 @@ defmodule JidoCode.Knowledge.Retention.Policy do
     experience_history: %{minimum_days: 2_555, disposition: :archive},
     content_lifecycle: %{minimum_days: 2_555, disposition: :archive},
     governed_content: %{minimum_days: :infinity, disposition: :retain},
+    dataset_lifecycle: %{minimum_days: 2_555, disposition: :archive},
     semantic_shell: %{minimum_days: 2_555, disposition: :archive},
     exact_payload: %{minimum_days: 30, disposition: :archive},
     evidence_history: %{minimum_days: 2_555, disposition: :archive},
@@ -33,6 +34,7 @@ defmodule JidoCode.Knowledge.Retention.Policy do
     capture_manifest: :semantic_shell,
     content_capture: :semantic_shell,
     episode_content: :exact_payload,
+    memory_dataset: :dataset_lifecycle,
     derived_cache: :disposable
   }
 

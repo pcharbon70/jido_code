@@ -346,6 +346,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @procedure_version "2.2.0"
   @content_version "2.3.0"
   @dataset_policy_version "2.4.0"
+  @dataset_version "2.5.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -678,6 +679,38 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   }
   @version_2_4 Map.merge(@version_2_3, @dataset_policy_commands)
 
+  @dataset_commands %{
+    "StoreMemoryDatasetManifest" => %{
+      owner: :evaluation,
+      capability: :dataset_writer,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :authorization_current,
+        :source_lineage_complete,
+        :chronology_verified,
+        :manifest_absent
+      ]
+    },
+    "RecordMemoryDatasetRows" => %{
+      owner: :evaluation,
+      capability: :dataset_writer,
+      graph_families: [:memory_dataset],
+      preconditions: [
+        :manifest_current,
+        :repository_split_isolated,
+        :deduplication_complete,
+        :forbidden_content_absent
+      ]
+    },
+    "InvalidateMemoryDatasetRows" => %{
+      owner: :evaluation,
+      capability: :dataset_writer,
+      graph_families: [:memory_dataset],
+      preconditions: [:source_invalidation_current, :lineage_exact]
+    }
+  }
+  @version_2_5 Map.merge(@version_2_4, @dataset_commands)
+
   @spec version() :: String.t()
   def version, do: @version
 
@@ -705,6 +738,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec dataset_policy_version() :: String.t()
   def dataset_policy_version, do: @dataset_policy_version
 
+  @spec dataset_version() :: String.t()
+  def dataset_version, do: @dataset_version
+
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
 
@@ -723,6 +759,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@procedure_version), do: @version_2_2 |> Map.keys() |> Enum.sort()
   def names(@content_version), do: @version_2_3 |> Map.keys() |> Enum.sort()
   def names(@dataset_policy_version), do: @version_2_4 |> Map.keys() |> Enum.sort()
+  def names(@dataset_version), do: @version_2_5 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -857,6 +894,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_2_4, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @dataset_policy_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @dataset_version) when is_binary(name) do
+    case Map.fetch(@version_2_5, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @dataset_version})}
 
       :error ->
         invalid(:command_type)
