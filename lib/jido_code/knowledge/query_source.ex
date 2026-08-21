@@ -994,6 +994,117 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:attempt_capture_completeness) do
+    """
+    SELECT ?segment ?expectedBody ?event ?eventKind ?sourceEvent ?bodyRole ?capture
+           ?outcome ?representation ?location ?availability ?retention ?hold ?classification
+           ?purpose ?reconstruction ?providerAvailability ?allowedUse ?limitation ?digest
+           WHERE {
+      GRAPH {{graph}} {
+        ?segment <#{@jf}segmentOf> {{resource}} .
+        ?event <#{@jf}segmentOf> ?segment ;
+               <#{@jf}eventKind> ?eventKind ;
+               <#{@jf}hasCapture> ?capture .
+        ?capture <#{@jf}capturedBody> ?expectedBody ;
+                 <#{@jf}sourceEvent> ?sourceEvent ;
+                 <#{@jf}bodyRole> ?bodyRole ;
+                 <#{@jf}captureOutcome> ?outcome ;
+                 <#{@jf}contentRepresentation> ?representation ;
+                 <#{@jf}storageLocation> ?location ;
+                 <#{@jf}availabilityState> ?availability ;
+                 <#{@jf}retentionState> ?retention ;
+                 <#{@jf}holdState> ?hold ;
+                 <#{@jf}contentClassification> ?classification ;
+                 <#{@jf}capturePurpose> ?purpose ;
+                 <#{@jf}reconstructionStatus> ?reconstruction ;
+                 <#{@jf}externalProviderAvailability> ?providerAvailability .
+        OPTIONAL { ?capture <#{@jf}allowedUse> ?allowedUse }
+        OPTIONAL { ?capture <#{@jf}limitation> ?limitation }
+        OPTIONAL { ?capture <#{@jf}representationDigest> ?digest }
+      }
+    }
+    ORDER BY ?expectedBody ?allowedUse ?limitation
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:task_attempt_lineage) do
+    """
+    SELECT ?attempt ?lease ?fence ?transition ?state ?validFrom ?validTo ?retryOf
+           ?cancellation ?outcome WHERE {
+      GRAPH {{graph}} {
+        ?lease a <#{@jf}Lease> ;
+               <#{@jf}leasesTask> {{resource}} ;
+               <#{@jf}fencingToken> ?fence .
+        ?transition <#{@jf}transitionSubject> ?lease ;
+                    <#{@jf}executes> ?attempt ;
+                    <#{@jf}nextState> ?state .
+        ?decision <#{@jf}accepts> ?transition .
+        OPTIONAL { ?transition <#{@jf}validFrom> ?validFrom }
+        OPTIONAL { ?transition <#{@jf}validTo> ?validTo }
+        OPTIONAL { ?attempt <#{@jf}retryOf> ?retryOf }
+        OPTIONAL { ?attempt <#{@jf}cancellationRequest> ?cancellation }
+        OPTIONAL { ?attempt <#{@jf}outcomeClass> ?outcome }
+      }
+    }
+    ORDER BY ?fence ?attempt ?transition
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:attempt_event_range), do: event_range_query(false)
+  def fetch(:segment_event_range), do: event_range_query(true)
+
+  def fetch(:exact_failure_occurrences) do
+    """
+    SELECT ?segment ?event ?sequence ?eventKind ?role ?occurred ?resource WHERE {
+      GRAPH {{graph}} {
+        ?segment <#{@jf}segmentOf> ?attempt .
+        ?event <#{@jf}segmentOf> ?segment ;
+               <#{@jf}eventSequence> ?sequence ;
+               <#{@jf}eventKind> ?eventKind ;
+               <#{@jf}eventRole> ?role ;
+               <#{@jf}accountsResource> ?resource .
+        ?resource <#{@jf}semanticDigest> {{signature}} ;
+                  <#{@prov}generatedAtTime> ?occurred .
+        FILTER(?occurred <= {{instant}})
+      }
+    }
+    ORDER BY ?occurred ?sequence ?event
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:issue_change_test_lineage) do
+    lineage_query("?relation", "")
+  end
+
+  def fetch(:incident_linkage) do
+    relation = "<#{@jf}incidentLink>"
+    lineage_query("?relation", "FILTER(?relation = #{relation})")
+  end
+
+  def fetch(:why_does_this_exist) do
+    """
+    SELECT ?relation ?source ?resourceRecorded ?recorded ?classification WHERE {
+      GRAPH {{graph}} {
+        {
+          {{resource}} ?relation ?source .
+        } UNION {
+          ?source ?relation {{resource}} .
+        }
+        {{resource}} <#{@jf}recordedAt> ?resourceRecorded .
+        OPTIONAL { ?source <#{@jf}recordedAt> ?recorded }
+        OPTIONAL { ?source <#{@prov}generatedAtTime> ?recorded }
+        OPTIONAL { ?source <#{@jf}contentClassification> ?classification }
+        FILTER(?resourceRecorded <= {{instant}})
+      }
+    }
+    ORDER BY ?recorded ?relation ?source
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:evidence_by_goal),
     do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
 
@@ -1291,6 +1402,68 @@ defmodule JidoCode.Knowledge.QuerySource do
   def fetch(:reusable_evidence_methods), do: insight_query("usesVerificationMethod")
   def fetch(:related_source_symbols), do: insight_query("relatedSymbol")
   def fetch(:applicable_lessons), do: insight_query("applicableLesson")
+
+  defp event_range_query(include_manifest?) do
+    manifest =
+      if include_manifest? do
+        """
+        ?segment <#{@jf}segmentIndex> ?segmentIndex ;
+                 <#{@jf}sequenceStart> ?segmentStart .
+        OPTIONAL { ?segment <#{@jf}sequenceEnd> ?segmentEnd }
+        OPTIONAL { ?segment <#{@jf}segmentRootDigest> ?segmentRoot }
+        OPTIONAL { ?segment <#{@jf}completenessState> ?completeness }
+        """
+      else
+        ""
+      end
+
+    """
+    SELECT ?segment ?segmentIndex ?segmentStart ?segmentEnd ?segmentRoot ?completeness
+           ?event ?sequence ?eventKind ?role ?predecessor ?sourceEvent ?sourceOrder
+           ?resource ?capture ?occurred WHERE {
+      GRAPH {{graph}} {
+        ?segment <#{@jf}segmentOf> {{resource}} .
+        #{manifest}
+        ?event <#{@jf}segmentOf> ?segment ;
+               <#{@jf}eventSequence> ?sequence ;
+               <#{@jf}eventKind> ?eventKind ;
+               <#{@jf}eventRole> ?role .
+        FILTER(?sequence >= {{sequence_start}} && ?sequence <= {{sequence_end}})
+        OPTIONAL { ?event <#{@jf}eventPredecessor> ?predecessor }
+        OPTIONAL { ?event <#{@jf}sourceEvent> ?sourceEvent }
+        OPTIONAL { ?event <#{@jf}sourceOrder> ?sourceOrder }
+        OPTIONAL { ?event <#{@jf}accountsResource> ?resource }
+        OPTIONAL { ?event <#{@jf}hasCapture> ?capture }
+        OPTIONAL { ?resource <#{@prov}generatedAtTime> ?occurred }
+      }
+    }
+    ORDER BY ?sequence ?event ?resource ?capture
+    LIMIT {{row_limit}}
+    """
+  end
+
+  defp lineage_query(relation_pattern, relation_binding) do
+    """
+    SELECT ?resource ?relation ?related ?resourceRecorded ?recorded ?classification WHERE {
+      GRAPH {{graph}} {
+        {
+          {{resource}} #{relation_pattern} ?related .
+          #{relation_binding}
+        } UNION {
+          ?related #{relation_pattern} {{resource}} .
+          #{relation_binding}
+        }
+        {{resource}} <#{@jf}recordedAt> ?resourceRecorded .
+        OPTIONAL { ?related <#{@jf}recordedAt> ?recorded }
+        OPTIONAL { ?related <#{@prov}generatedAtTime> ?recorded }
+        OPTIONAL { ?related <#{@jf}contentClassification> ?classification }
+        FILTER(?resourceRecorded <= {{instant}})
+      }
+    }
+    ORDER BY ?recorded ?relation ?related
+    LIMIT {{row_limit}}
+    """
+  end
 
   defp claim_query(predicate) do
     """

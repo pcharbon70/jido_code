@@ -56,6 +56,12 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Evolution, as: KnowledgeEvolution
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
+  alias JidoCode.Knowledge.Memory.CandidateAccess
+  alias JidoCode.Knowledge.Memory.EvidencePacket
+  alias JidoCode.Knowledge.Memory.RetrievalIndex
+  alias JidoCode.Knowledge.Memory.RetrievalPipeline
+  alias JidoCode.Knowledge.Memory.RetrievalActivity
+  alias JidoCode.Knowledge.Memory.RetrievalRequest
   alias JidoCode.Knowledge.Memory.StateTransition, as: KnowledgeStateTransition
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Learning.Feedback, as: LearningFeedback
@@ -460,6 +466,31 @@ defmodule JidoCode.Knowledge do
 
   def resolve_knowledge_state(transitions), do: KnowledgeStateTransition.resolve(transitions)
   def retrieve_knowledge(result, context), do: KnowledgeRetrieval.build(result, context)
+  def memory_retrieval_request(attributes), do: RetrievalRequest.new(attributes)
+  def memory_evidence_packet?(%EvidencePacket{}), do: true
+  def memory_evidence_packet?(_value), do: false
+
+  def generate_memory_candidates(request, channel, generator),
+    do: CandidateAccess.generate(request, channel, generator)
+
+  def build_memory_retrieval_index(request, channel, generator),
+    do: RetrievalIndex.build(request, channel, generator)
+
+  def lookup_memory_retrieval_index(index, request),
+    do: RetrievalIndex.lookup(index, request)
+
+  def retrieve_memory(request, generators),
+    do: RetrievalPipeline.retrieve(request, generators)
+
+  def start_memory_retrieval(request, occurred_at),
+    do: RetrievalActivity.start(request, occurred_at)
+
+  def finish_memory_retrieval(start, attributes),
+    do: RetrievalActivity.outcome(start, attributes)
+
+  def record_memory_retrieval(activity, segment, attributes, options \\ []),
+    do: RetrievalActivity.record_command(activity, segment, attributes, options)
+
   def memory_graph_identity(repository_iri), do: MemoryGraph.memory_graph(repository_iri)
 
   def reasoning_profiles, do: ReasoningProfiles.names()

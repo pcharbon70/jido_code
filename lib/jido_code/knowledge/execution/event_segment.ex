@@ -54,7 +54,7 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
   @event_types ~w[
     attempt_started segment_continued model_start model_outcome tool_start tool_outcome
     message transition proposal sandbox artifact cancellation retry terminal provider_observation
-    lifecycle_observation
+    lifecycle_observation memory_retrieval_start memory_retrieval_outcome
   ]a
   @roles ~w[observation start outcome transition artifact message terminal]a
   @protocol "2.0.0"

@@ -122,8 +122,6 @@ defmodule JidoCode.Knowledge.Memory.GuardrailsTest do
              ])
 
     assert Guardrails.disabled_features() == %{
-             history_queries: :MG3,
-             retrieval_index: :MG3,
              experience_writer: :MG4,
              diagnostic_capture: :MG6,
              project_total_history: :MG6,
@@ -133,6 +131,8 @@ defmodule JidoCode.Knowledge.Memory.GuardrailsTest do
            }
 
     refute Enum.any?(Map.keys(Guardrails.disabled_features()), &Guardrails.feature_enabled?/1)
+    assert Guardrails.feature_enabled?(:history_queries)
+    assert Guardrails.feature_enabled?(:retrieval_index)
     refute Guardrails.feature_enabled?(:unknown_future_feature)
   end
 

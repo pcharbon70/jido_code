@@ -11,6 +11,7 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.ResourceIdentity
+  alias JidoCode.Security.DataPolicy
 
   @enforce_keys [:iri, :attempt_iri, :index, :digest, :kind, :reconstruction]
   defstruct @enforce_keys ++
@@ -21,7 +22,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
                 :estimated_tokens,
                 :omissions,
                 :unavailable_fields,
-                :missing_classes
+                :missing_classes,
+                :retrieval_commitment
               ]
 
   @type t :: %__MODULE__{}
@@ -46,7 +48,10 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   @missing_reconstruction_classes ~w[
     raw_prompt raw_response raw_tool_output provider_session retention_gap
   ]a
-  @classifications ~w[public internal confidential]a
+  @classifications DataPolicy.classifications() --
+                     ~w[secret_value prompt encrypted_content backup_derivative]a
+  @memory_trust ~w[verified accepted asserted observed untrusted]a
+  @memory_reconstruction ~w[semantic_only recoverable_reference unavailable]a
 
   @spec new(String.t(), map()) :: {:ok, t()} | {:error, Error.t()}
   def new(attempt_iri, attributes) when is_binary(attempt_iri) and is_map(attributes) do
@@ -64,6 +69,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
          {:ok, omissions} <- omissions(attributes[:omissions]),
          :ok <- unavailable_fields(kind, attributes[:unavailable_fields]),
          :ok <- missing_classes(reconstruction, attributes[:missing_classes]),
+         {:ok, retrieval_commitment} <-
+           retrieval_commitment(attributes[:retrieval_commitment]),
          {:ok, iri} <-
            ResourceIdentity.deterministic(
              :context_manifest,
@@ -83,7 +90,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
          estimated_tokens: attributes[:estimated_tokens] || 0,
          omissions: omissions || [],
          unavailable_fields: attributes[:unavailable_fields] || [],
-         missing_classes: attributes[:missing_classes] || []
+         missing_classes: attributes[:missing_classes] || [],
+         retrieval_commitment: retrieval_commitment
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
@@ -116,7 +124,8 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
       item_statements(manifest) ++
       omission_statements(manifest) ++
       unavailable_field_statements(manifest) ++
-      missing_class_statements(manifest)
+      missing_class_statements(manifest) ++
+      retrieval_commitment_statements(manifest)
   end
 
   @spec first_manifest_iri(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
@@ -144,21 +153,30 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
 
   defp item_statements(manifest) do
     Enum.map(manifest.items, fn item ->
-      {manifest.iri, @jf <> "manifestItem",
-       RDF.XSD.String.new(
-         Enum.join(
-           [
-             item.iri,
-             item.digest,
-             Integer.to_string(item.bytes),
-             to_string(Map.get(item, :classification, :internal)),
-             Map.get(item, :provenance_digest, item.digest)
-           ],
-           "|"
-         )
-       )}
+      fields =
+        [
+          item.iri,
+          item.digest,
+          Integer.to_string(item.bytes),
+          to_string(Map.get(item, :classification, :internal)),
+          Map.get(item, :provenance_digest, item.digest)
+        ] ++ memory_item_fields(item)
+
+      {manifest.iri, @jf <> "manifestItem", RDF.XSD.String.new(Enum.join(fields, "|"))}
     end)
   end
+
+  defp memory_item_fields(%{kind: :memory_evidence} = item) do
+    [
+      "memory_evidence",
+      item.source_iri,
+      to_string(item.trust),
+      to_string(item.reconstruction),
+      item.packet_digest
+    ]
+  end
+
+  defp memory_item_fields(_item), do: []
 
   defp omission_statements(manifest) do
     Enum.map(manifest.omissions, fn omission ->
@@ -177,6 +195,22 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
     Enum.map(manifest.missing_classes, fn class ->
       {manifest.iri, @jf <> "reconstructionMissing", RDF.XSD.String.new(class)}
     end)
+  end
+
+  defp retrieval_commitment_statements(%{retrieval_commitment: nil}), do: []
+
+  defp retrieval_commitment_statements(%{retrieval_commitment: commitment} = manifest) do
+    [
+      {manifest.iri, @jf <> "memoryRetrievalRequest", RDF.iri(commitment.request_iri)},
+      {manifest.iri, @jf <> "evidencePacket", RDF.iri(commitment.packet_iri)},
+      {manifest.iri, @jf <> "evidencePacketDigest", RDF.XSD.String.new(commitment.packet_digest)},
+      {manifest.iri, @jf <> "candidatePartitionDigest",
+       RDF.XSD.String.new(commitment.partition_digest)},
+      {manifest.iri, @jf <> "memoryQueryVersion", RDF.XSD.String.new(commitment.query_version)},
+      {manifest.iri, @jf <> "memoryRankingVersion",
+       RDF.XSD.String.new(commitment.ranking_version)},
+      {manifest.iri, @jf <> "memoryIndexVersion", RDF.XSD.String.new(commitment.index_version)}
+    ]
   end
 
   defp source_graphs(nil), do: {:ok, nil}
@@ -200,14 +234,7 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
 
   defp items(values) when is_list(values) do
     if length(values) <= @max_items and
-         Enum.all?(values, fn item ->
-           is_map(item) and is_binary(item[:iri]) and
-             ResourceIdentity.validate(item.iri) == :ok and
-             is_binary(item[:digest]) and Regex.match?(@digest64, item.digest) and
-             is_integer(item[:bytes]) and item.bytes in 1..@max_item_bytes and
-             Map.get(item, :classification, :internal) in @classifications and
-             provenance_digest?(Map.get(item, :provenance_digest, item.digest))
-         end),
+         Enum.all?(values, &valid_item?/1),
        do: {:ok, values},
        else: invalid(:context_manifest_items)
   rescue
@@ -215,6 +242,24 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   end
 
   defp items(_values), do: invalid(:context_manifest_items)
+
+  defp valid_item?(item) when is_map(item) do
+    is_binary(item[:iri]) and ResourceIdentity.validate(item.iri) == :ok and
+      is_binary(item[:digest]) and Regex.match?(@digest64, item.digest) and
+      is_integer(item[:bytes]) and item.bytes in 1..@max_item_bytes and
+      Map.get(item, :classification, :internal) in @classifications and
+      provenance_digest?(Map.get(item, :provenance_digest, item.digest)) and
+      valid_memory_item?(item)
+  end
+
+  defp valid_item?(_item), do: false
+
+  defp valid_memory_item?(%{kind: :memory_evidence} = item) do
+    ResourceIdentity.validate(item[:source_iri]) == :ok and item[:trust] in @memory_trust and
+      item[:reconstruction] in @memory_reconstruction and provenance_digest?(item[:packet_digest])
+  end
+
+  defp valid_memory_item?(item), do: not Map.has_key?(item, :kind)
 
   defp totals(source_graphs, items, attributes) do
     serialized = attributes[:serialized_bytes] || 0
@@ -297,6 +342,30 @@ defmodule JidoCode.Knowledge.Execution.ContextManifest do
   end
 
   defp missing_classes(_reconstruction, _values), do: invalid(:context_manifest_missing)
+
+  defp retrieval_commitment(nil), do: {:ok, nil}
+
+  defp retrieval_commitment(commitment) when is_map(commitment) do
+    resource_fields = ~w[request_iri packet_iri]a
+    digest_fields = ~w[packet_digest partition_digest]a
+    version_fields = ~w[query_version ranking_version index_version]a
+
+    if Enum.all?(resource_fields, &(ResourceIdentity.validate(commitment[&1]) == :ok)) and
+         Enum.all?(digest_fields, &provenance_digest?(commitment[&1])) and
+         Enum.all?(version_fields, fn field ->
+           value = commitment[field]
+
+           is_binary(value) and byte_size(value) in 1..64 and
+             not Regex.match?(~r/[\x00-\x1F\x7F]/u, value)
+         end) do
+      {:ok, Map.take(commitment, resource_fields ++ digest_fields ++ version_fields)}
+    else
+      invalid(:context_manifest_retrieval_commitment)
+    end
+  end
+
+  defp retrieval_commitment(_commitment),
+    do: invalid(:context_manifest_retrieval_commitment)
 
   defp provenance_digest?(value),
     do: is_binary(value) and Regex.match?(@digest64, value)
