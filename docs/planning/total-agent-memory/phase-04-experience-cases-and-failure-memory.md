@@ -50,21 +50,21 @@ Back to plan: [README](./README.md)
       - [x] 4.2.1.4 Subtask - Require an independent actor and exact source/effective-time manifest before validation.
       - [x] 4.2.1.5 Subtask - Preserve contradictory and failed cases instead of consolidating only successful trajectories.
 
-  - [ ] 4.3 Section - Retrieve similar cases and failed interventions.
+  - [x] 4.3 Section - Retrieve similar cases and failed interventions.
 
     This section adds narrow case-based products with strict applicability and
     chronological eligibility.
 
-    - [ ] 4.3.1 Task {#tam-p04-case-retrieval} [repo: jido_code] [after: {#tam-p04-case-construction}] - Implement case retrieval and failure-memory products.
+    - [x] 4.3.1 Task {#tam-p04-case-retrieval} [repo: jido_code] [after: {#tam-p04-case-construction}] - Implement case retrieval and failure-memory products.
 
       This task supplies a few strong precedents instead of flooding context
       with trajectories.
 
-      - [ ] 4.3.1.1 Subtask - Add `similar_resolved_cases`, `failed_interventions`, case source-trace, contradiction, and lifecycle queries.
-      - [ ] 4.3.1.2 Subtask - Filter by repository, framework, version, environment, dependency, task class, plan phase, effective time, and current applicability.
-      - [ ] 4.3.1.3 Subtask - Keep lexical, graph, failure-signature, and optional dense scores separate until deterministic reranking.
-      - [ ] 4.3.1.4 Subtask - Enforce a small configurable case count and diversity across success, failure, and ambiguity.
-      - [ ] 4.3.1.5 Subtask - Evaluate localization, repeated-action avoidance, retry recovery, and abstention when no applicable case exists.
+      - [x] 4.3.1.1 Subtask - Add `similar_resolved_cases`, `failed_interventions`, case source-trace, contradiction, and lifecycle queries.
+      - [x] 4.3.1.2 Subtask - Filter by repository, framework, version, environment, dependency, task class, plan phase, effective time, and current applicability.
+      - [x] 4.3.1.3 Subtask - Keep lexical, graph, failure-signature, and optional dense scores separate until deterministic reranking.
+      - [x] 4.3.1.4 Subtask - Enforce a small configurable case count and diversity across success, failure, and ambiguity.
+      - [x] 4.3.1.5 Subtask - Evaluate localization, repeated-action avoidance, retry recovery, and abstention when no applicable case exists.
 
   - [ ] 4.4 Section - Measure case utility and negative transfer.
 

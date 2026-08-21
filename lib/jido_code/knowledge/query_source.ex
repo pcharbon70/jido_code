@@ -1105,6 +1105,70 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:similar_resolved_cases), do: experience_case_query(false)
+  def fetch(:failed_interventions), do: experience_case_query(true)
+
+  def fetch(:experience_case_source_trace) do
+    """
+    SELECT ?manifest ?manifestDigest ?event ?artifact ?evidence ?recorded WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+        OPTIONAL {
+          ?summary <#{@jf}about> {{resource}} ; <#{@jf}sourceManifest> ?manifest .
+          ?manifest <#{@jf}manifestDigest> ?manifestDigest .
+        }
+        OPTIONAL { {{resource}} <#{@jf}sourceEvent> ?event }
+        OPTIONAL { {{resource}} <#{@jf}sourceArtifact> ?artifact }
+        OPTIONAL { {{resource}} <#{@jf}evidenceSource> ?evidence }
+      }
+    }
+    ORDER BY ?event ?artifact ?evidence
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:experience_case_contradictions) do
+    """
+    SELECT ?contradiction ?evidence ?recorded WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}recordedAt> ?caseRecorded .
+        FILTER(?caseRecorded <= {{instant}})
+        {
+          ?contradiction <#{@jf}contradicts> {{resource}} .
+        } UNION {
+          {{resource}} <#{@jf}evidenceSource> ?evidence .
+          ?evidence <#{@jf}contradicts> ?contradiction .
+        }
+        OPTIONAL { ?contradiction <#{@jf}recordedAt> ?recorded }
+      }
+    }
+    ORDER BY ?recorded ?contradiction ?evidence
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:experience_case_lifecycle) do
+    """
+    SELECT ?transition ?prior ?state ?revision ?predecessor ?actor ?cause ?reason ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> {{resource}} ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ;
+                    <#{@prov}wasAssociatedWith> ?actor ;
+                    <#{@jf}cause> ?cause ;
+                    <#{@jf}reason> ?reason ;
+                    <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+        OPTIONAL { ?transition <#{@jf}priorState> ?prior }
+        OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+      }
+    }
+    ORDER BY ?revision ?transition
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:evidence_by_goal),
     do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
 
@@ -1439,6 +1503,49 @@ defmodule JidoCode.Knowledge.QuerySource do
     }
     ORDER BY ?sequence ?event ?resource ?capture
     LIMIT {{row_limit}}
+    """
+  end
+
+  defp experience_case_query(failures_only?) do
+    class_filter =
+      if failures_only? do
+        "FILTER(?caseClass != <https://jido.run/ontology/concept/Success>)"
+      else
+        ""
+      end
+
+    """
+    SELECT ?case ?caseClass ?signature ?framework ?frameworkVersion ?environment ?dependency
+           ?taskClass ?planPhase ?terminalIntervention ?recorded ?validatedAt ?transition WHERE {
+      GRAPH {{graph}} {
+        ?case a <#{@jf}ExperienceCase> ;
+              <#{@jf}about> {{resource}} ;
+              <#{@jf}caseClass> ?caseClass ;
+              <#{@jf}problemSignature> ?signature ;
+              <#{@jf}environmentFramework> ?framework ;
+              <#{@jf}environmentVersion> ?frameworkVersion ;
+              <#{@jf}environmentRuntime> ?environment ;
+              <#{@jf}dependency> ?dependency ;
+              <#{@jf}taskClass> ?taskClass ;
+              <#{@jf}planPhase> ?planPhase ;
+              <#{@jf}terminalIntervention> ?terminalIntervention ;
+              <#{@jf}recordedAt> ?recorded .
+        ?transition <#{@jf}transitionSubject> ?case ;
+                    <#{@jf}nextState> <https://jido.run/ontology/concept/ExperienceValidated> ;
+                    <#{@jf}recordedAt> ?validatedAt .
+        FILTER(?signature = {{signature}})
+        FILTER(?framework = {{framework}})
+        FILTER(?frameworkVersion = {{framework_version}})
+        FILTER(?environment = {{environment}})
+        FILTER(?dependency = {{dependency}})
+        FILTER(?taskClass = {{task_class}})
+        FILTER(?planPhase = {{plan_phase}})
+        FILTER(?recorded <= {{instant}} && ?validatedAt <= {{instant}})
+        #{class_filter}
+      }
+    }
+    ORDER BY DESC(?validatedAt) ?caseClass ?case
+    LIMIT {{case_limit}}
     """
   end
 

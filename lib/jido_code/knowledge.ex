@@ -57,6 +57,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
   alias JidoCode.Knowledge.Memory.CandidateAccess
+  alias JidoCode.Knowledge.Memory.CaseRetrieval
   alias JidoCode.Knowledge.Memory.EvidencePacket
   alias JidoCode.Knowledge.Memory.ExperienceCase
   alias JidoCode.Knowledge.Memory.ExperienceCommand
@@ -502,6 +503,12 @@ defmodule JidoCode.Knowledge do
 
   def transition_experience_case(experience, transition, attributes, options \\ []),
     do: ExperienceCommand.transition(experience, transition, attributes, options)
+
+  def retrieve_experience_cases(request, candidates),
+    do: CaseRetrieval.retrieve(request, candidates)
+
+  def evaluate_experience_retrieval(result, outcome),
+    do: CaseRetrieval.evaluate(result, outcome)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)
