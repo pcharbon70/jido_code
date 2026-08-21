@@ -1360,6 +1360,64 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:content_lifecycle) do
+    """
+    SELECT ?transition ?prior ?state ?revision ?predecessor ?actor ?cause ?reason ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?transition a <#{@jf}ContentLifecycleTransition> ;
+                    <#{@jf}transitionSubject> {{resource}} ; <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ; <#{@prov}wasAssociatedWith> ?actor ;
+                    <#{@jf}cause> ?cause ; <#{@jf}reason> ?reason ; <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+        OPTIONAL { ?transition <#{@jf}priorState> ?prior }
+        OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+      }
+    }
+    ORDER BY ?revision ?transition
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:content_holds) do
+    """
+    SELECT ?hold ?state ?revision ?owner ?approver ?scope ?purpose ?policy ?review ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?hold <#{@jf}affectedContent> {{resource}} ; <#{@jf}holdState> ?state ;
+              <#{@jf}subjectRevision> ?revision ; <#{@prov}wasAssociatedWith> ?owner ;
+              <#{@jf}approvedBy> ?approver ; <#{@jf}scope> ?scope ; <#{@jf}purpose> ?purpose ;
+              <#{@jf}accessPolicy> ?policy ; <#{@jf}reviewAt> ?review ;
+              <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY ?revision ?hold
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:content_access_audit) do
+    """
+    SELECT ?permit ?activity ?outcome ?status ?byteCount ?commitment ?activityRecorded ?outcomeRecorded WHERE {
+      GRAPH {{graph}} {
+        ?permit a <#{@jf}ContentAccessPermit> ; <#{@jf}selectedContent> {{resource}} .
+        OPTIONAL {
+          ?activity a <#{@jf}ContentAccessActivity> ; <#{@jf}consumesPermit> ?permit ;
+                    <#{@jf}recordedAt> ?activityRecorded .
+          FILTER(?activityRecorded <= {{instant}})
+        }
+        OPTIONAL {
+          ?outcome a <#{@jf}ContentAccessOutcome> ; <#{@jf}consumesPermit> ?permit ;
+                   <#{@jf}accessOutcome> ?status ; <#{@jf}releasedByteCount> ?byteCount ;
+                   <#{@jf}ciphertextCommitment> ?commitment ; <#{@jf}recordedAt> ?outcomeRecorded .
+          FILTER(?outcomeRecorded <= {{instant}})
+        }
+      }
+    }
+    ORDER BY ?activityRecorded ?outcomeRecorded ?permit
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:evidence_by_goal),
     do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
 

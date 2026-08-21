@@ -344,6 +344,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @segmented_execution_version "2.0.0"
   @experience_version "2.1.0"
   @procedure_version "2.2.0"
+  @content_version "2.3.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -583,6 +584,72 @@ defmodule JidoCode.Knowledge.CommandRegistry do
                |> Map.merge(@artifact_claim_commands)
                |> Map.merge(@procedure_commands)
 
+  @content_commands %{
+    "StoreEpisodeContent" => %{
+      owner: :runtime,
+      capability: :content_writer,
+      graph_families: [:episode_content],
+      preconditions: [
+        :encrypted_before_command,
+        :content_segment_complete,
+        :immutable_target_absent
+      ]
+    },
+    "AuthorizeContentAccess" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:authorization_current, :content_current, :permit_absent]
+    },
+    "ConsumeContentAccess" => %{
+      owner: :runtime,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:permit_current, :authorization_rechecked, :single_use]
+    },
+    "RecordContentAccessOutcome" => %{
+      owner: :runtime,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:permit_consumed, :outcome_absent, :audit_contains_no_released_bytes]
+    },
+    "TransitionContentLifecycle" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:content_state_current, :unique_transition_successor]
+    },
+    "PlaceContentHold" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:case_scope_exact, :owner_and_approver_distinct, :hold_absent]
+    },
+    "ReviewContentHold" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:hold_current, :review_due, :unique_transition_successor]
+    },
+    "ReleaseContentHold" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [:hold_release_pending, :approver_current, :unique_transition_successor]
+    },
+    "RecordContentErasure" => %{
+      owner: :evaluation,
+      capability: :content_lifecycle_writer,
+      graph_families: [:content_lifecycle],
+      preconditions: [
+        :retrieval_blocked_first,
+        :derivative_inventory_complete,
+        :restore_floor_advanced
+      ]
+    }
+  }
+  @version_2_3 Map.merge(@version_2_2, @content_commands)
+
   @spec version() :: String.t()
   def version, do: @version
 
@@ -604,6 +671,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec procedure_version() :: String.t()
   def procedure_version, do: @procedure_version
 
+  @spec content_version() :: String.t()
+  def content_version, do: @content_version
+
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
 
@@ -620,6 +690,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@segmented_execution_version), do: @version_2_0 |> Map.keys() |> Enum.sort()
   def names(@experience_version), do: @version_2_1 |> Map.keys() |> Enum.sort()
   def names(@procedure_version), do: @version_2_2 |> Map.keys() |> Enum.sort()
+  def names(@content_version), do: @version_2_3 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -734,6 +805,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_2_2, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @procedure_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @content_version) when is_binary(name) do
+    case Map.fetch(@version_2_3, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @content_version})}
 
       :error ->
         invalid(:command_type)

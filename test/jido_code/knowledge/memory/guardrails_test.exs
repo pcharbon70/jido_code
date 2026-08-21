@@ -108,7 +108,7 @@ defmodule JidoCode.Knowledge.Memory.GuardrailsTest do
              :vault_adr_required
   end
 
-  test "closes the memory threat inventory and keeps future features disabled" do
+  test "closes the threat inventory and keeps broader capture profiles disabled" do
     assert Guardrails.threats() |> Enum.map(& &1.id) |> MapSet.new() ==
              MapSet.new([
                :persistent_poisoning,
@@ -122,17 +122,17 @@ defmodule JidoCode.Knowledge.Memory.GuardrailsTest do
              ])
 
     assert Guardrails.disabled_features() == %{
-             diagnostic_capture: :MG6,
-             project_total_history: :MG6,
-             content_lifecycle_writer: :MG6,
-             episode_content_writer: :MG6,
-             content_gateway: :MG6
+             diagnostic_capture: :superseding_privacy_contract,
+             project_total_history: :accepted_diagnostic_evaluation
            }
 
     refute Enum.any?(Map.keys(Guardrails.disabled_features()), &Guardrails.feature_enabled?/1)
     assert Guardrails.feature_enabled?(:history_queries)
     assert Guardrails.feature_enabled?(:retrieval_index)
     assert Guardrails.feature_enabled?(:experience_writer)
+    assert Guardrails.feature_enabled?(:content_lifecycle_writer)
+    assert Guardrails.feature_enabled?(:episode_content_writer)
+    assert Guardrails.feature_enabled?(:content_gateway)
     refute Guardrails.feature_enabled?(:unknown_future_feature)
   end
 

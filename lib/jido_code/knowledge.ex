@@ -62,6 +62,20 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ArtifactClaimTransition
   alias JidoCode.Knowledge.Memory.CaseRetrieval
   alias JidoCode.Knowledge.Memory.EvidencePacket
+  alias JidoCode.Knowledge.Memory.ContentBenchmark
+  alias JidoCode.Knowledge.Memory.ContentAccessCommand
+  alias JidoCode.Knowledge.Memory.ContentAccessPermit
+  alias JidoCode.Knowledge.Memory.ContentCipher
+  alias JidoCode.Knowledge.Memory.ContentGateway
+  alias JidoCode.Knowledge.Memory.ContentBackupManifest
+  alias JidoCode.Knowledge.Memory.ContentErasurePlan
+  alias JidoCode.Knowledge.Memory.ContentHold
+  alias JidoCode.Knowledge.Memory.ContentLifecycleCommand
+  alias JidoCode.Knowledge.Memory.ContentLifecycleTransition
+  alias JidoCode.Knowledge.Memory.ContentStorageDecision
+  alias JidoCode.Knowledge.Memory.DerivativeCleanup
+  alias JidoCode.Knowledge.Memory.EpisodeContent
+  alias JidoCode.Knowledge.Memory.EpisodeContentCommand
   alias JidoCode.Knowledge.Memory.ExperienceCase
   alias JidoCode.Knowledge.Memory.ExperienceCommand
   alias JidoCode.Knowledge.Memory.ExperienceConstruction
@@ -586,6 +600,72 @@ defmodule JidoCode.Knowledge do
 
   def record_procedure_use(observation, graph, revision, attributes, options \\ []),
     do: ProcedureUseObservation.record(observation, graph, revision, attributes, options)
+
+  def episode_content(attributes), do: EpisodeContent.new(attributes)
+
+  def store_episode_content(content, attributes, options \\ []),
+    do: EpisodeContentCommand.store(content, attributes, options)
+
+  def measure_content_benchmark(baseline, measured, integrity),
+    do: ContentBenchmark.measure(baseline, measured, integrity)
+
+  def decide_content_storage(metrics, signer), do: ContentBenchmark.decide(metrics, signer)
+
+  def encrypt_content(provider, server, tenant, object, plaintext, attributes, options \\ []),
+    do: ContentCipher.encrypt(provider, server, tenant, object, plaintext, attributes, options)
+
+  def content_access_permit(attributes), do: ContentAccessPermit.new(attributes)
+
+  def authorize_content_access(permit, repository, revision, attributes, options \\ []),
+    do: ContentAccessCommand.authorize(permit, repository, revision, attributes, options)
+
+  def consume_content_access(permit, repository, revision, attributes, options \\ []),
+    do: ContentAccessCommand.consume(permit, repository, revision, attributes, options)
+
+  def record_content_access_outcome(
+        permit,
+        outcome,
+        repository,
+        revision,
+        attributes,
+        options \\ []
+      ),
+      do: ContentAccessCommand.outcome(permit, outcome, repository, revision, attributes, options)
+
+  def release_content(permit, encrypted, context, options),
+    do: ContentGateway.consume(permit, encrypted, context, options)
+
+  def content_lifecycle_transition(attributes), do: ContentLifecycleTransition.new(attributes)
+  def resolve_content_lifecycle(transitions), do: ContentLifecycleTransition.resolve(transitions)
+  def place_content_hold(attributes), do: ContentHold.place(attributes)
+  def review_content_hold(hold, attributes), do: ContentHold.review(hold, attributes)
+  def release_content_hold(hold, attributes), do: ContentHold.release(hold, attributes)
+  def plan_content_erasure(attributes), do: ContentErasurePlan.build(attributes)
+  def content_backup_manifest(attributes), do: ContentBackupManifest.new(attributes)
+
+  def content_restore_allowed?(manifest, restore),
+    do: ContentBackupManifest.restore_allowed?(manifest, restore)
+
+  def plan_content_derivative_cleanup(erased, projections),
+    do: DerivativeCleanup.plan(erased, projections)
+
+  def transition_content_lifecycle(transition, repository, revision, attributes, options \\ []),
+    do: ContentLifecycleCommand.transition(transition, repository, revision, attributes, options)
+
+  def record_content_hold(hold, repository, revision, attributes, options \\ []),
+    do: ContentLifecycleCommand.hold(hold, repository, revision, attributes, options)
+
+  def record_content_erasure(plan, repository, revision, attributes, options \\ []),
+    do: ContentLifecycleCommand.erasure(plan, repository, revision, attributes, options)
+
+  def accept_content_storage(decision, verifier),
+    do: ContentStorageDecision.accept(decision, verifier)
+
+  def accept_content_vault(decision, adr, proof),
+    do: ContentStorageDecision.accept_vault(decision, adr, proof)
+
+  def provider_content_artifact_allowed?(attributes),
+    do: ContentStorageDecision.provider_artifact_allowed?(attributes)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

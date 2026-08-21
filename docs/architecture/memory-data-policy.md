@@ -13,10 +13,11 @@ provider egress, Personal data, and sensitive commitments.
 | `project_total_history` | Disabled | maximum policy-authorized observable project content | accepted diagnostic evaluation plus explicit project contract |
 | `incident_hold` | Disabled | case-scoped frozen eligibility | dual approval and periodic hold review |
 
-Listing a disabled profile is not authorization. The exact-content graph family
-is also disabled, so even a classification and representation allowed by the
-policy cannot become durable through `durable_allowed?/4` until both the
-profile and graph family are enabled by their owning gates.
+Listing a disabled profile is not authorization. The graph-native
+`episode_content` family is enabled only for already-encrypted, independently
+authorized content through command version `2.3.0`; release still requires a
+purpose-bound consumed permit. This does not enable either broader capture
+profile.
 
 Secret values, reusable credentials, provider-private state, and hidden
 reasoning remain forbidden in every profile. Personal data is confined to the
@@ -66,9 +67,8 @@ owned by MG6.
 
 Semantic capture manifests and content-capture shells use the longer
 `semantic_shell` class. Exact payload uses the shorter `exact_payload` class,
-while the disabled `episode_content` family remains retained until the MG6
-resource-level lifecycle can make a more precise decision. Closed legacy run
-graphs are not selectively mutated.
+and `episode_content` availability is now governed by its append-only MG6
+lifecycle. Closed legacy run graphs are not selectively mutated.
 
 ## Sensitive Commitments
 

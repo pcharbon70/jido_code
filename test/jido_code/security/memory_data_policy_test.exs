@@ -50,7 +50,7 @@ defmodule JidoCode.Security.MemoryDataPolicyTest do
              :semantic_history
            )
 
-    refute DataPolicy.durable_allowed?(
+    assert DataPolicy.durable_allowed?(
              :encrypted_content,
              :episode_content,
              :ciphertext,

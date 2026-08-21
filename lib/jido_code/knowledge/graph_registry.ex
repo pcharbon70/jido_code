@@ -10,7 +10,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
   alias JidoCode.Knowledge.ResourceIdentity
 
   @base "https://jido.run/graph/"
-  @revision "2.2.0"
+  @revision "2.3.0"
 
   @families %{
     ontology: %{
@@ -187,7 +187,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       mutability: :append_supersede,
       completeness: :complete,
       retention: :content_lifecycle,
-      enabled: false,
+      enabled: true,
       allowed_links: [
         :factory_policy,
         :repository_control,
@@ -205,7 +205,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       mutability: :immutable,
       completeness: :complete,
       retention: :governed_content,
-      enabled: false,
+      enabled: true,
       allowed_links: [
         :run_attempt,
         :run_event_segment,

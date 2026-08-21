@@ -65,13 +65,13 @@ defmodule JidoCode.Knowledge.Memory.Phase04ExperienceCaseTest do
              transition(experience, experience.transition, :candidate, :candidate, 1)
   end
 
-  test "enables only the MG4 experience family and rejects incomplete or future lineage" do
-    assert GraphRegistry.revision() == "2.2.0"
+  test "retains MG4 lineage invariants after later memory gates activate" do
+    assert GraphRegistry.revision() == "2.3.0"
     assert {:ok, %{enabled: true}} = GraphRegistry.fetch(:experience)
-    assert Guardrails.revision() == "1.2.0"
+    assert Guardrails.revision() == "1.3.0"
     assert Guardrails.feature_enabled?(:experience_writer)
     refute Map.has_key?(Guardrails.disabled_features(), :experience_writer)
-    refute Guardrails.feature_enabled?(:content_lifecycle_writer)
+    assert Guardrails.feature_enabled?(:content_lifecycle_writer)
 
     assert {:error, %{kind: :invalid_input}} =
              base_attributes()

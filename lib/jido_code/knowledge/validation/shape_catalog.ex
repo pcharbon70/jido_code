@@ -51,7 +51,9 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       GraphRevisionReference MigrationActivity
     ],
     content_lifecycle: ~w[
-      ContentLifecycleActivity ContentAccessPermit GraphRevisionReference MigrationActivity
+      ContentLifecycleActivity ContentLifecycleTransition ContentAccessPermit ContentAccessActivity
+      ContentAccessOutcome ContentHold ContentHoldTransition ContentErasurePlan BackupManifest
+      DerivativeCleanup GraphRevisionReference MigrationActivity
     ],
     episode_content: ~w[
       EpisodeContent ContentChunk
