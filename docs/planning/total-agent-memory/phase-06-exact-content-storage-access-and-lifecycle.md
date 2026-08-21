@@ -91,17 +91,17 @@ Back to plan: [README](./README.md)
     This final section proves exact-content storage and release under realistic
     volume, adversarial input, failure, backup, and erasure.
 
-    - [ ] 6.5.1 Task {#tam-p06-integration} [repo: jido_code] [after: {#tam-p06-storage-decision}] - Execute the exact-content and lifecycle matrix.
+    - [x] 6.5.1 Task {#tam-p06-integration} [repo: jido_code] [after: {#tam-p06-storage-decision}] - Execute the exact-content and lifecycle matrix.
 
       This task validates the accepted real storage branch; mocks cannot close
       MG6.
 
-      - [ ] 6.5.1.1 Subtask - Capture, encrypt, chunk, close, retrieve, rotate, cold-tier, hold, expire, erase, and restore realistic prompts, logs, outputs, and artifacts.
-      - [ ] 6.5.1.2 Subtask - Exercise concurrent permit use, expiry, revocation, stale fence, wrong profile, wrong range, wrong sink, wrong destination, crash ambiguity, and replay.
-      - [ ] 6.5.1.3 Subtask - Prove zero secret-value capture under canary/entropy/provider classifiers and zero cross-scope plaintext or embedding leakage.
-      - [ ] 6.5.1.4 Subtask - Verify deletion propagation across primary storage, indexes, cases, procedures, exports, backups, and restoration attempts.
-      - [ ] 6.5.1.5 Subtask - Rerun the accepted benchmark and publish reproducible capacity, latency, backup, restore, and rebuild evidence.
-      - [ ] 6.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
+      - [x] 6.5.1.1 Subtask - Capture, encrypt, chunk, close, retrieve, rotate, cold-tier, hold, expire, erase, and restore realistic prompts, logs, outputs, and artifacts.
+      - [x] 6.5.1.2 Subtask - Exercise concurrent permit use, expiry, revocation, stale fence, wrong profile, wrong range, wrong sink, wrong destination, crash ambiguity, and replay.
+      - [x] 6.5.1.3 Subtask - Prove zero secret-value capture under canary/entropy/provider classifiers and zero cross-scope plaintext or embedding leakage.
+      - [x] 6.5.1.4 Subtask - Verify deletion propagation across primary storage, indexes, cases, procedures, exports, backups, and restoration attempts.
+      - [x] 6.5.1.5 Subtask - Rerun the accepted benchmark and publish reproducible capacity, latency, backup, restore, and rebuild evidence.
+      - [x] 6.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
     - [ ] 6.5.2 Task {#tam-p06-phase-receipt} [repo: jido_code] [after: {#tam-p06-integration}] - Publish the Phase 6 exact-content receipt.
 
@@ -109,7 +109,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/memory-phase-06-receipt.md` and binds MG6 to the
       merged candidate.
 
-      - [ ] 6.5.2.1 Subtask - Record storage decision, ADR if applicable, graph/vault/cipher/key/gateway/profile revisions, benchmark digest, and candidate commit.
-      - [ ] 6.5.2.2 Subtask - Attach encryption, permit, lifecycle, erasure, restore, adversarial, and capacity evidence.
-      - [ ] 6.5.2.3 Subtask - Keep MG6 blocked if exact content can bypass a consumed permit, erasure can resurrect data, or a second store gains semantic authority.
+      - [x] 6.5.2.1 Subtask - Record storage decision, ADR if applicable, graph/vault/cipher/key/gateway/profile revisions, benchmark digest, and candidate commit.
+      - [x] 6.5.2.2 Subtask - Attach encryption, permit, lifecycle, erasure, restore, adversarial, and capacity evidence.
+      - [x] 6.5.2.3 Subtask - Keep MG6 blocked if exact content can bypass a consumed permit, erasure can resurrect data, or a second store gains semantic authority.
       - [ ] 6.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 7.

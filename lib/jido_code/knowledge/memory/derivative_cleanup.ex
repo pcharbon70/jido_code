@@ -12,7 +12,7 @@ defmodule JidoCode.Knowledge.Memory.DerivativeCleanup do
       when is_list(erased_content_iris) and is_list(projections) do
     erased = MapSet.new(erased_content_iris)
 
-    with true <- erased != MapSet.new(),
+    with true <- MapSet.size(erased) > 0,
          true <- Enum.all?(erased, &(ResourceIdentity.validate(&1) == :ok)),
          true <- Enum.all?(projections, &projection?/1) do
       actions =

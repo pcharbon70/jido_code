@@ -3,6 +3,7 @@ defmodule JidoCode.Knowledge.Memory.ContentCipher do
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.Memory.Guardrails
+  alias JidoCode.Knowledge.Memory.ContentHygiene
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Security.DataPolicy
 
@@ -21,7 +22,7 @@ defmodule JidoCode.Knowledge.Memory.ContentCipher do
 
     with :ok <- ResourceIdentity.validate(tenant_iri),
          :ok <- ResourceIdentity.validate(object_iri),
-         false <- forbidden_plaintext?(plaintext, attributes),
+         :ok <- ContentHygiene.inspect(plaintext, attributes),
          true <- attributes[:policy_revision] == DataPolicy.revision(),
          {:ok, key} <- key(provider, server, tenant_iri, object_iri, key_operation),
          nonce when is_binary(nonce) and byte_size(nonce) == 12 <- random_bytes.(12),
@@ -112,11 +113,6 @@ defmodule JidoCode.Knowledge.Memory.ContentCipher do
       },
       [:deterministic]
     )
-  end
-
-  defp forbidden_plaintext?(plaintext, attributes) do
-    plaintext == "" or attributes[:classification] == :secret_value or
-      attributes[:provider_private_state?] == true or attributes[:hidden_reasoning?] == true
   end
 
   defp key(provider, server, tenant, object, :create),

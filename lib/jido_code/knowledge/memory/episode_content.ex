@@ -135,6 +135,29 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
 
   def plaintext(content) when is_struct(content, __MODULE__), do: :unavailable
 
+  def identity(attributes) when is_map(attributes) do
+    with :ok <- resources(attributes, ~w[repository_iri source_event_iri]a),
+         true <- opaque_identity?(attributes[:content_identity]),
+         true <- non_negative_integer?(attributes[:segment_index]) do
+      ResourceIdentity.deterministic(
+        :episode_content,
+        Enum.join(
+          [
+            attributes.repository_iri,
+            attributes.source_event_iri,
+            attributes.content_identity,
+            Integer.to_string(attributes.segment_index)
+          ],
+          "\n"
+        )
+      )
+    else
+      _invalid -> {:error, Error.new(:invalid_input, :episode_content_identity)}
+    end
+  end
+
+  def identity(_attributes), do: {:error, Error.new(:invalid_input, :episode_content_identity)}
+
   defp build_chunks(content_iri, chunks, attributes) when is_list(chunks) do
     maximum = Guardrails.capacity_profile().content_chunks_per_command
 
@@ -177,21 +200,6 @@ defmodule JidoCode.Knowledge.Memory.EpisodeContent do
     if Enum.all?(specs, &match?({:ok, _}, &1)),
       do: {:ok, Enum.map(specs, &elem(&1, 1))},
       else: {:error, Error.new(:invalid_input, :content_chunks)}
-  end
-
-  defp identity(attributes) do
-    ResourceIdentity.deterministic(
-      :episode_content,
-      Enum.join(
-        [
-          attributes.repository_iri,
-          attributes.source_event_iri,
-          attributes.content_identity,
-          Integer.to_string(attributes.segment_index)
-        ],
-        "\n"
-      )
-    )
   end
 
   defp completeness_root(chunks, attributes) do

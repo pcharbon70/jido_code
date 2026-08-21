@@ -1397,22 +1397,23 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:content_access_audit) do
     """
-    SELECT ?permit ?activity ?outcome ?status ?byteCount ?commitment ?recorded WHERE {
+    SELECT ?permit ?activity ?outcome ?status ?byteCount ?commitment ?activityRecorded ?outcomeRecorded WHERE {
       GRAPH {{graph}} {
         ?permit a <#{@jf}ContentAccessPermit> ; <#{@jf}selectedContent> {{resource}} .
         OPTIONAL {
           ?activity a <#{@jf}ContentAccessActivity> ; <#{@jf}consumesPermit> ?permit ;
-                    <#{@jf}recordedAt> ?recorded .
+                    <#{@jf}recordedAt> ?activityRecorded .
+          FILTER(?activityRecorded <= {{instant}})
         }
         OPTIONAL {
           ?outcome a <#{@jf}ContentAccessOutcome> ; <#{@jf}consumesPermit> ?permit ;
                    <#{@jf}accessOutcome> ?status ; <#{@jf}releasedByteCount> ?byteCount ;
-                   <#{@jf}ciphertextCommitment> ?commitment ; <#{@jf}recordedAt> ?recorded .
+                   <#{@jf}ciphertextCommitment> ?commitment ; <#{@jf}recordedAt> ?outcomeRecorded .
+          FILTER(?outcomeRecorded <= {{instant}})
         }
-        FILTER(!BOUND(?recorded) || ?recorded <= {{instant}})
       }
     }
-    ORDER BY ?recorded ?permit
+    ORDER BY ?activityRecorded ?outcomeRecorded ?permit
     LIMIT {{row_limit}}
     """
   end

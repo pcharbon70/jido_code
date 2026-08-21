@@ -73,7 +73,7 @@ defmodule JidoCode.Knowledge.Memory.Phase06ContentAccessTest do
     assert {:error, %Error{kind: :unavailable}} =
              ContentCipher.decrypt(InMemoryContentKeyProvider, keys, encrypted, attributes)
 
-    assert {:error, %Error{kind: :invalid_input}} =
+    assert {:error, %Error{kind: :unauthorized}} =
              Knowledge.encrypt_content(
                InMemoryContentKeyProvider,
                keys,

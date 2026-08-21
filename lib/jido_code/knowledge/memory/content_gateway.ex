@@ -78,12 +78,6 @@ defmodule JidoCode.Knowledge.Memory.ContentGateway do
       {:error, %Error{} = error} ->
         outcome(permit, encrypted, :failed, 0, context.now, "content release failed")
         |> error_result(error)
-
-      _invalid ->
-        error = Error.new(:unavailable, :content_release)
-
-        outcome(permit, encrypted, :unavailable, 0, context.now, "range unavailable")
-        |> error_result(error)
     end
   end
 
