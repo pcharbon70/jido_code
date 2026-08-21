@@ -1222,6 +1222,144 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:artifact_claims) do
+    """
+    SELECT ?claim ?snapshot ?artifact ?path ?symbol ?selector ?digest ?value ?command
+           ?environment ?evidence ?strength ?state ?revision ?checked WHERE {
+      GRAPH {{graph}} {
+        ?claim a <#{@jf}ArtifactClaim> ;
+               <#{@jf}about> {{resource}} ;
+               <#{@jf}sourceSnapshot> ?snapshot ;
+               <#{@jf}evaluatesArtifact> ?artifact ;
+               <#{@jf}path> ?path ;
+               <#{@jf}contentDigest> ?digest ;
+               <#{@jf}value> ?value ;
+               <#{@jf}verificationCommand> ?command ;
+               <#{@jf}verificationEnvironment> ?environment ;
+               <#{@jf}evidenceSource> ?evidence ;
+               <#{@jf}evidenceStrength> ?strength ;
+               <#{@jf}checkedAt> ?checked .
+        ?transition <#{@jf}transitionSubject> ?claim ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ;
+                    <#{@jf}recordedAt> ?transitionAt .
+        FILTER(?checked <= {{instant}} && ?transitionAt <= {{instant}})
+        OPTIONAL { ?claim <#{@jf}symbol> ?symbol }
+        OPTIONAL { ?claim <#{@jf}selector> ?selector }
+      }
+    }
+    ORDER BY ?claim DESC(?revision)
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:historical_test_risk) do
+    """
+    SELECT ?claim ?artifact ?path ?value ?strength ?state ?revision ?checked WHERE {
+      GRAPH {{graph}} {
+        ?claim a <#{@jf}ArtifactClaim> ; <#{@jf}about> {{resource}} ;
+               <#{@jf}evaluatesArtifact> ?artifact ; <#{@jf}path> ?path ;
+               <#{@jf}value> ?value ; <#{@jf}evidenceStrength> ?strength ;
+               <#{@jf}checkedAt> ?checked .
+        ?transition <#{@jf}transitionSubject> ?claim ; <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ; <#{@jf}recordedAt> ?recorded .
+        FILTER(?checked <= {{instant}} && ?recorded <= {{instant}})
+      }
+    }
+    ORDER BY DESC(?revision) ?claim
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:procedures_for_task) do
+    """
+    SELECT ?procedure ?purpose ?step ?stop ?exception ?evidence ?validatedAt WHERE {
+      GRAPH {{graph}} {
+        ?procedure a <#{@jf}ProcedureRevision> ; <#{@jf}about> {{resource}} ;
+                   <#{@jf}purpose> ?purpose ; <#{@jf}taskPhase> {{task_phase}} ;
+                   <#{@jf}framework> {{framework}} ; <#{@jf}frameworkVersion> {{framework_version}} ;
+                   <#{@jf}environment> {{environment}} ; <#{@jf}policyVersion> {{policy_version}} ;
+                   <#{@jf}procedureStep> ?step ; <#{@jf}requiredTool> {{tool}} .
+        ?transition <#{@jf}transitionSubject> ?procedure ;
+                    <#{@jf}nextState> <https://jido.run/ontology/concept/ProcedureValidated> ;
+                    <#{@jf}recordedAt> ?validatedAt .
+        FILTER(?validatedAt <= {{instant}})
+        OPTIONAL { ?procedure <#{@jf}stopCondition> ?stop }
+        OPTIONAL { ?procedure <#{@jf}exception> ?exception }
+        OPTIONAL { ?procedure <#{@jf}supports> ?evidence }
+      }
+    }
+    ORDER BY DESC(?validatedAt) ?procedure ?step
+    LIMIT {{procedure_limit}}
+    """
+  end
+
+  def fetch(:procedure_evidence) do
+    """
+    SELECT ?support ?contradiction ?transition ?actor ?cause ?recorded WHERE {
+      GRAPH {{graph}} {
+        OPTIONAL { {{resource}} <#{@jf}supports> ?support }
+        OPTIONAL { {{resource}} <#{@jf}contradicts> ?contradiction }
+        OPTIONAL {
+          ?transition <#{@jf}transitionSubject> {{resource}} ;
+                      <#{@prov}wasAssociatedWith> ?actor ; <#{@jf}cause> ?cause ;
+                      <#{@jf}recordedAt> ?recorded .
+          FILTER(?recorded <= {{instant}})
+        }
+      }
+    }
+    ORDER BY ?recorded ?support ?contradiction
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:procedure_contradictions) do
+    """
+    SELECT ?contradiction ?recorded WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}contradicts> ?contradiction .
+        ?contradiction <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY ?recorded ?contradiction
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:procedure_lifecycle) do
+    """
+    SELECT ?transition ?prior ?state ?revision ?predecessor ?actor ?cause ?reason ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?transition <#{@jf}transitionSubject> {{resource}} ; <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision ; <#{@prov}wasAssociatedWith> ?actor ;
+                    <#{@jf}cause> ?cause ; <#{@jf}reason> ?reason ; <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+        OPTIONAL { ?transition <#{@jf}priorState> ?prior }
+        OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+      }
+    }
+    ORDER BY ?revision ?transition
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:procedure_use_outcomes) do
+    """
+    SELECT ?use ?packet ?attempt ?actor ?phase ?assessmentState ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?use a <#{@jf}ProcedureUseObservation> ; <#{@jf}about> {{resource}} ;
+             <#{@jf}retrievalPacket> ?packet ; <#{@jf}evaluatedAttempt> ?attempt ;
+             <#{@prov}wasAssociatedWith> ?actor ; <#{@jf}taskPhase> ?phase ;
+             <#{@jf}assessmentState> ?assessmentState ; <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY ?recorded ?use
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:evidence_by_goal),
     do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
 

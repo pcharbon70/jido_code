@@ -45,7 +45,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     experience: ~w[
       ExperienceCase ExperienceCaseTransition ExperienceSourceManifest CandidateFactOrSummary
-      ExperienceQuarantineReport ProcedureRevision ArtifactClaim RetrievalActivity
+      ExperienceQuarantineReport ProcedureRevision ProcedureTransition ProcedureQuarantineReport
+      ProcedureUseObservation ArtifactClaim RetrievalActivity
       MemoryUseAssessment
       GraphRevisionReference MigrationActivity
     ],
@@ -57,7 +58,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity
-      VerificationCheck EvidenceSufficiency GraphRevisionReference MigrationActivity
+      VerificationCheck EvidenceSufficiency ArtifactClaim ArtifactClaimTransition
+      GraphRevisionReference MigrationActivity
     ],
     memory: ~w[
       KnowledgeAssertion Claim AdoptionActivity KnowledgeStateTransition

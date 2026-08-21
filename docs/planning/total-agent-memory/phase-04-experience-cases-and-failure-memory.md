@@ -13,7 +13,7 @@ cases.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Turn governed history into source-linked cases without promoting one trajectory into truth.
+- [x] 4 Phase - Turn governed history into source-linked cases without promoting one trajectory into truth.
 
   This phase establishes MG4 by adding applicability-filtered case retrieval
   and independent measurement of benefit or harm.
@@ -82,7 +82,7 @@ Back to plan: [README](./README.md)
       - [x] 4.4.1.4 Subtask - Demote or transition repeatedly harmful cases through governed lifecycle commands.
       - [x] 4.4.1.5 Subtask - Detect suspicious trigger concentration and memory-poisoning success as immediate disablement signals.
 
-  - [ ] 4.5 Section - Phase 4 Integration Tests.
+  - [x] 4.5 Section - Phase 4 Integration Tests.
 
     This final section proves case construction, quarantine, retrieval,
     assessment, and invalidation against complete attempt lineage.
@@ -98,7 +98,7 @@ Back to plan: [README](./README.md)
       - [x] 4.5.1.5 Subtask - Exercise replay, concurrent lifecycle transitions, invalidation, supersession, restart, and index rebuild.
       - [x] 4.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
-    - [ ] 4.5.2 Task {#tam-p04-phase-receipt} [repo: jido_code] [after: {#tam-p04-integration}] - Publish the Phase 4 experience-memory receipt.
+    - [x] 4.5.2 Task {#tam-p04-phase-receipt} [repo: jido_code] [after: {#tam-p04-integration}] - Publish the Phase 4 experience-memory receipt.
 
       This task records case and assessment evidence in
       `docs/architecture/memory-phase-04-receipt.md` and binds MG4 to the
@@ -107,4 +107,4 @@ Back to plan: [README](./README.md)
       - [x] 4.5.2.1 Subtask - Record case schema, command, query, ranker, quarantine, evaluator, and corpus revisions.
       - [x] 4.5.2.2 Subtask - Attach case-class, leakage, poisoning, retrieval, negative-transfer, and lifecycle evidence.
       - [x] 4.5.2.3 Subtask - Keep MG4 blocked if a case can hide lineage, cross scope, use future evidence, or gain authority from frequency.
-      - [ ] 4.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 5.
+      - [x] 4.5.2.4 Subtask - Pin merged candidate `48527f240c5145ebc8535d46dd8b622e4385f495` before authorizing Phase 5.

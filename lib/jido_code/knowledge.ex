@@ -57,6 +57,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
   alias JidoCode.Knowledge.Memory.CandidateAccess
+  alias JidoCode.Knowledge.Memory.ArtifactClaim
+  alias JidoCode.Knowledge.Memory.ArtifactClaimCommand
+  alias JidoCode.Knowledge.Memory.ArtifactClaimTransition
   alias JidoCode.Knowledge.Memory.CaseRetrieval
   alias JidoCode.Knowledge.Memory.EvidencePacket
   alias JidoCode.Knowledge.Memory.ExperienceCase
@@ -68,6 +71,14 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ExperienceValidation
   alias JidoCode.Knowledge.Memory.MemoryUseAssessment
   alias JidoCode.Knowledge.Memory.NegativeTransfer
+  alias JidoCode.Knowledge.Memory.ProcedureInduction
+  alias JidoCode.Knowledge.Memory.ProcedureAuthority
+  alias JidoCode.Knowledge.Memory.ProcedureCommand
+  alias JidoCode.Knowledge.Memory.ProcedureRevision
+  alias JidoCode.Knowledge.Memory.ProcedureRetrieval
+  alias JidoCode.Knowledge.Memory.ProcedureTransition
+  alias JidoCode.Knowledge.Memory.ProcedureUseObservation
+  alias JidoCode.Knowledge.Memory.ProcedureValidation
   alias JidoCode.Knowledge.Memory.CandidateFactOrSummary
   alias JidoCode.Knowledge.Memory.RetrievalIndex
   alias JidoCode.Knowledge.Memory.RetrievalPipeline
@@ -519,6 +530,62 @@ defmodule JidoCode.Knowledge do
 
   def evaluate_negative_transfer(experience, assessments, transition, attributes),
     do: NegativeTransfer.evaluate(experience, assessments, transition, attributes)
+
+  def artifact_claim(attributes), do: ArtifactClaim.new(attributes)
+  def artifact_claim_transition(attributes), do: ArtifactClaimTransition.new(attributes)
+
+  def resolve_artifact_claim_lifecycle(transitions),
+    do: ArtifactClaimTransition.resolve(transitions)
+
+  def artifact_claim_current?(claim, current, transitions \\ nil),
+    do: ArtifactClaim.current?(claim, current, transitions)
+
+  def evaluate_artifact_claim_drift(claim, current, transition, attributes),
+    do: ArtifactClaim.drift_transition(claim, current, transition, attributes)
+
+  def record_artifact_claim(claim, graph, revision, attributes, options \\ []),
+    do: ArtifactClaimCommand.record(claim, graph, revision, attributes, options)
+
+  def transition_artifact_claim(claim, transition, graph, revision, attributes, options \\ []),
+    do: ArtifactClaimCommand.transition(claim, transition, graph, revision, attributes, options)
+
+  def propose_procedure(attributes, context), do: ProcedureInduction.propose(attributes, context)
+
+  def quarantine_procedure(procedure, context),
+    do: ProcedureInduction.quarantine(procedure, context)
+
+  def procedure_revision(attributes), do: ProcedureRevision.new(attributes)
+  def procedure_transition(attributes), do: ProcedureTransition.new(attributes)
+  def resolve_procedure_lifecycle(transitions), do: ProcedureTransition.resolve(transitions)
+
+  def validate_procedure(procedure, report, executions, attributes),
+    do: ProcedureValidation.validate(procedure, report, executions, attributes)
+
+  def evaluate_procedure_drift(procedure, current, transition, attributes),
+    do: ProcedureValidation.drift(procedure, current, transition, attributes)
+
+  def procedure_knowledge_proposition(procedure, validation, attributes),
+    do: ProcedureAuthority.knowledge_proposition(procedure, validation, attributes)
+
+  def procedure_policy_representation(procedure, validation, attributes),
+    do: ProcedureAuthority.sanitized_policy(procedure, validation, attributes)
+
+  def record_procedure_proposal(procedure, graph, revision, report, attributes, options \\ []),
+    do: ProcedureCommand.propose(procedure, graph, revision, report, attributes, options)
+
+  def transition_procedure(procedure, transition, graph, revision, attributes, options \\ []),
+    do: ProcedureCommand.transition(procedure, transition, graph, revision, attributes, options)
+
+  def retrieve_procedures(request, candidates),
+    do: ProcedureRetrieval.retrieve(request, candidates)
+
+  def evaluate_procedure_retrieval(result, baseline),
+    do: ProcedureRetrieval.evaluate(result, baseline)
+
+  def procedure_use_observation(attributes), do: ProcedureUseObservation.new(attributes)
+
+  def record_procedure_use(observation, graph, revision, attributes, options \\ []),
+    do: ProcedureUseObservation.record(observation, graph, revision, attributes, options)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)
