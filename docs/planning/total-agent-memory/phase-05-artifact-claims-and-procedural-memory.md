@@ -13,7 +13,7 @@ independent validation.
 
 Back to plan: [README](./README.md)
 
-- [ ] 5 Phase - Build fresh artifact claims and validated procedures without compiling historical advice into policy automatically.
+- [x] 5 Phase - Build fresh artifact claims and validated procedures without compiling historical advice into policy automatically.
 
   This phase establishes MG5 by separating evidence strength, freshness,
   procedural usefulness, accepted knowledge, and executable control.
@@ -82,7 +82,7 @@ Back to plan: [README](./README.md)
       - [x] 5.4.1.4 Subtask - Return stop conditions, exceptions, failure history, freshness, and evidence alongside ordered steps.
       - [x] 5.4.1.5 Subtask - Record every use as a new observation and wait for independent assessment before updating lifecycle or ranking.
 
-  - [ ] 5.5 Section - Phase 5 Integration Tests.
+  - [x] 5.5 Section - Phase 5 Integration Tests.
 
     This final section proves artifact drift and procedural lifecycle preserve
     evidence and control separation.
@@ -99,7 +99,7 @@ Back to plan: [README](./README.md)
       - [x] 5.5.1.5 Subtask - Measure history-aware test selection, applicability abstention, and negative transfer against fixed baselines.
       - [x] 5.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
-    - [ ] 5.5.2 Task {#tam-p05-phase-receipt} [repo: jido_code] [after: {#tam-p05-integration}] - Publish the Phase 5 artifact-and-procedure receipt.
+    - [x] 5.5.2 Task {#tam-p05-phase-receipt} [repo: jido_code] [after: {#tam-p05-integration}] - Publish the Phase 5 artifact-and-procedure receipt.
 
       This task records claim and procedure evidence in
       `docs/architecture/memory-phase-05-receipt.md` and binds MG5 to the
@@ -108,4 +108,4 @@ Back to plan: [README](./README.md)
       - [x] 5.5.2.1 Subtask - Record claim, procedure, command, query, applicability, validation, and policy revisions.
       - [x] 5.5.2.2 Subtask - Attach drift, lifecycle, retrieval, negative-transfer, and policy-boundary evidence.
       - [x] 5.5.2.3 Subtask - Keep MG5 blocked if stale claims remain current, procedures lack independent evidence, or guidance can become control automatically.
-      - [ ] 5.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 6.
+      - [x] 5.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 6.

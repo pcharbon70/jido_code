@@ -2,10 +2,10 @@
 
 ## Status
 
-This receipt records the Memory Phase 5 merge candidate verified locally on
-2026-08-21. MG5 remains merge-pending until the implementation pull request
-passes clean-checkout CI, merges, and its full merge commit is pinned here and
-in the Phase 5 plan. Phase 6 is not yet authorized.
+This receipt records the accepted Memory Phase 5 merged candidate. Pull request
+#57 passed clean-checkout CI and merged on 2026-08-21 as
+`7068d4c64bd11d9716c8ec7079f8aa2d70002a15`. MG5 is accepted at that merged
+candidate, and Phase 6 is authorized from this pinned baseline.
 
 ## Candidate Provenance
 
@@ -18,7 +18,7 @@ in the Phase 5 plan. Phase 6 is not yet authorized.
 | Section 5.3 | `87d305e72589a17f1f276646604ad52b4508febb` - validate procedures without granting control |
 | Section 5.4 | `b157d68d21bc60332ea8c17819d6ac969161416a` - retrieve current phase-aware procedures |
 | Section 5.5 and receipt | This commit; exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; not yet accepted |
+| Merged candidate | `7068d4c64bd11d9716c8ec7079f8aa2d70002a15`; merged 2026-08-21 and accepted |
 
 ## Contract Pins
 
@@ -104,7 +104,7 @@ two-transition procedure lifecycle from durable graph truth.
 | Complete memory suite, including prior phases | 91 tests, 0 failures |
 | `mix architecture.check` | Pass |
 | `mix precommit` | 692 tests, 0 failures; pass |
-| Pull request clean-checkout CI | Merge-pending |
+| Pull request clean-checkout CI | PR #57 `verify` and `dialyzer` passed; merged 2026-08-21 |
 
 ## Known Limitations
 
@@ -119,9 +119,9 @@ two-transition procedure lifecycle from durable graph truth.
 
 ## Gate MG5
 
-MG5 remains merge-pending. It may be accepted only after clean-checkout CI and
-merge, by pinning the full merge-commit SHA here and in the Phase 5 plan. Phase
-6 remains unauthorized until then.
+MG5 is accepted at merged candidate
+`7068d4c64bd11d9716c8ec7079f8aa2d70002a15` after clean-checkout CI and merge
+on 2026-08-21. Phase 6 is authorized from that pinned baseline.
 
 MG5 reopens if an artifact claim can omit exact repository revision, artifact,
 content digest, verification environment, evidence strength, or checked time;
