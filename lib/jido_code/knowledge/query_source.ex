@@ -1169,6 +1169,59 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:memory_use_outcomes) do
+    """
+    SELECT ?assessment ?packet ?packetDigest ?attempt ?attemptOutcome ?evaluator ?policy
+           ?policyVersion ?outcome ?controlAttempt ?controlOutcome ?triggerConcentration
+           ?poisoningSuccess ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?assessment a <#{@jf}MemoryUseAssessment> ;
+                    <#{@jf}about> {{resource}} ;
+                    <#{@jf}retrievalPacket> ?packet ;
+                    <#{@jf}retrievalPacketDigest> ?packetDigest ;
+                    <#{@jf}evaluatedAttempt> ?attempt ;
+                    <#{@jf}attemptOutcome> ?attemptOutcome ;
+                    <#{@prov}wasAssociatedWith> ?evaluator ;
+                    <#{@jf}governedBy> ?policy ;
+                    <#{@jf}policyVersion> ?policyVersion ;
+                    <#{@jf}memoryUseOutcome> ?outcome ;
+                    <#{@jf}withheldControlAttempt> ?controlAttempt ;
+                    <#{@jf}withheldControlOutcome> ?controlOutcome ;
+                    <#{@jf}suspiciousTriggerConcentration> ?triggerConcentration ;
+                    <#{@jf}poisoningSuccess> ?poisoningSuccess ;
+                    <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY ?recorded ?assessment
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:negative_transfer_cases) do
+    """
+    SELECT ?assessment ?outcome ?triggerConcentration ?poisoningSuccess ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?assessment a <#{@jf}MemoryUseAssessment> ;
+                    <#{@jf}about> {{resource}} ;
+                    <#{@jf}memoryUseOutcome> ?outcome ;
+                    <#{@jf}suspiciousTriggerConcentration> ?triggerConcentration ;
+                    <#{@jf}poisoningSuccess> ?poisoningSuccess ;
+                    <#{@jf}recordedAt> ?recorded .
+        FILTER(?recorded <= {{instant}})
+        FILTER(
+          ?outcome = <https://jido.run/ontology/concept/Misleading> ||
+          ?outcome = <https://jido.run/ontology/concept/Stale> ||
+          ?outcome = <https://jido.run/ontology/concept/Unauthorized> ||
+          ?poisoningSuccess = true || ?triggerConcentration >= 0.8
+        )
+      }
+    }
+    ORDER BY DESC(?triggerConcentration) ?recorded ?assessment
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:evidence_by_goal),
     do: evidence_bundle_query("?activity <#{@jf}evaluatedGoal> {{resource}} .")
 

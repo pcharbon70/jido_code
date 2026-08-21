@@ -1563,6 +1563,28 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         "Read the append-only lifecycle of one experience case.",
         :product,
         :declared
+      ),
+      spec(
+        :memory_use_outcomes,
+        :select,
+        instant,
+        :experience_writer,
+        [:experience],
+        :timeline,
+        "Read independent memory-use assessments for one exact case.",
+        :product,
+        :declared
+      ),
+      spec(
+        :negative_transfer_cases,
+        :select,
+        instant,
+        :experience_writer,
+        [:experience],
+        :table,
+        "Read harmful or suspicious memory-use outcomes without rewriting their cases.",
+        :product,
+        :declared
       )
     ]
   end

@@ -66,6 +66,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ExperienceSourceManifest
   alias JidoCode.Knowledge.Memory.ExperienceTransition
   alias JidoCode.Knowledge.Memory.ExperienceValidation
+  alias JidoCode.Knowledge.Memory.MemoryUseAssessment
+  alias JidoCode.Knowledge.Memory.NegativeTransfer
   alias JidoCode.Knowledge.Memory.CandidateFactOrSummary
   alias JidoCode.Knowledge.Memory.RetrievalIndex
   alias JidoCode.Knowledge.Memory.RetrievalPipeline
@@ -509,6 +511,14 @@ defmodule JidoCode.Knowledge do
 
   def evaluate_experience_retrieval(result, outcome),
     do: CaseRetrieval.evaluate(result, outcome)
+
+  def memory_use_assessment(attributes), do: MemoryUseAssessment.new(attributes)
+
+  def record_memory_use_assessment(assessment, graph, revision, attributes, options \\ []),
+    do: MemoryUseAssessment.record_command(assessment, graph, revision, attributes, options)
+
+  def evaluate_negative_transfer(experience, assessments, transition, attributes),
+    do: NegativeTransfer.evaluate(experience, assessments, transition, attributes)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

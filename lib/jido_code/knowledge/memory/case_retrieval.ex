@@ -93,7 +93,9 @@ defmodule JidoCode.Knowledge.Memory.CaseRetrieval do
       Enum.all?(candidate.channel_scores, fn
         {:dense, nil} -> true
         {_channel, score} -> is_number(score) and score >= 0.0 and score <= 1.0
-      end) and candidate[:current_applicable?] in [true, false]
+      end) and candidate[:current_applicable?] in [true, false] and
+      is_number(candidate[:negative_transfer]) and candidate.negative_transfer >= 0.0 and
+      candidate.negative_transfer <= 1.0
   end
 
   defp candidate?(_candidate), do: false
@@ -117,7 +119,8 @@ defmodule JidoCode.Knowledge.Memory.CaseRetrieval do
     score =
       scores.failure_signature * 0.4 + scores.graph * 0.3 + scores.lexical * 0.25 + dense * 0.05
 
-    {-score, -DateTime.to_unix(candidate.validated_at, :microsecond), candidate.iri}
+    adjusted = score - candidate.negative_transfer * 0.5
+    {-adjusted, -DateTime.to_unix(candidate.validated_at, :microsecond), candidate.iri}
   end
 
   defp diversify(ranked, maximum) do

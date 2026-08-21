@@ -66,21 +66,21 @@ Back to plan: [README](./README.md)
       - [x] 4.3.1.4 Subtask - Enforce a small configurable case count and diversity across success, failure, and ambiguity.
       - [x] 4.3.1.5 Subtask - Evaluate localization, repeated-action avoidance, retry recovery, and abstention when no applicable case exists.
 
-  - [ ] 4.4 Section - Measure case utility and negative transfer.
+  - [x] 4.4 Section - Measure case utility and negative transfer.
 
     This section evaluates memory influence independently after attempts close
     and feeds harmful outcomes into lifecycle and ranking.
 
-    - [ ] 4.4.1 Task {#tam-p04-memory-use-assessment} [repo: jido_code] [after: {#tam-p04-case-retrieval}] - Implement independent `MemoryUseAssessment`.
+    - [x] 4.4.1 Task {#tam-p04-memory-use-assessment} [repo: jido_code] [after: {#tam-p04-case-retrieval}] - Implement independent `MemoryUseAssessment`.
 
       This task prevents frequency or model self-report from becoming evidence
       of usefulness.
 
-      - [ ] 4.4.1.1 Subtask - Record useful, neutral, misleading, stale, unauthorized, and causally-indeterminate outcomes from independent evidence.
-      - [ ] 4.4.1.2 Subtask - Bind the exact retrieval packet, attempt, outcome, evaluator, policy, graph revisions, and matched withheld-memory control.
-      - [ ] 4.4.1.3 Subtask - Add `memory_use_outcomes` and negative-transfer queries without modifying the original case.
-      - [ ] 4.4.1.4 Subtask - Demote or transition repeatedly harmful cases through governed lifecycle commands.
-      - [ ] 4.4.1.5 Subtask - Detect suspicious trigger concentration and memory-poisoning success as immediate disablement signals.
+      - [x] 4.4.1.1 Subtask - Record useful, neutral, misleading, stale, unauthorized, and causally-indeterminate outcomes from independent evidence.
+      - [x] 4.4.1.2 Subtask - Bind the exact retrieval packet, attempt, outcome, evaluator, policy, graph revisions, and matched withheld-memory control.
+      - [x] 4.4.1.3 Subtask - Add `memory_use_outcomes` and negative-transfer queries without modifying the original case.
+      - [x] 4.4.1.4 Subtask - Demote or transition repeatedly harmful cases through governed lifecycle commands.
+      - [x] 4.4.1.5 Subtask - Detect suspicious trigger concentration and memory-poisoning success as immediate disablement signals.
 
   - [ ] 4.5 Section - Phase 4 Integration Tests.
 

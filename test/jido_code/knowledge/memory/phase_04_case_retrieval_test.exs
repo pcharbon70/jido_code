@@ -165,6 +165,7 @@ defmodule JidoCode.Knowledge.Memory.Phase04CaseRetrievalTest do
       case_class: case_class,
       lifecycle_state: :validated,
       current_applicable?: true,
+      negative_transfer: 0.0,
       recorded_at: DateTime.add(@now, -2, :second),
       validated_at: DateTime.add(@now, -1, :second),
       channel_scores: %{

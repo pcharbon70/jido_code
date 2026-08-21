@@ -520,6 +520,17 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       capability: :experience_writer,
       graph_families: [:experience],
       preconditions: [:case_current, :unique_transition_successor]
+    },
+    "RecordMemoryUseAssessment" => %{
+      owner: :evaluation,
+      capability: :experience_writer,
+      graph_families: [:experience],
+      preconditions: [
+        :retrieval_packet_exact,
+        :attempt_outcome_exact,
+        :independent_evidence,
+        :withheld_control_matched
+      ]
     }
   }
   @version_2_1 Map.merge(@version_2_0, @experience_commands)
