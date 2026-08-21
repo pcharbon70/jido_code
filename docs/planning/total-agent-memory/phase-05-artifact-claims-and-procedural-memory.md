@@ -34,21 +34,21 @@ Back to plan: [README](./README.md)
       - [x] 5.1.1.4 Subtask - Add `artifact_claims` and `historical_test_risk` queries with exact current-revision comparison.
       - [x] 5.1.1.5 Subtask - Exclude stale claims from current retrieval while preserving historical visibility and original evidence strength.
 
-  - [ ] 5.2 Section - Define and induce candidate procedures.
+  - [x] 5.2 Section - Define and induce candidate procedures.
 
     This section models reusable workflows with explicit applicability,
     branches, evidence, failure modes, and lifecycle.
 
-    - [ ] 5.2.1 Task {#tam-p05-procedure-contract} [repo: jido_code] [after: {#tam-p05-artifact-claims}] - Implement `ProcedureRevision` proposal and quarantine.
+    - [x] 5.2.1 Task {#tam-p05-procedure-contract} [repo: jido_code] [after: {#tam-p05-artifact-claims}] - Implement `ProcedureRevision` proposal and quarantine.
 
       This task prevents one successful patch or plausible summary from
       becoming a reusable workflow.
 
-      - [ ] 5.2.1.1 Subtask - Bind purpose, task class, triggers, applicability, repository/language/framework/version scope, ordered semantic steps, required tools/capabilities, and expected observations.
-      - [ ] 5.2.1.2 Subtask - Bind decision branches, stop/escalation/rollback conditions, exceptions, supporting and contradicting cases, delayed outcomes, and last validation.
-      - [ ] 5.2.1.3 Subtask - Define candidate, validated, stale, invalidated, and superseded states with immutable revisions.
-      - [ ] 5.2.1.4 Subtask - Require multiple applicable cases or explicit expert review; success count alone never promotes a procedure.
-      - [ ] 5.2.1.5 Subtask - Quarantine secrets, prompt injection, over-generalization, missing preconditions, duplicate procedures, and benchmark leakage.
+      - [x] 5.2.1.1 Subtask - Bind purpose, task class, triggers, applicability, repository/language/framework/version scope, ordered semantic steps, required tools/capabilities, and expected observations.
+      - [x] 5.2.1.2 Subtask - Bind decision branches, stop/escalation/rollback conditions, exceptions, supporting and contradicting cases, delayed outcomes, and last validation.
+      - [x] 5.2.1.3 Subtask - Define candidate, validated, stale, invalidated, and superseded states with immutable revisions.
+      - [x] 5.2.1.4 Subtask - Require multiple applicable cases or explicit expert review; success count alone never promotes a procedure.
+      - [x] 5.2.1.5 Subtask - Quarantine secrets, prompt injection, over-generalization, missing preconditions, duplicate procedures, and benchmark leakage.
 
   - [ ] 5.3 Section - Validate procedures and preserve authority boundaries.
 

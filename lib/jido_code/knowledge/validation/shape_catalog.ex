@@ -45,7 +45,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     experience: ~w[
       ExperienceCase ExperienceCaseTransition ExperienceSourceManifest CandidateFactOrSummary
-      ExperienceQuarantineReport ProcedureRevision ArtifactClaim RetrievalActivity
+      ExperienceQuarantineReport ProcedureRevision ProcedureTransition ProcedureQuarantineReport
+      ArtifactClaim RetrievalActivity
       MemoryUseAssessment
       GraphRevisionReference MigrationActivity
     ],

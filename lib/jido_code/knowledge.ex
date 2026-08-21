@@ -71,6 +71,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ExperienceValidation
   alias JidoCode.Knowledge.Memory.MemoryUseAssessment
   alias JidoCode.Knowledge.Memory.NegativeTransfer
+  alias JidoCode.Knowledge.Memory.ProcedureInduction
+  alias JidoCode.Knowledge.Memory.ProcedureRevision
+  alias JidoCode.Knowledge.Memory.ProcedureTransition
   alias JidoCode.Knowledge.Memory.CandidateFactOrSummary
   alias JidoCode.Knowledge.Memory.RetrievalIndex
   alias JidoCode.Knowledge.Memory.RetrievalPipeline
@@ -540,6 +543,15 @@ defmodule JidoCode.Knowledge do
 
   def transition_artifact_claim(claim, transition, graph, revision, attributes, options \\ []),
     do: ArtifactClaimCommand.transition(claim, transition, graph, revision, attributes, options)
+
+  def propose_procedure(attributes, context), do: ProcedureInduction.propose(attributes, context)
+
+  def quarantine_procedure(procedure, context),
+    do: ProcedureInduction.quarantine(procedure, context)
+
+  def procedure_revision(attributes), do: ProcedureRevision.new(attributes)
+  def procedure_transition(attributes), do: ProcedureTransition.new(attributes)
+  def resolve_procedure_lifecycle(transitions), do: ProcedureTransition.resolve(transitions)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)
