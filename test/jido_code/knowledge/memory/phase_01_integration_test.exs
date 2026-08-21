@@ -85,7 +85,7 @@ defmodule JidoCode.Knowledge.Memory.Phase01IntegrationTest do
     refute DataPolicy.provider_egress_allowed?(:export_derivative, :approved)
   end
 
-  test "post-MG1 families remain closed and unreachable by legacy commands" do
+  test "MG4 experience is enabled while later families remain closed to legacy commands" do
     {:ok, repository} = ResourceIdentity.repository("memory-phase-01")
     {:ok, attempt} = ResourceIdentity.local(:attempt, 1_000, <<1::80>>)
     {:ok, content} = ResourceIdentity.local(:claim, 1_001, <<2::80>>)
@@ -99,18 +99,27 @@ defmodule JidoCode.Knowledge.Memory.Phase01IntegrationTest do
     Enum.each(families, fn {family, scopes} ->
       assert {:ok, graph} = GraphRegistry.graph_iri(family, scopes)
       assert {:ok, contract} = GraphRegistry.fetch(family)
-      refute contract.enabled
+      assert contract.enabled == (family == :experience)
       assert {:ok, _retention} = RetentionPolicy.class_for_family(family)
 
-      assert {:error, %Error{kind: :unauthorized}} =
-               GraphRegistry.validate_target(graph, contract.capability)
+      if family == :experience do
+        assert {:ok, %{family: :experience}} =
+                 GraphRegistry.validate_target(graph, contract.capability)
+      else
+        assert {:error, %Error{kind: :unauthorized}} =
+                 GraphRegistry.validate_target(graph, contract.capability)
+      end
 
       assert {:error, %Error{kind: :unauthorized}} =
                GraphRegistry.validate_target(graph, :policy_writer)
 
-      for operation <- [:create, :append, :close, :replace] do
-        refute GraphRegistry.write_allowed?(family, operation, %{lifecycle_state: :open})
-      end
+      assert GraphRegistry.write_allowed?(family, :create) == (family == :experience)
+
+      assert GraphRegistry.write_allowed?(family, :append, %{lifecycle_state: :open}) ==
+               (family == :experience)
+
+      refute GraphRegistry.write_allowed?(family, :close, %{lifecycle_state: :open})
+      refute GraphRegistry.write_allowed?(family, :replace, %{lifecycle_state: :open})
     end)
 
     assert {:ok, segment_graph} =

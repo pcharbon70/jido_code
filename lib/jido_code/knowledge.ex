@@ -57,7 +57,18 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Graph, as: MemoryGraph
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
   alias JidoCode.Knowledge.Memory.CandidateAccess
+  alias JidoCode.Knowledge.Memory.CaseRetrieval
   alias JidoCode.Knowledge.Memory.EvidencePacket
+  alias JidoCode.Knowledge.Memory.ExperienceCase
+  alias JidoCode.Knowledge.Memory.ExperienceCommand
+  alias JidoCode.Knowledge.Memory.ExperienceConstruction
+  alias JidoCode.Knowledge.Memory.ExperienceQuarantine
+  alias JidoCode.Knowledge.Memory.ExperienceSourceManifest
+  alias JidoCode.Knowledge.Memory.ExperienceTransition
+  alias JidoCode.Knowledge.Memory.ExperienceValidation
+  alias JidoCode.Knowledge.Memory.MemoryUseAssessment
+  alias JidoCode.Knowledge.Memory.NegativeTransfer
+  alias JidoCode.Knowledge.Memory.CandidateFactOrSummary
   alias JidoCode.Knowledge.Memory.RetrievalIndex
   alias JidoCode.Knowledge.Memory.RetrievalPipeline
   alias JidoCode.Knowledge.Memory.RetrievalActivity
@@ -469,6 +480,45 @@ defmodule JidoCode.Knowledge do
   def memory_retrieval_request(attributes), do: RetrievalRequest.new(attributes)
   def memory_evidence_packet?(%EvidencePacket{}), do: true
   def memory_evidence_packet?(_value), do: false
+  def experience_case(attributes), do: ExperienceCase.new(attributes)
+  def experience_source_manifest(attributes), do: ExperienceSourceManifest.new(attributes)
+  def experience_transition(attributes), do: ExperienceTransition.new(attributes)
+  def resolve_experience_lifecycle(transitions), do: ExperienceTransition.resolve(transitions)
+
+  def construct_experience_case(run, evidence, attributes),
+    do: ExperienceConstruction.build(run, evidence, attributes)
+
+  def experience_candidate_summary(case_iri, manifest, attributes),
+    do: CandidateFactOrSummary.new(case_iri, manifest, attributes)
+
+  def quarantine_experience_case(experience, summary, manifest, context),
+    do: ExperienceQuarantine.evaluate(experience, summary, manifest, context)
+
+  def validate_experience_case(experience, summary, manifest, report, attributes),
+    do: ExperienceValidation.validate(experience, summary, manifest, report, attributes)
+
+  def propose_experience_case(experience, manifest, summary, report, attributes, options \\ []),
+    do: ExperienceCommand.propose(experience, manifest, summary, report, attributes, options)
+
+  def quarantine_experience_case_command(experience, report, attributes, options \\ []),
+    do: ExperienceCommand.quarantine(experience, report, attributes, options)
+
+  def transition_experience_case(experience, transition, attributes, options \\ []),
+    do: ExperienceCommand.transition(experience, transition, attributes, options)
+
+  def retrieve_experience_cases(request, candidates),
+    do: CaseRetrieval.retrieve(request, candidates)
+
+  def evaluate_experience_retrieval(result, outcome),
+    do: CaseRetrieval.evaluate(result, outcome)
+
+  def memory_use_assessment(attributes), do: MemoryUseAssessment.new(attributes)
+
+  def record_memory_use_assessment(assessment, graph, revision, attributes, options \\ []),
+    do: MemoryUseAssessment.record_command(assessment, graph, revision, attributes, options)
+
+  def evaluate_negative_transfer(experience, assessments, transition, attributes),
+    do: NegativeTransfer.evaluate(experience, assessments, transition, attributes)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

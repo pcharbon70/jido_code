@@ -27,7 +27,7 @@ defmodule JidoCode.Knowledge.CommandContractTest do
              CommandRegistry.resolve("ProposeGoal", "2.0.0")
 
     assert {:error, %Error{kind: :incompatible}} =
-             CommandRegistry.resolve("ProposeGoal", "2.1.0")
+             CommandRegistry.resolve("ProposeGoal", "2.2.0")
   end
 
   test "builds a clocked envelope while redacting payload and idempotency material" do
