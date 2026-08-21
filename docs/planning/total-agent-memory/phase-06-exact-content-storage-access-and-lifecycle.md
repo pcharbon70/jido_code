@@ -18,22 +18,22 @@ Back to plan: [README](./README.md)
   This phase establishes MG6 while leaving high-retention capture profiles
   disabled by default.
 
-  - [ ] 6.1 Section - Implement and benchmark graph-native encrypted content.
+  - [x] 6.1 Section - Implement and benchmark graph-native encrypted content.
 
     This section stores bounded authorized payloads in immutable content
     segments under the sole-store contract.
 
-    - [ ] 6.1.1 Task {#tam-p06-graph-content} [repo: jido_code] [after: {#tam-p05-phase-receipt}] - Implement `episode_content` chunking and capacity benchmarks.
+    - [x] 6.1.1 Task {#tam-p06-graph-content} [repo: jido_code] [after: {#tam-p05-phase-receipt}] - Implement `episode_content` chunking and capacity benchmarks.
 
       This task tests the preferred graph-first design before any vault
       decision.
 
-      - [ ] 6.1.1.1 Subtask - Use opaque semantic content IRIs and encrypt authorized sensitive bytes before semantic command construction.
-      - [ ] 6.1.1.2 Subtask - Store ordered bounded ciphertext chunks with homogeneous initial policy, media type, byte count, ciphertext digest, key reference, source event, and completeness root.
-      - [ ] 6.1.1.3 Subtask - Prohibit plaintext secrets, public plaintext hashes of sensitive content, authority-bearing predicates, and ordinary product projection.
-      - [ ] 6.1.1.4 Subtask - Close each content segment atomically and reject missing, duplicate, reordered, oversized, mixed-policy, or orphaned chunks.
-      - [ ] 6.1.1.5 Subtask - Benchmark the Phase 1 corpus across capture, retrieval, backup, restore, retention, erasure, index rebuild, and storage growth.
-      - [ ] 6.1.1.6 Subtask - Produce a signed benchmark decision against every pinned acceptance threshold.
+      - [x] 6.1.1.1 Subtask - Use opaque semantic content IRIs and encrypt authorized sensitive bytes before semantic command construction.
+      - [x] 6.1.1.2 Subtask - Store ordered bounded ciphertext chunks with homogeneous initial policy, media type, byte count, ciphertext digest, key reference, source event, and completeness root.
+      - [x] 6.1.1.3 Subtask - Prohibit plaintext secrets, public plaintext hashes of sensitive content, authority-bearing predicates, and ordinary product projection.
+      - [x] 6.1.1.4 Subtask - Close each content segment atomically and reject missing, duplicate, reordered, oversized, mixed-policy, or orphaned chunks.
+      - [x] 6.1.1.5 Subtask - Benchmark the Phase 1 corpus across capture, retrieval, backup, restore, retention, erasure, index rebuild, and storage growth.
+      - [x] 6.1.1.6 Subtask - Produce a signed benchmark decision against every pinned acceptance threshold.
 
   - [ ] 6.2 Section - Implement encryption and single-use content access.
 

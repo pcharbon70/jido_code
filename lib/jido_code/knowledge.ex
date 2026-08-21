@@ -62,6 +62,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ArtifactClaimTransition
   alias JidoCode.Knowledge.Memory.CaseRetrieval
   alias JidoCode.Knowledge.Memory.EvidencePacket
+  alias JidoCode.Knowledge.Memory.ContentBenchmark
+  alias JidoCode.Knowledge.Memory.EpisodeContent
+  alias JidoCode.Knowledge.Memory.EpisodeContentCommand
   alias JidoCode.Knowledge.Memory.ExperienceCase
   alias JidoCode.Knowledge.Memory.ExperienceCommand
   alias JidoCode.Knowledge.Memory.ExperienceConstruction
@@ -586,6 +589,16 @@ defmodule JidoCode.Knowledge do
 
   def record_procedure_use(observation, graph, revision, attributes, options \\ []),
     do: ProcedureUseObservation.record(observation, graph, revision, attributes, options)
+
+  def episode_content(attributes), do: EpisodeContent.new(attributes)
+
+  def store_episode_content(content, attributes, options \\ []),
+    do: EpisodeContentCommand.store(content, attributes, options)
+
+  def measure_content_benchmark(baseline, measured, integrity),
+    do: ContentBenchmark.measure(baseline, measured, integrity)
+
+  def decide_content_storage(metrics, signer), do: ContentBenchmark.decide(metrics, signer)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)
