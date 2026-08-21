@@ -21,23 +21,23 @@ Back to plan: [README](./README.md)
   purpose-bound and temporally valid, then closes the total-agent-memory plan
   from a pinned merged candidate.
 
-  - [ ] 7.1 Section - Define cross-repository purpose and authorization.
+  - [x] 7.1 Section - Define cross-repository purpose and authorization.
 
     This section makes every cohort operation an explicit, expiring
     authorization decision rather than an emergent consequence of repository
     access.
 
-    - [ ] 7.1.1 Task {#tam-p07-cross-repository-policy} [repo: jido_code] [after: {#tam-p06-phase-receipt}] - Implement the cross-repository authorization policy.
+    - [x] 7.1.1 Task {#tam-p07-cross-repository-policy} [repo: jido_code] [after: {#tam-p06-phase-receipt}] - Implement the cross-repository authorization policy.
 
       This task defines the policy boundary and durable evidence required
       before any query, analysis, candidate generation, or export may span
       repositories.
 
-      - [ ] 7.1.1.1 Subtask - Require an explicit cohort, repository set, actor set, purpose, allowed uses, data classes, effective cutoff, expiry, policy revision, and authorization decision.
-      - [ ] 7.1.1.2 Subtask - Partition candidate generation and indexes by authorization scope and erasure generation so an unauthorized repository cannot influence retrieval or aggregate counts.
-      - [ ] 7.1.1.3 Subtask - Treat cross-repository cases and procedures as candidates only; require independent acceptance in the target repository before they gain local authority.
-      - [ ] 7.1.1.4 Subtask - Deny exact content, prompt-derived content, personal data, and confidential content unless each class is expressly covered by the authorization.
-      - [ ] 7.1.1.5 Subtask - Audit every cross-repository query, export, omission, denial, revocation, and expiry without copying protected payloads into the audit record.
+      - [x] 7.1.1.1 Subtask - Require an explicit cohort, repository set, actor set, purpose, allowed uses, data classes, effective cutoff, expiry, policy revision, and authorization decision.
+      - [x] 7.1.1.2 Subtask - Partition candidate generation and indexes by authorization scope and erasure generation so an unauthorized repository cannot influence retrieval or aggregate counts.
+      - [x] 7.1.1.3 Subtask - Treat cross-repository cases and procedures as candidates only; require independent acceptance in the target repository before they gain local authority.
+      - [x] 7.1.1.4 Subtask - Deny exact content, prompt-derived content, personal data, and confidential content unless each class is expressly covered by the authorization.
+      - [x] 7.1.1.5 Subtask - Audit every cross-repository query, export, omission, denial, revocation, and expiry without copying protected payloads into the audit record.
 
   - [ ] 7.2 Section - Build chronological governed datasets.
 
