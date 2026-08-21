@@ -2,10 +2,11 @@
 
 ## Status
 
-This receipt records the Memory Phase 3 candidate verified locally on
-2026-08-20. MG3 is merge-pending: the candidate must still pass clean-checkout
-CI and merge before this receipt can accept a merged commit or authorize Phase
-4. No MG3 blocking invariant was observed in the local verification matrix.
+This receipt records the Memory Phase 3 candidate verified locally and
+accepted after pull request merge on 2026-08-21. Pull request #54 passed
+clean-checkout CI and merged on 2026-08-21 as
+`c1185415439bf32d7387e5fe9e94c57bc7a2d42e`. MG3 is accepted, and Phase 4 is
+authorized only from that exact merged baseline.
 
 ## Candidate Provenance
 
@@ -17,8 +18,8 @@ CI and merge before this receipt can accept a merged commit or authorize Phase
 | Section 3.2 | `caff03d2ed824e69d65301abdfef247c9665a515` - authorize memory retrieval before search |
 | Section 3.3 | `13325d730e8e807d7e449746191b5a56db90500d` - build bounded memory evidence packets |
 | Section 3.4 | `7a3053e73733a3748f29fc1a081a4ea05d11514d` - integrate memory evidence with harness context |
-| Section 3.5 and receipt | merge-pending branch candidate; the commit containing this receipt |
-| Merged candidate | merge-pending; must be replaced by the full merge-commit SHA after clean-checkout CI and merge |
+| Section 3.5 and receipt | `bc90f6c78e5b42ae4fc37b41fbe41b3b691c5fe0` - verify governed memory retrieval |
+| Merged candidate | `c1185415439bf32d7387e5fe9e94c57bc7a2d42e` |
 
 ## Contract Pins
 
@@ -93,7 +94,7 @@ same item, graph, byte, token, and time budget map.
 | Disposable index, oversized packet, contradiction, and harness regression subset after contract pinning | 10 tests, 0 failures |
 | `mix architecture.check` | Pass |
 | `mix precommit` | 664 tests, 0 failures; pass |
-| Pull request clean-checkout CI | merge-pending |
+| Pull request #54 clean-checkout CI | Pass; merged 2026-08-21 |
 
 ## Known Limitations
 
@@ -111,9 +112,9 @@ same item, graph, byte, token, and time budget map.
 
 ## Gate MG3
 
-MG3 remains merge-pending. After the pull request passes clean-checkout CI and
-merges, this receipt and the Phase 3 plan must pin the full merge-commit SHA and
-merge date before Phase 4 is authorized.
+MG3 is accepted at merged candidate
+`c1185415439bf32d7387e5fe9e94c57bc7a2d42e`, pinned in this receipt and the
+Phase 3 plan. Phase 4 is authorized only from that exact baseline.
 
 MG3 reopens if authorization does not precede every candidate lookup; if an
 index can inspect or combine candidates across repository, tenant, actor,

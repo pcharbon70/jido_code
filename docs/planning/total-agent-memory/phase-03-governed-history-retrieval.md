@@ -13,7 +13,7 @@ integration.
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Retrieve small, time-correct evidence packets without turning history into instructions or authority.
+- [x] 3 Phase - Retrieve small, time-correct evidence packets without turning history into instructions or authority.
 
   This phase establishes MG3 by proving every retrieved item is scoped,
   temporally eligible, source-linked, bounded, and non-authoritative.
@@ -82,7 +82,7 @@ Back to plan: [README](./README.md)
       - [x] 3.4.1.4 Subtask - Support a strict no-memory mode producing bit-identical base authorization and tool behavior.
       - [x] 3.4.1.5 Subtask - Emit bounded retrieval latency, cost, truncation, source-availability, and index-rebuild metrics without payload values.
 
-  - [ ] 3.5 Section - Phase 3 Integration Tests.
+  - [x] 3.5 Section - Phase 3 Integration Tests.
 
     This final section proves authorized, temporal, bounded retrieval and safe
     harness use.
@@ -99,7 +99,7 @@ Back to plan: [README](./README.md)
       - [x] 3.5.1.5 Subtask - Compare no-memory, recent-context, full-eligible, lexical, graph, and hybrid packets under identical budgets.
       - [x] 3.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
-    - [ ] 3.5.2 Task {#tam-p03-phase-receipt} [repo: jido_code] [after: {#tam-p03-integration}] - Publish the Phase 3 governed-retrieval receipt.
+    - [x] 3.5.2 Task {#tam-p03-phase-receipt} [repo: jido_code] [after: {#tam-p03-integration}] - Publish the Phase 3 governed-retrieval receipt.
 
       This task records query and retrieval evidence in
       `docs/architecture/memory-phase-03-receipt.md` and binds MG3 to the
@@ -108,4 +108,4 @@ Back to plan: [README](./README.md)
       - [x] 3.5.2.1 Subtask - Record query, ranker, index, packet, profile, corpus, and candidate revisions.
       - [x] 3.5.2.2 Subtask - Attach temporal, scope, budget, poisoning, rebuild, and ablation results.
       - [x] 3.5.2.3 Subtask - Keep MG3 blocked if filtering occurs only after search, a packet can grant authority, or future/ineligible evidence is returned.
-      - [ ] 3.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 4.
+      - [x] 3.5.2.4 Subtask - Pin merged candidate `c1185415439bf32d7387e5fe9e94c57bc7a2d42e` before authorizing Phase 4.
