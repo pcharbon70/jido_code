@@ -6,6 +6,8 @@ defmodule JidoCode.Knowledge.Memory.DatasetExportPermit do
   alias JidoCode.Knowledge.ResourceIdentity
 
   @revision "1.0.0"
+  @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+  @jf "https://jido.run/ontology/factory#"
   @enforce_keys [
     :iri,
     :revision,
@@ -83,6 +85,23 @@ defmodule JidoCode.Knowledge.Memory.DatasetExportPermit do
 
   def consume(_permit, _now), do: {:error, Error.new(:unauthorized, :dataset_export_permit)}
 
+  def statements(%__MODULE__{} = permit) do
+    [
+      {permit.iri, @rdf_type, RDF.iri(@jf <> "DatasetExportPermit")},
+      {permit.iri, @jf <> "datasetManifest", RDF.iri(permit.manifest_iri)},
+      {permit.iri, @jf <> "authorization", RDF.iri(permit.authorization_iri)},
+      {permit.iri, @jf <> "actor", RDF.iri(permit.actor_iri)},
+      {permit.iri, @jf <> "approvedSink", RDF.iri(permit.sink_iri)},
+      {permit.iri, @jf <> "purpose", concept(permit.purpose)},
+      {permit.iri, @jf <> "rowLimit", RDF.XSD.NonNegativeInteger.new(permit.row_limit)},
+      {permit.iri, @jf <> "byteLimit", RDF.XSD.NonNegativeInteger.new(permit.byte_limit)},
+      {permit.iri, @jf <> "issuedAt", RDF.XSD.DateTime.new(permit.issued_at)},
+      {permit.iri, @jf <> "validTo", RDF.XSD.DateTime.new(permit.expires_at)},
+      {permit.iri, @jf <> "permitState", concept(permit.state)}
+    ] ++
+      Enum.map(permit.classifications, &{permit.iri, @jf <> "allowedDataClass", concept(&1)})
+  end
+
   defp identity(manifest, attributes, classifications) do
     ResourceIdentity.deterministic(
       :dataset_export_permit,
@@ -114,5 +133,9 @@ defmodule JidoCode.Knowledge.Memory.DatasetExportPermit do
 
   defp classifications(_values, _manifest), do: :error
   defp positive_bounded?(value, maximum), do: is_integer(value) and value > 0 and value <= maximum
+
+  defp concept(value),
+    do: RDF.iri("https://jido.run/ontology/concept/" <> Macro.camelize(to_string(value)))
+
   defp invalid, do: {:error, Error.new(:invalid_input, :dataset_export_permit)}
 end

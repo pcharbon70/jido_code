@@ -2,7 +2,7 @@
 
 ## Policy And Profile Posture
 
-`JidoCode.Security.DataPolicy` `2.0.0` is the shared closed contract for durable
+`JidoCode.Security.DataPolicy` `2.1.0` is the shared closed contract for durable
 graph placement, representation, product/operational output, approved export,
 provider egress, Personal data, and sensitive commitments.
 
@@ -18,6 +18,14 @@ Listing a disabled profile is not authorization. The graph-native
 authorized content through command version `2.3.0`; release still requires a
 purpose-bound consumed permit. This does not enable either broader capture
 profile.
+
+Phase 7 admits only payload-free `export_derivative` identity, digest, schema,
+lineage, count, authorization, lifecycle, and evaluation metadata to the
+`memory_dataset` family. Dataset bytes remain at the individually approved
+external sink. Personal data, secret values, provider-private fields, hidden
+reasoning, and unresolved deletion candidates are excluded before rows exist.
+Cross-repository and export authority is explicit, expiring, manifest-bound,
+and does not authorize model training or deployment.
 
 Secret values, reusable credentials, provider-private state, and hidden
 reasoning remain forbidden in every profile. Personal data is confined to the

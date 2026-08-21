@@ -100,18 +100,18 @@ Back to plan: [README](./README.md)
     across authorization, time, lifecycle, export, restoration, and release
     acceptance boundaries.
 
-    - [ ] 7.5.1 Task {#tam-p07-integration} [repo: jido_code] [after: {#tam-p07-evaluation-release}] - Run Phase 7 integration, leakage, lifecycle, and release tests.
+    - [x] 7.5.1 Task {#tam-p07-integration} [repo: jido_code] [after: {#tam-p07-evaluation-release}] - Run Phase 7 integration, leakage, lifecycle, and release tests.
 
       This task proves MG7 and all earlier gates against realistic
       multi-repository workflows, adversarial dataset inputs, and lifecycle
       transitions.
 
-      - [ ] 7.5.1.1 Subtask - Test multi-repository, multi-tenant, and multi-actor preauthorization so denied repositories remain concealed from candidates, rankings, aggregates, logs, and exports.
-      - [ ] 7.5.1.2 Subtask - Inject overlap, future evidence, secrets, personal data, provider-private fields, poisoned memory, stale claims, deleted sources, and ambiguous outcomes into dataset candidates and prove exclusion or quarantine.
-      - [ ] 7.5.1.3 Subtask - Trace a complete authorized attempt from graph capture through history, case, claim, procedure, exact-content access, dataset construction, export permit, evaluation, and revocation.
-      - [ ] 7.5.1.4 Subtask - Exercise rebuild, restart, backup restore, key rotation, hold, expiry, deletion, and dataset invalidation without creating a second authority or orphaned derivative.
-      - [ ] 7.5.1.5 Subtask - Prove diagnostic and project profiles, adapter-specific memory, broad cohort access, automatic export, model training, and deployment remain disabled by default.
-      - [ ] 7.5.1.6 Subtask - Run the full memory evaluation suite, all prior phase integration suites, architecture checks, and `mix precommit` from a clean checkout.
+      - [x] 7.5.1.1 Subtask - Test multi-repository, multi-tenant, and multi-actor preauthorization so denied repositories remain concealed from candidates, rankings, aggregates, logs, and exports.
+      - [x] 7.5.1.2 Subtask - Inject overlap, future evidence, secrets, personal data, provider-private fields, poisoned memory, stale claims, deleted sources, and ambiguous outcomes into dataset candidates and prove exclusion or quarantine.
+      - [x] 7.5.1.3 Subtask - Trace a complete authorized attempt from graph capture through history, case, claim, procedure, exact-content access, dataset construction, export permit, evaluation, and revocation.
+      - [x] 7.5.1.4 Subtask - Exercise rebuild, restart, backup restore, key rotation, hold, expiry, deletion, and dataset invalidation without creating a second authority or orphaned derivative.
+      - [x] 7.5.1.5 Subtask - Prove diagnostic and project profiles, adapter-specific memory, broad cohort access, automatic export, model training, and deployment remain disabled by default.
+      - [x] 7.5.1.6 Subtask - Run the full memory evaluation suite, all prior phase integration suites, architecture checks, and `mix precommit` from a clean checkout.
 
     - [ ] 7.5.2 Task {#tam-p07-phase-receipt} [repo: jido_code] [after: {#tam-p07-integration}] - Publish and pin the Phase 7 receipt.
 
@@ -119,7 +119,7 @@ Back to plan: [README](./README.md)
       only after the implementation pull request passes clean-checkout CI and
       merges.
 
-      - [ ] 7.5.2.1 Subtask - Create `docs/architecture/memory-phase-07-receipt.md` with all contract, policy, query, extractor, dataset, export, and evaluation revisions.
-      - [ ] 7.5.2.2 Subtask - Attach authorization-isolation, temporal-leakage, lifecycle, erasure, export, evaluation, and clean-checkout evidence.
-      - [ ] 7.5.2.3 Subtask - Keep MG7 open if any unauthorized influence, future evidence, forbidden content, lineage gap, lifecycle failure, critical false acceptance, or required metric failure remains.
+      - [x] 7.5.2.1 Subtask - Create `docs/architecture/memory-phase-07-receipt.md` with all contract, policy, query, extractor, dataset, export, and evaluation revisions.
+      - [x] 7.5.2.2 Subtask - Attach authorization-isolation, temporal-leakage, lifecycle, erasure, export, evaluation, and clean-checkout evidence.
+      - [x] 7.5.2.3 Subtask - Keep MG7 open if any unauthorized influence, future evidence, forbidden content, lineage gap, lifecycle failure, critical false acceptance, or required metric failure remains.
       - [ ] 7.5.2.4 Subtask - Pin the merged candidate commit, close the total-agent-memory plan, and preserve every MG1-MG7 reopening condition.

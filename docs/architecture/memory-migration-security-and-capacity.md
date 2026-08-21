@@ -2,7 +2,7 @@
 
 ## Compatibility And Activation
 
-`JidoCode.Knowledge.Memory.Guardrails` `1.0.0` defines the inherited
+`JidoCode.Knowledge.Memory.Guardrails` `1.5.0` defines the inherited
 preconditions for every later memory phase. The `1.x` run protocol remains
 readable as immutable, bounded-observable evidence. It is never rewritten and
 never relabeled as complete event accounting. The `2.0.0` segmented protocol
@@ -34,6 +34,12 @@ result; accepting caller-selected fields or filtering a shared search result
 after inspection is forbidden. Changing any generation produces a different
 partition identity, so stale time or erasure indexes cannot silently remain
 eligible.
+
+Phase 7 extends this boundary to an explicit repository set, actor set,
+cohort, allowed uses and classes, effective cutoff, expiry, policy revision,
+and per-repository erasure generation. Candidate generation opens only the
+exact authorization partition. Unauthorized repositories therefore cannot
+affect candidates, rankings, counts, omissions, logs, or exports.
 
 ## Capacity Profile
 
@@ -73,8 +79,10 @@ storage or accepts and proves a superseding encrypted-vault ADR.
 
 ## Activation Posture
 
-The segmented writer, governed history queries, experience writer, and the
-graph-native lifecycle/content writers and gateway are active through their
-versioned command lines. Phase 6 authorizes no vault. `diagnostic_capture` and
-`project_total_history` remain unregistered and runtime-disabled; their names
-and owning requirements grant no capture authority.
+The segmented writer, governed history queries, experience writer,
+graph-native lifecycle/content writers and gateway, governed dataset builder,
+manifest-bound exporter, and release evaluator are active through their
+versioned command lines. Phase 6 authorizes no vault. Broad cohort access,
+automatic export, model training, model deployment, `diagnostic_capture`, and
+`project_total_history` remain runtime-disabled; their names and owning
+requirements grant no authority.

@@ -11,13 +11,17 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
     {:ok, revision} = ResourceIdentity.git_object(:sha1, String.duplicate("a", 40))
     {:ok, attempt} = ResourceIdentity.local(:attempt, 200, <<1::80>>)
     {:ok, content} = ResourceIdentity.local(:claim, 300, <<2::80>>)
+    {:ok, cohort} = ResourceIdentity.deterministic(:repository_cohort, "cohort-1")
+    {:ok, dataset} = ResourceIdentity.deterministic(:memory_dataset_manifest, "dataset-1")
 
     %{
       repository: repository,
       batch: batch,
       revision: revision,
       attempt: attempt,
-      content: content
+      content: content,
+      cohort: cohort,
+      dataset: dataset
     }
   end
 
@@ -33,6 +37,7 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
       run_event_segment: %{attempt: ids.attempt, segment: 0},
       evidence: %{repository: ids.repository},
       memory: %{repository: ids.repository},
+      memory_dataset: %{cohort: ids.cohort, dataset: ids.dataset},
       experience: %{repository: ids.repository},
       content_lifecycle: %{repository: ids.repository},
       episode_content: %{repository: ids.repository, content: ids.content},

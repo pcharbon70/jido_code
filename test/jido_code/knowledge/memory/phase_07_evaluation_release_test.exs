@@ -5,6 +5,7 @@ defmodule JidoCode.Knowledge.Memory.Phase07EvaluationReleaseTest do
   alias JidoCode.Knowledge.CommandRegistry
   alias JidoCode.Knowledge.Memory.Guardrails
   alias JidoCode.Knowledge.Memory.MemoryEvaluationProgram
+  alias JidoCode.Knowledge.QueryCatalog
   alias JidoCode.Knowledge.ResourceIdentity
 
   test "runs every required ablation and accepts supported utility with zero governance failures" do
@@ -68,6 +69,19 @@ defmodule JidoCode.Knowledge.Memory.Phase07EvaluationReleaseTest do
     refute Enum.any?(CommandRegistry.names("2.7.0"), fn command ->
              String.contains?(command, ["Train", "Checkpoint", "RegisterModel", "Deploy"])
            end)
+
+    assert QueryCatalog.dataset_version() == "2.7.0"
+    assert :ok = QueryCatalog.verify()
+
+    for query <- [
+          :memory_dataset_manifest,
+          :memory_dataset_lineage,
+          :memory_release_evaluation
+        ] do
+      assert {:ok, definition} = QueryCatalog.fetch(query, QueryCatalog.dataset_version())
+      assert definition.capability == :memory_evaluator
+      assert definition.graph_families == [:memory_dataset]
+    end
   end
 
   defp attributes do
