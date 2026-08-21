@@ -58,6 +58,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.Retrieval, as: KnowledgeRetrieval
   alias JidoCode.Knowledge.Memory.CandidateAccess
   alias JidoCode.Knowledge.Memory.EvidencePacket
+  alias JidoCode.Knowledge.Memory.ExperienceCase
+  alias JidoCode.Knowledge.Memory.ExperienceTransition
   alias JidoCode.Knowledge.Memory.RetrievalIndex
   alias JidoCode.Knowledge.Memory.RetrievalPipeline
   alias JidoCode.Knowledge.Memory.RetrievalActivity
@@ -469,6 +471,9 @@ defmodule JidoCode.Knowledge do
   def memory_retrieval_request(attributes), do: RetrievalRequest.new(attributes)
   def memory_evidence_packet?(%EvidencePacket{}), do: true
   def memory_evidence_packet?(_value), do: false
+  def experience_case(attributes), do: ExperienceCase.new(attributes)
+  def experience_transition(attributes), do: ExperienceTransition.new(attributes)
+  def resolve_experience_lifecycle(transitions), do: ExperienceTransition.resolve(transitions)
 
   def generate_memory_candidates(request, channel, generator),
     do: CandidateAccess.generate(request, channel, generator)

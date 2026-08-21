@@ -15,7 +15,7 @@ defmodule JidoCode.Knowledge.Memory.TopologyContractTest do
     %{repository: repository, attempt: attempt, content: content}
   end
 
-  test "registers the MG2 segment family and keeps later memory families disabled", ids do
+  test "registers the MG4 experience family and keeps later memory families disabled", ids do
     expected = %{
       run_event_segment: %{
         scopes: %{attempt: ids.attempt, segment: 12},
@@ -47,21 +47,23 @@ defmodule JidoCode.Knowledge.Memory.TopologyContractTest do
       }
     }
 
-    assert GraphRegistry.revision() == "2.1.0"
+    assert GraphRegistry.revision() == "2.2.0"
 
     Enum.each(expected, fn {family, expected_contract} ->
       assert {:ok, graph} = GraphRegistry.graph_iri(family, expected_contract.scopes)
       assert {:ok, ^family} = GraphRegistry.identify(graph)
       assert {:ok, contract} = GraphRegistry.fetch(family)
-      assert contract.enabled == (family == :run_event_segment)
+      assert contract.enabled == family in [:run_event_segment, :experience]
       assert contract.capability == expected_contract.capability
       assert contract.mutability == expected_contract.mutability
       assert contract.completeness == expected_contract.completeness
       assert contract.retention == expected_contract.retention
-      assert GraphRegistry.write_allowed?(family, :create) == (family == :run_event_segment)
 
-      if family == :run_event_segment do
-        assert {:ok, %{family: :run_event_segment}} =
+      assert GraphRegistry.write_allowed?(family, :create) ==
+               family in [:run_event_segment, :experience]
+
+      if family in [:run_event_segment, :experience] do
+        assert {:ok, %{family: ^family}} =
                  GraphRegistry.validate_target(graph, expected_contract.capability)
       else
         assert {:error, %Error{kind: :unauthorized}} =

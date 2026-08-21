@@ -18,21 +18,21 @@ Back to plan: [README](./README.md)
   This phase establishes MG4 by adding applicability-filtered case retrieval
   and independent measurement of benefit or harm.
 
-  - [ ] 4.1 Section - Define experience-case contracts and lifecycle.
+  - [x] 4.1 Section - Define experience-case contracts and lifecycle.
 
     This section gives reusable episodes a closed non-authoritative schema and
     append-only state machine.
 
-    - [ ] 4.1.1 Task {#tam-p04-case-contract} [repo: jido_code] [after: {#tam-p03-phase-receipt}] - Implement `ExperienceCase` and its governed lifecycle.
+    - [x] 4.1.1 Task {#tam-p04-case-contract} [repo: jido_code] [after: {#tam-p03-phase-receipt}] - Implement `ExperienceCase` and its governed lifecycle.
 
       This task preserves reusable episode structure without hiding raw
       lineage.
 
-      - [ ] 4.1.1.1 Subtask - Bind problem signature, repository/version, environment, dependencies, symptoms, reproduction, inspected files/symbols, interventions, and disproved assumptions.
-      - [ ] 4.1.1.2 Subtask - Bind terminal intervention, verification, delayed outcome, exceptions, limitations, and exact source event/artifact/evidence references.
-      - [ ] 4.1.1.3 Subtask - Distinguish success, failure, revert, flake, infrastructure, abandonment, and ambiguous cases.
-      - [ ] 4.1.1.4 Subtask - Define candidate, validated, stale, invalidated, and superseded transitions in the `experience` family.
-      - [ ] 4.1.1.5 Subtask - Ensure case status never satisfies work, accepts evidence, adopts knowledge, or compiles policy.
+      - [x] 4.1.1.1 Subtask - Bind problem signature, repository/version, environment, dependencies, symptoms, reproduction, inspected files/symbols, interventions, and disproved assumptions.
+      - [x] 4.1.1.2 Subtask - Bind terminal intervention, verification, delayed outcome, exceptions, limitations, and exact source event/artifact/evidence references.
+      - [x] 4.1.1.3 Subtask - Distinguish success, failure, revert, flake, infrastructure, abandonment, and ambiguous cases.
+      - [x] 4.1.1.4 Subtask - Define candidate, validated, stale, invalidated, and superseded transitions in the `experience` family.
+      - [x] 4.1.1.5 Subtask - Ensure case status never satisfies work, accepts evidence, adopts knowledge, or compiles policy.
 
   - [ ] 4.2 Section - Construct and quarantine cases.
 

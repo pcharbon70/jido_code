@@ -10,7 +10,7 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Security.DataPolicy
 
-  @revision "1.1.0"
+  @revision "1.2.0"
   @legacy_protocol "1.x"
   @segmented_protocol "2.0.0"
   @terminal_states ~w[completed failed timed_out cancelled abandoned]a
@@ -135,7 +135,6 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
   ]
 
   @disabled_features %{
-    experience_writer: :MG4,
     diagnostic_capture: :MG6,
     project_total_history: :MG6,
     content_lifecycle_writer: :MG6,
@@ -275,7 +274,11 @@ defmodule JidoCode.Knowledge.Memory.Guardrails do
 
   @spec feature_enabled?(atom()) :: boolean()
   def feature_enabled?(:run_event_segment_writer), do: true
-  def feature_enabled?(feature) when feature in [:history_queries, :retrieval_index], do: true
+
+  def feature_enabled?(feature)
+      when feature in [:history_queries, :retrieval_index, :experience_writer],
+      do: true
+
   def feature_enabled?(_feature), do: false
 
   defp terminal_legacy_attempt?(attempt) when is_map(attempt) do
