@@ -64,6 +64,23 @@ defmodule JidoCode.Knowledge.Memory.Phase05ProcedureValidationTest do
 
     assert stale.next_state == :stale
 
+    for state <- [:invalidated, :superseded] do
+      assert {:ok, transition} =
+               Knowledge.procedure_transition(%{
+                 procedure_iri: procedure.iri,
+                 prior_state: :validated,
+                 next_state: state,
+                 revision: validation.transition.revision + 1,
+                 expected_predecessor: validation.transition.iri,
+                 actor_iri: resource(:authorization_grant, "#{state}-evaluator"),
+                 cause_iri: resource(:evidence_claim, "#{state}-evidence"),
+                 reason: "independent #{state} disposition",
+                 recorded_at: DateTime.add(@now, 2, :second)
+               })
+
+      assert transition.next_state == state
+    end
+
     assert {:error, %{kind: :unauthorized}} =
              Knowledge.procedure_knowledge_proposition(
                procedure,
@@ -90,6 +107,15 @@ defmodule JidoCode.Knowledge.Memory.Phase05ProcedureValidationTest do
                sanitized_representation: %{effect: :deny},
                command_iri: nil
              })
+
+    assert {:error, %{kind: :invalid_input}} =
+             CommandRegistry.resolve(
+               "GrantCapabilityFromProcedure",
+               CommandRegistry.procedure_version()
+             )
+
+    assert {:error, %{kind: :invalid_input}} =
+             CommandRegistry.resolve("ApproveProcedure", CommandRegistry.procedure_version())
   end
 
   test "builds separate governed procedure proposal and validation commands" do
@@ -123,7 +149,9 @@ defmodule JidoCode.Knowledge.Memory.Phase05ProcedureValidationTest do
                validation.transition,
                graph,
                1,
-               %{attrs | expected_graph_revisions: %{graph => 1}}, clock: fn -> @now end)
+               %{attrs | expected_graph_revisions: %{graph => 1}},
+               clock: fn -> @now end
+             )
 
     assert command.command_type == "ValidateProcedureRevision"
   end

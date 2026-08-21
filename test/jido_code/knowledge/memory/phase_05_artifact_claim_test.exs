@@ -71,7 +71,9 @@ defmodule JidoCode.Knowledge.Memory.Phase05ArtifactClaimTest do
                claim,
                evidence_graph,
                1,
-               command_attributes(evidence_graph), clock: fn -> @now end)
+               command_attributes(evidence_graph),
+               clock: fn -> @now end
+             )
 
     assert command.command_type == "RecordArtifactClaim"
     assert command.command_version == CommandRegistry.procedure_version()

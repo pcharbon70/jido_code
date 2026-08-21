@@ -87,17 +87,17 @@ Back to plan: [README](./README.md)
     This final section proves artifact drift and procedural lifecycle preserve
     evidence and control separation.
 
-    - [ ] 5.5.1 Task {#tam-p05-integration} [repo: jido_code] [after: {#tam-p05-procedure-retrieval}] - Execute the artifact-and-procedure integration matrix.
+    - [x] 5.5.1 Task {#tam-p05-integration} [repo: jido_code] [after: {#tam-p05-procedure-retrieval}] - Execute the artifact-and-procedure integration matrix.
 
       This task validates claims and workflows across source change,
       independent execution, negative transfer, and policy boundaries.
 
-      - [ ] 5.5.1.1 Subtask - Create strong and weak artifact claims, change their supporting content, and prove exact freshness invalidation.
-      - [ ] 5.5.1.2 Subtask - Induce procedures from mixed success/failure/revert cases and reject one-off or unsupported generalization.
-      - [ ] 5.5.1.3 Subtask - Validate, retrieve, use, fail, stale, invalidate, and supersede procedures under exact applicability.
-      - [ ] 5.5.1.4 Subtask - Attempt to turn a candidate procedure directly into accepted knowledge, capability, approval, or policy and prove denial.
-      - [ ] 5.5.1.5 Subtask - Measure history-aware test selection, applicability abstention, and negative transfer against fixed baselines.
-      - [ ] 5.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
+      - [x] 5.5.1.1 Subtask - Create strong and weak artifact claims, change their supporting content, and prove exact freshness invalidation.
+      - [x] 5.5.1.2 Subtask - Induce procedures from mixed success/failure/revert cases and reject one-off or unsupported generalization.
+      - [x] 5.5.1.3 Subtask - Validate, retrieve, use, fail, stale, invalidate, and supersede procedures under exact applicability.
+      - [x] 5.5.1.4 Subtask - Attempt to turn a candidate procedure directly into accepted knowledge, capability, approval, or policy and prove denial.
+      - [x] 5.5.1.5 Subtask - Measure history-aware test selection, applicability abstention, and negative transfer against fixed baselines.
+      - [x] 5.5.1.6 Subtask - Rerun prior suites, architecture scans, and `mix precommit`.
 
     - [ ] 5.5.2 Task {#tam-p05-phase-receipt} [repo: jido_code] [after: {#tam-p05-integration}] - Publish the Phase 5 artifact-and-procedure receipt.
 
@@ -105,7 +105,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/memory-phase-05-receipt.md` and binds MG5 to the
       merged candidate.
 
-      - [ ] 5.5.2.1 Subtask - Record claim, procedure, command, query, applicability, validation, and policy revisions.
-      - [ ] 5.5.2.2 Subtask - Attach drift, lifecycle, retrieval, negative-transfer, and policy-boundary evidence.
-      - [ ] 5.5.2.3 Subtask - Keep MG5 blocked if stale claims remain current, procedures lack independent evidence, or guidance can become control automatically.
+      - [x] 5.5.2.1 Subtask - Record claim, procedure, command, query, applicability, validation, and policy revisions.
+      - [x] 5.5.2.2 Subtask - Attach drift, lifecycle, retrieval, negative-transfer, and policy-boundary evidence.
+      - [x] 5.5.2.3 Subtask - Keep MG5 blocked if stale claims remain current, procedures lack independent evidence, or guidance can become control automatically.
       - [ ] 5.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 6.
