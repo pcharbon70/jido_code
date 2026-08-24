@@ -83,7 +83,7 @@ defmodule JidoCode.Knowledge.QuerySource do
           ?transition a <#{@jf}StateTransition> ;
                       <#{@jf}transitionSubject> ?profile ;
                       <#{@jf}nextState> ?state ;
-                      <#{@jf}transitionRevision> ?revision .
+                      <#{@jf}subjectRevision> ?revision .
           OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
         }
       }

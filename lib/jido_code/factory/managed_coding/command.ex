@@ -70,9 +70,7 @@ defmodule JidoCode.Factory.ManagedCoding.Command do
 
   defp forbidden_runtime_state?(payload) do
     forbidden =
-      MapSet.new(
-        ~w[adapter adapter_module credential executable function graph_handle mfa module pid pod_pid provider_session secret store tool_arguments workspace_path]
-      )
+      ~w[adapter adapter_module credential executable function graph_handle mfa module pid pod_pid provider_session secret store tool_arguments workspace_path]
 
     forbidden_value?(payload, forbidden)
   rescue
@@ -86,7 +84,7 @@ defmodule JidoCode.Factory.ManagedCoding.Command do
   defp forbidden_value?(value, forbidden) when is_map(value) do
     Enum.any?(value, fn {key, nested} ->
       normalized = key |> to_string() |> String.downcase()
-      MapSet.member?(forbidden, normalized) or forbidden_value?(nested, forbidden)
+      normalized in forbidden or forbidden_value?(nested, forbidden)
     end)
   end
 

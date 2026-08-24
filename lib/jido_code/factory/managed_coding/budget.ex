@@ -24,7 +24,7 @@ defmodule JidoCode.Factory.ManagedCoding.Budget do
 
   @spec new(map()) :: {:ok, t()} | {:error, AdapterError.t()}
   def new(attributes) when is_map(attributes) do
-    with true <- MapSet.new(Map.keys(attributes)) == MapSet.new(@dimensions),
+    with true <- Enum.sort(Map.keys(attributes)) == Enum.sort(@dimensions),
          true <- Enum.all?(@dimensions, &valid_limit?(&1, attributes[&1])) do
       {:ok, struct!(__MODULE__, Map.take(attributes, @dimensions))}
     else

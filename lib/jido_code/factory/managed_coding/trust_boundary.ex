@@ -35,7 +35,7 @@ defmodule JidoCode.Factory.ManagedCoding.TrustBoundary do
   defp trusted_instructions(_instructions), do: {:error, :repository_prompt_injection}
 
   defp tool_arguments(arguments) when is_map(arguments) do
-    forbidden = MapSet.new(~w[adapter adapter_module executable function mfa module])
+    forbidden = ~w[adapter adapter_module executable function mfa module]
 
     if nested_key?(arguments, forbidden),
       do: {:error, :tool_argument_smuggling},
@@ -45,8 +45,8 @@ defmodule JidoCode.Factory.ManagedCoding.TrustBoundary do
   defp tool_arguments(_arguments), do: {:error, :tool_argument_smuggling}
 
   defp exact_capabilities(attributes) do
-    admitted = normalized_set(attributes[:admitted_capabilities])
-    current = normalized_set(attributes[:current_capabilities])
+    admitted = normalized_list(attributes[:admitted_capabilities])
+    current = normalized_list(attributes[:current_capabilities])
 
     if admitted != :error and admitted == current, do: :ok, else: {:error, :capability_drift}
   end
@@ -83,16 +83,16 @@ defmodule JidoCode.Factory.ManagedCoding.TrustBoundary do
 
   defp independent_verifier(_attributes), do: {:error, :self_verification}
 
-  defp normalized_set(values) when is_list(values) and values != [] do
-    if Enum.all?(values, &is_binary/1), do: MapSet.new(values), else: :error
+  defp normalized_list(values) when is_list(values) and values != [] do
+    if Enum.all?(values, &is_binary/1), do: values |> Enum.uniq() |> Enum.sort(), else: :error
   end
 
-  defp normalized_set(_values), do: :error
+  defp normalized_list(_values), do: :error
 
   defp nested_key?(value, forbidden) when is_map(value) do
     Enum.any?(value, fn {key, nested} ->
       normalized = key |> to_string() |> String.downcase()
-      MapSet.member?(forbidden, normalized) or nested_key?(nested, forbidden)
+      normalized in forbidden or nested_key?(nested, forbidden)
     end)
   rescue
     _error -> true
