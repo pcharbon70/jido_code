@@ -36,21 +36,21 @@ Back to plan: [README](./README.md)
       - [x] 3.1.1.4 Subtask - Enforce legal transitions across preparing, awaiting model, awaiting tool, awaiting actor, assembling candidate, candidate ready, cancelling, completed, cancelled, and failed states.
       - [x] 3.1.1.5 Subtask - Reject unknown, stale, duplicate, cross-attempt, wrong-invocation, wrong-fence, and post-terminal actions without reopening or silently advancing the loop.
 
-  - [ ] 3.2 Section - Implement directives and result routing.
+  - [x] 3.2 Section - Implement directives and result routing.
 
     This section moves all external work out of strategy code and returns typed
     correlated results through the AgentServer boundary.
 
-    - [ ] 3.2.1 Task {#mcar-p03-directives} [repo: jido_code] [after: {#mcar-p03-strategy}] - Implement the managed coding directive executor and dispatcher.
+    - [x] 3.2.1 Task {#mcar-p03-directives} [repo: jido_code] [after: {#mcar-p03-strategy}] - Implement the managed coding directive executor and dispatcher.
 
       This task owns asynchronous effect execution, back-pressure, correlation,
       and safe result delivery while keeping strategy decisions pure.
 
-      - [ ] 3.2.1.1 Subtask - Define closed directive structs for context compilation, model dispatch, governed tool execution, actor clarification, candidate capture, runtime observation, and bounded continuation.
-      - [ ] 3.2.1.2 Subtask - Implement one supervised dispatcher with per-attempt queues, concurrency ceilings, deadlines, monitors, cancellation, and no unbounded mailbox growth.
-      - [ ] 3.2.1.3 Subtask - Correlate every directive and result by attempt, fence, strategy sequence, effect type, and invocation IRI and deliver only to the current runtime identity.
-      - [ ] 3.2.1.4 Subtask - Convert crashes, exits, timeouts, corrupt returns, missing adapters, and late completions into closed bounded result signals without leaking implementation errors.
-      - [ ] 3.2.1.5 Subtask - Prove directive executors call only Factory facades/ports, never Knowledge internals, raw adapters selected by the model, or the store.
+      - [x] 3.2.1.1 Subtask - Define closed directive structs for context compilation, model dispatch, governed tool execution, actor clarification, candidate capture, runtime observation, and bounded continuation.
+      - [x] 3.2.1.2 Subtask - Implement one supervised dispatcher with per-attempt queues, concurrency ceilings, deadlines, monitors, cancellation, and no unbounded mailbox growth.
+      - [x] 3.2.1.3 Subtask - Correlate every directive and result by attempt, fence, strategy sequence, effect type, and invocation IRI and deliver only to the current runtime identity.
+      - [x] 3.2.1.4 Subtask - Convert crashes, exits, timeouts, corrupt returns, missing adapters, and late completions into closed bounded result signals without leaking implementation errors.
+      - [x] 3.2.1.5 Subtask - Prove directive executors call only Factory facades/ports, never Knowledge internals, raw adapters selected by the model, or the store.
 
   - [ ] 3.3 Section - Connect exact context and model interactions.
 
