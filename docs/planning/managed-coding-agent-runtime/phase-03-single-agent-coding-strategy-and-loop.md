@@ -68,21 +68,21 @@ Back to plan: [README](./README.md)
       - [x] 3.3.1.4 Subtask - Commit invocation start before dispatch, use the sole ModelGateway with explicit credential release and no provider fallback, and record one bounded outcome before continuation.
       - [x] 3.3.1.5 Subtask - Recompile context after relevant source, workspace, policy, lease, capability, prompt, tool, memory partition, or erasure-generation changes rather than silently reusing stale context.
 
-  - [ ] 3.4 Section - Enforce loop budgets, steering, and terminal proposals.
+  - [x] 3.4 Section - Enforce loop budgets, steering, and terminal proposals.
 
     This section prevents a useful loop from becoming an unbounded autonomous
     process and keeps operator input inside the accepted interaction boundary.
 
-    - [ ] 3.4.1 Task {#mcar-p03-loop-control} [repo: jido_code] [after: {#mcar-p03-context-model}] - Implement bounded continuation and actor steering.
+    - [x] 3.4.1 Task {#mcar-p03-loop-control} [repo: jido_code] [after: {#mcar-p03-context-model}] - Implement bounded continuation and actor steering.
 
       This task makes every next turn an explicit policy decision and ensures
       terminal model text remains a proposal rather than an accepted outcome.
 
-      - [ ] 3.4.1.1 Subtask - Decrement and persist bounded observations for turns, model calls, tokens, tool calls, bytes, time, cost, changed files, diff size, checks, and clarification rounds at their enforcement points.
-      - [ ] 3.4.1.2 Subtask - Stop before the next effect when any hard or next-effect budget is exhausted and record which dimensions were unavailable or observed-only.
-      - [ ] 3.4.1.3 Subtask - Route clarification through an authenticated actor session with purpose, audience, expiry, size bounds, and no capability widening through response text.
-      - [ ] 3.4.1.4 Subtask - Support bounded operator steer, pause, resume, and cancellation only through graph-authorized interactions and current attempt/fence validation.
-      - [ ] 3.4.1.5 Subtask - Treat completion as a candidate proposal requiring deterministic candidate capture and later verification; reject model claims of test success, evidence sufficiency, acceptance, publication, or merge.
+      - [x] 3.4.1.1 Subtask - Decrement and persist bounded observations for turns, model calls, tokens, tool calls, bytes, time, cost, changed files, diff size, checks, and clarification rounds at their enforcement points.
+      - [x] 3.4.1.2 Subtask - Stop before the next effect when any hard or next-effect budget is exhausted and record which dimensions were unavailable or observed-only.
+      - [x] 3.4.1.3 Subtask - Route clarification through an authenticated actor session with purpose, audience, expiry, size bounds, and no capability widening through response text.
+      - [x] 3.4.1.4 Subtask - Support bounded operator steer, pause, resume, and cancellation only through graph-authorized interactions and current attempt/fence validation.
+      - [x] 3.4.1.5 Subtask - Treat completion as a candidate proposal requiring deterministic candidate capture and later verification; reject model claims of test success, evidence sufficiency, acceptance, publication, or merge.
 
   - [ ] 3.5 Section - Phase 3 Integration Tests.
 
