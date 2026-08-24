@@ -52,21 +52,21 @@ Back to plan: [README](./README.md)
       - [x] 3.2.1.4 Subtask - Convert crashes, exits, timeouts, corrupt returns, missing adapters, and late completions into closed bounded result signals without leaking implementation errors.
       - [x] 3.2.1.5 Subtask - Prove directive executors call only Factory facades/ports, never Knowledge internals, raw adapters selected by the model, or the store.
 
-  - [ ] 3.3 Section - Connect exact context and model interactions.
+  - [x] 3.3 Section - Connect exact context and model interactions.
 
     This section compiles the task's attributable input and treats every model
     turn as one separately governed interaction.
 
-    - [ ] 3.3.1 Task {#mcar-p03-context-model} [repo: jido_code] [after: {#mcar-p03-directives}] - Integrate `ContextCompiler`, memory packets, and `ModelGateway` with the strategy.
+    - [x] 3.3.1 Task {#mcar-p03-context-model} [repo: jido_code] [after: {#mcar-p03-directives}] - Integrate `ContextCompiler`, memory packets, and `ModelGateway` with the strategy.
 
       This task gives the agent useful context and structured model output
       without granting the provider control of the loop or tool plane.
 
-      - [ ] 3.3.1.1 Subtask - Build the first context manifest from exact task, policy, snapshot, graph, prompt, tool, profile, and authority revisions with deterministic ordering, budgets, omissions, and classifications.
-      - [ ] 3.3.1.2 Subtask - Append only separately authorized, temporally eligible, source-complete memory evidence packets as non-instructional context and preserve no-memory equivalence when disabled.
-      - [ ] 3.3.1.3 Subtask - Define a strict model response union for tool proposal, completion proposal, clarification, and abstention/failure with closed schemas and no legacy coercion or repair fallback.
-      - [ ] 3.3.1.4 Subtask - Commit invocation start before dispatch, use the sole ModelGateway with explicit credential release and no provider fallback, and record one bounded outcome before continuation.
-      - [ ] 3.3.1.5 Subtask - Recompile context after relevant source, workspace, policy, lease, capability, prompt, tool, memory partition, or erasure-generation changes rather than silently reusing stale context.
+      - [x] 3.3.1.1 Subtask - Build the first context manifest from exact task, policy, snapshot, graph, prompt, tool, profile, and authority revisions with deterministic ordering, budgets, omissions, and classifications.
+      - [x] 3.3.1.2 Subtask - Append only separately authorized, temporally eligible, source-complete memory evidence packets as non-instructional context and preserve no-memory equivalence when disabled.
+      - [x] 3.3.1.3 Subtask - Define a strict model response union for tool proposal, completion proposal, clarification, and abstention/failure with closed schemas and no legacy coercion or repair fallback.
+      - [x] 3.3.1.4 Subtask - Commit invocation start before dispatch, use the sole ModelGateway with explicit credential release and no provider fallback, and record one bounded outcome before continuation.
+      - [x] 3.3.1.5 Subtask - Recompile context after relevant source, workspace, policy, lease, capability, prompt, tool, memory partition, or erasure-generation changes rather than silently reusing stale context.
 
   - [ ] 3.4 Section - Enforce loop budgets, steering, and terminal proposals.
 

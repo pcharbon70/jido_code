@@ -62,9 +62,19 @@ defmodule JidoCode.Runtime.ManagedCoding.Transition do
          kind when is_atom(kind) <- params[:kind],
          true <- Vocabulary.valid?(:tool_result_kind, kind) do
       case kind do
-        :completed -> {:ok, advance(params, %{phase: :preparing, current_invocation_iri: nil})}
-        :cancelled -> {:ok, advance(params, cancelled())}
-        _other -> {:ok, advance(params, failed(:failure))}
+        :completed ->
+          {:ok,
+           advance(params, %{
+             phase: :preparing,
+             current_invocation_iri: nil,
+             pending_decision: %{}
+           })}
+
+        :cancelled ->
+          {:ok, advance(params, cancelled())}
+
+        _other ->
+          {:ok, advance(params, failed(:failure))}
       end
     else
       {:error, %AdapterError{} = error} -> {:error, error}
@@ -74,7 +84,12 @@ defmodule JidoCode.Runtime.ManagedCoding.Transition do
 
   defp transition(%AgentState{phase: :awaiting_actor} = state, :actor_response, params) do
     with :ok <- invocation(state, params) do
-      {:ok, advance(params, %{phase: :preparing, current_invocation_iri: nil})}
+      {:ok,
+       advance(params, %{
+         phase: :preparing,
+         current_invocation_iri: nil,
+         pending_decision: %{}
+       })}
     end
   end
 
@@ -128,7 +143,12 @@ defmodule JidoCode.Runtime.ManagedCoding.Transition do
 
   defp model_transition(:tool_proposal, params) do
     with invocation when is_binary(invocation) <- params[:next_invocation_iri] do
-      {:ok, advance(params, %{phase: :awaiting_tool, current_invocation_iri: invocation})}
+      {:ok,
+       advance(params, %{
+         phase: :awaiting_tool,
+         current_invocation_iri: invocation,
+         pending_decision: params[:decision] || %{}
+       })}
     else
       _invalid -> invalid(:managed_coding_model_tool_proposal)
     end
@@ -136,7 +156,12 @@ defmodule JidoCode.Runtime.ManagedCoding.Transition do
 
   defp model_transition(:clarification, params) do
     with invocation when is_binary(invocation) <- params[:next_invocation_iri] do
-      {:ok, advance(params, %{phase: :awaiting_actor, current_invocation_iri: invocation})}
+      {:ok,
+       advance(params, %{
+         phase: :awaiting_actor,
+         current_invocation_iri: invocation,
+         pending_decision: params[:decision] || %{}
+       })}
     else
       _invalid -> invalid(:managed_coding_model_clarification)
     end
@@ -144,7 +169,12 @@ defmodule JidoCode.Runtime.ManagedCoding.Transition do
 
   defp model_transition(:completion_proposal, params) do
     with invocation when is_binary(invocation) <- params[:next_invocation_iri] do
-      {:ok, advance(params, %{phase: :assembling_candidate, current_invocation_iri: invocation})}
+      {:ok,
+       advance(params, %{
+         phase: :assembling_candidate,
+         current_invocation_iri: invocation,
+         pending_decision: params[:decision] || %{}
+       })}
     else
       _invalid -> invalid(:managed_coding_model_completion)
     end

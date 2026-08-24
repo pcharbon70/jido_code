@@ -10,6 +10,7 @@ defmodule JidoCode.Runtime.ManagedCoding.Actions.ModelResultAction do
       sequence: [type: :pos_integer, required: true],
       invocation_iri: [type: :string, required: true],
       kind: [type: :atom, required: true],
+      decision: [type: :map, required: false],
       next_invocation_iri: [type: :string, required: false]
     ]
 

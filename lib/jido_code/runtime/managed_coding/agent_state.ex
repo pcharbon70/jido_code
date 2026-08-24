@@ -16,6 +16,7 @@ defmodule JidoCode.Runtime.ManagedCoding.AgentState do
     :model_digest,
     :current_invocation_iri,
     :budgets,
+    :pending_decision,
     :candidate_digests,
     :cancellation,
     :terminal_classification,
@@ -41,6 +42,7 @@ defmodule JidoCode.Runtime.ManagedCoding.AgentState do
          :ok <- optional_resource(attributes[:current_invocation_iri]),
          budgets when is_map(budgets) and map_size(budgets) <= 32 <- attributes[:budgets],
          true <- Enum.all?(budgets, &budget_entry?/1),
+         pending when is_map(pending) and map_size(pending) <= 32 <- attributes[:pending_decision],
          candidates when is_list(candidates) and length(candidates) <= 64 <-
            attributes[:candidate_digests],
          true <- Enum.all?(candidates, &digest?/1),
@@ -68,6 +70,7 @@ defmodule JidoCode.Runtime.ManagedCoding.AgentState do
           sequence: 0,
           current_invocation_iri: nil,
           budgets: %{},
+          pending_decision: %{},
           candidate_digests: [],
           cancellation: :not_requested,
           terminal_classification: nil,
