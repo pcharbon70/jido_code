@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_managed_coding_agent_runtime_phase_02
 parent_plan: plan.jido_code_managed_coding_agent_runtime
-status: planned
+status: completed
 intent: feature
 ---
 
@@ -14,7 +14,7 @@ invocation accounting before a model-driven loop may use them.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Implement the complete mediated tool plane for one disposable coding workspace.
+- [x] 2 Phase - Implement the complete mediated tool plane for one disposable coding workspace.
 
   This phase proves MCG2 by ensuring every coding effect has a concrete adapter,
   closed schema, current authorization, exact effect identity, bounded result,
@@ -100,7 +100,7 @@ Back to plan: [README](./README.md)
       - [x] 2.5.1.4 Subtask - Bound and classify diagnostics so paths, source content, secrets, backend errors, and sandbox internals cannot leak through graph events or model results.
       - [x] 2.5.1.5 Subtask - Add architecture checks proving managed runtime code reaches effects only through the Factory tool port and registered adapters.
 
-  - [ ] 2.6 Section - Phase 2 Integration Tests.
+  - [x] 2.6 Section - Phase 2 Integration Tests.
 
     This final section proves real source, filesystem, sandbox, check, and
     candidate effects under the complete mediation boundary.
@@ -115,7 +115,7 @@ Back to plan: [README](./README.md)
       - [x] 2.6.1.3 Subtask - Prove cancellation and cleanup remove or quarantine disposable state without losing the graph's ability to identify completed and unresolved effects.
       - [x] 2.6.1.4 Subtask - Rerun MCG1, harness tool/sandbox/security suites, architecture checks, Dialyzer, and `mix precommit`.
 
-    - [ ] 2.6.2 Task {#mcar-p02-phase-receipt} [repo: jido_code] [after: {#mcar-p02-integration}] - Publish and pin the Phase 2 receipt.
+    - [x] 2.6.2 Task {#mcar-p02-phase-receipt} [repo: jido_code] [after: {#mcar-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records MCG2 evidence in
       `docs/architecture/managed-coding-phase-02-receipt.md` and authorizes
@@ -124,4 +124,4 @@ Back to plan: [README](./README.md)
       - [x] 2.6.2.1 Subtask - Record workspace, adapter, tool catalog, registered check, sandbox, effect identity, and candidate schema revisions and digests.
       - [x] 2.6.2.2 Subtask - Attach real-worktree, mutation, check, candidate, race, cancellation, and cleanup evidence with known limitations.
       - [x] 2.6.2.3 Subtask - Keep MCG2 open while any enabled tool lacks a concrete adapter, any effect bypass exists, or any retry can duplicate a write.
-      - [ ] 2.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 3 and preserve every MCG1-MCG2 reopening condition.
+      - [x] 2.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 3 and preserve every MCG1-MCG2 reopening condition.
