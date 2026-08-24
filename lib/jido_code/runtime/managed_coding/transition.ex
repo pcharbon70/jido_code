@@ -20,7 +20,6 @@ defmodule JidoCode.Runtime.ManagedCoding.Transition do
     else
       true -> conflict(:managed_coding_post_terminal)
       {:error, %AdapterError{} = error} -> {:error, error}
-      _invalid -> conflict(:managed_coding_transition)
     end
   rescue
     _error -> invalid(:managed_coding_transition)

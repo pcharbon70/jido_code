@@ -28,9 +28,9 @@ defmodule JidoCode.Factory.ManagedCoding.ModelDecision do
 
   defp decision(%{"kind" => "tool_proposal", "tool" => tool} = value)
        when map_size(value) == 2 and is_map(tool) do
-    expected = MapSet.new(~w[name version arguments classification input_refs])
+    expected = Enum.sort(~w[name version arguments classification input_refs])
 
-    if MapSet.new(Map.keys(tool)) == expected and is_binary(tool["name"]) and
+    if Enum.sort(Map.keys(tool)) == expected and is_binary(tool["name"]) and
          is_binary(tool["version"]) and is_map(tool["arguments"]) and
          tool["classification"] in ~w[public internal confidential restricted] and
          is_list(tool["input_refs"]) do

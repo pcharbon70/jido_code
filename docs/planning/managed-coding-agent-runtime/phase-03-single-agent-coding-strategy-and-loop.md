@@ -89,15 +89,15 @@ Back to plan: [README](./README.md)
     This final section exercises the real Jido AgentServer, deterministic model
     fixtures, governed tools, and graph accounting as one loop.
 
-    - [ ] 3.5.1 Task {#mcar-p03-integration} [repo: jido_code] [after: {#mcar-p03-loop-control}] - Execute the single-agent loop matrix.
+    - [x] 3.5.1 Task {#mcar-p03-integration} [repo: jido_code] [after: {#mcar-p03-loop-control}] - Execute the single-agent loop matrix.
 
       This task closes MCG3 only when the agent can produce a bounded candidate
       proposal without bypassing host authority.
 
-      - [ ] 3.5.1.1 Subtask - Run inspect-only, edit, create/delete, registered-check, clarification, abstention, and candidate-completion fixtures through a real AgentServer and isolated workspace.
-      - [ ] 3.5.1.2 Subtask - Inject malformed model output, invalid tools, prompt injection, duplicate/late signals, stale context, budget exhaustion, provider timeout, adapter crash, and cancellation at every phase.
-      - [ ] 3.5.1.3 Subtask - Prove the strategy never calls Knowledge or effects directly, every external action has complete graph accounting, and terminal proposals have no verification/publication authority.
-      - [ ] 3.5.1.4 Subtask - Rerun MCG1-MCG2, complete harness/model/tool/memory suites, architecture checks, Dialyzer, and `mix precommit`.
+      - [x] 3.5.1.1 Subtask - Run inspect-only, edit, create/delete, registered-check, clarification, abstention, and candidate-completion fixtures through a real AgentServer and isolated workspace.
+      - [x] 3.5.1.2 Subtask - Inject malformed model output, invalid tools, prompt injection, duplicate/late signals, stale context, budget exhaustion, provider timeout, adapter crash, and cancellation at every phase.
+      - [x] 3.5.1.3 Subtask - Prove the strategy never calls Knowledge or effects directly, every external action has complete graph accounting, and terminal proposals have no verification/publication authority.
+      - [x] 3.5.1.4 Subtask - Rerun MCG1-MCG2, complete harness/model/tool/memory suites, architecture checks, Dialyzer, and `mix precommit`.
 
     - [ ] 3.5.2 Task {#mcar-p03-phase-receipt} [repo: jido_code] [after: {#mcar-p03-integration}] - Publish and pin the Phase 3 receipt.
 
@@ -105,7 +105,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/managed-coding-phase-03-receipt.md` and authorizes
       Phase 4 only from the pinned merged baseline.
 
-      - [ ] 3.5.2.1 Subtask - Record agent, strategy, action, directive, signal, dispatcher, context, prompt, model, tool, and budget revisions and digests.
-      - [ ] 3.5.2.2 Subtask - Attach loop, malformed-result, budget, steering, cancellation, and authority-separation evidence with known limitations.
-      - [ ] 3.5.2.3 Subtask - Keep MCG3 open if any model can choose an adapter/sink, any effect bypasses a directive, or any terminal claim gains authority.
+      - [x] 3.5.2.1 Subtask - Record agent, strategy, action, directive, signal, dispatcher, context, prompt, model, tool, and budget revisions and digests.
+      - [x] 3.5.2.2 Subtask - Attach loop, malformed-result, budget, steering, cancellation, and authority-separation evidence with known limitations.
+      - [x] 3.5.2.3 Subtask - Keep MCG3 open if any model can choose an adapter/sink, any effect bypasses a directive, or any terminal claim gains authority.
       - [ ] 3.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 4 and preserve every MCG1-MCG3 reopening condition.

@@ -22,7 +22,6 @@ defmodule JidoCode.Runtime.ManagedCoding.LoopControl do
     else
       {:stop, reason} -> {:stop, reason, budget}
       {:error, %AdapterError{} = error} -> {:error, error}
-      _invalid -> {:error, AdapterError.new(:invalid_input, :managed_coding_loop_control)}
     end
   end
 
@@ -31,6 +30,9 @@ defmodule JidoCode.Runtime.ManagedCoding.LoopControl do
 
   defp effect(%AgentState{phase: :preparing}, observation),
     do: {:ok, :context, observation, %{turns: 1}}
+
+  defp effect(%AgentState{phase: :awaiting_model}, observation),
+    do: {:ok, :model, observation, %{model_calls: 1}}
 
   defp effect(%AgentState{phase: :awaiting_tool, pending_decision: decision}, _observation),
     do: {:ok, :tool, decision, %{tool_calls: 1}}

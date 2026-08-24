@@ -102,7 +102,6 @@ defmodule JidoCode.Runtime.ManagedCoding.Dispatcher do
       end
     else
       {:error, %AdapterError{} = error} -> {:reply, {:error, error}, state}
-      _invalid -> {:reply, invalid(:managed_coding_dispatch), state}
     end
   end
 
@@ -310,7 +309,7 @@ defmodule JidoCode.Runtime.ManagedCoding.Dispatcher do
   defp envelope(_directive), do: invalid(:managed_coding_directive_type)
 
   defp handlers(handlers) when is_map(handlers) do
-    if MapSet.new(Map.keys(handlers)) == MapSet.new(@kinds) and
+    if Enum.sort(Map.keys(handlers)) == Enum.sort(@kinds) and
          Enum.all?(handlers, fn {_kind, value} -> handler?(value) end),
        do: :ok,
        else: :error
