@@ -771,6 +771,10 @@ defmodule JidoCode.Knowledge do
   def run_graph_identity(attempt_iri), do: ExecutionGraph.run_graph(attempt_iri)
 
   def validate_resource_identity(iri), do: ResourceIdentity.validate(iri)
+
+  def deterministic_resource_identity(kind, material),
+    do: ResourceIdentity.deterministic(kind, material)
+
   def validate_graph_identity(iri), do: GraphRegistry.identify(iri)
 
   def health, do: Readiness.snapshot()

@@ -16,7 +16,7 @@ defmodule JidoCode.Security.Redactor do
   @secret_patterns [
     ~r/-----BEGIN [A-Z ]*PRIVATE KEY-----/,
     ~r/\bBearer\s+[A-Za-z0-9._~+\/-]+=*\b/i,
-    ~r/\b(?:ghp|github_pat|sk|xox[baprs])-[_A-Za-z0-9-]{12,}\b/,
+    ~r/\b(?:ghp|github_pat|sk|xox[baprs])[-_][_A-Za-z0-9-]{12,}\b/,
     ~r|https?://[^/@\s:]+:[^/@\s]+@|,
     ~r{/(?:home|Users)/[^/\s]+/}
   ]
