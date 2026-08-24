@@ -20,53 +20,53 @@ Back to plan: [README](./README.md)
   closed schema, current authorization, exact effect identity, bounded result,
   and independently recoverable outcome.
 
-  - [ ] 2.1 Section - Establish the isolated workspace contract.
+  - [x] 2.1 Section - Establish the isolated workspace contract.
 
     This section creates the only filesystem boundary in which managed coding
     tools may operate.
 
-    - [ ] 2.1.1 Task {#mcar-p02-workspace} [repo: jido_code] [after: {#mcar-p01-phase-receipt}] - Implement managed coding workspace provisioning and identity.
+    - [x] 2.1.1 Task {#mcar-p02-workspace} [repo: jido_code] [after: {#mcar-p01-phase-receipt}] - Implement managed coding workspace provisioning and identity.
 
       This task binds one disposable workspace to an exact snapshot, attempt,
       lease, fence, sandbox profile, and cleanup policy.
 
-      - [ ] 2.1.1.1 Subtask - Provision a fresh isolated worktree from the exact verified source snapshot with no unrelated repository, Git credential, SSH agent, Docker socket, host home, or store access.
-      - [ ] 2.1.1.2 Subtask - Define canonical workspace, base-tree, current-tree, parent-directory, candidate-diff, and cleanup digests with deterministic normalization.
-      - [ ] 2.1.1.3 Subtask - Extend the repository path guard to reject absolute paths, traversal, symlink escapes, special files, case/Unicode ambiguity, and paths outside authorized scopes.
-      - [ ] 2.1.1.4 Subtask - Enforce file-count, byte, disk, process, memory, wall, idle, and changed-path ceilings at the sandbox boundary.
-      - [ ] 2.1.1.5 Subtask - Define cleanup, quarantine, hold, cancellation, crash, and candidate-retention behavior without making workspace survival part of recovery truth.
+      - [x] 2.1.1.1 Subtask - Provision a fresh isolated worktree from the exact verified source snapshot with no unrelated repository, Git credential, SSH agent, Docker socket, host home, or store access.
+      - [x] 2.1.1.2 Subtask - Define canonical workspace, base-tree, current-tree, parent-directory, candidate-diff, and cleanup digests with deterministic normalization.
+      - [x] 2.1.1.3 Subtask - Extend the repository path guard to reject absolute paths, traversal, symlink escapes, special files, case/Unicode ambiguity, and paths outside authorized scopes.
+      - [x] 2.1.1.4 Subtask - Enforce file-count, byte, disk, process, memory, wall, idle, and changed-path ceilings at the sandbox boundary.
+      - [x] 2.1.1.5 Subtask - Define cleanup, quarantine, hold, cancellation, crash, and candidate-retention behavior without making workspace survival part of recovery truth.
 
-  - [ ] 2.2 Section - Implement source discovery and exact reads.
+  - [x] 2.2 Section - Implement source discovery and exact reads.
 
     This section gives the runtime useful repository inspection without raw
     shell access or unbounded source disclosure.
 
-    - [ ] 2.2.1 Task {#mcar-p02-read-tools} [repo: jido_code] [after: {#mcar-p02-workspace}] - Implement closed source-search, symbol-inspection, and file-read adapters.
+    - [x] 2.2.1 Task {#mcar-p02-read-tools} [repo: jido_code] [after: {#mcar-p02-workspace}] - Implement closed source-search, symbol-inspection, and file-read adapters.
 
       This task makes every read revision-pinned, scope-safe, attributable, and
       bounded before it reaches model context.
 
-      - [ ] 2.2.1.1 Subtask - Implement `search_source` over the accepted source index with exact repository/snapshot scope, deterministic ranking, result count, byte limits, omissions, and no arbitrary SPARQL.
-      - [ ] 2.2.1.2 Subtask - Implement `inspect_symbol` from reviewed source queries with exact analysis revision, uncertainty, source spans, truncation, and current-snapshot validation.
-      - [ ] 2.2.1.3 Subtask - Implement `read_file` with canonical path, expected digest, byte/range bounds, binary/encoding classification, content policy, and explicit unavailable/truncated outcomes.
-      - [ ] 2.2.1.4 Subtask - Treat repository text and tool output as untrusted data, apply secret and forbidden-content scanning, and prevent returned content from altering tool schemas or authority metadata.
-      - [ ] 2.2.1.5 Subtask - Add deterministic pagination or continuation handles that cannot widen repository, path, classification, snapshot, or actor scope.
+      - [x] 2.2.1.1 Subtask - Implement `search_source` over the accepted source index with exact repository/snapshot scope, deterministic ranking, result count, byte limits, omissions, and no arbitrary SPARQL.
+      - [x] 2.2.1.2 Subtask - Implement `inspect_symbol` from reviewed source queries with exact analysis revision, uncertainty, source spans, truncation, and current-snapshot validation.
+      - [x] 2.2.1.3 Subtask - Implement `read_file` with canonical path, expected digest, byte/range bounds, binary/encoding classification, content policy, and explicit unavailable/truncated outcomes.
+      - [x] 2.2.1.4 Subtask - Treat repository text and tool output as untrusted data, apply secret and forbidden-content scanning, and prevent returned content from altering tool schemas or authority metadata.
+      - [x] 2.2.1.5 Subtask - Add deterministic pagination or continuation handles that cannot widen repository, path, classification, snapshot, or actor scope.
 
-  - [ ] 2.3 Section - Implement digest-guarded workspace mutation.
+  - [x] 2.3 Section - Implement digest-guarded workspace mutation.
 
     This section provides the minimal write tools needed for coding while
     rejecting ambiguous or stale edits.
 
-    - [ ] 2.3.1 Task {#mcar-p02-write-tools} [repo: jido_code] [after: {#mcar-p02-read-tools}] - Implement apply, create, and delete adapters.
+    - [x] 2.3.1 Task {#mcar-p02-write-tools} [repo: jido_code] [after: {#mcar-p02-read-tools}] - Implement apply, create, and delete adapters.
 
       This task makes every file mutation explicit, reversible where possible,
       and protected by snapshot, digest, path, capability, and fence checks.
 
-      - [ ] 2.3.1.1 Subtask - Implement `apply_edit` as one exact-match replacement with expected file digest, expected match count of one, encoding preservation, output-size checks, and a new digest receipt.
-      - [ ] 2.3.1.2 Subtask - Implement `create_file` with target-absent, parent-authorized, expected parent digest, classification, byte, path, and file-mode constraints and no overwrite fallback.
-      - [ ] 2.3.1.3 Subtask - Implement `delete_file` with exact target digest, allowed-file-type checks, protected-path denial, and a recoverable candidate-diff record.
-      - [ ] 2.3.1.4 Subtask - Revalidate lease, fence, workspace identity, current digest, capability, and policy immediately before each filesystem effect and reject late or raced operations.
-      - [ ] 2.3.1.5 Subtask - Assign deterministic effect identities and reconcile filesystem state before retry so a timeout or process loss cannot double-apply a mutation.
+      - [x] 2.3.1.1 Subtask - Implement `apply_edit` as one exact-match replacement with expected file digest, expected match count of one, encoding preservation, output-size checks, and a new digest receipt.
+      - [x] 2.3.1.2 Subtask - Implement `create_file` with target-absent, parent-authorized, expected parent digest, classification, byte, path, and file-mode constraints and no overwrite fallback.
+      - [x] 2.3.1.3 Subtask - Implement `delete_file` with exact target digest, allowed-file-type checks, protected-path denial, and a recoverable candidate-diff record.
+      - [x] 2.3.1.4 Subtask - Revalidate lease, fence, workspace identity, current digest, capability, and policy immediately before each filesystem effect and reject late or raced operations.
+      - [x] 2.3.1.5 Subtask - Assign deterministic effect identities and reconcile filesystem state before retry so a timeout or process loss cannot double-apply a mutation.
 
   - [ ] 2.4 Section - Implement registered checks and candidate artifacts.
 
