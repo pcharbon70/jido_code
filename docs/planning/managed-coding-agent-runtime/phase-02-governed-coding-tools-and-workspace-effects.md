@@ -84,21 +84,21 @@ Back to plan: [README](./README.md)
       - [x] 2.4.1.4 Subtask - Implement candidate capture with immutable patch/artifact digest, base snapshot, changed paths, file modes, submodule state, workspace digest, toolchain/profile revisions, and no publication side effect.
       - [x] 2.4.1.5 Subtask - Keep governed commands, network effects, candidate publication, protected-branch writes, and merge outside the ordinary coder tool capability.
 
-  - [ ] 2.5 Section - Wire complete mediation and effect accounting.
+  - [x] 2.5 Section - Wire complete mediation and effect accounting.
 
     This section connects every adapter to the reference monitor, tool ledger,
     semantic commands, and late-result guards.
 
-    - [ ] 2.5.1 Task {#mcar-p02-tool-gateway} [repo: jido_code] [after: {#mcar-p02-check-candidate-tools}] - Integrate production adapters through `ToolGateway`.
+    - [x] 2.5.1 Task {#mcar-p02-tool-gateway} [repo: jido_code] [after: {#mcar-p02-check-candidate-tools}] - Integrate production adapters through `ToolGateway`.
 
       This task eliminates catalog-only tools and proves no managed effect can
       bypass invocation-before-effect accounting.
 
-      - [ ] 2.5.1.1 Subtask - Register each adapter module and digest against exactly one tool definition revision and fail closed on missing, substituted, or multiply registered adapters.
-      - [ ] 2.5.1.2 Subtask - Commit tool proposal and invocation start before effect dispatch, recover ambiguous command commits, and record exactly one bounded terminal outcome afterward.
-      - [ ] 2.5.1.3 Subtask - Revalidate policy and claim the effect sink at the linearization point, returning replay receipts for already completed identities and denying stale fences.
-      - [ ] 2.5.1.4 Subtask - Bound and classify diagnostics so paths, source content, secrets, backend errors, and sandbox internals cannot leak through graph events or model results.
-      - [ ] 2.5.1.5 Subtask - Add architecture checks proving managed runtime code reaches effects only through the Factory tool port and registered adapters.
+      - [x] 2.5.1.1 Subtask - Register each adapter module and digest against exactly one tool definition revision and fail closed on missing, substituted, or multiply registered adapters.
+      - [x] 2.5.1.2 Subtask - Commit tool proposal and invocation start before effect dispatch, recover ambiguous command commits, and record exactly one bounded terminal outcome afterward.
+      - [x] 2.5.1.3 Subtask - Revalidate policy and claim the effect sink at the linearization point, returning replay receipts for already completed identities and denying stale fences.
+      - [x] 2.5.1.4 Subtask - Bound and classify diagnostics so paths, source content, secrets, backend errors, and sandbox internals cannot leak through graph events or model results.
+      - [x] 2.5.1.5 Subtask - Add architecture checks proving managed runtime code reaches effects only through the Factory tool port and registered adapters.
 
   - [ ] 2.6 Section - Phase 2 Integration Tests.
 

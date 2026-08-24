@@ -3,7 +3,6 @@ defmodule JidoCode.Factory.ManagedCoding.WorkspaceSpec do
 
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Knowledge
-  alias JidoCode.Knowledge.ResourceIdentity
 
   @enforce_keys [
     :iri,
@@ -39,7 +38,7 @@ defmodule JidoCode.Factory.ManagedCoding.WorkspaceSpec do
          {:ok, paths} <- paths(attributes[:allowed_paths]),
          {:ok, limits} <- limits(attributes[:limits]),
          {:ok, iri} <-
-           ResourceIdentity.deterministic(
+           Knowledge.deterministic_resource_identity(
              :sandbox_instance,
              Enum.join(
                [

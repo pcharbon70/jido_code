@@ -60,6 +60,22 @@ defmodule JidoCode.Architecture.CheckerTest do
     assert Enum.count(violations, &(&1.rule == :dependency_direction)) == 4
   end
 
+  test "managed runtime effects cannot bypass Factory ports" do
+    assert {:error, violations} =
+             Checker.check_sources([
+               {"lib/jido_code/runtime/managed_coding/bypass.ex",
+                "defmodule JidoCode.Runtime.ManagedCoding.Bypass do\n  alias JidoCode.Integrations.ManagedCodingMutationTools\n  def write(request, args), do: ManagedCodingMutationTools.create_file(request, args, [])\nend"}
+             ])
+
+    assert Enum.any?(violations, &(&1.rule == :dependency_direction))
+
+    assert {:ok, []} =
+             Checker.check_sources([
+               {"lib/jido_code/runtime/managed_coding/mediated.ex",
+                "defmodule JidoCode.Runtime.ManagedCoding.Mediated do\n  alias JidoCode.Factory.ToolGateway\n  def execute(proposal, capability, current, options), do: ToolGateway.execute(proposal, capability, current, options)\nend"}
+             ])
+  end
+
   test "keeps Jido internals inside the runtime namespace" do
     sources = [
       {"lib/jido_code/knowledge/runtime_leak.ex",

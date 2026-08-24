@@ -28,7 +28,7 @@ defmodule JidoCode.Factory.Tool.Catalog do
         effect_class: :read,
         preconditions: [:scope_current, :source_revision_current],
         max_output_bytes: 65_536,
-        adapter_identity: "JidoCode.Factory.Tools.SearchSource/1"
+        adapter_identity: "Elixir.JidoCode.Integrations.ManagedCodingAdapters.SearchSource/1"
       ),
       definition(
         "inspect_symbol",
@@ -43,7 +43,7 @@ defmodule JidoCode.Factory.Tool.Catalog do
         effect_class: :read,
         preconditions: [:source_revision_current],
         max_output_bytes: 65_536,
-        adapter_identity: "JidoCode.Factory.Tools.InspectSymbol/1"
+        adapter_identity: "Elixir.JidoCode.Integrations.ManagedCodingAdapters.InspectSymbol/1"
       ),
       definition(
         "read_file",
@@ -58,7 +58,7 @@ defmodule JidoCode.Factory.Tool.Catalog do
         effect_class: :read,
         preconditions: [:snapshot_current, :path_authorized, :digest_current],
         max_output_bytes: 262_144,
-        adapter_identity: "JidoCode.Factory.Tools.ReadFile/1"
+        adapter_identity: "Elixir.JidoCode.Integrations.ManagedCodingAdapters.ReadFile/1"
       ),
       definition(
         "apply_edit",
@@ -77,7 +77,7 @@ defmodule JidoCode.Factory.Tool.Catalog do
         side_effects: [:workspace_mutation],
         reversibility: :reversible,
         idempotency_policy: :required,
-        adapter_identity: "JidoCode.Factory.Tools.ApplyEdit/1"
+        adapter_identity: "Elixir.JidoCode.Integrations.ManagedCodingAdapters.ApplyEdit/1"
       ),
       definition(
         "create_file",
@@ -95,7 +95,7 @@ defmodule JidoCode.Factory.Tool.Catalog do
         reversibility: :reversible,
         idempotency_policy: :required,
         max_output_bytes: 32_768,
-        adapter_identity: "JidoCode.Factory.Tools.CreateFile/1"
+        adapter_identity: "Elixir.JidoCode.Integrations.ManagedCodingAdapters.CreateFile/1"
       ),
       definition(
         "delete_file",
@@ -109,7 +109,7 @@ defmodule JidoCode.Factory.Tool.Catalog do
         reversibility: :reversible,
         idempotency_policy: :required,
         max_output_bytes: 32_768,
-        adapter_identity: "JidoCode.Factory.Tools.DeleteFile/1"
+        adapter_identity: "Elixir.JidoCode.Integrations.ManagedCodingAdapters.DeleteFile/1"
       ),
       definition(
         "run_registered_check",
@@ -125,7 +125,8 @@ defmodule JidoCode.Factory.Tool.Catalog do
         idempotency_policy: :required,
         timeout_ms: 300_000,
         max_output_bytes: 131_072,
-        adapter_identity: "JidoCode.Factory.Tools.RegisteredCheck/1"
+        adapter_identity:
+          "Elixir.JidoCode.Integrations.ManagedCodingAdapters.RunRegisteredCheck/1"
       ),
       definition(
         "run_governed_command",
@@ -152,7 +153,7 @@ defmodule JidoCode.Factory.Tool.Catalog do
         effect_class: :read,
         preconditions: [:snapshot_current],
         max_output_bytes: 262_144,
-        adapter_identity: "JidoCode.Factory.Tools.ShowCandidateDiff/1"
+        adapter_identity: "Elixir.JidoCode.Integrations.ManagedCodingAdapters.ShowCandidateDiff/1"
       ),
       definition(
         "submit_candidate",

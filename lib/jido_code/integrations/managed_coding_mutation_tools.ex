@@ -1,6 +1,11 @@
 defmodule JidoCode.Integrations.ManagedCodingMutationTools do
   @moduledoc "Concrete digest-, scope-, authority-, and fence-guarded file mutations."
 
+  @architecture_file_role :external_worktree
+
+  @spec architecture_file_role() :: :external_worktree
+  def architecture_file_role, do: @architecture_file_role
+
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Factory.ManagedCoding.MutationRequest
   alias JidoCode.Factory.ManagedCoding.WorkspaceDigest
