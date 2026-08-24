@@ -20,21 +20,21 @@ Back to plan: [README](./README.md)
   allowing the agent strategy to call graph internals, effects, or providers
   directly.
 
-  - [ ] 3.1 Section - Implement agent state and the coding strategy.
+  - [x] 3.1 Section - Implement agent state and the coding strategy.
 
     This section gives the runtime an explicit, inspectable behavioral state
     machine rather than an effectful recursive loop.
 
-    - [ ] 3.1.1 Task {#mcar-p03-strategy} [repo: jido_code] [after: {#mcar-p02-phase-receipt}] - Implement `ManagedCodingAgent` and `ManagedCodingStrategy`.
+    - [x] 3.1.1 Task {#mcar-p03-strategy} [repo: jido_code] [after: {#mcar-p02-phase-receipt}] - Implement `ManagedCodingAgent` and `ManagedCodingStrategy`.
 
       This task defines the pure state transitions that select the next bounded
       effect or terminal proposal.
 
-      - [ ] 3.1.1.1 Subtask - Define validated agent state for attempt/fence identity, phase, sequence, exact profile/context/tool/model digests, current invocation references, budgets, candidate digests, cancellation, terminal classification, and reconstruction watermark.
-      - [ ] 3.1.1.2 Subtask - Implement strategy initialization, action specifications, command handling, continuation ticks, stable snapshots, and closed signal routes.
-      - [ ] 3.1.1.3 Subtask - Implement pure actions for begin, context result, model result, tool result, actor response, candidate result, cancellation, budget exhaustion, and recovery.
-      - [ ] 3.1.1.4 Subtask - Enforce legal transitions across preparing, awaiting model, awaiting tool, awaiting actor, assembling candidate, candidate ready, cancelling, completed, cancelled, and failed states.
-      - [ ] 3.1.1.5 Subtask - Reject unknown, stale, duplicate, cross-attempt, wrong-invocation, wrong-fence, and post-terminal actions without reopening or silently advancing the loop.
+      - [x] 3.1.1.1 Subtask - Define validated agent state for attempt/fence identity, phase, sequence, exact profile/context/tool/model digests, current invocation references, budgets, candidate digests, cancellation, terminal classification, and reconstruction watermark.
+      - [x] 3.1.1.2 Subtask - Implement strategy initialization, action specifications, command handling, continuation ticks, stable snapshots, and closed signal routes.
+      - [x] 3.1.1.3 Subtask - Implement pure actions for begin, context result, model result, tool result, actor response, candidate result, cancellation, budget exhaustion, and recovery.
+      - [x] 3.1.1.4 Subtask - Enforce legal transitions across preparing, awaiting model, awaiting tool, awaiting actor, assembling candidate, candidate ready, cancelling, completed, cancelled, and failed states.
+      - [x] 3.1.1.5 Subtask - Reject unknown, stale, duplicate, cross-attempt, wrong-invocation, wrong-fence, and post-terminal actions without reopening or silently advancing the loop.
 
   - [ ] 3.2 Section - Implement directives and result routing.
 
