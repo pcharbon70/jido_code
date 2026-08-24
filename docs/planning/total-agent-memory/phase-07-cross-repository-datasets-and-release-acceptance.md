@@ -14,7 +14,7 @@ plan.
 
 Back to plan: [README](./README.md)
 
-- [ ] 7 Phase - Produce governed cross-repository evidence and datasets without broadening memory authority or leaking future data.
+- [x] 7 Phase - Produce governed cross-repository evidence and datasets without broadening memory authority or leaking future data.
 
   This phase satisfies MG7 by proving that cohort analysis, dataset
   construction, export, evaluation, revocation, and erasure remain
@@ -94,7 +94,7 @@ Back to plan: [README](./README.md)
       - [x] 7.4.1.5 Subtask - Require zero cross-scope leaks, secret leaks, accounting drift, missing sources, temporal violations, permit bypasses, stale-claim acceptance, erasure failures, and future-patch leakage.
       - [x] 7.4.1.6 Subtask - Require statistically supported benefit for at least one launch memory product, no critical false acceptance, and an immediate disable path for each launched product.
 
-  - [ ] 7.5 Section - Phase 7 Integration Tests.
+  - [x] 7.5 Section - Phase 7 Integration Tests.
 
     This final section exercises the full governed-memory and dataset path
     across authorization, time, lifecycle, export, restoration, and release
@@ -113,7 +113,7 @@ Back to plan: [README](./README.md)
       - [x] 7.5.1.5 Subtask - Prove diagnostic and project profiles, adapter-specific memory, broad cohort access, automatic export, model training, and deployment remain disabled by default.
       - [x] 7.5.1.6 Subtask - Run the full memory evaluation suite, all prior phase integration suites, architecture checks, and `mix precommit` from a clean checkout.
 
-    - [ ] 7.5.2 Task {#tam-p07-phase-receipt} [repo: jido_code] [after: {#tam-p07-integration}] - Publish and pin the Phase 7 receipt.
+    - [x] 7.5.2 Task {#tam-p07-phase-receipt} [repo: jido_code] [after: {#tam-p07-integration}] - Publish and pin the Phase 7 receipt.
 
       This task records the final governed-memory evidence and closes the plan
       only after the implementation pull request passes clean-checkout CI and
@@ -122,4 +122,4 @@ Back to plan: [README](./README.md)
       - [x] 7.5.2.1 Subtask - Create `docs/architecture/memory-phase-07-receipt.md` with all contract, policy, query, extractor, dataset, export, and evaluation revisions.
       - [x] 7.5.2.2 Subtask - Attach authorization-isolation, temporal-leakage, lifecycle, erasure, export, evaluation, and clean-checkout evidence.
       - [x] 7.5.2.3 Subtask - Keep MG7 open if any unauthorized influence, future evidence, forbidden content, lineage gap, lifecycle failure, critical false acceptance, or required metric failure remains.
-      - [ ] 7.5.2.4 Subtask - Pin the merged candidate commit, close the total-agent-memory plan, and preserve every MG1-MG7 reopening condition.
+      - [x] 7.5.2.4 Subtask - Pin the merged candidate commit, close the total-agent-memory plan, and preserve every MG1-MG7 reopening condition.
