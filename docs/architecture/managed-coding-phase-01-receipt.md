@@ -2,10 +2,11 @@
 
 ## Status
 
-This receipt records the Phase 1 implementation candidate verified locally on
-2026-08-24. MCG1 remains **merge-pending** until the implementation pull
-request passes clean-checkout CI, merges, and this receipt pins the full merge
-commit SHA and merge date. Phase 2 is not authorized from this branch.
+This receipt records the Phase 1 implementation candidate verified locally and
+accepted after pull request merge on 2026-08-24. The implementation pull
+request passed clean-checkout CI and merged as
+`92d32f55a5afb5c59099a08fe4da762653dafdc3`; MCG1 is accepted at that merged
+candidate and Phase 2 is authorized from this pinned baseline.
 
 The candidate establishes the managed coding ownership contract, immutable
 profile and budget contracts, additive ontology and semantic-command protocol,
@@ -24,7 +25,7 @@ merge.
 | Section 1.3 | `c13193d2d7e27e9a6e741c8b2abc05ca281c7935` - add graph protocol and ontology 1.3.0 |
 | Section 1.4 | `eae82ae43b0bf778dda19a62fcb7a2e35e0ff025` - pin Jido and threat conformance |
 | Section 1.5 | This receipt, integration fixture, and final gate fixes; exact commit recorded by Git history |
-| Merged candidate | **Pending** |
+| Merged candidate | `92d32f55a5afb5c59099a08fe4da762653dafdc3` - merged 2026-08-24 |
 
 ## Contract Pins
 
@@ -97,7 +98,7 @@ are superseded rather than reinterpreted.
 | Real isolated graph integration | 2 tests, 0 failures |
 | Dialyzer | Passed; zero unignored candidate warnings |
 | `mix precommit` | 754 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | Pending |
+| Clean-checkout CI | Passed on PR #62; verify and Dialyzer succeeded |
 
 ## Known Limits And Disabled Posture
 
@@ -113,11 +114,11 @@ are superseded rather than reinterpreted.
 
 ## Gate MCG1
 
-Status: **merge-pending**.
+Status: **accepted at merged candidate**
 
-MCG1 may be accepted only at the merged candidate after clean-checkout CI and
-the final full merge-commit SHA are recorded here. Phase 2 remains unauthorized
-until that pin exists.
+MCG1 is accepted at merged candidate
+`92d32f55a5afb5c59099a08fe4da762653dafdc3` after clean-checkout CI and merge
+on 2026-08-24. Phase 2 is authorized only from this exact pinned baseline.
 
 MCG1 reopens regardless of checklist state if any runtime field has ambiguous
 ownership; any profile can widen authority or omit a required enforceable
