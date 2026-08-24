@@ -68,21 +68,21 @@ Back to plan: [README](./README.md)
       - [x] 2.3.1.4 Subtask - Revalidate lease, fence, workspace identity, current digest, capability, and policy immediately before each filesystem effect and reject late or raced operations.
       - [x] 2.3.1.5 Subtask - Assign deterministic effect identities and reconcile filesystem state before retry so a timeout or process loss cannot double-apply a mutation.
 
-  - [ ] 2.4 Section - Implement registered checks and candidate artifacts.
+  - [x] 2.4 Section - Implement registered checks and candidate artifacts.
 
     This section lets the runtime test and package work without arbitrary
     commands or publication authority.
 
-    - [ ] 2.4.1 Task {#mcar-p02-check-candidate-tools} [repo: jido_code] [after: {#mcar-p02-write-tools}] - Implement check, diff, and candidate-capture adapters.
+    - [x] 2.4.1 Task {#mcar-p02-check-candidate-tools} [repo: jido_code] [after: {#mcar-p02-write-tools}] - Implement check, diff, and candidate-capture adapters.
 
       This task turns workspace results into bounded observations and immutable
       candidate artifacts suitable for independent verification.
 
-      - [ ] 2.4.1.1 Subtask - Implement `run_registered_check` from a server-owned catalog with fixed executable/arguments, image/toolchain digest, cwd, environment, egress, timeout, output, resource, and retry policy.
-      - [ ] 2.4.1.2 Subtask - Classify check success, failure, timeout, cancellation, infrastructure failure, flake suspicion, truncation, and unavailable evidence without letting the agent relabel outcomes.
-      - [ ] 2.4.1.3 Subtask - Implement `show_candidate_diff` with stable ordering, binary/large-file summaries, secret scanning, byte limits, exact base/current digests, and explicit omissions.
-      - [ ] 2.4.1.4 Subtask - Implement candidate capture with immutable patch/artifact digest, base snapshot, changed paths, file modes, submodule state, workspace digest, toolchain/profile revisions, and no publication side effect.
-      - [ ] 2.4.1.5 Subtask - Keep governed commands, network effects, candidate publication, protected-branch writes, and merge outside the ordinary coder tool capability.
+      - [x] 2.4.1.1 Subtask - Implement `run_registered_check` from a server-owned catalog with fixed executable/arguments, image/toolchain digest, cwd, environment, egress, timeout, output, resource, and retry policy.
+      - [x] 2.4.1.2 Subtask - Classify check success, failure, timeout, cancellation, infrastructure failure, flake suspicion, truncation, and unavailable evidence without letting the agent relabel outcomes.
+      - [x] 2.4.1.3 Subtask - Implement `show_candidate_diff` with stable ordering, binary/large-file summaries, secret scanning, byte limits, exact base/current digests, and explicit omissions.
+      - [x] 2.4.1.4 Subtask - Implement candidate capture with immutable patch/artifact digest, base snapshot, changed paths, file modes, submodule state, workspace digest, toolchain/profile revisions, and no publication side effect.
+      - [x] 2.4.1.5 Subtask - Keep governed commands, network effects, candidate publication, protected-branch writes, and merge outside the ordinary coder tool capability.
 
   - [ ] 2.5 Section - Wire complete mediation and effect accounting.
 

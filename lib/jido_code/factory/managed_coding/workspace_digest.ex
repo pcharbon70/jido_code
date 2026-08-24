@@ -38,7 +38,10 @@ defmodule JidoCode.Factory.ManagedCoding.WorkspaceDigest do
     root
     |> Path.join("**/*")
     |> Path.wildcard(match_dot: true)
-    |> Enum.reject(&(Path.relative_to(&1, root) == ".git"))
+    |> Enum.reject(fn path ->
+      relative = Path.relative_to(path, root)
+      relative == ".git" or String.starts_with?(relative, ".git/")
+    end)
     |> Enum.reduce_while({:ok, []}, fn path, {:ok, files} ->
       case File.lstat(path) do
         {:ok, %File.Stat{type: :regular}} -> {:cont, {:ok, [path | files]}}
