@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_managed_coding_agent_runtime_phase_01
 parent_plan: plan.jido_code_managed_coding_agent_runtime
-status: active
+status: completed
 intent: feature
 ---
 
@@ -14,7 +14,7 @@ protocol, graph accounting, Jido compatibility baseline, and threat fixtures.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Establish a graph-authorized coding-runtime contract before enabling coding effects.
+- [x] 1 Phase - Establish a graph-authorized coding-runtime contract before enabling coding effects.
 
   This phase proves MCG1 by giving every runtime state, transition, effect, and
   recovery input exactly one owner and by preventing Jido or pod state from
@@ -84,7 +84,7 @@ Back to plan: [README](./README.md)
       - [x] 1.4.1.4 Subtask - Add fixtures for repository prompt injection, tool-argument smuggling, capability drift, stale fences, context substitution, secret exposure, budget exhaustion, and self-verification attempts.
       - [x] 1.4.1.5 Subtask - Record Jido `2.3.2` compatibility gaps and require explicit evidence before consuming behavior introduced by later Jido patch releases.
 
-  - [ ] 1.5 Section - Phase 1 Integration Tests.
+  - [x] 1.5 Section - Phase 1 Integration Tests.
 
     This final section proves the contract, graph protocol, Jido semantics, and
     disabled posture against a real isolated dataset.
@@ -99,7 +99,7 @@ Back to plan: [README](./README.md)
       - [x] 1.5.1.3 Subtask - Destroy the Jido runtime during every non-effecting phase and prove graph projections yield one deterministic recovery classification.
       - [x] 1.5.1.4 Subtask - Run the threat fixtures, prior factory/harness/memory suites, architecture checks, Dialyzer, and `mix precommit`.
 
-    - [ ] 1.5.2 Task {#mcar-p01-phase-receipt} [repo: jido_code] [after: {#mcar-p01-integration}] - Publish and pin the Phase 1 receipt.
+    - [x] 1.5.2 Task {#mcar-p01-phase-receipt} [repo: jido_code] [after: {#mcar-p01-integration}] - Publish and pin the Phase 1 receipt.
 
       This task records MCG1 evidence in
       `docs/architecture/managed-coding-phase-01-receipt.md` and authorizes
@@ -108,4 +108,4 @@ Back to plan: [README](./README.md)
       - [x] 1.5.2.1 Subtask - Record accepted runtime, profile, graph, command, shape, Jido, strategy, and threat-fixture revisions and digests.
       - [x] 1.5.2.2 Subtask - Attach contract, compatibility, restart, denial, and disabled-posture evidence with known limitations.
       - [x] 1.5.2.3 Subtask - Keep MCG1 open if any runtime field has ambiguous ownership, any profile can widen authority, or any Jido state becomes required truth.
-      - [ ] 1.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 2 and preserve every MCG1 reopening condition.
+      - [x] 1.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 2 and preserve every MCG1 reopening condition.
