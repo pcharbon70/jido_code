@@ -66,6 +66,9 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     relatedEvent acceptedGraph captureProfile captureOutcome contentRepresentation storageLocation
     availabilityState retentionState holdState contentClassification reconstructionStatus
     externalProviderAvailability captureCompleteness
+    managedCodingProfile usesCodingStrategyRevision modelAccessProfile boundActor boundTenant
+    boundRepository boundCapability runtimePhase terminalClassification candidate
+    clarificationSession handoffState
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i
@@ -650,6 +653,129 @@ defmodule JidoCode.Knowledge.Validation.Validator do
           cardinality(index, subject, @jf <> local, 1, 1, "HarnessProfileShape", graph) ++
             datatype(index, subject, @jf <> local, RDF.XSD.String, "HarnessProfileShape", graph)
         end
+      )
+  end
+
+  defp shape_issues(@jf <> "ManagedCodingProfile", subject, index, graph) do
+    string_predicates = ~w[
+      profileDigest jidoVersion strategyRevisionDigest promptBundleRevision
+      contextPolicyRevision memoryPolicyRevision toolCatalogRevision adapterSetRevision
+      sandboxProfileRevision verifierProfileRevision candidateSchemaRevision budgetContract
+    ]
+
+    cardinality(
+      index,
+      subject,
+      @jf <> "profileRevision",
+      1,
+      1,
+      "ManagedCodingProfileShape",
+      graph
+    ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "profileRevision",
+        RDF.XSD.NonNegativeInteger,
+        "ManagedCodingProfileShape",
+        graph
+      ) ++
+      Enum.flat_map(string_predicates, fn local ->
+        cardinality(index, subject, @jf <> local, 1, 1, "ManagedCodingProfileShape", graph) ++
+          datatype(
+            index,
+            subject,
+            @jf <> local,
+            RDF.XSD.String,
+            "ManagedCodingProfileShape",
+            graph
+          )
+      end) ++
+      Enum.flat_map(
+        ~w[modelAccessProfile usesCodingStrategyRevision boundActor boundTenant boundRepository boundCapability],
+        fn local ->
+          cardinality(index, subject, @jf <> local, 1, nil, "ManagedCodingProfileShape", graph) ++
+            node_kind(index, subject, @jf <> local, :iri, "ManagedCodingProfileShape", graph)
+        end
+      )
+  end
+
+  defp shape_issues(class, subject, index, graph)
+       when class in [
+              @jf <> "CodingRuntimeObservation",
+              @jf <> "CodingBudgetSnapshot",
+              @jf <> "CandidateCompletionProposal",
+              @jf <> "CodingClarification",
+              @jf <> "CandidateHandoff"
+            ] do
+    iri_predicates = ~w[attempts validFor managedCodingProfile runtimePhase]
+    string_predicates = ~w[strategyRevisionDigest reconstructionWatermark]
+
+    Enum.flat_map(iri_predicates, fn local ->
+      cardinality(index, subject, @jf <> local, 1, 1, "ManagedCodingObservationShape", graph) ++
+        node_kind(index, subject, @jf <> local, :iri, "ManagedCodingObservationShape", graph)
+    end) ++
+      Enum.flat_map(string_predicates, fn local ->
+        cardinality(index, subject, @jf <> local, 1, 1, "ManagedCodingObservationShape", graph) ++
+          datatype(
+            index,
+            subject,
+            @jf <> local,
+            RDF.XSD.String,
+            "ManagedCodingObservationShape",
+            graph
+          )
+      end) ++
+      cardinality(
+        index,
+        subject,
+        @jf <> "fencingToken",
+        1,
+        1,
+        "ManagedCodingObservationShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "fencingToken",
+        RDF.XSD.NonNegativeInteger,
+        "ManagedCodingObservationShape",
+        graph
+      ) ++
+      cardinality(
+        index,
+        subject,
+        @jf <> "runtimeSequence",
+        1,
+        1,
+        "ManagedCodingObservationShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @jf <> "runtimeSequence",
+        RDF.XSD.NonNegativeInteger,
+        "ManagedCodingObservationShape",
+        graph
+      ) ++
+      cardinality(
+        index,
+        subject,
+        @prov_generated_at,
+        1,
+        1,
+        "ManagedCodingObservationShape",
+        graph
+      ) ++
+      datatype(
+        index,
+        subject,
+        @prov_generated_at,
+        RDF.XSD.DateTime,
+        "ManagedCodingObservationShape",
+        graph
       )
   end
 

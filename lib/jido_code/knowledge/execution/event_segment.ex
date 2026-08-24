@@ -55,6 +55,8 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
     attempt_started segment_continued model_start model_outcome tool_start tool_outcome
     message transition proposal sandbox artifact cancellation retry terminal provider_observation
     lifecycle_observation memory_retrieval_start memory_retrieval_outcome
+    coding_runtime_observation coding_budget_snapshot candidate_completion_proposal
+    coding_clarification candidate_handoff
   ]a
   @roles ~w[observation start outcome transition artifact message terminal]a
   @protocol "2.0.0"
@@ -779,9 +781,12 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
     do: invalid(:event_segment_predecessor)
 
   defp envelope(type, attributes, changes, guards) do
+    {command_version, semantic_version} =
+      if managed_coding_command?(type), do: {"2.8.0", "1.3.0"}, else: {@protocol, "1.2.0"}
+
     %{
       command_type: type,
-      command_version: @protocol,
+      command_version: command_version,
       command_iri: attributes[:command_iri],
       principal_iri: attributes[:principal_iri],
       actor_iri: attributes[:actor_iri],
@@ -791,13 +796,23 @@ defmodule JidoCode.Knowledge.Execution.EventSegment do
       idempotency_key: attributes[:idempotency_key] || attributes[:command_iri],
       correlation_iri: attributes[:correlation_iri],
       causation_iri: attributes[:causation_iri],
-      ontology_version: "1.2.0",
-      shape_version: "1.2.0",
+      ontology_version: semantic_version,
+      shape_version: semantic_version,
       expected_dataset_revision: attributes[:expected_dataset_revision],
       expected_graph_revisions: attributes[:expected_graph_revisions],
       reason: attributes[:reason],
       payload: %{changes: changes, guards: guards}
     }
+  end
+
+  defp managed_coding_command?(type) do
+    type in [
+      "RecordCodingRuntimeObservation",
+      "RecordCodingBudgetExhaustion",
+      "RecordCodingClarification",
+      "ProposeCandidateCompletion",
+      "RecordCandidateHandoff"
+    ]
   end
 
   defp identity(kind, fields) do

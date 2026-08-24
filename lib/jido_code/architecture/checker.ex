@@ -101,6 +101,7 @@ defmodule JidoCode.Architecture.Checker do
         |> add_multiple_module_violation(path, modules)
         |> add_forbidden_dependency_violations(path, aliases)
         |> add_runtime_dependency_violations(path, caller, plane, aliases)
+        |> add_runtime_persistence_violations(path, plane, aliases, calls)
         |> add_direction_violations(path, caller, plane, aliases)
         |> add_call_violations(path, caller, plane, calls, file_role)
         |> add_model_violations(
@@ -190,6 +191,54 @@ defmodule JidoCode.Architecture.Checker do
             path,
             line,
             "#{caller} must use the product-owned runtime port instead of #{target}"
+          )
+          | acc
+        ]
+      else
+        acc
+      end
+    end)
+  end
+
+  defp add_runtime_persistence_violations(violations, _path, plane, _aliases, _calls)
+       when plane != :runtime,
+       do: violations
+
+  defp add_runtime_persistence_violations(violations, path, :runtime, aliases, calls) do
+    forbidden_modules = [
+      "Jido.AgentOS",
+      "Jido.Persist",
+      "Jido.Storage.File",
+      "Jido.Storage.Redis"
+    ]
+
+    violations =
+      Enum.reduce(aliases, violations, fn {target, line}, acc ->
+        if Enum.any?(forbidden_modules, &module_prefix?(target, &1)) do
+          [
+            violation(
+              :runtime_persistence,
+              path,
+              line,
+              "#{target} is prohibited; runtime state must remain disposable"
+            )
+            | acc
+          ]
+        else
+          acc
+        end
+      end)
+
+    Enum.reduce(calls, violations, fn call, acc ->
+      if call.function in [:hibernate, :thaw] and
+           (module_prefix?(call.module, "Jido") or
+              module_prefix?(call.module, "JidoCode.Runtime.JidoInstance")) do
+        [
+          violation(
+            :runtime_persistence,
+            path,
+            call.line,
+            "#{call.module}.#{call.function} is prohibited; recover from graph projections"
           )
           | acc
         ]

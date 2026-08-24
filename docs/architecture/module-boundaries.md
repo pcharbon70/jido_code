@@ -98,6 +98,14 @@ adapter implementations. Workers operate by attempt IRI and fencing token,
 consume bounded context, and report through Factory services. They cannot hold
 the store handle or self-accept outcomes.
 
+The managed coding specialization is defined by the
+[Managed Coding Runtime Contract](./managed-coding-runtime-contract.md).
+`JidoCode.Factory.ManagedCoding` owns its stable admission, start, steering,
+cancellation, status, and candidate-handoff facade. Runtime code implements
+Factory-owned ports only; it cannot query Knowledge directly, persist through
+Jido or AgentOS, or expose PIDs, graph handles, provider sessions, credentials,
+or workspace paths through that facade.
+
 ### `JidoCodeWeb`
 
 Owns routing, authentication/session presentation, LiveView shells, HEEx

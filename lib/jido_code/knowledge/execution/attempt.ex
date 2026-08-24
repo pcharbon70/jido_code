@@ -34,7 +34,13 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
     :context_digest,
     :runtime_version
   ]
-  defstruct @enforce_keys ++ [:retry_of_iri]
+  defstruct @enforce_keys ++
+              [
+                :retry_of_iri,
+                :managed_coding_profile_iri,
+                :coding_strategy_revision,
+                :reconstruction_watermark
+              ]
 
   @type t :: %__MODULE__{}
 
@@ -62,6 +68,7 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
          true <- context.runtime_version in Map.get(attributes, :available_runtime_versions, []),
          key when is_binary(key) and byte_size(key) in 1..256 <- attributes[:idempotency_key],
          :ok <- optional_resource(attributes[:retry_of_iri]),
+         :ok <- managed_coding_binding(context),
          {:ok, iri} <- ResourceIdentity.deterministic(:execution_attempt, material),
          {:ok, context_iri} <-
            ResourceIdentity.deterministic(:execution_context, iri <> "\n" <> context.digest),
@@ -87,7 +94,10 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
          fencing_token: context.fencing_token,
          context_digest: context.digest,
          runtime_version: context.runtime_version,
-         retry_of_iri: attributes[:retry_of_iri]
+         retry_of_iri: attributes[:retry_of_iri],
+         managed_coding_profile_iri: Map.get(context, :managed_coding_profile_iri),
+         coding_strategy_revision: Map.get(context, :coding_strategy_revision),
+         reconstruction_watermark: Map.get(context, :reconstruction_watermark)
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
@@ -453,6 +463,21 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
         {attempt.context_iri, @jf <> "expectedEvidenceClass", RDF.XSD.String.new(evidence)}
       end) ++
       optional_iri(attempt.iri, @jf <> "retryOf", attempt.retry_of_iri) ++
+      optional_iri(
+        attempt.iri,
+        @jf <> "managedCodingProfile",
+        attempt.managed_coding_profile_iri
+      ) ++
+      optional_literal(
+        attempt.iri,
+        @jf <> "strategyRevisionDigest",
+        attempt.coding_strategy_revision
+      ) ++
+      optional_literal(
+        attempt.iri,
+        @jf <> "reconstructionWatermark",
+        attempt.reconstruction_watermark
+      ) ++
       graph_reference_statements(attempt, context.source_graph_revisions) ++
       Enum.map(context.omissions, fn omission ->
         {attempt.context_iri, @jf <> "omittedBecause",
@@ -585,6 +610,8 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
     |> Base.encode16(case: :lower)
   end
 
+  defp digest?(value), do: is_binary(value) and Regex.match?(~r/^[a-f0-9]{64}$/, value)
+
   defp secret?(value) when is_map(value) do
     Enum.any?(value, fn {key, item} -> secret?(key) or secret?(item) end)
   end
@@ -602,6 +629,29 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
 
   defp optional_resource(nil), do: :ok
   defp optional_resource(value), do: ResourceIdentity.validate(value)
+
+  defp managed_coding_binding(context) do
+    values = [
+      Map.get(context, :managed_coding_profile_iri),
+      Map.get(context, :coding_strategy_revision),
+      Map.get(context, :reconstruction_watermark)
+    ]
+
+    case values do
+      [nil, nil, nil] ->
+        :ok
+
+      [profile, strategy, watermark] ->
+        with :ok <- ResourceIdentity.validate(profile),
+             true <- digest?(strategy),
+             true <- digest?(watermark) do
+          :ok
+        else
+          _invalid -> invalid(:managed_coding_attempt_binding)
+        end
+    end
+  end
+
   defp optional_iri(_subject, _predicate, nil), do: []
   defp optional_iri(subject, predicate, object), do: [{subject, predicate, RDF.iri(object)}]
   defp optional_literal(_subject, _predicate, nil), do: []

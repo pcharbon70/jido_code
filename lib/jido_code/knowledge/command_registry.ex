@@ -349,6 +349,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @dataset_version "2.5.0"
   @dataset_export_version "2.6.0"
   @memory_evaluation_version "2.7.0"
+  @managed_coding_version "2.8.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -777,6 +778,44 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   }
   @version_2_7 Map.merge(@version_2_6, @memory_evaluation_commands)
 
+  @managed_coding_event %{
+    owner: :runtime,
+    capability: :execution,
+    graph_families: [:run_event_segment],
+    preconditions: [
+      :attempt_current,
+      :current_fence,
+      :exact_event_head,
+      :managed_profile_exact,
+      :strategy_revision_exact
+    ]
+  }
+  @managed_coding_commands %{
+    "RegisterManagedCodingProfile" => %{
+      owner: :factory,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [:profile_absent, :model_access_profile_known, :profile_disabled]
+    },
+    "TransitionManagedCodingProfile" => %{
+      owner: :factory,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [:profile_known, :profile_transition_current, :unique_transition_successor]
+    },
+    "RecordCodingRuntimeObservation" =>
+      Map.update!(@managed_coding_event, :preconditions, &(&1 ++ [:runtime_observation_current])),
+    "RecordCodingBudgetExhaustion" =>
+      Map.update!(@managed_coding_event, :preconditions, &(&1 ++ [:budget_snapshot_complete])),
+    "RecordCodingClarification" =>
+      Map.update!(@managed_coding_event, :preconditions, &(&1 ++ [:interaction_session_known])),
+    "ProposeCandidateCompletion" =>
+      Map.update!(@managed_coding_event, :preconditions, &(&1 ++ [:candidate_is_proposal])),
+    "RecordCandidateHandoff" =>
+      Map.update!(@managed_coding_event, :preconditions, &(&1 ++ [:candidate_handoff_separated]))
+  }
+  @version_2_8 Map.merge(@version_2_7, @managed_coding_commands)
+
   @spec version() :: String.t()
   def version, do: @version
 
@@ -813,6 +852,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec memory_evaluation_version() :: String.t()
   def memory_evaluation_version, do: @memory_evaluation_version
 
+  @spec managed_coding_version() :: String.t()
+  def managed_coding_version, do: @managed_coding_version
+
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
 
@@ -834,6 +876,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@dataset_version), do: @version_2_5 |> Map.keys() |> Enum.sort()
   def names(@dataset_export_version), do: @version_2_6 |> Map.keys() |> Enum.sort()
   def names(@memory_evaluation_version), do: @version_2_7 |> Map.keys() |> Enum.sort()
+  def names(@managed_coding_version), do: @version_2_8 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -998,6 +1041,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_2_7, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @memory_evaluation_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @managed_coding_version) when is_binary(name) do
+    case Map.fetch(@version_2_8, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @managed_coding_version})}
 
       :error ->
         invalid(:command_type)
