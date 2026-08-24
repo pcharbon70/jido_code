@@ -25,8 +25,26 @@ defmodule JidoCode.Integrations.ManagedCodingAdapters.Dispatcher do
   def execute(_name, _state, _request, _options),
     do: {:error, AdapterError.new(:invalid_input, :managed_coding_adapter)}
 
+  defp invoke(
+         "inspect_symbol",
+         %{read_request: %ReadRequest{} = request, analysis_revision_number: expected},
+         arguments,
+         _options
+       ) do
+    with ^expected <- arguments[:expected_revision] do
+      arguments =
+        arguments
+        |> Map.put(:expected_analysis_revision, request.analysis_revision)
+        |> Map.delete(:expected_revision)
+
+      ManagedCodingReadTools.inspect_symbol(request, arguments)
+    else
+      _stale -> {:error, AdapterError.new(:conflict, :managed_coding_analysis_revision)}
+    end
+  end
+
   defp invoke(name, %{read_request: %ReadRequest{} = request}, arguments, _options)
-       when name in ["search_source", "inspect_symbol", "read_file"] do
+       when name in ["search_source", "read_file"] do
     apply(ManagedCodingReadTools, String.to_existing_atom(name), [request, arguments])
   end
 

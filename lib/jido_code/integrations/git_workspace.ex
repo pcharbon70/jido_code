@@ -74,7 +74,6 @@ defmodule JidoCode.Integrations.GitWorkspace do
        }}
     else
       {:error, %AdapterError{} = error} -> {:error, error}
-      _invalid -> {:error, AdapterError.new(:unavailable, :workspace_cleanup)}
     end
   end
 

@@ -105,15 +105,15 @@ Back to plan: [README](./README.md)
     This final section proves real source, filesystem, sandbox, check, and
     candidate effects under the complete mediation boundary.
 
-    - [ ] 2.6.1 Task {#mcar-p02-integration} [repo: jido_code] [after: {#mcar-p02-tool-gateway}] - Execute the governed tool and workspace matrix.
+    - [x] 2.6.1 Task {#mcar-p02-integration} [repo: jido_code] [after: {#mcar-p02-tool-gateway}] - Execute the governed tool and workspace matrix.
 
       This task closes MCG2 only when every catalogued initial tool performs its
       real effect safely and recoverably.
 
-      - [ ] 2.6.1.1 Subtask - Exercise source search, symbol inspection, file reads, edits, creates, deletes, checks, diff rendering, and candidate capture against isolated real Git worktrees.
-      - [ ] 2.6.1.2 Subtask - Inject traversal, symlink, stale digest, stale fence, duplicate effect, oversized input/output, secret, binary, race, process loss, timeout, and ambiguous-result cases.
-      - [ ] 2.6.1.3 Subtask - Prove cancellation and cleanup remove or quarantine disposable state without losing the graph's ability to identify completed and unresolved effects.
-      - [ ] 2.6.1.4 Subtask - Rerun MCG1, harness tool/sandbox/security suites, architecture checks, Dialyzer, and `mix precommit`.
+      - [x] 2.6.1.1 Subtask - Exercise source search, symbol inspection, file reads, edits, creates, deletes, checks, diff rendering, and candidate capture against isolated real Git worktrees.
+      - [x] 2.6.1.2 Subtask - Inject traversal, symlink, stale digest, stale fence, duplicate effect, oversized input/output, secret, binary, race, process loss, timeout, and ambiguous-result cases.
+      - [x] 2.6.1.3 Subtask - Prove cancellation and cleanup remove or quarantine disposable state without losing the graph's ability to identify completed and unresolved effects.
+      - [x] 2.6.1.4 Subtask - Rerun MCG1, harness tool/sandbox/security suites, architecture checks, Dialyzer, and `mix precommit`.
 
     - [ ] 2.6.2 Task {#mcar-p02-phase-receipt} [repo: jido_code] [after: {#mcar-p02-integration}] - Publish and pin the Phase 2 receipt.
 
@@ -121,7 +121,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/managed-coding-phase-02-receipt.md` and authorizes
       Phase 3 only from the pinned merged baseline.
 
-      - [ ] 2.6.2.1 Subtask - Record workspace, adapter, tool catalog, registered check, sandbox, effect identity, and candidate schema revisions and digests.
-      - [ ] 2.6.2.2 Subtask - Attach real-worktree, mutation, check, candidate, race, cancellation, and cleanup evidence with known limitations.
-      - [ ] 2.6.2.3 Subtask - Keep MCG2 open while any enabled tool lacks a concrete adapter, any effect bypass exists, or any retry can duplicate a write.
+      - [x] 2.6.2.1 Subtask - Record workspace, adapter, tool catalog, registered check, sandbox, effect identity, and candidate schema revisions and digests.
+      - [x] 2.6.2.2 Subtask - Attach real-worktree, mutation, check, candidate, race, cancellation, and cleanup evidence with known limitations.
+      - [x] 2.6.2.3 Subtask - Keep MCG2 open while any enabled tool lacks a concrete adapter, any effect bypass exists, or any retry can duplicate a write.
       - [ ] 2.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 3 and preserve every MCG1-MCG2 reopening condition.
