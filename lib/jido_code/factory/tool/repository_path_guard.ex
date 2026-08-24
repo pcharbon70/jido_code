@@ -54,7 +54,8 @@ defmodule JidoCode.Factory.Tool.RepositoryPathGuard do
 
   defp relative_path(path) when is_binary(path) and byte_size(path) in 1..512 do
     valid? =
-      Path.type(path) == :relative and
+      String.valid?(path) and String.normalize(path, :nfc) == path and
+        Path.type(path) == :relative and
         not String.contains?(path, ["\\", <<0>>, "//"]) and
         not String.starts_with?(path, ["./", "/"]) and
         path == Path.join(Path.split(path)) and
