@@ -1,0 +1,59 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/factory/1.3.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://jido.run/ontology/factory/1.3.0> ;
+  owl:versionInfo "1.3.0" ;
+  owl:imports <https://jido.run/ontology/factory/1.2.0> ;
+  rdfs:label "Jido Factory managed coding runtime contract" ;
+  rdfs:comment "Additive profile and bounded runtime-accounting terms. These terms grant no execution, verification, publication, or merge authority." .
+
+jf:ManagedCodingProfile a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:CodingStrategyRevision a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:CodingRuntimeObservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:CodingBudgetSnapshot a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:CandidateCompletionProposal a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:CodingClarification a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:CandidateHandoff a owl:Class ; rdfs:subClassOf prov:Entity .
+
+jf:managedCodingProfile a owl:ObjectProperty ; rdfs:range jf:ManagedCodingProfile .
+jf:usesCodingStrategyRevision a owl:ObjectProperty ; rdfs:range jf:CodingStrategyRevision .
+jf:modelAccessProfile a owl:ObjectProperty ; rdfs:range jf:ModelAccessProfile .
+jf:boundActor a owl:ObjectProperty ; rdfs:range prov:Agent .
+jf:boundTenant a owl:ObjectProperty .
+jf:boundRepository a owl:ObjectProperty ; rdfs:range jf:SoftwareRepository .
+jf:boundCapability a owl:ObjectProperty ; rdfs:range jf:Capability .
+jf:runtimePhase a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:terminalClassification a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:candidate a owl:ObjectProperty ; rdfs:range prov:Entity .
+jf:clarificationSession a owl:ObjectProperty ; rdfs:range jf:InteractionSession .
+jf:handoffState a owl:ObjectProperty ; rdfs:range skos:Concept .
+
+jf:profileRevision a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:profileDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:jidoVersion a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:strategyRevisionDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:promptBundleRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:contextPolicyRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:memoryPolicyRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:toolCatalogRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:adapterSetRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sandboxProfileRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:verifierProfileRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:candidateSchemaRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:budgetContract a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:taskClass a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:runtimeSequence a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:reconstructionWatermark a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:budgetSnapshot a owl:DatatypeProperty ; rdfs:range xsd:string .
+
+jfc:ManagedCodingProfileDisabled a skos:Concept .
+jfc:ManagedCodingProfileEnabled a skos:Concept .
+jfc:ManagedCodingProfileRevoked a skos:Concept .
+jfc:ManagedCodingProfileSuperseded a skos:Concept .

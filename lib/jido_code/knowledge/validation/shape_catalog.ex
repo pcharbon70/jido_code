@@ -1,11 +1,12 @@
 defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
   @moduledoc false
 
-  @version "1.2.0"
-  @ontology_version "1.2.0"
+  @version "1.3.0"
+  @ontology_version "1.3.0"
   @known_versions MapSet.new([
                     {"1.0.0", "1.0.0"},
                     {"1.1.0", "1.1.0"},
+                    {"1.2.0", "1.2.0"},
                     {@ontology_version, @version}
                   ])
   @jf "https://jido.run/ontology/factory#"
@@ -18,7 +19,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     factory_policy: ~w[
       DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope
       Decision StateTransition RepositoryCohort GraphRevisionReference CredentialReference
-      ModelAccessProfile HarnessProfile ToolDefinitionRevision
+      ModelAccessProfile HarnessProfile ToolDefinitionRevision ManagedCodingProfile
+      CodingStrategyRevision
     ],
     observation_batch: ~w[
       ObservationActivity ObservationBatch RepositorySnapshot SourceArtifact Claim Finding
@@ -42,6 +44,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       SandboxEvent CancellationObservation RetryObservation TerminalObservation
       ProviderObservation LifecycleObservation ModelInvocationStart ToolInvocationStart
       AttemptTransitionObservation NormalizedActionProposal ExecutionArtifactObservation
+      CodingRuntimeObservation CodingBudgetSnapshot CandidateCompletionProposal
+      CodingClarification CandidateHandoff
     ],
     experience: ~w[
       ExperienceCase ExperienceCaseTransition ExperienceSourceManifest CandidateFactOrSummary

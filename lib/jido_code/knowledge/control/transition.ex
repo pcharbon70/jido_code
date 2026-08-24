@@ -37,6 +37,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
           | :lease
           | :interaction_session
           | :execution_attempt
+          | :managed_coding_profile
   @type t :: %__MODULE__{}
 
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -60,7 +61,8 @@ defmodule JidoCode.Knowledge.Control.Transition do
     execution_attempt: ~w[
       prepared starting running waiting_tool cancelling cancelled completed failed timed_out
       abandoned recovered superseded
-    ]a
+    ]a,
+    managed_coding_profile: ~w[disabled enabled revoked superseded]a
   }
 
   @edges %{
@@ -167,6 +169,12 @@ defmodule JidoCode.Knowledge.Control.Transition do
       timed_out: ~w[recovered superseded]a,
       abandoned: ~w[recovered superseded]a,
       recovered: ~w[running cancelling failed superseded]a,
+      superseded: []
+    },
+    managed_coding_profile: %{
+      disabled: ~w[enabled revoked superseded]a,
+      enabled: ~w[disabled revoked superseded]a,
+      revoked: [],
       superseded: []
     }
   }
@@ -356,6 +364,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
   end
 
   defp initial_state(:execution_attempt), do: :prepared
+  defp initial_state(:managed_coding_profile), do: :disabled
   defp initial_state(_domain), do: :proposed
 
   defp valid_reason?(value), do: is_binary(value) and byte_size(value) in 1..512

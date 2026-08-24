@@ -8,21 +8,21 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Writer
 
-  @graph "https://jido.run/graph/ontology/1.2.0"
-  @canonical_sha "631bd63fbe3e79f8b320aa5290062ab54d2c5cdfeb60185d00f94141a9bc62a5"
-  @package_sha "d4d7568c264bdac5d879186966c08889920615018ee6bec8e815f5e3d839b2b2"
+  @graph "https://jido.run/graph/ontology/1.3.0"
+  @canonical_sha "2b2162ec5aa9cd145786ec99d2c3f9b7f3cd1f839541760c90c33d7acfb582d3"
+  @package_sha "bf037bef8293f1aedf79f675db792286a330cff2a664e2d2d7766536601309cf"
 
   test "verifies and canonicalizes the immutable ontology package deterministically" do
     assert {:ok, manifest} = Release.verify()
-    assert manifest.version == "1.2.0"
-    assert manifest.shape_version == "1.2.0"
+    assert manifest.version == "1.3.0"
+    assert manifest.shape_version == "1.3.0"
     assert manifest.graph_iri == @graph
     assert manifest.package_sha256 == @package_sha
     assert manifest.canonical_nquads_sha256 == @canonical_sha
 
     assert {:ok, dataset} = Release.dataset()
     assert RDF.Dataset.graph_names(dataset) == [RDF.iri(@graph)]
-    assert length(RDF.Dataset.quads(dataset)) == 1_783
+    assert length(RDF.Dataset.quads(dataset)) == 1_940
 
     assert {:ok, first} = Release.canonical_nquads()
     assert {:ok, second} = Release.canonical_nquads()
@@ -31,11 +31,13 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
     assert {:ok, checksum} = Release.checksum()
     assert checksum.package_sha256 == @package_sha
     assert checksum.canonical_nquads_sha256 == @canonical_sha
-    assert checksum.quad_count == 1_783
+    assert checksum.quad_count == 1_940
   end
 
   test "retains deterministic read compatibility for immutable prior releases" do
-    assert Release.versions() == ["1.2.0", "1.1.0", "1.0.0"]
+    assert Release.versions() == ["1.3.0", "1.2.0", "1.1.0", "1.0.0"]
+    assert {:ok, segmented} = Release.verify("1.2.0")
+    assert segmented.version == "1.2.0"
     assert {:ok, prior} = Release.verify("1.1.0")
     assert prior.version == "1.1.0"
     assert prior.shape_version == "1.1.0"
@@ -70,7 +72,7 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
     assert loaded.graph_iri == @graph
     assert loaded.receipt.dataset_revision == 1
 
-    assert {:ok, %{@graph => 1_783}} =
+    assert {:ok, %{@graph => 1_940}} =
              StoreServer.request(server, {:graph_counts, [@graph]})
 
     assert {:ok, replayed} = Release.load(store_server: server, writer: writer)

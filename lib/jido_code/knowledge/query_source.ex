@@ -73,6 +73,57 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:managed_coding_profile) do
+    """
+    SELECT ?profile ?predicate ?value ?transition ?state ?revision ?predecessor WHERE {
+      GRAPH {{graph}} {
+        BIND({{resource}} AS ?profile)
+        ?profile a <#{@jf}ManagedCodingProfile> ; ?predicate ?value .
+        OPTIONAL {
+          ?transition a <#{@jf}StateTransition> ;
+                      <#{@jf}transitionSubject> ?profile ;
+                      <#{@jf}nextState> ?state ;
+                      <#{@jf}transitionRevision> ?revision .
+          OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+        }
+      }
+    }
+    ORDER BY ?revision ?predicate ?value
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:managed_coding_attempt) do
+    """
+    SELECT ?profile ?strategy ?fence ?watermark WHERE {
+      GRAPH {{graph}} {
+        {{resource}} <#{@jf}managedCodingProfile> ?profile ;
+                     <#{@jf}strategyRevisionDigest> ?strategy ;
+                     <#{@jf}fencingToken> ?fence ;
+                     <#{@jf}reconstructionWatermark> ?watermark .
+      }
+    }
+    LIMIT 1
+    """
+  end
+
+  def fetch(:managed_coding_observations) do
+    """
+    SELECT ?event ?resource ?kind ?sequence ?phase ?watermark WHERE {
+      GRAPH {{graph}} {
+        ?event <#{@jf}accountsResource> ?resource ;
+               <#{@jf}eventKind> ?kind ;
+               <#{@jf}eventSequence> ?sequence .
+        ?resource <#{@jf}attempts> {{resource}} ;
+                  <#{@jf}runtimePhase> ?phase ;
+                  <#{@jf}reconstructionWatermark> ?watermark .
+      }
+    }
+    ORDER BY ?sequence
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:resource_description) do
     """
     CONSTRUCT { {{resource}} ?predicate ?value }

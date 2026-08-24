@@ -24,6 +24,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @procedure_version "2.2.0"
   @content_version "2.3.0"
   @dataset_version "2.7.0"
+  @managed_coding_version "2.8.0"
   @versions [
     @version,
     @repository_version,
@@ -37,7 +38,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @experience_version,
     @procedure_version,
     @content_version,
-    @dataset_version
+    @dataset_version,
+    @managed_coding_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -87,6 +89,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec dataset_version() :: String.t()
   def dataset_version, do: @dataset_version
+
+  @spec managed_coding_version() :: String.t()
+  def managed_coding_version, do: @managed_coding_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -500,6 +505,27 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           procedure_specifications(resource) ++
           content_specifications(resource) ++
           dataset_specifications(resource)
+
+      @managed_coding_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource) ++
+          history_specifications(resource) ++
+          experience_specifications(resource) ++
+          artifact_claim_specifications(resource) ++
+          procedure_specifications(resource) ++
+          content_specifications(resource) ++
+          dataset_specifications(resource) ++
+          managed_coding_specifications(resource)
     end
   end
 
@@ -1834,6 +1860,44 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:memory_dataset],
         :table,
         "Read evaluation digest, decision, and disable ownership for one manifest.",
+        :product,
+        :declared
+      )
+    ]
+  end
+
+  defp managed_coding_specifications(resource) do
+    [
+      spec(
+        :managed_coding_profile,
+        :select,
+        resource,
+        :harness,
+        [:factory_policy],
+        :timeline,
+        "Read one exact managed coding profile and its append-only lifecycle.",
+        :product,
+        :declared
+      ),
+      spec(
+        :managed_coding_attempt,
+        :select,
+        resource,
+        :execution,
+        [:run_attempt],
+        :table,
+        "Read the profile, strategy, fence, and reconstruction binding for one coding attempt.",
+        :product,
+        :declared
+      ),
+      spec(
+        :managed_coding_observations,
+        :select,
+        resource,
+        :execution,
+        [:run_event_segment],
+        :timeline,
+        "Read bounded managed coding observations in the shared attempt sequence.",
         :product,
         :declared
       )

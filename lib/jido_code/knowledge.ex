@@ -16,6 +16,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Control.Cohort
   alias JidoCode.Knowledge.Control.GovernanceProjection
   alias JidoCode.Knowledge.Control.ModelAccessProfile
+  alias JidoCode.Knowledge.Control.ManagedCodingProfile
   alias JidoCode.Knowledge.Control.HarnessProfile
   alias JidoCode.Knowledge.Control.Obligation
   alias JidoCode.Knowledge.Control.Policy
@@ -38,6 +39,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Execution.Graph, as: ExecutionGraph
   alias JidoCode.Knowledge.Execution.ImmutableEvent
   alias JidoCode.Knowledge.Execution.ModelInvocation
+  alias JidoCode.Knowledge.Execution.ManagedCodingObservation
   alias JidoCode.Knowledge.Execution.ToolInvocation
   alias JidoCode.Knowledge.Execution.Provenance
   alias JidoCode.Knowledge.Execution.SegmentedRun
@@ -380,6 +382,35 @@ defmodule JidoCode.Knowledge do
   def tool_invocation(attempt, attributes), do: ToolInvocation.new(attempt, attributes)
 
   def model_access_profile(attributes), do: ModelAccessProfile.new(attributes)
+
+  def managed_coding_profile(attributes), do: ManagedCodingProfile.new(attributes)
+
+  def register_managed_coding_profile(profile, attributes, options \\ []),
+    do: ManagedCodingProfile.register_command(profile, attributes, options)
+
+  def transition_managed_coding_profile(
+        profile,
+        resolution,
+        next_state,
+        attributes,
+        options \\ []
+      ),
+      do:
+        ManagedCodingProfile.transition_command(
+          profile,
+          resolution,
+          next_state,
+          attributes,
+          options
+        )
+
+  def project_managed_coding_profile(rows, profile_iri),
+    do: ManagedCodingProfile.project(rows, profile_iri)
+
+  def managed_coding_observation(attributes), do: ManagedCodingObservation.new(attributes)
+
+  def record_managed_coding_observation(observation, segment, attributes, options \\ []),
+    do: ManagedCodingObservation.record_command(observation, segment, attributes, options)
 
   def enroll_model_access_profile(profile, attributes, options \\ []),
     do: ModelAccessProfile.enroll_command(profile, attributes, options)

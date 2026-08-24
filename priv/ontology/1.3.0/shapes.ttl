@@ -1,0 +1,36 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/shapes/1.3.0>
+  a sh:ShapesGraph ;
+  jf:shapeVersion "1.3.0" ;
+  rdfs:comment "Structural managed coding profile and runtime observation shapes. Fence, lifecycle, predecessor-head, and completeness rules are additionally enforced by commands." .
+
+jfs:ManagedCodingProfileShape a sh:NodeShape ;
+  sh:targetClass jf:ManagedCodingProfile ;
+  sh:property jfs:ProfileRevisionProperty, jfs:ProfileDigestProperty,
+    jfs:JidoVersionProperty, jfs:StrategyRevisionProperty,
+    jfs:ModelAccessProfileProperty, jfs:BudgetContractProperty .
+
+jfs:ManagedCodingObservationShape a sh:NodeShape ;
+  sh:targetClass jf:CodingRuntimeObservation, jf:CodingBudgetSnapshot,
+    jf:CandidateCompletionProposal, jf:CodingClarification, jf:CandidateHandoff ;
+  sh:property jfs:AttemptsProperty, jfs:ValidForProperty,
+    jfs:FencingTokenProperty, jfs:ManagedProfileProperty,
+    jfs:StrategyRevisionProperty, jfs:RuntimePhaseProperty,
+    jfs:RuntimeSequenceProperty, jfs:ReconstructionWatermarkProperty,
+    jfs:GeneratedAtProperty .
+
+jfs:ProfileRevisionProperty a sh:PropertyShape ; sh:path jf:profileRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ProfileDigestProperty a sh:PropertyShape ; sh:path jf:profileDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:JidoVersionProperty a sh:PropertyShape ; sh:path jf:jidoVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:StrategyRevisionProperty a sh:PropertyShape ; sh:path jf:strategyRevisionDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ModelAccessProfileProperty a sh:PropertyShape ; sh:path jf:modelAccessProfile ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:BudgetContractProperty a sh:PropertyShape ; sh:path jf:budgetContract ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
+jfs:ManagedProfileProperty a sh:PropertyShape ; sh:path jf:managedCodingProfile ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:RuntimePhaseProperty a sh:PropertyShape ; sh:path jf:runtimePhase ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:RuntimeSequenceProperty a sh:PropertyShape ; sh:path jf:runtimeSequence ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ReconstructionWatermarkProperty a sh:PropertyShape ; sh:path jf:reconstructionWatermark ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string .
