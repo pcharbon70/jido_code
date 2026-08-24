@@ -3,9 +3,10 @@
 ## Status
 
 This receipt records the Phase 2 implementation candidate verified locally and
-awaiting clean-checkout CI and pull request merge. MCG2 remains merge-pending;
-Phase 3 is not authorized until this receipt is updated with the full merged
-candidate commit.
+accepted after pull request merge on 2026-08-24. The implementation pull
+request passed clean-checkout CI and merged as
+`9c484d1cda35e21fae98168ebad1119dd1b3df8a`; MCG2 is accepted at that merged
+candidate and Phase 3 is authorized from this pinned baseline.
 
 The candidate establishes isolated disposable Git workspaces, bounded and
 revision-pinned source reads, digest-guarded mutation, server-owned registered
@@ -25,7 +26,7 @@ merge remain outside the ordinary coding capability.
 | Section 2.4 | `1d2c63d` - add registered checks and candidate capture |
 | Section 2.5 | `55d130e` - mediate managed coding adapters |
 | Section 2.6 | This receipt, real-worktree integration, and final gate evidence; exact commit recorded by Git history |
-| Merged candidate | **merge-pending** |
+| Merged candidate | `9c484d1cda35e21fae98168ebad1119dd1b3df8a` - merged 2026-08-24 |
 
 ## Contract Pins
 
@@ -113,7 +114,7 @@ merge remain outside the ordinary coding capability.
 | Architecture checks | Passed locally |
 | Dialyzer | Passed; zero unignored candidate warnings |
 | `mix precommit` | 774 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | **merge-pending** |
+| Clean-checkout CI | Passed on PR #64; verify and Dialyzer succeeded |
 
 ## Known Limits And Disabled Posture
 
@@ -131,11 +132,11 @@ merge remain outside the ordinary coding capability.
 
 ## Gate MCG2
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-MCG2 remains open until the implementation pull request passes clean-checkout
-CI, merges, and this receipt pins the full merged candidate SHA and merge date.
-Phase 3 is not authorized from an unmerged branch or this provisional receipt.
+MCG2 is accepted at merged candidate
+`9c484d1cda35e21fae98168ebad1119dd1b3df8a` after clean-checkout CI and merge
+on 2026-08-24. Phase 3 is authorized only from this exact pinned baseline.
 
 MCG2 reopens regardless of checklist state if any enabled tool lacks a concrete
 adapter; any managed runtime effect bypasses `ToolGateway`, invocation-before-
