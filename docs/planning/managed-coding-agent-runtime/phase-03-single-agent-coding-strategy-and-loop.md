@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_managed_coding_agent_runtime_phase_03
 parent_plan: plan.jido_code_managed_coding_agent_runtime
-status: planned
+status: completed
 intent: feature
 ---
 
@@ -14,7 +14,7 @@ interaction, one governed tool effect, and bounded continuation.
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Run one bounded Jido agent through a complete inspect-plan-edit-check loop.
+- [x] 3 Phase - Run one bounded Jido agent through a complete inspect-plan-edit-check loop.
 
   This phase proves MCG3 by connecting the accepted model and tool seams without
   allowing the agent strategy to call graph internals, effects, or providers
@@ -84,7 +84,7 @@ Back to plan: [README](./README.md)
       - [x] 3.4.1.4 Subtask - Support bounded operator steer, pause, resume, and cancellation only through graph-authorized interactions and current attempt/fence validation.
       - [x] 3.4.1.5 Subtask - Treat completion as a candidate proposal requiring deterministic candidate capture and later verification; reject model claims of test success, evidence sufficiency, acceptance, publication, or merge.
 
-  - [ ] 3.5 Section - Phase 3 Integration Tests.
+  - [x] 3.5 Section - Phase 3 Integration Tests.
 
     This final section exercises the real Jido AgentServer, deterministic model
     fixtures, governed tools, and graph accounting as one loop.
@@ -99,7 +99,7 @@ Back to plan: [README](./README.md)
       - [x] 3.5.1.3 Subtask - Prove the strategy never calls Knowledge or effects directly, every external action has complete graph accounting, and terminal proposals have no verification/publication authority.
       - [x] 3.5.1.4 Subtask - Rerun MCG1-MCG2, complete harness/model/tool/memory suites, architecture checks, Dialyzer, and `mix precommit`.
 
-    - [ ] 3.5.2 Task {#mcar-p03-phase-receipt} [repo: jido_code] [after: {#mcar-p03-integration}] - Publish and pin the Phase 3 receipt.
+    - [x] 3.5.2 Task {#mcar-p03-phase-receipt} [repo: jido_code] [after: {#mcar-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records MCG3 evidence in
       `docs/architecture/managed-coding-phase-03-receipt.md` and authorizes
@@ -108,4 +108,4 @@ Back to plan: [README](./README.md)
       - [x] 3.5.2.1 Subtask - Record agent, strategy, action, directive, signal, dispatcher, context, prompt, model, tool, and budget revisions and digests.
       - [x] 3.5.2.2 Subtask - Attach loop, malformed-result, budget, steering, cancellation, and authority-separation evidence with known limitations.
       - [x] 3.5.2.3 Subtask - Keep MCG3 open if any model can choose an adapter/sink, any effect bypasses a directive, or any terminal claim gains authority.
-      - [ ] 3.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 4 and preserve every MCG1-MCG3 reopening condition.
+      - [x] 3.5.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 4 and preserve every MCG1-MCG3 reopening condition.
