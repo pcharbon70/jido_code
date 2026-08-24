@@ -71,19 +71,32 @@ defmodule JidoCode.Factory.ManagedCoding.Command do
   defp forbidden_runtime_state?(payload) do
     forbidden =
       MapSet.new(
-        ~w[pid pod_pid graph_handle store provider_session workspace_path credential secret]
+        ~w[adapter adapter_module credential executable function graph_handle mfa module pid pod_pid provider_session secret store tool_arguments workspace_path]
       )
 
-    Enum.any?(payload, fn {key, value} ->
-      normalized = if is_binary(key), do: key, else: to_string(key)
-      MapSet.member?(forbidden, normalized) or runtime_value?(value)
-    end)
+    forbidden_value?(payload, forbidden)
   rescue
     _error -> true
   end
 
-  defp runtime_value?(value) when is_pid(value) or is_port(value) or is_reference(value), do: true
-  defp runtime_value?(_value), do: false
+  defp forbidden_value?(value, _forbidden)
+       when is_pid(value) or is_port(value) or is_reference(value),
+       do: true
+
+  defp forbidden_value?(value, forbidden) when is_map(value) do
+    Enum.any?(value, fn {key, nested} ->
+      normalized = key |> to_string() |> String.downcase()
+      MapSet.member?(forbidden, normalized) or forbidden_value?(nested, forbidden)
+    end)
+  end
+
+  defp forbidden_value?(value, forbidden) when is_list(value),
+    do: Enum.any?(value, &forbidden_value?(&1, forbidden))
+
+  defp forbidden_value?(value, forbidden) when is_tuple(value),
+    do: value |> Tuple.to_list() |> forbidden_value?(forbidden)
+
+  defp forbidden_value?(_value, _forbidden), do: false
 
   defp invalid(operation), do: {:error, AdapterError.new(:invalid_input, operation)}
 end

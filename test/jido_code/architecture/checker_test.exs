@@ -80,6 +80,26 @@ defmodule JidoCode.Architecture.CheckerTest do
              ])
   end
 
+  test "keeps managed runtime persistence ETS-only and unreachable" do
+    sources = [
+      {"lib/jido_code/runtime/persisted.ex",
+       "defmodule JidoCode.Runtime.Persisted do\n  alias Jido.Persist\nend"},
+      {"lib/jido_code/runtime/file_store.ex",
+       "defmodule JidoCode.Runtime.FileStore do\n  alias Jido.Storage.File\nend"},
+      {"lib/jido_code/runtime/thaw.ex",
+       "defmodule JidoCode.Runtime.Thaw do\n  def restore(agent), do: JidoCode.Runtime.JidoInstance.thaw(agent)\nend"}
+    ]
+
+    assert {:error, violations} = Checker.check_sources(sources)
+    assert Enum.count(violations, &(&1.rule == :runtime_persistence)) == 3
+
+    assert {:ok, []} =
+             Checker.check_sources([
+               {"lib/jido_code/runtime/ephemeral.ex",
+                "defmodule JidoCode.Runtime.Ephemeral do\n  alias Jido.Storage.ETS\nend"}
+             ])
+  end
+
   test "allows explicit public contracts and owned filesystem roles" do
     sources = [
       {"lib/jido_code/factory/service.ex",
