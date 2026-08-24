@@ -43,15 +43,40 @@ defmodule JidoCode.Integrations.ManagedCodingAdapters.Dispatcher do
     end
   end
 
-  defp invoke(name, %{read_request: %ReadRequest{} = request}, arguments, _options)
-       when name in ["search_source", "read_file"] do
-    apply(ManagedCodingReadTools, String.to_existing_atom(name), [request, arguments])
+  defp invoke("search_source", %{read_request: %ReadRequest{} = request}, arguments, _options),
+    do: ManagedCodingReadTools.search_source(request, arguments)
+
+  defp invoke("read_file", %{read_request: %ReadRequest{} = request}, arguments, _options),
+    do: ManagedCodingReadTools.read_file(request, arguments)
+
+  defp invoke(
+         "apply_edit",
+         %{mutation_request: %MutationRequest{} = request} = state,
+         arguments,
+         options
+       ) do
+    merged = Keyword.merge(Map.get(state, :effect_options, []), options)
+    ManagedCodingMutationTools.apply_edit(request, arguments, merged)
   end
 
-  defp invoke(name, %{mutation_request: %MutationRequest{} = request} = state, arguments, options)
-       when name in ["apply_edit", "create_file", "delete_file"] do
+  defp invoke(
+         "create_file",
+         %{mutation_request: %MutationRequest{} = request} = state,
+         arguments,
+         options
+       ) do
     merged = Keyword.merge(Map.get(state, :effect_options, []), options)
-    apply(ManagedCodingMutationTools, String.to_existing_atom(name), [request, arguments, merged])
+    ManagedCodingMutationTools.create_file(request, arguments, merged)
+  end
+
+  defp invoke(
+         "delete_file",
+         %{mutation_request: %MutationRequest{} = request} = state,
+         arguments,
+         options
+       ) do
+    merged = Keyword.merge(Map.get(state, :effect_options, []), options)
+    ManagedCodingMutationTools.delete_file(request, arguments, merged)
   end
 
   defp invoke(

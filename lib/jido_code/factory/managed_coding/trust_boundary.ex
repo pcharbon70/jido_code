@@ -9,6 +9,19 @@ defmodule JidoCode.Factory.ManagedCoding.TrustBoundary do
 
   @digest ~r/^[a-f0-9]{64}$/
   @secret_markers ["-----BEGIN PRIVATE KEY-----", "ghp_", "sk-", "aws_secret_access_key"]
+  @runtime_keys ~w[adapter adapter_module credential executable function graph_handle mfa module pid pod_pid provider_session secret store workspace_path]
+
+  @spec validate_payload(term()) :: :ok | {:error, :untrusted_runtime_payload}
+  def validate_payload(payload) when is_map(payload) do
+    if byte_size(:erlang.term_to_binary(payload, [:deterministic])) <= 32_768 and
+         not forbidden_payload?(payload),
+       do: :ok,
+       else: {:error, :untrusted_runtime_payload}
+  rescue
+    _error -> {:error, :untrusted_runtime_payload}
+  end
+
+  def validate_payload(_payload), do: {:error, :untrusted_runtime_payload}
 
   @spec assess(map()) :: :ok | {:error, atom()}
   def assess(attributes) when is_map(attributes) do
@@ -102,4 +115,25 @@ defmodule JidoCode.Factory.ManagedCoding.TrustBoundary do
     do: Enum.any?(value, &nested_key?(&1, forbidden))
 
   defp nested_key?(_value, _forbidden), do: false
+
+  defp forbidden_payload?(value) when is_pid(value) or is_port(value) or is_reference(value),
+    do: true
+
+  defp forbidden_payload?(value) when is_function(value), do: true
+
+  defp forbidden_payload?(value) when is_map(value) do
+    Enum.any?(value, fn {key, nested} ->
+      normalized = key |> to_string() |> String.downcase()
+      normalized in @runtime_keys or forbidden_payload?(nested)
+    end)
+  rescue
+    _error -> true
+  end
+
+  defp forbidden_payload?(value) when is_list(value), do: Enum.any?(value, &forbidden_payload?/1)
+
+  defp forbidden_payload?(value) when is_tuple(value),
+    do: value |> Tuple.to_list() |> forbidden_payload?()
+
+  defp forbidden_payload?(_value), do: false
 end
