@@ -2,10 +2,11 @@
 
 ## Status
 
-This receipt records the locally verified Phase 3 implementation candidate.
-MCG3 remains **merge-pending** until the implementation pull request passes
-clean-checkout CI and its merge commit is pinned here. Phase 4 is not yet
-authorized.
+This receipt records the Phase 3 implementation candidate verified locally and
+accepted after pull request merge on 2026-08-24. The implementation pull
+request passed clean-checkout CI and merged as
+`de850ea92227e910380eca4fa199945109af9e81`; MCG3 is accepted at that merged
+candidate and Phase 4 is authorized from this pinned baseline.
 
 The candidate supplies one disposable `Jido.Agent`, a pure custom strategy,
 closed correlated actions and directives, a supervised dispatcher, exact
@@ -23,7 +24,7 @@ capture.
 | Section 3.3 | `98ea904` - connect managed context and model turns |
 | Section 3.4 | `ba29f62` - enforce managed coding loop controls |
 | Section 3.5 | This receipt, the real-loop matrix, and final gate evidence; exact commit recorded by Git history |
-| Merged candidate | **merge-pending** |
+| Merged candidate | `de850ea92227e910380eca4fa199945109af9e81` - merged 2026-08-24 |
 
 ## Contract Pins
 
@@ -102,7 +103,7 @@ capture.
 | Architecture checks | Passed locally |
 | Dialyzer | Passed; zero unignored candidate warnings |
 | `mix precommit` | 791 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | **merge-pending** |
+| Clean-checkout CI | Passed on PR #66; verify and Dialyzer succeeded |
 
 ## Known Limits And Disabled Posture
 
@@ -119,11 +120,11 @@ capture.
 
 ## Gate MCG3
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-MCG3 remains open until clean-checkout CI passes, the implementation pull
-request merges, and this receipt pins the full merge-commit SHA and merge date.
-Phase 4 is not authorized from an unmerged branch candidate.
+MCG3 is accepted at merged candidate
+`de850ea92227e910380eca4fa199945109af9e81` after clean-checkout CI and merge
+on 2026-08-24. Phase 4 is authorized only from this exact pinned baseline.
 
 MCG3 reopens regardless of checklist state if any strategy action calls
 Knowledge, an adapter, workspace, store, or effect directly; any external action
