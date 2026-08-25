@@ -36,21 +36,21 @@ Back to plan: [README](./README.md)
       - [x] 4.1.1.4 Subtask - Reject duplicate, conflicting, stale, unauthorized, unsupported, or over-capacity admissions with closed reasons and no partial workspace or process.
       - [x] 4.1.1.5 Subtask - Start and monitor the runtime through the accepted supervisor path and reconcile start failure without inventing graph state from process state.
 
-  - [ ] 4.2 Section - Coordinate the end-to-end attempt lifecycle.
+  - [x] 4.2 Section - Coordinate the end-to-end attempt lifecycle.
 
     This section makes graph transitions the durable spine around disposable
     process execution, workspaces, model turns, tools, and candidate capture.
 
-    - [ ] 4.2.1 Task {#mcar-p04-lifecycle} [repo: jido_code] [after: {#mcar-p04-admission}] - Implement attempt coordination and durable lifecycle accounting.
+    - [x] 4.2.1 Task {#mcar-p04-lifecycle} [repo: jido_code] [after: {#mcar-p04-admission}] - Implement attempt coordination and durable lifecycle accounting.
 
       This task connects each runtime milestone to explicit graph facts and
       keeps projections reproducible after process loss.
 
-      - [ ] 4.2.1.1 Subtask - Define the admitted, preparing, running, awaiting actor, assembling candidate, candidate ready, verifying, dispositioned, cancelled, and failed lifecycle transitions with legal predecessor sets.
-      - [ ] 4.2.1.2 Subtask - Record workspace, invocation, interaction, tool effect, check, artifact, budget, terminal proposal, and candidate relationships using current attempt/fence identity.
-      - [ ] 4.2.1.3 Subtask - Project status, current wait reason, progress observations, budget use, and evidence links from graph facts without treating UI/cache state as authority.
-      - [ ] 4.2.1.4 Subtask - Make repeated commands and lifecycle callbacks idempotent and reject stale coordinators, agents, workspaces, or directive results.
-      - [ ] 4.2.1.5 Subtask - Preserve causal ordering and attributable timestamps while allowing explicitly marked observations to arrive after their originating effect.
+      - [x] 4.2.1.1 Subtask - Define the admitted, preparing, running, awaiting actor, assembling candidate, candidate ready, verifying, dispositioned, cancelled, and failed lifecycle transitions with legal predecessor sets.
+      - [x] 4.2.1.2 Subtask - Record workspace, invocation, interaction, tool effect, check, artifact, budget, terminal proposal, and candidate relationships using current attempt/fence identity.
+      - [x] 4.2.1.3 Subtask - Project status, current wait reason, progress observations, budget use, and evidence links from graph facts without treating UI/cache state as authority.
+      - [x] 4.2.1.4 Subtask - Make repeated commands and lifecycle callbacks idempotent and reject stale coordinators, agents, workspaces, or directive results.
+      - [x] 4.2.1.5 Subtask - Preserve causal ordering and attributable timestamps while allowing explicitly marked observations to arrive after their originating effect.
 
   - [ ] 4.3 Section - Close immutable candidate artifacts.
 
