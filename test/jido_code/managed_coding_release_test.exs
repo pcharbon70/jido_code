@@ -1,0 +1,30 @@
+defmodule JidoCode.ManagedCodingReleaseTest do
+  use ExUnit.Case, async: true
+
+  alias JidoCode.ManagedCodingRelease
+
+  test "pins the supported single-agent workflow and rejected features" do
+    assert :ok = ManagedCodingRelease.verify()
+    manifest = ManagedCodingRelease.manifest()
+
+    assert manifest.contract_version == "7.0.0"
+    assert manifest.production_profile == "single_agent"
+    assert manifest.specialist_topology == :rejected
+    assert manifest.agent_os == :rejected
+    assert manifest.agent_os_adapter == :absent
+    refute manifest.pod_managers_in_default_supervision
+    assert manifest.merge_authority == :human_only
+    assert :specialist_topology in manifest.disabled_features
+    assert :automatic_merge in manifest.disabled_features
+    assert manifest.supported_workflow |> List.last() == :human_merge
+    assert byte_size(ManagedCodingRelease.digest()) == 64
+  end
+
+  test "keeps evaluation infrastructure outside default production supervision" do
+    {:ok, {_flags, children}} = JidoCode.Runtime.Supervisor.init([])
+    descriptions = Enum.map(children, &inspect/1)
+
+    refute Enum.any?(descriptions, &String.contains?(&1, "ManagedCoding.PodManager"))
+    refute Enum.any?(descriptions, &String.contains?(&1, "ManagedCoding.SpecialistManager"))
+  end
+end

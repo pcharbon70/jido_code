@@ -1,6 +1,6 @@
 # Jido 2.3.2 Managed Coding Compatibility
 
-Status: accepted for the Phase 1 disabled runtime baseline
+Status: accepted for the Phase 7 evaluation-only Pod projection
 
 JidoCode pins Jido exactly to `2.3.2`. The managed coding runtime consumes only
 immutable agent command output, the strategy snapshot contract, AgentServer
@@ -20,9 +20,19 @@ that cache cannot satisfy recovery; recovery starts from graph projections and
 their exact profile, strategy, fence, and reconstruction-watermark pins.
 
 InstanceManager is compatible only with `storage: nil`, an explicit partition,
-and an infinite idle timeout. Specialist pods remain disabled in Phase 1. Pod
-topology, if introduced later, will be a graph-authorized projection rather than
-a durable checkpoint.
+and an infinite idle timeout. Phase 7 additionally pins `Jido.Pod` topology
+construction, reconciliation waves, eager child startup, lookup, signal
+routing, monitor-based child lifecycle, and shutdown through
+`Jido.Agent.InstanceManager`. A managed Pod is evaluation-only: its topology is
+rebuilt from an exact graph projection and is never restored from process,
+registry, ETS, mailbox, or AgentOS state.
+
+The host uses fixed, compiled role modules and manager names. User or model
+values never become atoms, process names, modules, or topology roles. Pod
+messages use the closed, correlated, size-bounded contract in
+`JidoCode.Factory.ManagedCoding.TopologyContract`; unknown fields, changed
+versions, stale fences, missing graph watermarks, and unsupported packet types
+fail closed.
 
 Later Jido patch releases are incompatible by default. Adoption requires a new
 lockfile pin, passing the project-owned compatibility and hostile-boundary

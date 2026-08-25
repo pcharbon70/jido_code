@@ -17,6 +17,12 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibility do
     {Jido.Agent.InstanceManager, :get, 3},
     {Jido.Agent.InstanceManager, :lookup, 3},
     {Jido.Agent.Strategy.Direct, :cmd, 3},
+    {Jido.Pod, :reconcile, 2},
+    {Jido.Pod, :nodes, 1},
+    {Jido.Pod, :lookup_node, 2},
+    {Jido.Pod.Runtime, :teardown_runtime, 2},
+    {Jido.Pod.Topology, :new, 1},
+    {Jido.Pod.Topology, :reconcile_waves, 2},
     {Jido.Signal, :new, 2},
     {JidoCode.Runtime.JidoInstance, :start_agent, 2},
     {JidoCode.Runtime.JidoInstance, :stop_agent, 1}
@@ -40,6 +46,7 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibility do
        %{
          jido_version: actual_version,
          required_exports: @required_exports,
+         pod_projection: :ephemeral_only,
          storage: Jido.Storage.ETS,
          persistence: :ephemeral_only
        }}

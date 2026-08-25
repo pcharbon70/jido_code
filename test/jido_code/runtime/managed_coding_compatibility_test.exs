@@ -7,6 +7,7 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibilityTest do
   alias JidoCode.Runtime.ExecutionAgent
   alias JidoCode.Runtime.JidoInstance
   alias JidoCode.Runtime.ManagedCodingCompatibility, as: Compatibility
+  alias JidoCode.TestSupport.ManagedCodingCompatibilityPod
   alias JidoCode.TestSupport.JidoDirectiveAction
 
   test "pins the exact Jido API surface and exposes bounded strategy snapshots" do
@@ -14,6 +15,7 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibilityTest do
     assert evidence.jido_version == "2.3.2"
     assert evidence.storage == Jido.Storage.ETS
     assert evidence.persistence == :ephemeral_only
+    assert evidence.pod_projection == :ephemeral_only
 
     agent =
       ExecutionAgent.new(
@@ -108,5 +110,66 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibilityTest do
     assert {:ok, ^pid} = InstanceManager.lookup(manager, "partitioned")
     assert {:ok, state} = Jido.AgentServer.state(pid)
     assert state.agent.state.__partition__ == :compatibility
+  end
+
+  test "Jido.Pod starts, discovers, restarts, and shuts down an eager disposable child" do
+    start_supervised!(
+      InstanceManager.child_spec(
+        name: :managed_coding_compatibility_specialists,
+        agent: ExecutionAgent,
+        jido: JidoCode.Runtime.JidoInstance,
+        storage: nil,
+        partition: :managed_coding_specialist,
+        idle_timeout: :infinity
+      )
+    )
+
+    start_supervised!(
+      InstanceManager.child_spec(
+        name: :managed_coding_compatibility_pods,
+        agent: ManagedCodingCompatibilityPod,
+        jido: JidoCode.Runtime.JidoInstance,
+        storage: nil,
+        partition: :managed_coding_pod,
+        idle_timeout: :infinity
+      )
+    )
+
+    assert {:ok, pod_pid} =
+             Jido.Pod.get(:managed_coding_compatibility_pods, "topology-1", initial_state: %{})
+
+    assert {:ok, nodes} = Jido.Pod.nodes(pod_pid)
+    assert %{status: :adopted, running_pid: worker_pid} = nodes["worker"]
+    assert is_pid(worker_pid)
+    assert {:ok, ^worker_pid} = Jido.Pod.lookup_node(pod_pid, "worker")
+
+    Process.exit(worker_pid, :kill)
+
+    assert eventually(fn ->
+             match?(
+               {:ok, replacement} when replacement != worker_pid,
+               Jido.Pod.lookup_node(pod_pid, "worker")
+             )
+           end)
+
+    assert {:ok, %{failed: []}} = Jido.Pod.reconcile(pod_pid)
+    assert {:ok, replacement_pid} = Jido.Pod.lookup_node(pod_pid, "worker")
+    assert replacement_pid != worker_pid
+
+    assert {:ok, %{failures: %{}}} = Jido.Pod.Runtime.teardown_runtime(pod_pid)
+    assert :ok = InstanceManager.stop(:managed_coding_compatibility_pods, "topology-1")
+    assert eventually(fn -> not Process.alive?(pod_pid) end)
+  end
+
+  defp eventually(fun, attempts \\ 50)
+  defp eventually(fun, 0), do: fun.()
+
+  defp eventually(fun, attempts) do
+    if fun.() do
+      true
+    else
+      Process.sleep(10)
+      eventually(fun, attempts - 1)
+    end
   end
 end
