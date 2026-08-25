@@ -35,22 +35,22 @@ Back to plan: [README](./README.md)
       - [x] 6.1.1.4 Subtask - Add startup/admission compatibility checks that reject missing, mismatched, expired, unknown, or unapproved profile components without fallback.
       - [x] 6.1.1.5 Subtask - Define a signed/profile-digested change-control process that forces reevaluation when any material component or limit changes.
 
-  - [ ] 6.2 Section - Build the private evaluation program.
+  - [x] 6.2 Section - Build the private evaluation program.
 
     This section measures useful coding performance alongside authority,
     reliability, isolation, and cost rather than optimizing for patch success
     alone.
 
-    - [ ] 6.2.1 Task {#mcar-p06-evaluation} [repo: jido_code] [after: {#mcar-p06-profile}] - Implement the managed coding evaluation harness and corpus.
+    - [x] 6.2.1 Task {#mcar-p06-evaluation} [repo: jido_code] [after: {#mcar-p06-profile}] - Implement the managed coding evaluation harness and corpus.
 
       This task creates reproducible offline evidence for the exact production
       profile against tasks that resemble intended use.
 
-      - [ ] 6.2.1.1 Subtask - Assemble a versioned private corpus spanning inspect, defect repair, focused feature, test repair, refactor, documentation, abstention, clarification, policy refusal, and unsupported-task cases.
-      - [ ] 6.2.1.2 Subtask - Include representative repository sizes, languages, dependency shapes, ambiguous requests, malicious instructions, flaky checks, failures, cancellations, and recovery points without leaking evaluation answers into prompts.
-      - [ ] 6.2.1.3 Subtask - Implement isolated repeatable runs with exact seeds/parameters, base revisions, clean workspaces, artifact capture, independent verification, and blinded human review where judgment is required.
-      - [ ] 6.2.1.4 Subtask - Score task correctness, regression rate, unsafe action rate, authority violations, unsupported success claims, abstention quality, recovery, latency, resource use, token use, and cost with confidence intervals.
-      - [ ] 6.2.1.5 Subtask - Define blocking thresholds, comparison baselines, sample sizes, variance rules, regression tolerances, and mandatory failure analysis before viewing release results.
+      - [x] 6.2.1.1 Subtask - Assemble a versioned private corpus spanning inspect, defect repair, focused feature, test repair, refactor, documentation, abstention, clarification, policy refusal, and unsupported-task cases.
+      - [x] 6.2.1.2 Subtask - Include representative repository sizes, languages, dependency shapes, ambiguous requests, malicious instructions, flaky checks, failures, cancellations, and recovery points without leaking evaluation answers into prompts.
+      - [x] 6.2.1.3 Subtask - Implement isolated repeatable runs with exact seeds/parameters, base revisions, clean workspaces, artifact capture, independent verification, and blinded human review where judgment is required.
+      - [x] 6.2.1.4 Subtask - Score task correctness, regression rate, unsafe action rate, authority violations, unsupported success claims, abstention quality, recovery, latency, resource use, token use, and cost with confidence intervals.
+      - [x] 6.2.1.5 Subtask - Define blocking thresholds, comparison baselines, sample sizes, variance rules, regression tolerances, and mandatory failure analysis before viewing release results.
 
   - [ ] 6.3 Section - Run a non-authoritative shadow rollout.
 
