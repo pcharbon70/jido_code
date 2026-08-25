@@ -19,21 +19,21 @@ Back to plan: [README](./README.md)
   This phase proves MCG6 by replacing generic capability claims with measured
   behavior for a pinned model, prompt, tools, sandbox, policies, and budgets.
 
-  - [ ] 6.1 Section - Pin the production profile and operating envelope.
+  - [x] 6.1 Section - Pin the production profile and operating envelope.
 
     This section turns all materially variable runtime choices into one
     reviewable, content-addressed release candidate.
 
-    - [ ] 6.1.1 Task {#mcar-p06-profile} [repo: jido_code] [after: {#mcar-p05-phase-receipt}] - Define and validate the initial production runtime profile.
+    - [x] 6.1.1 Task {#mcar-p06-profile} [repo: jido_code] [after: {#mcar-p05-phase-receipt}] - Define and validate the initial production runtime profile.
 
       This task declares exactly what is being evaluated and prevents silent
       provider, policy, tool, or environment drift during rollout.
 
-      - [ ] 6.1.1.1 Subtask - Pin provider/model parameters, prompt templates, context policy, tool registry, model/tool adapters, sandbox image, check registry, credential policy, memory mode, and verifier environment by revision and digest.
-      - [ ] 6.1.1.2 Subtask - Set hard and next-effect limits for time, turns, model calls, tokens, cost, tool calls, output bytes, workspace bytes, changed files, diff size, checks, retries, and clarification rounds.
-      - [ ] 6.1.1.3 Subtask - Define supported repository/task classes, languages, dependency policies, network modes, actor requirements, exclusion rules, and declared unavailable capabilities.
-      - [ ] 6.1.1.4 Subtask - Add startup/admission compatibility checks that reject missing, mismatched, expired, unknown, or unapproved profile components without fallback.
-      - [ ] 6.1.1.5 Subtask - Define a signed/profile-digested change-control process that forces reevaluation when any material component or limit changes.
+      - [x] 6.1.1.1 Subtask - Pin provider/model parameters, prompt templates, context policy, tool registry, model/tool adapters, sandbox image, check registry, credential policy, memory mode, and verifier environment by revision and digest.
+      - [x] 6.1.1.2 Subtask - Set hard and next-effect limits for time, turns, model calls, tokens, cost, tool calls, output bytes, workspace bytes, changed files, diff size, checks, retries, and clarification rounds.
+      - [x] 6.1.1.3 Subtask - Define supported repository/task classes, languages, dependency policies, network modes, actor requirements, exclusion rules, and declared unavailable capabilities.
+      - [x] 6.1.1.4 Subtask - Add startup/admission compatibility checks that reject missing, mismatched, expired, unknown, or unapproved profile components without fallback.
+      - [x] 6.1.1.5 Subtask - Define a signed/profile-digested change-control process that forces reevaluation when any material component or limit changes.
 
   - [ ] 6.2 Section - Build the private evaluation program.
 
