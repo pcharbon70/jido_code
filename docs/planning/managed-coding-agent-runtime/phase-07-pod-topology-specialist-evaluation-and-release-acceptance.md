@@ -35,21 +35,21 @@ Back to plan: [README](./README.md)
       - [x] 7.1.1.4 Subtask - Define closed schemas and size/budget limits for specialist requests, replies, evidence, artifacts, errors, and terminal proposals with full attempt/fence correlation.
       - [x] 7.1.1.5 Subtask - Record compatibility fixtures and fail closed on unsupported or changed Jido/Pod behavior instead of introducing a hidden alternate runtime path.
 
-  - [ ] 7.2 Section - Implement topology reconciliation and bounded delegation.
+  - [x] 7.2 Section - Implement topology reconciliation and bounded delegation.
 
     This section projects declared specialists into supervised processes and
     mediates every delegation through host authority and shared budgets.
 
-    - [ ] 7.2.1 Task {#mcar-p07-reconciliation} [repo: jido_code] [after: {#mcar-p07-topology-contract}] - Implement the managed Pod coordinator and reconciler.
+    - [x] 7.2.1 Task {#mcar-p07-reconciliation} [repo: jido_code] [after: {#mcar-p07-topology-contract}] - Implement the managed Pod coordinator and reconciler.
 
       This task makes specialist processes recoverable execution components and
       prevents peer messages from becoming an ungoverned tool or memory plane.
 
-      - [ ] 7.2.1.1 Subtask - Reconcile desired graph topology to a named supervised Pod with deterministic child identities, monitors, deadlines, restart limits, and no dynamic atom creation.
-      - [ ] 7.2.1.2 Subtask - Admit each delegation through current policy, capability, context, budget, role, attempt, fence, and concurrency checks before starting or signalling a specialist.
-      - [ ] 7.2.1.3 Subtask - Route all specialist model/tool/context/memory effects through the same gateways, registries, workspaces, credentials, and graph accounting accepted in MCG1-MCG6.
-      - [ ] 7.2.1.4 Subtask - Deduct shared and per-role budgets, bound fan-out/depth/message size, reject recursive self-delegation, and prevent specialists from expanding roles or topology.
-      - [ ] 7.2.1.5 Subtask - Reconstruct, cancel, supersede, and quarantine Pod projections using graph facts and fences while containing duplicate, late, stale, forged, and cross-specialist signals.
+      - [x] 7.2.1.1 Subtask - Reconcile desired graph topology to a named supervised Pod with deterministic child identities, monitors, deadlines, restart limits, and no dynamic atom creation.
+      - [x] 7.2.1.2 Subtask - Admit each delegation through current policy, capability, context, budget, role, attempt, fence, and concurrency checks before starting or signalling a specialist.
+      - [x] 7.2.1.3 Subtask - Route all specialist model/tool/context/memory effects through the same gateways, registries, workspaces, credentials, and graph accounting accepted in MCG1-MCG6.
+      - [x] 7.2.1.4 Subtask - Deduct shared and per-role budgets, bound fan-out/depth/message size, reject recursive self-delegation, and prevent specialists from expanding roles or topology.
+      - [x] 7.2.1.5 Subtask - Reconstruct, cancel, supersede, and quarantine Pod projections using graph facts and fences while containing duplicate, late, stale, forged, and cross-specialist signals.
 
   - [ ] 7.3 Section - Evaluate a minimal specialist topology.
 
