@@ -52,22 +52,22 @@ Back to plan: [README](./README.md)
       - [x] 6.2.1.4 Subtask - Score task correctness, regression rate, unsafe action rate, authority violations, unsupported success claims, abstention quality, recovery, latency, resource use, token use, and cost with confidence intervals.
       - [x] 6.2.1.5 Subtask - Define blocking thresholds, comparison baselines, sample sizes, variance rules, regression tolerances, and mandatory failure analysis before viewing release results.
 
-  - [ ] 6.3 Section - Run a non-authoritative shadow rollout.
+  - [x] 6.3 Section - Run a non-authoritative shadow rollout.
 
     This section observes the production profile on real eligible tasks while
     preventing its candidates and decisions from affecting repositories or
     existing delivery outcomes.
 
-    - [ ] 6.3.1 Task {#mcar-p06-shadow} [repo: jido_code] [after: {#mcar-p06-evaluation}] - Implement and operate shadow-mode qualification.
+    - [x] 6.3.1 Task {#mcar-p06-shadow} [repo: jido_code] [after: {#mcar-p06-evaluation}] - Implement and operate shadow-mode qualification.
 
       This task tests production traffic, infrastructure, and operational
       assumptions with zero publication authority.
 
-      - [ ] 6.3.1.1 Subtask - Sample explicitly eligible tasks under tenant/repository policy and create shadow attempts that cannot push branches, open pull requests, alter primary task state, or influence the active implementation.
-      - [ ] 6.3.1.2 Subtask - Apply production data classification, credentials, rate limits, isolation, retention, redaction, and cost accounting even though outputs are non-authoritative.
-      - [ ] 6.3.1.3 Subtask - Compare shadow candidates and dispositions to observed human/production outcomes using delayed blinded scoring and no feedback into the same attempt.
-      - [ ] 6.3.1.4 Subtask - Monitor failure distribution, abstention, clarification demand, capacity, cost, latency, recovery, security events, and cohort-specific regressions over a declared observation window.
-      - [ ] 6.3.1.5 Subtask - Automatically stop shadow admission on threshold breach, evidence gaps, profile drift, isolation failure, unexplained cost growth, or inability to reconstruct results.
+      - [x] 6.3.1.1 Subtask - Sample explicitly eligible tasks under tenant/repository policy and create shadow attempts that cannot push branches, open pull requests, alter primary task state, or influence the active implementation.
+      - [x] 6.3.1.2 Subtask - Apply production data classification, credentials, rate limits, isolation, retention, redaction, and cost accounting even though outputs are non-authoritative.
+      - [x] 6.3.1.3 Subtask - Compare shadow candidates and dispositions to observed human/production outcomes using delayed blinded scoring and no feedback into the same attempt.
+      - [x] 6.3.1.4 Subtask - Monitor failure distribution, abstention, clarification demand, capacity, cost, latency, recovery, security events, and cohort-specific regressions over a declared observation window.
+      - [x] 6.3.1.5 Subtask - Automatically stop shadow admission on threshold breach, evidence gaps, profile drift, isolation failure, unexplained cost growth, or inability to reconstruct results.
 
   - [ ] 6.4 Section - Run a human-reviewed draft-PR pilot.
 
