@@ -35,21 +35,21 @@ Back to plan: [README](./README.md)
       - [x] 5.1.1.4 Subtask - Compare reconstruction watermarks, invocation identities, budgets, candidate digests, and terminal facts before resuming any continuation.
       - [x] 5.1.1.5 Subtask - Quarantine contradictory, incomplete, unverifiable, or future-version evidence and require an authorized resolution instead of guessing.
 
-  - [ ] 5.2 Section - Reconcile retries and ambiguous effects.
+  - [x] 5.2 Section - Reconcile retries and ambiguous effects.
 
     This section distinguishes safe replay from effects whose outcome is
     unknown, preventing a restart from duplicating or fabricating work.
 
-    - [ ] 5.2.1 Task {#mcar-p05-reconciliation} [repo: jido_code] [after: {#mcar-p05-recovery}] - Implement effect-specific retry and ambiguity handling.
+    - [x] 5.2.1 Task {#mcar-p05-reconciliation} [repo: jido_code] [after: {#mcar-p05-recovery}] - Implement effect-specific retry and ambiguity handling.
 
       This task assigns each external operation an explicit idempotency and
       reconciliation contract before automatic retry is permitted.
 
-      - [ ] 5.2.1.1 Subtask - Classify context, model, tool, filesystem, credential, artifact, verifier, interaction, and publication operations as replayable, query-reconcilable, compensatable, or manual-resolution-only.
-      - [ ] 5.2.1.2 Subtask - Persist intent before dispatch and outcome after completion using stable invocation/idempotency keys and current fence identity.
-      - [ ] 5.2.1.3 Subtask - Query authoritative adapters or compare content-addressed state when an outcome is ambiguous; never interpret timeout or caller death as non-execution.
-      - [ ] 5.2.1.4 Subtask - Bound retry count, elapsed time, backoff, jitter, and resource consumption by the admitted profile and record every retry decision.
-      - [ ] 5.2.1.5 Subtask - Route irreconcilable ambiguity to a closed operator interaction that cannot widen capability or erase prior evidence.
+      - [x] 5.2.1.1 Subtask - Classify context, model, tool, filesystem, credential, artifact, verifier, interaction, and publication operations as replayable, query-reconcilable, compensatable, or manual-resolution-only.
+      - [x] 5.2.1.2 Subtask - Persist intent before dispatch and outcome after completion using stable invocation/idempotency keys and current fence identity.
+      - [x] 5.2.1.3 Subtask - Query authoritative adapters or compare content-addressed state when an outcome is ambiguous; never interpret timeout or caller death as non-execution.
+      - [x] 5.2.1.4 Subtask - Bound retry count, elapsed time, backoff, jitter, and resource consumption by the admitted profile and record every retry decision.
+      - [x] 5.2.1.5 Subtask - Route irreconcilable ambiguity to a closed operator interaction that cannot widen capability or erase prior evidence.
 
   - [ ] 5.3 Section - Make cancellation race safe.
 
