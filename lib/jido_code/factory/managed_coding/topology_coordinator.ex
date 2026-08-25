@@ -164,7 +164,7 @@ defmodule JidoCode.Factory.ManagedCoding.TopologyCoordinator do
     manager = Keyword.get(options, :manager, @pod_manager)
 
     case InstanceManager.lookup(manager, contract.topology_iri) do
-      {:ok, pod_pid} -> stop_specialists(pod_pid)
+      {:ok, pod_pid} -> Jido.Pod.Runtime.teardown_runtime(pod_pid, timeout: contract.timeout_ms)
       :error -> :ok
     end
 
@@ -206,20 +206,6 @@ defmodule JidoCode.Factory.ManagedCoding.TopologyCoordinator do
         _error -> {:halt, invalid(:managed_coding_topology_reconciliation)}
       end
     end)
-  end
-
-  defp stop_specialists(pod_pid) do
-    case Jido.Pod.nodes(pod_pid) do
-      {:ok, nodes} ->
-        Enum.each(nodes, fn {_role, snapshot} ->
-          InstanceManager.stop(snapshot.node.manager, snapshot.key,
-            partition: :managed_coding_pods
-          )
-        end)
-
-      _error ->
-        :ok
-    end
   end
 
   defp identities(request) do

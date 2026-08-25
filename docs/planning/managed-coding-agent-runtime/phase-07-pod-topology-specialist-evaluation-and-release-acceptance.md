@@ -51,21 +51,21 @@ Back to plan: [README](./README.md)
       - [x] 7.2.1.4 Subtask - Deduct shared and per-role budgets, bound fan-out/depth/message size, reject recursive self-delegation, and prevent specialists from expanding roles or topology.
       - [x] 7.2.1.5 Subtask - Reconstruct, cancel, supersede, and quarantine Pod projections using graph facts and fences while containing duplicate, late, stale, forged, and cross-specialist signals.
 
-  - [ ] 7.3 Section - Evaluate a minimal specialist topology.
+  - [x] 7.3 Section - Evaluate a minimal specialist topology.
 
     This section tests only narrowly motivated role separation and requires it
     to outperform the qualified single-agent baseline after added complexity.
 
-    - [ ] 7.3.1 Task {#mcar-p07-specialists} [repo: jido_code] [after: {#mcar-p07-reconciliation}] - Implement and evaluate investigator/coder/reviewer specialist roles.
+    - [x] 7.3.1 Task {#mcar-p07-specialists} [repo: jido_code] [after: {#mcar-p07-reconciliation}] - Implement and evaluate investigator/coder/reviewer specialist roles.
 
       This task determines whether independent evidence gathering or review
       improves outcomes without granting any specialist acceptance authority.
 
-      - [ ] 7.3.1.1 Subtask - Define bounded investigator, coder, and reviewer inputs/outputs, tools, context, budgets, termination rules, and explicit unavailable authorities; instantiate only roles required by the selected experiment.
-      - [ ] 7.3.1.2 Subtask - Require source-complete content-addressed evidence packets for handoffs and recompile recipient context rather than sharing opaque process memory or mutable transcripts.
-      - [ ] 7.3.1.3 Subtask - Keep one candidate owner and route disagreement, missing evidence, proposed revisions, and reviewer findings through deterministic host-controlled arbitration.
-      - [ ] 7.3.1.4 Subtask - Compare topology variants to the pinned Phase 6 baseline on the same blinded corpus for correctness, unsafe behavior, regressions, abstention, latency, tokens, cost, recovery, and operator burden.
-      - [ ] 7.3.1.5 Subtask - Predeclare acceptance thresholds and select accept, restrict, or reject; retain the single-agent production profile when gains are insignificant, unsafe, unstable, or operationally disproportionate.
+      - [x] 7.3.1.1 Subtask - Define bounded investigator, coder, and reviewer inputs/outputs, tools, context, budgets, termination rules, and explicit unavailable authorities; instantiate only roles required by the selected experiment.
+      - [x] 7.3.1.2 Subtask - Require source-complete content-addressed evidence packets for handoffs and recompile recipient context rather than sharing opaque process memory or mutable transcripts.
+      - [x] 7.3.1.3 Subtask - Keep one candidate owner and route disagreement, missing evidence, proposed revisions, and reviewer findings through deterministic host-controlled arbitration.
+      - [x] 7.3.1.4 Subtask - Compare topology variants to the pinned Phase 6 baseline on the same blinded corpus for correctness, unsafe behavior, regressions, abstention, latency, tokens, cost, recovery, and operator burden.
+      - [x] 7.3.1.5 Subtask - Predeclare acceptance thresholds and select accept, restrict, or reject; retain the single-agent production profile when gains are insignificant, unsafe, unstable, or operationally disproportionate.
 
   - [ ] 7.4 Section - Decide the role of AgentOS persistence.
 

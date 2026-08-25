@@ -150,6 +150,7 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibilityTest do
     assert {:ok, replacement_pid} = Jido.Pod.lookup_node(pod_pid, "worker")
     assert replacement_pid != worker_pid
 
+    assert {:ok, %{failures: %{}}} = Jido.Pod.Runtime.teardown_runtime(pod_pid)
     assert :ok = InstanceManager.stop(:managed_coding_compatibility_pods, "topology-1")
     assert eventually(fn -> not Process.alive?(pod_pid) end)
   end

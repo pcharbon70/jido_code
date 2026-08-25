@@ -20,6 +20,7 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibility do
     {Jido.Pod, :reconcile, 2},
     {Jido.Pod, :nodes, 1},
     {Jido.Pod, :lookup_node, 2},
+    {Jido.Pod.Runtime, :teardown_runtime, 2},
     {Jido.Pod.Topology, :new, 1},
     {Jido.Pod.Topology, :reconcile_waves, 2},
     {Jido.Signal, :new, 2},
