@@ -1,6 +1,6 @@
 ---
 id: plan.jido_code_managed_coding_agent_runtime
-status: planned
+status: completed
 intent: feature
 source:
   - docs/research/10-managed-coding-agent-runtime.md
@@ -66,12 +66,13 @@ digests, budgets, and references only. `TripleStore` remains the sole durable
 authority for work, leases, attempts, invocations, effects, candidates,
 evidence, decisions, and recovery.
 
-`Jido.Pod` is introduced only after the single-agent profile has real rollout
-evidence. A pod topology is a runtime projection of an accepted graph-owned
-profile revision, not independent durable truth. `Jido.AgentOS` remains an
-evaluation target unless it can run without a competing persistence path.
-JidoHarness remains a distinct delegated-runtime profile and is never nested
-inside the host-controlled coding loop by default.
+Phase 7 evaluated `Jido.Pod` only as a disposable projection of graph-owned
+topology and rejected the specialist profile for production because it did not
+show a material gain over the qualified single-agent baseline. It also rejected
+AgentOS for this release because no measured service benefit justified its
+operational and competing-persistence risk. JidoHarness remains a distinct
+delegated-runtime profile and is never nested inside the host-controlled coding
+loop by default.
 
 ## Gate And Phase Mapping
 
