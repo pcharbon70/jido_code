@@ -145,7 +145,13 @@ defmodule JidoCode.Runtime.ManagedCodingCompatibilityTest do
 
     Process.exit(worker_pid, :kill)
 
-    assert eventually(fn -> Jido.Pod.lookup_node(pod_pid, "worker") == :error end)
+    assert eventually(fn ->
+             match?(
+               {:ok, replacement} when replacement != worker_pid,
+               Jido.Pod.lookup_node(pod_pid, "worker")
+             )
+           end)
+
     assert {:ok, %{failed: []}} = Jido.Pod.reconcile(pod_pid)
     assert {:ok, replacement_pid} = Jido.Pod.lookup_node(pod_pid, "worker")
     assert replacement_pid != worker_pid

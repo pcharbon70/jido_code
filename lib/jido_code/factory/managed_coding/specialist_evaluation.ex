@@ -94,8 +94,7 @@ defmodule JidoCode.Factory.ManagedCoding.SpecialistEvaluation do
   def compile_handoff(packet, recipient_role, context_limit)
       when is_map(packet) and recipient_role in @roles and is_integer(context_limit) and
              context_limit > 0 do
-    with true <- packet[:source_complete] == true,
-         true <- valid_digest?(packet[:packet_digest]),
+    with :ok <- valid_evidence_packet(packet),
          true <- byte_size(packet[:body]) <= context_limit,
          true <- recipient_role != packet[:role] do
       manifest = %{
@@ -239,6 +238,37 @@ defmodule JidoCode.Factory.ManagedCoding.SpecialistEvaluation do
   end
 
   defp sources(_values), do: :error
+
+  defp valid_evidence_packet(packet) do
+    material =
+      Map.take(packet, [
+        :delegation_iri,
+        :attempt_iri,
+        :role,
+        :fence,
+        :source_complete,
+        :sources,
+        :body_digest
+      ])
+
+    valid =
+      exact_keys?(packet, [
+        :delegation_iri,
+        :attempt_iri,
+        :role,
+        :fence,
+        :source_complete,
+        :sources,
+        :body_digest,
+        :packet_digest,
+        :body
+      ]) and packet.source_complete == true and valid_digest?(packet.packet_digest) and
+        packet.packet_digest == digest(material) and packet.body_digest == sha256(packet.body)
+
+    if valid, do: :ok, else: :error
+  rescue
+    _error -> :error
+  end
 
   defp valid_trial?(trial, program, variant) when is_map(trial) do
     exact_keys?(trial, @trial_keys) and Identity.validate_resource(trial.trial_id) == :ok and

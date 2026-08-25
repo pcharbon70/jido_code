@@ -110,9 +110,9 @@ Back to plan: [README](./README.md)
       This task closes MCG7 only when optional complexity is evidence justified
       and the simpler accepted baseline remains safe and operable.
 
-      - [ ] 7.6.1.1 Subtask - Run accepted topology variants and the single-agent fallback through representative end-to-end, recovery, cancellation, ambiguity, security, capacity, verification, publication, and disable scenarios.
-      - [ ] 7.6.1.2 Subtask - Inject Pod/coordinator/specialist loss, topology drift, duplicate/late/forged signals, handoff corruption, budget contention, conflicting recommendations, AgentOS unavailability, and split-state attempts.
-      - [ ] 7.6.1.3 Subtask - Reproduce comparative evaluation, prove rejected/deferred features are unreachable in production, and audit graph reconstruction and human merge authority across every enabled profile.
+      - [x] 7.6.1.1 Subtask - Run accepted topology variants and the single-agent fallback through representative end-to-end, recovery, cancellation, ambiguity, security, capacity, verification, publication, and disable scenarios.
+      - [x] 7.6.1.2 Subtask - Inject Pod/coordinator/specialist loss, topology drift, duplicate/late/forged signals, handoff corruption, budget contention, conflicting recommendations, AgentOS unavailability, and split-state attempts.
+      - [x] 7.6.1.3 Subtask - Reproduce comparative evaluation, prove rejected/deferred features are unreachable in production, and audit graph reconstruction and human merge authority across every enabled profile.
       - [ ] 7.6.1.4 Subtask - Rerun MCG1-MCG6, all plan-wide runtime/security/recovery/evaluation suites, architecture checks, Dialyzer, clean-checkout CI, and `mix precommit`.
 
     - [ ] 7.6.2 Task {#mcar-p07-phase-receipt} [repo: jido_code] [after: {#mcar-p07-integration}] - Publish and pin the Phase 7 receipt and close the plan.

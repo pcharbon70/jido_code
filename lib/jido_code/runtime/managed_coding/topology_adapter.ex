@@ -68,7 +68,6 @@ defmodule JidoCode.Runtime.ManagedCoding.TopologyAdapter do
     case InstanceManager.stop(manager, contract.topology_iri) do
       :ok -> :ok
       {:error, :not_found} -> :ok
-      _error -> invalid(:managed_coding_topology_stop)
     end
   end
 
