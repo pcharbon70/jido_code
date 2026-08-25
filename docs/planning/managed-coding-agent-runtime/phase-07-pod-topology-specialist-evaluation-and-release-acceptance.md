@@ -19,21 +19,21 @@ Back to plan: [README](./README.md)
   This phase proves MCG7 by making topology an explicitly evaluated runtime
   choice, not an assumption or a second source of durable truth.
 
-  - [ ] 7.1 Section - Define topology and compatibility contracts.
+  - [x] 7.1 Section - Define topology and compatibility contracts.
 
     This section specifies exactly how Pod membership, agent state, signals, and
     graph evidence coexist before any specialist workflow is implemented.
 
-    - [ ] 7.1.1 Task {#mcar-p07-topology-contract} [repo: jido_code] [after: {#mcar-p06-phase-receipt}] - Specify and test the graph-projected Jido.Pod topology contract.
+    - [x] 7.1.1 Task {#mcar-p07-topology-contract} [repo: jido_code] [after: {#mcar-p06-phase-receipt}] - Specify and test the graph-projected Jido.Pod topology contract.
 
       This task defines the boundary between disposable process coordination and
       durable task, attempt, delegation, artifact, and decision identity.
 
-      - [ ] 7.1.1.1 Subtask - Pin the evaluated Jido/Jido.Pod versions and probe child startup, identifiers, signal routing, restart, membership, registry, lifecycle, timeout, and shutdown semantics.
-      - [ ] 7.1.1.2 Subtask - Define graph entities and transitions for topology instance, specialist role, delegation, evidence packet, handoff, conflict, completion, cancellation, and reconstruction watermark.
-      - [ ] 7.1.1.3 Subtask - Declare the graph authoritative for topology intent and history while the Pod process tree is only a fenced projection that may be rebuilt.
-      - [ ] 7.1.1.4 Subtask - Define closed schemas and size/budget limits for specialist requests, replies, evidence, artifacts, errors, and terminal proposals with full attempt/fence correlation.
-      - [ ] 7.1.1.5 Subtask - Record compatibility fixtures and fail closed on unsupported or changed Jido/Pod behavior instead of introducing a hidden alternate runtime path.
+      - [x] 7.1.1.1 Subtask - Pin the evaluated Jido/Jido.Pod versions and probe child startup, identifiers, signal routing, restart, membership, registry, lifecycle, timeout, and shutdown semantics.
+      - [x] 7.1.1.2 Subtask - Define graph entities and transitions for topology instance, specialist role, delegation, evidence packet, handoff, conflict, completion, cancellation, and reconstruction watermark.
+      - [x] 7.1.1.3 Subtask - Declare the graph authoritative for topology intent and history while the Pod process tree is only a fenced projection that may be rebuilt.
+      - [x] 7.1.1.4 Subtask - Define closed schemas and size/budget limits for specialist requests, replies, evidence, artifacts, errors, and terminal proposals with full attempt/fence correlation.
+      - [x] 7.1.1.5 Subtask - Record compatibility fixtures and fail closed on unsupported or changed Jido/Pod behavior instead of introducing a hidden alternate runtime path.
 
   - [ ] 7.2 Section - Implement topology reconciliation and bounded delegation.
 
