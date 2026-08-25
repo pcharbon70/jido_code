@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_managed_coding_agent_runtime_phase_04
 parent_plan: plan.jido_code_managed_coding_agent_runtime
-status: in_progress
+status: completed
 intent: feature
 ---
 
@@ -14,7 +14,7 @@ accept, publish, merge, or redefine the work it performed.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Deliver one managed task from admission through independently verified candidate disposition.
+- [x] 4 Phase - Deliver one managed task from admission through independently verified candidate disposition.
 
   This phase proves MCG4 by connecting the accepted runtime to orchestration,
   projections, verification, and publication boundaries without combining
@@ -100,7 +100,7 @@ Back to plan: [README](./README.md)
       - [x] 4.5.1.4 Subtask - Prevent logs, model output, patches, secrets, and cross-tenant identifiers from leaking through summaries, events, URLs, DOM identifiers, or telemetry.
       - [x] 4.5.1.5 Subtask - Verify refresh, reconnect, duplicate submission, and process restart preserve the same graph-derived view and do not repeat effects.
 
-  - [ ] 4.6 Section - Phase 4 Integration Tests.
+  - [x] 4.6 Section - Phase 4 Integration Tests.
 
     This final section exercises admission, a real bounded agent, candidate
     closure, fresh-checkout verification, disposition, and projections as one
@@ -116,7 +116,7 @@ Back to plan: [README](./README.md)
       - [x] 4.6.1.3 Subtask - Prove verification uses the exact immutable candidate in a fresh checkout, all views reconstruct from graph state, and no runtime/verifier can publish, approve, or merge.
       - [x] 4.6.1.4 Subtask - Rerun MCG1-MCG3, complete Factory/Knowledge/runtime/tool/model/verifier/UI suites, architecture checks, Dialyzer, and `mix precommit`.
 
-    - [ ] 4.6.2 Task {#mcar-p04-phase-receipt} [repo: jido_code] [after: {#mcar-p04-integration}] - Publish and pin the Phase 4 receipt.
+    - [x] 4.6.2 Task {#mcar-p04-phase-receipt} [repo: jido_code] [after: {#mcar-p04-integration}] - Publish and pin the Phase 4 receipt.
 
       This task records MCG4 evidence in
       `docs/architecture/managed-coding-phase-04-receipt.md` and authorizes
@@ -125,4 +125,4 @@ Back to plan: [README](./README.md)
       - [x] 4.6.2.1 Subtask - Record service, lifecycle, candidate, verifier, disposition, publication, projection, policy, and environment revisions and digests.
       - [x] 4.6.2.2 Subtask - Attach end-to-end, fresh-checkout, mutation, replay, failure-injection, authorization, and data-isolation evidence with known limitations.
       - [x] 4.6.2.3 Subtask - Keep MCG4 open if candidate material is mutable, producer evidence can self-verify, graph state is incomplete, or any runtime path can publish/merge.
-      - [ ] 4.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 5 and preserve every MCG1-MCG4 reopening condition.
+      - [x] 4.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 5 and preserve every MCG1-MCG4 reopening condition.

@@ -2,10 +2,11 @@
 
 ## Status
 
-This receipt records the Phase 4 implementation candidate verified locally on
-2026-08-25. MCG4 remains **merge-pending** until the implementation pull
-request passes clean-checkout CI and its full merge commit is pinned here.
-Phase 5 is not authorized from a branch or pull-request head.
+This receipt records the Phase 4 implementation candidate verified locally and
+accepted after pull request merge on 2026-08-25. The implementation pull
+request passed clean-checkout CI and merged as
+`24c6b7928d11452a08edf24963df9f0b8788afd2`; MCG4 is accepted at that merged
+candidate and Phase 5 is authorized from this pinned baseline.
 
 The candidate supplies ledger-first admission, a graph-backed lifecycle,
 immutable content-addressed candidate closure, independent fresh-checkout
@@ -23,7 +24,7 @@ handoff, and an authenticated graph-derived operator surface.
 | Section 4.4 | `93f6ae6c6f1788430764f61a27630bbe19482751` - separate candidate verification authority |
 | Section 4.5 | `214d3c073161c3611de1266c36de1dc4b6ec8931` - expose managed coding attempt controls |
 | Section 4.6 | This receipt, workflow coordinator, integration matrix, and final local gates; exact commit recorded by Git history |
-| Merged candidate | **merge-pending** |
+| Merged candidate | `24c6b7928d11452a08edf24963df9f0b8788afd2` - merged 2026-08-25 |
 
 ## Contract Pins
 
@@ -133,7 +134,7 @@ handoff, and an authenticated graph-derived operator surface.
 | Repository-wide `mix precommit` | 822 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 177 existing warnings skipped by policy, zero unignored errors |
-| Clean-checkout CI | **merge-pending** |
+| Clean-checkout CI | Passed on PR #68; verify and Dialyzer succeeded |
 
 ## Known Limits And Disabled Posture
 
@@ -146,16 +147,17 @@ handoff, and an authenticated graph-derived operator surface.
   missing, unauthorized, or mismatched scoped data renders unavailable.
 - Publication remains a separately authorized human workflow. Autonomous
   branch push, approval, publication, and merge remain disabled.
-- MCG4 and the Phase 4 checklist remain open until clean-checkout CI passes and
-  the full merged candidate SHA is pinned in this receipt.
+- MCG4 closed only after PR #68 clean-checkout CI passed and the exact merged
+  candidate was pinned; later discovery of a reopening condition overrides
+  this accepted status.
 
 ## Gate MCG4
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-MCG4 remains open until the implementation pull request passes clean-checkout
-CI, merges, and the full merge-commit SHA is pinned here. Phase 5 is not
-authorized before that closure.
+MCG4 is accepted at merged candidate
+`24c6b7928d11452a08edf24963df9f0b8788afd2` after clean-checkout CI and merge
+on 2026-08-25. Phase 5 is authorized only from this exact pinned baseline.
 
 MCG4 reopens regardless of checklist state if admission starts a process or
 effect before exact identity and evidence commit; process, workspace, cache, or
