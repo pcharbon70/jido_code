@@ -67,21 +67,21 @@ Back to plan: [README](./README.md)
       - [x] 5.3.1.4 Subtask - Resolve races among completion, cancellation, lease expiry, restart, verification, and disposition through explicit compare-and-commit rules.
       - [x] 5.3.1.5 Subtask - Clean or quarantine workspaces and secrets according to retention policy while preserving immutable audit evidence.
 
-  - [ ] 5.4 Section - Enforce hostile-input and tenant isolation controls.
+  - [x] 5.4 Section - Enforce hostile-input and tenant isolation controls.
 
     This section assumes repositories, task text, model output, tool output, and
     dependencies may be malicious and keeps them below host policy authority.
 
-    - [ ] 5.4.1 Task {#mcar-p05-security} [repo: jido_code] [after: {#mcar-p05-cancellation}] - Implement runtime security and adversarial controls.
+    - [x] 5.4.1 Task {#mcar-p05-security} [repo: jido_code] [after: {#mcar-p05-cancellation}] - Implement runtime security and adversarial controls.
 
       This task validates isolation across data, credentials, network, process,
       filesystem, logs, artifacts, and control messages.
 
-      - [ ] 5.4.1.1 Subtask - Enforce tenant/repository scoping on every lookup, command, signal, artifact, cache key, workspace, credential request, projection, and telemetry dimension.
-      - [ ] 5.4.1.2 Subtask - Treat repository instructions, generated code, dependency hooks, tool output, model text, and retrieved memory as untrusted data that cannot alter host policy or adapter selection.
-      - [ ] 5.4.1.3 Subtask - Apply sandbox process, filesystem, network, environment, resource, child-process, and symlink boundaries to both coding tools and independent verification.
-      - [ ] 5.4.1.4 Subtask - Redact and classify secrets and sensitive source in prompts, tool results, logs, signals, errors, artifacts, metrics, and operator views while retaining auditable digests.
-      - [ ] 5.4.1.5 Subtask - Add adversarial fixtures for prompt injection, path traversal, symlink escape, fork bombs, output floods, secret exfiltration, cross-tenant references, forged signals, and dependency lifecycle scripts.
+      - [x] 5.4.1.1 Subtask - Enforce tenant/repository scoping on every lookup, command, signal, artifact, cache key, workspace, credential request, projection, and telemetry dimension.
+      - [x] 5.4.1.2 Subtask - Treat repository instructions, generated code, dependency hooks, tool output, model text, and retrieved memory as untrusted data that cannot alter host policy or adapter selection.
+      - [x] 5.4.1.3 Subtask - Apply sandbox process, filesystem, network, environment, resource, child-process, and symlink boundaries to both coding tools and independent verification.
+      - [x] 5.4.1.4 Subtask - Redact and classify secrets and sensitive source in prompts, tool results, logs, signals, errors, artifacts, metrics, and operator views while retaining auditable digests.
+      - [x] 5.4.1.5 Subtask - Add adversarial fixtures for prompt injection, path traversal, symlink escape, fork bombs, output floods, secret exfiltration, cross-tenant references, forged signals, and dependency lifecycle scripts.
 
   - [ ] 5.5 Section - Bound capacity and expose operational health.
 
