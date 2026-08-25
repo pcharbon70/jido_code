@@ -68,21 +68,21 @@ Back to plan: [README](./README.md)
       - [x] 4.3.1.4 Subtask - Represent empty, partial, conflicting, oversized, policy-blocked, and capture-failed outcomes explicitly instead of coercing them into a successful candidate.
       - [x] 4.3.1.5 Subtask - Prove candidate identity changes for every material input change and remains stable across equivalent deterministic captures.
 
-  - [ ] 4.4 Section - Separate verification, disposition, and publication authority.
+  - [x] 4.4 Section - Separate verification, disposition, and publication authority.
 
     This section evaluates the candidate from a fresh environment and prevents
     the producer's claims or local state from becoming acceptance evidence.
 
-    - [ ] 4.4.1 Task {#mcar-p04-verification} [repo: jido_code] [after: {#mcar-p04-candidate}] - Implement independent verification handoff and disposition.
+    - [x] 4.4.1 Task {#mcar-p04-verification} [repo: jido_code] [after: {#mcar-p04-candidate}] - Implement independent verification handoff and disposition.
 
       This task gives a distinct verifier exact inputs and returns an
       attributable result without granting it publication or merge authority.
 
-      - [ ] 4.4.1.1 Subtask - Materialize the exact base and candidate in a fresh isolated checkout using no mutable producer workspace state, caches, credentials, or unpinned dependencies beyond the accepted profile.
-      - [ ] 4.4.1.2 Subtask - Run required deterministic checks with independent logs, artifacts, resource observations, deadlines, and closed classifications for unavailable or indeterminate checks.
-      - [ ] 4.4.1.3 Subtask - Bind the verification result to candidate digest, verifier profile, toolchain/environment revisions, policy revision, and evidence digests.
-      - [ ] 4.4.1.4 Subtask - Implement accept, reject, indeterminate, expired, and superseded dispositions through authorized policy/actor decisions; never infer acceptance from producer success text.
-      - [ ] 4.4.1.5 Subtask - Keep branch push, pull-request creation, approval, and merge in separately authorized publication workflows with human merge as the initial production rule.
+      - [x] 4.4.1.1 Subtask - Materialize the exact base and candidate in a fresh isolated checkout using no mutable producer workspace state, caches, credentials, or unpinned dependencies beyond the accepted profile.
+      - [x] 4.4.1.2 Subtask - Run required deterministic checks with independent logs, artifacts, resource observations, deadlines, and closed classifications for unavailable or indeterminate checks.
+      - [x] 4.4.1.3 Subtask - Bind the verification result to candidate digest, verifier profile, toolchain/environment revisions, policy revision, and evidence digests.
+      - [x] 4.4.1.4 Subtask - Implement accept, reject, indeterminate, expired, and superseded dispositions through authorized policy/actor decisions; never infer acceptance from producer success text.
+      - [x] 4.4.1.5 Subtask - Keep branch push, pull-request creation, approval, and merge in separately authorized publication workflows with human merge as the initial production rule.
 
   - [ ] 4.5 Section - Expose operator and product projections.
 
