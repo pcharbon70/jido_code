@@ -104,15 +104,15 @@ Back to plan: [README](./README.md)
     This final section subjects the complete workflow to fault injection,
     cancellation races, adversarial repositories, and sustained bounded load.
 
-    - [ ] 5.6.1 Task {#mcar-p05-integration} [repo: jido_code] [after: {#mcar-p05-capacity}] - Execute the resilience, security, and capacity matrix.
+    - [x] 5.6.1 Task {#mcar-p05-integration} [repo: jido_code] [after: {#mcar-p05-capacity}] - Execute the resilience, security, and capacity matrix.
 
       This task closes MCG5 only when faults and hostile inputs fail closed while
       healthy work continues within declared capacity.
 
-      - [ ] 5.6.1.1 Subtask - Kill and restart coordinators, agents, dispatchers, adapters, workspaces, providers, and verifiers before dispatch, during effects, after outcomes, and at every terminal race.
-      - [ ] 5.6.1.2 Subtask - Run ambiguity, duplicate, late-output, cancellation, lease expiry, graph contention, corrupt evidence, tenant-isolation, sandbox-escape, secret-leak, and output-flood fixtures.
-      - [ ] 5.6.1.3 Subtask - Sustain work above configured capacity and prove bounded queues/mailboxes, fair admission, correct rejection/defer semantics, complete cleanup, and useful alerts.
-      - [ ] 5.6.1.4 Subtask - Rerun MCG1-MCG4, complete recovery/security/load/runtime/verifier/UI suites, architecture checks, Dialyzer, and `mix precommit`.
+      - [x] 5.6.1.1 Subtask - Kill and restart coordinators, agents, dispatchers, adapters, workspaces, providers, and verifiers before dispatch, during effects, after outcomes, and at every terminal race.
+      - [x] 5.6.1.2 Subtask - Run ambiguity, duplicate, late-output, cancellation, lease expiry, graph contention, corrupt evidence, tenant-isolation, sandbox-escape, secret-leak, and output-flood fixtures.
+      - [x] 5.6.1.3 Subtask - Sustain work above configured capacity and prove bounded queues/mailboxes, fair admission, correct rejection/defer semantics, complete cleanup, and useful alerts.
+      - [x] 5.6.1.4 Subtask - Rerun MCG1-MCG4, complete recovery/security/load/runtime/verifier/UI suites, architecture checks, Dialyzer, and `mix precommit`.
 
     - [ ] 5.6.2 Task {#mcar-p05-phase-receipt} [repo: jido_code] [after: {#mcar-p05-integration}] - Publish and pin the Phase 5 receipt.
 

@@ -32,7 +32,7 @@ defmodule JidoCode.Factory.ManagedCoding.CapacityConfig do
     do: {:error, AdapterError.new(:invalid_input, :managed_coding_capacity_config)}
 
   defp limits(values, zero_allowed) when is_map(values) do
-    valid_keys = MapSet.new(Map.keys(values)) == MapSet.new(@dimensions)
+    valid_keys = Enum.sort(Map.keys(values)) == Enum.sort(@dimensions)
 
     valid_values =
       Enum.all?(@dimensions, fn dimension ->
