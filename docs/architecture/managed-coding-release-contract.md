@@ -1,6 +1,6 @@
 # Managed Coding Runtime Release Contract
 
-Status: final candidate, merge-pending  
+Status: accepted at merged candidate `00c10cf0e7bd4705773a3fd23bcbcbe1af390580`
 Contract version: `7.0.0`
 
 ## Supported Product Boundary

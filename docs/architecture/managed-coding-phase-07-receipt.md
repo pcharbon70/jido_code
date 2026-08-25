@@ -2,10 +2,12 @@
 
 ## Status
 
-This receipt records the Phase 7 implementation candidate verified locally.
-MCG7 and the overall managed coding plan remain **merge-pending** until the
-implementation pull request passes clean-checkout CI, merges, and its exact
-merge commit and merge date are pinned here.
+This receipt records the Phase 7 implementation candidate verified locally and
+accepted after pull request merge on 2026-08-25. Pull request #74 passed
+clean-checkout CI and merged as
+`00c10cf0e7bd4705773a3fd23bcbcbe1af390580`; MCG7 is accepted at that merged
+candidate and the managed coding runtime plan is complete at its pinned
+baseline.
 
 The candidate pins Jido.Pod behavior, implements a graph-projected bounded
 specialist evaluation runtime, rejects specialist production adoption after an
@@ -24,8 +26,8 @@ verification and human merge authority.
 | Section 7.3 | `73680eb` - specialist roles and comparative evaluation |
 | Section 7.4 | `2c8da8c` - AgentOS decision and runtime-port correction |
 | Section 7.5 | `f905c49` - final release and operating contract |
-| Section 7.6 | This receipt, integration matrix, audit, and final gates; exact commit recorded by Git history |
-| Merged candidate | **merge-pending** |
+| Section 7.6 | `2724323669afec6df82366f50fe3d34dc0bf03ac` - integration matrix and merge-pending receipt |
+| Merged candidate | `00c10cf0e7bd4705773a3fd23bcbcbe1af390580` - merged 2026-08-25 |
 
 ## Contract Pins
 
@@ -111,7 +113,7 @@ verification and human merge authority.
 | Repository-wide `mix precommit` | 886 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 177 existing warnings skipped by policy, zero unignored errors |
-| Clean-checkout CI | Pending implementation pull request |
+| Clean-checkout CI | Passed on PR #74; verify, dependency audit, production asset builds, and Dialyzer succeeded |
 
 ## Known Limits And Disabled Posture
 
@@ -132,12 +134,12 @@ verification and human merge authority.
 
 ## Gate MCG7
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-MCG7 remains open until clean-checkout CI passes, the implementation pull
-request merges, and the exact merged candidate and merge date are pinned in
-this receipt. Only then may Phase 7 and the overall managed coding runtime plan
-be marked complete.
+MCG7 is accepted at merged candidate
+`00c10cf0e7bd4705773a3fd23bcbcbe1af390580` after clean-checkout CI and merge
+on 2026-08-25. The seven-phase managed coding runtime plan is complete at this
+exact pinned baseline.
 
 MCG7 reopens regardless of checklist state if process, Pod, AgentOS, Ecto,
 registry, mailbox, cache, workspace, provider, or scheduler state competes with

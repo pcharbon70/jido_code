@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_managed_coding_agent_runtime_phase_07
 parent_plan: plan.jido_code_managed_coding_agent_runtime
-status: planned
+status: completed
 intent: feature
 ---
 
@@ -14,7 +14,7 @@ the simpler runtime; either result preserves one durable authority model.
 
 Back to plan: [README](./README.md)
 
-- [ ] 7 Phase - Evaluate optional specialist topology and close the managed coding runtime plan.
+- [x] 7 Phase - Evaluate optional specialist topology and close the managed coding runtime plan.
 
   This phase proves MCG7 by making topology an explicitly evaluated runtime
   choice, not an assumption or a second source of durable truth.
@@ -99,13 +99,13 @@ Back to plan: [README](./README.md)
       - [x] 7.5.1.4 Subtask - Audit all public APIs, configuration, feature flags, migrations, dependencies, telemetry, UI language, and documentation for legacy, experimental, or contradictory authority paths.
       - [x] 7.5.1.5 Subtask - Define post-plan SLOs, review cadence, regression gates, upgrade procedure, capacity process, security reevaluation, and future automation prerequisites while preserving human merge authority.
 
-  - [ ] 7.6 Section - Phase 7 Integration Tests.
+  - [x] 7.6 Section - Phase 7 Integration Tests.
 
     This final section validates topology reconstruction, specialist evaluation,
     any AgentOS integration, baseline fallback, and the complete managed coding
     release contract.
 
-    - [ ] 7.6.1 Task {#mcar-p07-integration} [repo: jido_code] [after: {#mcar-p07-release}] - Execute the topology and plan-wide acceptance matrix.
+    - [x] 7.6.1 Task {#mcar-p07-integration} [repo: jido_code] [after: {#mcar-p07-release}] - Execute the topology and plan-wide acceptance matrix.
 
       This task closes MCG7 only when optional complexity is evidence justified
       and the simpler accepted baseline remains safe and operable.
@@ -113,15 +113,15 @@ Back to plan: [README](./README.md)
       - [x] 7.6.1.1 Subtask - Run accepted topology variants and the single-agent fallback through representative end-to-end, recovery, cancellation, ambiguity, security, capacity, verification, publication, and disable scenarios.
       - [x] 7.6.1.2 Subtask - Inject Pod/coordinator/specialist loss, topology drift, duplicate/late/forged signals, handoff corruption, budget contention, conflicting recommendations, AgentOS unavailability, and split-state attempts.
       - [x] 7.6.1.3 Subtask - Reproduce comparative evaluation, prove rejected/deferred features are unreachable in production, and audit graph reconstruction and human merge authority across every enabled profile.
-      - [ ] 7.6.1.4 Subtask - Rerun MCG1-MCG6, all plan-wide runtime/security/recovery/evaluation suites, architecture checks, Dialyzer, clean-checkout CI, and `mix precommit`.
+      - [x] 7.6.1.4 Subtask - Rerun MCG1-MCG6, all plan-wide runtime/security/recovery/evaluation suites, architecture checks, Dialyzer, clean-checkout CI, and `mix precommit`.
 
-    - [ ] 7.6.2 Task {#mcar-p07-phase-receipt} [repo: jido_code] [after: {#mcar-p07-integration}] - Publish and pin the Phase 7 receipt and close the plan.
+    - [x] 7.6.2 Task {#mcar-p07-phase-receipt} [repo: jido_code] [after: {#mcar-p07-integration}] - Publish and pin the Phase 7 receipt and close the plan.
 
       This task records MCG7 evidence in
       `docs/architecture/managed-coding-phase-07-receipt.md` and closes the plan
       only from the pinned merged baseline.
 
-      - [ ] 7.6.2.1 Subtask - Record Pod, topology, specialist, delegation, arbitration, AgentOS decision, final profile, architecture, evaluation, operations, and documentation revisions and digests.
-      - [ ] 7.6.2.2 Subtask - Attach compatibility, reconstruction, fault, comparative evaluation, baseline fallback, authority audit, clean-checkout CI, and unresolved limitation evidence.
-      - [ ] 7.6.2.3 Subtask - Keep MCG7 open if process state competes with the graph, specialist benefit is unproven, baseline fallback fails, enabled persistence splits authority, or any agent gains acceptance/merge authority.
-      - [ ] 7.6.2.4 Subtask - Pin the merged candidate commit, tick the Phase 7 and plan-level completion checkboxes, and preserve every MCG1-MCG7 reopening condition.
+      - [x] 7.6.2.1 Subtask - Record Pod, topology, specialist, delegation, arbitration, AgentOS decision, final profile, architecture, evaluation, operations, and documentation revisions and digests.
+      - [x] 7.6.2.2 Subtask - Attach compatibility, reconstruction, fault, comparative evaluation, baseline fallback, authority audit, clean-checkout CI, and unresolved limitation evidence.
+      - [x] 7.6.2.3 Subtask - Keep MCG7 open if process state competes with the graph, specialist benefit is unproven, baseline fallback fails, enabled persistence splits authority, or any agent gains acceptance/merge authority.
+      - [x] 7.6.2.4 Subtask - Pin the merged candidate commit, tick the Phase 7 and plan-level completion checkboxes, and preserve every MCG1-MCG7 reopening condition.
