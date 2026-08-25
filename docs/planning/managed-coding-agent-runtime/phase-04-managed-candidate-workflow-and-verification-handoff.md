@@ -106,15 +106,15 @@ Back to plan: [README](./README.md)
     closure, fresh-checkout verification, disposition, and projections as one
     production-shaped workflow.
 
-    - [ ] 4.6.1 Task {#mcar-p04-integration} [repo: jido_code] [after: {#mcar-p04-projections}] - Execute the managed candidate workflow matrix.
+    - [x] 4.6.1 Task {#mcar-p04-integration} [repo: jido_code] [after: {#mcar-p04-projections}] - Execute the managed candidate workflow matrix.
 
       This task closes MCG4 only when a candidate can cross every boundary with
       complete evidence and no producer-controlled acceptance path.
 
-      - [ ] 4.6.1.1 Subtask - Run successful, rejected, indeterminate, empty, policy-blocked, clarification, cancellation, and supersession fixtures from admission through final disposition.
-      - [ ] 4.6.1.2 Subtask - Inject process loss, duplicate commands, stale fences, graph contention, capture failure, verifier timeout, corrupt artifacts, checkout mismatch, and UI reconnect at every lifecycle boundary.
-      - [ ] 4.6.1.3 Subtask - Prove verification uses the exact immutable candidate in a fresh checkout, all views reconstruct from graph state, and no runtime/verifier can publish, approve, or merge.
-      - [ ] 4.6.1.4 Subtask - Rerun MCG1-MCG3, complete Factory/Knowledge/runtime/tool/model/verifier/UI suites, architecture checks, Dialyzer, and `mix precommit`.
+      - [x] 4.6.1.1 Subtask - Run successful, rejected, indeterminate, empty, policy-blocked, clarification, cancellation, and supersession fixtures from admission through final disposition.
+      - [x] 4.6.1.2 Subtask - Inject process loss, duplicate commands, stale fences, graph contention, capture failure, verifier timeout, corrupt artifacts, checkout mismatch, and UI reconnect at every lifecycle boundary.
+      - [x] 4.6.1.3 Subtask - Prove verification uses the exact immutable candidate in a fresh checkout, all views reconstruct from graph state, and no runtime/verifier can publish, approve, or merge.
+      - [x] 4.6.1.4 Subtask - Rerun MCG1-MCG3, complete Factory/Knowledge/runtime/tool/model/verifier/UI suites, architecture checks, Dialyzer, and `mix precommit`.
 
     - [ ] 4.6.2 Task {#mcar-p04-phase-receipt} [repo: jido_code] [after: {#mcar-p04-integration}] - Publish and pin the Phase 4 receipt.
 
@@ -122,7 +122,7 @@ Back to plan: [README](./README.md)
       `docs/architecture/managed-coding-phase-04-receipt.md` and authorizes
       Phase 5 only from the pinned merged baseline.
 
-      - [ ] 4.6.2.1 Subtask - Record service, lifecycle, candidate, verifier, disposition, publication, projection, policy, and environment revisions and digests.
-      - [ ] 4.6.2.2 Subtask - Attach end-to-end, fresh-checkout, mutation, replay, failure-injection, authorization, and data-isolation evidence with known limitations.
-      - [ ] 4.6.2.3 Subtask - Keep MCG4 open if candidate material is mutable, producer evidence can self-verify, graph state is incomplete, or any runtime path can publish/merge.
+      - [x] 4.6.2.1 Subtask - Record service, lifecycle, candidate, verifier, disposition, publication, projection, policy, and environment revisions and digests.
+      - [x] 4.6.2.2 Subtask - Attach end-to-end, fresh-checkout, mutation, replay, failure-injection, authorization, and data-isolation evidence with known limitations.
+      - [x] 4.6.2.3 Subtask - Keep MCG4 open if candidate material is mutable, producer evidence can self-verify, graph state is incomplete, or any runtime path can publish/merge.
       - [ ] 4.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 5 and preserve every MCG1-MCG4 reopening condition.
