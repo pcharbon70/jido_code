@@ -2,9 +2,11 @@
 
 ## Status
 
-This receipt records the Phase 6 implementation candidate verified locally.
-MCG6 remains **merge-pending** until the implementation pull request passes
-clean-checkout CI, merges, and its exact merge commit is pinned here.
+This receipt records the Phase 6 implementation candidate verified locally and
+accepted after pull request merge on 2026-08-25. The implementation pull
+request passed clean-checkout CI and merged as
+`3744759726696193ea2fd40f273c06fc2e29c250`; MCG6 is accepted at that merged
+candidate and Phase 7 is authorized from this pinned baseline.
 
 The candidate supplies a signed production profile, a private reproducible
 evaluation program, non-authoritative shadow qualification, a narrowly scoped
@@ -22,7 +24,7 @@ disable/incident operations, and end-to-end qualification reconciliation.
 | Section 6.4 | `a0b9e972c6fe28e6e57cda2c4057a4e65598d74e` - human-reviewed draft pilot |
 | Section 6.5 | `8701ef09bff2e845375243c5edebc3c374bbb7ff` - rollout governance |
 | Section 6.6 | This receipt, audit, integration matrix, and final gates; exact commit recorded by Git history |
-| Merged candidate | **merge-pending** |
+| Merged candidate | `3744759726696193ea2fd40f273c06fc2e29c250` - merged 2026-08-25 |
 
 ## Contract Pins
 
@@ -119,7 +121,7 @@ disable/incident operations, and end-to-end qualification reconciliation.
 | Repository-wide `mix precommit` | 867 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 177 existing warnings skipped by policy, zero unignored errors |
-| Clean-checkout CI | Pending |
+| Clean-checkout CI | Passed on PR #72; verify and Dialyzer succeeded |
 
 ## Known Limits And Disabled Posture
 
@@ -131,15 +133,17 @@ disable/incident operations, and end-to-end qualification reconciliation.
   provider credentials and repository protections remain separately operated.
 - A release decision can accept only the declared envelope. Automatic approval,
   automatic merge, and general multi-agent topology remain disabled.
-- MCG6 closes only after clean-checkout CI and exact merged-candidate pinning.
+- MCG6 closed only after PR #72 clean-checkout CI passed and the exact merged
+  candidate was pinned; later discovery of a reopening condition overrides
+  this accepted status.
 
 ## Gate MCG6
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-MCG6 remains open until the implementation pull request passes clean-checkout
-CI, merges, and the full merge-commit SHA and merge date replace the pending
-provenance above. Phase 7 is not authorized from an unmerged candidate.
+MCG6 is accepted at merged candidate
+`3744759726696193ea2fd40f273c06fc2e29c250` after clean-checkout CI and merge
+on 2026-08-25. Phase 7 is authorized only from this exact pinned baseline.
 
 MCG6 reopens regardless of checklist state if any material profile component,
 parameter, adapter, image, environment, policy, registry, credential mode,

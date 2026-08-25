@@ -14,7 +14,7 @@ has explicit stop, rollback, and evidence requirements.
 
 Back to plan: [README](./README.md)
 
-- [ ] 6 Phase - Qualify and safely roll out one production managed coding profile.
+- [x] 6 Phase - Qualify and safely roll out one production managed coding profile.
 
   This phase proves MCG6 by replacing generic capability claims with measured
   behavior for a pinned model, prompt, tools, sandbox, policies, and budgets.
@@ -101,7 +101,7 @@ Back to plan: [README](./README.md)
       - [x] 6.5.1.4 Subtask - Require an independent release decision to accept, extend, restrict, or reject the profile based on predeclared thresholds and unresolved findings.
       - [x] 6.5.1.5 Subtask - Publish the supported operating envelope and keep automatic approval, automatic merge, and general multi-agent topology outside this phase's authorization.
 
-  - [ ] 6.6 Section - Phase 6 Integration Tests.
+  - [x] 6.6 Section - Phase 6 Integration Tests.
 
     This final section validates the pinned profile, evaluation harness, shadow
     path, pilot publication controls, and emergency operations as one release
@@ -117,13 +117,13 @@ Back to plan: [README](./README.md)
       - [x] 6.6.1.3 Subtask - Audit representative attempts from task admission to human outcome and reconcile every profile, effect, candidate, verification, publication, and operator decision.
       - [x] 6.6.1.4 Subtask - Rerun MCG1-MCG5, complete evaluation/shadow/pilot/operations suites, architecture checks, Dialyzer, and `mix precommit`.
 
-    - [ ] 6.6.2 Task {#mcar-p06-phase-receipt} [repo: jido_code] [after: {#mcar-p06-integration}] - Publish and pin the Phase 6 receipt.
+    - [x] 6.6.2 Task {#mcar-p06-phase-receipt} [repo: jido_code] [after: {#mcar-p06-integration}] - Publish and pin the Phase 6 receipt.
 
       This task records MCG6 evidence in
       `docs/architecture/managed-coding-phase-06-receipt.md` and authorizes
       Phase 7 only from the pinned merged baseline.
 
-      - [ ] 6.6.2.1 Subtask - Record exact profile, corpus, harness, thresholds, shadow window, pilot cohort, publication, operational control, and release-decision revisions and digests.
-      - [ ] 6.6.2.2 Subtask - Attach aggregate and cohort metrics, confidence/variance analysis, failure reviews, drift checks, disable/incident drills, and unresolved limitations.
-      - [ ] 6.6.2.3 Subtask - Keep MCG6 open if thresholds fail, profile identity is incomplete, shadow affects live work, human merge can be bypassed, or emergency controls are unproven.
-      - [ ] 6.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 7 and preserve every MCG1-MCG6 reopening condition.
+      - [x] 6.6.2.1 Subtask - Record exact profile, corpus, harness, thresholds, shadow window, pilot cohort, publication, operational control, and release-decision revisions and digests.
+      - [x] 6.6.2.2 Subtask - Attach aggregate and cohort metrics, confidence/variance analysis, failure reviews, drift checks, disable/incident drills, and unresolved limitations.
+      - [x] 6.6.2.3 Subtask - Keep MCG6 open if thresholds fail, profile identity is incomplete, shadow affects live work, human merge can be bypassed, or emergency controls are unproven.
+      - [x] 6.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 7 and preserve every MCG1-MCG6 reopening condition.
