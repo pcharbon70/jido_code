@@ -19,21 +19,21 @@ Back to plan: [README](./README.md)
   This phase proves MCG5 by preserving the accepted authority model throughout
   operational faults and adversarial conditions.
 
-  - [ ] 5.1 Section - Reconstruct attempts from durable evidence.
+  - [x] 5.1 Section - Reconstruct attempts from durable evidence.
 
     This section treats Jido processes and workspaces as replaceable execution
     material while preserving graph identity and committed progress.
 
-    - [ ] 5.1.1 Task {#mcar-p05-recovery} [repo: jido_code] [after: {#mcar-p04-phase-receipt}] - Implement graph-driven recovery and reconciliation.
+    - [x] 5.1.1 Task {#mcar-p05-recovery} [repo: jido_code] [after: {#mcar-p04-phase-receipt}] - Implement graph-driven recovery and reconciliation.
 
       This task resumes only from facts that can be proven and fences every
       abandoned runtime before a replacement can act.
 
-      - [ ] 5.1.1.1 Subtask - Discover admitted nonterminal attempts, acquire a new lease/fence, and reconstruct strategy state from ordered graph facts plus validated immutable artifacts.
-      - [ ] 5.1.1.2 Subtask - Define recovery behavior for every lifecycle point from pre-workspace admission through candidate verification and final disposition.
-      - [ ] 5.1.1.3 Subtask - Recreate disposable workspaces and agent processes from pinned inputs rather than relying on process snapshots or orphaned filesystem state.
-      - [ ] 5.1.1.4 Subtask - Compare reconstruction watermarks, invocation identities, budgets, candidate digests, and terminal facts before resuming any continuation.
-      - [ ] 5.1.1.5 Subtask - Quarantine contradictory, incomplete, unverifiable, or future-version evidence and require an authorized resolution instead of guessing.
+      - [x] 5.1.1.1 Subtask - Discover admitted nonterminal attempts, acquire a new lease/fence, and reconstruct strategy state from ordered graph facts plus validated immutable artifacts.
+      - [x] 5.1.1.2 Subtask - Define recovery behavior for every lifecycle point from pre-workspace admission through candidate verification and final disposition.
+      - [x] 5.1.1.3 Subtask - Recreate disposable workspaces and agent processes from pinned inputs rather than relying on process snapshots or orphaned filesystem state.
+      - [x] 5.1.1.4 Subtask - Compare reconstruction watermarks, invocation identities, budgets, candidate digests, and terminal facts before resuming any continuation.
+      - [x] 5.1.1.5 Subtask - Quarantine contradictory, incomplete, unverifiable, or future-version evidence and require an authorized resolution instead of guessing.
 
   - [ ] 5.2 Section - Reconcile retries and ambiguous effects.
 
