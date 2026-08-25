@@ -69,21 +69,21 @@ Back to plan: [README](./README.md)
       - [x] 6.3.1.4 Subtask - Monitor failure distribution, abstention, clarification demand, capacity, cost, latency, recovery, security events, and cohort-specific regressions over a declared observation window.
       - [x] 6.3.1.5 Subtask - Automatically stop shadow admission on threshold breach, evidence gaps, profile drift, isolation failure, unexplained cost growth, or inability to reconstruct results.
 
-  - [ ] 6.4 Section - Run a human-reviewed draft-PR pilot.
+  - [x] 6.4 Section - Run a human-reviewed draft-PR pilot.
 
     This section introduces useful repository output only after shadow evidence
     passes, with narrow eligibility and mandatory human review and merge.
 
-    - [ ] 6.4.1 Task {#mcar-p06-pilot} [repo: jido_code] [after: {#mcar-p06-shadow}] - Implement and operate the controlled production pilot.
+    - [x] 6.4.1 Task {#mcar-p06-pilot} [repo: jido_code] [after: {#mcar-p06-shadow}] - Implement and operate the controlled production pilot.
 
       This task exercises the real publication boundary without transferring
       approval or merge authority to the coding runtime.
 
-      - [ ] 6.4.1.1 Subtask - Restrict enrollment by explicit tenant/repository allowlist, supported task class, profile digest, volume ceiling, business hours/on-call coverage, and documented opt-out.
-      - [ ] 6.4.1.2 Subtask - Permit only authorized draft branch/pull-request creation from an accepted candidate and attach exact provenance, verification, limitations, and human-review requirements.
-      - [ ] 6.4.1.3 Subtask - Require a human to review, modify if needed, approve, and merge through existing repository protections; record outcomes without attributing human changes to the candidate.
-      - [ ] 6.4.1.4 Subtask - Measure acceptance, edit distance, review time, escaped regression, reopen/revert, unsafe behavior, abstention, latency, cost, and operator burden by eligible cohort.
-      - [ ] 6.4.1.5 Subtask - Stop new pilot work and quarantine pending publication when any safety, quality, provenance, isolation, cost, or operational threshold is crossed.
+      - [x] 6.4.1.1 Subtask - Restrict enrollment by explicit tenant/repository allowlist, supported task class, profile digest, volume ceiling, business hours/on-call coverage, and documented opt-out.
+      - [x] 6.4.1.2 Subtask - Permit only authorized draft branch/pull-request creation from an accepted candidate and attach exact provenance, verification, limitations, and human-review requirements.
+      - [x] 6.4.1.3 Subtask - Require a human to review, modify if needed, approve, and merge through existing repository protections; record outcomes without attributing human changes to the candidate.
+      - [x] 6.4.1.4 Subtask - Measure acceptance, edit distance, review time, escaped regression, reopen/revert, unsafe behavior, abstention, latency, cost, and operator burden by eligible cohort.
+      - [x] 6.4.1.5 Subtask - Stop new pilot work and quarantine pending publication when any safety, quality, provenance, isolation, cost, or operational threshold is crossed.
 
   - [ ] 6.5 Section - Establish production operations and release decisions.
 
