@@ -52,21 +52,21 @@ Back to plan: [README](./README.md)
       - [x] 4.2.1.4 Subtask - Make repeated commands and lifecycle callbacks idempotent and reject stale coordinators, agents, workspaces, or directive results.
       - [x] 4.2.1.5 Subtask - Preserve causal ordering and attributable timestamps while allowing explicitly marked observations to arrive after their originating effect.
 
-  - [ ] 4.3 Section - Close immutable candidate artifacts.
+  - [x] 4.3 Section - Close immutable candidate artifacts.
 
     This section converts mutable workspace output into a content-addressed,
     reviewable handoff whose exact provenance can be independently reproduced.
 
-    - [ ] 4.3.1 Task {#mcar-p04-candidate} [repo: jido_code] [after: {#mcar-p04-lifecycle}] - Implement candidate assembly and closure.
+    - [x] 4.3.1 Task {#mcar-p04-candidate} [repo: jido_code] [after: {#mcar-p04-lifecycle}] - Implement candidate assembly and closure.
 
       This task freezes all material needed to understand and verify the
       proposed repository change without trusting the live agent process.
 
-      - [ ] 4.3.1.1 Subtask - Capture base revision, repository identity, normalized patch/tree digest, changed-file manifest, generated artifacts, check observations, model/tool lineage, and terminal summary.
-      - [ ] 4.3.1.2 Subtask - Validate path scope, candidate size, file modes, binary policy, forbidden content, secret scanning outcome, and absence of untracked material outside the manifest.
-      - [ ] 4.3.1.3 Subtask - Close the candidate atomically as immutable content-addressed evidence and prevent the workspace or agent from mutating the closed object.
-      - [ ] 4.3.1.4 Subtask - Represent empty, partial, conflicting, oversized, policy-blocked, and capture-failed outcomes explicitly instead of coercing them into a successful candidate.
-      - [ ] 4.3.1.5 Subtask - Prove candidate identity changes for every material input change and remains stable across equivalent deterministic captures.
+      - [x] 4.3.1.1 Subtask - Capture base revision, repository identity, normalized patch/tree digest, changed-file manifest, generated artifacts, check observations, model/tool lineage, and terminal summary.
+      - [x] 4.3.1.2 Subtask - Validate path scope, candidate size, file modes, binary policy, forbidden content, secret scanning outcome, and absence of untracked material outside the manifest.
+      - [x] 4.3.1.3 Subtask - Close the candidate atomically as immutable content-addressed evidence and prevent the workspace or agent from mutating the closed object.
+      - [x] 4.3.1.4 Subtask - Represent empty, partial, conflicting, oversized, policy-blocked, and capture-failed outcomes explicitly instead of coercing them into a successful candidate.
+      - [x] 4.3.1.5 Subtask - Prove candidate identity changes for every material input change and remains stable across equivalent deterministic captures.
 
   - [ ] 4.4 Section - Separate verification, disposition, and publication authority.
 
