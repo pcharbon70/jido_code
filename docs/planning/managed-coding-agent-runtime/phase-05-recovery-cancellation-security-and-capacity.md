@@ -14,7 +14,7 @@ completed or did not complete an external effect.
 
 Back to plan: [README](./README.md)
 
-- [ ] 5 Phase - Make managed coding safely recoverable, cancellable, isolated, and capacity bounded.
+- [x] 5 Phase - Make managed coding safely recoverable, cancellable, isolated, and capacity bounded.
 
   This phase proves MCG5 by preserving the accepted authority model throughout
   operational faults and adversarial conditions.
@@ -99,7 +99,7 @@ Back to plan: [README](./README.md)
       - [x] 5.5.1.4 Subtask - Implement health checks and alerts for stuck attempts, orphaned leases/workspaces, missing outcomes, fence conflicts, evidence gaps, and sustained capacity pressure.
       - [x] 5.5.1.5 Subtask - Document operational limits, degradation modes, safe drain, restart, reconciliation, quarantine, and emergency-disable procedures.
 
-  - [ ] 5.6 Section - Phase 5 Integration Tests.
+  - [x] 5.6 Section - Phase 5 Integration Tests.
 
     This final section subjects the complete workflow to fault injection,
     cancellation races, adversarial repositories, and sustained bounded load.
@@ -114,13 +114,13 @@ Back to plan: [README](./README.md)
       - [x] 5.6.1.3 Subtask - Sustain work above configured capacity and prove bounded queues/mailboxes, fair admission, correct rejection/defer semantics, complete cleanup, and useful alerts.
       - [x] 5.6.1.4 Subtask - Rerun MCG1-MCG4, complete recovery/security/load/runtime/verifier/UI suites, architecture checks, Dialyzer, and `mix precommit`.
 
-    - [ ] 5.6.2 Task {#mcar-p05-phase-receipt} [repo: jido_code] [after: {#mcar-p05-integration}] - Publish and pin the Phase 5 receipt.
+    - [x] 5.6.2 Task {#mcar-p05-phase-receipt} [repo: jido_code] [after: {#mcar-p05-integration}] - Publish and pin the Phase 5 receipt.
 
       This task records MCG5 evidence in
       `docs/architecture/managed-coding-phase-05-receipt.md` and authorizes
       Phase 6 only from the pinned merged baseline.
 
-      - [ ] 5.6.2.1 Subtask - Record recovery, retry, cancellation, sandbox, redaction, quota, scheduler, telemetry, alert, and runbook revisions and digests.
-      - [ ] 5.6.2.2 Subtask - Attach crash-point, ambiguity, race, adversarial, cross-tenant, saturation, cleanup, and restart evidence with measured limits and known limitations.
-      - [ ] 5.6.2.3 Subtask - Keep MCG5 open if recovery guesses effect outcomes, cancellation permits late authority, isolation can be crossed, or capacity is not fail-closed and bounded.
-      - [ ] 5.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 6 and preserve every MCG1-MCG5 reopening condition.
+      - [x] 5.6.2.1 Subtask - Record recovery, retry, cancellation, sandbox, redaction, quota, scheduler, telemetry, alert, and runbook revisions and digests.
+      - [x] 5.6.2.2 Subtask - Attach crash-point, ambiguity, race, adversarial, cross-tenant, saturation, cleanup, and restart evidence with measured limits and known limitations.
+      - [x] 5.6.2.3 Subtask - Keep MCG5 open if recovery guesses effect outcomes, cancellation permits late authority, isolation can be crossed, or capacity is not fail-closed and bounded.
+      - [x] 5.6.2.4 Subtask - Pin the merged candidate commit before authorizing Phase 6 and preserve every MCG1-MCG5 reopening condition.

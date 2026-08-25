@@ -2,9 +2,11 @@
 
 ## Status
 
-This receipt records the Phase 5 implementation candidate verified locally.
-MCG5 remains **merge-pending** until the implementation pull request passes
-clean-checkout CI, merges, and its exact merge commit is pinned here.
+This receipt records the Phase 5 implementation candidate verified locally and
+accepted after pull request merge on 2026-08-25. The implementation pull
+request passed clean-checkout CI and merged as
+`4319ff50fe123a3050bab26b72b3d91826799cf1`; MCG5 is accepted at that merged
+candidate and Phase 6 is authorized from this pinned baseline.
 
 The candidate adds graph-authoritative recovery, explicit effect ambiguity
 contracts, race-safe cancellation, hostile-input and tenant isolation controls,
@@ -21,7 +23,7 @@ bounded fair capacity, low-cardinality health evidence, and an operator runbook.
 | Section 5.4 | `384d45bc08f5f34ed0521315b95e7d18e8c714c1` - hostile-input isolation |
 | Section 5.5 | `8c0417f9b7fb2a3913a0bb2391b9a17fb20f8592` - bounded capacity and health |
 | Section 5.6 | This receipt and integration matrix; exact commit recorded by Git history |
-| Merged candidate | **merge-pending** |
+| Merged candidate | `4319ff50fe123a3050bab26b72b3d91826799cf1` - merged 2026-08-25 |
 
 ## Contract Pins
 
@@ -100,7 +102,7 @@ bounded fair capacity, low-cardinality health evidence, and an operator runbook.
 | Repository-wide `mix precommit` | 846 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 177 existing warnings skipped by policy, zero unignored errors |
-| Clean-checkout CI | Pending |
+| Clean-checkout CI | Passed on PR #70; verify and Dialyzer succeeded |
 
 ## Known Limits And Disabled Posture
 
@@ -111,15 +113,17 @@ bounded fair capacity, low-cardinality health evidence, and an operator runbook.
   Autonomous push, approval, publication, and merge remain disabled.
 - Capacity is a pure scheduler contract for embedding by the durable admission
   service; cross-node quota consensus is not claimed by this phase.
-- MCG5 closes only after clean-checkout CI and exact merged-candidate pinning.
+- MCG5 closed only after PR #70 clean-checkout CI passed and the exact merged
+  candidate was pinned; later discovery of a reopening condition overrides
+  this accepted status.
 
 ## Gate MCG5
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-MCG5 remains open until the implementation pull request passes clean-checkout
-CI, merges, and the full merge-commit SHA and merge date replace the pending
-provenance above. Phase 6 is not authorized from an unmerged candidate.
+MCG5 is accepted at merged candidate
+`4319ff50fe123a3050bab26b72b3d91826799cf1` after clean-checkout CI and merge
+on 2026-08-25. Phase 6 is authorized only from this exact pinned baseline.
 
 MCG5 reopens regardless of checklist state if recovery trusts process,
 workspace, cache, snapshot, or orphan state; reconstruction continues from
