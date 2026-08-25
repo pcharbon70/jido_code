@@ -85,21 +85,21 @@ Back to plan: [README](./README.md)
       - [x] 6.4.1.4 Subtask - Measure acceptance, edit distance, review time, escaped regression, reopen/revert, unsafe behavior, abstention, latency, cost, and operator burden by eligible cohort.
       - [x] 6.4.1.5 Subtask - Stop new pilot work and quarantine pending publication when any safety, quality, provenance, isolation, cost, or operational threshold is crossed.
 
-  - [ ] 6.5 Section - Establish production operations and release decisions.
+  - [x] 6.5 Section - Establish production operations and release decisions.
 
     This section gives accountable operators the evidence and controls needed to
     continue, pause, roll back, or reject the profile.
 
-    - [ ] 6.5.1 Task {#mcar-p06-operations} [repo: jido_code] [after: {#mcar-p06-pilot}] - Implement rollout governance, incident response, and profile disablement.
+    - [x] 6.5.1 Task {#mcar-p06-operations} [repo: jido_code] [after: {#mcar-p06-pilot}] - Implement rollout governance, incident response, and profile disablement.
 
       This task makes production status an explicit authorized decision backed
       by evaluation and pilot evidence.
 
-      - [ ] 6.5.1.1 Subtask - Define accountable owners, approvers, on-call roles, dashboards, alert routes, review cadence, escalation paths, and evidence retention for the managed coding service.
-      - [ ] 6.5.1.2 Subtask - Implement global, tenant, repository, provider, adapter, tool, and profile disable controls that block new effects promptly and preserve recoverable state.
-      - [ ] 6.5.1.3 Subtask - Document incident triage, cancellation/drain, credential revocation, evidence preservation, tenant notification, candidate quarantine, rollback, and safe reenable procedures.
-      - [ ] 6.5.1.4 Subtask - Require an independent release decision to accept, extend, restrict, or reject the profile based on predeclared thresholds and unresolved findings.
-      - [ ] 6.5.1.5 Subtask - Publish the supported operating envelope and keep automatic approval, automatic merge, and general multi-agent topology outside this phase's authorization.
+      - [x] 6.5.1.1 Subtask - Define accountable owners, approvers, on-call roles, dashboards, alert routes, review cadence, escalation paths, and evidence retention for the managed coding service.
+      - [x] 6.5.1.2 Subtask - Implement global, tenant, repository, provider, adapter, tool, and profile disable controls that block new effects promptly and preserve recoverable state.
+      - [x] 6.5.1.3 Subtask - Document incident triage, cancellation/drain, credential revocation, evidence preservation, tenant notification, candidate quarantine, rollback, and safe reenable procedures.
+      - [x] 6.5.1.4 Subtask - Require an independent release decision to accept, extend, restrict, or reject the profile based on predeclared thresholds and unresolved findings.
+      - [x] 6.5.1.5 Subtask - Publish the supported operating envelope and keep automatic approval, automatic merge, and general multi-agent topology outside this phase's authorization.
 
   - [ ] 6.6 Section - Phase 6 Integration Tests.
 
