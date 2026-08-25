@@ -83,21 +83,21 @@ Back to plan: [README](./README.md)
       - [x] 7.4.1.4 Subtask - Test restart, split-state, lag, duplicate, conflict, migration, backup/restore, and disable scenarios and prove graph-only reconstruction still yields the accepted outcome.
       - [x] 7.4.1.5 Subtask - Publish an architecture decision with measured benefit, ownership, operational cost, compatibility pins, reopening conditions, and an explicit adopt/defer/reject result.
 
-  - [ ] 7.5 Section - Finalize the managed runtime release contract.
+  - [x] 7.5 Section - Finalize the managed runtime release contract.
 
     This section consolidates the accepted single-agent baseline and any
     approved optional topology into one supportable product boundary.
 
-    - [ ] 7.5.1 Task {#mcar-p07-release} [repo: jido_code] [after: {#mcar-p07-agentos}] - Publish the final runtime architecture, profiles, and operating contract.
+    - [x] 7.5.1 Task {#mcar-p07-release} [repo: jido_code] [after: {#mcar-p07-agentos}] - Publish the final runtime architecture, profiles, and operating contract.
 
       This task makes the plan's end state explicit, including rejected options
       and the evidence required to revisit them later.
 
-      - [ ] 7.5.1.1 Subtask - Document the final component map, ownership boundaries, durable graph schema, runtime/profile selection, gateway/tool plane, verification/publication split, and supported user workflow.
-      - [ ] 7.5.1.2 Subtask - Mark each proposed specialist topology and AgentOS capability accepted, restricted, deferred, or rejected with its evidence, limitations, and reopening threshold.
-      - [ ] 7.5.1.3 Subtask - Consolidate compatibility pins, profile manifests, schemas, threat model, runbooks, dashboards, evaluation procedures, rollout controls, data handling, and incident ownership.
-      - [ ] 7.5.1.4 Subtask - Audit all public APIs, configuration, feature flags, migrations, dependencies, telemetry, UI language, and documentation for legacy, experimental, or contradictory authority paths.
-      - [ ] 7.5.1.5 Subtask - Define post-plan SLOs, review cadence, regression gates, upgrade procedure, capacity process, security reevaluation, and future automation prerequisites while preserving human merge authority.
+      - [x] 7.5.1.1 Subtask - Document the final component map, ownership boundaries, durable graph schema, runtime/profile selection, gateway/tool plane, verification/publication split, and supported user workflow.
+      - [x] 7.5.1.2 Subtask - Mark each proposed specialist topology and AgentOS capability accepted, restricted, deferred, or rejected with its evidence, limitations, and reopening threshold.
+      - [x] 7.5.1.3 Subtask - Consolidate compatibility pins, profile manifests, schemas, threat model, runbooks, dashboards, evaluation procedures, rollout controls, data handling, and incident ownership.
+      - [x] 7.5.1.4 Subtask - Audit all public APIs, configuration, feature flags, migrations, dependencies, telemetry, UI language, and documentation for legacy, experimental, or contradictory authority paths.
+      - [x] 7.5.1.5 Subtask - Define post-plan SLOs, review cadence, regression gates, upgrade procedure, capacity process, security reevaluation, and future automation prerequisites while preserving human merge authority.
 
   - [ ] 7.6 Section - Phase 7 Integration Tests.
 

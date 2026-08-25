@@ -49,6 +49,17 @@ defmodule JidoCode.Runtime.ManagedCoding.TopologyAdapter do
   def stop(%TopologyContract{} = contract, options) when is_list(options) do
     manager = Keyword.get(options, :manager, @pod_manager)
 
+    case InstanceManager.agent_module(manager) do
+      {:ok, _module} -> stop_running(manager, contract)
+      {:error, :not_found} -> :ok
+    end
+  rescue
+    _error -> invalid(:managed_coding_topology_stop)
+  end
+
+  def stop(_contract, _options), do: invalid(:managed_coding_topology_stop)
+
+  defp stop_running(manager, contract) do
     case InstanceManager.lookup(manager, contract.topology_iri) do
       {:ok, pod_pid} -> Jido.Pod.Runtime.teardown_runtime(pod_pid, timeout: contract.timeout_ms)
       :error -> :ok
@@ -60,8 +71,6 @@ defmodule JidoCode.Runtime.ManagedCoding.TopologyAdapter do
       _error -> invalid(:managed_coding_topology_stop)
     end
   end
-
-  def stop(_contract, _options), do: invalid(:managed_coding_topology_stop)
 
   defp ensure_roles(pod_pid, contract, projection) do
     Enum.reduce_while(contract.roles, {:ok, %{}}, fn role, {:ok, running} ->

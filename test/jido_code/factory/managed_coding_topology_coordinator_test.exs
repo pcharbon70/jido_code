@@ -5,12 +5,36 @@ defmodule JidoCode.Factory.ManagedCodingTopologyCoordinatorTest do
   alias JidoCode.Factory.ManagedCoding.TopologyCoordinator
   alias JidoCode.Runtime.ManagedCoding.SpecialistAgent
   alias JidoCode.Runtime.ManagedCoding.SpecialistManager
+  alias JidoCode.Runtime.ManagedCoding.Pod
+  alias JidoCode.Runtime.ManagedCoding.PodManager
   alias JidoCode.Runtime.ManagedCoding.TopologyAdapter
 
   @digest String.duplicate("a", 64)
   @watermark String.duplicate("b", 64)
 
   setup do
+    start_supervised!(
+      Jido.Agent.InstanceManager.child_spec(
+        name: SpecialistManager,
+        agent: SpecialistAgent,
+        jido: JidoCode.Runtime.JidoInstance,
+        storage: nil,
+        partition: :managed_coding_specialists,
+        idle_timeout: :infinity
+      )
+    )
+
+    start_supervised!(
+      Jido.Agent.InstanceManager.child_spec(
+        name: PodManager,
+        agent: Pod,
+        jido: JidoCode.Runtime.JidoInstance,
+        storage: nil,
+        partition: :managed_coding_pods,
+        idle_timeout: :infinity
+      )
+    )
+
     {:ok, contract} = TopologyContract.new(contract_attributes())
     on_exit(fn -> TopologyCoordinator.stop(contract, runtime: TopologyAdapter) end)
     %{contract: contract}

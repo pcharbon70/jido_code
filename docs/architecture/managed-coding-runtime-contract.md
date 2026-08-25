@@ -2,10 +2,12 @@
 
 ## Status And Scope
 
-Contract version `1.0.0` defines the Phase 1 single-agent boundary. It is an
-additive specialization of the accepted execution and harness contracts. It
-does not enable model calls, coding tools, candidate acceptance, publication,
-or merge.
+Contract version `7.0.0` defines the final managed coding product boundary. It
+retains the graph-authorized single-agent architecture accepted through Phase
+6 and records the Phase 7 specialist and AgentOS decisions. Model and coding
+tool calls are enabled only through the signed production profile and governed
+Factory gateways; candidate acceptance, publication authorization, and merge
+remain separate human-controlled boundaries.
 
 `JidoCode.Factory.ManagedCoding` is the only product-facing runtime API. Its
 closed operations are `admit`, `start`, `steer`, `cancel`, `status`, and
@@ -21,7 +23,7 @@ are prohibited.
 | Tasks, policies, profiles, leases, attempts, invocations, effects, budgets, candidates, evidence, decisions | `TripleStore` through Knowledge commands | Exact bounded projections | Requery the graph |
 | Admission, command ordering, authorization, projections | Factory | Commands and bounded outcomes | Reconcile from graph facts |
 | Phase, local sequence, pending directive correlation, bounded working context | Agent strategy | Current process only | Reconstruct from graph watermark |
-| Pod membership and specialist processes | Disabled projection | None in Phase 1 | No durable topology exists |
+| Pod membership and specialist processes | Rejected production projection | Evaluation-only bounded evidence | Rebuild from graph during explicit qualification only |
 | Provider streams, sandboxes, workspaces, credentials, adapter requests | Integration effect boundary | Minimum effect input | Reconcile by invocation/effect identity |
 
 No field may be jointly authoritative. Digests and IRIs may be copied across
@@ -35,7 +37,7 @@ attempt. A lower token is stale. A higher token supersedes prior processes but
 does not rewrite their history. A different attempt IRI is unrelated even when
 the task is the same.
 
-The supported Phase 1 lifecycle is:
+The supported final single-agent lifecycle is:
 
 ```text
 admitted -> preparing -> running -> awaiting_actor -> running
@@ -50,11 +52,12 @@ or superseded recovery classification rather than reinterpretation.
 
 ## Disabled Posture
 
-Phase 1 keeps all external coding effects disabled. `Jido.Pod` specialists,
-AgentOS/Ecto persistence, Jido hibernate/thaw, managed JidoHarness writes,
-provider-native tools, automatic verification, publication, approval, and
-autonomous merge are unreachable. Jido ETS state is disposable and is never
-evidence that a semantic transition occurred.
+Production keeps `Jido.Pod` specialists, AgentOS/Ecto persistence, Jido
+hibernate/thaw, managed JidoHarness writes, provider-native tools, automatic
+approval, automatic publication, and autonomous merge unreachable. The exact
+single-agent profile may use registered context, model, coding tool, workspace,
+candidate, and verification boundaries accepted in MCG2-MCG6. Jido ETS state
+is disposable and is never evidence that a semantic transition occurred.
 
 ## Dependency And Security Rules
 

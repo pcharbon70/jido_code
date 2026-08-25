@@ -15,6 +15,7 @@ defmodule JidoCode.ReleaseContractTest do
     assert manifest.store_schema == 1
     assert manifest.backend_schema == 2
     assert String.starts_with?(manifest.runtime_contract, "jido:2.3.2/")
+    assert byte_size(manifest.managed_coding) == 64
     assert byte_size(manifest.query_digest) == 64
     assert byte_size(manifest.reasoning_digest) == 64
     assert byte_size(ReleaseContract.digest()) == 64
@@ -31,6 +32,7 @@ defmodule JidoCode.ReleaseContractTest do
              :store_schema,
              :graphs,
              :derived_rebuild,
+             :managed_coding,
              :acceptance
            ]
   end
