@@ -5,7 +5,7 @@ defmodule JidoCode.TestSupport.FakeManagedCoding do
 
   alias JidoCode.Factory.ManagedCoding.Outcome
 
-  for operation <- [:admit, :start, :steer, :cancel, :status, :handoff] do
+  for operation <- [:admit, :start, :steer, :cancel, :status, :await, :handoff] do
     @impl true
     def unquote(operation)(command, options) do
       Outcome.new(%{

@@ -12,5 +12,6 @@ defmodule JidoCode.Factory.Ports.ManagedCoding do
   @callback steer(Command.t(), keyword()) :: result()
   @callback cancel(Command.t(), keyword()) :: result()
   @callback status(Command.t(), keyword()) :: result()
+  @callback await(Command.t(), keyword()) :: result()
   @callback handoff(Command.t(), keyword()) :: result()
 end

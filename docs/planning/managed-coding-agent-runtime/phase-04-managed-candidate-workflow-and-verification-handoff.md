@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_managed_coding_agent_runtime_phase_04
 parent_plan: plan.jido_code_managed_coding_agent_runtime
-status: planned
+status: in_progress
 intent: feature
 ---
 
@@ -20,21 +20,21 @@ Back to plan: [README](./README.md)
   projections, verification, and publication boundaries without combining
   incompatible authorities.
 
-  - [ ] 4.1 Section - Admit and coordinate managed coding attempts.
+  - [x] 4.1 Section - Admit and coordinate managed coding attempts.
 
     This section creates one Factory-owned entry point that resolves authority,
     commits identity, and starts the runtime from an attributable baseline.
 
-    - [ ] 4.1.1 Task {#mcar-p04-admission} [repo: jido_code] [after: {#mcar-p03-phase-receipt}] - Implement the managed coding service and admission transaction.
+    - [x] 4.1.1 Task {#mcar-p04-admission} [repo: jido_code] [after: {#mcar-p03-phase-receipt}] - Implement the managed coding service and admission transaction.
 
       This task establishes a single host-controlled path from an authorized
       task request to a fenced, supervised coding attempt.
 
-      - [ ] 4.1.1.1 Subtask - Define the public Factory command and response contracts for starting, inspecting, steering, cancelling, and awaiting a managed coding attempt.
-      - [ ] 4.1.1.2 Subtask - Resolve tenant, repository, task, actor, policy, runtime profile, snapshot, budget, credential, and capability revisions before admitting work.
-      - [ ] 4.1.1.3 Subtask - Atomically commit attempt identity, lease/fence, resolved inputs, initial lifecycle state, and admission evidence before starting a Jido process or external effect.
-      - [ ] 4.1.1.4 Subtask - Reject duplicate, conflicting, stale, unauthorized, unsupported, or over-capacity admissions with closed reasons and no partial workspace or process.
-      - [ ] 4.1.1.5 Subtask - Start and monitor the runtime through the accepted supervisor path and reconcile start failure without inventing graph state from process state.
+      - [x] 4.1.1.1 Subtask - Define the public Factory command and response contracts for starting, inspecting, steering, cancelling, and awaiting a managed coding attempt.
+      - [x] 4.1.1.2 Subtask - Resolve tenant, repository, task, actor, policy, runtime profile, snapshot, budget, credential, and capability revisions before admitting work.
+      - [x] 4.1.1.3 Subtask - Atomically commit attempt identity, lease/fence, resolved inputs, initial lifecycle state, and admission evidence before starting a Jido process or external effect.
+      - [x] 4.1.1.4 Subtask - Reject duplicate, conflicting, stale, unauthorized, unsupported, or over-capacity admissions with closed reasons and no partial workspace or process.
+      - [x] 4.1.1.5 Subtask - Start and monitor the runtime through the accepted supervisor path and reconcile start failure without inventing graph state from process state.
 
   - [ ] 4.2 Section - Coordinate the end-to-end attempt lifecycle.
 
