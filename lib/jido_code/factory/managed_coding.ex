@@ -12,7 +12,7 @@ defmodule JidoCode.Factory.ManagedCoding do
   alias JidoCode.Factory.ManagedCoding.Command
   alias JidoCode.Factory.ManagedCoding.Outcome
 
-  @operations ~w[admit start steer cancel status handoff]a
+  @operations ~w[admit start steer cancel status await handoff]a
 
   @spec admit(module(), Command.t(), keyword()) :: result()
   def admit(adapter, command, options \\ []), do: dispatch(:admit, adapter, command, options)
@@ -28,6 +28,9 @@ defmodule JidoCode.Factory.ManagedCoding do
 
   @spec status(module(), Command.t(), keyword()) :: result()
   def status(adapter, command, options \\ []), do: dispatch(:status, adapter, command, options)
+
+  @spec await(module(), Command.t(), keyword()) :: result()
+  def await(adapter, command, options \\ []), do: dispatch(:await, adapter, command, options)
 
   @spec handoff(module(), Command.t(), keyword()) :: result()
   def handoff(adapter, command, options \\ []), do: dispatch(:handoff, adapter, command, options)

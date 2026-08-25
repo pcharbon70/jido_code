@@ -11,7 +11,7 @@ defmodule JidoCode.Factory.ManagedCoding.Command do
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Knowledge
 
-  @operations ~w[admit start steer cancel status handoff]a
+  @operations ~w[admit start steer cancel status await handoff]a
   @enforce_keys [
     :operation,
     :command_iri,

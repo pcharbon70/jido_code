@@ -4,7 +4,7 @@ defmodule JidoCode.Factory.ManagedCoding.Outcome do
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Knowledge
 
-  @states ~w[admitted preparing running awaiting_actor candidate_ready cancelling cancelled completed failed rejected]a
+  @states ~w[admitted preparing running awaiting_actor assembling_candidate candidate_ready verifying dispositioned cancelling cancelled completed failed rejected]a
   @enforce_keys [:attempt_iri, :fencing_token, :state, :sequence, :occurred_at, :references]
   defstruct @enforce_keys ++ [:classification]
 
