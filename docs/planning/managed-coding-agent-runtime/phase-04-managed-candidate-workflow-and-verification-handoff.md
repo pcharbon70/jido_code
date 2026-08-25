@@ -84,21 +84,21 @@ Back to plan: [README](./README.md)
       - [x] 4.4.1.4 Subtask - Implement accept, reject, indeterminate, expired, and superseded dispositions through authorized policy/actor decisions; never infer acceptance from producer success text.
       - [x] 4.4.1.5 Subtask - Keep branch push, pull-request creation, approval, and merge in separately authorized publication workflows with human merge as the initial production rule.
 
-  - [ ] 4.5 Section - Expose operator and product projections.
+  - [x] 4.5 Section - Expose operator and product projections.
 
     This section makes runtime progress and evidence understandable without
     creating a second control plane in the interface.
 
-    - [ ] 4.5.1 Task {#mcar-p04-projections} [repo: jido_code] [after: {#mcar-p04-verification}] - Implement managed coding attempt projections and controls.
+    - [x] 4.5.1 Task {#mcar-p04-projections} [repo: jido_code] [after: {#mcar-p04-verification}] - Implement managed coding attempt projections and controls.
 
       This task surfaces durable state, bounded interactions, and candidate
       evidence through existing authenticated product boundaries.
 
-      - [ ] 4.5.1.1 Subtask - Project task, attempt, runtime phase, wait reason, budgets, interactions, tool/check summaries, candidate identity, verification, disposition, and audit evidence from graph queries.
-      - [ ] 4.5.1.2 Subtask - Add authenticated steer, answer, cancel, and retry controls that submit Factory commands with current attempt/fence and explicit confirmation where policy requires it.
-      - [ ] 4.5.1.3 Subtask - Represent delayed, unavailable, indeterminate, cancelled, superseded, and policy-blocked states distinctly from failure or success.
-      - [ ] 4.5.1.4 Subtask - Prevent logs, model output, patches, secrets, and cross-tenant identifiers from leaking through summaries, events, URLs, DOM identifiers, or telemetry.
-      - [ ] 4.5.1.5 Subtask - Verify refresh, reconnect, duplicate submission, and process restart preserve the same graph-derived view and do not repeat effects.
+      - [x] 4.5.1.1 Subtask - Project task, attempt, runtime phase, wait reason, budgets, interactions, tool/check summaries, candidate identity, verification, disposition, and audit evidence from graph queries.
+      - [x] 4.5.1.2 Subtask - Add authenticated steer, answer, cancel, and retry controls that submit Factory commands with current attempt/fence and explicit confirmation where policy requires it.
+      - [x] 4.5.1.3 Subtask - Represent delayed, unavailable, indeterminate, cancelled, superseded, and policy-blocked states distinctly from failure or success.
+      - [x] 4.5.1.4 Subtask - Prevent logs, model output, patches, secrets, and cross-tenant identifiers from leaking through summaries, events, URLs, DOM identifiers, or telemetry.
+      - [x] 4.5.1.5 Subtask - Verify refresh, reconnect, duplicate submission, and process restart preserve the same graph-derived view and do not repeat effects.
 
   - [ ] 4.6 Section - Phase 4 Integration Tests.
 
