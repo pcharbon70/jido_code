@@ -83,21 +83,21 @@ Back to plan: [README](./README.md)
       - [x] 5.4.1.4 Subtask - Redact and classify secrets and sensitive source in prompts, tool results, logs, signals, errors, artifacts, metrics, and operator views while retaining auditable digests.
       - [x] 5.4.1.5 Subtask - Add adversarial fixtures for prompt injection, path traversal, symlink escape, fork bombs, output floods, secret exfiltration, cross-tenant references, forged signals, and dependency lifecycle scripts.
 
-  - [ ] 5.5 Section - Bound capacity and expose operational health.
+  - [x] 5.5 Section - Bound capacity and expose operational health.
 
     This section prevents managed coding workloads from exhausting the host and
     gives operators evidence to shed load before safety degrades.
 
-    - [ ] 5.5.1 Task {#mcar-p05-capacity} [repo: jido_code] [after: {#mcar-p05-security}] - Implement admission back-pressure, quotas, and runtime observability.
+    - [x] 5.5.1 Task {#mcar-p05-capacity} [repo: jido_code] [after: {#mcar-p05-security}] - Implement admission back-pressure, quotas, and runtime observability.
 
       This task connects resource ceilings to admission and scheduling without
       creating unbounded internal queues.
 
-      - [ ] 5.5.1.1 Subtask - Define global, tenant, repository, provider, sandbox, verifier, and adapter concurrency/queue limits with fair scheduling and explicit reserved capacity.
-      - [ ] 5.5.1.2 Subtask - Reject or defer work before durable admission when capacity is unavailable and expire admitted queue positions under bounded policy.
-      - [ ] 5.5.1.3 Subtask - Measure queue age, active attempts, directive latency, budget burn, crashes, retries, ambiguity, cancellation lag, verifier lag, and resource saturation without high-cardinality leaks.
-      - [ ] 5.5.1.4 Subtask - Implement health checks and alerts for stuck attempts, orphaned leases/workspaces, missing outcomes, fence conflicts, evidence gaps, and sustained capacity pressure.
-      - [ ] 5.5.1.5 Subtask - Document operational limits, degradation modes, safe drain, restart, reconciliation, quarantine, and emergency-disable procedures.
+      - [x] 5.5.1.1 Subtask - Define global, tenant, repository, provider, sandbox, verifier, and adapter concurrency/queue limits with fair scheduling and explicit reserved capacity.
+      - [x] 5.5.1.2 Subtask - Reject or defer work before durable admission when capacity is unavailable and expire admitted queue positions under bounded policy.
+      - [x] 5.5.1.3 Subtask - Measure queue age, active attempts, directive latency, budget burn, crashes, retries, ambiguity, cancellation lag, verifier lag, and resource saturation without high-cardinality leaks.
+      - [x] 5.5.1.4 Subtask - Implement health checks and alerts for stuck attempts, orphaned leases/workspaces, missing outcomes, fence conflicts, evidence gaps, and sustained capacity pressure.
+      - [x] 5.5.1.5 Subtask - Document operational limits, degradation modes, safe drain, restart, reconciliation, quarantine, and emergency-disable procedures.
 
   - [ ] 5.6 Section - Phase 5 Integration Tests.
 
