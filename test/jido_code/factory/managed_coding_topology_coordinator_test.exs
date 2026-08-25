@@ -5,20 +5,23 @@ defmodule JidoCode.Factory.ManagedCodingTopologyCoordinatorTest do
   alias JidoCode.Factory.ManagedCoding.TopologyCoordinator
   alias JidoCode.Runtime.ManagedCoding.SpecialistAgent
   alias JidoCode.Runtime.ManagedCoding.SpecialistManager
+  alias JidoCode.Runtime.ManagedCoding.TopologyAdapter
 
   @digest String.duplicate("a", 64)
   @watermark String.duplicate("b", 64)
 
   setup do
     {:ok, contract} = TopologyContract.new(contract_attributes())
-    on_exit(fn -> TopologyCoordinator.stop(contract) end)
+    on_exit(fn -> TopologyCoordinator.stop(contract, runtime: TopologyAdapter) end)
     %{contract: contract}
   end
 
   test "reconciles fixed supervised roles solely from the exact graph projection", %{
     contract: contract
   } do
-    assert {:ok, runtime} = TopologyCoordinator.reconcile(contract, projection())
+    assert {:ok, runtime} =
+             TopologyCoordinator.reconcile(contract, projection(), runtime: TopologyAdapter)
+
     assert runtime.authority == :graph_projection
     assert runtime.persistence == :none
     assert runtime.watermark == @watermark
@@ -32,14 +35,18 @@ defmodule JidoCode.Factory.ManagedCodingTopologyCoordinatorTest do
                state.agent.state.reconstruction_watermark == @watermark
            end)
 
-    assert {:ok, same_runtime} = TopologyCoordinator.reconcile(contract, projection())
+    assert {:ok, same_runtime} =
+             TopologyCoordinator.reconcile(contract, projection(), runtime: TopologyAdapter)
+
     assert same_runtime.pod_pid == runtime.pod_pid
     assert same_runtime.roles == runtime.roles
 
-    assert :ok = TopologyCoordinator.stop(contract)
+    assert :ok = TopologyCoordinator.stop(contract, runtime: TopologyAdapter)
     refute Process.alive?(runtime.pod_pid)
 
-    assert {:ok, rebuilt} = TopologyCoordinator.reconcile(contract, projection())
+    assert {:ok, rebuilt} =
+             TopologyCoordinator.reconcile(contract, projection(), runtime: TopologyAdapter)
+
     assert rebuilt.pod_pid != runtime.pod_pid
     assert rebuilt.watermark == runtime.watermark
   end
@@ -47,7 +54,9 @@ defmodule JidoCode.Factory.ManagedCodingTopologyCoordinatorTest do
   test "admits bounded delegation and routes every effect through existing host gateways", %{
     contract: contract
   } do
-    {:ok, runtime} = TopologyCoordinator.reconcile(contract, projection())
+    {:ok, runtime} =
+      TopologyCoordinator.reconcile(contract, projection(), runtime: TopologyAdapter)
+
     request = request()
 
     assert {:ok, admission} = TopologyCoordinator.admit_delegation(contract, runtime, request)
@@ -75,7 +84,8 @@ defmodule JidoCode.Factory.ManagedCodingTopologyCoordinatorTest do
   test "rejects recursion, fan-out, stale authority, role expansion, and forged signals", %{
     contract: contract
   } do
-    {:ok, runtime} = TopologyCoordinator.reconcile(contract, projection())
+    {:ok, runtime} =
+      TopologyCoordinator.reconcile(contract, projection(), runtime: TopologyAdapter)
 
     invalid = [
       %{request() | parent_role: "coder"},

@@ -67,21 +67,21 @@ Back to plan: [README](./README.md)
       - [x] 7.3.1.4 Subtask - Compare topology variants to the pinned Phase 6 baseline on the same blinded corpus for correctness, unsafe behavior, regressions, abstention, latency, tokens, cost, recovery, and operator burden.
       - [x] 7.3.1.5 Subtask - Predeclare acceptance thresholds and select accept, restrict, or reject; retain the single-agent production profile when gains are insignificant, unsafe, unstable, or operationally disproportionate.
 
-  - [ ] 7.4 Section - Decide the role of AgentOS persistence.
+  - [x] 7.4 Section - Decide the role of AgentOS persistence.
 
     This section resolves whether AgentOS contributes useful runtime services
     without permitting its Ecto state to compete with the knowledge graph.
 
-    - [ ] 7.4.1 Task {#mcar-p07-agentos} [repo: jido_code] [after: {#mcar-p07-specialists}] - Evaluate and record the AgentOS adoption decision.
+    - [x] 7.4.1 Task {#mcar-p07-agentos} [repo: jido_code] [after: {#mcar-p07-specialists}] - Evaluate and record the AgentOS adoption decision.
 
       This task either adopts a narrowly compatible integration or documents why
       the managed runtime will operate without AgentOS persistence.
 
-      - [ ] 7.4.1.1 Subtask - Inventory candidate AgentOS lifecycle, persistence, registry, scheduling, telemetry, and operational capabilities against already accepted JidoCode services.
-      - [ ] 7.4.1.2 Subtask - Reject any design in which AgentOS/Ecto becomes authoritative for task, attempt, topology, delegation, budget, candidate, verification, disposition, or recovery state.
-      - [ ] 7.4.1.3 Subtask - If beneficial, implement only ephemeral services or an explicit graph-backed adapter with one-way authority, complete provenance, reconciliation, retention, and failure semantics.
-      - [ ] 7.4.1.4 Subtask - Test restart, split-state, lag, duplicate, conflict, migration, backup/restore, and disable scenarios and prove graph-only reconstruction still yields the accepted outcome.
-      - [ ] 7.4.1.5 Subtask - Publish an architecture decision with measured benefit, ownership, operational cost, compatibility pins, reopening conditions, and an explicit adopt/defer/reject result.
+      - [x] 7.4.1.1 Subtask - Inventory candidate AgentOS lifecycle, persistence, registry, scheduling, telemetry, and operational capabilities against already accepted JidoCode services.
+      - [x] 7.4.1.2 Subtask - Reject any design in which AgentOS/Ecto becomes authoritative for task, attempt, topology, delegation, budget, candidate, verification, disposition, or recovery state.
+      - [x] 7.4.1.3 Subtask - If beneficial, implement only ephemeral services or an explicit graph-backed adapter with one-way authority, complete provenance, reconciliation, retention, and failure semantics.
+      - [x] 7.4.1.4 Subtask - Test restart, split-state, lag, duplicate, conflict, migration, backup/restore, and disable scenarios and prove graph-only reconstruction still yields the accepted outcome.
+      - [x] 7.4.1.5 Subtask - Publish an architecture decision with measured benefit, ownership, operational cost, compatibility pins, reopening conditions, and an explicit adopt/defer/reject result.
 
   - [ ] 7.5 Section - Finalize the managed runtime release contract.
 

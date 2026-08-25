@@ -7,13 +7,10 @@ defmodule JidoCode.Factory.ManagedCoding.TopologyCoordinator do
   credential, policy, publication, verification, or acceptance capability.
   """
 
-  alias Jido.Agent.InstanceManager
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Factory.ManagedCoding.Identity
   alias JidoCode.Factory.ManagedCoding.TopologyContract
-  alias JidoCode.Runtime.ManagedCodingCompatibility
 
-  @pod_manager JidoCode.Runtime.ManagedCoding.PodManager
   @request_keys ~w[delegation_iri task_iri attempt_iri role fence depth parent_role policy_current capability_ref context_digest profile_digest shared_remaining role_remaining concurrent active_roles]a
   @remaining_keys ~w[messages input_bytes output_bytes tokens cost_microunits timeout_ms]a
   @gateway_routes %{
@@ -30,30 +27,12 @@ defmodule JidoCode.Factory.ManagedCoding.TopologyCoordinator do
 
   def reconcile(%TopologyContract{} = contract, graph_projection, options)
       when is_map(graph_projection) and is_list(options) do
-    with {:ok, compatible} <- ManagedCodingCompatibility.verify(),
-         true <- compatible.jido_version == contract.jido_version,
+    with runtime when is_atom(runtime) <- options[:runtime],
+         true <- runtime?(runtime),
          {:ok, projection} <- TopologyContract.projection(contract, graph_projection),
          true <- projection.desired_state == :active,
-         manager when is_atom(manager) <- Keyword.get(options, :manager, @pod_manager),
-         {:ok, pod_pid} <-
-           Jido.Pod.get(manager, contract.topology_iri,
-             initial_state: %{
-               topology_iri: contract.topology_iri,
-               profile_digest: contract.profile_digest,
-               reconstruction_watermark: projection.watermark
-             }
-           ),
-         {:ok, roles} <- ensure_roles(pod_pid, contract, projection) do
-      {:ok,
-       %{
-         pod_pid: pod_pid,
-         topology_iri: contract.topology_iri,
-         profile_digest: contract.profile_digest,
-         watermark: projection.watermark,
-         roles: roles,
-         authority: :graph_projection,
-         persistence: :none
-       }}
+         {:ok, runtime_projection} <- runtime.reconcile(contract, projection, options) do
+      {:ok, runtime_projection}
     else
       {:error, %AdapterError{} = error} -> {:error, error}
       _invalid -> invalid(:managed_coding_topology_reconciliation)
@@ -155,57 +134,29 @@ defmodule JidoCode.Factory.ManagedCoding.TopologyCoordinator do
     cond do
       expected_role != incoming_role -> :forged
       fence != incoming_fence -> :superseded
-      true -> ManagedCodingCompatibility.signal_sequence(current_sequence, incoming_sequence)
+      incoming_sequence == current_sequence + 1 -> :next
+      incoming_sequence == current_sequence -> :duplicate
+      incoming_sequence < current_sequence -> :stale
+      true -> :gap
     end
   end
 
   @spec stop(TopologyContract.t(), keyword()) :: :ok | {:error, AdapterError.t()}
   def stop(%TopologyContract{} = contract, options \\ []) when is_list(options) do
-    manager = Keyword.get(options, :manager, @pod_manager)
+    case options[:runtime] do
+      runtime when is_atom(runtime) ->
+        if runtime?(runtime),
+          do: runtime.stop(contract, options),
+          else: invalid(:managed_coding_topology_stop)
 
-    case InstanceManager.lookup(manager, contract.topology_iri) do
-      {:ok, pod_pid} -> Jido.Pod.Runtime.teardown_runtime(pod_pid, timeout: contract.timeout_ms)
-      :error -> :ok
-    end
-
-    case InstanceManager.stop(manager, contract.topology_iri) do
-      :ok -> :ok
-      {:error, :not_found} -> :ok
-      _error -> invalid(:managed_coding_topology_stop)
+      _invalid ->
+        invalid(:managed_coding_topology_stop)
     end
   end
 
   @spec unavailable_authorities() :: [atom()]
   def unavailable_authorities do
     [:graph, :policy, :credential, :verification, :acceptance, :publication, :merge, :topology]
-  end
-
-  defp ensure_roles(pod_pid, contract, projection) do
-    roles = Enum.map(contract.roles, & &1.name)
-
-    Enum.reduce_while(roles, {:ok, %{}}, fn role, {:ok, running} ->
-      delegation_iri = contract.topology_iri <> "/projection/" <> role
-
-      initial_state = %{
-        topology_iri: contract.topology_iri,
-        delegation_iri: delegation_iri,
-        task_iri: contract.topology_iri <> "/task",
-        attempt_iri: contract.topology_iri <> "/attempt",
-        role: role,
-        fencing_token: 1,
-        reconstruction_watermark: projection.watermark,
-        sequence: 0
-      }
-
-      case Jido.Pod.ensure_node(pod_pid, role,
-             initial_state: initial_state,
-             timeout: contract.timeout_ms,
-             max_concurrency: contract.max_fan_out
-           ) do
-        {:ok, pid} -> {:cont, {:ok, Map.put(running, role, pid)}}
-        _error -> {:halt, invalid(:managed_coding_topology_reconciliation)}
-      end
-    end)
   end
 
   defp identities(request) do
@@ -236,6 +187,12 @@ defmodule JidoCode.Factory.ManagedCoding.TopologyCoordinator do
   defp budget_key(:cost_microunits), do: :max_cost_microunits
   defp budget_key(:timeout_ms), do: :timeout_ms
   defp debit_message(remaining), do: Map.update!(remaining, :messages, &(&1 - 1))
+
+  defp runtime?(module) do
+    Code.ensure_loaded?(module) and function_exported?(module, :reconcile, 3) and
+      function_exported?(module, :stop, 2)
+  end
+
   defp exact_keys?(map, keys), do: Enum.sort(Map.keys(map)) == Enum.sort(keys)
   defp valid_digest?(value), do: is_binary(value) and Regex.match?(~r/^[a-f0-9]{64}$/, value)
   defp invalid(operation), do: {:error, AdapterError.new(:invalid_input, operation)}
