@@ -51,21 +51,21 @@ Back to plan: [README](./README.md)
       - [x] 5.2.1.4 Subtask - Bound retry count, elapsed time, backoff, jitter, and resource consumption by the admitted profile and record every retry decision.
       - [x] 5.2.1.5 Subtask - Route irreconcilable ambiguity to a closed operator interaction that cannot widen capability or erase prior evidence.
 
-  - [ ] 5.3 Section - Make cancellation race safe.
+  - [x] 5.3 Section - Make cancellation race safe.
 
     This section defines cancellation as a durable protocol spanning the graph,
     process, directive, workspace, credential, and verifier boundaries.
 
-    - [ ] 5.3.1 Task {#mcar-p05-cancellation} [repo: jido_code] [after: {#mcar-p05-reconciliation}] - Implement cancellation and late-output containment.
+    - [x] 5.3.1 Task {#mcar-p05-cancellation} [repo: jido_code] [after: {#mcar-p05-reconciliation}] - Implement cancellation and late-output containment.
 
       This task ensures a cancellation request converges to a terminal outcome
       without allowing stale work to regain authority.
 
-      - [ ] 5.3.1.1 Subtask - Commit cancellation request identity, actor, reason, time, and target fence before signalling runtime components.
-      - [ ] 5.3.1.2 Subtask - Stop new dispatch, revoke credentials/capabilities, cancel queued work, terminate supervised effects after bounded grace, and release capacity deterministically.
-      - [ ] 5.3.1.3 Subtask - Record late or uninterruptible results as non-authoritative observations and prevent them from advancing state, closing candidates, or changing disposition.
-      - [ ] 5.3.1.4 Subtask - Resolve races among completion, cancellation, lease expiry, restart, verification, and disposition through explicit compare-and-commit rules.
-      - [ ] 5.3.1.5 Subtask - Clean or quarantine workspaces and secrets according to retention policy while preserving immutable audit evidence.
+      - [x] 5.3.1.1 Subtask - Commit cancellation request identity, actor, reason, time, and target fence before signalling runtime components.
+      - [x] 5.3.1.2 Subtask - Stop new dispatch, revoke credentials/capabilities, cancel queued work, terminate supervised effects after bounded grace, and release capacity deterministically.
+      - [x] 5.3.1.3 Subtask - Record late or uninterruptible results as non-authoritative observations and prevent them from advancing state, closing candidates, or changing disposition.
+      - [x] 5.3.1.4 Subtask - Resolve races among completion, cancellation, lease expiry, restart, verification, and disposition through explicit compare-and-commit rules.
+      - [x] 5.3.1.5 Subtask - Clean or quarantine workspaces and secrets according to retention policy while preserving immutable audit evidence.
 
   - [ ] 5.4 Section - Enforce hostile-input and tenant isolation controls.
 
