@@ -85,8 +85,8 @@ defmodule JidoCode.Factory.ManagedCoding.ShadowRollout do
          %DateTime{} = outcome_at <- observation[:outcome_observed_at],
          %DateTime{} = scored_at <- observation[:scored_at],
          true <- DateTime.after?(scored_at, outcome_at),
-         true <- observation[:blinded] == true,
-         true <- observation[:feedback_to_attempt] == false,
+         true <- observation[:blinded] === true,
+         true <- no_feedback?(observation[:feedback_to_attempt]),
          :ok <- metric_values(observation[:metrics]),
          :ok <- stop_signals(observation[:signals]) do
       observations = [observation | state.observations]
@@ -119,7 +119,7 @@ defmodule JidoCode.Factory.ManagedCoding.ShadowRollout do
   end
 
   defp eligible?(state, request, now) do
-    state.status == :open and DateTime.compare(now, state.window_start) in [:gt, :eq] and
+    DateTime.compare(now, state.window_start) in [:gt, :eq] and
       DateTime.compare(now, state.window_end) == :lt and request[:tenant_iri] in state.tenant_iris and
       request[:repository_iri] in state.repository_iris and
       request[:task_class] in state.task_classes and
@@ -196,6 +196,7 @@ defmodule JidoCode.Factory.ManagedCoding.ShadowRollout do
   end
 
   defp strings(_values), do: :error
+  defp no_feedback?(value), do: value === false
   defp valid_digest?(value), do: is_binary(value) and Regex.match?(@digest, value)
   defp invalid(operation), do: {:error, AdapterError.new(:invalid_input, operation)}
 end

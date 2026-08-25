@@ -107,15 +107,15 @@ Back to plan: [README](./README.md)
     path, pilot publication controls, and emergency operations as one release
     system.
 
-    - [ ] 6.6.1 Task {#mcar-p06-integration} [repo: jido_code] [after: {#mcar-p06-operations}] - Execute the production qualification and rollout matrix.
+    - [x] 6.6.1 Task {#mcar-p06-integration} [repo: jido_code] [after: {#mcar-p06-operations}] - Execute the production qualification and rollout matrix.
 
       This task closes MCG6 only when the exact profile meets its thresholds and
       can be stopped safely without losing evidence or granting excess authority.
 
-      - [ ] 6.6.1.1 Subtask - Reproduce the evaluation corpus from clean environments, rerun statistical/regression analysis, and prove material profile drift invalidates prior qualification.
-      - [ ] 6.6.1.2 Subtask - Exercise shadow non-interference, pilot eligibility, draft publication, human merge enforcement, threshold stops, disable controls, drain, incident, rollback, and reenable drills.
-      - [ ] 6.6.1.3 Subtask - Audit representative attempts from task admission to human outcome and reconcile every profile, effect, candidate, verification, publication, and operator decision.
-      - [ ] 6.6.1.4 Subtask - Rerun MCG1-MCG5, complete evaluation/shadow/pilot/operations suites, architecture checks, Dialyzer, and `mix precommit`.
+      - [x] 6.6.1.1 Subtask - Reproduce the evaluation corpus from clean environments, rerun statistical/regression analysis, and prove material profile drift invalidates prior qualification.
+      - [x] 6.6.1.2 Subtask - Exercise shadow non-interference, pilot eligibility, draft publication, human merge enforcement, threshold stops, disable controls, drain, incident, rollback, and reenable drills.
+      - [x] 6.6.1.3 Subtask - Audit representative attempts from task admission to human outcome and reconcile every profile, effect, candidate, verification, publication, and operator decision.
+      - [x] 6.6.1.4 Subtask - Rerun MCG1-MCG5, complete evaluation/shadow/pilot/operations suites, architecture checks, Dialyzer, and `mix precommit`.
 
     - [ ] 6.6.2 Task {#mcar-p06-phase-receipt} [repo: jido_code] [after: {#mcar-p06-integration}] - Publish and pin the Phase 6 receipt.
 
