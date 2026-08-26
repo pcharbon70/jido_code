@@ -8,8 +8,8 @@ defmodule JidoCode.ReleaseContractTest do
     manifest = ReleaseContract.manifest()
 
     assert manifest.application == "0.1.0"
-    assert manifest.ontology == "1.3.0"
-    assert manifest.shapes == "1.3.0"
+    assert manifest.ontology == "1.4.0"
+    assert manifest.shapes == "1.4.0"
     assert manifest.query_catalog == "1.7.0"
     assert manifest.graph_registry == "2.4.0"
     assert manifest.store_schema == 1

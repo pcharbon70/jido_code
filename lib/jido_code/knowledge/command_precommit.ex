@@ -43,6 +43,9 @@ defmodule JidoCode.Knowledge.CommandPrecommit do
     relatedEvent acceptedGraph captureProfile captureOutcome contentRepresentation storageLocation
     availabilityState retentionState holdState contentClassification reconstructionStatus
     externalProviderAvailability captureCompleteness
+    delegatedAgentProfile adapterRelease harnessProfile modelAccessProfile runtimeClass
+    deploymentClass authenticationKind billingMode capabilityClass readinessEvidence
+    invocationBeforeEffect
   ])
   @max_guards 100
 

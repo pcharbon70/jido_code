@@ -350,6 +350,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @dataset_export_version "2.6.0"
   @memory_evaluation_version "2.7.0"
   @managed_coding_version "2.8.0"
+  @delegated_agent_version "2.9.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -815,6 +816,47 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       Map.update!(@managed_coding_event, :preconditions, &(&1 ++ [:candidate_handoff_separated]))
   }
   @version_2_8 Map.merge(@version_2_7, @managed_coding_commands)
+  @delegated_agent_commands %{
+    "RegisterDelegatedAdapterRelease" => %{
+      owner: :factory,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [:release_absent, :release_vocabulary_closed, :release_evidence_current]
+    },
+    "RegisterDelegatedAgentProfile" => %{
+      owner: :factory,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [
+        :profile_absent,
+        :delegated_references_exact,
+        :profile_vocabulary_closed,
+        :profile_disabled
+      ]
+    },
+    "TransitionDelegatedAgentProfile" => %{
+      owner: :factory,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [
+        :profile_known,
+        :profile_transition_current,
+        :unique_transition_successor
+      ]
+    },
+    "RecordDelegatedAgentReadiness" => %{
+      owner: :runtime,
+      capability: :harness,
+      graph_families: [:factory_policy],
+      preconditions: [
+        :delegated_profile_exact,
+        :delegated_adapter_exact,
+        :credential_generation_exact,
+        :readiness_observation_absent
+      ]
+    }
+  }
+  @version_2_9 Map.merge(@version_2_8, @delegated_agent_commands)
 
   @spec version() :: String.t()
   def version, do: @version
@@ -855,6 +897,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec managed_coding_version() :: String.t()
   def managed_coding_version, do: @managed_coding_version
 
+  @spec delegated_agent_version() :: String.t()
+  def delegated_agent_version, do: @delegated_agent_version
+
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
 
@@ -877,6 +922,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@dataset_export_version), do: @version_2_6 |> Map.keys() |> Enum.sort()
   def names(@memory_evaluation_version), do: @version_2_7 |> Map.keys() |> Enum.sort()
   def names(@managed_coding_version), do: @version_2_8 |> Map.keys() |> Enum.sort()
+  def names(@delegated_agent_version), do: @version_2_9 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -1051,6 +1097,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_2_8, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @managed_coding_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @delegated_agent_version) when is_binary(name) do
+    case Map.fetch(@version_2_9, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @delegated_agent_version})}
 
       :error ->
         invalid(:command_type)

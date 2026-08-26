@@ -1,0 +1,58 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/shapes/1.4.0>
+  a sh:ShapesGraph ;
+  jf:shapeVersion "1.4.0" ;
+  rdfs:comment "Closed delegated release, profile, and readiness shapes. Cross-resource compatibility, current transition heads, signature trust, and expiry are additionally enforced by semantic commands and resolution." .
+
+jfs:DelegatedAdapterReleaseShape a sh:NodeShape ;
+  sh:targetClass jf:DelegatedAdapterRelease ;
+  sh:property jfs:AdapterProviderProperty, jfs:AdapterKeyProperty,
+    jfs:ReleaseRevisionProperty, jfs:ExecutableRegistryKeyProperty,
+    jfs:PromptTransportProperty, jfs:ReleaseDigestProperty,
+    jfs:SignedDigestProperty, jfs:ApprovedAtProperty, jfs:ExpiresAtProperty .
+
+jfs:DelegatedAgentProfileShape a sh:NodeShape ;
+  sh:targetClass jf:DelegatedAgentProfile ;
+  sh:property jfs:ProfileRevisionProperty, jfs:ProfileDigestProperty,
+    jfs:RuntimeClassProperty, jfs:AdapterReleaseProperty,
+    jfs:DeploymentClassProperty, jfs:PromptTransportProperty,
+    jfs:CapabilityClassProperty, jfs:ApprovedAtProperty, jfs:ExpiresAtProperty .
+
+jfs:DelegatedAgentReadinessShape a sh:NodeShape ;
+  sh:targetClass jf:DelegatedAgentReadiness ;
+  sh:property jfs:ValidForProperty, jfs:AdapterReleaseProperty,
+    jfs:ObservationDigestProperty, jfs:CredentialGenerationProperty,
+    jfs:WorkerReadyProperty, jfs:NetworkReadyProperty,
+    jfs:AuthenticationReadyProperty, jfs:CandidateReadyProperty,
+    jfs:VerifierReadyProperty, jfs:GeneratedAtProperty, jfs:ExpiresAtProperty .
+
+jfs:AdapterProviderProperty a sh:PropertyShape ; sh:path jf:adapterProvider ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:AdapterKeyProperty a sh:PropertyShape ; sh:path jf:adapterKey ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 64 .
+jfs:ReleaseRevisionProperty a sh:PropertyShape ; sh:path jf:releaseRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:minInclusive 1 .
+jfs:ExecutableRegistryKeyProperty a sh:PropertyShape ; sh:path jf:executableRegistryKey ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 64 .
+jfs:PromptTransportProperty a sh:PropertyShape ; sh:path jf:promptTransport ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:pattern "(Stdin|ProtectedFile)$" .
+jfs:ReleaseDigestProperty a sh:PropertyShape ; sh:path jf:releaseDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:SignedDigestProperty a sh:PropertyShape ; sh:path jf:signedDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:ProfileRevisionProperty a sh:PropertyShape ; sh:path jf:profileRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:minInclusive 1 .
+jfs:ProfileDigestProperty a sh:PropertyShape ; sh:path jf:profileDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:RuntimeClassProperty a sh:PropertyShape ; sh:path jf:runtimeClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue jfc:DelegatedCli .
+jfs:AdapterReleaseProperty a sh:PropertyShape ; sh:path jf:adapterRelease ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:DeploymentClassProperty a sh:PropertyShape ; sh:path jf:deploymentClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:pattern "(DeveloperLocal|ManagedFleet)$" .
+jfs:CapabilityClassProperty a sh:PropertyShape ; sh:path jf:capabilityClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ApprovedAtProperty a sh:PropertyShape ; sh:path jf:approvedAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:ExpiresAtProperty a sh:PropertyShape ; sh:path jf:expiresAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:ValidForProperty a sh:PropertyShape ; sh:path jf:validFor ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ObservationDigestProperty a sh:PropertyShape ; sh:path jf:observationDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:CredentialGenerationProperty a sh:PropertyShape ; sh:path jf:credentialGeneration ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:minInclusive 1 .
+jfs:WorkerReadyProperty a sh:PropertyShape ; sh:path jf:workerReady ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfs:NetworkReadyProperty a sh:PropertyShape ; sh:path jf:networkReady ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfs:AuthenticationReadyProperty a sh:PropertyShape ; sh:path jf:authenticationReady ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfs:CandidateReadyProperty a sh:PropertyShape ; sh:path jf:candidateReady ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfs:VerifierReadyProperty a sh:PropertyShape ; sh:path jf:verifierReady ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean .
+jfs:GeneratedAtProperty a sh:PropertyShape ; sh:path <http://www.w3.org/ns/prov#generatedAtTime> ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .

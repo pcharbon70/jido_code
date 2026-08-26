@@ -26,7 +26,7 @@ defmodule JidoCode.Knowledge.CommandContractTest do
     assert {:ok, %{version: "2.0.0"}} =
              CommandRegistry.resolve("ProposeGoal", "2.0.0")
 
-    assert {:error, %Error{kind: :incompatible}} =
+    assert {:ok, %{version: "2.9.0"}} =
              CommandRegistry.resolve("ProposeGoal", "2.9.0")
   end
 

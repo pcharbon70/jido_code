@@ -124,6 +124,107 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:selectable_agent_offerings_by_scope) do
+    """
+    SELECT ?profile ?displayName ?provider ?deployment ?billing ?capabilityClass ?rollout ?profileDigest ?transition ?state ?profileStateRevision ?readiness ?observed ?expires WHERE {
+      GRAPH {{graph}} {
+        ?profile a <#{@jf}DelegatedAgentProfile> ;
+                 <#{@jf}displayName> ?displayName ;
+                 <#{@jf}profileProvider> ?provider ;
+                 <#{@jf}deploymentClass> ?deployment ;
+                 <#{@jf}billingMode> ?billing ;
+                 <#{@jf}capabilityClass> ?capabilityClass ;
+                 <#{@jf}rolloutStage> ?rollout ;
+                 <#{@jf}profileDigest> ?profileDigest ;
+                 <#{@jf}boundActor> {{actor}} ;
+                 <#{@jf}boundTenant> {{tenant}} ;
+                 <#{@jf}boundRepository> {{repository}} ;
+                 <#{@jf}boundCapability> {{capability}} ;
+                 <#{@jf}taskClass> {{task_class}} ;
+                 <#{@jf}languageClass> {{language_class}} ;
+                 <#{@jf}expiresAt> ?profileExpires .
+        ?transition a <#{@jf}StateTransition> ;
+                    <#{@jf}transitionSubject> ?profile ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?profileStateRevision .
+        ?readiness a <#{@jf}DelegatedAgentReadiness> ;
+                   <#{@jf}validFor> ?profile ;
+                   <#{@prov}generatedAtTime> ?observed ;
+                   <#{@jf}expiresAt> ?expires ;
+                   <#{@jf}workerReady> true ;
+                   <#{@jf}networkReady> true ;
+                   <#{@jf}authenticationReady> true ;
+                   <#{@jf}candidateReady> true ;
+                   <#{@jf}verifierReady> true .
+        FILTER(?profileExpires > {{instant}} && ?observed <= {{instant}} && ?expires > {{instant}})
+      }
+    }
+    ORDER BY ?displayName ?profile
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:delegated_agent_profile_detail) do
+    """
+    SELECT ?predicate ?value WHERE {
+      GRAPH {{graph}} {
+        {{resource}} a <#{@jf}DelegatedAgentProfile> ; ?predicate ?value .
+        FILTER(?predicate != <#{@jf}executableRegistryKey> && ?predicate != <#{@jf}credentialReference>)
+      }
+    }
+    ORDER BY ?predicate ?value
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:delegated_agent_readiness_by_profile) do
+    """
+    SELECT ?readiness ?profileDigest ?adapter ?releaseDigest ?cliVersion ?credentialGeneration ?workerRevision ?sandboxRevision ?networkRevision ?verifierRevision ?candidateRevision ?workerReady ?networkReady ?authenticationReady ?candidateReady ?verifierReady ?observed ?expires WHERE {
+      GRAPH {{graph}} {
+        ?readiness a <#{@jf}DelegatedAgentReadiness> ;
+                   <#{@jf}validFor> {{resource}} ;
+                   <#{@jf}profileDigest> ?profileDigest ;
+                   <#{@jf}adapterRelease> ?adapter ;
+                   <#{@jf}releaseDigest> ?releaseDigest ;
+                   <#{@jf}cliVersion> ?cliVersion ;
+                   <#{@jf}credentialGeneration> ?credentialGeneration ;
+                   <#{@jf}workerRevision> ?workerRevision ;
+                   <#{@jf}sandboxProfileRevision> ?sandboxRevision ;
+                   <#{@jf}networkPolicyRevision> ?networkRevision ;
+                   <#{@jf}verificationProfileRevision> ?verifierRevision ;
+                   <#{@jf}candidateProtocolRevision> ?candidateRevision ;
+                   <#{@jf}workerReady> ?workerReady ;
+                   <#{@jf}networkReady> ?networkReady ;
+                   <#{@jf}authenticationReady> ?authenticationReady ;
+                   <#{@jf}candidateReady> ?candidateReady ;
+                   <#{@jf}verifierReady> ?verifierReady ;
+                   <#{@prov}generatedAtTime> ?observed ;
+                   <#{@jf}expiresAt> ?expires .
+        FILTER(?observed <= {{instant}} && ?expires > {{instant}})
+      }
+    }
+    ORDER BY DESC(?observed)
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:delegated_agent_profile_history) do
+    """
+    SELECT ?transition ?state ?revision ?predecessor ?supersedes WHERE {
+      GRAPH {{graph}} {
+        ?transition a <#{@jf}StateTransition> ;
+                    <#{@jf}transitionSubject> {{resource}} ;
+                    <#{@jf}nextState> ?state ;
+                    <#{@jf}subjectRevision> ?revision .
+        OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+        OPTIONAL { {{resource}} <#{@jf}supersedes> ?supersedes }
+      }
+    }
+    ORDER BY ?revision
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:resource_description) do
     """
     CONSTRUCT { {{resource}} ?predicate ?value }

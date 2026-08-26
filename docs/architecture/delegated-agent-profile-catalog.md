@@ -16,7 +16,7 @@ sessions as durable authority. It defines the semantic profile, closed adapter
 registry, lifecycle, catalog projection, and exact selection rules needed to
 move beyond the current Pi deny-all and read-only developer-local profiles.
 
-This specification proposes additive resources and new contract revisions. It
+This specification defines additive resources and new contract revisions. It
 does not reinterpret an existing `HarnessProfile` or enable a blocked adapter.
 
 ## Terms
