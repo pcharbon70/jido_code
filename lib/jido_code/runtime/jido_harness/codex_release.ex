@@ -1,8 +1,6 @@
 defmodule JidoCode.Runtime.JidoHarness.CodexRelease do
   @moduledoc "Closed application-owned release contract for the initial Codex delegated agent."
 
-  alias JidoCode.Knowledge.Control.DelegatedAgentContract, as: Contract
-
   @jido_harness_revision "e41fc1651282469f2db4219a48d9f7feef1b0dbc"
   @jido_harness_archive_sha256 "fbe4d49edf2e5ae7843231e45c47158a15fdcdbc494b40a3d766967c1b81f8b3"
   @cli_version "0.144.6"
@@ -60,13 +58,13 @@ defmodule JidoCode.Runtime.JidoHarness.CodexRelease do
       protocols: %{
         prompt_transport: :stdin,
         events: :codex_jsonl,
-        events_revision: Contract.digest("codex-jsonl-0.144.6/v1"),
+        events_revision: contract_digest("codex-jsonl-0.144.6/v1"),
         session: :controller_reconstructed_turns,
         cancellation: :native_and_outer,
-        candidate: Contract.digest("delegated-candidate/v1")
+        candidate: contract_digest("delegated-candidate/v1")
       },
       output_schema: @output_schema,
-      output_schema_digest: Contract.digest(@output_schema),
+      output_schema_digest: contract_digest(@output_schema),
       deployment_classes: [:developer_local],
       capability_classes: [:workspace_write_registered_checks],
       observation_completeness: :partial,
@@ -153,10 +151,10 @@ defmodule JidoCode.Runtime.JidoHarness.CodexRelease do
   def validate_runtime_profile(_profile), do: :error
 
   @spec digest() :: String.t()
-  def digest, do: Contract.digest(manifest())
+  def digest, do: contract_digest(manifest())
 
   @spec profile_digest() :: String.t()
-  def profile_digest, do: Contract.digest(profile())
+  def profile_digest, do: contract_digest(profile())
 
   @spec executable_sha256() :: String.t()
   def executable_sha256, do: @executable_sha256
@@ -168,5 +166,25 @@ defmodule JidoCode.Runtime.JidoHarness.CodexRelease do
   def model, do: @model
 
   @spec output_schema_digest() :: String.t()
-  def output_schema_digest, do: Contract.digest(@output_schema)
+  def output_schema_digest, do: contract_digest(@output_schema)
+
+  defp contract_digest(value) do
+    value
+    |> canonical()
+    |> :erlang.term_to_binary([:deterministic])
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
+  end
+
+  defp canonical(%DateTime{} = value), do: DateTime.to_iso8601(value)
+
+  defp canonical(value) when is_map(value) do
+    value
+    |> Enum.map(fn {key, item} -> {to_string(key), canonical(item)} end)
+    |> Enum.sort()
+  end
+
+  defp canonical(value) when is_list(value), do: Enum.map(value, &canonical/1)
+  defp canonical(value) when is_atom(value), do: Atom.to_string(value)
+  defp canonical(value), do: value
 end

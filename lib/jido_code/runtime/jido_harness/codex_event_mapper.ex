@@ -10,12 +10,16 @@ defmodule JidoCode.Runtime.JidoHarness.CodexEventMapper do
   @spec normalize([map()], DateTime.t()) :: {:ok, map()} | {:error, AdapterError.t()}
   def normalize(events, %DateTime{} = observed_at)
       when is_list(events) and length(events) <= 100 do
-    Enum.reduce_while(events, {:ok, initial()}, fn event, {:ok, accumulator} ->
-      case normalize_event(event, observed_at) do
-        {:ok, normalized} -> {:cont, {:ok, merge(accumulator, normalized)}}
-        {:error, %AdapterError{} = error} -> {:halt, {:error, error}}
-      end
-    end)
+    with :ok <- ordered_once(events) do
+      Enum.reduce_while(events, {:ok, initial()}, fn event, {:ok, accumulator} ->
+        with {:ok, normalized} <- normalize_event(event, observed_at),
+             {:ok, merged} <- merge(accumulator, normalized) do
+          {:cont, {:ok, merged}}
+        else
+          {:error, %AdapterError{} = error} -> {:halt, {:error, error}}
+        end
+      end)
+    end
   rescue
     _error -> invalid(:codex_jsonl_event)
   end
@@ -119,13 +123,37 @@ defmodule JidoCode.Runtime.JidoHarness.CodexEventMapper do
 
   defp usage(_decoded), do: {:ok, %{}}
 
+  defp merge(%{result: existing}, %{result: incoming})
+       when not is_nil(existing) and not is_nil(incoming),
+       do: invalid(:codex_duplicate_final_output)
+
   defp merge(accumulator, normalized) do
-    %{
-      observations: accumulator.observations ++ normalized.observations,
-      usage: Map.merge(accumulator.usage, normalized.usage),
-      result: normalized.result || accumulator.result,
-      failed?: accumulator.failed? or normalized.failed?
-    }
+    {:ok,
+     %{
+       observations: accumulator.observations ++ normalized.observations,
+       usage: Map.merge(accumulator.usage, normalized.usage),
+       result: normalized.result || accumulator.result,
+       failed?: accumulator.failed? or normalized.failed?
+     }}
+  end
+
+  defp ordered_once(events) do
+    events
+    |> Enum.reduce_while({:ok, nil}, fn
+      %{sequence: sequence}, {:ok, nil} when is_integer(sequence) and sequence > 0 ->
+        {:cont, {:ok, sequence}}
+
+      %{sequence: sequence}, {:ok, previous}
+      when is_integer(sequence) and sequence > previous ->
+        {:cont, {:ok, sequence}}
+
+      _event, _state ->
+        {:halt, invalid(:codex_event_sequence)}
+    end)
+    |> case do
+      {:ok, _sequence} -> :ok
+      {:error, %AdapterError{} = error} -> {:error, error}
+    end
   end
 
   defp observation(sequence, type, occurred_at, payload_digest) do

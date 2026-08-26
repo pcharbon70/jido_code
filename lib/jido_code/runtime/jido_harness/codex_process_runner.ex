@@ -13,6 +13,10 @@ defmodule JidoCode.Runtime.JidoHarness.CodexProcessRunner do
   @architecture_file_role :temporary
   @max_prompt_bytes 65_536
   @environment_names ~w[PATH HOME TMPDIR LANG LC_ALL CODEX_HOME]
+  @launch_keys ~w[
+    deployment_class explicit_opt_in managed_eligible prompt run_id workspace_path executable
+    executable_digest environment limits cli_version provider_version context_digest occurred_at
+  ]a
 
   @impl true
   def start(profile, launch, options) when is_map(profile) and is_map(launch) do
@@ -30,7 +34,6 @@ defmodule JidoCode.Runtime.JidoHarness.CodexProcessRunner do
     else
       :error -> invalid(:codex_process_profile)
       {:error, %AdapterError{} = error} -> {:error, error}
-      {:error, _reason} -> unavailable(:codex_process_start)
       _invalid -> invalid(:codex_process_start)
     end
   rescue
@@ -139,7 +142,8 @@ defmodule JidoCode.Runtime.JidoHarness.CodexProcessRunner do
   end
 
   defp validate_launch(launch) do
-    with :developer_local <- launch[:deployment_class],
+    with true <- Map.keys(launch) |> Enum.sort() == Enum.sort(@launch_keys),
+         :developer_local <- launch[:deployment_class],
          true <- launch[:explicit_opt_in] == true,
          false <- launch[:managed_eligible],
          true <- bounded_prompt?(launch[:prompt]),

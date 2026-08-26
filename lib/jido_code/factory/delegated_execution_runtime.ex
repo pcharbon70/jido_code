@@ -45,7 +45,6 @@ defmodule JidoCode.Factory.DelegatedExecutionRuntime do
       invoke(operation, resolved.adapter, request, argument, adapter_options)
     else
       {:error, %AdapterError{} = error} -> {:error, error}
-      _invalid -> {:error, AdapterError.new(:unauthorized, operation)}
     end
   rescue
     _error -> {:error, AdapterError.new(:unavailable, operation)}

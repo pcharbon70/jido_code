@@ -87,10 +87,10 @@ Back to plan: [README](./README.md)
       This task closes DCG2 only when the real JidoHarness process path
       satisfies the accepted Codex launch contract.
 
-      - [ ] 2.4.1.1 Subtask - Inspect spawned process arguments, environments, metadata, diagnostics, and process titles with prompt, memory, repository, and credential canaries.
-      - [ ] 2.4.1.2 Subtask - Test positive JSONL streams plus malformed, oversized, partial, duplicate, out-of-order, secret-bearing, and unknown events.
-      - [ ] 2.4.1.3 Subtask - Test clarification, follow-up steering, turn exhaustion, cooperative cancellation, stalled processes, resistant descendants, timeouts, and late output.
-      - [ ] 2.4.1.4 Subtask - Prove the upstream built-in Codex adapter, arbitrary flags, user configuration, provider-session resume, and unsafe sandbox modes remain unreachable.
+      - [x] 2.4.1.1 Subtask - Inspect spawned process arguments, environments, metadata, diagnostics, and process titles with prompt, memory, repository, and credential canaries.
+      - [x] 2.4.1.2 Subtask - Test positive JSONL streams plus malformed, oversized, partial, duplicate, out-of-order, secret-bearing, and unknown events.
+      - [x] 2.4.1.3 Subtask - Test clarification, follow-up steering, turn exhaustion, cooperative cancellation, stalled processes, resistant descendants, timeouts, and late output.
+      - [x] 2.4.1.4 Subtask - Prove the upstream built-in Codex adapter, arbitrary flags, user configuration, provider-session resume, and unsafe sandbox modes remain unreachable.
       - [ ] 2.4.1.5 Subtask - Rerun DCG1, harness compatibility, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
     - [ ] 2.4.2 Task {#dca-p02-phase-receipt} [repo: jido_code] [after: {#dca-p02-integration}] - Publish and pin the Phase 2 receipt.
@@ -98,7 +98,7 @@ Back to plan: [README](./README.md)
       This task records DCG2 evidence in
       `docs/architecture/delegated-agent-phase-02-receipt.md`.
 
-      - [ ] 2.4.2.1 Subtask - Record adapter, JidoHarness, Codex, model, executable, output-schema, runner, session-protocol, and event-mapper revisions and digests.
-      - [ ] 2.4.2.2 Subtask - Keep DCG2 open if context enters argv, arbitrary configuration is reachable, runtime selection can fall back, or cancellation leaves descendants.
+      - [x] 2.4.2.1 Subtask - Record adapter, JidoHarness, Codex, model, executable, output-schema, runner, session-protocol, and event-mapper revisions and digests.
+      - [x] 2.4.2.2 Subtask - Keep DCG2 open if context enters argv, arbitrary configuration is reachable, runtime selection can fall back, or cancellation leaves descendants.
       - [ ] 2.4.2.3 Subtask - Attach launch, prompt privacy, event, interaction, cancellation, architecture, Dialyzer, precommit, and clean-checkout evidence.
       - [ ] 2.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 3.

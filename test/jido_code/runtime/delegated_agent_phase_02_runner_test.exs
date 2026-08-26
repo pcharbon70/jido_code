@@ -101,7 +101,15 @@ defmodule JidoCode.Runtime.DelegatedAgentPhase02RunnerTest do
       {context.profile, put_in(context.launch, [:environment, "PROMPT"], context.launch.prompt)},
       {context.profile, put_in(context.launch, [:environment, "HOME"], context.launch.prompt)},
       {context.profile, Map.put(context.launch, :cli_version, "latest")},
-      {context.profile, Map.put(context.launch, :provider_version, "fallback-model")}
+      {context.profile, Map.put(context.launch, :provider_version, "fallback-model")},
+      {context.profile, Map.put(context.launch, :provider_session_ref, "resume-thread")},
+      {context.profile,
+       Map.put(context.launch, :argv, ["--dangerously-bypass-approvals-and-sandbox"])},
+      {Map.put(context.profile, :argv, ["exec", "--sandbox", "danger-full-access"]),
+       context.launch},
+      {Map.put(context.profile, :argv, ["exec", "resume"]), context.launch},
+      {Map.put(context.profile, :argv, ["exec", "--config", "project.rules=true"]),
+       context.launch}
     ]
 
     for {profile, launch} <- mutations do
@@ -152,11 +160,12 @@ defmodule JidoCode.Runtime.DelegatedAgentPhase02RunnerTest do
     assert receipt.candidate_diff_digest == nil
   end
 
-  test "fails closed on malformed, unknown, oversized, and secret-bearing events" do
+  test "fails closed on malformed, partial, unknown, oversized, and secret-bearing events" do
     oversized = String.duplicate("x", 65_537)
 
     for event <- [
           %{sequence: 2, type: :stdout, data: "{"},
+          %{sequence: 2, type: :stdout, data: "{\"type\":\"turn.started\""},
           event(2, "future.event", %{}),
           %{sequence: 2, type: :stdout, data: oversized},
           event(2, "item.completed", %{
@@ -168,6 +177,25 @@ defmodule JidoCode.Runtime.DelegatedAgentPhase02RunnerTest do
         ] do
       assert {:error, %{operation: operation}} = CodexEventMapper.normalize([event], @now)
       assert operation in [:codex_jsonl_event, :codex_final_output]
+    end
+  end
+
+  test "fails closed on duplicate, out-of-order, and repeated final events" do
+    final =
+      event(2, "item.completed", %{
+        "item" => %{
+          "type" => "agent_message",
+          "text" => Jason.encode!(%{"classification" => "candidate", "summary" => "ready"})
+        }
+      })
+
+    for events <- [
+          [event(2, "turn.started", %{}), event(2, "turn.completed", %{})],
+          [event(3, "turn.started", %{}), event(2, "turn.completed", %{})],
+          [final, %{final | sequence: 3}]
+        ] do
+      assert {:error, %{operation: operation}} = CodexEventMapper.normalize(events, @now)
+      assert operation in [:codex_event_sequence, :codex_duplicate_final_output]
     end
   end
 

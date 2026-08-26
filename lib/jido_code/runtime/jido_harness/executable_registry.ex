@@ -6,6 +6,7 @@ defmodule JidoCode.Runtime.JidoHarness.ExecutableRegistry do
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Runtime.JidoHarness.CodexRelease
 
+  @architecture_file_role :temporary
   @max_executable_bytes 512 * 1_024 * 1_024
 
   @spec descriptor(String.t()) :: {:ok, map()} | {:error, AdapterError.t()}
@@ -60,7 +61,6 @@ defmodule JidoCode.Runtime.JidoHarness.ExecutableRegistry do
          mode: stat.mode
        }}
     else
-      {:error, %AdapterError{} = error} -> {:error, error}
       {:error, _reason} -> unavailable(:delegated_executable_verification)
       _invalid -> incompatible(:delegated_executable_verification)
     end
@@ -69,6 +69,9 @@ defmodule JidoCode.Runtime.JidoHarness.ExecutableRegistry do
   end
 
   def verify(_descriptor), do: invalid(:delegated_executable_verification)
+
+  @doc false
+  def architecture_file_role, do: @architecture_file_role
 
   defp codex_root do
     Path.join([
@@ -94,7 +97,7 @@ defmodule JidoCode.Runtime.JidoHarness.ExecutableRegistry do
   defp file_digest(path) do
     digest =
       path
-      |> File.stream!([], 1_048_576)
+      |> File.stream!(1_048_576, [])
       |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
       |> :crypto.hash_final()
       |> Base.encode16(case: :lower)
