@@ -55,3 +55,37 @@ expiry are current. Cancellation, expiry, supersession, termination, and worker
 loss are closed revocation reasons. Destruction occurs only after the matching
 semantic transition is committed, and a revoked attachment cannot be looked up
 or reused.
+
+## Workspace Effects And Registered Checks
+
+`DelegatedWorkspaceController` materializes the exact admitted commit through
+the existing `GitWorkspace` provider, then moves the worktree `.git` marker into
+an owner-only controller directory before handing the tree to the unprivileged
+worker. The worker receives no Git control path, external directory, host path,
+socket, device, or unrelated repository. Controller-owned Git commands use the
+private worktree directory and work-tree binding only for change accounting,
+registered checks, and cleanup.
+
+Every completed turn is rescanned from the filesystem and private Git view.
+Only regular files and directories are accepted. A symlink, special file,
+recreated `.git`, disallowed changed path, sensitive-content finding,
+filesystem race, file-count, per-file input, disk, changed-file, or diff-size
+breach immediately changes the workspace to `quarantined`. The receipt binds
+the admitted commit and snapshot to exact changed paths, canonical current-tree
+and diff digests, counts, limits, attempt, lease, and fence. Untracked file
+content participates in the diff digest. Cleanup restores the private marker
+only inside the controller and destroys the entire disposable worktree.
+
+Process CPU, memory, process-count, disk, output, wall, and idle ceilings are
+bound to the accepted Firecracker isolation profile before launch. Filesystem
+counts, disk use, paths, content, and diff bounds are independently recomputed
+by the workspace controller rather than accepted from Codex output.
+
+`DelegatedRegisteredChecks` ignores check claims or commands in repository and
+Codex observations. At a completed-turn or handoff boundary it selects names
+only from graph-derived authority and the revision-pinned server
+`CheckCatalog`. The controller supplies the private Git environment directly to
+the registered runner. Durable receipts omit output text and bind attempt,
+lease, fence, source snapshot, workspace, profile, catalog, command, resource
+limits, network denial, exit status, duration, and bounded sanitized-output
+digest. Codex events remain explicitly untrusted observations.

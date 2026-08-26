@@ -29,6 +29,7 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
          :ok <- version(attributes[:cli_version]),
          :ok <- version(attributes[:provider_version]),
          {:ok, limits} <- validate_limits(attributes[:limits], profile),
+         :ok <- validate_isolation_limits(worker.isolation_profile, limits),
          :ok <- validate_exclusions(attributes) do
       {:ok,
        %{
@@ -235,7 +236,7 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
            {:run_count, value} -> valid_turn_limit?(profile, :run_count, value)
            {:session_turns, value} -> valid_turn_limit?(profile, :session_turns, value)
            {_key, value} -> is_integer(value) and value in 1..3_600_000_000
-         end) do
+         end) and limits.idle_ms <= limits.wall_ms do
       {:ok, Map.take(limits, @limit_keys)}
     else
       :error
@@ -243,6 +244,22 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
   end
 
   defp validate_limits(_limits, _profile), do: :error
+
+  defp validate_isolation_limits(%IsolationProfile{} = isolation, limits) do
+    request_limits = %{
+      cpu_ms: limits.cpu_ms,
+      memory_bytes: limits.memory_bytes,
+      process_count: limits.process_count,
+      disk_bytes: limits.disk_bytes,
+      output_bytes: limits.output_bytes,
+      timeout_ms: limits.wall_ms,
+      network: :deny
+    }
+
+    if IsolationProfile.admits?(isolation, request_limits), do: :ok, else: :error
+  end
+
+  defp validate_isolation_limits(_isolation, _limits), do: :error
 
   defp valid_turn_limit?(%{name: :codex_dga1}, key, value)
        when key in [:run_count, :session_turns],

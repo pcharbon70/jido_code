@@ -61,30 +61,30 @@ Back to plan: [README](./README.md)
       - [x] 3.2.1.4 Subtask - Permit only brokered OpenAI provider egress and deny arbitrary network access to shell commands and repository content.
       - [x] 3.2.1.5 Subtask - Revoke the permit and destroy the credential attachment on cancellation, expiry, supersession, termination, or worker loss.
 
-  - [ ] 3.3 Section - Enable bounded workspace writes and registered checks.
+  - [x] 3.3 Section - Enable bounded workspace writes and registered checks.
 
     This section gives Codex a useful editing environment while keeping
     authoritative effects and evidence controller-owned.
 
-    - [ ] 3.3.1 Task {#dca-p03-workspace} [repo: jido_code] [after: {#dca-p03-isolation}] - Materialize the exact disposable `jido_code` workspace.
+    - [x] 3.3.1 Task {#dca-p03-workspace} [repo: jido_code] [after: {#dca-p03-isolation}] - Materialize the exact disposable `jido_code` workspace.
 
       This task limits Codex changes to one admitted source snapshot under
       independently enforced resource and path controls.
 
-      - [ ] 3.3.1.1 Subtask - Create a copy-on-write worktree at the exact admitted revision under an unprivileged identity.
-      - [ ] 3.3.1.2 Subtask - Protect `.git` control data, refs, external directories, sockets, devices, special files, unrelated repositories, and host paths.
-      - [ ] 3.3.1.3 Subtask - Enforce path, symlink, file-count, patch-size, disk, process, memory, output, idle, wall-time, and egress limits independently of Codex reporting.
-      - [ ] 3.3.1.4 Subtask - Quarantine the workspace immediately on an out-of-scope path, special file, symlink escape, secret finding, or limit breach.
+      - [x] 3.3.1.1 Subtask - Create a copy-on-write worktree at the exact admitted revision under an unprivileged identity.
+      - [x] 3.3.1.2 Subtask - Protect `.git` control data, refs, external directories, sockets, devices, special files, unrelated repositories, and host paths.
+      - [x] 3.3.1.3 Subtask - Enforce path, symlink, file-count, patch-size, disk, process, memory, output, idle, wall-time, and egress limits independently of Codex reporting.
+      - [x] 3.3.1.4 Subtask - Quarantine the workspace immediately on an out-of-scope path, special file, symlink escape, secret finding, or limit breach.
 
-    - [ ] 3.3.2 Task {#dca-p03-checks} [repo: jido_code] [after: {#dca-p03-workspace}] - Run registered checks through the Factory boundary.
+    - [x] 3.3.2 Task {#dca-p03-checks} [repo: jido_code] [after: {#dca-p03-workspace}] - Run registered checks through the Factory boundary.
 
       This task prevents Codex-reported commands from becoming authoritative
       verification evidence.
 
-      - [ ] 3.3.2.1 Subtask - Allow the opaque Codex loop to run its own sandboxed commands while labeling their events untrusted observations.
-      - [ ] 3.3.2.2 Subtask - Select authoritative checks only from the existing Factory check registry and run them after each completed turn or handoff.
-      - [ ] 3.3.2.3 Subtask - Bind check receipts to attempt, fence, source, workspace, profile, command, limits, exit status, and bounded output digest.
-      - [ ] 3.3.2.4 Subtask - Prevent repository content, task input, or Codex output from adding or changing registered commands.
+      - [x] 3.3.2.1 Subtask - Allow the opaque Codex loop to run its own sandboxed commands while labeling their events untrusted observations.
+      - [x] 3.3.2.2 Subtask - Select authoritative checks only from the existing Factory check registry and run them after each completed turn or handoff.
+      - [x] 3.3.2.3 Subtask - Bind check receipts to attempt, fence, source, workspace, profile, command, limits, exit status, and bounded output digest.
+      - [x] 3.3.2.4 Subtask - Prevent repository content, task input, or Codex output from adding or changing registered commands.
 
   - [ ] 3.4 Section - Phase 3 Integration Tests.
 
