@@ -110,3 +110,4 @@ until their gated implementation merges.
 - [Delegated coding agent product and qualification specification](./delegated-agent-product-and-qualification.md)
 - [Delegated coding agent governance baseline](./delegated-agent-governance-baseline.md)
 - [Delegated coding agent Phase 1 semantic contract receipt](./delegated-agent-phase-01-receipt.md)
+- [Protected Codex delegated runtime](./delegated-agent-codex-runtime.md)

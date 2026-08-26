@@ -14,7 +14,8 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
       when is_map(profile) and is_map(attributes) do
     worker = attributes[:worker]
 
-    with :developer_local_cli <- profile[:deployment_class],
+    with deployment when deployment in [:developer_local_cli, :developer_local] <-
+           profile[:deployment_class],
          true <- profile[:explicit_opt_in] == true,
          false <- profile[:managed_eligible],
          true <- attributes[:consent] == true,
@@ -28,7 +29,7 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
          :ok <- validate_exclusions(attributes) do
       {:ok,
        %{
-         deployment_class: :developer_local_cli,
+         deployment_class: deployment,
          explicit_opt_in: true,
          managed_eligible: false,
          workspace_path: worker.workspace_path,

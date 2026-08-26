@@ -11,6 +11,9 @@ defmodule JidoCode.Runtime.JidoHarness.JidoHarnessProcessAPI do
     do: Jido.Harness.Process.send_input(process_id, input)
 
   @impl true
+  def close_input(process_id, _options), do: Jido.Harness.Process.close_input(process_id)
+
+  @impl true
   def info(process_id, _options), do: Jido.Harness.Process.info(process_id)
 
   @impl true

@@ -12,11 +12,17 @@ defmodule JidoCode.Runtime.JidoHarness.CodexRelease do
   @executable_registry_key "codex_cli"
 
   @output_schema %{
-    version: "1.0.0",
-    additional_properties: false,
-    required: [:classification, :summary],
-    classifications: [:candidate, :clarification, :checkpoint, :failure],
-    summary_max_bytes: 8_192
+    "$schema" => "https://json-schema.org/draft/2020-12/schema",
+    "type" => "object",
+    "additionalProperties" => false,
+    "required" => ["classification", "summary"],
+    "properties" => %{
+      "classification" => %{
+        "type" => "string",
+        "enum" => ["candidate", "clarification", "checkpoint", "failure"]
+      },
+      "summary" => %{"type" => "string", "minLength" => 1, "maxLength" => 8_192}
+    }
   }
 
   @fixed_argv [
@@ -132,7 +138,8 @@ defmodule JidoCode.Runtime.JidoHarness.CodexRelease do
          mode: :memory_only,
          isolation: :controller_owned,
          record_bytes: 65_536,
-         total_bytes: 1_048_576
+         total_bytes: 1_048_576,
+         memory_bytes: 1_048_576
        }
      }}
   end
@@ -159,4 +166,7 @@ defmodule JidoCode.Runtime.JidoHarness.CodexRelease do
 
   @spec model() :: String.t()
   def model, do: @model
+
+  @spec output_schema_digest() :: String.t()
+  def output_schema_digest, do: Contract.digest(@output_schema)
 end

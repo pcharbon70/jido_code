@@ -16,6 +16,12 @@ defmodule JidoCode.TestSupport.FakeJidoHarnessProcessAPI do
   end
 
   @impl true
+  def close_input(process_id, options) do
+    notify(options, {:jido_harness_process_api, :close_input, process_id})
+    Keyword.get(options, :close_input_result, :ok)
+  end
+
+  @impl true
   def info(process_id, options) do
     notify(options, {:jido_harness_process_api, :info, process_id})
 

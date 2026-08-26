@@ -3,6 +3,7 @@ defmodule JidoCode.Runtime.DelegatedRuntimeRegistry do
 
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Runtime.JidoHarness.CodexRelease
+  alias JidoCode.Runtime.JidoHarness.CodexProcessRunner
   alias JidoCode.Runtime.JidoHarness.ExecutableRegistry
   alias JidoCode.Runtime.JidoHarnessAdapter
 
@@ -30,6 +31,7 @@ defmodule JidoCode.Runtime.DelegatedRuntimeRegistry do
       {:ok,
        %{
          adapter: JidoHarnessAdapter,
+         runner: CodexProcessRunner,
          profile: :codex_dga1,
          release: release
        }}

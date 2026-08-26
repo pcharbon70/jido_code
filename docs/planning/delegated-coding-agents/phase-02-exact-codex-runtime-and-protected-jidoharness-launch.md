@@ -44,21 +44,21 @@ Back to plan: [README](./README.md)
       - [x] 2.1.2.3 Subtask - Reject unknown, changed, symlinked, writable, out-of-registry, or version-incompatible executables and adapters.
       - [x] 2.1.2.4 Subtask - Preserve `JidoCode.Factory.Ports.ExecutionRuntime` and reauthorize `prepare`, `start`, `signal`, `status`, `cancel`, and `terminate` before dispatch.
 
-  - [ ] 2.2 Section - Implement the protected Codex process runner.
+  - [x] 2.2 Section - Implement the protected Codex process runner.
 
     This section launches Codex through JidoHarness without leaking compiled
     context through process arguments, environment, or ambient configuration.
 
-    - [ ] 2.2.1 Task {#dca-p02-runner} [repo: jido_code] [after: {#dca-p02-resolver}] - Add the JidoCode-owned Codex runner.
+    - [x] 2.2.1 Task {#dca-p02-runner} [repo: jido_code] [after: {#dca-p02-resolver}] - Add the JidoCode-owned Codex runner.
 
       This task retains the pinned JidoHarness lifecycle and Codex JSONL
       semantics while enforcing a fixed launch envelope.
 
-      - [ ] 2.2.1.1 Subtask - Construct a fixed launch equivalent to `codex exec --json --ephemeral --ignore-user-config --ignore-rules --strict-config --model gpt-5.3-codex --sandbox workspace-write --output-schema <controller-owned-file> -`.
-      - [ ] 2.2.1.2 Subtask - Send the bounded compiled task/context manifest through stdin, close the prompt stream correctly, and prove prompt absence from argv, environment, metadata, diagnostics, and process titles.
-      - [ ] 2.2.1.3 Subtask - Forbid `--add-dir`, unrestricted sandboxing, arbitrary configuration, MCP, skills, project rules, web search, dangerous bypass flags, caller-provided environment, and caller-provided endpoints.
-      - [ ] 2.2.1.4 Subtask - Reuse the pinned JidoHarness managed-process lifecycle and normalized Codex JSONL mappings without enabling the upstream built-in adapter.
-      - [ ] 2.2.1.5 Subtask - Classify the controller-enforced final output as candidate, clarification, checkpoint, or failure and treat all CLI file and check claims as observations.
+      - [x] 2.2.1.1 Subtask - Construct a fixed launch equivalent to `codex exec --json --ephemeral --ignore-user-config --ignore-rules --strict-config --model gpt-5.3-codex --sandbox workspace-write --output-schema <controller-owned-file> -`.
+      - [x] 2.2.1.2 Subtask - Send the bounded compiled task/context manifest through stdin, close the prompt stream correctly, and prove prompt absence from argv, environment, metadata, diagnostics, and process titles.
+      - [x] 2.2.1.3 Subtask - Forbid `--add-dir`, unrestricted sandboxing, arbitrary configuration, MCP, skills, project rules, web search, dangerous bypass flags, caller-provided environment, and caller-provided endpoints.
+      - [x] 2.2.1.4 Subtask - Reuse the pinned JidoHarness managed-process lifecycle and normalized Codex JSONL mappings without enabling the upstream built-in adapter.
+      - [x] 2.2.1.5 Subtask - Classify the controller-enforced final output as candidate, clarification, checkpoint, or failure and treat all CLI file and check claims as observations.
 
   - [ ] 2.3 Section - Implement bounded turns, steering, clarification, and cancellation.
 
