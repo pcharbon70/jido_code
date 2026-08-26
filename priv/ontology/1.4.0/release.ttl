@@ -1,0 +1,11 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/release/1.4.0>
+  a jf:OntologyRelease ;
+  jf:releaseVersion "1.4.0" ;
+  jf:shapeVersion "1.4.0" ;
+  jf:releasedOn "2026-08-26"^^xsd:date ;
+  jf:releaseGraph <https://jido.run/graph/ontology/1.4.0> ;
+  owl:imports <https://jido.run/ontology/factory/1.3.0> .

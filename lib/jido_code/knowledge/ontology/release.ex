@@ -11,14 +11,20 @@ defmodule JidoCode.Knowledge.Ontology.Release do
   alias JidoCode.Knowledge.WriteBatch
   alias JidoCode.Knowledge.Writer
 
-  @current_version "1.3.0"
-  @versions [@current_version, "1.2.0", "1.1.0", "1.0.0"]
-  @base_versions %{"1.3.0" => "1.2.0", "1.2.0" => "1.1.0", "1.1.0" => "1.0.0"}
+  @current_version "1.4.0"
+  @versions [@current_version, "1.3.0", "1.2.0", "1.1.0", "1.0.0"]
+  @base_versions %{
+    "1.4.0" => "1.3.0",
+    "1.3.0" => "1.2.0",
+    "1.2.0" => "1.1.0",
+    "1.1.0" => "1.0.0"
+  }
   @schema_sources %{
     "1.0.0" => ~w[factory.ttl policy-terms.ttl shapes.ttl work-states.ttl],
     "1.1.0" => ~w[memory.ttl shapes.ttl],
     "1.2.0" => ~w[semantic-accounting.ttl shapes.ttl],
-    "1.3.0" => ~w[managed-coding.ttl shapes.ttl]
+    "1.3.0" => ~w[managed-coding.ttl shapes.ttl],
+    "1.4.0" => ~w[delegated-agents.ttl shapes.ttl]
   }
   @max_artifact_bytes 1_000_000
   @required_manifest_keys ~w[

@@ -1,0 +1,88 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/factory/1.4.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://jido.run/ontology/factory/1.4.0> ;
+  owl:versionInfo "1.4.0" ;
+  owl:imports <https://jido.run/ontology/factory/1.3.0> ;
+  rdfs:label "Jido Factory delegated coding agent contract" ;
+  rdfs:comment "Additive immutable adapter releases, delegated profiles, and expiring readiness observations. Runtime processes and catalog projections receive no graph authority." .
+
+jf:DelegatedAdapterRelease a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:DelegatedAgentProfile a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:DelegatedAgentReadiness a owl:Class ; rdfs:subClassOf prov:Entity .
+
+jf:adapterRelease a owl:ObjectProperty ; rdfs:range jf:DelegatedAdapterRelease .
+jf:adapterProvider a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:runtimeClass a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:deploymentClass a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:authenticationKind a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:promptTransport a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:capabilityClass a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:credentialDelivery a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:rolloutStage a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:releaseState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:supportedCapabilityClass a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:supportedDeploymentClass a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:cancellationEnforcement a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:observationCompleteness a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:signedBy a owl:ObjectProperty ; rdfs:range prov:Agent .
+
+jf:adapterKey a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:releaseRevision a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:jidoHarnessRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:jidoHarnessDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:jidoHarnessProtocol a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:cliProduct a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:cliVersion a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:executableRegistryKey a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:inputProtocolRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:eventProtocolRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:statusProtocolRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:cancellationProtocolRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:candidateProtocolRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:journalPolicy a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sessionPolicy a owl:DatatypeProperty .
+jf:unavailableObservationField a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:conformanceDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:securityEvidenceDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:releaseDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:signedDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:displayName a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:agentKey a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:languageClass a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:toolManifestDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:workspacePolicyRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:networkPolicyRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:verificationProfileRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:approvedAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime .
+jf:expiresAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime .
+jf:observationDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:credentialGeneration a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:workerRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:workerReady a owl:DatatypeProperty ; rdfs:range xsd:boolean .
+jf:networkReady a owl:DatatypeProperty ; rdfs:range xsd:boolean .
+jf:authenticationReady a owl:DatatypeProperty ; rdfs:range xsd:boolean .
+jf:candidateReady a owl:DatatypeProperty ; rdfs:range xsd:boolean .
+jf:verifierReady a owl:DatatypeProperty ; rdfs:range xsd:boolean .
+
+jfc:DelegatedCli a skos:Concept .
+jfc:DeveloperLocal a skos:Concept .
+jfc:ManagedFleet a skos:Concept .
+jfc:Stdin a skos:Concept .
+jfc:ProtectedFile a skos:Concept .
+jfc:DelegatedAgentProfileDisabled a skos:Concept .
+jfc:DelegatedAgentProfileEnabled a skos:Concept .
+jfc:DelegatedAgentProfileRevoked a skos:Concept .
+jfc:DelegatedAgentProfileSuperseded a skos:Concept .
+
+# Legacy DeveloperLocalCli is retained only as adapter-boundary read vocabulary.
+jfc:DeveloperLocalCli a skos:Concept ;
+  owl:deprecated true ;
+  skos:broader jfc:DeveloperLocal .

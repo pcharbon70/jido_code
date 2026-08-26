@@ -35,31 +35,31 @@ Back to plan: [README](./README.md)
       - [x] 1.1.1.4 Subtask - Limit DGA1 to foreground `developer_local` execution against `jido_code`; keep DGA2, other providers, managed fleet, publication, and merge out of scope.
       - [x] 1.1.1.5 Subtask - Reconcile terminology with the accepted harness and managed-coding contracts and update architecture indexes.
 
-  - [ ] 1.2 Section - Extend the ontology and semantic command line.
+  - [x] 1.2 Section - Extend the ontology and semantic command line.
 
     This section gives profiles, adapter releases, readiness, and runtime
     selection durable, versioned meanings.
 
-    - [ ] 1.2.1 Task {#dca-p01-ontology} [repo: jido_code] [after: {#dca-p01-governance}] - Publish ontology and SHACL revision `1.4.0`.
+    - [x] 1.2.1 Task {#dca-p01-ontology} [repo: jido_code] [after: {#dca-p01-governance}] - Publish ontology and SHACL revision `1.4.0`.
 
       This task defines the delegated-agent resources and validates their
       closed-world invariants.
 
-      - [ ] 1.2.1.1 Subtask - Define `DelegatedAdapterRelease` with provider, CLI compatibility, JidoHarness revision, executable-registry key, prompt protocol, session protocol, capability support, and evidence digest.
-      - [ ] 1.2.1.2 Subtask - Define `DelegatedAgentProfile` with runtime class, deployment, repository/task/language envelope, access profile, capability, sandbox, network, candidate, verifier, budgets, rollout, and exact adapter release.
-      - [ ] 1.2.1.3 Subtask - Define expiring `DelegatedAgentReadiness` observations tied to the exact profile, adapter, CLI, credential generation, worker, network, and verifier revisions.
-      - [ ] 1.2.1.4 Subtask - Use canonical `developer_local` vocabulary while retaining read compatibility for legacy `developer_local_cli` values only at the adapter boundary.
-      - [ ] 1.2.1.5 Subtask - Place releases and profiles in existing policy/catalog graph families and attempt observations in existing run graphs without adding a durable store.
+      - [x] 1.2.1.1 Subtask - Define `DelegatedAdapterRelease` with provider, CLI compatibility, JidoHarness revision, executable-registry key, prompt protocol, session protocol, capability support, and evidence digest.
+      - [x] 1.2.1.2 Subtask - Define `DelegatedAgentProfile` with runtime class, deployment, repository/task/language envelope, access profile, capability, sandbox, network, candidate, verifier, budgets, rollout, and exact adapter release.
+      - [x] 1.2.1.3 Subtask - Define expiring `DelegatedAgentReadiness` observations tied to the exact profile, adapter, CLI, credential generation, worker, network, and verifier revisions.
+      - [x] 1.2.1.4 Subtask - Use canonical `developer_local` vocabulary while retaining read compatibility for legacy `developer_local_cli` values only at the adapter boundary.
+      - [x] 1.2.1.5 Subtask - Place releases and profiles in existing policy/catalog graph families and attempt observations in existing run graphs without adding a durable store.
 
-    - [ ] 1.2.2 Task {#dca-p01-command-protocol} [repo: jido_code] [after: {#dca-p01-ontology}] - Publish semantic command and query protocol `2.9.0`.
+    - [x] 1.2.2 Task {#dca-p01-command-protocol} [repo: jido_code] [after: {#dca-p01-ontology}] - Publish semantic command and query protocol `2.9.0`.
 
       This task makes every delegated profile mutation and catalog projection
       pass through reviewed semantic interfaces.
 
-      - [ ] 1.2.2.1 Subtask - Add `RegisterDelegatedAdapterRelease`, `RegisterDelegatedAgentProfile`, `TransitionDelegatedAgentProfile`, and `RecordDelegatedAgentReadiness` with authorization, preconditions, idempotency, provenance, and redaction.
-      - [ ] 1.2.2.2 Subtask - Add `SelectableAgentOfferingsByScope`, `DelegatedAgentProfileDetail`, `DelegatedAgentReadinessByProfile`, and `DelegatedAgentProfileHistory` with bounded parameters and result shapes.
-      - [ ] 1.2.2.3 Subtask - Reject unknown runtime classes, providers, executable keys, releases, deployment classes, capabilities, and lifecycle transitions.
-      - [ ] 1.2.2.4 Subtask - Preserve read compatibility with protocol `2.8.0` and ontology `1.3.0` without allowing old records to imply delegated eligibility.
+      - [x] 1.2.2.1 Subtask - Add `RegisterDelegatedAdapterRelease`, `RegisterDelegatedAgentProfile`, `TransitionDelegatedAgentProfile`, and `RecordDelegatedAgentReadiness` with authorization, preconditions, idempotency, provenance, and redaction.
+      - [x] 1.2.2.2 Subtask - Add `SelectableAgentOfferingsByScope`, `DelegatedAgentProfileDetail`, `DelegatedAgentReadinessByProfile`, and `DelegatedAgentProfileHistory` with bounded parameters and result shapes.
+      - [x] 1.2.2.3 Subtask - Reject unknown runtime classes, providers, executable keys, releases, deployment classes, capabilities, and lifecycle transitions.
+      - [x] 1.2.2.4 Subtask - Preserve read compatibility with protocol `2.8.0` and ontology `1.3.0` without allowing old records to imply delegated eligibility.
 
   - [ ] 1.3 Section - Implement exact catalog projection and resolution.
 

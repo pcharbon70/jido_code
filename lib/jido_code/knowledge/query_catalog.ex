@@ -25,6 +25,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @content_version "2.3.0"
   @dataset_version "2.7.0"
   @managed_coding_version "2.8.0"
+  @delegated_agent_version "2.9.0"
   @versions [
     @version,
     @repository_version,
@@ -39,7 +40,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @procedure_version,
     @content_version,
     @dataset_version,
-    @managed_coding_version
+    @managed_coding_version,
+    @delegated_agent_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -92,6 +94,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec managed_coding_version() :: String.t()
   def managed_coding_version, do: @managed_coding_version
+
+  @spec delegated_agent_version() :: String.t()
+  def delegated_agent_version, do: @delegated_agent_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -526,6 +531,28 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           content_specifications(resource) ++
           dataset_specifications(resource) ++
           managed_coding_specifications(resource)
+
+      @delegated_agent_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource) ++
+          history_specifications(resource) ++
+          experience_specifications(resource) ++
+          artifact_claim_specifications(resource) ++
+          procedure_specifications(resource) ++
+          content_specifications(resource) ++
+          dataset_specifications(resource) ++
+          managed_coding_specifications(resource) ++
+          delegated_agent_specifications(graph, resource)
     end
   end
 
@@ -1899,6 +1926,67 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :timeline,
         "Read bounded managed coding observations in the shared attempt sequence.",
         :product,
+        :declared
+      )
+    ]
+  end
+
+  defp delegated_agent_specifications(graph, resource) do
+    scope =
+      graph
+      |> Map.put(:actor, %{type: :resource_iri, required: true})
+      |> Map.put(:tenant, %{type: :resource_iri, required: true})
+      |> Map.put(:repository, %{type: :resource_iri, required: true})
+      |> Map.put(:capability, %{type: :resource_iri, required: true})
+      |> Map.put(:task_class, %{type: :literal, required: true, max_bytes: 64})
+      |> Map.put(:language_class, %{type: :literal, required: true, max_bytes: 64})
+      |> Map.put(:instant, %{type: :datetime, required: true})
+
+    current = Map.put(resource, :instant, %{type: :datetime, required: true})
+
+    [
+      spec(
+        :selectable_agent_offerings_by_scope,
+        :select,
+        scope,
+        :harness,
+        [:factory_policy],
+        :table,
+        "Read delegated profiles authorized for one exact actor, tenant, repository, task, language, capability, and instant.",
+        :product,
+        :declared
+      ),
+      spec(
+        :delegated_agent_profile_detail,
+        :select,
+        resource,
+        :harness,
+        [:factory_policy],
+        :table,
+        "Read one exact delegated profile without executable or credential secrets.",
+        :product,
+        :declared
+      ),
+      spec(
+        :delegated_agent_readiness_by_profile,
+        :select,
+        current,
+        :harness,
+        [:factory_policy],
+        :table,
+        "Read the latest unexpired readiness observation for one exact delegated profile.",
+        :product,
+        :declared
+      ),
+      spec(
+        :delegated_agent_profile_history,
+        :select,
+        resource,
+        :harness,
+        [:factory_policy],
+        :timeline,
+        "Read bounded delegated profile transitions and supersession lineage.",
+        :diagnostic,
         :declared
       )
     ]
