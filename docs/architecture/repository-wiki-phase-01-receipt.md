@@ -2,13 +2,13 @@
 
 ## Status
 
-This merge-pending receipt records the Phase 1 implementation candidate built
-from repository main commit
-`1347712cb5e922b4ccf22a33677e1da912999c56`, which contains the accepted
-delegated-agent Phase 1 prerequisite at
-`5d79d798de87a8c652ad429fd677b6e82c69e764`. RW1 remains open until the
-implementation pull request passes clean-checkout CI, merges, and a closure
-change pins the full merge-commit SHA and merge date.
+This accepted receipt records the Phase 1 implementation candidate built from
+repository main commit `1347712cb5e922b4ccf22a33677e1da912999c56`, which
+contains the accepted delegated-agent Phase 1 prerequisite at
+`5d79d798de87a8c652ad429fd677b6e82c69e764`. The implementation passed
+clean-checkout CI and merged through pull request #81 on 2026-08-26 as
+`606f646440a5e3cc60285143395638d9e951b69a`; RW1 is accepted at that exact
+merged candidate.
 
 The candidate publishes an additive repository-wiki ontology, an isolated
 repository-and-edition graph family, explicit default-off enrollment, reviewed
@@ -27,8 +27,8 @@ maintainer processes, and product activation remain unavailable.
 | Section 1.2 | `8e4d7c207e3e794f4748ab6cec140949d93a34e3` - ontology and graph topology |
 | Section 1.3 | `8414bc0c2a4e28027356784df400525296c503f4` - enrollment and semantic interfaces |
 | Section 1.4 | `79317adf43dc8589135f92b4d1d19e1f3e0faea4` - deterministic inventory, editions, and recovery |
-| Section 1.5 | Merge-pending implementation PR head; exact commit is recorded by Git history |
-| Merged candidate | **Pending clean-checkout CI and merge** |
+| Section 1.5 | `1078f7b84811cddc914b6a6b74799ea5fbb90d28` - integration proof and merge-pending receipt |
+| Merged candidate | `606f646440a5e3cc60285143395638d9e951b69a` - pull request #81, merged 2026-08-26 |
 
 ## Governing Document Pins
 
@@ -126,7 +126,7 @@ maintainer processes, and product activation remain unavailable.
 | Compile with warnings as errors | Passed |
 | Repository-wide isolated `mix precommit` | Passed; 950 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
 | Dialyzer | Passed; 178 existing warnings skipped by policy, zero unignored errors |
-| Clean-checkout CI | Pending implementation PR |
+| Clean-checkout CI | Passed at pull request #81 head `1078f7b84811cddc914b6a6b74799ea5fbb90d28`: CI run `32989427186` and Dialyzer run `32989427148` |
 
 ## Known Limits And Disabled Posture
 
@@ -146,11 +146,12 @@ maintainer processes, and product activation remain unavailable.
 
 ## Gate RW1
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-RW1 becomes accepted only after clean-checkout CI passes, the implementation
-pull request merges, and the receipt pins the exact merged candidate and date.
-Phase 2 is not authorized from this merge-pending state.
+RW1 is accepted at merge commit
+`606f646440a5e3cc60285143395638d9e951b69a`, merged on 2026-08-26 after
+clean-checkout CI passed. Phase 2 is authorized only from this exact pinned
+baseline.
 
 RW1 reopens regardless of checklist state if absent enrollment creates work or
 visibility; repository, tenant, session, preview, edition, source, retention,
