@@ -96,10 +96,10 @@ Back to plan: [README](./README.md)
       This task closes DCG3 only when the real write-capable profile remains
       contained under hostile repository and process behavior.
 
-      - [ ] 3.4.1.1 Subtask - Exercise installation, login, readiness expiry, consent, billing, revocation, and non-billable discovery paths.
-      - [ ] 3.4.1.2 Subtask - Run credential, prompt, journal, host-path, cross-actor, and cross-repository canaries from the Codex parent and spawned tool descendants.
-      - [ ] 3.4.1.3 Subtask - Exercise real file creation, modification, deletion, registered checks, and workspace destruction in isolated temporary workers.
-      - [ ] 3.4.1.4 Subtask - Attack symlinks, special files, `.git`, egress, process count, output, disk, memory, time, and resistant descendants.
+      - [x] 3.4.1.1 Subtask - Exercise installation, login, readiness expiry, consent, billing, revocation, and non-billable discovery paths.
+      - [x] 3.4.1.2 Subtask - Run credential, prompt, journal, host-path, cross-actor, and cross-repository canaries from the Codex parent and spawned tool descendants.
+      - [x] 3.4.1.3 Subtask - Exercise real file creation, modification, deletion, registered checks, and workspace destruction in isolated temporary workers.
+      - [x] 3.4.1.4 Subtask - Attack symlinks, special files, `.git`, egress, process count, output, disk, memory, time, and resistant descendants.
       - [ ] 3.4.1.5 Subtask - Rerun DCG1-DCG2, sandbox and harness suites, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
     - [ ] 3.4.2 Task {#dca-p03-phase-receipt} [repo: jido_code] [after: {#dca-p03-integration}] - Publish and pin the Phase 3 receipt.
@@ -107,7 +107,7 @@ Back to plan: [README](./README.md)
       This task records DCG3 evidence in
       `docs/architecture/delegated-agent-phase-03-receipt.md`.
 
-      - [ ] 3.4.2.1 Subtask - Record credential, consent, readiness, worker, sandbox, network, workspace, limits, check-registry, and cleanup revisions and digests.
-      - [ ] 3.4.2.2 Subtask - Keep DCG3 open if a tool descendant can read or reuse the login, escape the workspace, broaden egress, or create an unaccounted effect.
+      - [x] 3.4.2.1 Subtask - Record credential, consent, readiness, worker, sandbox, network, workspace, limits, check-registry, and cleanup revisions and digests.
+      - [x] 3.4.2.2 Subtask - Keep DCG3 open if a tool descendant can read or reuse the login, escape the workspace, broaden egress, or create an unaccounted effect.
       - [ ] 3.4.2.3 Subtask - Attach credential-canary, isolation, workspace, registered-check, resource, cancellation, architecture, Dialyzer, precommit, and clean-checkout evidence.
       - [ ] 3.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 4.

@@ -144,10 +144,10 @@ defmodule JidoCode.Integrations.DelegatedRegisteredChecks do
   end
 
   defp valid_check_environment?(environment) do
-    MapSet.new(Map.keys(environment)) ==
-      MapSet.new(
-        ~w[GIT_CONFIG_NOSYSTEM GIT_CONFIG_GLOBAL GIT_TERMINAL_PROMPT GIT_ASKPASS GIT_DIR GIT_WORK_TREE]
-      ) and
+    expected =
+      ~w[GIT_CONFIG_NOSYSTEM GIT_CONFIG_GLOBAL GIT_TERMINAL_PROMPT GIT_ASKPASS GIT_DIR GIT_WORK_TREE]
+
+    Enum.sort(Map.keys(environment)) == Enum.sort(expected) and
       Enum.all?(environment, fn {key, value} ->
         is_binary(key) and is_binary(value) and byte_size(value) in 1..1_024
       end)

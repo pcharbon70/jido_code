@@ -112,6 +112,7 @@ until their gated implementation merges.
 - [Delegated coding agent Phase 1 semantic contract receipt](./delegated-agent-phase-01-receipt.md)
 - [Protected Codex delegated runtime](./delegated-agent-codex-runtime.md)
 - [Delegated coding agent Phase 2 protected runtime receipt](./delegated-agent-phase-02-receipt.md)
+- [Delegated coding agent Phase 3 local containment receipt](./delegated-agent-phase-03-receipt.md)
 - [Delegated agent developer-local containment](./delegated-agent-local-containment.md)
 
 ## Approved Repository Wiki Architecture

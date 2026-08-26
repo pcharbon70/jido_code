@@ -100,7 +100,7 @@ defmodule JidoCode.Runtime.JidoHarness.CodexReadiness do
   defp infrastructure(infrastructure) when is_map(infrastructure) do
     revisions = CodexLocalRelease.revisions()
 
-    if MapSet.new(Map.keys(infrastructure)) == MapSet.new(@component_fields) and
+    if Enum.sort(Map.keys(infrastructure)) == Enum.sort(@component_fields) and
          Enum.all?(@component_fields, fn field ->
            case infrastructure[field] do
              %{ready: ready, revision: revision}
