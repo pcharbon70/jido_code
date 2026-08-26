@@ -66,7 +66,7 @@ defmodule JidoCode.Knowledge.Memory.Phase04ExperienceCaseTest do
   end
 
   test "retains MG4 lineage invariants after later memory gates activate" do
-    assert GraphRegistry.revision() == "2.4.0"
+    assert GraphRegistry.revision() == "2.5.0"
     assert {:ok, %{enabled: true}} = GraphRegistry.fetch(:experience)
     assert Guardrails.revision() == "1.5.0"
     assert Guardrails.feature_enabled?(:experience_writer)

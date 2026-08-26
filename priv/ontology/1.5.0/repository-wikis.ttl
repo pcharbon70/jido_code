@@ -1,0 +1,155 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/factory/1.5.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://jido.run/ontology/factory/1.5.0> ;
+  owl:versionInfo "1.5.0" ;
+  owl:imports <https://jido.run/ontology/factory/1.4.0> ;
+  rdfs:label "Jido Factory repository wiki contract" ;
+  rdfs:comment "Additive repository-scoped wiki enrollment, immutable editions, attributed pages and sources, previews, maintenance, budgets, reservations, and terminal usage. Wiki projections receive no source or command authority." .
+
+jf:RepositoryWiki a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:RepositoryWikiEnrollment a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiGenerationProfile a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiEdition a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiPage a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiSection a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiSource a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiCitation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiLink a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiGap a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiDriftFinding a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiLintReport a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiPreview a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiMaintainer a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiBudget a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiReservation a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiUsageRecord a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiCompilationAttempt a owl:Class ; rdfs:subClassOf prov:Activity .
+
+jf:repositoryScope a owl:ObjectProperty ; rdfs:range jf:SoftwareRepository .
+jf:tenantScope a owl:ObjectProperty ; rdfs:range jf:Scope .
+jf:repositoryWiki a owl:ObjectProperty ; rdfs:range jf:RepositoryWiki .
+jf:wikiEnrollment a owl:ObjectProperty ; rdfs:range jf:RepositoryWikiEnrollment .
+jf:wikiGenerationProfile a owl:ObjectProperty ; rdfs:range jf:WikiGenerationProfile .
+jf:wikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
+jf:currentWikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
+jf:predecessorWikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
+jf:expectedCurrentWikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
+jf:wikiPage a owl:ObjectProperty ; rdfs:range jf:WikiPage .
+jf:wikiSection a owl:ObjectProperty ; rdfs:range jf:WikiSection .
+jf:wikiSource a owl:ObjectProperty ; rdfs:range jf:WikiSource .
+jf:wikiCitation a owl:ObjectProperty ; rdfs:range jf:WikiCitation .
+jf:wikiLink a owl:ObjectProperty ; rdfs:range jf:WikiLink .
+jf:wikiGap a owl:ObjectProperty ; rdfs:range jf:WikiGap .
+jf:wikiLintReport a owl:ObjectProperty ; rdfs:range jf:WikiLintReport .
+jf:wikiPreview a owl:ObjectProperty ; rdfs:range jf:WikiPreview .
+jf:wikiMaintainer a owl:ObjectProperty ; rdfs:range jf:WikiMaintainer .
+jf:wikiBudget a owl:ObjectProperty ; rdfs:range jf:WikiBudget .
+jf:wikiReservation a owl:ObjectProperty ; rdfs:range jf:WikiReservation .
+jf:wikiUsageRecord a owl:ObjectProperty ; rdfs:range jf:WikiUsageRecord .
+jf:wikiCompilationAttempt a owl:ObjectProperty ; rdfs:range jf:WikiCompilationAttempt .
+jf:sourceSnapshot a owl:ObjectProperty ; rdfs:range jf:RepositorySnapshot .
+jf:sourceGraph a owl:ObjectProperty ; rdfs:range jf:NamedGraph .
+jf:sourceResource a owl:ObjectProperty .
+jf:lintProfile a owl:ObjectProperty .
+jf:renderProfile a owl:ObjectProperty .
+jf:activatedBy a owl:ObjectProperty ; rdfs:range prov:Activity .
+jf:invalidatedBy a owl:ObjectProperty ; rdfs:range prov:Activity .
+jf:supersededBy a owl:ObjectProperty ; rdfs:range prov:Activity .
+
+jf:enrollmentRevision a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:profileKey a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:enrollmentState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:generationMode a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:previewMode a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:editionState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:editionPurpose a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:freshnessState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:sourceKind a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:authorityClass a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:pageKind a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:linkKind a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:gapKind a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:accountingState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:maintainerState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:updateReason a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:wikiRetentionClass a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:editionRoot a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sourceFence a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:compilerProfile a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:compilerDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:inputManifestDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:closureDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:stableKey a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:title a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:slug a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sourceLocator a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sourceAuthority a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sourceContentDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:pageOrder a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:pageCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:sectionCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:citationCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:linkCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:gapCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:segmentCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:statementCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:contentBytes a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:modelInputTokens a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:modelOutputTokens a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:modelCachedTokens a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:modelReasoningTokens a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:usageCost a owl:DatatypeProperty ; rdfs:range xsd:decimal .
+jf:usageCurrency a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:warningCode a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:omissionCode a owl:DatatypeProperty ; rdfs:range xsd:string .
+
+jfc:RepositoryWikiGraph a skos:Concept .
+
+jfc:WikiOff a skos:Concept .
+jfc:WikiManual a skos:Concept .
+jfc:WikiAutomatic a skos:Concept .
+jfc:WikiDeterministicOnly a skos:Concept .
+jfc:WikiSynthesisAllowed a skos:Concept .
+jfc:WikiPreviewDisabled a skos:Concept .
+jfc:WikiPreviewAllowed a skos:Concept .
+
+jfc:WikiBuilding a skos:Concept .
+jfc:WikiFinalized a skos:Concept .
+jfc:WikiLinted a skos:Concept .
+jfc:WikiClosed a skos:Concept .
+jfc:WikiIncomplete a skos:Concept .
+jfc:WikiStale a skos:Concept .
+jfc:WikiInvalidated a skos:Concept .
+jfc:WikiSuperseded a skos:Concept .
+
+jfc:WikiCurrentPurpose a skos:Concept .
+jfc:WikiReleasePurpose a skos:Concept .
+jfc:WikiCandidatePreviewPurpose a skos:Concept .
+jfc:WikiRecoveryPurpose a skos:Concept .
+
+jfc:WikiFresh a skos:Concept .
+jfc:WikiFreshnessStale a skos:Concept .
+jfc:WikiFreshnessUnknown a skos:Concept .
+jfc:WikiAuthored a skos:Concept .
+jfc:WikiDeterministic a skos:Concept .
+jfc:WikiSynthesized a skos:Concept .
+jfc:WikiLivePanel a skos:Concept .
+jfc:WikiGapSection a skos:Concept .
+
+jfc:WikiCurrentRetention a skos:Concept .
+jfc:WikiSupersededRetention a skos:Concept .
+jfc:WikiPreviewRetention a skos:Concept .
+jfc:WikiIncompleteRetention a skos:Concept .
+jfc:WikiInvalidRetention a skos:Concept .
+jfc:WikiSourceSnapshotRetention a skos:Concept .
+jfc:WikiRenderArtifactRetention a skos:Concept .
+jfc:WikiAccountingRetention a skos:Concept .
+jfc:WikiAuditRetention a skos:Concept .

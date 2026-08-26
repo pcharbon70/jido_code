@@ -130,8 +130,8 @@ defmodule JidoCode.Knowledge.Memory.Phase07DatasetConstructionTest do
   end
 
   test "versions the dataset writer boundary without authorizing model training" do
-    assert GraphRegistry.revision() == "2.4.0"
-    assert DataPolicy.revision() == "2.1.0"
+    assert GraphRegistry.revision() == "2.5.0"
+    assert DataPolicy.revision() == "2.2.0"
     assert CommandRegistry.dataset_version() == "2.5.0"
     assert :dataset_writer in Authorization.capabilities()
 

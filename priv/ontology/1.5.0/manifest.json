@@ -1,0 +1,20 @@
+{
+  "canonical_nquads_sha256": "7a93ddd1a5bd9ce5e2275e4f7eadc573229a96e350ce36c5cc7d0384390112a9",
+  "compatibility": "additive; imports 1.4.0 and retains historical read compatibility without implying wiki enrollment or synthesis authority",
+  "graph_iri": "https://jido.run/graph/ontology/1.5.0",
+  "imports": ["https://jido.run/ontology/factory/1.4.0"],
+  "ontology_iri": "https://jido.run/ontology/factory/1.5.0",
+  "package_sha256": "a5d162b0547e7caea5b589ea5b2d68e963e0671680c30469406263999fcb9239",
+  "released_on": "2026-08-26",
+  "resource_namespace": "https://jido.run/id/",
+  "shape_version": "1.5.0",
+  "shapes_iri": "https://jido.run/ontology/shapes/1.5.0",
+  "sources": {
+    "RELEASE.md": "9f7a95c55ce64be7f5cbe483645690047a7ddfb8e268acdf873812acf1d5a88b",
+    "release.ttl": "6ed1822adcd3012faab50940ddb248d1f0aea0c319fb63b36e082b47870e1a46",
+    "repository-wikis.ttl": "c388b5c0c7b0c850c8e8bf0b6a8aebbbb40de3dab7abd4080e4de1342a52b239",
+    "shapes.ttl": "f49d60c55aa61bc4aaa8326b74360aeae0d1b02001932fc29711ea175c6b8f94"
+  },
+  "term_namespace": "https://jido.run/ontology/factory#",
+  "version": "1.5.0"
+}

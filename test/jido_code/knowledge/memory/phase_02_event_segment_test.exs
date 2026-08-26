@@ -133,7 +133,7 @@ defmodule JidoCode.Knowledge.Memory.Phase02EventSegmentTest do
   end
 
   test "keeps the MG2 segment writer active alongside later guarded writers" do
-    assert GraphRegistry.revision() == "2.4.0"
+    assert GraphRegistry.revision() == "2.5.0"
 
     assert {:ok, %{enabled: true, capability: :execution_writer}} =
              GraphRegistry.fetch(:run_event_segment)

@@ -1,0 +1,166 @@
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfs: <https://jido.run/ontology/shapes#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/shapes/1.5.0>
+  a sh:ShapesGraph ;
+  jf:shapeVersion "1.5.0" ;
+  rdfs:comment "Closed repository wiki enrollment, edition, page, source, preview, maintainer, budget, reservation, and usage shapes. Cross-resource scope, singular-current selection, lifecycle transition, and source-fence invariants are additionally enforced by semantic commands." .
+
+jfs:RepositoryWikiEnrollmentShape a sh:NodeShape ;
+  sh:targetClass jf:RepositoryWikiEnrollment ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:RepositoryWikiProperty, jfs:EnrollmentRevisionProperty,
+    jfs:EnrollmentStateProperty, jfs:GenerationModeProperty,
+    jfs:PreviewModeProperty, jfs:WikiGenerationProfileProperty,
+    jfs:WikiRetentionClassProperty, jfs:CurrentWikiEditionProperty,
+    jfs:GeneratedAtProperty .
+
+jfs:WikiGenerationProfileShape a sh:NodeShape ;
+  sh:targetClass jf:WikiGenerationProfile ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:ProfileKeyProperty, jfs:ProfileRevisionProperty,
+    jfs:ProfileDigestProperty, jfs:GenerationModeProperty,
+    jfs:CompilerProfileProperty, jfs:CompilerDigestProperty,
+    jfs:ApprovedAtProperty, jfs:ExpiresAtProperty .
+
+jfs:WikiEditionShape a sh:NodeShape ;
+  sh:targetClass jf:WikiEdition ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:RepositoryWikiProperty, jfs:EditionRootProperty,
+    jfs:EditionStateProperty, jfs:EditionPurposeProperty,
+    jfs:SourceSnapshotProperty, jfs:SourceFenceProperty,
+    jfs:CompilerProfileProperty, jfs:CompilerDigestProperty,
+    jfs:InputManifestDigestProperty, jfs:FreshnessStateProperty,
+    jfs:CompletenessStateProperty, jfs:WikiRetentionClassProperty,
+    jfs:PageCountProperty, jfs:SectionCountProperty,
+    jfs:CitationCountProperty, jfs:LinkCountProperty, jfs:GapCountProperty,
+    jfs:SegmentCountProperty, jfs:StatementCountProperty,
+    jfs:ContentBytesProperty, jfs:PredecessorWikiEditionProperty,
+    jfs:ExpectedCurrentWikiEditionProperty, jfs:WikiLintReportProperty,
+    jfs:ClosureDigestProperty, jfs:GeneratedAtProperty .
+
+jfs:WikiPageShape a sh:NodeShape ;
+  sh:targetClass jf:WikiPage ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:WikiEditionProperty, jfs:PageKindProperty, jfs:StableKeyProperty,
+    jfs:TitleProperty, jfs:SlugProperty, jfs:PageOrderProperty,
+    jfs:ContentDigestProperty, jfs:FreshnessStateProperty,
+    jfs:CompletenessStateProperty, jfs:WikiSourceProperty .
+
+jfs:WikiSourceShape a sh:NodeShape ;
+  sh:targetClass jf:WikiSource ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:WikiEditionProperty, jfs:SourceKindProperty,
+    jfs:SourceSnapshotProperty, jfs:SourceGraphProperty,
+    jfs:SourceResourceProperty, jfs:SourceLocatorProperty,
+    jfs:SourceAuthorityProperty, jfs:SourceContentDigestProperty,
+    jfs:FreshnessStateProperty .
+
+jfs:WikiPreviewShape a sh:NodeShape ;
+  sh:targetClass jf:WikiPreview ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:WikiEditionProperty, jfs:SourceSnapshotProperty,
+    jfs:SourceFenceProperty, jfs:WikiCompilationAttemptProperty,
+    jfs:GeneratedAtProperty, jfs:ExpiresAtProperty .
+
+jfs:WikiMaintainerShape a sh:NodeShape ;
+  sh:targetClass jf:WikiMaintainer ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:RepositoryWikiProperty, jfs:ProfileRevisionProperty,
+    jfs:ProfileDigestProperty, jfs:MaintainerStateProperty,
+    jfs:GeneratedAtProperty, jfs:ExpiresAtProperty .
+
+jfs:WikiBudgetShape a sh:NodeShape ;
+  sh:targetClass jf:WikiBudget ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:ProfileRevisionProperty, jfs:ProfileDigestProperty,
+    jfs:UsageCurrencyProperty, jfs:ApprovedAtProperty,
+    jfs:ExpiresAtProperty .
+
+jfs:WikiReservationShape a sh:NodeShape ;
+  sh:targetClass jf:WikiReservation ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:WikiEditionProperty, jfs:WikiCompilationAttemptProperty,
+    jfs:WikiBudgetProperty, jfs:AccountingStateProperty,
+    jfs:UsageCurrencyProperty, jfs:UsageCostProperty,
+    jfs:GeneratedAtProperty, jfs:ExpiresAtProperty .
+
+jfs:WikiUsageRecordShape a sh:NodeShape ;
+  sh:targetClass jf:WikiUsageRecord ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
+    jfs:WikiEditionProperty, jfs:WikiCompilationAttemptProperty,
+    jfs:WikiReservationProperty, jfs:AccountingStateProperty,
+    jfs:ModelInputTokensProperty, jfs:ModelOutputTokensProperty,
+    jfs:ModelCachedTokensProperty, jfs:ModelReasoningTokensProperty,
+    jfs:UsageCurrencyProperty, jfs:UsageCostProperty,
+    jfs:GeneratedAtProperty .
+
+jfs:RdfTypeProperty a sh:PropertyShape ; sh:path rdf:type ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+jfs:RepositoryScopeProperty a sh:PropertyShape ; sh:path jf:repositoryScope ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:TenantScopeProperty a sh:PropertyShape ; sh:path jf:tenantScope ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:RepositoryWikiProperty a sh:PropertyShape ; sh:path jf:repositoryWiki ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiGenerationProfileProperty a sh:PropertyShape ; sh:path jf:wikiGenerationProfile ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CurrentWikiEditionProperty a sh:PropertyShape ; sh:path jf:currentWikiEdition ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiEditionProperty a sh:PropertyShape ; sh:path jf:wikiEdition ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:PredecessorWikiEditionProperty a sh:PropertyShape ; sh:path jf:predecessorWikiEdition ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:ExpectedCurrentWikiEditionProperty a sh:PropertyShape ; sh:path jf:expectedCurrentWikiEdition ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiSourceProperty a sh:PropertyShape ; sh:path jf:wikiSource ; sh:minCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiLintReportProperty a sh:PropertyShape ; sh:path jf:wikiLintReport ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiCompilationAttemptProperty a sh:PropertyShape ; sh:path jf:wikiCompilationAttempt ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiBudgetProperty a sh:PropertyShape ; sh:path jf:wikiBudget ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiReservationProperty a sh:PropertyShape ; sh:path jf:wikiReservation ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SourceSnapshotProperty a sh:PropertyShape ; sh:path jf:sourceSnapshot ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SourceGraphProperty a sh:PropertyShape ; sh:path jf:sourceGraph ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SourceResourceProperty a sh:PropertyShape ; sh:path jf:sourceResource ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:LintProfileProperty a sh:PropertyShape ; sh:path jf:lintProfile ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:EnrollmentRevisionProperty a sh:PropertyShape ; sh:path jf:enrollmentRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ProfileKeyProperty a sh:PropertyShape ; sh:path jf:profileKey ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^(manual_deterministic|automatic_deterministic)$" .
+jfs:EnrollmentStateProperty a sh:PropertyShape ; sh:path jf:enrollmentState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:GenerationModeProperty a sh:PropertyShape ; sh:path jf:generationMode ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:PreviewModeProperty a sh:PropertyShape ; sh:path jf:previewMode ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:EditionStateProperty a sh:PropertyShape ; sh:path jf:editionState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:EditionPurposeProperty a sh:PropertyShape ; sh:path jf:editionPurpose ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:FreshnessStateProperty a sh:PropertyShape ; sh:path jf:freshnessState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:CompletenessStateProperty a sh:PropertyShape ; sh:path jf:completenessState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:SourceKindProperty a sh:PropertyShape ; sh:path jf:sourceKind ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:PageKindProperty a sh:PropertyShape ; sh:path jf:pageKind ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiRetentionClassProperty a sh:PropertyShape ; sh:path jf:wikiRetentionClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:AccountingStateProperty a sh:PropertyShape ; sh:path jf:accountingState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:MaintainerStateProperty a sh:PropertyShape ; sh:path jf:maintainerState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:EditionRootProperty a sh:PropertyShape ; sh:path jf:editionRoot ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:SourceFenceProperty a sh:PropertyShape ; sh:path jf:sourceFence ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 512 .
+jfs:CompilerProfileProperty a sh:PropertyShape ; sh:path jf:compilerProfile ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 128 .
+jfs:CompilerDigestProperty a sh:PropertyShape ; sh:path jf:compilerDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:InputManifestDigestProperty a sh:PropertyShape ; sh:path jf:inputManifestDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:ClosureDigestProperty a sh:PropertyShape ; sh:path jf:closureDigest ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:StableKeyProperty a sh:PropertyShape ; sh:path jf:stableKey ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 160 .
+jfs:TitleProperty a sh:PropertyShape ; sh:path jf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 256 .
+jfs:SlugProperty a sh:PropertyShape ; sh:path jf:slug ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 160 .
+jfs:SourceLocatorProperty a sh:PropertyShape ; sh:path jf:sourceLocator ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 512 .
+jfs:SourceAuthorityProperty a sh:PropertyShape ; sh:path jf:sourceAuthority ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 64 .
+jfs:SourceContentDigestProperty a sh:PropertyShape ; sh:path jf:sourceContentDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:PageOrderProperty a sh:PropertyShape ; sh:path jf:pageOrder ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ContentDigestProperty a sh:PropertyShape ; sh:path jf:contentDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:PageCountProperty a sh:PropertyShape ; sh:path jf:pageCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SectionCountProperty a sh:PropertyShape ; sh:path jf:sectionCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:CitationCountProperty a sh:PropertyShape ; sh:path jf:citationCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:LinkCountProperty a sh:PropertyShape ; sh:path jf:linkCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:GapCountProperty a sh:PropertyShape ; sh:path jf:gapCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SegmentCountProperty a sh:PropertyShape ; sh:path jf:segmentCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:StatementCountProperty a sh:PropertyShape ; sh:path jf:statementCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ContentBytesProperty a sh:PropertyShape ; sh:path jf:contentBytes ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ProfileRevisionProperty a sh:PropertyShape ; sh:path jf:profileRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:minInclusive 1 .
+jfs:ProfileDigestProperty a sh:PropertyShape ; sh:path jf:profileDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:ModelInputTokensProperty a sh:PropertyShape ; sh:path jf:modelInputTokens ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ModelOutputTokensProperty a sh:PropertyShape ; sh:path jf:modelOutputTokens ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ModelCachedTokensProperty a sh:PropertyShape ; sh:path jf:modelCachedTokens ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:ModelReasoningTokensProperty a sh:PropertyShape ; sh:path jf:modelReasoningTokens ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:UsageCurrencyProperty a sh:PropertyShape ; sh:path jf:usageCurrency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 3 .
+jfs:UsageCostProperty a sh:PropertyShape ; sh:path jf:usageCost ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 .
+jfs:ApprovedAtProperty a sh:PropertyShape ; sh:path jf:approvedAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:GeneratedAtProperty a sh:PropertyShape ; sh:path prov:generatedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime .
+jfs:ExpiresAtProperty a sh:PropertyShape ; sh:path jf:expiresAt ; sh:maxCount 1 ; sh:datatype xsd:dateTime .

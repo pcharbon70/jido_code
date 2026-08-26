@@ -37,32 +37,32 @@ Back to plan: [README](./README.md)
       - [x] 1.1.1.4 Subtask - Record that all repositories start `off`, V1 production is deterministic-only, and no hosted synthesis or provider/model price is enabled.
       - [x] 1.1.1.5 Subtask - Reconcile vocabulary, version ownership, graph authority, and parallel-session semantics with accepted factory, memory, managed-coding, and delegated-agent architecture indexes.
 
-  - [ ] 1.2 Section - Define repository-wiki ontology, shapes, and graph topology.
+  - [x] 1.2 Section - Define repository-wiki ontology, shapes, and graph topology.
 
     This section gives enrollment, editions, pages, sources, budgets, usage,
     and maintenance durable meanings inside a closed repository graph family.
 
-    - [ ] 1.2.1 Task {#rwi-p01-ontology} [repo: jido_code] [after: {#rwi-p01-governance}] - Publish ontology and SHACL revision `1.5.0`.
+    - [x] 1.2.1 Task {#rwi-p01-ontology} [repo: jido_code] [after: {#rwi-p01-governance}] - Publish ontology and SHACL revision `1.5.0`.
 
       This task defines the repository-wiki resources and validates their
       identity, lifecycle, provenance, and isolation invariants.
 
-      - [ ] 1.2.1.1 Subtask - Define `RepositoryWikiEnrollment`, `WikiGenerationProfile`, `WikiEdition`, `WikiPage`, `WikiSource`, `WikiPreview`, `WikiMaintainer`, `WikiBudget`, `WikiReservation`, and `WikiUsageRecord` classes.
-      - [ ] 1.2.1.2 Subtask - Define closed lifecycle and reason vocabularies for enrollment, edition state, generation mode, trigger, freshness, source kind, retention class, accounting state, and maintainer state.
-      - [ ] 1.2.1.3 Subtask - Require repository identity, tenant scope, source revision, compiler profile and digest, edition sequence, creation provenance, timestamps, and current-source fence wherever applicable.
-      - [ ] 1.2.1.4 Subtask - Add shapes that reject cross-repository references, multiple current editions, mutable finalized editions, unclosed profile keys, incomplete usage terminality, and pages without source provenance.
-      - [ ] 1.2.1.5 Subtask - Publish compatibility rules for ontology `1.4.0` readers and prove older resources cannot imply wiki enrollment, current-edition authority, or synthesis permission.
+      - [x] 1.2.1.1 Subtask - Define `RepositoryWikiEnrollment`, `WikiGenerationProfile`, `WikiEdition`, `WikiPage`, `WikiSource`, `WikiPreview`, `WikiMaintainer`, `WikiBudget`, `WikiReservation`, and `WikiUsageRecord` classes.
+      - [x] 1.2.1.2 Subtask - Define closed lifecycle and reason vocabularies for enrollment, edition state, generation mode, trigger, freshness, source kind, retention class, accounting state, and maintainer state.
+      - [x] 1.2.1.3 Subtask - Require repository identity, tenant scope, source revision, compiler profile and digest, edition sequence, creation provenance, timestamps, and current-source fence wherever applicable.
+      - [x] 1.2.1.4 Subtask - Add shapes that reject cross-repository references, multiple current editions, mutable finalized editions, unclosed profile keys, incomplete usage terminality, and pages without source provenance.
+      - [x] 1.2.1.5 Subtask - Publish compatibility rules for ontology `1.4.0` readers and prove older resources cannot imply wiki enrollment, current-edition authority, or synthesis permission.
 
-    - [ ] 1.2.2 Task {#rwi-p01-graph-topology} [repo: jido_code] [after: {#rwi-p01-ontology}] - Publish `GraphRegistry` revision `2.5.0` with the `repository_wiki` family.
+    - [x] 1.2.2 Task {#rwi-p01-graph-topology} [repo: jido_code] [after: {#rwi-p01-ontology}] - Publish `GraphRegistry` revision `2.5.0` with the `repository_wiki` family.
 
       This task makes graph placement deterministic and prevents callers or
       repository content from selecting another repository's wiki graph.
 
-      - [ ] 1.2.2.1 Subtask - Define the `repository_wiki` graph family from canonical tenant and repository identity with a deterministic, collision-resistant graph IRI.
-      - [ ] 1.2.2.2 Subtask - Register ownership, allowed resource roots, lifecycle, backup class, retention class, and reviewed query access for the family.
-      - [ ] 1.2.2.3 Subtask - Link wiki graphs to repository, policy, run, artifact, and accepted-knowledge graphs only through typed provenance references.
-      - [ ] 1.2.2.4 Subtask - Reject caller-selected graph IRIs, aliases, path-derived traversal, unknown roots, cross-tenant links, and writes outside the registered family.
-      - [ ] 1.2.2.5 Subtask - Add startup verification, registry drift detection, graph inventory reporting, backup inclusion, and restore ordering for repository wiki graphs.
+      - [x] 1.2.2.1 Subtask - Define the `repository_wiki` graph family from canonical tenant and repository identity with a deterministic, collision-resistant graph IRI.
+      - [x] 1.2.2.2 Subtask - Register ownership, allowed resource roots, lifecycle, backup class, retention class, and reviewed query access for the family.
+      - [x] 1.2.2.3 Subtask - Link wiki graphs to repository, policy, run, artifact, and accepted-knowledge graphs only through typed provenance references.
+      - [x] 1.2.2.4 Subtask - Reject caller-selected graph IRIs, aliases, path-derived traversal, unknown roots, cross-tenant links, and writes outside the registered family.
+      - [x] 1.2.2.5 Subtask - Add startup verification, registry drift detection, graph inventory reporting, backup inclusion, and restore ordering for repository wiki graphs.
 
   - [ ] 1.3 Section - Implement enrollment and reviewed semantic interfaces.
 

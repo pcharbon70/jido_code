@@ -1,0 +1,37 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix jf: <https://jido.run/ontology/factory#> .
+@prefix jfc: <https://jido.run/ontology/concept/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://jido.run/ontology/release/1.5.0>
+  a jf:OntologyRelease ;
+  dcterms:identifier "1.5.0" ;
+  dcterms:issued "2026-08-26"^^xsd:date ;
+  dcterms:title "Jido Factory repository wiki contract 1.5.0" ;
+  jf:shapeVersion "1.5.0" ;
+  jf:graphKind jfc:OntologyGraph ;
+  jf:lifecycleState jfc:Closed ;
+  jf:completenessState jfc:Complete ;
+  prov:specializationOf <https://jido.run/ontology/factory/1.5.0> ;
+  prov:wasDerivedFrom <https://jido.run/ontology/release/1.4.0> .
+
+<https://jido.run/graph/ontology/1.5.0>
+  a jf:NamedGraph ;
+  jf:graphKind jfc:OntologyGraph ;
+  jf:ownerScope <https://jido.run/id/scope/factory> ;
+  jf:ontologyVersion <https://jido.run/ontology/release/1.5.0> ;
+  jf:creationActivity <https://jido.run/id/activity/ontology-release-1.5.0> ;
+  jf:createdAt "2026-08-26T00:00:00Z"^^xsd:dateTime ;
+  jf:closedAt "2026-08-26T00:00:00Z"^^xsd:dateTime ;
+  jf:lifecycleState jfc:Closed ;
+  jf:completenessState jfc:Complete ;
+  jf:graphRevision "1"^^xsd:nonNegativeInteger ;
+  jf:retentionClass "permanent" .
+
+<https://jido.run/id/scope/factory> a jf:Scope .
+<https://jido.run/id/activity/ontology-release-1.5.0>
+  a prov:Activity ;
+  prov:used <https://jido.run/ontology/release/1.4.0> ;
+  prov:generated <https://jido.run/ontology/release/1.5.0> .
+

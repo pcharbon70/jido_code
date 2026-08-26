@@ -14,6 +14,9 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
     {:ok, cohort} = ResourceIdentity.deterministic(:repository_cohort, "cohort-1")
     {:ok, dataset} = ResourceIdentity.deterministic(:memory_dataset_manifest, "dataset-1")
 
+    {:ok, edition} =
+      ResourceIdentity.wiki_edition(repository, String.duplicate("b", 64))
+
     %{
       repository: repository,
       batch: batch,
@@ -21,7 +24,8 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
       attempt: attempt,
       content: content,
       cohort: cohort,
-      dataset: dataset
+      dataset: dataset,
+      edition: edition
     }
   end
 
@@ -38,6 +42,7 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
       evidence: %{repository: ids.repository},
       memory: %{repository: ids.repository},
       memory_dataset: %{cohort: ids.cohort, dataset: ids.dataset},
+      repository_wiki: %{repository: ids.repository, edition: ids.edition},
       experience: %{repository: ids.repository},
       content_lifecycle: %{repository: ids.repository},
       episode_content: %{repository: ids.repository, content: ids.content},
@@ -86,7 +91,25 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
 
     assert GraphRegistry.write_allowed?(:run_event_segment, :create, nil)
     assert GraphRegistry.allowed_link?(:run_attempt, :run_event_segment)
+    assert GraphRegistry.allowed_link?(:repository_control, :repository_wiki)
+    assert GraphRegistry.allowed_link?(:repository_wiki, :source_revision)
+    assert GraphRegistry.allowed_link?(:repository_wiki, :repository_wiki)
+    refute GraphRegistry.allowed_link?(:source_revision, :repository_wiki)
     refute GraphRegistry.allowed_link?(:episode_content, :memory)
+
+    assert {:ok, wiki} =
+             GraphRegistry.graph_iri(:repository_wiki, %{
+               repository: ids.repository,
+               edition: ids.edition
+             })
+
+    assert {:ok, %{family: :repository_wiki, retention: :wiki_edition}} =
+             GraphRegistry.validate_target(wiki, :wiki_writer)
+
+    assert GraphRegistry.write_allowed?(:repository_wiki, :create)
+    assert GraphRegistry.write_allowed?(:repository_wiki, :append, %{lifecycle_state: :open})
+    assert GraphRegistry.write_allowed?(:repository_wiki, :close, %{lifecycle_state: :open})
+    refute GraphRegistry.write_allowed?(:repository_wiki, :append, %{lifecycle_state: :closed})
   end
 
   test "rejects unknown graphs and malformed scope maps", ids do
@@ -101,5 +124,11 @@ defmodule JidoCode.Knowledge.GraphRegistryTest do
 
     assert {:error, %Error{operation: :graph_scope}} =
              GraphRegistry.graph_iri(:security_audit, %{period: "2026-13"})
+
+    assert {:error, %Error{kind: :invalid_input}} =
+             GraphRegistry.graph_iri(:repository_wiki, %{
+               repository: ids.repository,
+               edition: "caller-selected"
+             })
   end
 end

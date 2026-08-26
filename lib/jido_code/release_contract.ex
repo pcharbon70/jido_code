@@ -44,6 +44,7 @@ defmodule JidoCode.ReleaseContract do
   @spec verify() :: :ok | {:error, Error.t()}
   def verify do
     with :ok <- Native.verify(),
+         :ok <- GraphRegistry.verify(),
          {:ok, ontology} <- Release.verify(),
          true <- ontology.version == manifest().ontology,
          true <- ShapeCatalog.known_versions?(manifest().ontology, manifest().shapes),
