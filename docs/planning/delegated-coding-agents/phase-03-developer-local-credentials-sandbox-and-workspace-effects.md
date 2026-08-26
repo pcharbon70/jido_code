@@ -19,30 +19,30 @@ Back to plan: [README](./README.md)
   protected local authentication, a disposable workspace, registered checks,
   independent resource limits, and complete cleanup.
 
-  - [ ] 3.1 Section - Implement readiness, consent, and local credential references.
+  - [x] 3.1 Section - Implement readiness, consent, and local credential references.
 
     This section treats installation and login signals as expiring
     observations rather than authorization.
 
-    - [ ] 3.1.1 Task {#dca-p03-readiness} [repo: jido_code] [after: {#dca-p02-phase-receipt}] - Implement non-billable Codex readiness discovery.
+    - [x] 3.1.1 Task {#dca-p03-readiness} [repo: jido_code] [after: {#dca-p02-phase-receipt}] - Implement non-billable Codex readiness discovery.
 
       This task verifies the exact profile tuple without sending a
       prompt-bearing provider request.
 
-      - [ ] 3.1.1.1 Subtask - Check executable digest and `codex --version` against the accepted adapter release.
-      - [ ] 3.1.1.2 Subtask - Check bounded Codex login status without claiming the provider identity equals the JidoCode actor.
-      - [ ] 3.1.1.3 Subtask - Verify worker, sandbox image, network broker, candidate capture, check registry, and independent verifier readiness.
-      - [ ] 3.1.1.4 Subtask - Bind readiness expiry to adapter, CLI, credential generation, sandbox, network, verifier, and policy drift.
+      - [x] 3.1.1.1 Subtask - Check executable digest and `codex --version` against the accepted adapter release.
+      - [x] 3.1.1.2 Subtask - Check bounded Codex login status without claiming the provider identity equals the JidoCode actor.
+      - [x] 3.1.1.3 Subtask - Verify worker, sandbox image, network broker, candidate capture, check registry, and independent verifier readiness.
+      - [x] 3.1.1.4 Subtask - Bind readiness expiry to adapter, CLI, credential generation, sandbox, network, verifier, and policy drift.
 
-    - [ ] 3.1.2 Task {#dca-p03-consent} [repo: jido_code] [after: {#dca-p03-readiness}] - Enforce foreground consent and billing acknowledgement.
+    - [x] 3.1.2 Task {#dca-p03-consent} [repo: jido_code] [after: {#dca-p03-readiness}] - Enforce foreground consent and billing acknowledgement.
 
       This task prevents silent subscription use, reusable credential release,
       or background scheduling.
 
-      - [ ] 3.1.2.1 Subtask - Require authenticated actor consent for the exact profile, repository, task, expiry, and billing classification.
-      - [ ] 3.1.2.2 Subtask - Require separate consent for every billable live smoke or qualification run.
-      - [ ] 3.1.2.3 Subtask - Record only opaque local-login references and current revocation generations in the graph.
-      - [ ] 3.1.2.4 Subtask - Reject managed eligibility, reusable credential export, background dispatch, expired consent, changed billing terms, and actor or repository mismatch.
+      - [x] 3.1.2.1 Subtask - Require authenticated actor consent for the exact profile, repository, task, expiry, and billing classification.
+      - [x] 3.1.2.2 Subtask - Require separate consent for every billable live smoke or qualification run.
+      - [x] 3.1.2.3 Subtask - Record only opaque local-login references and current revocation generations in the graph.
+      - [x] 3.1.2.4 Subtask - Reject managed eligibility, reusable credential export, background dispatch, expired consent, changed billing terms, and actor or repository mismatch.
 
   - [ ] 3.2 Section - Isolate the Codex login and process namespace.
 
