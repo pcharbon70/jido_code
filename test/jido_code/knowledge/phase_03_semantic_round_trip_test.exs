@@ -333,7 +333,7 @@ defmodule JidoCode.Knowledge.Phase03SemanticRoundTripTest do
     assert semantically_equal?(stored, expected)
 
     assert length(RDF.Graph.triples(RDF.Dataset.graph(dataset, RDF.iri(@ontology_graph)))) ==
-             2_891
+             2_938
   end
 
   defp assert_fixture_links!(dataset, fixture) do

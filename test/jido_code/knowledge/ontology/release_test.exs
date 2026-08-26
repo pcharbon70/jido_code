@@ -9,8 +9,8 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
   alias JidoCode.Knowledge.Writer
 
   @graph "https://jido.run/graph/ontology/1.5.0"
-  @canonical_sha "7a93ddd1a5bd9ce5e2275e4f7eadc573229a96e350ce36c5cc7d0384390112a9"
-  @package_sha "a5d162b0547e7caea5b589ea5b2d68e963e0671680c30469406263999fcb9239"
+  @canonical_sha "861ccea657b77f03b74d65e147a87f7c1fbcb054ebd2d664ebdd60134e5a3f3a"
+  @package_sha "2f84e045aa1ff341bb08eca94251395241100d8ae92a80cd9d836c9d6509902d"
 
   test "verifies and canonicalizes the immutable ontology package deterministically" do
     assert {:ok, manifest} = Release.verify()
@@ -22,7 +22,7 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
 
     assert {:ok, dataset} = Release.dataset()
     assert RDF.Dataset.graph_names(dataset) == [RDF.iri(@graph)]
-    assert length(RDF.Dataset.quads(dataset)) == 2_891
+    assert length(RDF.Dataset.quads(dataset)) == 2_938
 
     assert {:ok, first} = Release.canonical_nquads()
     assert {:ok, second} = Release.canonical_nquads()
@@ -31,7 +31,7 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
     assert {:ok, checksum} = Release.checksum()
     assert checksum.package_sha256 == @package_sha
     assert checksum.canonical_nquads_sha256 == @canonical_sha
-    assert checksum.quad_count == 2_891
+    assert checksum.quad_count == 2_938
   end
 
   test "retains deterministic read compatibility for immutable prior releases" do
@@ -76,7 +76,7 @@ defmodule JidoCode.Knowledge.Ontology.ReleaseTest do
     assert loaded.graph_iri == @graph
     assert loaded.receipt.dataset_revision == 1
 
-    assert {:ok, %{@graph => 2_891}} =
+    assert {:ok, %{@graph => 2_938}} =
              StoreServer.request(server, {:graph_counts, [@graph]})
 
     assert {:ok, replayed} = Release.load(store_server: server, writer: writer)

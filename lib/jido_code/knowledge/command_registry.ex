@@ -351,6 +351,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @memory_evaluation_version "2.7.0"
   @managed_coding_version "2.8.0"
   @delegated_agent_version "2.9.0"
+  @repository_wiki_version "2.10.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -857,6 +858,118 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
   @version_2_9 Map.merge(@version_2_8, @delegated_agent_commands)
+  @repository_wiki_commands %{
+    "RegisterWikiGenerationProfile" => %{
+      owner: :factory,
+      capability: :administrative,
+      graph_families: [:factory_catalog],
+      preconditions: [:profile_absent, :wiki_profile_closed, :deterministic_only]
+    },
+    "TransitionRepositoryWikiEnrollment" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:factory_catalog, :repository_control],
+      preconditions: [
+        :repository_scope_exact,
+        :enrollment_revision_exact,
+        :generation_profile_exact,
+        :unique_transition_successor
+      ]
+    },
+    "AdmitDeterministicWikiCompilation" => %{
+      owner: :runtime,
+      capability: :wiki_writer,
+      graph_families: [:repository_control, :repository_wiki],
+      preconditions: [
+        :repository_scope_exact,
+        :enrollment_revision_exact,
+        :source_fence_exact,
+        :compiler_identity_exact
+      ]
+    },
+    "StartWikiEdition" => %{
+      owner: :runtime,
+      capability: :wiki_writer,
+      graph_families: [:repository_control, :repository_wiki],
+      preconditions: [:compilation_admitted, :edition_absent, :source_fence_exact]
+    },
+    "AppendWikiEditionSegment" => %{
+      owner: :runtime,
+      capability: :wiki_writer,
+      graph_families: [:repository_wiki],
+      preconditions: [:edition_building, :segment_sequence_exact, :writer_fence_current]
+    },
+    "FinalizeWikiEdition" => %{
+      owner: :runtime,
+      capability: :wiki_writer,
+      graph_families: [:repository_wiki],
+      preconditions: [:edition_building, :segment_manifest_complete, :writer_fence_current]
+    },
+    "RecordWikiLintResult" => %{
+      owner: :evaluation,
+      capability: :wiki_writer,
+      graph_families: [:repository_wiki],
+      preconditions: [:edition_finalized, :lint_profile_exact, :writer_fence_current]
+    },
+    "CloseWikiEdition" => %{
+      owner: :evaluation,
+      capability: :wiki_writer,
+      graph_families: [:repository_wiki],
+      preconditions: [:edition_linted, :blocking_findings_absent, :writer_fence_current]
+    },
+    "MarkWikiEditionStale" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_wiki],
+      preconditions: [:edition_known, :source_fence_superseded]
+    },
+    "InvalidateWikiEdition" => %{
+      owner: :evaluation,
+      capability: :control,
+      graph_families: [:repository_wiki],
+      preconditions: [:edition_known, :invalidation_evidence_present]
+    },
+    "ActivateWikiEdition" => %{
+      owner: :factory,
+      capability: :control,
+      graph_families: [:repository_control, :repository_wiki],
+      preconditions: [
+        :edition_closed,
+        :enrollment_revision_exact,
+        :source_fence_current,
+        :expected_current_edition_exact
+      ]
+    },
+    "AcquireWikiMaintainerLease" => %{
+      owner: :runtime,
+      capability: :wiki_writer,
+      graph_families: [:repository_control],
+      preconditions: [:protocol_reserved],
+      availability: :reserved_disabled
+    },
+    "ReserveWikiModelBudget" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control],
+      preconditions: [:protocol_reserved],
+      availability: :reserved_disabled
+    },
+    "RecordWikiModelUsage" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:protocol_reserved],
+      availability: :reserved_disabled
+    },
+    "InvokeWikiSynthesis" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:run_attempt],
+      preconditions: [:protocol_reserved],
+      availability: :reserved_disabled
+    }
+  }
+  @version_2_10 Map.merge(@version_2_9, @repository_wiki_commands)
 
   @spec version() :: String.t()
   def version, do: @version
@@ -900,6 +1013,9 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @spec delegated_agent_version() :: String.t()
   def delegated_agent_version, do: @delegated_agent_version
 
+  @spec repository_wiki_version() :: String.t()
+  def repository_wiki_version, do: @repository_wiki_version
+
   @spec names() :: [String.t()]
   def names, do: @commands |> Map.keys() |> Enum.sort()
 
@@ -923,6 +1039,7 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@memory_evaluation_version), do: @version_2_7 |> Map.keys() |> Enum.sort()
   def names(@managed_coding_version), do: @version_2_8 |> Map.keys() |> Enum.sort()
   def names(@delegated_agent_version), do: @version_2_9 |> Map.keys() |> Enum.sort()
+  def names(@repository_wiki_version), do: @version_2_10 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -1107,6 +1224,16 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     case Map.fetch(@version_2_9, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @delegated_agent_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @repository_wiki_version) when is_binary(name) do
+    case Map.fetch(@version_2_10, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @repository_wiki_version})}
 
       :error ->
         invalid(:command_type)

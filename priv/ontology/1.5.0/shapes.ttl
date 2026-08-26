@@ -15,15 +15,19 @@ jfs:RepositoryWikiEnrollmentShape a sh:NodeShape ;
   sh:targetClass jf:RepositoryWikiEnrollment ; sh:closed true ;
   sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
     jfs:RepositoryWikiProperty, jfs:EnrollmentRevisionProperty,
-    jfs:EnrollmentStateProperty, jfs:GenerationModeProperty,
-    jfs:PreviewModeProperty, jfs:WikiGenerationProfileProperty,
+    jfs:EnrollmentStateProperty, jfs:MaintenanceModeProperty, jfs:GenerationModeProperty,
+    jfs:PreviewModeProperty, jfs:WikiReadVisibilityProperty,
+    jfs:WikiAccountingRetentionProperty, jfs:WikiAuditRetentionProperty,
+    jfs:WikiCancellationGenerationProperty, jfs:WikiGenerationProfileProperty,
     jfs:WikiRetentionClassProperty, jfs:CurrentWikiEditionProperty,
     jfs:GeneratedAtProperty .
 
 jfs:WikiGenerationProfileShape a sh:NodeShape ;
   sh:targetClass jf:WikiGenerationProfile ; sh:closed true ;
   sh:property jfs:RdfTypeProperty, jfs:ProfileKeyProperty, jfs:ProfileRevisionProperty,
-    jfs:ProfileDigestProperty, jfs:GenerationModeProperty,
+    jfs:ProfileDigestProperty, jfs:MaintenanceModeProperty, jfs:GenerationModeProperty,
+    jfs:PreviewModeProperty, jfs:WikiReadVisibilityProperty,
+    jfs:WikiAccountingRetentionProperty, jfs:WikiAuditRetentionProperty,
     jfs:CompilerProfileProperty, jfs:CompilerDigestProperty,
     jfs:ApprovedAtProperty, jfs:ExpiresAtProperty .
 
@@ -120,8 +124,13 @@ jfs:LintProfileProperty a sh:PropertyShape ; sh:path jf:lintProfile ; sh:maxCoun
 jfs:EnrollmentRevisionProperty a sh:PropertyShape ; sh:path jf:enrollmentRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:ProfileKeyProperty a sh:PropertyShape ; sh:path jf:profileKey ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^(manual_deterministic|automatic_deterministic)$" .
 jfs:EnrollmentStateProperty a sh:PropertyShape ; sh:path jf:enrollmentState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:MaintenanceModeProperty a sh:PropertyShape ; sh:path jf:maintenanceMode ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:GenerationModeProperty a sh:PropertyShape ; sh:path jf:generationMode ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:PreviewModeProperty a sh:PropertyShape ; sh:path jf:previewMode ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiReadVisibilityProperty a sh:PropertyShape ; sh:path jf:wikiReadVisibility ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiAccountingRetentionProperty a sh:PropertyShape ; sh:path jf:wikiAccountingRetention ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiAuditRetentionProperty a sh:PropertyShape ; sh:path jf:wikiAuditRetention ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:WikiCancellationGenerationProperty a sh:PropertyShape ; sh:path jf:wikiCancellationGeneration ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:EditionStateProperty a sh:PropertyShape ; sh:path jf:editionState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:EditionPurposeProperty a sh:PropertyShape ; sh:path jf:editionPurpose ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:FreshnessStateProperty a sh:PropertyShape ; sh:path jf:freshnessState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .

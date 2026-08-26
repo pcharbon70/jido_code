@@ -88,6 +88,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ExperienceQuarantine
   alias JidoCode.Knowledge.Memory.ExperienceSourceManifest
   alias JidoCode.Knowledge.Memory.ExperienceTransition
+  alias JidoCode.Knowledge.RepositoryWiki.Enrollment, as: RepositoryWikiEnrollment
+  alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
   alias JidoCode.Knowledge.Memory.ExperienceValidation
   alias JidoCode.Knowledge.Memory.MemoryUseAssessment
   alias JidoCode.Knowledge.Memory.NegativeTransfer
@@ -419,6 +421,36 @@ defmodule JidoCode.Knowledge do
 
   def record_delegated_agent_readiness(readiness, attributes, options \\ []),
     do: DelegatedAgentReadiness.record_command(readiness, attributes, options)
+
+  def wiki_generation_profile(key, attributes),
+    do: WikiGenerationProfile.new(key, attributes)
+
+  def register_wiki_generation_profile(profile, attributes, options \\ []),
+    do: WikiGenerationProfile.register_command(profile, attributes, options)
+
+  def repository_wiki_default(repository_iri, tenant_iri),
+    do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)
+
+  def repository_wiki_enrollment(attributes),
+    do: RepositoryWikiEnrollment.new(attributes)
+
+  def transition_repository_wiki_enrollment(
+        repository_iri,
+        tenant_iri,
+        resolution,
+        next_state,
+        attributes,
+        options \\ []
+      ),
+      do:
+        RepositoryWikiEnrollment.transition_command(
+          repository_iri,
+          tenant_iri,
+          resolution,
+          next_state,
+          attributes,
+          options
+        )
 
   def agent_catalog(native_candidates, delegated_candidates, context),
     do: AgentCatalog.project(native_candidates, delegated_candidates, context)

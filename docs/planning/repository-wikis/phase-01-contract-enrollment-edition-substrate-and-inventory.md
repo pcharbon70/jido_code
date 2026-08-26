@@ -64,32 +64,32 @@ Back to plan: [README](./README.md)
       - [x] 1.2.2.4 Subtask - Reject caller-selected graph IRIs, aliases, path-derived traversal, unknown roots, cross-tenant links, and writes outside the registered family.
       - [x] 1.2.2.5 Subtask - Add startup verification, registry drift detection, graph inventory reporting, backup inclusion, and restore ordering for repository wiki graphs.
 
-  - [ ] 1.3 Section - Implement enrollment and reviewed semantic interfaces.
+  - [x] 1.3 Section - Implement enrollment and reviewed semantic interfaces.
 
     This section ensures no wiki work, read surface, token spend, or
     maintainer process exists without current repository-scoped enrollment.
 
-    - [ ] 1.3.1 Task {#rwi-p01-enrollment} [repo: jido_code] [after: {#rwi-p01-graph-topology}] - Implement closed repository-wiki enrollment and generation profiles.
+    - [x] 1.3.1 Task {#rwi-p01-enrollment} [repo: jido_code] [after: {#rwi-p01-graph-topology}] - Implement closed repository-wiki enrollment and generation profiles.
 
       This task represents opt-in, update mode, generation permissions, read
       visibility, retention, and budgets as explicit graph policy.
 
-      - [ ] 1.3.1.1 Subtask - Add enrollment states `off`, `manual`, and `automatic` with authorized transitions, revision preconditions, idempotency, provenance, and audit history.
-      - [ ] 1.3.1.2 Subtask - Add exact generation profiles for `manual_deterministic` and `automatic_deterministic`; model-backed profiles remain closed and unavailable.
-      - [ ] 1.3.1.3 Subtask - Separate generation permission from retained-edition read visibility, preview visibility, accounting retention, and audit retention.
-      - [ ] 1.3.1.4 Subtask - Make absent configuration equivalent to `off`, prevent inheritance from another repository or tenant, and expose no wiki product entry when reads are disabled.
-      - [ ] 1.3.1.5 Subtask - Define disable behavior that rejects new work, fences in-flight work, releases reservations, removes current product availability, and preserves required history.
+      - [x] 1.3.1.1 Subtask - Add enrollment states `off`, `manual`, and `automatic` with authorized transitions, revision preconditions, idempotency, provenance, and audit history.
+      - [x] 1.3.1.2 Subtask - Add exact generation profiles for `manual_deterministic` and `automatic_deterministic`; model-backed profiles remain closed and unavailable.
+      - [x] 1.3.1.3 Subtask - Separate generation permission from retained-edition read visibility, preview visibility, accounting retention, and audit retention.
+      - [x] 1.3.1.4 Subtask - Make absent configuration equivalent to `off`, prevent inheritance from another repository or tenant, and expose no wiki product entry when reads are disabled.
+      - [x] 1.3.1.5 Subtask - Define disable behavior that rejects new work, fences in-flight work, releases reservations, removes current product availability, and preserves required history.
 
-    - [ ] 1.3.2 Task {#rwi-p01-command-protocol} [repo: jido_code] [after: {#rwi-p01-enrollment}] - Publish semantic command and query protocol `2.10.0`.
+    - [x] 1.3.2 Task {#rwi-p01-command-protocol} [repo: jido_code] [after: {#rwi-p01-enrollment}] - Publish semantic command and query protocol `2.10.0`.
 
       This task routes all repository-wiki mutations and reads through bounded,
       typed interfaces instead of raw graph access.
 
-      - [ ] 1.3.2.1 Subtask - Add commands for enrollment transitions, deterministic compilation admission, segmented edition writes, edition finalization, lint result recording, staleness, invalidation, and current-edition activation.
-      - [ ] 1.3.2.2 Subtask - Reserve disabled commands for maintainer, reservation, usage, and synthesis lifecycles so later phases extend behavior without inventing incompatible meanings.
-      - [ ] 1.3.2.3 Subtask - Add reviewed queries for enrollment detail, current edition, edition history, page detail, source coverage, freshness, and bounded compilation status.
-      - [ ] 1.3.2.4 Subtask - Require authorization, repository scope, exact revision or fence, idempotency key, provenance, bounded payloads, and stable public outcomes on every interface.
-      - [ ] 1.3.2.5 Subtask - Reject generic SPARQL mutation/read surfaces, raw graph selection, unknown enum values, stale revisions, forged compiler identities, and unsupported protocol combinations.
+      - [x] 1.3.2.1 Subtask - Add commands for enrollment transitions, deterministic compilation admission, segmented edition writes, edition finalization, lint result recording, staleness, invalidation, and current-edition activation.
+      - [x] 1.3.2.2 Subtask - Reserve disabled commands for maintainer, reservation, usage, and synthesis lifecycles so later phases extend behavior without inventing incompatible meanings.
+      - [x] 1.3.2.3 Subtask - Add reviewed queries for enrollment detail, current edition, edition history, page detail, source coverage, freshness, and bounded compilation status.
+      - [x] 1.3.2.4 Subtask - Require authorization, repository scope, exact revision or fence, idempotency key, provenance, bounded payloads, and stable public outcomes on every interface.
+      - [x] 1.3.2.5 Subtask - Reject generic SPARQL mutation/read surfaces, raw graph selection, unknown enum values, stale revisions, forged compiler identities, and unsupported protocol combinations.
 
   - [ ] 1.4 Section - Build immutable editions and deterministic repository inventory.
 

@@ -67,8 +67,13 @@ jf:supersededBy a owl:ObjectProperty ; rdfs:range prov:Activity .
 jf:enrollmentRevision a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:profileKey a owl:DatatypeProperty ; rdfs:range xsd:string .
 jf:enrollmentState a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:maintenanceMode a owl:ObjectProperty ; rdfs:range skos:Concept .
 jf:generationMode a owl:ObjectProperty ; rdfs:range skos:Concept .
 jf:previewMode a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:wikiReadVisibility a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:wikiAccountingRetention a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:wikiAuditRetention a owl:ObjectProperty ; rdfs:range skos:Concept .
+jf:wikiCancellationGeneration a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:editionState a owl:ObjectProperty ; rdfs:range skos:Concept .
 jf:editionPurpose a owl:ObjectProperty ; rdfs:range skos:Concept .
 jf:freshnessState a owl:ObjectProperty ; rdfs:range skos:Concept .
@@ -120,6 +125,8 @@ jfc:WikiDeterministicOnly a skos:Concept .
 jfc:WikiSynthesisAllowed a skos:Concept .
 jfc:WikiPreviewDisabled a skos:Concept .
 jfc:WikiPreviewAllowed a skos:Concept .
+jfc:WikiReadHidden a skos:Concept .
+jfc:WikiReadRetained a skos:Concept .
 
 jfc:WikiBuilding a skos:Concept .
 jfc:WikiFinalized a skos:Concept .
