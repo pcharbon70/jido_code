@@ -66,7 +66,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:repository_wiki_default)
     end
   end
 
@@ -133,7 +132,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
 
   def new(_attributes), do: invalid(:repository_wiki_enrollment)
 
-  @spec statements(t()) :: [RDF.Triple.t()]
+  @spec statements(t()) :: [tuple()]
   def statements(%__MODULE__{} = enrollment) do
     [
       {enrollment.iri, @rdf_type, RDF.iri(@jf <> "RepositoryWikiEnrollment")},
@@ -217,8 +216,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
 
     with :ok <- Contract.resource(repository_iri),
          :ok <- Contract.resource(tenant_iri),
-         {:ok, :repository_control} <- GraphRegistry.identify(control_graph),
-         {:ok, :factory_catalog} <- GraphRegistry.identify(catalog_graph),
+         true <- exact_control_graph?(control_graph, repository_iri),
+         true <- exact_catalog_graph?(catalog_graph),
          true <- positive_revision?(attributes[:expected_control_revision]),
          true <- positive_revision?(attributes[:expected_catalog_revision]),
          %DateTime{} = recorded_at <- attributes[:recorded_at],
@@ -487,6 +486,20 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
     do: value
 
   defp positive_revision?(value), do: is_integer(value) and value > 0
+
+  defp exact_control_graph?(graph, repository_iri) do
+    case GraphRegistry.graph_iri(:repository_control, %{repository: repository_iri}) do
+      {:ok, expected} -> expected == graph
+      {:error, %Error{}} -> false
+    end
+  end
+
+  defp exact_catalog_graph?(graph) do
+    case GraphRegistry.graph_iri(:factory_catalog, %{}) do
+      {:ok, expected} -> expected == graph
+      {:error, %Error{}} -> false
+    end
+  end
 
   defp state_concept(:off), do: Contract.concept(:wiki_off)
   defp state_concept(:manual), do: Contract.concept(:wiki_manual)

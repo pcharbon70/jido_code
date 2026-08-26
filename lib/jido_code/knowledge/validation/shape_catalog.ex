@@ -32,6 +32,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ontology: :schema,
     factory_catalog: ~w[
       RepositoryFactory SoftwareRepository RepositoryLocator ManagementEnrollment Actor Agent Scope
+      WikiGenerationProfile WikiBudget
     ],
     factory_policy: ~w[
       DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope
@@ -49,7 +50,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
       GraphRevisionReference ReconciliationActivity ReconciliationInput Gap ControlProposal
       EligibilityReceipt InteractionSession Message Instruction DecisionFollowUp ApprovalRequest
-      RepositoryWikiEnrollment WikiMaintainer WikiBudget WikiReservation WikiUsageRecord
+      RepositoryWikiEnrollment WikiCompilationAttempt WikiMaintainer WikiBudget WikiReservation
+      WikiUsageRecord WikiDriftFinding
     ],
     run_attempt: ~w[
       ExecutionAttempt ExecutionContext ToolInvocation Patch VerificationActivity Artifact
@@ -88,9 +90,9 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       GraphRevisionReference MigrationActivity
     ],
     repository_wiki: ~w[
-      RepositoryWiki WikiEdition WikiPage WikiSection WikiSource WikiCitation WikiLink WikiGap
-      WikiDriftFinding WikiLintReport WikiPreview WikiCompilationAttempt GraphRevisionReference
-      MigrationActivity
+      RepositoryWiki WikiEdition WikiEditionSegment WikiPage WikiSection WikiSource WikiCitation WikiLink WikiGap
+      WikiDriftFinding WikiLintReport WikiPreview WikiCompilationAttempt WikiUsageRecord
+      GraphRevisionReference MigrationActivity
     ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity

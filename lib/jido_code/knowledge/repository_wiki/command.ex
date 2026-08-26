@@ -46,7 +46,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Command do
       {:ok, envelope}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> {:error, Error.new(:invalid_input, :repository_wiki_command)}
     end
   end
 

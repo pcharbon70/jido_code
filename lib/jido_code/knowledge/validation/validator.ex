@@ -214,8 +214,9 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     end
   end
 
-  defp completeness_allowed?(family, state) when family in [:run_attempt, :run_event_segment],
-    do: state in [:building, :complete, :incomplete]
+  defp completeness_allowed?(family, state)
+       when family in [:run_attempt, :run_event_segment, :repository_wiki],
+       do: state in [:building, :complete, :incomplete]
 
   defp completeness_allowed?(_family, state), do: state == :complete
 

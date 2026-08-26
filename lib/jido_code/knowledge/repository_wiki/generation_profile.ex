@@ -63,7 +63,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.GenerationProfile do
 
   def new(_key, _attributes), do: invalid(:wiki_generation_profile)
 
-  @spec statements(t()) :: [RDF.Triple.t()]
+  @spec statements(t()) :: [tuple()]
   def statements(%__MODULE__{} = profile) do
     [
       {profile.iri, @rdf_type, RDF.iri(@jf <> "WikiGenerationProfile")},
@@ -94,7 +94,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.GenerationProfile do
       when is_map(attributes) and is_list(options) do
     graph = attributes[:catalog_graph_iri]
 
-    with {:ok, :factory_catalog} <- GraphRegistry.identify(graph),
+    with true <- exact_catalog_graph?(graph),
          revision when is_integer(revision) and revision > 0 <-
            attributes[:expected_catalog_revision],
          {:ok, command_iri} <-
@@ -169,6 +169,13 @@ defmodule JidoCode.Knowledge.RepositoryWiki.GenerationProfile do
 
   defp wiki_concept(:manual), do: :wiki_manual
   defp wiki_concept(:automatic), do: :wiki_automatic
+
+  defp exact_catalog_graph?(graph) do
+    case GraphRegistry.graph_iri(:factory_catalog, %{}) do
+      {:ok, expected} -> expected == graph
+      {:error, %Error{}} -> false
+    end
+  end
 
   defp optional_datetime(_subject, _predicate, nil), do: []
 

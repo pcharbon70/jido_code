@@ -5,6 +5,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
   alias JidoCode.Knowledge.Control.Graph, as: ControlGraph
   alias JidoCode.Knowledge.Control.Transition
   alias JidoCode.Knowledge.Error
+  alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.RepositoryWiki.Command
   alias JidoCode.Knowledge.RepositoryWiki.Contract
   alias JidoCode.Knowledge.RepositoryWiki.Enrollment
@@ -143,7 +144,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
     revision = attributes[:expected_control_revision]
     material = edition.attempt_iri <> "\nadmit"
 
-    with true <- enrollment[:state] in [:manual, :automatic],
+    with true <- exact_control_graph?(graph, edition.repository_iri),
+         true <- enrollment[:state] in [:manual, :automatic],
          true <- enrollment[:revision] == attributes[:enrollment_revision],
          true <- enrollment[:repository_iri] == edition.repository_iri,
          true <- enrollment[:tenant_iri] == edition.tenant_iri,
@@ -186,7 +188,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
   def start_command(%__MODULE__{} = edition, attributes, options \\ []) do
     material = edition.iri <> "\nstart"
 
-    with true <- attributes[:wiki_graph_iri] == edition.graph_iri,
+    with true <- exact_control_graph?(attributes[:control_graph_iri], edition.repository_iri),
+         true <- attributes[:wiki_graph_iri] == edition.graph_iri,
          true <- attributes[:expected_wiki_revision] == 0,
          {:ok, command_iri} <- Command.identity("StartWikiEdition", material),
          {:ok, target} <-
@@ -378,7 +381,9 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
     wiki_graph = edition.graph_iri
     next_revision = resolution[:current_revision] + 1
 
-    with true <- resolution[:repository_iri] == edition.repository_iri,
+    with true <- exact_control_graph?(control_graph, edition.repository_iri),
+         true <- exact_catalog_graph?(catalog_graph),
+         true <- resolution[:repository_iri] == edition.repository_iri,
          true <- resolution[:tenant_iri] == edition.tenant_iri,
          true <- resolution[:current_state] in [:manual, :automatic],
          true <- profile_matches_state?(profile, resolution.current_state),
@@ -477,7 +482,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
     revision = attributes[:expected_control_revision]
     material = Enum.join([edition.iri, type, attributes[:source_fence]], "\n")
 
-    with true <- is_integer(revision) and revision > 0,
+    with true <- exact_control_graph?(graph, edition.repository_iri),
+         true <- is_integer(revision) and revision > 0,
          {:ok, finding_iri} <- ResourceIdentity.deterministic(:wiki_drift_finding, material),
          {:ok, command_iri} <- Command.identity(type, material),
          additions = [
@@ -674,6 +680,20 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
        do: true
 
   defp profile_matches_state?(_profile, _state), do: false
+
+  defp exact_control_graph?(graph, repository_iri) do
+    case GraphRegistry.graph_iri(:repository_control, %{repository: repository_iri}) do
+      {:ok, expected} -> expected == graph
+      {:error, %Error{}} -> false
+    end
+  end
+
+  defp exact_catalog_graph?(graph) do
+    case GraphRegistry.graph_iri(:factory_catalog, %{}) do
+      {:ok, expected} -> expected == graph
+      {:error, %Error{}} -> false
+    end
+  end
 
   defp purpose_concept(:current), do: Contract.concept(:wiki_current_purpose)
   defp purpose_concept(:release), do: Contract.concept(:wiki_release_purpose)

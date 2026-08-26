@@ -139,10 +139,10 @@ Back to plan: [README](./README.md)
       This task closes RW1 only when unconfigured repositories do no work and
       parallel writers cannot corrupt or prematurely expose an edition.
 
-      - [ ] 1.5.1.1 Subtask - Exercise enrollment authorization, revision conflicts, duplicates, disable during work, retained reads, unknown profiles, and default-off behavior against the real store.
-      - [ ] 1.5.1.2 Subtask - Exercise hostile and Unicode paths, symlinks, oversized files, source changes, malformed segments, duplicate segments, incomplete editions, and deterministic recompilation.
-      - [ ] 1.5.1.3 Subtask - Race same-repository sessions, different repositories, stale fences, retries, activation, cancellation, and late results; prove one current edition and no cross-scope disclosure.
-      - [ ] 1.5.1.4 Subtask - Exercise backup, restore, abandoned-work recovery, retention, graph registry drift, startup validation, and graph-only reconstruction.
+      - [x] 1.5.1.1 Subtask - Exercise enrollment authorization, revision conflicts, duplicates, disable during work, retained reads, unknown profiles, and default-off behavior against the real store.
+      - [x] 1.5.1.2 Subtask - Exercise hostile and Unicode paths, symlinks, oversized files, source changes, malformed segments, duplicate segments, incomplete editions, and deterministic recompilation.
+      - [x] 1.5.1.3 Subtask - Race same-repository sessions, different repositories, stale fences, retries, activation, cancellation, and late results; prove one current edition and no cross-scope disclosure.
+      - [x] 1.5.1.4 Subtask - Exercise backup, restore, abandoned-work recovery, retention, graph registry drift, startup validation, and graph-only reconstruction.
       - [ ] 1.5.1.5 Subtask - Run prior architecture and semantic suites, ontology verification, Dialyzer, `mix precommit`, and clean-checkout CI.
 
     - [ ] 1.5.2 Task {#rwi-p01-phase-receipt} [repo: jido_code] [after: {#rwi-p01-integration}] - Publish and pin the Phase 1 receipt.
@@ -150,7 +150,7 @@ Back to plan: [README](./README.md)
       This task records RW1 evidence in
       `docs/architecture/repository-wiki-phase-01-receipt.md`.
 
-      - [ ] 1.5.2.1 Subtask - Record governing document, ontology, SHACL, GraphRegistry, protocol, compiler, query, fixture, and migration revisions and digests.
-      - [ ] 1.5.2.2 Subtask - Keep RW1 open if absent enrollment creates work, a caller can select a graph, repository code executes, editions mutate after finalization, or a stale writer can activate.
+      - [x] 1.5.2.1 Subtask - Record governing document, ontology, SHACL, GraphRegistry, protocol, compiler, query, fixture, and migration revisions and digests.
+      - [x] 1.5.2.2 Subtask - Keep RW1 open if absent enrollment creates work, a caller can select a graph, repository code executes, editions mutate after finalization, or a stale writer can activate.
       - [ ] 1.5.2.3 Subtask - Preserve every gate reopening condition and attach architecture, store, isolation, concurrency, recovery, precommit, Dialyzer, and clean-checkout evidence.
       - [ ] 1.5.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 1 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 2.
