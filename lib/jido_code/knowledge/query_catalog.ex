@@ -1952,7 +1952,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :harness,
         [:factory_policy],
         :table,
-        "Read delegated profiles authorized for one exact actor, tenant, repository, task, language, capability, and instant.",
+        "Read scoped delegated profile, complete lifecycle, and readiness rows for fail-closed disposable offering projection.",
         :product,
         :declared
       ),

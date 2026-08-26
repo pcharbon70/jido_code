@@ -198,7 +198,6 @@ defmodule JidoCode.Knowledge.Control.AgentCatalog do
         {:ok, nil}
       end
     else
-      {:error, %Error{} = error} -> {:error, error}
       _invalid -> invalid(:native_agent_catalog_candidate)
     end
   end

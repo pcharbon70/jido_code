@@ -126,7 +126,7 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:selectable_agent_offerings_by_scope) do
     """
-    SELECT ?profile ?displayName ?provider ?deployment ?billing ?capabilityClass ?rollout ?profileDigest ?readiness ?observed ?expires WHERE {
+    SELECT ?profile ?displayName ?provider ?deployment ?billing ?capabilityClass ?rollout ?profileDigest ?transition ?state ?profileStateRevision ?readiness ?observed ?expires WHERE {
       GRAPH {{graph}} {
         ?profile a <#{@jf}DelegatedAgentProfile> ;
                  <#{@jf}displayName> ?displayName ;
@@ -145,13 +145,8 @@ defmodule JidoCode.Knowledge.QuerySource do
                  <#{@jf}expiresAt> ?profileExpires .
         ?transition a <#{@jf}StateTransition> ;
                     <#{@jf}transitionSubject> ?profile ;
-                    <#{@jf}nextState> <https://jido.run/ontology/concept/DelegatedAgentProfileEnabled> ;
+                    <#{@jf}nextState> ?state ;
                     <#{@jf}subjectRevision> ?profileStateRevision .
-        FILTER NOT EXISTS {
-          ?later <#{@jf}transitionSubject> ?profile ;
-                 <#{@jf}subjectRevision> ?laterRevision .
-          FILTER(?laterRevision > ?profileStateRevision)
-        }
         ?readiness a <#{@jf}DelegatedAgentReadiness> ;
                    <#{@jf}validFor> ?profile ;
                    <#{@prov}generatedAtTime> ?observed ;
@@ -171,10 +166,9 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:delegated_agent_profile_detail) do
     """
-    SELECT ?profile ?predicate ?value WHERE {
+    SELECT ?predicate ?value WHERE {
       GRAPH {{graph}} {
-        BIND({{resource}} AS ?profile)
-        ?profile a <#{@jf}DelegatedAgentProfile> ; ?predicate ?value .
+        {{resource}} a <#{@jf}DelegatedAgentProfile> ; ?predicate ?value .
         FILTER(?predicate != <#{@jf}executableRegistryKey> && ?predicate != <#{@jf}credentialReference>)
       }
     }
@@ -185,32 +179,45 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:delegated_agent_readiness_by_profile) do
     """
-    SELECT ?readiness ?predicate ?value ?observed ?expires WHERE {
+    SELECT ?readiness ?profileDigest ?adapter ?releaseDigest ?cliVersion ?credentialGeneration ?workerRevision ?sandboxRevision ?networkRevision ?verifierRevision ?candidateRevision ?workerReady ?networkReady ?authenticationReady ?candidateReady ?verifierReady ?observed ?expires WHERE {
       GRAPH {{graph}} {
         ?readiness a <#{@jf}DelegatedAgentReadiness> ;
                    <#{@jf}validFor> {{resource}} ;
+                   <#{@jf}profileDigest> ?profileDigest ;
+                   <#{@jf}adapterRelease> ?adapter ;
+                   <#{@jf}releaseDigest> ?releaseDigest ;
+                   <#{@jf}cliVersion> ?cliVersion ;
+                   <#{@jf}credentialGeneration> ?credentialGeneration ;
+                   <#{@jf}workerRevision> ?workerRevision ;
+                   <#{@jf}sandboxProfileRevision> ?sandboxRevision ;
+                   <#{@jf}networkPolicyRevision> ?networkRevision ;
+                   <#{@jf}verificationProfileRevision> ?verifierRevision ;
+                   <#{@jf}candidateProtocolRevision> ?candidateRevision ;
+                   <#{@jf}workerReady> ?workerReady ;
+                   <#{@jf}networkReady> ?networkReady ;
+                   <#{@jf}authenticationReady> ?authenticationReady ;
+                   <#{@jf}candidateReady> ?candidateReady ;
+                   <#{@jf}verifierReady> ?verifierReady ;
                    <#{@prov}generatedAtTime> ?observed ;
-                   <#{@jf}expiresAt> ?expires ;
-                   ?predicate ?value .
+                   <#{@jf}expiresAt> ?expires .
         FILTER(?observed <= {{instant}} && ?expires > {{instant}})
       }
     }
-    ORDER BY DESC(?observed) ?predicate
+    ORDER BY DESC(?observed)
     LIMIT {{row_limit}}
     """
   end
 
   def fetch(:delegated_agent_profile_history) do
     """
-    SELECT ?profile ?transition ?state ?revision ?predecessor ?supersedes WHERE {
+    SELECT ?transition ?state ?revision ?predecessor ?supersedes WHERE {
       GRAPH {{graph}} {
-        BIND({{resource}} AS ?profile)
-        OPTIONAL { ?profile <#{@jf}supersedes> ?supersedes }
         ?transition a <#{@jf}StateTransition> ;
-                    <#{@jf}transitionSubject> ?profile ;
+                    <#{@jf}transitionSubject> {{resource}} ;
                     <#{@jf}nextState> ?state ;
                     <#{@jf}subjectRevision> ?revision .
         OPTIONAL { ?transition <#{@jf}expectedPredecessor> ?predecessor }
+        OPTIONAL { {{resource}} <#{@jf}supersedes> ?supersedes }
       }
     }
     ORDER BY ?revision

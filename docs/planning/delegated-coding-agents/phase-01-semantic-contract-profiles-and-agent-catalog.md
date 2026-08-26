@@ -96,9 +96,9 @@ Back to plan: [README](./README.md)
       This task closes DCG1 only when no disposable projection or
       caller-controlled value can become runtime authority.
 
-      - [ ] 1.4.1.1 Subtask - Exercise registration, transition, readiness, expiry, revocation, duplicate, malformed, unauthorized, stale, and concurrent command cases against the real store.
-      - [ ] 1.4.1.2 Subtask - Prove catalog isolation across actors, tenants, repositories, task classes, languages, capabilities, rollout states, time, and readiness generations.
-      - [ ] 1.4.1.3 Subtask - Prove exact opaque selection, no fallback, legacy read compatibility, and deterministic graph-only reconstruction.
+      - [x] 1.4.1.1 Subtask - Exercise registration, transition, readiness, expiry, revocation, duplicate, malformed, unauthorized, stale, and concurrent command cases against the real store.
+      - [x] 1.4.1.2 Subtask - Prove catalog isolation across actors, tenants, repositories, task classes, languages, capabilities, rollout states, time, and readiness generations.
+      - [x] 1.4.1.3 Subtask - Prove exact opaque selection, no fallback, legacy read compatibility, and deterministic graph-only reconstruction.
       - [ ] 1.4.1.4 Subtask - Run ontology verification, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
     - [ ] 1.4.2 Task {#dca-p01-phase-receipt} [repo: jido_code] [after: {#dca-p01-integration}] - Publish and pin the Phase 1 receipt.
@@ -106,7 +106,7 @@ Back to plan: [README](./README.md)
       This task records DCG1 evidence in
       `docs/architecture/delegated-agent-phase-01-receipt.md`.
 
-      - [ ] 1.4.2.1 Subtask - Record ADR, specification, ontology, protocol, query, profile, projection, and fixture revisions and digests.
-      - [ ] 1.4.2.2 Subtask - Keep DCG1 open if selection can bypass current graph authorization, disclose another scope, or fall back to another runtime tuple.
+      - [x] 1.4.2.1 Subtask - Record ADR, specification, ontology, protocol, query, profile, projection, and fixture revisions and digests.
+      - [x] 1.4.2.2 Subtask - Keep DCG1 open if selection can bypass current graph authorization, disclose another scope, or fall back to another runtime tuple.
       - [ ] 1.4.2.3 Subtask - Attach architecture, store, compatibility, precommit, Dialyzer, and clean-checkout evidence.
       - [ ] 1.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 2.
