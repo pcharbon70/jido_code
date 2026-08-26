@@ -8,6 +8,7 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
 
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.Control.ExecutionLease
+  alias JidoCode.Knowledge.Control.DelegatedAgentAdmission
   alias JidoCode.Knowledge.Control.Graph, as: ControlGraph
   alias JidoCode.Knowledge.Control.Transition
   alias JidoCode.Knowledge.Error
@@ -39,7 +40,8 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
                 :retry_of_iri,
                 :managed_coding_profile_iri,
                 :coding_strategy_revision,
-                :reconstruction_watermark
+                :reconstruction_watermark,
+                :delegated_admission
               ]
 
   @type t :: %__MODULE__{}
@@ -70,6 +72,7 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
          :ok <- optional_resource(attributes[:retry_of_iri]),
          :ok <- managed_coding_binding(context),
          {:ok, iri} <- ResourceIdentity.deterministic(:execution_attempt, material),
+         :ok <- delegated_binding(context, iri),
          {:ok, context_iri} <-
            ResourceIdentity.deterministic(:execution_context, iri <> "\n" <> context.digest),
          {:ok, instruction_iri} <-
@@ -97,7 +100,8 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
          retry_of_iri: attributes[:retry_of_iri],
          managed_coding_profile_iri: Map.get(context, :managed_coding_profile_iri),
          coding_strategy_revision: Map.get(context, :coding_strategy_revision),
-         reconstruction_watermark: Map.get(context, :reconstruction_watermark)
+         reconstruction_watermark: Map.get(context, :reconstruction_watermark),
+         delegated_admission: Map.get(context, :delegated_admission)
        }}
     else
       {:error, %Error{} = error} -> {:error, error}
@@ -332,6 +336,10 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
       attributes[:recorded_at] |> then(&DateTime.compare(&1, lease.expires_at)) != :lt ->
         :error
 
+      delegated_binding(context, attempt.iri) != :ok or
+          Map.get(context, :delegated_admission) != attempt.delegated_admission ->
+        :error
+
       true ->
         :ok
     end
@@ -478,6 +486,7 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
         @jf <> "reconstructionWatermark",
         attempt.reconstruction_watermark
       ) ++
+      delegated_admission_statements(attempt) ++
       graph_reference_statements(attempt, context.source_graph_revisions) ++
       Enum.map(context.omissions, fn omission ->
         {attempt.context_iri, @jf <> "omittedBecause",
@@ -651,6 +660,31 @@ defmodule JidoCode.Knowledge.Execution.Attempt do
         end
     end
   end
+
+  defp delegated_binding(context, attempt_iri) do
+    case Map.get(context, :delegated_admission) do
+      nil ->
+        :ok
+
+      %DelegatedAgentAdmission{} = binding ->
+        if binding.attempt_iri == attempt_iri and binding.lease_iri == context[:lease_iri] and
+             binding.fencing_token == context[:fencing_token] and
+             binding.source_snapshot_iri == context[:snapshot_iri] and
+             binding.source_graph_revisions == context[:source_graph_revisions] do
+          :ok
+        else
+          invalid(:delegated_agent_attempt_binding)
+        end
+
+      _invalid ->
+        invalid(:delegated_agent_attempt_binding)
+    end
+  end
+
+  defp delegated_admission_statements(%{delegated_admission: nil}), do: []
+
+  defp delegated_admission_statements(%{delegated_admission: binding}),
+    do: DelegatedAgentAdmission.statements(binding)
 
   defp optional_iri(_subject, _predicate, nil), do: []
   defp optional_iri(subject, predicate, object), do: [{subject, predicate, RDF.iri(object)}]

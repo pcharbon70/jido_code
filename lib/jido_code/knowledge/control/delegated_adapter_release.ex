@@ -48,6 +48,17 @@ defmodule JidoCode.Knowledge.Control.DelegatedAdapterRelease do
   @prov "http://www.w3.org/ns/prov#"
   @jf "https://jido.run/ontology/factory#"
   @providers ~w[codex pi claude gemini opencode amp grok kimi zai]a
+  @executable_keys %{
+    codex: ~w[codex_cli],
+    pi: ~w[pi_cli],
+    claude: ~w[claude_cli],
+    gemini: ~w[gemini_cli],
+    opencode: ~w[opencode_cli],
+    amp: ~w[amp_cli],
+    grok: ~w[grok_cli],
+    kimi: ~w[kimi_cli],
+    zai: ~w[zai_cli]
+  }
   @prompt_transports ~w[stdin protected_file]a
   @capabilities ~w[deny_all bounded_read_only workspace_write workspace_write_registered_checks]a
   @deployments ~w[developer_local managed_fleet]a
@@ -70,6 +81,7 @@ defmodule JidoCode.Knowledge.Control.DelegatedAdapterRelease do
          {:ok, cli_product} <- Contract.identifier(attributes[:cli_product], 64),
          {:ok, cli_versions} <- cli_versions(attributes[:cli_versions]),
          {:ok, executable_key} <- Contract.identifier(attributes[:executable_registry_key], 64),
+         true <- executable_key in Map.fetch!(@executable_keys, provider),
          {:ok, prompt_transport} <-
            Contract.enum(attributes[:prompt_transport], @prompt_transports),
          true <- prompt_transport != :argv,

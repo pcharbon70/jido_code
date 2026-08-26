@@ -20,6 +20,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Control.DelegatedAdapterRelease
   alias JidoCode.Knowledge.Control.DelegatedAgentProfile
   alias JidoCode.Knowledge.Control.DelegatedAgentReadiness
+  alias JidoCode.Knowledge.Control.AgentCatalog
   alias JidoCode.Knowledge.Control.HarnessProfile
   alias JidoCode.Knowledge.Control.Obligation
   alias JidoCode.Knowledge.Control.Policy
@@ -418,6 +419,25 @@ defmodule JidoCode.Knowledge do
 
   def record_delegated_agent_readiness(readiness, attributes, options \\ []),
     do: DelegatedAgentReadiness.record_command(readiness, attributes, options)
+
+  def agent_catalog(native_candidates, delegated_candidates, context),
+    do: AgentCatalog.project(native_candidates, delegated_candidates, context)
+
+  def resolve_agent_offering(
+        reference,
+        native_candidates,
+        delegated_candidates,
+        context,
+        admission
+      ),
+      do:
+        AgentCatalog.resolve(
+          reference,
+          native_candidates,
+          delegated_candidates,
+          context,
+          admission
+        )
 
   def register_managed_coding_profile(profile, attributes, options \\ []),
     do: ManagedCodingProfile.register_command(profile, attributes, options)

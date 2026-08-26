@@ -69,6 +69,8 @@ defmodule JidoCode.Knowledge.Validation.Validator do
     managedCodingProfile usesCodingStrategyRevision modelAccessProfile boundActor boundTenant
     boundRepository boundCapability runtimePhase terminalClassification candidate
     clarificationSession handoffState
+    delegatedAgentProfile adapterRelease harnessProfile runtimeClass deploymentClass
+    authenticationKind capabilityClass readinessEvidence invocationBeforeEffect
   ])
   @secret_predicate ~r/(?:credentialvalue|secret|password|privatekey|accesstoken|bearertoken)$/i
   @secret_literal ~r/(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b|(?:password|token|secret)\s*[=:]\s*\S+)/i

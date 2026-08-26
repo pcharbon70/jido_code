@@ -61,30 +61,30 @@ Back to plan: [README](./README.md)
       - [x] 1.2.2.3 Subtask - Reject unknown runtime classes, providers, executable keys, releases, deployment classes, capabilities, and lifecycle transitions.
       - [x] 1.2.2.4 Subtask - Preserve read compatibility with protocol `2.8.0` and ontology `1.3.0` without allowing old records to imply delegated eligibility.
 
-  - [ ] 1.3 Section - Implement exact catalog projection and resolution.
+  - [x] 1.3 Section - Implement exact catalog projection and resolution.
 
     This section turns durable profiles into scoped product offerings without
     persisting or trusting the projection.
 
-    - [ ] 1.3.1 Task {#dca-p01-catalog} [repo: jido_code] [after: {#dca-p01-command-protocol}] - Implement the unified native and delegated agent catalog.
+    - [x] 1.3.1 Task {#dca-p01-catalog} [repo: jido_code] [after: {#dca-p01-command-protocol}] - Implement the unified native and delegated agent catalog.
 
       This task returns only offerings currently authorized for the requesting
       actor, repository, task, capability, rollout, and time.
 
-      - [ ] 1.3.1.1 Subtask - Define disposable `AgentOffering` values with opaque reference, display label, runtime class, provider, deployment, billing, readiness age, capability summary, rollout, and limitations.
-      - [ ] 1.3.1.2 Subtask - Derive offerings at query time from exact current graph revisions and never persist them as authorization.
-      - [ ] 1.3.1.3 Subtask - Include existing native profiles and the disabled Codex profile in one projection while clearly distinguishing availability and runtime class.
-      - [ ] 1.3.1.4 Subtask - Prevent cross-actor, cross-tenant, cross-repository, expired, revoked, stale-readiness, and unsupported-task disclosure.
+      - [x] 1.3.1.1 Subtask - Define disposable `AgentOffering` values with opaque reference, display label, runtime class, provider, deployment, billing, readiness age, capability summary, rollout, and limitations.
+      - [x] 1.3.1.2 Subtask - Derive offerings at query time from exact current graph revisions and never persist them as authorization.
+      - [x] 1.3.1.3 Subtask - Include existing native profiles and the disabled Codex profile in one projection while clearly distinguishing availability and runtime class.
+      - [x] 1.3.1.4 Subtask - Prevent cross-actor, cross-tenant, cross-repository, expired, revoked, stale-readiness, and unsupported-task disclosure.
 
-    - [ ] 1.3.2 Task {#dca-p01-resolution} [repo: jido_code] [after: {#dca-p01-catalog}] - Bind opaque selections to exact managed-coding admission.
+    - [x] 1.3.2 Task {#dca-p01-resolution} [repo: jido_code] [after: {#dca-p01-catalog}] - Bind opaque selections to exact managed-coding admission.
 
       This task makes selection deterministic and prevents provider, runtime,
       authentication, or billing fallback.
 
-      - [ ] 1.3.2.1 Subtask - Resolve the opaque offering reference server-side to exact profile and adapter digests under the current authorization context.
-      - [ ] 1.3.2.2 Subtask - Commit profile, runtime, adapter, access, deployment, capability, readiness, attempt, lease, fence, and invocation-before-effect identities before process creation.
-      - [ ] 1.3.2.3 Subtask - Return bounded admitted, duplicate, stale, unauthorized, incompatible, unavailable, and rejected outcomes.
-      - [ ] 1.3.2.4 Subtask - Invalidate the offering after profile, adapter, readiness, credential-generation, policy, or source-snapshot drift.
+      - [x] 1.3.2.1 Subtask - Resolve the opaque offering reference server-side to exact profile and adapter digests under the current authorization context.
+      - [x] 1.3.2.2 Subtask - Commit profile, runtime, adapter, access, deployment, capability, readiness, attempt, lease, fence, and invocation-before-effect identities before process creation.
+      - [x] 1.3.2.3 Subtask - Return bounded admitted, duplicate, stale, unauthorized, incompatible, unavailable, and rejected outcomes.
+      - [x] 1.3.2.4 Subtask - Invalidate the offering after profile, adapter, readiness, credential-generation, policy, or source-snapshot drift.
 
   - [ ] 1.4 Section - Phase 1 Integration Tests.
 

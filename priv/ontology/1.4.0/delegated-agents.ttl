@@ -19,6 +19,10 @@ jf:DelegatedAgentProfile a owl:Class ; rdfs:subClassOf prov:Entity .
 jf:DelegatedAgentReadiness a owl:Class ; rdfs:subClassOf prov:Entity .
 
 jf:adapterRelease a owl:ObjectProperty ; rdfs:range jf:DelegatedAdapterRelease .
+jf:delegatedAgentProfile a owl:ObjectProperty ; rdfs:range jf:DelegatedAgentProfile .
+jf:harnessProfile a owl:ObjectProperty ; rdfs:range jf:HarnessProfile .
+jf:readinessEvidence a owl:ObjectProperty ; rdfs:range jf:DelegatedAgentReadiness .
+jf:invocationBeforeEffect a owl:ObjectProperty ; rdfs:range prov:Activity .
 jf:adapterProvider a owl:ObjectProperty ; rdfs:range skos:Concept .
 jf:runtimeClass a owl:ObjectProperty ; rdfs:range skos:Concept .
 jf:deploymentClass a owl:ObjectProperty ; rdfs:range skos:Concept .
@@ -64,6 +68,7 @@ jf:verificationProfileRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
 jf:approvedAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime .
 jf:expiresAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime .
 jf:observationDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:admissionBindingDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
 jf:credentialGeneration a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:workerRevision a owl:DatatypeProperty ; rdfs:range xsd:string .
 jf:workerReady a owl:DatatypeProperty ; rdfs:range xsd:boolean .

@@ -113,6 +113,12 @@ defmodule JidoCode.Knowledge.DelegatedAgentGraphProtocolTest do
              |> signed_release()
              |> Knowledge.delegated_adapter_release()
 
+    assert {:error, _error} =
+             release
+             |> Map.put(:executable_registry_key, "caller_supplied_binary")
+             |> signed_release()
+             |> Knowledge.delegated_adapter_release()
+
     accepted = release!()
     profile = profile_attributes(accepted)
 
