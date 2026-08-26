@@ -251,10 +251,11 @@ delegated profile additionally:
 
 ## Initial Provider Sequencing
 
-The first implementation plan should select one provider/CLI based on current
-developer demand, credential-isolation feasibility, JidoHarness adapter
-maturity, cancellation support, candidate behavior, and testability. It must
-not enable all upstream adapters at once.
+The approved first implementation plan selects Codex CLI for a
+`developer_local`, `jido_code`-only profile based on current developer demand,
+credential-isolation feasibility, JidoHarness process maturity, cancellation
+support, candidate behavior, and testability. It does not enable all upstream
+adapters at once.
 
 After DGA1, additional Codex, Claude Code, Pi, Gemini CLI, OpenCode, or other
 profiles repeat the same provider-specific gates. Ordering is a product

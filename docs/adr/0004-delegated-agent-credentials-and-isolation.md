@@ -140,9 +140,10 @@ exchange, or attaching-proxy boundary cannot receive a managed profile.
 - **Trust the CLI to hide its own credentials:** the CLI and its descendants
   are inside the effect boundary, not the authorization boundary.
 
-## Acceptance Conditions
+## Implementation Acceptance And Reopening Conditions
 
-This ADR may move to `Accepted` only after one exact provider profile proves:
+The credential and isolation decision is accepted, but a write-capable
+provider profile remains disabled until it proves:
 
 1. credential canaries are absent from argv, environment visible to tool
    descendants, prompts, journals, output, artifacts, and diagnostics;
@@ -160,3 +161,7 @@ This ADR may move to `Accepted` only after one exact provider profile proves:
 
 Acceptance of a developer-local provider profile does not accept its
 managed-fleet counterpart. Each deployment class requires separate evidence.
+The decision reopens if reusable material reaches a repository-controlled
+descendant, if authentication or billing falls back, if credential release is
+not bound to the current lease and fence, or if developer-local evidence is
+used to claim managed-fleet isolation.

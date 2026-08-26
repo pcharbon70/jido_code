@@ -56,6 +56,7 @@ The governing decisions and specifications are:
 - [Delegated coding agent profile and catalog](../../architecture/delegated-agent-profile-catalog.md)
 - [Delegated coding agent runtime protocol](../../architecture/delegated-agent-runtime-protocol.md)
 - [Delegated coding agent product and qualification](../../architecture/delegated-agent-product-and-qualification.md)
+- [Delegated coding agent governance baseline](../../architecture/delegated-agent-governance-baseline.md)
 
 The completed graph-native factory, secure harness, total memory, and managed
 coding plans remain binding. This plan adds no second durable store, runtime

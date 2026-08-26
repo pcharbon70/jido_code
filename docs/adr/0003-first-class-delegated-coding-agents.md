@@ -147,9 +147,10 @@ does not itself enable any currently blocked adapter.
 - **Replace the native ReqLLM agent:** the host-controlled loop offers stronger
   mediation and remains valuable for supported tasks.
 
-## Acceptance Conditions
+## Implementation Acceptance And Reopening Conditions
 
-This ADR may move to `Accepted` only with:
+The architectural decision is accepted, but delegated-write selection remains
+disabled until one exact profile proves:
 
 1. versioned ontology and shape changes for the delegated profile and catalog;
 2. semantic commands and reviewed queries with scope, revision, and authority
@@ -167,4 +168,7 @@ This ADR may move to `Accepted` only with:
 
 Until these conditions pass and the implementation pull request merges, the
 current managed-coding release contract and its disabled delegated-write
-posture remain authoritative.
+posture remain authoritative. The decision reopens if either runtime class can
+be selected outside an exact graph-owned profile, if fallback crosses runtime
+or provider boundaries, if disposable runtime state becomes durable authority,
+or if a delegated process gains verification, publication, or merge authority.

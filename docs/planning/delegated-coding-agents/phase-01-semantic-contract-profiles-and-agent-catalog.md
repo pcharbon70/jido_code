@@ -19,21 +19,21 @@ Back to plan: [README](./README.md)
   offerings, and selections graph-authorized, scoped, versioned, and
   reconstructable.
 
-  - [ ] 1.1 Section - Baseline the approved delegated-agent architecture and DGA1 boundary.
+  - [x] 1.1 Section - Baseline the approved delegated-agent architecture and DGA1 boundary.
 
     This section pins the accepted ADRs and approved specifications as the
     implementation baseline.
 
-    - [ ] 1.1.1 Task {#dca-p01-governance} [repo: jido_code] - Pin and reconcile the delegated-agent decisions.
+    - [x] 1.1.1 Task {#dca-p01-governance} [repo: jido_code] - Pin and reconcile the delegated-agent decisions.
 
       This task makes the Codex-first, JidoCode-owned protected launch policy
       and developer-local scope normative.
 
-      - [ ] 1.1.1.1 Subtask - Pin accepted ADRs 0003 and 0004, their consequences, alternatives, and reopening conditions as governing inputs.
-      - [ ] 1.1.1.2 Subtask - Pin the approved profile, runtime, and product specification revisions and record their canonical digests.
-      - [ ] 1.1.1.3 Subtask - Record that JidoHarness and Codex are the intended execution route while the current prompt-in-argv built-in adapter remains blocked.
-      - [ ] 1.1.1.4 Subtask - Limit DGA1 to foreground `developer_local` execution against `jido_code`; keep DGA2, other providers, managed fleet, publication, and merge out of scope.
-      - [ ] 1.1.1.5 Subtask - Reconcile terminology with the accepted harness and managed-coding contracts and update architecture indexes.
+      - [x] 1.1.1.1 Subtask - Pin accepted ADRs 0003 and 0004, their consequences, alternatives, and reopening conditions as governing inputs.
+      - [x] 1.1.1.2 Subtask - Pin the approved profile, runtime, and product specification revisions and record their canonical digests.
+      - [x] 1.1.1.3 Subtask - Record that JidoHarness and Codex are the intended execution route while the current prompt-in-argv built-in adapter remains blocked.
+      - [x] 1.1.1.4 Subtask - Limit DGA1 to foreground `developer_local` execution against `jido_code`; keep DGA2, other providers, managed fleet, publication, and merge out of scope.
+      - [x] 1.1.1.5 Subtask - Reconcile terminology with the accepted harness and managed-coding contracts and update architecture indexes.
 
   - [ ] 1.2 Section - Extend the ontology and semantic command line.
 
