@@ -95,3 +95,16 @@ implementation plan was merged.
 - [Graph-native contributor fitness checks](../contributing/graph-native-fitness-checks.md)
 - [Phase 10 architecture audit](./phase-10-architecture-audit.md)
 - [Phase 10 product and release acceptance receipt](./phase-10-receipt.md)
+
+## Approved Delegated Coding Agent Remediation
+
+These approved specifications define the work required to make
+developer-facing JidoHarness coding CLIs first-class JidoCode agents under
+accepted ADRs 0003 and 0004. They do not change the current release posture
+until their gated implementation merges.
+
+- [ADR 0003: First-class delegated coding agents](../adr/0003-first-class-delegated-coding-agents.md)
+- [ADR 0004: Delegated-agent credentials and isolation](../adr/0004-delegated-agent-credentials-and-isolation.md)
+- [Delegated coding agent profile and catalog specification](./delegated-agent-profile-catalog.md)
+- [Delegated coding agent runtime protocol specification](./delegated-agent-runtime-protocol.md)
+- [Delegated coding agent product and qualification specification](./delegated-agent-product-and-qualification.md)
