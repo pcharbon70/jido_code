@@ -47,6 +47,48 @@ defmodule JidoCode.Knowledge.ResourceIdentityTest do
     assert :ok = ResourceIdentity.validate(first)
   end
 
+  test "constructs repository-scoped wiki, edition, page, and section identities" do
+    assert {:ok, repository} = ResourceIdentity.repository("wiki-identity")
+    assert {:ok, wiki} = ResourceIdentity.repository_wiki(repository)
+    assert String.match?(wiki, ~r|/id/repo/[a-f0-9]{32}/wiki$|)
+
+    root = String.duplicate("A", 64)
+    assert {:ok, edition} = ResourceIdentity.wiki_edition(repository, root)
+    assert String.ends_with?(edition, "/edition/#{String.downcase(root)}")
+
+    assert {:ok, first_page} =
+             ResourceIdentity.wiki_page(edition, :project_overview, "overview")
+
+    assert {:ok, same_page} =
+             ResourceIdentity.wiki_page(edition, "project_overview", "overview")
+
+    assert first_page == same_page
+    assert String.match?(first_page, ~r|/page/[a-f0-9]{32}$|)
+
+    assert {:ok, section} =
+             ResourceIdentity.wiki_section(first_page, :deterministic, "repository-summary")
+
+    assert String.match?(section, ~r|/section/[a-f0-9]{32}$|)
+    assert :ok = ResourceIdentity.validate(section)
+  end
+
+  test "rejects wiki identities outside the canonical repository lineage" do
+    assert {:ok, repository} = ResourceIdentity.repository("wiki-hostile")
+
+    assert {:error, %Error{operation: :digest_value}} =
+             ResourceIdentity.wiki_edition(repository, "not-a-root")
+
+    assert {:error, %Error{operation: :wiki_page_identity}} =
+             ResourceIdentity.wiki_page(repository, :home, "home")
+
+    assert {:error, %Error{operation: :identity_segment}} =
+             ResourceIdentity.wiki_page(
+               ResourceIdentity.wiki_edition(repository, String.duplicate("c", 64)) |> elem(1),
+               :home,
+               "../escape"
+             )
+  end
+
   test "rejects ambiguous, oversized, non-normalized, and literal relationship identities" do
     assert {:error, %Error{operation: :provider_identity}} =
              ResourceIdentity.provider_host("https://user@example.com/path")

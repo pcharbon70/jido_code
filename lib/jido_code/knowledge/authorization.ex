@@ -51,7 +51,8 @@ defmodule JidoCode.Knowledge.Authorization do
     :dataset_policy_writer,
     :dataset_writer,
     :dataset_exporter,
-    :memory_evaluator
+    :memory_evaluator,
+    :wiki_writer
   ]
 
   @spec authorize(CommandEnvelope.t(), map(), ChangeSet.t(), map()) ::

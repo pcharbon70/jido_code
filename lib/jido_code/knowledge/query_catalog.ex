@@ -26,6 +26,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @dataset_version "2.7.0"
   @managed_coding_version "2.8.0"
   @delegated_agent_version "2.9.0"
+  @repository_wiki_version "2.10.0"
   @versions [
     @version,
     @repository_version,
@@ -41,7 +42,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @content_version,
     @dataset_version,
     @managed_coding_version,
-    @delegated_agent_version
+    @delegated_agent_version,
+    @repository_wiki_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -97,6 +99,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec delegated_agent_version() :: String.t()
   def delegated_agent_version, do: @delegated_agent_version
+
+  @spec repository_wiki_version() :: String.t()
+  def repository_wiki_version, do: @repository_wiki_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -553,6 +558,29 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           dataset_specifications(resource) ++
           managed_coding_specifications(resource) ++
           delegated_agent_specifications(graph, resource)
+
+      @repository_wiki_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource) ++
+          history_specifications(resource) ++
+          experience_specifications(resource) ++
+          artifact_claim_specifications(resource) ++
+          procedure_specifications(resource) ++
+          content_specifications(resource) ++
+          dataset_specifications(resource) ++
+          managed_coding_specifications(resource) ++
+          delegated_agent_specifications(graph, resource) ++
+          repository_wiki_specifications(graph, resource)
     end
   end
 
@@ -1986,6 +2014,94 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:factory_policy],
         :timeline,
         "Read bounded delegated profile transitions and supersession lineage.",
+        :diagnostic,
+        :declared
+      )
+    ]
+  end
+
+  defp repository_wiki_specifications(_graph, resource) do
+    edition_pair = %{
+      control_graph: %{type: :graph_iri, required: true},
+      wiki_graph: %{type: :graph_iri, required: true},
+      resource: %{type: :resource_iri, required: true}
+    }
+
+    [
+      spec(
+        :repository_wiki_enrollment_detail,
+        :select,
+        resource,
+        :control,
+        [:repository_control],
+        :table,
+        "Read the latest exact repository wiki enrollment, visibility, retention, and cancellation fence.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_current_edition,
+        :select,
+        edition_pair,
+        :observation,
+        [:repository_control, :repository_wiki],
+        :table,
+        "Read one authorized current edition through its exact repository enrollment pointer.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_edition_history,
+        :select,
+        resource,
+        :observation,
+        [:repository_control],
+        :timeline,
+        "Read bounded repository wiki enrollment and edition-pointer history.",
+        :diagnostic,
+        :declared
+      ),
+      spec(
+        :repository_wiki_page_detail,
+        :select,
+        resource,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read one bounded wiki page with its exact source references.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_source_coverage,
+        :select,
+        resource,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read bounded source coverage and explicit gaps for one edition.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_freshness,
+        :select,
+        resource,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read edition and page freshness against the admitted source fence.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_compilation_status,
+        :select,
+        Map.put(resource, :instant, %{type: :datetime, required: true}),
+        :execution,
+        [:repository_wiki],
+        :table,
+        "Read one bounded compilation attempt status without exposing process-local state.",
         :diagnostic,
         :declared
       )

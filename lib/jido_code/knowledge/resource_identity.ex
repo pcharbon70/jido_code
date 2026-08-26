@@ -50,6 +50,9 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     dataset-lifecycle-transition dataset-external-copy training-boundary
     memory-evaluation-run memory-release-decision memory-product-disable
     delegated-adapter-release delegated-agent-profile delegated-agent-readiness
+    repository-wiki-enrollment wiki-generation-profile wiki-edition wiki-edition-segment wiki-page wiki-section
+    wiki-source wiki-citation wiki-link wiki-gap wiki-drift-finding wiki-lint-report wiki-preview
+    wiki-maintainer wiki-budget wiki-reservation wiki-usage-record wiki-compilation-attempt
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
   @max_timestamp 281_474_976_710_655
@@ -316,6 +319,68 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
 
   def content_digest(_algorithm, _hex), do: invalid(:content_identity)
 
+  @spec repository_wiki(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
+  def repository_wiki(repository_iri) do
+    with {:ok, repository_token} <- graph_token(repository_iri) do
+      build("repo", [repository_token, "wiki"])
+    end
+  end
+
+  @spec wiki_edition(String.t(), String.t()) :: {:ok, String.t()} | {:error, Error.t()}
+  def wiki_edition(repository_iri, edition_root) when is_binary(edition_root) do
+    with {:ok, wiki_iri} <- repository_wiki(repository_iri),
+         {:ok, normalized_root} <- normalize_hex(edition_root, @digest_lengths["sha256"]),
+         :ok <- validate(wiki_iri) do
+      {:ok, wiki_iri <> "/edition/" <> normalized_root}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _invalid -> invalid(:wiki_edition_identity)
+    end
+  end
+
+  def wiki_edition(_repository_iri, _edition_root), do: invalid(:wiki_edition_identity)
+
+  @spec wiki_page(String.t(), atom() | String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def wiki_page(edition_iri, page_kind, stable_key) when is_binary(stable_key) do
+    kind = if is_atom(page_kind), do: Atom.to_string(page_kind), else: page_kind
+
+    with :ok <- validate(edition_iri),
+         true <- wiki_edition_iri?(edition_iri),
+         {:ok, normalized_kind} <- normalize_text(kind, 64),
+         true <- Regex.match?(~r/^[a-z][a-z0-9_]{0,63}$/, normalized_kind),
+         {:ok, normalized_key} <- normalize_text(stable_key, @max_segment_bytes) do
+      token = digest_token("wiki-page", normalized_kind <> "\n" <> normalized_key)
+      {:ok, edition_iri <> "/page/" <> token}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _invalid -> invalid(:wiki_page_identity)
+    end
+  end
+
+  def wiki_page(_edition_iri, _page_kind, _stable_key), do: invalid(:wiki_page_identity)
+
+  @spec wiki_section(String.t(), atom() | String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, Error.t()}
+  def wiki_section(page_iri, section_kind, stable_key) when is_binary(stable_key) do
+    kind = if is_atom(section_kind), do: Atom.to_string(section_kind), else: section_kind
+
+    with :ok <- validate(page_iri),
+         true <- wiki_page_iri?(page_iri),
+         {:ok, normalized_kind} <- normalize_text(kind, 64),
+         true <- Regex.match?(~r/^[a-z][a-z0-9_]{0,63}$/, normalized_kind),
+         {:ok, normalized_key} <- normalize_text(stable_key, @max_segment_bytes) do
+      token = digest_token("wiki-section", normalized_kind <> "\n" <> normalized_key)
+      {:ok, page_iri <> "/section/" <> token}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _invalid -> invalid(:wiki_section_identity)
+    end
+  end
+
+  def wiki_section(_page_iri, _section_kind, _stable_key),
+    do: invalid(:wiki_section_identity)
+
   @spec scope(String.t() | atom(), String.t()) :: {:ok, String.t()} | {:error, Error.t()}
   def scope(kind, value) when is_binary(value) do
     with {:ok, kind_segment} <-
@@ -532,6 +597,20 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
   defp locator_material?(value) do
     String.contains?(value, ["://", "/", "\\"]) or
       String.starts_with?(String.downcase(value), ["git@", "file:"])
+  end
+
+  defp wiki_edition_iri?(iri) do
+    Regex.match?(
+      ~r|^#{@base}repo/[a-f0-9]{32}/wiki/edition/[a-f0-9]{64}$|,
+      iri
+    )
+  end
+
+  defp wiki_page_iri?(iri) do
+    Regex.match?(
+      ~r|^#{@base}repo/[a-f0-9]{32}/wiki/edition/[a-f0-9]{64}/page/[a-f0-9]{32}$|,
+      iri
+    )
   end
 
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}

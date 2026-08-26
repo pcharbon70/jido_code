@@ -372,7 +372,8 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
 
   defp unique_root(context) do
     unique = System.unique_integer([:positive, :monotonic])
+    timestamp = System.system_time(:nanosecond)
     name = context.test |> Atom.to_string() |> :erlang.phash2()
-    Path.join(System.tmp_dir!(), "jido-code-command-pipeline-#{name}-#{unique}")
+    Path.join(System.tmp_dir!(), "jido-code-command-pipeline-#{name}-#{timestamp}-#{unique}")
   end
 end

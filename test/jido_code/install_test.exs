@@ -26,7 +26,7 @@ defmodule JidoCode.InstallTest do
     assert {:ok, receipt} =
              Install.bootstrap("phase-04-integration-operator-token", options)
 
-    assert receipt.ontology_version == "1.4.0"
+    assert receipt.ontology_version == "1.5.0"
     assert receipt.actor_iri == actor
     assert receipt.authority_dataset_revision == 2
     assert byte_size(receipt.release_contract_digest) == 64

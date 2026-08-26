@@ -225,6 +225,158 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:repository_wiki_enrollment_detail) do
+    """
+    SELECT ?enrollment ?revision ?state ?generation ?preview ?profile ?readVisibility ?accountingRetention ?auditRetention ?cancellationGeneration ?currentEdition ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?enrollment a <#{@jf}RepositoryWikiEnrollment> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}enrollmentRevision> ?revision ;
+                    <#{@jf}enrollmentState> ?state ;
+                    <#{@jf}generationMode> ?generation ;
+                    <#{@jf}previewMode> ?preview ;
+                    <#{@jf}wikiReadVisibility> ?readVisibility ;
+                    <#{@jf}wikiAccountingRetention> ?accountingRetention ;
+                    <#{@jf}wikiAuditRetention> ?auditRetention ;
+                    <#{@jf}wikiCancellationGeneration> ?cancellationGeneration ;
+                    <#{@prov}generatedAtTime> ?recorded .
+        OPTIONAL { ?enrollment <#{@jf}wikiGenerationProfile> ?profile }
+        OPTIONAL { ?enrollment <#{@jf}currentWikiEdition> ?currentEdition }
+      }
+    }
+    ORDER BY DESC(?revision)
+    LIMIT 1
+    """
+  end
+
+  def fetch(:repository_wiki_current_edition) do
+    """
+    SELECT ?enrollment ?enrollmentRevision ?edition ?editionState ?sourceSnapshot ?sourceFence ?compilerProfile ?compilerDigest ?freshness ?closedAt WHERE {
+      GRAPH {{control_graph}} {
+        ?enrollment a <#{@jf}RepositoryWikiEnrollment> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}enrollmentRevision> ?enrollmentRevision ;
+                    <#{@jf}wikiReadVisibility> <https://jido.run/ontology/concept/WikiReadRetained> ;
+                    <#{@jf}currentWikiEdition> ?edition .
+      }
+      GRAPH {{wiki_graph}} {
+        ?edition a <#{@jf}WikiEdition> ;
+                 <#{@jf}repositoryScope> {{resource}} ;
+                 <#{@jf}editionState> ?editionState ;
+                 <#{@jf}sourceSnapshot> ?sourceSnapshot ;
+                 <#{@jf}sourceFence> ?sourceFence ;
+                 <#{@jf}compilerProfile> ?compilerProfile ;
+                 <#{@jf}compilerDigest> ?compilerDigest ;
+                 <#{@jf}freshnessState> ?freshness .
+        OPTIONAL { ?edition <#{@jf}closedAt> ?closedAt }
+      }
+    }
+    ORDER BY DESC(?enrollmentRevision)
+    LIMIT 1
+    """
+  end
+
+  def fetch(:repository_wiki_edition_history) do
+    """
+    SELECT ?enrollment ?revision ?state ?profile ?currentEdition ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?enrollment a <#{@jf}RepositoryWikiEnrollment> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}enrollmentRevision> ?revision ;
+                    <#{@jf}enrollmentState> ?state ;
+                    <#{@prov}generatedAtTime> ?recorded .
+        OPTIONAL { ?enrollment <#{@jf}wikiGenerationProfile> ?profile }
+        OPTIONAL { ?enrollment <#{@jf}currentWikiEdition> ?currentEdition }
+      }
+    }
+    ORDER BY ?revision
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_page_detail) do
+    """
+    SELECT ?predicate ?value ?source ?sourceKind ?sourceLocator ?sourceDigest WHERE {
+      GRAPH {{graph}} {
+        {{resource}} a <#{@jf}WikiPage> ; ?predicate ?value ; <#{@jf}wikiSource> ?source .
+        ?source a <#{@jf}WikiSource> ;
+                <#{@jf}sourceKind> ?sourceKind ;
+                <#{@jf}sourceContentDigest> ?sourceDigest .
+        OPTIONAL { ?source <#{@jf}sourceLocator> ?sourceLocator }
+      }
+    }
+    ORDER BY ?predicate ?source
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_source_coverage) do
+    """
+    SELECT ?source ?sourceKind ?sourceAuthority ?sourceLocator ?sourceDigest ?freshness ?gap ?gapKind ?omissionCode WHERE {
+      GRAPH {{graph}} {
+        { ?source a <#{@jf}WikiSource> ;
+                  <#{@jf}wikiEdition> {{resource}} ;
+                  <#{@jf}sourceKind> ?sourceKind ;
+                  <#{@jf}sourceAuthority> ?sourceAuthority ;
+                  <#{@jf}sourceContentDigest> ?sourceDigest ;
+                  <#{@jf}freshnessState> ?freshness .
+          OPTIONAL { ?source <#{@jf}sourceLocator> ?sourceLocator }
+        }
+        UNION
+        { ?gap a <#{@jf}WikiGap> ;
+               <#{@jf}wikiEdition> {{resource}} ;
+               <#{@jf}gapKind> ?gapKind ;
+               <#{@jf}omissionCode> ?omissionCode . }
+      }
+    }
+    ORDER BY ?source ?gap
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_freshness) do
+    """
+    SELECT ?item ?kind ?freshness ?sourceFence ?sourceSnapshot WHERE {
+      GRAPH {{graph}} {
+        { BIND({{resource}} AS ?item)
+          ?item a <#{@jf}WikiEdition> ;
+                <#{@jf}editionState> ?kind ;
+                <#{@jf}freshnessState> ?freshness ;
+                <#{@jf}sourceFence> ?sourceFence ;
+                <#{@jf}sourceSnapshot> ?sourceSnapshot . }
+        UNION
+        { ?item a <#{@jf}WikiPage> ;
+                <#{@jf}wikiEdition> {{resource}} ;
+                <#{@jf}pageKind> ?kind ;
+                <#{@jf}freshnessState> ?freshness . }
+      }
+    }
+    ORDER BY ?item
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_compilation_status) do
+    """
+    SELECT ?state ?repository ?edition ?sourceSnapshot ?sourceFence ?compilerProfile ?compilerDigest ?started ?updated WHERE {
+      GRAPH {{graph}} {
+        {{resource}} a <#{@jf}WikiCompilationAttempt> ;
+                     <#{@jf}repositoryScope> ?repository ;
+                     <#{@jf}wikiEdition> ?edition ;
+                     <#{@jf}sourceSnapshot> ?sourceSnapshot ;
+                     <#{@jf}sourceFence> ?sourceFence ;
+                     <#{@jf}compilerProfile> ?compilerProfile ;
+                     <#{@jf}compilerDigest> ?compilerDigest ;
+                     <#{@jf}editionState> ?state ;
+                     <#{@prov}startedAtTime> ?started .
+        OPTIONAL { {{resource}} <#{@prov}endedAtTime> ?updated }
+        FILTER(?started <= {{instant}})
+      }
+    }
+    LIMIT 1
+    """
+  end
+
   def fetch(:resource_description) do
     """
     CONSTRUCT { {{resource}} ?predicate ?value }

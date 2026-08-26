@@ -1,8 +1,8 @@
 defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
   @moduledoc false
 
-  @version "1.4.0"
-  @ontology_version "1.4.0"
+  @version "1.5.0"
+  @ontology_version "1.5.0"
   @known_versions MapSet.new([
                     {"1.0.0", "1.0.0"},
                     {"1.0.0", "1.1.0"},
@@ -18,6 +18,12 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
                     {"1.2.0", "1.4.0"},
                     {"1.3.0", "1.3.0"},
                     {"1.3.0", "1.4.0"},
+                    {"1.0.0", "1.5.0"},
+                    {"1.1.0", "1.5.0"},
+                    {"1.2.0", "1.5.0"},
+                    {"1.3.0", "1.5.0"},
+                    {"1.4.0", "1.4.0"},
+                    {"1.4.0", "1.5.0"},
                     {@ontology_version, @version}
                   ])
   @jf "https://jido.run/ontology/factory#"
@@ -26,13 +32,14 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ontology: :schema,
     factory_catalog: ~w[
       RepositoryFactory SoftwareRepository RepositoryLocator ManagementEnrollment Actor Agent Scope
+      WikiGenerationProfile WikiBudget
     ],
     factory_policy: ~w[
       DesiredOutcome Constraint Policy Obligation Capability AuthorizationGrant Delegation Scope
       Decision StateTransition RepositoryCohort GraphRevisionReference CredentialReference
       ModelAccessProfile HarnessProfile ToolDefinitionRevision ManagedCodingProfile
       CodingStrategyRevision DelegatedAdapterRelease DelegatedAgentProfile
-      DelegatedAgentReadiness
+      DelegatedAgentReadiness WikiGenerationProfile WikiBudget
     ],
     observation_batch: ~w[
       ObservationActivity ObservationBatch RepositorySnapshot SourceArtifact Claim Finding
@@ -43,6 +50,8 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       Goal Constraint Obligation Task Plan Capability Lease StateTransition Decision MigrationActivity
       GraphRevisionReference ReconciliationActivity ReconciliationInput Gap ControlProposal
       EligibilityReceipt InteractionSession Message Instruction DecisionFollowUp ApprovalRequest
+      RepositoryWikiEnrollment WikiCompilationAttempt WikiMaintainer WikiBudget WikiReservation
+      WikiUsageRecord WikiDriftFinding
     ],
     run_attempt: ~w[
       ExecutionAttempt ExecutionContext ToolInvocation Patch VerificationActivity Artifact
@@ -57,7 +66,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       ProviderObservation LifecycleObservation ModelInvocationStart ToolInvocationStart
       AttemptTransitionObservation NormalizedActionProposal ExecutionArtifactObservation
       CodingRuntimeObservation CodingBudgetSnapshot CandidateCompletionProposal
-      CodingClarification CandidateHandoff
+      CodingClarification CandidateHandoff WikiReservation WikiUsageRecord
     ],
     experience: ~w[
       ExperienceCase ExperienceCaseTransition ExperienceSourceManifest CandidateFactOrSummary
@@ -80,6 +89,11 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
       MemoryEvaluationRun MemoryReleaseDecision MemoryProductDisable
       GraphRevisionReference MigrationActivity
     ],
+    repository_wiki: ~w[
+      RepositoryWiki WikiEdition WikiEditionSegment WikiPage WikiSection WikiSource WikiCitation WikiLink WikiGap
+      WikiDriftFinding WikiLintReport WikiPreview WikiCompilationAttempt WikiUsageRecord
+      GraphRevisionReference MigrationActivity
+    ],
     evidence: ~w[
       EvidenceBundle Decision Claim Finding Contradiction VerificationMethod VerificationActivity
       VerificationCheck EvidenceSufficiency ArtifactClaim ArtifactClaimTransition
@@ -91,7 +105,7 @@ defmodule JidoCode.Knowledge.Validation.ShapeCatalog do
     ],
     security_audit: ~w[
       AuthorizationGrant CredentialReference ValidationReport ValidationResult MigrationActivity
-      CrossRepositoryAudit
+      CrossRepositoryAudit WikiUsageRecord
     ],
     derived: ~w[
       Claim Finding Contradiction GraphRevisionReference ValidationReport ValidationResult

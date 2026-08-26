@@ -6,7 +6,7 @@ defmodule JidoCode.Security.MemoryDataPolicyTest do
   alias JidoCode.Security.DataPolicy
 
   test "enables only semantic history and keeps alternative profiles gated" do
-    assert DataPolicy.revision() == "2.1.0"
+    assert DataPolicy.revision() == "2.2.0"
 
     assert DataPolicy.profiles() == [
              :diagnostic_capture,
@@ -79,6 +79,7 @@ defmodule JidoCode.Security.MemoryDataPolicyTest do
     assert :omitted in dimensions.capture_outcome
     assert :ciphertext in dimensions.representation
     assert :episode_content_graph in dimensions.storage_location
+    assert :repository_wiki_graph in dimensions.storage_location
     assert :cold in dimensions.availability
     assert :archived in dimensions.retention
     assert :physically_deleted in dimensions.retention

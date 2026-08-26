@@ -112,3 +112,24 @@ until their gated implementation merges.
 - [Delegated coding agent Phase 1 semantic contract receipt](./delegated-agent-phase-01-receipt.md)
 - [Protected Codex delegated runtime](./delegated-agent-codex-runtime.md)
 - [Delegated coding agent Phase 2 protected runtime receipt](./delegated-agent-phase-02-receipt.md)
+
+## Approved Repository Wiki Architecture
+
+These accepted decisions and approved specifications let each enrolled
+codebase opt into a
+repository-scoped, editioned wiki without replacing Git or the accepted graph
+authority boundaries. Their gated implementation remains disabled until the
+corresponding phase receipts are accepted at merged candidates.
+
+- [Repository wiki research](../research/11-repository-wikis-as-compiled-knowledge-projections.md)
+- [ADR 0005: Repository wikis as compiled knowledge projections](../adr/0005-repository-wikis-as-compiled-knowledge-projections.md)
+- [ADR 0006: Per-repository wiki maintainer agents](../adr/0006-per-repository-wiki-maintainer-agents.md)
+- [ADR 0007: Repository wiki enrollment and cost governance](../adr/0007-repository-wiki-enrollment-and-cost-governance.md)
+- [Repository wiki graph and edition contract](./repository-wiki-graph-and-edition-contract.md)
+- [Repository wiki compilation and update protocol](./repository-wiki-compilation-and-update-protocol.md)
+- [Repository wiki Mix project and dependency catalog](./repository-wiki-mix-project-and-dependency-catalog.md)
+- [Repository wiki maintainer runtime](./repository-wiki-maintainer-runtime.md)
+- [Repository wiki enrollment, budget, and accounting](./repository-wiki-enrollment-budget-and-accounting.md)
+- [Repository wiki product and qualification](./repository-wiki-product-and-qualification.md)
+- [Repository wikis implementation plan](../planning/repository-wikis/README.md)
+- [Repository wiki governance baseline](./repository-wiki-governance-baseline.md)

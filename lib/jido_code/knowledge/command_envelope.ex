@@ -63,6 +63,7 @@ defmodule JidoCode.Knowledge.CommandEnvelope do
          false <- Map.has_key?(attributes, :issued_at),
          {:ok, definition} <-
            CommandRegistry.resolve(attributes[:command_type], attributes[:command_version]),
+         true <- Map.get(definition, :availability, :enabled) == :enabled,
          false <- CommandRegistry.generic_crud?(attributes[:command_type]),
          :ok <- validate_resource(attributes[:command_iri]),
          :ok <- validate_resource(attributes[:principal_iri]),

@@ -39,6 +39,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
           | :execution_attempt
           | :managed_coding_profile
           | :delegated_agent_profile
+          | :repository_wiki_enrollment
   @type t :: %__MODULE__{}
 
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -64,7 +65,8 @@ defmodule JidoCode.Knowledge.Control.Transition do
       abandoned recovered superseded
     ]a,
     managed_coding_profile: ~w[disabled enabled revoked superseded]a,
-    delegated_agent_profile: ~w[disabled enabled revoked superseded]a
+    delegated_agent_profile: ~w[disabled enabled revoked superseded]a,
+    repository_wiki_enrollment: ~w[off manual automatic]a
   }
 
   @edges %{
@@ -184,6 +186,11 @@ defmodule JidoCode.Knowledge.Control.Transition do
       enabled: ~w[disabled revoked superseded]a,
       revoked: [],
       superseded: []
+    },
+    repository_wiki_enrollment: %{
+      off: ~w[manual automatic]a,
+      manual: ~w[off manual automatic]a,
+      automatic: ~w[off manual automatic]a
     }
   }
 
@@ -374,6 +381,7 @@ defmodule JidoCode.Knowledge.Control.Transition do
   defp initial_state(:execution_attempt), do: :prepared
   defp initial_state(:managed_coding_profile), do: :disabled
   defp initial_state(:delegated_agent_profile), do: :disabled
+  defp initial_state(:repository_wiki_enrollment), do: :off
   defp initial_state(_domain), do: :proposed
 
   defp valid_reason?(value), do: is_binary(value) and byte_size(value) in 1..512
