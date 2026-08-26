@@ -60,21 +60,21 @@ Back to plan: [README](./README.md)
       - [x] 2.2.1.4 Subtask - Reuse the pinned JidoHarness managed-process lifecycle and normalized Codex JSONL mappings without enabling the upstream built-in adapter.
       - [x] 2.2.1.5 Subtask - Classify the controller-enforced final output as candidate, clarification, checkpoint, or failure and treat all CLI file and check claims as observations.
 
-  - [ ] 2.3 Section - Implement bounded turns, steering, clarification, and cancellation.
+  - [x] 2.3 Section - Implement bounded turns, steering, clarification, and cancellation.
 
     This section supports developer interaction without relying on provider
     sessions as durable state or accepting unsupported live stdin semantics.
 
-    - [ ] 2.3.1 Task {#dca-p02-turns} [repo: jido_code] [after: {#dca-p02-runner}] - Implement controller-reconstructed Codex turns.
+    - [x] 2.3.1 Task {#dca-p02-turns} [repo: jido_code] [after: {#dca-p02-runner}] - Implement controller-reconstructed Codex turns.
 
       This task provides one initial turn and one bounded follow-up turn while
       keeping provider-session resume disabled.
 
-      - [ ] 2.3.1.1 Subtask - Declare `controller_reconstructed_turns` as the DGA1 session protocol with hard `run_count=2` and `session_turns=2`.
-      - [ ] 2.3.1.2 Subtask - Transition a clarification or checkpoint result to `awaiting_actor`; validate `answer` or `steer`, create a new delegated-input manifest, and launch a fresh Codex process in the same fenced workspace.
-      - [ ] 2.3.1.3 Subtask - Allow steering only at an accepted turn boundary, return a state conflict while Codex is actively running, and keep cancellation available.
-      - [ ] 2.3.1.4 Subtask - Account each turn as a separate outer invocation under the same attempt, lease, fence, profile, workspace, and total budgets.
-      - [ ] 2.3.1.5 Subtask - Commit cancellation before JidoHarness cancellation and independent process-namespace termination and reject every late event or result.
+      - [x] 2.3.1.1 Subtask - Declare `controller_reconstructed_turns` as the DGA1 session protocol with hard `run_count=2` and `session_turns=2`.
+      - [x] 2.3.1.2 Subtask - Transition a clarification or checkpoint result to `awaiting_actor`; validate `answer` or `steer`, create a new delegated-input manifest, and launch a fresh Codex process in the same fenced workspace.
+      - [x] 2.3.1.3 Subtask - Allow steering only at an accepted turn boundary, return a state conflict while Codex is actively running, and keep cancellation available.
+      - [x] 2.3.1.4 Subtask - Account each turn as a separate outer invocation under the same attempt, lease, fence, profile, workspace, and total budgets.
+      - [x] 2.3.1.5 Subtask - Commit cancellation before JidoHarness cancellation and independent process-namespace termination and reject every late event or result.
 
   - [ ] 2.4 Section - Phase 2 Integration Tests.
 

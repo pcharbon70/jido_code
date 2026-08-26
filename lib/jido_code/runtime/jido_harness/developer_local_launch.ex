@@ -25,7 +25,7 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
          :ok <- validate_credential_reference(attributes[:credential_reference_iri]),
          :ok <- version(attributes[:cli_version]),
          :ok <- version(attributes[:provider_version]),
-         {:ok, limits} <- validate_limits(attributes[:limits]),
+         {:ok, limits} <- validate_limits(attributes[:limits], profile),
          :ok <- validate_exclusions(attributes) do
       {:ok,
        %{
@@ -167,11 +167,11 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
 
   defp validate_credential_reference(_value), do: :error
 
-  defp validate_limits(limits) when is_map(limits) do
+  defp validate_limits(limits, profile) when is_map(limits) do
     if MapSet.new(Map.keys(limits)) == MapSet.new(@limit_keys) and
          Enum.all?(limits, fn
-           {:run_count, value} -> value == 1
-           {:session_turns, value} -> value in 1..10
+           {:run_count, value} -> valid_turn_limit?(profile, :run_count, value)
+           {:session_turns, value} -> valid_turn_limit?(profile, :session_turns, value)
            {_key, value} -> is_integer(value) and value in 1..3_600_000_000
          end) do
       {:ok, Map.take(limits, @limit_keys)}
@@ -180,7 +180,14 @@ defmodule JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch do
     end
   end
 
-  defp validate_limits(_limits), do: :error
+  defp validate_limits(_limits, _profile), do: :error
+
+  defp valid_turn_limit?(%{name: :codex_dga1}, key, value)
+       when key in [:run_count, :session_turns],
+       do: value == 2
+
+  defp valid_turn_limit?(_profile, :run_count, value), do: value == 1
+  defp valid_turn_limit?(_profile, :session_turns, value), do: value in 1..10
 
   defp validate_exclusions(attributes) do
     if Enum.all?(

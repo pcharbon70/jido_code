@@ -62,6 +62,23 @@ classification and summary digest are retained. CLI file changes, check
 claims, internal tools, hidden reasoning, and provider session state remain
 partial observations and cannot become candidate or verification authority.
 
+## Controller-Reconstructed Turns
+
+The DGA1 session protocol is `controller_reconstructed_turns`. It permits
+exactly two outer invocations: one initial invocation and, only after an
+accepted clarification or checkpoint boundary, one actor-authenticated answer
+or steering invocation. The follow-up is a fresh Codex process in the same
+fenced workspace; provider-session resume and live stdin steering are not
+session authority.
+
+Every invocation carries the same attempt, lease, fencing token, runtime
+profile, workspace identity, and total budget. The controller rejects steering
+while a process is running, rejects widened or stale actor input, and fails a
+second interactive result as turn exhaustion. Cancellation commits the
+semantic transition before invoking runtime cancellation and independent
+process-namespace termination. Once cancelled, all late events and results are
+conflicts.
+
 ## Disabled Posture
 
 The profile remains graph-disabled through DCG3-DCG6. Phase 2 runtime code has
