@@ -217,7 +217,7 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
 
       attributes when is_map(attributes) ->
         case DeveloperLocalLaunch.build(request, profile, attributes) do
-          {:ok, launch} -> {:ok, Map.merge(base, launch)}
+          {:ok, launch} -> bind_resolved_launch(Map.merge(base, launch), profile, options)
           {:error, %AdapterError{} = error} -> {:error, error}
         end
 
@@ -225,6 +225,20 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
         invalid(:jido_harness_developer_local_launch)
     end
   end
+
+  defp bind_resolved_launch(launch, %{name: :codex_dga1}, options) do
+    with %{executable: executable} <- Keyword.get(options, :delegated_runtime),
+         true <- launch.executable == executable.path,
+         true <- launch.executable_digest == "sha256:" <> executable.sha256,
+         true <- launch.cli_version == executable.version,
+         true <- launch.provider_version == JidoCode.Runtime.JidoHarness.CodexRelease.model() do
+      {:ok, launch}
+    else
+      _invalid -> invalid(:jido_harness_resolved_launch)
+    end
+  end
+
+  defp bind_resolved_launch(launch, _profile, _options), do: {:ok, launch}
 
   defp missing_event(request, options) do
     context =

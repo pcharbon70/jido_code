@@ -2,10 +2,10 @@
 
 ## Status And Scope
 
-Contract version `7.0.0` defines the final managed coding product boundary. It
-retains the graph-authorized single-agent architecture accepted through Phase
-6 and records the Phase 7 specialist and AgentOS decisions. Model and coding
-tool calls are enabled only through the signed production profile and governed
+Contract version `8.0.0` retains the graph-authorized native single-agent
+architecture and adds the exact disabled Codex DGA1 delegated-runtime identity.
+Historical version `7.0.0` keeps its exact accepted interpretation. Model and
+coding tool calls remain enabled only through signed profiles and governed
 Factory gateways; candidate acceptance, publication authorization, and merge
 remain separate human-controlled boundaries.
 
@@ -53,11 +53,12 @@ or superseded recovery classification rather than reinterpretation.
 ## Disabled Posture
 
 Production keeps `Jido.Pod` specialists, AgentOS/Ecto persistence, Jido
-hibernate/thaw, managed JidoHarness writes, provider-native tools, automatic
-approval, automatic publication, and autonomous merge unreachable. The exact
-single-agent profile may use registered context, model, coding tool, workspace,
-candidate, and verification boundaries accepted in MCG2-MCG6. Jido ETS state
-is disposable and is never evidence that a semantic transition occurred.
+hibernate/thaw, selectable delegated Codex, managed JidoHarness writes,
+automatic approval, automatic publication, and autonomous merge unreachable.
+The exact native single-agent profile remains the production profile. The
+Codex runtime and adapter release may be exercised only by later gated
+qualification work until DCG3-DCG6 close. Jido ETS state is disposable and is
+never evidence that a semantic transition occurred.
 
 ## Dependency And Security Rules
 
