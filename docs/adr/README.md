@@ -13,3 +13,6 @@ consequences.
 - [ADR 0002: TripleStore backend contract](./0002-triple-store-backend-contract.md)
 - [ADR 0003: First-class delegated coding agents](./0003-first-class-delegated-coding-agents.md)
 - [ADR 0004: Delegated-agent credentials and isolation](./0004-delegated-agent-credentials-and-isolation.md)
+- [ADR 0005: Repository wikis as compiled knowledge projections](./0005-repository-wikis-as-compiled-knowledge-projections.md)
+- [ADR 0006: Per-repository wiki maintainer agents](./0006-per-repository-wiki-maintainer-agents.md)
+- [ADR 0007: Repository wiki enrollment and cost governance](./0007-repository-wiki-enrollment-and-cost-governance.md)
