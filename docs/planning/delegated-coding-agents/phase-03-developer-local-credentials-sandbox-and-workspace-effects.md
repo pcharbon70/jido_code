@@ -44,22 +44,22 @@ Back to plan: [README](./README.md)
       - [x] 3.1.2.3 Subtask - Record only opaque local-login references and current revocation generations in the graph.
       - [x] 3.1.2.4 Subtask - Reject managed eligibility, reusable credential export, background dispatch, expired consent, changed billing terms, and actor or repository mismatch.
 
-  - [ ] 3.2 Section - Isolate the Codex login and process namespace.
+  - [x] 3.2 Section - Isolate the Codex login and process namespace.
 
     This section exposes the narrowest usable login reference to Codex while
     preventing repository-controlled tool descendants from reading, copying,
     refreshing, or reusing it.
 
-    - [ ] 3.2.1 Task {#dca-p03-isolation} [repo: jido_code] [after: {#dca-p03-consent}] - Implement the trusted local Codex connector.
+    - [x] 3.2.1 Task {#dca-p03-isolation} [repo: jido_code] [after: {#dca-p03-consent}] - Implement the trusted local Codex connector.
 
       This task attaches the existing local login only inside the accepted
       developer-local worker.
 
-      - [ ] 3.2.1.1 Subtask - Resolve the approved login file or session through the credential broker without storing token bytes in graph state.
-      - [ ] 3.2.1.2 Subtask - Attach the credential read-only outside the workspace, with the Codex parent able to authenticate and sandboxed tool descendants denied access.
-      - [ ] 3.2.1.3 Subtask - Use environment replacement with only fixed non-secret paths and required runtime values; exclude host home, SSH agent, Docker socket, arbitrary configuration, and publication credentials.
-      - [ ] 3.2.1.4 Subtask - Permit only brokered OpenAI provider egress and deny arbitrary network access to shell commands and repository content.
-      - [ ] 3.2.1.5 Subtask - Revoke the permit and destroy the credential attachment on cancellation, expiry, supersession, termination, or worker loss.
+      - [x] 3.2.1.1 Subtask - Resolve the approved login file or session through the credential broker without storing token bytes in graph state.
+      - [x] 3.2.1.2 Subtask - Attach the credential read-only outside the workspace, with the Codex parent able to authenticate and sandboxed tool descendants denied access.
+      - [x] 3.2.1.3 Subtask - Use environment replacement with only fixed non-secret paths and required runtime values; exclude host home, SSH agent, Docker socket, arbitrary configuration, and publication credentials.
+      - [x] 3.2.1.4 Subtask - Permit only brokered OpenAI provider egress and deny arbitrary network access to shell commands and repository content.
+      - [x] 3.2.1.5 Subtask - Revoke the permit and destroy the credential attachment on cancellation, expiry, supersession, termination, or worker loss.
 
   - [ ] 3.3 Section - Enable bounded workspace writes and registered checks.
 

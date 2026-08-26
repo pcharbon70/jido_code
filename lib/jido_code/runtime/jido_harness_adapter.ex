@@ -13,6 +13,7 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
   alias JidoCode.Factory.Execution.RuntimeEvent
   alias JidoCode.Runtime.JidoHarness.Adoption
   alias JidoCode.Runtime.JidoHarness.DeveloperLocalLaunch
+  alias JidoCode.Runtime.JidoHarness.CodexProcessRunner
   alias JidoCode.Runtime.JidoHarness.Recovery
   alias JidoCode.Runtime.JidoHarness.RunRecord
   alias JidoCode.Runtime.JidoHarness.RunRegistry
@@ -232,7 +233,7 @@ defmodule JidoCode.Runtime.JidoHarnessAdapter do
          true <- launch.executable_digest == "sha256:" <> executable.sha256,
          true <- launch.cli_version == executable.version,
          true <- launch.provider_version == JidoCode.Runtime.JidoHarness.CodexRelease.model() do
-      {:ok, launch}
+      {:ok, Map.take(launch, CodexProcessRunner.launch_keys())}
     else
       _invalid -> invalid(:jido_harness_resolved_launch)
     end

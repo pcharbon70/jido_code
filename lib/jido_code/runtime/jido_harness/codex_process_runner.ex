@@ -16,6 +16,7 @@ defmodule JidoCode.Runtime.JidoHarness.CodexProcessRunner do
   @launch_keys ~w[
     deployment_class explicit_opt_in managed_eligible prompt run_id workspace_path executable
     executable_digest environment limits cli_version provider_version context_digest occurred_at
+    credential_attachment_digest
   ]a
 
   @impl true
@@ -79,6 +80,9 @@ defmodule JidoCode.Runtime.JidoHarness.CodexProcessRunner do
   @doc false
   def architecture_file_role, do: @architecture_file_role
 
+  @doc false
+  def launch_keys, do: @launch_keys
+
   defp start_process(launch, spec, retention, schema, options) do
     case api(options).start(spec, api_options(options)) do
       {:ok, process_id} ->
@@ -135,7 +139,8 @@ defmodule JidoCode.Runtime.JidoHarness.CodexProcessRunner do
         deployment_class: :developer_local,
         context_digest: launch.context_digest,
         output_schema_digest: schema.digest,
-        adapter_release_digest: CodexRelease.digest()
+        adapter_release_digest: CodexRelease.digest(),
+        credential_attachment_digest: launch.credential_attachment_digest
       },
       retention: retention.retention
     }
@@ -155,6 +160,7 @@ defmodule JidoCode.Runtime.JidoHarness.CodexProcessRunner do
          :ok <- validate_limits(launch[:limits]),
          true <- launch[:cli_version] == CodexRelease.cli_version(),
          true <- launch[:provider_version] == CodexRelease.model(),
+         true <- valid_digest?(launch[:credential_attachment_digest]),
          true <- valid_digest?(launch[:context_digest]),
          %DateTime{} <- launch[:occurred_at] do
       :ok

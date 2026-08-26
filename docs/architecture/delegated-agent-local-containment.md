@@ -29,3 +29,29 @@ effects require their own effect-bound consent.
 Durable credential and consent records contain only opaque resource identity,
 current generation, bounded policy bindings, digests, and expiry. Local login
 keys and reusable authentication material are never part of those records.
+
+## Credential And Process Isolation
+
+`CodexLocalConnector` is the only trusted component that resolves an approved
+local Codex login reference. Its private state retains the source path; the
+credential broker, execution request, graph records, launch metadata, and
+attachment receipt receive no login bytes or source path. The connector accepts
+only a regular owner-protected file below an owner-protected approved root,
+rejects symlinked parents and workspace-owned paths, and attaches it read-only
+at `/run/jido-code/codex-home` for the exact attempt, fence, profile, generation,
+and permit expiry.
+
+The Codex launch replaces the environment with fixed non-secret paths and runs
+inside the accepted disposable Firecracker process namespace. Host home, SSH
+agent, Docker socket, store handles, arbitrary provider configuration,
+publication credentials, unrelated repositories, extensions, MCP servers,
+skills, and additional directories remain absent. Only the Codex parent may
+request brokered provider traffic; tool descendants are denied credential
+access and egress. `CodexProviderEgress` admits HTTPS traffic only to
+`api.openai.com:443/v1`, with redirects disabled.
+
+An attachment remains usable only while its attempt, fence, generation, and
+expiry are current. Cancellation, expiry, supersession, termination, and worker
+loss are closed revocation reasons. Destruction occurs only after the matching
+semantic transition is committed, and a revoked attachment cannot be looked up
+or reused.
