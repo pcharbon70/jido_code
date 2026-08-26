@@ -2,11 +2,10 @@
 
 ## Status
 
-This merge-pending receipt records the Phase 2 implementation candidate built
-from the accepted Phase 1 closure baseline
-`79d147234b3c09d57faf75d8cc524b3aec5eb04a`. DCG2 remains open until the
-implementation pull request passes clean-checkout CI, merges, and a closure
-change pins the full merge-commit SHA and merge date.
+This receipt records the Phase 2 implementation accepted after pull request
+#79 passed clean-checkout CI and merged on 2026-08-26 as
+`1347712cb5e922b4ccf22a33677e1da912999c56`. DCG2 is accepted at that exact
+merged candidate, which is the authorized baseline for Phase 3.
 
 The candidate defines one disabled exact Codex runtime, resolves its reviewed
 binary without fallback, launches it through the pinned JidoHarness Process
@@ -22,8 +21,8 @@ authority and total budget.
 | Section 2.1 | `8c75eca` - exact Codex release, profile, and resolver |
 | Section 2.2 | `3dbae8b` - protected JidoHarness Codex runner |
 | Section 2.3 | `f819d44` - bounded turns, interaction, and cancellation |
-| Section 2.4 | Merge-pending implementation PR head; exact commit is recorded by Git history |
-| Merged candidate | **Pending clean-checkout CI and merge** |
+| Section 2.4 | `79de71edfd87c1050e0c4d1a3e63fbc96414cc7e` - integration matrix and merge-pending receipt |
+| Merged candidate | `1347712cb5e922b4ccf22a33677e1da912999c56` - merged 2026-08-26 |
 
 ## Runtime And Contract Pins
 
@@ -101,7 +100,7 @@ and digest
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 177 existing warnings skipped by policy, zero unignored errors |
 | Repository-wide isolated `mix precommit` | Passed; 919 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | Pending implementation PR |
+| Clean-checkout CI | Passed on PR #79; verify and Dialyzer jobs succeeded before merge |
 
 ## Known Limits And Disabled Posture
 
@@ -120,11 +119,11 @@ and digest
 
 ## Gate DCG2
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-DCG2 becomes accepted only after clean-checkout CI passes, the implementation
-PR merges, and the receipt pins the exact merged candidate and date. Phase 3 is
-not authorized from this merge-pending state.
+DCG2 is accepted at merged candidate
+`1347712cb5e922b4ccf22a33677e1da912999c56` after clean-checkout CI and merge
+on 2026-08-26. Phase 3 is authorized only from this exact pinned baseline.
 
 DCG2 reopens regardless of checklist state if compiled context, memory,
 repository material, or credentials enter argv, environment, process titles,
