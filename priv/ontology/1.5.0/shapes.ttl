@@ -47,6 +47,13 @@ jfs:WikiEditionShape a sh:NodeShape ;
     jfs:ExpectedCurrentWikiEditionProperty, jfs:WikiLintReportProperty,
     jfs:ClosureDigestProperty, jfs:GeneratedAtProperty .
 
+jfs:WikiEditionSegmentShape a sh:NodeShape ;
+  sh:targetClass jf:WikiEditionSegment ; sh:closed true ;
+  sh:property jfs:RdfTypeProperty, jfs:WikiEditionProperty,
+    jfs:SegmentIndexProperty, jfs:SegmentDigestProperty,
+    jfs:SegmentBytesProperty, jfs:SegmentStatementCountProperty,
+    jfs:PredecessorWikiSegmentProperty, jfs:GeneratedAtProperty .
+
 jfs:WikiPageShape a sh:NodeShape ;
   sh:targetClass jf:WikiPage ; sh:closed true ;
   sh:property jfs:RdfTypeProperty, jfs:RepositoryScopeProperty, jfs:TenantScopeProperty,
@@ -62,7 +69,7 @@ jfs:WikiSourceShape a sh:NodeShape ;
     jfs:SourceSnapshotProperty, jfs:SourceGraphProperty,
     jfs:SourceResourceProperty, jfs:SourceLocatorProperty,
     jfs:SourceAuthorityProperty, jfs:SourceContentDigestProperty,
-    jfs:FreshnessStateProperty .
+    jfs:SourceConfidenceProperty, jfs:FreshnessStateProperty .
 
 jfs:WikiPreviewShape a sh:NodeShape ;
   sh:targetClass jf:WikiPreview ; sh:closed true ;
@@ -111,6 +118,7 @@ jfs:WikiGenerationProfileProperty a sh:PropertyShape ; sh:path jf:wikiGeneration
 jfs:CurrentWikiEditionProperty a sh:PropertyShape ; sh:path jf:currentWikiEdition ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:WikiEditionProperty a sh:PropertyShape ; sh:path jf:wikiEdition ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:PredecessorWikiEditionProperty a sh:PropertyShape ; sh:path jf:predecessorWikiEdition ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
+jfs:PredecessorWikiSegmentProperty a sh:PropertyShape ; sh:path jf:predecessorWikiSegment ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:ExpectedCurrentWikiEditionProperty a sh:PropertyShape ; sh:path jf:expectedCurrentWikiEdition ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
 jfs:WikiSourceProperty a sh:PropertyShape ; sh:path jf:wikiSource ; sh:minCount 1 ; sh:nodeKind sh:IRI .
 jfs:WikiLintReportProperty a sh:PropertyShape ; sh:path jf:wikiLintReport ; sh:maxCount 1 ; sh:nodeKind sh:IRI .
@@ -152,6 +160,7 @@ jfs:SlugProperty a sh:PropertyShape ; sh:path jf:slug ; sh:minCount 1 ; sh:maxCo
 jfs:SourceLocatorProperty a sh:PropertyShape ; sh:path jf:sourceLocator ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 512 .
 jfs:SourceAuthorityProperty a sh:PropertyShape ; sh:path jf:sourceAuthority ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:maxLength 64 .
 jfs:SourceContentDigestProperty a sh:PropertyShape ; sh:path jf:sourceContentDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:SourceConfidenceProperty a sh:PropertyShape ; sh:path jf:sourceConfidence ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 .
 jfs:PageOrderProperty a sh:PropertyShape ; sh:path jf:pageOrder ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:ContentDigestProperty a sh:PropertyShape ; sh:path jf:contentDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
 jfs:PageCountProperty a sh:PropertyShape ; sh:path jf:pageCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
@@ -160,6 +169,10 @@ jfs:CitationCountProperty a sh:PropertyShape ; sh:path jf:citationCount ; sh:min
 jfs:LinkCountProperty a sh:PropertyShape ; sh:path jf:linkCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:GapCountProperty a sh:PropertyShape ; sh:path jf:gapCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:SegmentCountProperty a sh:PropertyShape ; sh:path jf:segmentCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SegmentIndexProperty a sh:PropertyShape ; sh:path jf:segmentIndex ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SegmentDigestProperty a sh:PropertyShape ; sh:path jf:segmentDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[a-f0-9]{64}$" .
+jfs:SegmentBytesProperty a sh:PropertyShape ; sh:path jf:segmentBytes ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
+jfs:SegmentStatementCountProperty a sh:PropertyShape ; sh:path jf:segmentStatementCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:StatementCountProperty a sh:PropertyShape ; sh:path jf:statementCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:ContentBytesProperty a sh:PropertyShape ; sh:path jf:contentBytes ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger .
 jfs:ProfileRevisionProperty a sh:PropertyShape ; sh:path jf:profileRevision ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ; sh:minInclusive 1 .

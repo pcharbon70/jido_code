@@ -248,7 +248,7 @@ defmodule JidoCode.Knowledge.GraphRegistry do
       enabled: true,
       owner_scope: :repository,
       resource_roots: ~w[
-        RepositoryWiki WikiEdition WikiPage WikiSection WikiSource WikiCitation WikiLink WikiGap
+        RepositoryWiki WikiEdition WikiEditionSegment WikiPage WikiSection WikiSource WikiCitation WikiLink WikiGap
         WikiDriftFinding WikiLintReport WikiPreview WikiCompilationAttempt
       ]a,
       backup: :application_owned,

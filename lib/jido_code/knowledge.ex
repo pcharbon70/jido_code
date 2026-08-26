@@ -89,7 +89,13 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.Memory.ExperienceSourceManifest
   alias JidoCode.Knowledge.Memory.ExperienceTransition
   alias JidoCode.Knowledge.RepositoryWiki.Enrollment, as: RepositoryWikiEnrollment
+  alias JidoCode.Knowledge.RepositoryWiki.Compiler, as: RepositoryWikiCompiler
+  alias JidoCode.Knowledge.RepositoryWiki.Edition, as: RepositoryWikiEdition
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
+  alias JidoCode.Knowledge.RepositoryWiki.Recovery, as: RepositoryWikiRecovery
+  alias JidoCode.Knowledge.RepositoryWiki.Retention, as: RepositoryWikiRetention
+  alias JidoCode.Knowledge.RepositoryWiki.Segment, as: RepositoryWikiSegment
+  alias JidoCode.Knowledge.RepositoryWiki.SourceInventory, as: RepositoryWikiSourceInventory
   alias JidoCode.Knowledge.Memory.ExperienceValidation
   alias JidoCode.Knowledge.Memory.MemoryUseAssessment
   alias JidoCode.Knowledge.Memory.NegativeTransfer
@@ -451,6 +457,59 @@ defmodule JidoCode.Knowledge do
           attributes,
           options
         )
+
+  def compile_repository_wiki(inventory, attributes),
+    do: RepositoryWikiCompiler.compile(inventory, attributes)
+
+  def inventory_repository_wiki(root, attributes),
+    do: RepositoryWikiSourceInventory.scan(root, attributes)
+
+  def partition_repository_wiki(edition_iri, statements, recorded_at),
+    do: RepositoryWikiSegment.partition(edition_iri, statements, recorded_at)
+
+  def repository_wiki_edition(compilation, segments),
+    do: RepositoryWikiEdition.new(compilation, segments)
+
+  def admit_repository_wiki_compilation(edition, enrollment, attributes, options \\ []),
+    do: RepositoryWikiEdition.admit_command(edition, enrollment, attributes, options)
+
+  def start_repository_wiki_edition(edition, attributes, options \\ []),
+    do: RepositoryWikiEdition.start_command(edition, attributes, options)
+
+  def append_repository_wiki_segment(segment, attributes, options \\ []),
+    do: RepositoryWikiSegment.append_command(segment, attributes, options)
+
+  def finalize_repository_wiki_edition(edition, segments, attributes, options \\ []),
+    do: RepositoryWikiEdition.finalize_command(edition, segments, attributes, options)
+
+  def lint_repository_wiki_edition(edition, findings, attributes, options \\ []),
+    do: RepositoryWikiEdition.lint_command(edition, findings, attributes, options)
+
+  def close_repository_wiki_edition(edition, report, metadata, attributes, options \\ []),
+    do: RepositoryWikiEdition.close_command(edition, report, metadata, attributes, options)
+
+  def activate_repository_wiki_edition(edition, resolution, profile, attributes, options \\ []),
+    do: RepositoryWikiEdition.activate_command(edition, resolution, profile, attributes, options)
+
+  def mark_repository_wiki_edition_stale(edition, attributes, options \\ []),
+    do: RepositoryWikiEdition.mark_stale_command(edition, attributes, options)
+
+  def invalidate_repository_wiki_edition(edition, attributes, options \\ []),
+    do: RepositoryWikiEdition.invalidate_command(edition, attributes, options)
+
+  def recover_repository_wiki(dataset, edition_iri, authority),
+    do: RepositoryWikiRecovery.recover(dataset, edition_iri, authority)
+
+  def rebuild_repository_wiki_indexes(dataset, edition_iri),
+    do: RepositoryWikiRecovery.rebuild_disposable_indexes(dataset, edition_iri)
+
+  def verify_repository_wiki_restore(snapshot),
+    do: RepositoryWikiRecovery.verify_restore(snapshot)
+
+  def repository_wiki_retention_classes, do: RepositoryWikiRetention.classes()
+
+  def repository_wiki_backup_manifest(attributes),
+    do: RepositoryWikiRetention.backup_manifest(attributes)
 
   def agent_catalog(native_candidates, delegated_candidates, context),
     do: AgentCatalog.project(native_candidates, delegated_candidates, context)

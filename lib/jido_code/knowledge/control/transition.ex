@@ -189,8 +189,8 @@ defmodule JidoCode.Knowledge.Control.Transition do
     },
     repository_wiki_enrollment: %{
       off: ~w[manual automatic]a,
-      manual: ~w[off automatic]a,
-      automatic: ~w[off manual]a
+      manual: ~w[off manual automatic]a,
+      automatic: ~w[off manual automatic]a
     }
   }
 

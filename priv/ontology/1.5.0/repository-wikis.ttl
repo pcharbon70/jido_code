@@ -18,6 +18,7 @@ jf:RepositoryWiki a owl:Class ; rdfs:subClassOf prov:Entity .
 jf:RepositoryWikiEnrollment a owl:Class ; rdfs:subClassOf prov:Entity .
 jf:WikiGenerationProfile a owl:Class ; rdfs:subClassOf prov:Entity .
 jf:WikiEdition a owl:Class ; rdfs:subClassOf prov:Entity .
+jf:WikiEditionSegment a owl:Class ; rdfs:subClassOf prov:Entity .
 jf:WikiPage a owl:Class ; rdfs:subClassOf prov:Entity .
 jf:WikiSection a owl:Class ; rdfs:subClassOf prov:Entity .
 jf:WikiSource a owl:Class ; rdfs:subClassOf prov:Entity .
@@ -41,6 +42,7 @@ jf:wikiGenerationProfile a owl:ObjectProperty ; rdfs:range jf:WikiGenerationProf
 jf:wikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
 jf:currentWikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
 jf:predecessorWikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
+jf:predecessorWikiSegment a owl:ObjectProperty ; rdfs:range jf:WikiEditionSegment .
 jf:expectedCurrentWikiEdition a owl:ObjectProperty ; rdfs:range jf:WikiEdition .
 jf:wikiPage a owl:ObjectProperty ; rdfs:range jf:WikiPage .
 jf:wikiSection a owl:ObjectProperty ; rdfs:range jf:WikiSection .
@@ -98,6 +100,7 @@ jf:slug a owl:DatatypeProperty ; rdfs:range xsd:string .
 jf:sourceLocator a owl:DatatypeProperty ; rdfs:range xsd:string .
 jf:sourceAuthority a owl:DatatypeProperty ; rdfs:range xsd:string .
 jf:sourceContentDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:sourceConfidence a owl:DatatypeProperty ; rdfs:range xsd:decimal .
 jf:pageOrder a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:pageCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:sectionCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
@@ -105,6 +108,10 @@ jf:citationCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:linkCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:gapCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:segmentCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:segmentIndex a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:segmentDigest a owl:DatatypeProperty ; rdfs:range xsd:string .
+jf:segmentBytes a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
+jf:segmentStatementCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:statementCount a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:contentBytes a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .
 jf:modelInputTokens a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger .

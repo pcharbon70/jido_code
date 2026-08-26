@@ -91,43 +91,43 @@ Back to plan: [README](./README.md)
       - [x] 1.3.2.4 Subtask - Require authorization, repository scope, exact revision or fence, idempotency key, provenance, bounded payloads, and stable public outcomes on every interface.
       - [x] 1.3.2.5 Subtask - Reject generic SPARQL mutation/read surfaces, raw graph selection, unknown enum values, stale revisions, forged compiler identities, and unsupported protocol combinations.
 
-  - [ ] 1.4 Section - Build immutable editions and deterministic repository inventory.
+  - [x] 1.4 Section - Build immutable editions and deterministic repository inventory.
 
     This section creates the first useful wiki edition using repository and
     accepted-graph facts only, with no repository execution or model call.
 
-    - [ ] 1.4.1 Task {#rwi-p01-inventory} [repo: jido_code] [after: {#rwi-p01-command-protocol}] - Implement the bounded repository source inventory.
+    - [x] 1.4.1 Task {#rwi-p01-inventory} [repo: jido_code] [after: {#rwi-p01-command-protocol}] - Implement the bounded repository source inventory.
 
       This task inventories safe source classes and records explicit coverage
       gaps without treating unexamined content as absent.
 
-      - [ ] 1.4.1.1 Subtask - Resolve repository identity, canonical root, accepted source revision, registered documentation roots, source roots, and Mix manifest paths through closed registries.
-      - [ ] 1.4.1.2 Subtask - Inventory `README`, accepted ADRs/specs/plans, source directory/module names, `mix.exs`, `mix.lock`, configured guide roots, and accepted factory knowledge under fixed file/count/byte limits.
-      - [ ] 1.4.1.3 Subtask - Classify missing, ignored, binary, oversized, unsupported, unreadable, symlinked, and changed-during-read inputs as explicit bounded gaps.
-      - [ ] 1.4.1.4 Subtask - Normalize hostile paths, Unicode, line endings, media types, digests, and deterministic ordering without following paths outside the registered repository root.
-      - [ ] 1.4.1.5 Subtask - Prove this phase never executes `mix.exs`, repository modules, scripts, hooks, build tools, or network requests.
+      - [x] 1.4.1.1 Subtask - Resolve repository identity, canonical root, accepted source revision, registered documentation roots, source roots, and Mix manifest paths through closed registries.
+      - [x] 1.4.1.2 Subtask - Inventory `README`, accepted ADRs/specs/plans, source directory/module names, `mix.exs`, `mix.lock`, configured guide roots, and accepted factory knowledge under fixed file/count/byte limits.
+      - [x] 1.4.1.3 Subtask - Classify missing, ignored, binary, oversized, unsupported, unreadable, symlinked, and changed-during-read inputs as explicit bounded gaps.
+      - [x] 1.4.1.4 Subtask - Normalize hostile paths, Unicode, line endings, media types, digests, and deterministic ordering without following paths outside the registered repository root.
+      - [x] 1.4.1.5 Subtask - Prove this phase never executes `mix.exs`, repository modules, scripts, hooks, build tools, or network requests.
 
-    - [ ] 1.4.2 Task {#rwi-p01-editions} [repo: jido_code] [after: {#rwi-p01-inventory}] - Implement wiki edition/compiler protocol `1.0.0` and the minimal deterministic compiler.
+    - [x] 1.4.2 Task {#rwi-p01-editions} [repo: jido_code] [after: {#rwi-p01-inventory}] - Implement wiki edition/compiler protocol `1.0.0` and the minimal deterministic compiler.
 
       This task creates immutable segmented editions and admits a current
       edition only from the exact current repository source fence.
 
-      - [ ] 1.4.2.1 Subtask - Implement start, bounded segment append, finalize, lint, close, stale, invalidate, and activate transitions with immutable edition identity and retry-safe idempotency.
-      - [ ] 1.4.2.2 Subtask - Enforce at most 800 statements and 192 KiB per reserved segment, exact sequence continuity, segment digests, edition totals, and no partial visibility.
-      - [ ] 1.4.2.3 Subtask - Compile deterministic Overview, Repository Inventory, Architecture Index, Source Map, Documentation Index, Provenance, and Known Gaps pages with stable page identities.
-      - [ ] 1.4.2.4 Subtask - Attach every page and material fact to source references, source revision, compiler profile `wiki-deterministic-elixir/1.0.0`, compiler digest, freshness, and confidence.
-      - [ ] 1.4.2.5 Subtask - Recheck enrollment revision and current-source fence immediately before activation; a stale or competing edition may close as history but cannot become current.
+      - [x] 1.4.2.1 Subtask - Implement start, bounded segment append, finalize, lint, close, stale, invalidate, and activate transitions with immutable edition identity and retry-safe idempotency.
+      - [x] 1.4.2.2 Subtask - Enforce at most 800 statements and 192 KiB per reserved segment, exact sequence continuity, segment digests, edition totals, and no partial visibility.
+      - [x] 1.4.2.3 Subtask - Compile deterministic Overview, Repository Inventory, Architecture Index, Source Map, Documentation Index, Provenance, and Known Gaps pages with stable page identities.
+      - [x] 1.4.2.4 Subtask - Attach every page and material fact to source references, source revision, compiler profile `wiki-deterministic-elixir/1.0.0`, compiler digest, freshness, and confidence.
+      - [x] 1.4.2.5 Subtask - Recheck enrollment revision and current-source fence immediately before activation; a stale or competing edition may close as history but cannot become current.
 
-    - [ ] 1.4.3 Task {#rwi-p01-recovery} [repo: jido_code] [after: {#rwi-p01-editions}] - Implement edition retention, backup, restore, and interrupted-write recovery.
+    - [x] 1.4.3 Task {#rwi-p01-recovery} [repo: jido_code] [after: {#rwi-p01-editions}] - Implement edition retention, backup, restore, and interrupted-write recovery.
 
       This task makes graph state and accepted content-addressed artifacts
       sufficient for recovery while preserving incomplete-work evidence.
 
-      - [ ] 1.4.3.1 Subtask - Define retention for current, superseded, preview, incomplete, invalid, source snapshot, render artifact, accounting, and audit classes.
-      - [ ] 1.4.3.2 Subtask - Detect abandoned open editions and segments after restart, mark them terminal or resumable only by exact fence, and prevent them from appearing in reads.
-      - [ ] 1.4.3.3 Subtask - Include enrollment, lineage, current pointer, source/provenance, compiler identity, retention, and audit facts in backup and restore verification.
-      - [ ] 1.4.3.4 Subtask - Rebuild disposable indexes and render caches from graph state and accepted artifacts without trusting process memory, queue state, or filesystem cursors.
-      - [ ] 1.4.3.5 Subtask - Prove restore cannot manufacture a current edition, revive disabled enrollment, cross-link repositories, or discard a required audit record.
+      - [x] 1.4.3.1 Subtask - Define retention for current, superseded, preview, incomplete, invalid, source snapshot, render artifact, accounting, and audit classes.
+      - [x] 1.4.3.2 Subtask - Detect abandoned open editions and segments after restart, mark them terminal or resumable only by exact fence, and prevent them from appearing in reads.
+      - [x] 1.4.3.3 Subtask - Include enrollment, lineage, current pointer, source/provenance, compiler identity, retention, and audit facts in backup and restore verification.
+      - [x] 1.4.3.4 Subtask - Rebuild disposable indexes and render caches from graph state and accepted artifacts without trusting process memory, queue state, or filesystem cursors.
+      - [x] 1.4.3.5 Subtask - Prove restore cannot manufacture a current edition, revive disabled enrollment, cross-link repositories, or discard a required audit record.
 
   - [ ] 1.5 Section - Phase 1 Integration Tests.
 

@@ -915,24 +915,25 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       owner: :evaluation,
       capability: :wiki_writer,
       graph_families: [:repository_wiki],
-      preconditions: [:edition_linted, :blocking_findings_absent, :writer_fence_current]
+      preconditions: [:edition_linted, :blocking_findings_absent, :writer_fence_current],
+      allow_closure?: true
     },
     "MarkWikiEditionStale" => %{
       owner: :factory,
       capability: :control,
-      graph_families: [:repository_wiki],
+      graph_families: [:repository_control, :repository_wiki],
       preconditions: [:edition_known, :source_fence_superseded]
     },
     "InvalidateWikiEdition" => %{
       owner: :evaluation,
       capability: :control,
-      graph_families: [:repository_wiki],
+      graph_families: [:repository_control, :repository_wiki],
       preconditions: [:edition_known, :invalidation_evidence_present]
     },
     "ActivateWikiEdition" => %{
       owner: :factory,
       capability: :control,
-      graph_families: [:repository_control, :repository_wiki],
+      graph_families: [:factory_catalog, :repository_control, :repository_wiki],
       preconditions: [
         :edition_closed,
         :enrollment_revision_exact,
