@@ -9,6 +9,7 @@ defmodule JidoCode.Runtime.JidoHarness.Adoption do
   """
 
   alias JidoCode.Factory.AdapterError
+  alias JidoCode.Runtime.JidoHarness.CodexRelease
 
   @source_url "https://github.com/agentjido/jido_harness"
   @revision "e41fc1651282469f2db4219a48d9f7feef1b0dbc"
@@ -17,6 +18,7 @@ defmodule JidoCode.Runtime.JidoHarness.Adoption do
   @toolchain %{elixir: "1.19.5", otp: "28.3.1"}
   @built_in_adapters ~w[amp claude codex gemini grok kimi opencode pi zai]a
   @enabled_profiles ~w[pi_rpc_deny_all pi_rpc_read_only]a
+  @registered_profiles @enabled_profiles ++ [:codex_dga1]
   @read_only_tools ~w[read grep find ls]
 
   @common_argv [
@@ -29,7 +31,7 @@ defmodule JidoCode.Runtime.JidoHarness.Adoption do
     "--no-approve"
   ]
 
-  @type profile_name :: :pi_rpc_deny_all | :pi_rpc_read_only
+  @type profile_name :: :pi_rpc_deny_all | :pi_rpc_read_only | :codex_dga1
 
   @spec receipt() :: map()
   def receipt do
@@ -42,6 +44,7 @@ defmodule JidoCode.Runtime.JidoHarness.Adoption do
       dependency_state: :exact_unreleased_git_revision,
       built_in_adapters: :blocked,
       managed_fleet: :blocked,
+      registered_profiles: @registered_profiles,
       enabled_profiles: @enabled_profiles,
       disabled_adapters: %{zai: :native_cancellation_unproven}
     }
@@ -82,9 +85,18 @@ defmodule JidoCode.Runtime.JidoHarness.Adoption do
     validate_profile(profile)
   end
 
+  def profile(:codex_dga1), do: CodexRelease.runtime_profile()
+
   def profile(_name), do: invalid(:jido_harness_profile)
 
   @spec validate_profile(map()) :: {:ok, map()} | {:error, AdapterError.t()}
+  def validate_profile(%{name: :codex_dga1} = profile) do
+    case CodexRelease.validate_runtime_profile(profile) do
+      {:ok, validated} -> {:ok, validated}
+      :error -> invalid(:jido_harness_profile)
+    end
+  end
+
   def validate_profile(profile) when is_map(profile) do
     with name when name in @enabled_profiles <- profile[:name],
          :pi <- profile[:provider],

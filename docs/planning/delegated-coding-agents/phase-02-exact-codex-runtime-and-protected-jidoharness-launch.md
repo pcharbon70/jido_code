@@ -19,30 +19,30 @@ Back to plan: [README](./README.md)
   protected JidoHarness Process API with protected context transport, bounded
   interactions, exact event adoption, and process-tree cancellation.
 
-  - [ ] 2.1 Section - Define the adapter release, runtime profile, and resolver.
+  - [x] 2.1 Section - Define the adapter release, runtime profile, and resolver.
 
     This section ensures graph data selects reviewed keys and digests, never
     executable paths, modules, arguments, or provider options.
 
-    - [ ] 2.1.1 Task {#dca-p02-release} [repo: jido_code] [after: {#dca-p01-phase-receipt}] - Register the initial Codex adapter and profile candidates.
+    - [x] 2.1.1 Task {#dca-p02-release} [repo: jido_code] [after: {#dca-p01-phase-receipt}] - Register the initial Codex adapter and profile candidates.
 
       This task pins every component needed to reproduce one DGA1 run while
       leaving the profile disabled.
 
-      - [ ] 2.1.1.1 Subtask - Pin JidoHarness revision `e41fc1651282469f2db4219a48d9f7feef1b0dbc` and its accepted source archive digest.
-      - [ ] 2.1.1.2 Subtask - Pin Codex CLI `0.144.6`, model `gpt-5.3-codex`, JSONL protocol, executable digest, and controller-owned output schema.
-      - [ ] 2.1.1.3 Subtask - Define the `developer_local`, `jido_code`, `workspace_write_registered_checks` profile as disabled until DCG3-DCG6 close.
-      - [ ] 2.1.1.4 Subtask - Add runtime and adapter fields to managed-coding release contract `8.0.0` while retaining the accepted native profile and historical `7.0.0` interpretation.
+      - [x] 2.1.1.1 Subtask - Pin JidoHarness revision `e41fc1651282469f2db4219a48d9f7feef1b0dbc` and its accepted source archive digest.
+      - [x] 2.1.1.2 Subtask - Pin Codex CLI `0.144.6`, model `gpt-5.3-codex`, JSONL protocol, executable digest, and controller-owned output schema.
+      - [x] 2.1.1.3 Subtask - Define the `developer_local`, `jido_code`, `workspace_write_registered_checks` profile as disabled until DCG3-DCG6 close.
+      - [x] 2.1.1.4 Subtask - Add runtime and adapter fields to managed-coding release contract `8.0.0` while retaining the accepted native profile and historical `7.0.0` interpretation.
 
-    - [ ] 2.1.2 Task {#dca-p02-resolver} [repo: jido_code] [after: {#dca-p02-release}] - Implement closed runtime and executable resolution.
+    - [x] 2.1.2 Task {#dca-p02-resolver} [repo: jido_code] [after: {#dca-p02-release}] - Implement closed runtime and executable resolution.
 
       This task prevents RDF, task input, repository content, and caller input
       from selecting code or launch flags.
 
-      - [ ] 2.1.2.1 Subtask - Map accepted runtime, adapter, and executable registry keys to compiled modules and exact absolute executable paths.
-      - [ ] 2.1.2.2 Subtask - Verify executable ownership, regular-file type, digest, version, and approved installation root before `prepare` succeeds.
-      - [ ] 2.1.2.3 Subtask - Reject unknown, changed, symlinked, writable, out-of-registry, or version-incompatible executables and adapters.
-      - [ ] 2.1.2.4 Subtask - Preserve `JidoCode.Factory.Ports.ExecutionRuntime` and reauthorize `prepare`, `start`, `signal`, `status`, `cancel`, and `terminate` before dispatch.
+      - [x] 2.1.2.1 Subtask - Map accepted runtime, adapter, and executable registry keys to compiled modules and exact absolute executable paths.
+      - [x] 2.1.2.2 Subtask - Verify executable ownership, regular-file type, digest, version, and approved installation root before `prepare` succeeds.
+      - [x] 2.1.2.3 Subtask - Reject unknown, changed, symlinked, writable, out-of-registry, or version-incompatible executables and adapters.
+      - [x] 2.1.2.4 Subtask - Preserve `JidoCode.Factory.Ports.ExecutionRuntime` and reauthorize `prepare`, `start`, `signal`, `status`, `cancel`, and `terminate` before dispatch.
 
   - [ ] 2.2 Section - Implement the protected Codex process runner.
 

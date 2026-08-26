@@ -1,7 +1,12 @@
 # Managed Coding Runtime Release Contract
 
 Status: accepted at merged candidate `00c10cf0e7bd4705773a3fd23bcbcbe1af390580`
-Contract version: `7.0.0`
+Contract version: `8.0.0`
+
+Version `8.0.0` adds the disabled, exact Codex DGA1 delegated-runtime identity
+without changing the accepted native production profile. Version `7.0.0`
+retains its exact historical interpretation and digest
+`64b43c9786eb9c6d59de817aaa41f0efd287a0a7d08d84357bc604dc6f36e464`.
 
 ## Supported Product Boundary
 
@@ -36,11 +41,21 @@ state are never public contract values.
 | Durable task/attempt/effect/candidate/evidence/decision state | Knowledge graph | Accepted, exclusive authority |
 | Admission, budgets, gateways, candidate closure, governance | Factory | Accepted |
 | One managed `Jido.Agent` and isolated workspaces | Runtime | Accepted, disposable |
+| Codex CLI `0.144.6` through JidoHarness | Runtime | Registered exact adapter; profile disabled pending DCG3-DCG6 |
 | Fresh-checkout verifier | Independent verifier port | Accepted, no decision authority |
 | Draft publication | Human-authorized publication boundary | Restricted to the Phase 6 pilot envelope |
 | Investigator/coder/reviewer Pod | Evaluation fixture | Rejected for production; no default managers |
 | AgentOS services or persistence | None | Rejected; dependency and adapter absent |
 | Automatic approval/publication/merge | None | Rejected and unavailable |
+
+The delegated runtime registry recognizes only runtime class `delegated_cli`,
+provider `codex`, adapter and executable key `codex_cli`, and the exact signed
+adapter-release digest. It maps those identities to
+`JidoCode.Runtime.JidoHarnessAdapter`; graph, task, repository, prompt, and
+caller values never select a module, executable path, or launch option. The
+executable registry resolves the canonical application-owned Codex release
+path and verifies a regular non-symlink file, installation root, owner, mode,
+SHA-256, and exact reported version before preparation can proceed.
 
 The specialist decision is recorded in
 [`managed-coding-specialist-evaluation.md`](./managed-coding-specialist-evaluation.md).
