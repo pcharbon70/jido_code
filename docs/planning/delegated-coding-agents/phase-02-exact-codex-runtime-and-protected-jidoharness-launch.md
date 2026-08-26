@@ -13,7 +13,7 @@ closed JidoCode launch policy.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Implement one exact Codex runtime behind the existing execution facade.
+- [x] 2 Phase - Implement one exact Codex runtime behind the existing execution facade.
 
   This phase proves DCG2 by running a revision-pinned Codex process through the
   protected JidoHarness Process API with protected context transport, bounded
@@ -76,13 +76,13 @@ Back to plan: [README](./README.md)
       - [x] 2.3.1.4 Subtask - Account each turn as a separate outer invocation under the same attempt, lease, fence, profile, workspace, and total budgets.
       - [x] 2.3.1.5 Subtask - Commit cancellation before JidoHarness cancellation and independent process-namespace termination and reject every late event or result.
 
-  - [ ] 2.4 Section - Phase 2 Integration Tests.
+  - [x] 2.4 Section - Phase 2 Integration Tests.
 
     This final section proves exact launch behavior, protected context
     transport, bounded interactions, event normalization, and process
     containment.
 
-    - [ ] 2.4.1 Task {#dca-p02-integration} [repo: jido_code] [after: {#dca-p02-turns}] - Execute the Codex runtime conformance matrix.
+    - [x] 2.4.1 Task {#dca-p02-integration} [repo: jido_code] [after: {#dca-p02-turns}] - Execute the Codex runtime conformance matrix.
 
       This task closes DCG2 only when the real JidoHarness process path
       satisfies the accepted Codex launch contract.
@@ -91,14 +91,14 @@ Back to plan: [README](./README.md)
       - [x] 2.4.1.2 Subtask - Test positive JSONL streams plus malformed, oversized, partial, duplicate, out-of-order, secret-bearing, and unknown events.
       - [x] 2.4.1.3 Subtask - Test clarification, follow-up steering, turn exhaustion, cooperative cancellation, stalled processes, resistant descendants, timeouts, and late output.
       - [x] 2.4.1.4 Subtask - Prove the upstream built-in Codex adapter, arbitrary flags, user configuration, provider-session resume, and unsafe sandbox modes remain unreachable.
-      - [ ] 2.4.1.5 Subtask - Rerun DCG1, harness compatibility, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
+      - [x] 2.4.1.5 Subtask - Rerun DCG1, harness compatibility, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 2.4.2 Task {#dca-p02-phase-receipt} [repo: jido_code] [after: {#dca-p02-integration}] - Publish and pin the Phase 2 receipt.
+    - [x] 2.4.2 Task {#dca-p02-phase-receipt} [repo: jido_code] [after: {#dca-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records DCG2 evidence in
       `docs/architecture/delegated-agent-phase-02-receipt.md`.
 
       - [x] 2.4.2.1 Subtask - Record adapter, JidoHarness, Codex, model, executable, output-schema, runner, session-protocol, and event-mapper revisions and digests.
       - [x] 2.4.2.2 Subtask - Keep DCG2 open if context enters argv, arbitrary configuration is reachable, runtime selection can fall back, or cancellation leaves descendants.
-      - [ ] 2.4.2.3 Subtask - Attach launch, prompt privacy, event, interaction, cancellation, architecture, Dialyzer, precommit, and clean-checkout evidence.
-      - [ ] 2.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 3.
+      - [x] 2.4.2.3 Subtask - Attach launch, prompt privacy, event, interaction, cancellation, architecture, Dialyzer, precommit, and clean-checkout evidence.
+      - [x] 2.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 3.
