@@ -13,7 +13,7 @@ delegated agent without granting graph authority to runtime code.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Establish the durable contract for delegated coding agents.
+- [x] 1 Phase - Establish the durable contract for delegated coding agents.
 
   This phase proves DCG1 by making adapter releases, profiles, readiness,
   offerings, and selections graph-authorized, scoped, versioned, and
@@ -86,12 +86,12 @@ Back to plan: [README](./README.md)
       - [x] 1.3.2.3 Subtask - Return bounded admitted, duplicate, stale, unauthorized, incompatible, unavailable, and rejected outcomes.
       - [x] 1.3.2.4 Subtask - Invalidate the offering after profile, adapter, readiness, credential-generation, policy, or source-snapshot drift.
 
-  - [ ] 1.4 Section - Phase 1 Integration Tests.
+  - [x] 1.4 Section - Phase 1 Integration Tests.
 
     This final section proves delegated-agent authority is fully semantic,
     scoped, exact, and backward compatible.
 
-    - [ ] 1.4.1 Task {#dca-p01-integration} [repo: jido_code] [after: {#dca-p01-resolution}] - Execute the semantic and catalog integration matrix.
+    - [x] 1.4.1 Task {#dca-p01-integration} [repo: jido_code] [after: {#dca-p01-resolution}] - Execute the semantic and catalog integration matrix.
 
       This task closes DCG1 only when no disposable projection or
       caller-controlled value can become runtime authority.
@@ -99,14 +99,14 @@ Back to plan: [README](./README.md)
       - [x] 1.4.1.1 Subtask - Exercise registration, transition, readiness, expiry, revocation, duplicate, malformed, unauthorized, stale, and concurrent command cases against the real store.
       - [x] 1.4.1.2 Subtask - Prove catalog isolation across actors, tenants, repositories, task classes, languages, capabilities, rollout states, time, and readiness generations.
       - [x] 1.4.1.3 Subtask - Prove exact opaque selection, no fallback, legacy read compatibility, and deterministic graph-only reconstruction.
-      - [ ] 1.4.1.4 Subtask - Run ontology verification, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
+      - [x] 1.4.1.4 Subtask - Run ontology verification, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 1.4.2 Task {#dca-p01-phase-receipt} [repo: jido_code] [after: {#dca-p01-integration}] - Publish and pin the Phase 1 receipt.
+    - [x] 1.4.2 Task {#dca-p01-phase-receipt} [repo: jido_code] [after: {#dca-p01-integration}] - Publish and pin the Phase 1 receipt.
 
       This task records DCG1 evidence in
       `docs/architecture/delegated-agent-phase-01-receipt.md`.
 
       - [x] 1.4.2.1 Subtask - Record ADR, specification, ontology, protocol, query, profile, projection, and fixture revisions and digests.
       - [x] 1.4.2.2 Subtask - Keep DCG1 open if selection can bypass current graph authorization, disclose another scope, or fall back to another runtime tuple.
-      - [ ] 1.4.2.3 Subtask - Attach architecture, store, compatibility, precommit, Dialyzer, and clean-checkout evidence.
-      - [ ] 1.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 2.
+      - [x] 1.4.2.3 Subtask - Attach architecture, store, compatibility, precommit, Dialyzer, and clean-checkout evidence.
+      - [x] 1.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 2.

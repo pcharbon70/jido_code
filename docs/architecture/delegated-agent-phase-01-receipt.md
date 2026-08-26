@@ -2,10 +2,10 @@
 
 ## Status
 
-This receipt records the Phase 1 implementation candidate verified locally on
-2026-08-26. DCG1 remains **merge-pending** until the implementation pull
-request passes clean-checkout CI, merges, and this receipt pins the full merge
-commit and merge date. Phase 2 is not authorized from an unmerged candidate.
+This receipt records the Phase 1 implementation accepted after pull request
+#77 passed clean-checkout CI and merged on 2026-08-26 as
+`5d79d798de87a8c652ad429fd677b6e82c69e764`. DCG1 is accepted at that exact
+merged candidate, which is the authorized baseline for Phase 2.
 
 The candidate publishes ontology `1.4.0` and semantic protocol `2.9.0`, adds
 closed delegated adapter, profile, readiness, catalog, and admission contracts,
@@ -20,8 +20,8 @@ before any effect can begin.
 | Section 1.1 | `d530ae8` - delegated-agent governance baseline |
 | Section 1.2 | `79a1f65` - ontology and semantic command/query protocol |
 | Section 1.3 | `8177b0e` - exact catalog projection and admission |
-| Section 1.4 | This receipt, integration matrix, release metadata correction, and final gates; exact commit is recorded by Git history |
-| Merged candidate | Merge-pending; full merge commit and merge date must be pinned after clean-checkout CI and merge |
+| Section 1.4 | `7c5acdaad7c9fb649cc5ad51b86e707711f86e69` - integration matrix, release metadata correction, and merge-pending receipt |
+| Merged candidate | `5d79d798de87a8c652ad429fd677b6e82c69e764` - merged 2026-08-26 |
 
 ## Contract Pins
 
@@ -98,7 +98,7 @@ for 2,219 quads.
 | Repository-wide isolated `mix precommit` | 899 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 177 existing warnings skipped by policy, zero unignored errors |
-| Clean-checkout CI | Pending on the Phase 1 implementation pull request |
+| Clean-checkout CI | Passed on PR #77; verify and Dialyzer jobs succeeded before merge |
 
 The final precommit run used a dedicated temporary root because another active
 repository session was concurrently executing tests; this prevents unrelated
@@ -123,11 +123,11 @@ unchanged.
 
 ## Gate DCG1
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-DCG1 remains open until clean-checkout CI passes, the implementation pull
-request merges, and this receipt records the exact full merge commit and merge
-date. Only that pinned merged baseline may authorize Phase 2.
+DCG1 is accepted at merged candidate
+`5d79d798de87a8c652ad429fd677b6e82c69e764` after clean-checkout CI and merge
+on 2026-08-26. Phase 2 is authorized only from this exact pinned baseline.
 
 DCG1 reopens regardless of checklist state if catalog selection bypasses current
 graph authorization; an offering discloses another actor, tenant, repository,
