@@ -2,21 +2,21 @@
 
 ## Status
 
-This merge-pending receipt records the Phase 3 implementation built from
+This accepted receipt records the Phase 3 implementation built from
 repository main commit `7b4d0916713addcdaa6855dbcde6926802b55640`, which
 contains the accepted RW2 merged candidate at
-`81dd898dc92c757360c142661b30f88ce8df8c30`. The implementation candidate is
-not accepted until its single implementation pull request passes clean-checkout
-CI, merges, and this receipt is updated in the required closure pull request
-with the full merge commit and merge date.
+`81dd898dc92c757360c142661b30f88ce8df8c30`. Implementation pull request #89
+passed exact-head clean-checkout CI and merged on 2026-08-27 as commit
+`b57b1d7eb19406d73a8fe8ca16948b62a9746f3a`. RW3 is accepted at that exact
+merged candidate.
 
 The candidate implements bounded guide discovery and rendering, deterministic
 full editions, immutable update classification, reviewed product reads,
 disposable search, authenticated repository navigation, opaque session
 previews, independent review evidence, exact activation qualification,
 serialized current-edition replacement, and governed retention. Deterministic
-generation records zero model calls, tokens, and model cost. Phase 4 remains
-unauthorized while this receipt is merge-pending.
+generation records zero model calls, tokens, and model cost. Phase 4 is
+authorized only from the pinned merged candidate recorded here.
 
 ## Candidate Provenance
 
@@ -28,8 +28,8 @@ unauthorized while this receipt is merge-pending.
 | Section 3.2 | `7f0ab68e1cafb2e3bf073c91535255599b691e3e` - full deterministic editions and update classification |
 | Section 3.3 | `f3da5dbea2f56f23cdc277eaa3a7d224dcbd2122` - reviewed product reads, search, navigation, and settings |
 | Section 3.4 | `54c6818b256198e8da7fbf834db25abcd66664af` - preview isolation, review, qualification, activation, and retention |
-| Section 3.5 | Merge-pending candidate commit containing this receipt |
-| Merged candidate | Pending implementation pull request, clean-checkout CI, and merge |
+| Section 3.5 | `4072b217eac6150920c454c04548ca00274b424e` - Phase 3 integration proof and merge-pending receipt |
+| Merged candidate | `b57b1d7eb19406d73a8fe8ca16948b62a9746f3a` - implementation pull request #89, merged 2026-08-27 |
 
 ## Governing Document Pins
 
@@ -143,7 +143,7 @@ unauthorized while this receipt is merge-pending.
 | Compile with warnings as errors | Passed |
 | Dialyzer | Passed; 178 existing warnings skipped by policy, zero unignored errors |
 | Repository-wide `mix precommit` | Passed on Section 3.5 code candidate `cfd3630`; 1,052 tests, 0 failures in 587.8 seconds |
-| Clean-checkout CI | Pending implementation pull request |
+| Clean-checkout CI | Passed at exact implementation head `4072b217eac6150920c454c04548ca00274b424e`; CI run `33102688843` completed in 17m1s and Dialyzer run `33102688814` completed in 1m53s before merge |
 
 ## Known Limits And Disabled Posture
 
@@ -157,16 +157,17 @@ unauthorized while this receipt is merge-pending.
 - Preview actor/session/candidate bindings are held behind the reviewed opaque
   resolver and are deliberately absent from ordinary graph/product results.
   Preview graphs have bounded non-backup retention.
-- This receipt remains merge-pending until exact-head clean-checkout CI, merge,
-  full merge SHA, merge date, and closure checklist state are pinned.
+- Phase 4 must retain the known disabled postures above and start from merged
+  candidate `b57b1d7eb19406d73a8fe8ca16948b62a9746f3a`; any reopening condition below
+  supersedes the accepted checklist state.
 
 ## Gate RW3
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-RW3 remains open. Phase 4 is unauthorized until the implementation candidate
-passes clean-checkout CI, merges, and this receipt is accepted at the exact
-merged candidate in the required closure pull request.
+RW3 is accepted at merged candidate
+`b57b1d7eb19406d73a8fe8ca16948b62a9746f3a` on 2026-08-27. Phase 4 is
+authorized only from that pinned baseline.
 
 RW3 reopens regardless of checklist state if authored guide markup executes or
 renders unsafe HTML, script, event, style, form, embed, data, credential, or
