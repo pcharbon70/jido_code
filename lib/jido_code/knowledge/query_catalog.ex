@@ -2042,6 +2042,20 @@ defmodule JidoCode.Knowledge.QueryCatalog do
       |> Map.put(:edition, %{type: :resource_iri, required: true})
       |> Map.put(:audience, %{type: :literal, required: true, max_bytes: 32})
 
+    preview_detail =
+      resource
+      |> Map.put(:edition, %{type: :resource_iri, required: true})
+      |> Map.put(:preview, %{type: :resource_iri, required: true})
+
+    edition_comparison = %{
+      control_graph: %{type: :graph_iri, required: true},
+      left_graph: %{type: :graph_iri, required: true},
+      right_graph: %{type: :graph_iri, required: true},
+      resource: %{type: :resource_iri, required: true},
+      left_edition: %{type: :resource_iri, required: true},
+      right_edition: %{type: :resource_iri, required: true}
+    }
+
     [
       spec(
         :repository_wiki_enrollment_detail,
@@ -2085,6 +2099,28 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :timeline,
         "Read bounded repository wiki enrollment and edition-pointer history.",
         :diagnostic,
+        :declared
+      ),
+      spec(
+        :repository_wiki_edition_comparison,
+        :select,
+        edition_comparison,
+        :observation,
+        [:repository_control, :repository_wiki],
+        :table,
+        "Compare two exact retained edition manifests and their bounded provenance.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_preview_detail,
+        :select,
+        preview_detail,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read one already-authorized opaque session preview without resolving siblings.",
+        :product,
         :declared
       ),
       spec(

@@ -930,12 +930,25 @@ defmodule JidoCode.Knowledge.CommandRegistry do
       graph_families: [:repository_control, :repository_wiki],
       preconditions: [:edition_known, :invalidation_evidence_present]
     },
+    "RecordWikiReviewDecision" => %{
+      owner: :evaluation,
+      capability: :control,
+      graph_families: [:repository_control, :repository_wiki],
+      preconditions: [
+        :edition_closed,
+        :lint_profile_exact,
+        :render_profile_exact,
+        :reviewer_authority_exact
+      ]
+    },
     "ActivateWikiEdition" => %{
       owner: :factory,
       capability: :control,
       graph_families: [:factory_catalog, :repository_control, :repository_wiki],
       preconditions: [
         :edition_closed,
+        :review_decision_approved,
+        :blocking_findings_absent,
         :enrollment_revision_exact,
         :source_fence_current,
         :expected_current_edition_exact

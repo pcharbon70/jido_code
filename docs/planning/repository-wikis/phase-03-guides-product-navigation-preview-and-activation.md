@@ -100,42 +100,42 @@ Back to plan: [README](./README.md)
       - [x] 3.3.2.4 Subtask - Add authorized settings for Off, Manual, and Automatic deterministic enrollment, retained reads, retention, and deterministic regeneration with explicit cost posture.
       - [x] 3.3.2.5 Subtask - Provide accessible loading, empty, disabled, stale, failed, rebuilding, preview, and current states with stable DOM identifiers and responsive navigation.
 
-  - [ ] 3.4 Section - Isolate previews, review editions, and serialize activation.
+  - [x] 3.4 Section - Isolate previews, review editions, and serialize activation.
 
     This section lets multiple coding sessions prepare wiki candidates without
     letting a preview or stale session replace the repository's current wiki.
 
-    - [ ] 3.4.1 Task {#rwi-p03-previews} [repo: jido_code] [after: {#rwi-p03-product}] - Implement session-scoped preview editions.
+    - [x] 3.4.1 Task {#rwi-p03-previews} [repo: jido_code] [after: {#rwi-p03-product}] - Implement session-scoped preview editions.
 
       This task binds every preview to one actor, repository, source snapshot,
       session, generation attempt, and expiration policy.
 
-      - [ ] 3.4.1.1 Subtask - Create opaque preview references bound to actor, tenant, repository, session, source revision, compiler profile, attempt, and expiration.
-      - [ ] 3.4.1.2 Subtask - Store preview graph facts in the repository wiki family with explicit noncurrent state and isolate disposable render/search caches by preview identity.
-      - [ ] 3.4.1.3 Subtask - Permit only authorized session participants and reviewers to read a preview; prevent navigation, search, logs, and cache keys from disclosing another preview.
-      - [ ] 3.4.1.4 Subtask - Expire, invalidate, or retain previews according to policy after source drift, session closure, rejection, enrollment disable, or time limit.
-      - [ ] 3.4.1.5 Subtask - Ensure previews never become agent context, product current state, or activation candidates without an explicit reviewed transition.
+      - [x] 3.4.1.1 Subtask - Create opaque preview references bound to actor, tenant, repository, session, source revision, compiler profile, attempt, and expiration.
+      - [x] 3.4.1.2 Subtask - Store preview graph facts in the repository wiki family with explicit noncurrent state and isolate disposable render/search caches by preview identity.
+      - [x] 3.4.1.3 Subtask - Permit only authorized session participants and reviewers to read a preview; prevent navigation, search, logs, and cache keys from disclosing another preview.
+      - [x] 3.4.1.4 Subtask - Expire, invalidate, or retain previews according to policy after source drift, session closure, rejection, enrollment disable, or time limit.
+      - [x] 3.4.1.5 Subtask - Ensure previews never become agent context, product current state, or activation candidates without an explicit reviewed transition.
 
-    - [ ] 3.4.2 Task {#rwi-p03-activation} [repo: jido_code] [after: {#rwi-p03-previews}] - Implement review, qualification, and current-edition activation.
+    - [x] 3.4.2 Task {#rwi-p03-activation} [repo: jido_code] [after: {#rwi-p03-previews}] - Implement review, qualification, and current-edition activation.
 
       This task makes current-edition replacement a single graph-authorized,
       compare-and-swap transition after deterministic qualification.
 
-      - [ ] 3.4.2.1 Subtask - Record reviewer decision, lint profile/result, render profile/result, source coverage, blocking warnings, policy revision, and review provenance.
-      - [ ] 3.4.2.2 Subtask - Require finalized immutable content, passing blocking lint/render checks, current enrollment, allowed profile, current source fence, and exact expected current-edition revision.
-      - [ ] 3.4.2.3 Subtask - Atomically supersede the old current edition and activate the new edition; return stable stale, competing, disabled, unqualified, duplicate, and unauthorized outcomes.
-      - [ ] 3.4.2.4 Subtask - Reject late activation after source, enrollment, policy, compiler, reviewer authority, or current-edition drift while retaining attributable candidate history.
-      - [ ] 3.4.2.5 Subtask - Invalidate and rebuild disposable navigation/search caches only after the activation commit is accepted.
+      - [x] 3.4.2.1 Subtask - Record reviewer decision, lint profile/result, render profile/result, source coverage, blocking warnings, policy revision, and review provenance.
+      - [x] 3.4.2.2 Subtask - Require finalized immutable content, passing blocking lint/render checks, current enrollment, allowed profile, current source fence, and exact expected current-edition revision.
+      - [x] 3.4.2.3 Subtask - Atomically supersede the old current edition and activate the new edition; return stable stale, competing, disabled, unqualified, duplicate, and unauthorized outcomes.
+      - [x] 3.4.2.4 Subtask - Reject late activation after source, enrollment, policy, compiler, reviewer authority, or current-edition drift while retaining attributable candidate history.
+      - [x] 3.4.2.5 Subtask - Invalidate and rebuild disposable navigation/search caches only after the activation commit is accepted.
 
-    - [ ] 3.4.3 Task {#rwi-p03-history-retention} [repo: jido_code] [after: {#rwi-p03-activation}] - Expose bounded edition history and enforce preview/current retention.
+    - [x] 3.4.3 Task {#rwi-p03-history-retention} [repo: jido_code] [after: {#rwi-p03-activation}] - Expose bounded edition history and enforce preview/current retention.
 
       This task lets readers understand changes and provenance without keeping
       every disposable artifact forever.
 
-      - [ ] 3.4.3.1 Subtask - Add reviewed history and comparison queries over stable page, source, dependency, coverage, compiler, trigger, usage, and review facts.
-      - [ ] 3.4.3.2 Subtask - Enforce separate retention for current, superseded, rejected, invalid, expired preview, render artifact, source snapshot, and audit records.
-      - [ ] 3.4.3.3 Subtask - Delete or compact only policy-authorized disposable artifacts while keeping immutable lineage, activation, usage, and audit evidence.
-      - [ ] 3.4.3.4 Subtask - Prove retained history remains repository-scoped and cannot restore a stale edition to current status without a new qualified activation.
+      - [x] 3.4.3.1 Subtask - Add reviewed history and comparison queries over stable page, source, dependency, coverage, compiler, trigger, usage, and review facts.
+      - [x] 3.4.3.2 Subtask - Enforce separate retention for current, superseded, rejected, invalid, expired preview, render artifact, source snapshot, and audit records.
+      - [x] 3.4.3.3 Subtask - Delete or compact only policy-authorized disposable artifacts while keeping immutable lineage, activation, usage, and audit evidence.
+      - [x] 3.4.3.4 Subtask - Prove retained history remains repository-scoped and cannot restore a stale edition to current status without a new qualified activation.
 
   - [ ] 3.5 Section - Phase 3 Integration Tests.
 

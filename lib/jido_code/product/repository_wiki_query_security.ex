@@ -16,6 +16,15 @@ defmodule JidoCode.Product.RepositoryWikiQuerySecurity do
     repository_wiki_enrollment_detail: [:graph, :resource],
     repository_wiki_current_edition: [:control_graph, :wiki_graph, :resource],
     repository_wiki_edition_history: [:graph, :resource],
+    repository_wiki_edition_comparison: [
+      :control_graph,
+      :left_edition,
+      :left_graph,
+      :resource,
+      :right_edition,
+      :right_graph
+    ],
+    repository_wiki_preview_detail: [:edition, :graph, :preview, :resource],
     repository_wiki_navigation_tree: [:graph, :resource],
     repository_wiki_page_by_slug: [:edition, :graph, :resource, :slug],
     repository_wiki_page_detail: [:graph, :resource],
@@ -67,6 +76,21 @@ defmodule JidoCode.Product.RepositoryWikiQuerySecurity do
     end
   end
 
+  defp validate_parameters(:repository_wiki_edition_comparison, parameters) do
+    with :ok <- graph(parameters.control_graph, :repository_control),
+         :ok <- graph(parameters.left_graph, :repository_wiki),
+         :ok <- graph(parameters.right_graph, :repository_wiki),
+         :ok <- resource(parameters.resource),
+         :ok <- resource(parameters.left_edition),
+         :ok <- resource(parameters.right_edition),
+         true <- parameters.left_edition != parameters.right_edition,
+         true <- parameters.left_graph != parameters.right_graph do
+      :ok
+    else
+      _invalid -> invalid()
+    end
+  end
+
   defp validate_parameters(name, %{graph: graph_iri, resource: resource_iri} = parameters) do
     family =
       if name in [:repository_wiki_enrollment_detail, :repository_wiki_edition_history],
@@ -76,6 +100,7 @@ defmodule JidoCode.Product.RepositoryWikiQuerySecurity do
     with :ok <- graph(graph_iri, family),
          :ok <- resource(resource_iri),
          :ok <- optional_edition(parameters),
+         :ok <- optional_preview(parameters),
          :ok <- optional_slug(parameters),
          :ok <- optional_dependency(parameters),
          :ok <- optional_audience(parameters) do
@@ -88,6 +113,9 @@ defmodule JidoCode.Product.RepositoryWikiQuerySecurity do
 
   defp optional_edition(%{edition: value}), do: resource(value)
   defp optional_edition(_parameters), do: :ok
+
+  defp optional_preview(%{preview: value}), do: resource(value)
+  defp optional_preview(_parameters), do: :ok
 
   defp optional_slug(%{slug: value}) when is_binary(value) do
     if Regex.match?(@slug, value), do: :ok, else: invalid()

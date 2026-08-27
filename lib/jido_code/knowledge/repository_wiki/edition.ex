@@ -12,6 +12,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile
   alias JidoCode.Knowledge.RepositoryWiki.Graph
   alias JidoCode.Knowledge.RepositoryWiki.Protocol
+  alias JidoCode.Knowledge.RepositoryWiki.Preview
   alias JidoCode.Knowledge.RepositoryWiki.Segment
   alias JidoCode.Knowledge.RepositoryWiki.SemanticContract
   alias JidoCode.Knowledge.ResourceIdentity
@@ -191,6 +192,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
     with true <- exact_control_graph?(attributes[:control_graph_iri], edition.repository_iri),
          true <- attributes[:wiki_graph_iri] == edition.graph_iri,
          true <- attributes[:expected_wiki_revision] == 0,
+         {:ok, preview_statements} <- preview_statements(edition, attributes[:preview]),
          {:ok, command_iri} <- Command.identity("StartWikiEdition", material),
          {:ok, target} <-
            Graph.create_target(
@@ -198,7 +200,9 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
              edition.repository_iri,
              command_iri,
              attributes.recorded_at,
-             statements(edition) ++ attempt_statements(edition, :building, attributes.recorded_at)
+             statements(edition) ++
+               preview_statements ++
+               attempt_statements(edition, :building, attributes.recorded_at)
            ),
          guards = [
            {:subject_present, attributes.control_graph_iri, edition.attempt_iri},
@@ -401,7 +405,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
              state: resolution.current_state,
              generation_profile: profile,
              generation_mode: :deterministic_only,
-             preview_mode: :disabled,
+             preview_mode: profile.preview_mode,
              read_visibility: resolution[:read_visibility],
              cancellation_generation: resolution[:cancellation_generation],
              current_edition_iri: edition.iri,
@@ -420,7 +424,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
              reason: attributes.reason,
              recorded_at: attributes.recorded_at
            }),
-         material = edition.iri <> "\nactivate\n" <> Integer.to_string(next_revision),
+         material = activation_material(edition, next_revision, attributes),
          {:ok, command_iri} <- Command.identity("ActivateWikiEdition", material),
          {:ok, target} <-
            ControlGraph.target(
@@ -429,7 +433,9 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
              edition.repository_iri,
              command_iri,
              attributes.recorded_at,
-             Enrollment.statements(enrollment) ++ Transition.statements(transition)
+             Enrollment.statements(enrollment) ++
+               Transition.statements(transition) ++
+               activation_statements(command_iri, edition, resolution, attributes.recorded_at)
            ),
          guards = activation_guards(edition, resolution, enrollment, profile, attributes),
          revisions = %{
@@ -553,8 +559,35 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
       {:triple_present, edition.graph_iri, edition.iri, @jf <> "sourceFence",
        RDF.XSD.String.new(edition.source_fence)},
       current_guard
+      | Map.get(attributes, :qualification_guards, [])
     ]
   end
+
+  defp activation_material(edition, next_revision, attributes) do
+    base = [edition.iri, "activate", Integer.to_string(next_revision)]
+
+    case attributes[:qualification_digest] do
+      digest when is_binary(digest) -> Enum.join(base ++ [digest], "\n")
+      _missing -> Enum.join(base, "\n")
+    end
+  end
+
+  defp activation_statements(command_iri, edition, resolution, recorded_at) do
+    [
+      {command_iri, @rdf_type, RDF.iri(@prov <> "Activity")},
+      {command_iri, @jf <> "repositoryScope", RDF.iri(edition.repository_iri)},
+      {command_iri, @jf <> "tenantScope", RDF.iri(edition.tenant_iri)},
+      {command_iri, @jf <> "wikiEdition", RDF.iri(edition.iri)},
+      {edition.iri, @jf <> "activatedBy", RDF.iri(command_iri)},
+      {command_iri, @prov <> "generatedAtTime", RDF.XSD.DateTime.new(recorded_at)}
+      | supersession_statements(resolution[:current_edition_iri], command_iri)
+    ]
+  end
+
+  defp supersession_statements(nil, _command_iri), do: []
+
+  defp supersession_statements(current_edition_iri, command_iri),
+    do: [{current_edition_iri, @jf <> "supersededBy", RDF.iri(command_iri)}]
 
   defp lint_statements(report) do
     [
@@ -705,6 +738,25 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
   defp purpose_concept(:release), do: Contract.concept(:wiki_release_purpose)
   defp purpose_concept(:candidate_preview), do: Contract.concept(:wiki_candidate_preview_purpose)
   defp purpose_concept(:recovery), do: Contract.concept(:wiki_recovery_purpose)
+
+  defp preview_statements(
+         %__MODULE__{purpose: :candidate_preview} = edition,
+         %Preview{} = preview
+       ) do
+    if preview.edition_iri == edition.iri and preview.repository_iri == edition.repository_iri and
+         preview.tenant_iri == edition.tenant_iri and preview.source_fence == edition.source_fence do
+      {:ok, Preview.statements(preview)}
+    else
+      invalid(:start_wiki_preview)
+    end
+  end
+
+  defp preview_statements(%__MODULE__{purpose: :candidate_preview}, _preview),
+    do: invalid(:start_wiki_preview)
+
+  defp preview_statements(%__MODULE__{}, nil), do: {:ok, []}
+  defp preview_statements(%__MODULE__{}, _preview), do: invalid(:start_wiki_edition)
+
   defp wiki_state(:admitted), do: :wiki_building
   defp wiki_state(:building), do: :wiki_building
 

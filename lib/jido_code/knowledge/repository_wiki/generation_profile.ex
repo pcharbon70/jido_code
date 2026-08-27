@@ -36,13 +36,16 @@ defmodule JidoCode.Knowledge.RepositoryWiki.GenerationProfile do
     automatic_deterministic: :automatic
   }
   @profile_keys Map.keys(@modes)
+  @preview_modes [:disabled, :allowed]
 
   @spec new(key(), map()) :: {:ok, t()} | {:error, Error.t()}
   def new(key, attributes) when key in @profile_keys and is_map(attributes) do
     with %DateTime{} = approved_at <- attributes[:approved_at],
          expires_at <- Map.get(attributes, :expires_at),
          true <- Contract.valid_interval?(approved_at, expires_at),
-         material <- material(key, approved_at, expires_at),
+         preview_mode when preview_mode in @preview_modes <-
+           Map.get(attributes, :preview_mode, :disabled),
+         material <- material(key, preview_mode, approved_at, expires_at),
          profile_digest <- Contract.digest(material),
          {:ok, iri} <- ResourceIdentity.deterministic(:wiki_generation_profile, profile_digest) do
       {:ok,
@@ -73,7 +76,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.GenerationProfile do
       {profile.iri, @jf <> "maintenanceMode",
        RDF.iri(Contract.concept(wiki_concept(profile.maintenance_mode)))},
       {profile.iri, @jf <> "generationMode", RDF.iri(Contract.concept(:wiki_deterministic_only))},
-      {profile.iri, @jf <> "previewMode", RDF.iri(Contract.concept(:wiki_preview_disabled))},
+      {profile.iri, @jf <> "previewMode",
+       RDF.iri(Contract.concept(preview_concept(profile.preview_mode)))},
       {profile.iri, @jf <> "wikiReadVisibility", RDF.iri(Contract.concept(:wiki_read_retained))},
       {profile.iri, @jf <> "wikiAccountingRetention",
        RDF.iri(Contract.concept(:wiki_accounting_retention))},
@@ -114,13 +118,13 @@ defmodule JidoCode.Knowledge.RepositoryWiki.GenerationProfile do
   def register_command(_profile, _attributes, _options),
     do: invalid(:register_wiki_generation_profile)
 
-  defp material(key, approved_at, expires_at) do
+  defp material(key, preview_mode, approved_at, expires_at) do
     %{
       profile_key: key,
       revision: 1,
       maintenance_mode: Map.fetch!(@modes, key),
       generation_mode: :deterministic_only,
-      preview_mode: :disabled,
+      preview_mode: preview_mode,
       read_visibility: :retained,
       accounting_retention: :wiki_accounting,
       audit_retention: :wiki_audit,
@@ -169,6 +173,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.GenerationProfile do
 
   defp wiki_concept(:manual), do: :wiki_manual
   defp wiki_concept(:automatic), do: :wiki_automatic
+  defp preview_concept(:disabled), do: :wiki_preview_disabled
+  defp preview_concept(:allowed), do: :wiki_preview_allowed
 
   defp exact_catalog_graph?(graph) do
     case GraphRegistry.graph_iri(:factory_catalog, %{}) do

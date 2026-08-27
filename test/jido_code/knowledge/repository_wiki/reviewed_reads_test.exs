@@ -11,17 +11,38 @@ defmodule JidoCode.Knowledge.RepositoryWiki.ReviewedReadsTest do
     repository_wiki_navigation_tree repository_wiki_page_by_slug repository_wiki_backlinks
     repository_wiki_source_references repository_wiki_dependency_lookup
     repository_wiki_guide_collection repository_wiki_known_gaps
+    repository_wiki_preview_detail repository_wiki_edition_comparison
   ]a
 
   setup do
     {:ok, repository} = ResourceIdentity.conceptual_repository("reviewed-wiki-reads")
     {:ok, edition} = ResourceIdentity.wiki_edition(repository, Contract.digest("edition"))
     {:ok, page} = ResourceIdentity.wiki_page(edition, :user_guide, "guide")
+    {:ok, other_edition} = ResourceIdentity.wiki_edition(repository, Contract.digest("other"))
+    {:ok, preview} = ResourceIdentity.deterministic(:wiki_preview, "reviewed-preview")
 
     {:ok, wiki_graph} =
       GraphRegistry.graph_iri(:repository_wiki, %{repository: repository, edition: edition})
 
-    %{repository: repository, edition: edition, page: page, wiki_graph: wiki_graph}
+    {:ok, other_wiki_graph} =
+      GraphRegistry.graph_iri(:repository_wiki, %{
+        repository: repository,
+        edition: other_edition
+      })
+
+    {:ok, control_graph} =
+      GraphRegistry.graph_iri(:repository_control, %{repository: repository})
+
+    %{
+      repository: repository,
+      edition: edition,
+      other_edition: other_edition,
+      preview: preview,
+      page: page,
+      wiki_graph: wiki_graph,
+      other_wiki_graph: other_wiki_graph,
+      control_graph: control_graph
+    }
   end
 
   test "publishes each reviewed read only in protocol 2.10.0" do
@@ -67,13 +88,29 @@ defmodule JidoCode.Knowledge.RepositoryWiki.ReviewedReadsTest do
          edition: fixture.edition,
          audience: "developer"
        }},
-      {:repository_wiki_known_gaps, %{graph: fixture.wiki_graph, resource: fixture.edition}}
+      {:repository_wiki_known_gaps, %{graph: fixture.wiki_graph, resource: fixture.edition}},
+      {:repository_wiki_preview_detail,
+       %{
+         graph: fixture.wiki_graph,
+         resource: fixture.repository,
+         edition: fixture.edition,
+         preview: fixture.preview
+       }},
+      {:repository_wiki_edition_comparison,
+       %{
+         control_graph: fixture.control_graph,
+         left_graph: fixture.wiki_graph,
+         right_graph: fixture.other_wiki_graph,
+         resource: fixture.repository,
+         left_edition: fixture.edition,
+         right_edition: fixture.other_edition
+       }}
     ]
 
     for {name, parameters} <- cases do
       assert {:ok, definition} = QueryCatalog.fetch(name, "2.10.0")
       assert {:ok, binding} = QueryParameters.bind(definition, parameters)
-      assert binding.graph_iris == [fixture.wiki_graph]
+      assert fixture.wiki_graph in binding.graph_iris
       refute binding.query =~ "{{"
       refute binding.query =~ "GRAPH ?"
     end

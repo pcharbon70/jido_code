@@ -81,7 +81,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
          :ok <- compatible_profile(state, profile),
          read_visibility when read_visibility in @read_visibility <-
            attributes[:read_visibility],
-         true <- attributes[:preview_mode] == :disabled,
+         preview_mode when preview_mode in [:disabled, :allowed] <- attributes[:preview_mode],
+         true <- preview_compatible?(state, profile, preview_mode),
          true <- attributes[:generation_mode] == :deterministic_only,
          cancellation when is_integer(cancellation) and cancellation >= 0 <-
            attributes[:cancellation_generation],
@@ -112,7 +113,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
          state: state,
          maintenance_mode: state,
          generation_mode: :deterministic_only,
-         preview_mode: :disabled,
+         preview_mode: preview_mode,
          generation_profile_iri: profile_iri,
          read_visibility: read_visibility,
          accounting_retention: :wiki_accounting,
@@ -146,7 +147,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
        RDF.iri(state_concept(enrollment.maintenance_mode))},
       {enrollment.iri, @jf <> "generationMode",
        RDF.iri(Contract.concept(:wiki_deterministic_only))},
-      {enrollment.iri, @jf <> "previewMode", RDF.iri(Contract.concept(:wiki_preview_disabled))},
+      {enrollment.iri, @jf <> "previewMode",
+       RDF.iri(Contract.concept(preview_concept(enrollment.preview_mode)))},
       {enrollment.iri, @jf <> "wikiReadVisibility",
        RDF.iri(read_visibility_concept(enrollment.read_visibility))},
       {enrollment.iri, @jf <> "wikiAccountingRetention",
@@ -294,7 +296,11 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
              state: next_state,
              generation_profile: profile,
              generation_mode: :deterministic_only,
-             preview_mode: :disabled,
+             preview_mode:
+               if(next_state == :off,
+                 do: :disabled,
+                 else: Map.get(attributes, :preview_mode, :disabled)
+               ),
              read_visibility: Map.get(attributes, :read_visibility, :retained),
              cancellation_generation: cancellation,
              current_edition_iri: Map.get(resolution, :current_edition_iri),
@@ -463,6 +469,14 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
 
   defp compatible_profile(_state, _profile), do: :error
 
+  defp preview_compatible?(:off, nil, :disabled), do: true
+
+  defp preview_compatible?(state, %GenerationProfile{} = profile, preview_mode)
+       when state in [:manual, :automatic],
+       do: profile.preview_mode == preview_mode
+
+  defp preview_compatible?(_state, _profile, _preview_mode), do: false
+
   defp profile_iri(nil), do: nil
   defp profile_iri(%GenerationProfile{iri: iri}), do: iri
 
@@ -504,6 +518,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Enrollment do
   defp state_concept(:off), do: Contract.concept(:wiki_off)
   defp state_concept(:manual), do: Contract.concept(:wiki_manual)
   defp state_concept(:automatic), do: Contract.concept(:wiki_automatic)
+  defp preview_concept(:disabled), do: :wiki_preview_disabled
+  defp preview_concept(:allowed), do: :wiki_preview_allowed
   defp read_visibility_concept(:hidden), do: Contract.concept(:wiki_read_hidden)
   defp read_visibility_concept(:retained), do: Contract.concept(:wiki_read_retained)
 

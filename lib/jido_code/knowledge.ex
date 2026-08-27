@@ -103,6 +103,10 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.MixStatic, as: RepositoryWikiMixStatic
   alias JidoCode.Knowledge.RepositoryWiki.Recovery, as: RepositoryWikiRecovery
   alias JidoCode.Knowledge.RepositoryWiki.Retention, as: RepositoryWikiRetention
+  alias JidoCode.Knowledge.RepositoryWiki.Preview, as: RepositoryWikiPreview
+  alias JidoCode.Knowledge.RepositoryWiki.ReviewDecision, as: RepositoryWikiReviewDecision
+  alias JidoCode.Knowledge.RepositoryWiki.Qualification, as: RepositoryWikiQualification
+  alias JidoCode.Knowledge.RepositoryWiki.Activation, as: RepositoryWikiActivation
   alias JidoCode.Knowledge.RepositoryWiki.Segment, as: RepositoryWikiSegment
   alias JidoCode.Knowledge.RepositoryWiki.SourceInventory, as: RepositoryWikiSourceInventory
   alias JidoCode.Knowledge.Memory.ExperienceValidation
@@ -601,6 +605,50 @@ defmodule JidoCode.Knowledge do
   def activate_repository_wiki_edition(edition, resolution, profile, attributes, options \\ []),
     do: RepositoryWikiEdition.activate_command(edition, resolution, profile, attributes, options)
 
+  def repository_wiki_preview(edition, enrollment, attributes),
+    do: RepositoryWikiPreview.new(edition, enrollment, attributes)
+
+  def authorize_repository_wiki_preview(preview, context),
+    do: RepositoryWikiPreview.authorize(preview, context)
+
+  def transition_repository_wiki_preview(preview, event, recorded_at),
+    do: RepositoryWikiPreview.transition(preview, event, recorded_at)
+
+  def repository_wiki_review_decision(edition, attributes),
+    do: RepositoryWikiReviewDecision.new(edition, attributes)
+
+  def record_repository_wiki_review(review, edition, attributes, options \\ []),
+    do: RepositoryWikiReviewDecision.record_command(review, edition, attributes, options)
+
+  def qualify_repository_wiki_edition(edition, resolution, profile, review, context),
+    do: RepositoryWikiQualification.assess(edition, resolution, profile, review, context)
+
+  def activate_qualified_repository_wiki_edition(
+        edition,
+        resolution,
+        profile,
+        review,
+        context,
+        attributes,
+        options \\ []
+      ),
+      do:
+        RepositoryWikiActivation.prepare(
+          edition,
+          resolution,
+          profile,
+          review,
+          context,
+          attributes,
+          options
+        )
+
+  def repository_wiki_activation_outcome(receipt),
+    do: RepositoryWikiActivation.outcome(receipt)
+
+  def repository_wiki_activation_cache_directive(receipt, edition),
+    do: RepositoryWikiActivation.cache_directive(receipt, edition)
+
   def mark_repository_wiki_edition_stale(edition, attributes, options \\ []),
     do: RepositoryWikiEdition.mark_stale_command(edition, attributes, options)
 
@@ -620,6 +668,9 @@ defmodule JidoCode.Knowledge do
 
   def repository_wiki_backup_manifest(attributes),
     do: RepositoryWikiRetention.backup_manifest(attributes)
+
+  def plan_repository_wiki_retention(resources, evaluated_at, policy),
+    do: RepositoryWikiRetention.plan(resources, evaluated_at, policy)
 
   def agent_catalog(native_candidates, delegated_candidates, context),
     do: AgentCatalog.project(native_candidates, delegated_candidates, context)

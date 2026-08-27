@@ -42,6 +42,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
           "CloseWikiEdition",
           "MarkWikiEditionStale",
           "InvalidateWikiEdition",
+          "RecordWikiReviewDecision",
           "ActivateWikiEdition"
         ] do
       assert {:ok, %{name: ^command, version: "2.10.0"}} =
@@ -66,6 +67,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
           :repository_wiki_enrollment_detail,
           :repository_wiki_current_edition,
           :repository_wiki_edition_history,
+          :repository_wiki_edition_comparison,
+          :repository_wiki_preview_detail,
           :repository_wiki_page_detail,
           :repository_wiki_generation_profiles,
           :repository_wiki_navigation_tree,
@@ -102,7 +105,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
     refute first.wiki_iri == other.wiki_iri
   end
 
-  test "constructs only the two exact zero-model generation profiles", context do
+  test "constructs only the two exact zero-model profile keys with explicit preview posture",
+       context do
     assert {:ok, manual} = profile(:manual_deterministic)
     assert {:ok, automatic} = profile(:automatic_deterministic)
 
@@ -113,6 +117,15 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
     assert manual.compiler_profile == "wiki-deterministic-elixir/1.0.0"
     assert manual.compiler_digest == Protocol.compiler_digest()
     refute manual.iri == automatic.iri
+
+    assert {:ok, preview_allowed} =
+             Knowledge.wiki_generation_profile(:manual_deterministic, %{
+               approved_at: @now,
+               preview_mode: :allowed
+             })
+
+    assert preview_allowed.preview_mode == :allowed
+    refute preview_allowed.iri == manual.iri
 
     assert {:error, %{kind: :invalid_input}} =
              Knowledge.wiki_generation_profile(:manual_synthesis, %{approved_at: @now})

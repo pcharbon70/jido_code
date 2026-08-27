@@ -323,6 +323,79 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:repository_wiki_preview_detail) do
+    """
+    SELECT ?preview ?edition ?sourceSnapshot ?sourceFence ?attempt ?created ?expires WHERE {
+      GRAPH {{graph}} {
+        {{preview}} a <#{@jf}WikiPreview> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}wikiEdition> {{edition}} ;
+                    <#{@jf}sourceSnapshot> ?sourceSnapshot ;
+                    <#{@jf}sourceFence> ?sourceFence ;
+                    <#{@jf}wikiCompilationAttempt> ?attempt ;
+                    <#{@prov}generatedAtTime> ?created ;
+                    <#{@jf}expiresAt> ?expires .
+        BIND({{preview}} AS ?preview)
+        BIND({{edition}} AS ?edition)
+      }
+    }
+    LIMIT 1
+    """
+  end
+
+  def fetch(:repository_wiki_edition_comparison) do
+    """
+    SELECT ?side ?edition ?page ?stableKey ?kind ?contentDigest ?source ?coverage ?compiler ?trigger ?usage ?review WHERE {
+      {
+        GRAPH {{left_graph}} {
+          BIND("left" AS ?side)
+          BIND({{left_edition}} AS ?edition)
+          {{left_edition}} a <#{@jf}WikiEdition> ;
+                           <#{@jf}repositoryScope> {{resource}} ;
+                           <#{@jf}compilerDigest> ?compiler .
+          OPTIONAL {
+            ?page a <#{@jf}WikiPage> ;
+                  <#{@jf}wikiEdition> {{left_edition}} ;
+                  <#{@jf}stableKey> ?stableKey ;
+                  <#{@jf}pageKind> ?kind ;
+                  <#{@jf}contentDigest> ?contentDigest .
+            OPTIONAL { ?page <#{@jf}wikiSource> ?source }
+            OPTIONAL { ?page <#{@jf}completenessState> ?coverage }
+          }
+        }
+      }
+      UNION
+      {
+        GRAPH {{right_graph}} {
+          BIND("right" AS ?side)
+          BIND({{right_edition}} AS ?edition)
+          {{right_edition}} a <#{@jf}WikiEdition> ;
+                            <#{@jf}repositoryScope> {{resource}} ;
+                            <#{@jf}compilerDigest> ?compiler .
+          OPTIONAL {
+            ?page a <#{@jf}WikiPage> ;
+                  <#{@jf}wikiEdition> {{right_edition}} ;
+                  <#{@jf}stableKey> ?stableKey ;
+                  <#{@jf}pageKind> ?kind ;
+                  <#{@jf}contentDigest> ?contentDigest .
+            OPTIONAL { ?page <#{@jf}wikiSource> ?source }
+            OPTIONAL { ?page <#{@jf}completenessState> ?coverage }
+          }
+        }
+      }
+      OPTIONAL {
+        GRAPH {{control_graph}} {
+          ?review <#{@jf}repositoryScope> {{resource}} ; <#{@jf}wikiEdition> ?edition .
+          OPTIONAL { ?review <#{@jf}updateReason> ?trigger }
+          OPTIONAL { ?review <#{@jf}wikiUsageRecord> ?usage }
+        }
+      }
+    }
+    ORDER BY ?side ?stableKey ?page ?source
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:repository_wiki_page_detail) do
     """
     SELECT ?predicate ?value ?source ?sourceKind ?sourceLocator ?sourceDigest WHERE {
