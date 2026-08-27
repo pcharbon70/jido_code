@@ -14,7 +14,7 @@ an authorized, linted edition at the current repository source fence.
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Deliver the reviewed deterministic wiki product and activation workflow.
+- [x] 3 Phase - Deliver the reviewed deterministic wiki product and activation workflow.
 
   This phase proves RW3 by making guides, freshness, reads, previews, review,
   activation, and product navigation safe under parallel coding sessions.
@@ -137,12 +137,12 @@ Back to plan: [README](./README.md)
       - [x] 3.4.3.3 Subtask - Delete or compact only policy-authorized disposable artifacts while keeping immutable lineage, activation, usage, and audit evidence.
       - [x] 3.4.3.4 Subtask - Prove retained history remains repository-scoped and cannot restore a stale edition to current status without a new qualified activation.
 
-  - [ ] 3.5 Section - Phase 3 Integration Tests.
+  - [x] 3.5 Section - Phase 3 Integration Tests.
 
     This final section proves the deterministic wiki is useful, safely
     rendered, reviewed, and correct under competing session previews.
 
-    - [ ] 3.5.1 Task {#rwi-p03-integration} [repo: jido_code] [after: {#rwi-p03-history-retention}] - Execute the RW3 guides, product, preview, and activation matrix.
+    - [x] 3.5.1 Task {#rwi-p03-integration} [repo: jido_code] [after: {#rwi-p03-history-retention}] - Execute the RW3 guides, product, preview, and activation matrix.
 
       This task closes RW3 only when users see a coherent current wiki and no
       preview, unsafe guide, or stale writer can become current.
@@ -152,14 +152,14 @@ Back to plan: [README](./README.md)
       - [x] 3.5.1.3 Subtask - Exercise product authorization, disabled/empty/stale/failure states, search bounds, navigation, source/dependency routes, history, and accessibility using LiveView selectors.
       - [x] 3.5.1.4 Subtask - Race parallel same-repository previews, independent repositories, duplicate review, source drift, opt-out, expiry, activation compare-and-swap, and late results.
       - [x] 3.5.1.5 Subtask - Prove one current edition, preview isolation, safe cache invalidation, zero-token evidence, retained audit lineage, and graph-only projection rebuild.
-      - [ ] 3.5.1.6 Subtask - Rerun RW1-RW2 and applicable product/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
+      - [x] 3.5.1.6 Subtask - Rerun RW1-RW2 and applicable product/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 3.5.2 Task {#rwi-p03-phase-receipt} [repo: jido_code] [after: {#rwi-p03-integration}] - Publish and pin the Phase 3 receipt.
+    - [x] 3.5.2 Task {#rwi-p03-phase-receipt} [repo: jido_code] [after: {#rwi-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records RW3 evidence in
       `docs/architecture/repository-wiki-phase-03-receipt.md`.
 
       - [x] 3.5.2.1 Subtask - Record guide, renderer, compiler, classifier, query, search, product, preview, lint, activation, retention, and fixture revisions and digests.
       - [x] 3.5.2.2 Subtask - Keep RW3 open if unsafe repository markup executes, hidden previews leak, a preview enters agent/current reads, or activation succeeds after any required fence drifts.
-      - [ ] 3.5.2.3 Subtask - Preserve every gate reopening condition and attach guide safety, deterministic replay, product, concurrency, activation, retention, precommit, Dialyzer, and clean-checkout evidence.
-      - [ ] 3.5.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 3 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 4.
+      - [x] 3.5.2.3 Subtask - Preserve every gate reopening condition and attach guide safety, deterministic replay, product, concurrency, activation, retention, precommit, Dialyzer, and clean-checkout evidence.
+      - [x] 3.5.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 3 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 4.
