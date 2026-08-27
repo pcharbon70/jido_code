@@ -21,11 +21,19 @@ defmodule JidoCodeWeb.ProductAuth do
   @nonce_key "jido_code_session_nonce"
   @maximum_token_bytes 512
 
-  def init(action) when action in [:fetch_current_scope, :require_authenticated_operator],
-    do: action
+  def init(action)
+      when action in [
+             :fetch_current_scope,
+             :require_authenticated_operator,
+             :fetch_api_scope,
+             :require_authenticated_api
+           ],
+      do: action
 
   def call(conn, :fetch_current_scope), do: fetch_current_scope(conn, [])
   def call(conn, :require_authenticated_operator), do: require_authenticated_operator(conn, [])
+  def call(conn, :fetch_api_scope), do: fetch_api_scope(conn, [])
+  def call(conn, :require_authenticated_api), do: require_authenticated_api(conn, [])
 
   @spec authenticate(String.t()) :: :ok | :error
   def authenticate(token) when is_binary(token) and byte_size(token) <= @maximum_token_bytes do
@@ -81,6 +89,64 @@ defmodule JidoCodeWeb.ProductAuth do
       |> redirect(to: ~p"/sign-in")
       |> halt()
     end
+  end
+
+  @spec fetch_api_scope(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
+  def fetch_api_scope(conn, _options) do
+    case bearer_token(conn) do
+      {:ok, token} ->
+        case api_scope(token) do
+          {:ok, scope, authority} ->
+            conn
+            |> assign(:current_scope, scope)
+            |> assign(:product_identity, scope.identity)
+            |> assign(:authority, authority)
+
+          :error ->
+            assign(conn, :current_scope, nil)
+        end
+
+      :error ->
+        assign(conn, :current_scope, nil)
+    end
+  end
+
+  @spec require_authenticated_api(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
+  def require_authenticated_api(conn, _options) do
+    if conn.assigns[:current_scope] do
+      conn
+    else
+      conn
+      |> put_status(:unauthorized)
+      |> json(%{outcome: "unauthorized", retry: "never"})
+      |> halt()
+    end
+  end
+
+  @spec api_scope(String.t()) :: {:ok, map(), term()} | :error
+  def api_scope(token) do
+    with :ok <- authenticate(token),
+         identity <- product_identity(),
+         {:ok, authority} <- Product.authority(identity) do
+      now = System.system_time(:second)
+
+      scope = %{
+        iri: identity.factory_scope_iri,
+        actor_iri: identity.actor_iri,
+        principal_iri: identity.principal_iri,
+        authenticated_at: now,
+        expires_at: now + ttl_seconds(),
+        session_generation: generation(),
+        nonce: "api",
+        identity: identity
+      }
+
+      {:ok, scope, authority}
+    else
+      _invalid -> :error
+    end
+  rescue
+    _error -> :error
   end
 
   def on_mount(:require_authenticated, _params, session, %Socket{} = socket) do
@@ -168,6 +234,13 @@ defmodule JidoCodeWeb.ProductAuth do
       @generation_key => get_session(conn, @generation_key),
       @nonce_key => get_session(conn, @nonce_key)
     }
+  end
+
+  defp bearer_token(conn) do
+    case get_req_header(conn, "authorization") do
+      ["Bearer " <> token] when byte_size(token) in 1..@maximum_token_bytes -> {:ok, token}
+      _missing_or_ambiguous -> :error
+    end
   end
 
   defp expires_at(authenticated_at) when is_integer(authenticated_at),

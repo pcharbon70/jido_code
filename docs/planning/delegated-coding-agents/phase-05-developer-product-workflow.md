@@ -18,31 +18,31 @@ Back to plan: [README](./README.md)
   catalog selection, submission, progress, clarification, steering,
   cancellation, candidate handoff, and independent verification.
 
-  - [ ] 5.1 Section - Implement product gateways and authenticated JSON APIs.
+  - [x] 5.1 Section - Implement product gateways and authenticated JSON APIs.
 
     This section translates product requests into the same reviewed queries
     and Factory commands used by every other surface.
 
-    - [ ] 5.1.1 Task {#dca-p05-gateways} [repo: jido_code] [after: {#dca-p04-phase-receipt}] - Add catalog, submission, attempt, and control gateways.
+    - [x] 5.1.1 Task {#dca-p05-gateways} [repo: jido_code] [after: {#dca-p04-phase-receipt}] - Add catalog, submission, attempt, and control gateways.
 
       This task centralizes input validation, authorization, redaction,
       idempotency, and exact offering resolution.
 
-      - [ ] 5.1.1.1 Subtask - Add a catalog gateway returning actor-, tenant-, repository-, task-, capability-, rollout-, and time-scoped `AgentOffering` projections.
-      - [ ] 5.1.1.2 Subtask - Add a submission gateway accepting semantic intent, repository and snapshot, task class, acceptance requirements, opaque offering, actor, and idempotency key.
-      - [ ] 5.1.1.3 Subtask - Extend the attempt projection with runtime, profile, provider, deployment, billing, readiness, interaction, workspace, candidate, verification, disposition, and limitation fields.
-      - [ ] 5.1.1.4 Subtask - Extend the control gateway with state-aware steer, answer, cancel, handoff, and accepted recovery controls.
-      - [ ] 5.1.1.5 Subtask - Prevent every gateway from accepting modules, executables, credentials, raw sandbox settings, arbitrary commands, graph names, raw RDF, or provider options.
+      - [x] 5.1.1.1 Subtask - Add a catalog gateway returning actor-, tenant-, repository-, task-, capability-, rollout-, and time-scoped `AgentOffering` projections.
+      - [x] 5.1.1.2 Subtask - Add a submission gateway accepting semantic intent, repository and snapshot, task class, acceptance requirements, opaque offering, actor, and idempotency key.
+      - [x] 5.1.1.3 Subtask - Extend the attempt projection with runtime, profile, provider, deployment, billing, readiness, interaction, workspace, candidate, verification, disposition, and limitation fields.
+      - [x] 5.1.1.4 Subtask - Extend the control gateway with state-aware steer, answer, cancel, handoff, and accepted recovery controls.
+      - [x] 5.1.1.5 Subtask - Prevent every gateway from accepting modules, executables, credentials, raw sandbox settings, arbitrary commands, graph names, raw RDF, or provider options.
 
-    - [ ] 5.1.2 Task {#dca-p05-api} [repo: jido_code] [after: {#dca-p05-gateways}] - Add versioned JSON API routes.
+    - [x] 5.1.2 Task {#dca-p05-api} [repo: jido_code] [after: {#dca-p05-gateways}] - Add versioned JSON API routes.
 
       This task gives automation a bounded representation of the same workflow
       without direct runtime or store access.
 
-      - [ ] 5.1.2.1 Subtask - Add authenticated `/api/v1/agent-offerings` and `/api/v1/coding-attempts` catalog, submit, detail, and refresh endpoints.
-      - [ ] 5.1.2.2 Subtask - Add state-bound control endpoints for steer, answer, cancel, handoff, and accepted recovery.
-      - [ ] 5.1.2.3 Subtask - Use bounded bearer authentication mapped to the existing product identity and authority context and never persist or echo the credential.
-      - [ ] 5.1.2.4 Subtask - Return stable outcome codes for admitted, duplicate, stale, unauthorized, incompatible, unavailable, rejected, and conflict cases.
+      - [x] 5.1.2.1 Subtask - Add authenticated `/api/v1/agent-offerings` and `/api/v1/coding-attempts` catalog, submit, detail, and refresh endpoints.
+      - [x] 5.1.2.2 Subtask - Add state-bound control endpoints for steer, answer, cancel, handoff, and accepted recovery.
+      - [x] 5.1.2.3 Subtask - Use bounded bearer authentication mapped to the existing product identity and authority context and never persist or echo the credential.
+      - [x] 5.1.2.4 Subtask - Return stable outcome codes for admitted, duplicate, stale, unauthorized, incompatible, unavailable, rejected, and conflict cases.
 
   - [ ] 5.2 Section - Build the browser catalog, submission, and attempt experience.
 
