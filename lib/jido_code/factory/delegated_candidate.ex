@@ -76,7 +76,13 @@ defmodule JidoCode.Factory.DelegatedCandidate do
          {:ok, changed_files} <- changed_files(attributes[:changed_files]),
          true <- Enum.map(changed_files, & &1.path) == checkpoint.changed_paths,
          {:ok, generated} <- generated_artifacts(attributes[:generated_artifacts], changed_files),
-         {:ok, checks} <- check_receipts(attributes[:check_receipts], checkpoint),
+         {:ok, checks} <-
+           check_receipts(
+             attributes[:check_receipts],
+             checkpoint,
+             attributes[:profile_digest],
+             attributes[:check_registry_revision]
+           ),
          true <- attributes[:accounting_omissions] == @omissions,
          %DateTime{} = captured_at <- attributes[:captured_at],
          material <- material(checkpoint, attributes, changed_files, generated, checks),
@@ -233,7 +239,8 @@ defmodule JidoCode.Factory.DelegatedCandidate do
 
   defp generated_artifacts(_values, _changed_files), do: :error
 
-  defp check_receipts(values, checkpoint) when is_list(values) and length(values) <= 64 do
+  defp check_receipts(values, checkpoint, profile_digest, registry_revision)
+       when is_list(values) and length(values) <= 64 do
     valid =
       Enum.all?(values, fn receipt ->
         is_map(receipt) and is_binary(receipt[:check]) and
@@ -244,7 +251,9 @@ defmodule JidoCode.Factory.DelegatedCandidate do
           receipt[:fencing_token] == checkpoint.fencing_token and
           receipt[:source_snapshot_iri] == checkpoint.source_snapshot_iri and
           receipt[:workspace_iri] == checkpoint.workspace_iri and
-          receipt[:workspace_digest] == checkpoint.workspace_digest
+          receipt[:workspace_digest] == checkpoint.workspace_digest and
+          receipt[:profile_revision] == profile_digest and
+          receipt[:catalog_revision] == registry_revision
       end)
 
     names = Enum.map(values, & &1.check)
@@ -254,7 +263,7 @@ defmodule JidoCode.Factory.DelegatedCandidate do
       else: :error
   end
 
-  defp check_receipts(_values, _checkpoint), do: :error
+  defp check_receipts(_values, _checkpoint, _profile_digest, _registry_revision), do: :error
 
   defp valid_path?(path) when is_binary(path) and byte_size(path) in 1..1_024 do
     parts = Path.split(path)

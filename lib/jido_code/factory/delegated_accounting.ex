@@ -2,6 +2,7 @@ defmodule JidoCode.Factory.DelegatedAccounting do
   @moduledoc "Honest outer accounting for opaque delegated coding turns."
 
   alias JidoCode.Factory.AdapterError
+  alias JidoCode.Factory.DelegatedCheckpoint
   alias JidoCode.Knowledge
 
   @effect_kinds ~w[codex_run credential_release registered_check checkpoint_capture candidate_capture verifier]a
@@ -143,12 +144,13 @@ defmodule JidoCode.Factory.DelegatedAccounting do
   def observe(%__MODULE__{}, _class, _value, _observed_at),
     do: invalid(:delegated_accounting_observation)
 
-  @spec attach_checkpoint(t(), map()) :: {:ok, t()} | {:error, AdapterError.t()}
-  def attach_checkpoint(%__MODULE__{} = accounting, checkpoint) when is_map(checkpoint) do
-    if checkpoint[:attempt_iri] == accounting.attempt_iri and
-         checkpoint[:lease_iri] == accounting.lease_iri and
-         checkpoint[:fencing_token] == accounting.fencing_token and
-         Knowledge.validate_resource_identity(checkpoint[:checkpoint_iri]) == :ok do
+  @spec attach_checkpoint(t(), DelegatedCheckpoint.t()) ::
+          {:ok, t()} | {:error, AdapterError.t()}
+  def attach_checkpoint(%__MODULE__{} = accounting, %DelegatedCheckpoint{} = checkpoint) do
+    if checkpoint.attempt_iri == accounting.attempt_iri and
+         checkpoint.lease_iri == accounting.lease_iri and
+         checkpoint.fencing_token == accounting.fencing_token and
+         Knowledge.validate_resource_identity(checkpoint.checkpoint_iri) == :ok do
       {:ok,
        %{
          accounting

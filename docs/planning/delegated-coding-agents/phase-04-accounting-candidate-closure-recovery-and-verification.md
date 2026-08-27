@@ -89,10 +89,10 @@ Back to plan: [README](./README.md)
       This task closes DCG4 only when opaque Codex work becomes independently
       reproducible evidence.
 
-      - [ ] 4.4.1.1 Subtask - Run admission, Codex turns, real workspace edits, registered checks, candidate capture, fresh-checkout verification, evidence, and disposition end to end.
-      - [ ] 4.4.1.2 Subtask - Inject malformed output, dirty bases, path attacks, secret findings, digest mismatch, check disagreement, verifier loss, and corrupt checkpoints.
-      - [ ] 4.4.1.3 Subtask - Inject BEAM restart, worker loss, provider outage, partial output, process crash, cancellation races, ambiguity, stale fences, and late results.
-      - [ ] 4.4.1.4 Subtask - Prove graph-only reconstruction and prove Codex cannot verify, accept, publish, merge, mutate policy, or adopt knowledge.
+      - [x] 4.4.1.1 Subtask - Run admission, Codex turns, real workspace edits, registered checks, candidate capture, fresh-checkout verification, evidence, and disposition end to end.
+      - [x] 4.4.1.2 Subtask - Inject malformed output, dirty bases, path attacks, secret findings, digest mismatch, check disagreement, verifier loss, and corrupt checkpoints.
+      - [x] 4.4.1.3 Subtask - Inject BEAM restart, worker loss, provider outage, partial output, process crash, cancellation races, ambiguity, stale fences, and late results.
+      - [x] 4.4.1.4 Subtask - Prove graph-only reconstruction and prove Codex cannot verify, accept, publish, merge, mutate policy, or adopt knowledge.
       - [ ] 4.4.1.5 Subtask - Rerun DCG1-DCG3 and prior factory, harness, memory, managed-coding, architecture, Dialyzer, `mix precommit`, and clean-checkout gates.
 
     - [ ] 4.4.2 Task {#dca-p04-phase-receipt} [repo: jido_code] [after: {#dca-p04-integration}] - Publish and pin the Phase 4 receipt.
@@ -100,7 +100,7 @@ Back to plan: [README](./README.md)
       This task records DCG4 evidence in
       `docs/architecture/delegated-agent-phase-04-receipt.md`.
 
-      - [ ] 4.4.2.1 Subtask - Record accounting, checkpoint, candidate, verifier, recovery, reconciliation, and adversarial fixture revisions and digests.
-      - [ ] 4.4.2.2 Subtask - Keep DCG4 open if CLI claims become authoritative, candidate facts are not recomputed, verification reuses the delegated workspace, or restart depends on disposable state.
+      - [x] 4.4.2.1 Subtask - Record accounting, checkpoint, candidate, verifier, recovery, reconciliation, and adversarial fixture revisions and digests.
+      - [x] 4.4.2.2 Subtask - Keep DCG4 open if CLI claims become authoritative, candidate facts are not recomputed, verification reuses the delegated workspace, or restart depends on disposable state.
       - [ ] 4.4.2.3 Subtask - Attach candidate, verifier, restart, cancellation, ambiguity, late-result, architecture, Dialyzer, precommit, and clean-checkout evidence.
       - [ ] 4.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 5.

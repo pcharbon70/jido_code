@@ -234,7 +234,8 @@ defmodule JidoCode.Factory.DelegatedAgentPhase04CandidateTest do
       status: :success,
       command_digest: digest("command"),
       output_digest: digest("output"),
-      receipt_digest: digest("check-receipt")
+      receipt_digest: digest("check-receipt"),
+      catalog_revision: digest("checks")
     }
 
     %{

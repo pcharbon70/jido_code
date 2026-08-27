@@ -298,7 +298,8 @@ defmodule JidoCode.Factory.DelegatedAgentPhase04VerificationRecoveryTest do
       status: :success,
       command_digest: CheckDefinition.digest(Map.fetch!(catalog.definitions, "git-diff-check")),
       output_digest: digest("delegated-output"),
-      receipt_digest: digest("delegated-check-receipt")
+      receipt_digest: digest("delegated-check-receipt"),
+      catalog_revision: catalog.revision
     }
 
     attributes = %{

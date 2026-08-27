@@ -38,7 +38,6 @@ defmodule JidoCode.Integrations.DelegatedFreshCheckoutVerifier do
       end
     else
       {:error, %AdapterError{} = error} -> {:error, error}
-      _invalid -> invalid(:delegated_fresh_checkout_verification)
     end
   rescue
     _error -> invalid(:delegated_fresh_checkout_verification)
