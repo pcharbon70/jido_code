@@ -19,22 +19,22 @@ Back to plan: [README](./README.md)
   candidates, separating verification, and recovering only from graph state
   and accepted content-addressed artifacts.
 
-  - [ ] 4.1 Section - Implement honest delegated accounting and turn checkpoints.
+  - [x] 4.1 Section - Implement honest delegated accounting and turn checkpoints.
 
     This section records everything JidoCode controls without fabricating
     visibility into Codex's internal prompts, reasoning, provider context, or
     tool loop.
 
-    - [ ] 4.1.1 Task {#dca-p04-accounting} [repo: jido_code] [after: {#dca-p03-phase-receipt}] - Extend total semantic accounting for delegated turns.
+    - [x] 4.1.1 Task {#dca-p04-accounting} [repo: jido_code] [after: {#dca-p03-phase-receipt}] - Extend total semantic accounting for delegated turns.
 
       This task distinguishes authoritative controller evidence from incomplete
       provider and CLI observations.
 
-      - [ ] 4.1.1.1 Subtask - Mark internal prompts, reasoning, provider context, and internal tool mediation explicitly unavailable in the delegated-input and accounting manifests.
-      - [ ] 4.1.1.2 Subtask - Record invocation-before-effect and terminal-or-ambiguous outcomes for every outer Codex run and JidoCode-controlled credential, check, candidate, and verifier effect.
-      - [ ] 4.1.1.3 Subtask - Adopt only bounded lifecycle, usage, changed-path, check-request, terminal, workspace, patch, tree, artifact, and omission observations.
-      - [ ] 4.1.1.4 Subtask - Exclude raw prompts, transcripts, hidden reasoning, unbounded output, credentials, and provider-private state from graph and memory.
-      - [ ] 4.1.1.5 Subtask - Capture a content-addressed workspace checkpoint at accepted turn boundaries so follow-up and restart do not require provider-session state.
+      - [x] 4.1.1.1 Subtask - Mark internal prompts, reasoning, provider context, and internal tool mediation explicitly unavailable in the delegated-input and accounting manifests.
+      - [x] 4.1.1.2 Subtask - Record invocation-before-effect and terminal-or-ambiguous outcomes for every outer Codex run and JidoCode-controlled credential, check, candidate, and verifier effect.
+      - [x] 4.1.1.3 Subtask - Adopt only bounded lifecycle, usage, changed-path, check-request, terminal, workspace, patch, tree, artifact, and omission observations.
+      - [x] 4.1.1.4 Subtask - Exclude raw prompts, transcripts, hidden reasoning, unbounded output, credentials, and provider-private state from graph and memory.
+      - [x] 4.1.1.5 Subtask - Capture a content-addressed workspace checkpoint at accepted turn boundaries so follow-up and restart do not require provider-session state.
 
   - [ ] 4.2 Section - Capture and close immutable candidates.
 
