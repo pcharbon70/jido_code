@@ -13,7 +13,7 @@ authority.
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Prove the write-capable Codex process is locally authenticated and contained.
+- [x] 3 Phase - Prove the write-capable Codex process is locally authenticated and contained.
 
   This phase proves DCG3 by combining expiring readiness, explicit consent,
   protected local authentication, a disposable workspace, registered checks,
@@ -86,12 +86,12 @@ Back to plan: [README](./README.md)
       - [x] 3.3.2.3 Subtask - Bind check receipts to attempt, fence, source, workspace, profile, command, limits, exit status, and bounded output digest.
       - [x] 3.3.2.4 Subtask - Prevent repository content, task input, or Codex output from adding or changing registered commands.
 
-  - [ ] 3.4 Section - Phase 3 Integration Tests.
+  - [x] 3.4 Section - Phase 3 Integration Tests.
 
     This final section proves credential privacy, process isolation, local
     filesystem effects, controller-owned checks, and bounded cleanup.
 
-    - [ ] 3.4.1 Task {#dca-p03-integration} [repo: jido_code] [after: {#dca-p03-checks}] - Execute the developer-local security and workspace matrix.
+    - [x] 3.4.1 Task {#dca-p03-integration} [repo: jido_code] [after: {#dca-p03-checks}] - Execute the developer-local security and workspace matrix.
 
       This task closes DCG3 only when the real write-capable profile remains
       contained under hostile repository and process behavior.
@@ -100,14 +100,14 @@ Back to plan: [README](./README.md)
       - [x] 3.4.1.2 Subtask - Run credential, prompt, journal, host-path, cross-actor, and cross-repository canaries from the Codex parent and spawned tool descendants.
       - [x] 3.4.1.3 Subtask - Exercise real file creation, modification, deletion, registered checks, and workspace destruction in isolated temporary workers.
       - [x] 3.4.1.4 Subtask - Attack symlinks, special files, `.git`, egress, process count, output, disk, memory, time, and resistant descendants.
-      - [ ] 3.4.1.5 Subtask - Rerun DCG1-DCG2, sandbox and harness suites, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
+      - [x] 3.4.1.5 Subtask - Rerun DCG1-DCG2, sandbox and harness suites, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 3.4.2 Task {#dca-p03-phase-receipt} [repo: jido_code] [after: {#dca-p03-integration}] - Publish and pin the Phase 3 receipt.
+    - [x] 3.4.2 Task {#dca-p03-phase-receipt} [repo: jido_code] [after: {#dca-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records DCG3 evidence in
       `docs/architecture/delegated-agent-phase-03-receipt.md`.
 
       - [x] 3.4.2.1 Subtask - Record credential, consent, readiness, worker, sandbox, network, workspace, limits, check-registry, and cleanup revisions and digests.
       - [x] 3.4.2.2 Subtask - Keep DCG3 open if a tool descendant can read or reuse the login, escape the workspace, broaden egress, or create an unaccounted effect.
-      - [ ] 3.4.2.3 Subtask - Attach credential-canary, isolation, workspace, registered-check, resource, cancellation, architecture, Dialyzer, precommit, and clean-checkout evidence.
-      - [ ] 3.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 4.
+      - [x] 3.4.2.3 Subtask - Attach credential-canary, isolation, workspace, registered-check, resource, cancellation, architecture, Dialyzer, precommit, and clean-checkout evidence.
+      - [x] 3.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 4.
