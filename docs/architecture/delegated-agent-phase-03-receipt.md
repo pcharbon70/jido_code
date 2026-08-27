@@ -2,11 +2,10 @@
 
 ## Status
 
-This merge-pending receipt records the Phase 3 implementation candidate built
-from the accepted Phase 2 closure baseline
-`aad56e85dd1f76d9ddf350750a03bd786f3645ca`. DCG3 remains open until the
-implementation pull request passes clean-checkout CI, merges, and a closure
-change pins the full merge-commit SHA and merge date.
+This receipt records the Phase 3 implementation accepted after pull request
+#83 passed clean-checkout CI and merged on 2026-08-27 as
+`f66e0da1c1548895fc3394182d348b9f0e8bcbf5`. DCG3 is accepted at that exact
+merged candidate, which is the authorized baseline for Phase 4.
 
 The candidate keeps the exact DGA1 Codex profile disabled while implementing
 prompt-free readiness, effect-bound foreground consent, opaque local-login
@@ -23,8 +22,8 @@ quarantine, revocation, and complete disposable-workspace cleanup.
 | Section 3.1 | `5b2a7f3` - readiness, foreground consent, and opaque credential references |
 | Section 3.2 | `2d022fc` - local Codex credential, namespace, environment, and egress isolation |
 | Section 3.3 | `5408532` - bounded workspace effects, quarantine, and registered checks |
-| Section 3.4 | Merge-pending implementation PR head; exact commit is recorded by Git history |
-| Merged candidate | **Pending clean-checkout CI and merge** |
+| Section 3.4 | `4665fcc72a766e4d1ad9013d1aa44becb905fe46` - integration matrix and merge-pending receipt |
+| Merged candidate | `f66e0da1c1548895fc3394182d348b9f0e8bcbf5` - merged 2026-08-27 |
 
 ## Local Security And Component Pins
 
@@ -112,7 +111,7 @@ quarantine, revocation, and complete disposable-workspace cleanup.
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 177 existing warnings skipped by policy, zero unignored errors |
 | Repository-wide isolated `mix precommit` | Passed on synchronized main; 967 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | Pending implementation PR |
+| Clean-checkout CI | Passed on PR #83; verify and Dialyzer jobs succeeded before merge |
 
 ## Known Limits And Disabled Posture
 
@@ -131,11 +130,11 @@ quarantine, revocation, and complete disposable-workspace cleanup.
 
 ## Gate DCG3
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-DCG3 becomes accepted only after clean-checkout CI passes, the implementation
-PR merges, and the receipt pins the exact merged candidate and date. Phase 4
-is not authorized from this merge-pending state.
+DCG3 is accepted at merged candidate
+`f66e0da1c1548895fc3394182d348b9f0e8bcbf5` after clean-checkout CI and merge
+on 2026-08-27. Phase 4 is authorized only from this exact pinned baseline.
 
 DCG3 reopens regardless of checklist state if readiness sends a prompt-bearing
 or billable request, outlives a bound revision, or claims unproved actor
