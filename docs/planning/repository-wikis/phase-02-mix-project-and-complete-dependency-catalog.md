@@ -100,31 +100,31 @@ Back to plan: [README](./README.md)
       - [x] 2.3.2.3 Subtask - Preserve optional, override, runtime, environment, manager, umbrella, sparse, branch, tag, ref, and subdirectory semantics in nodes and edges.
       - [x] 2.3.2.4 Subtask - Avoid external links for private, ambiguous, moving, unsupported, or unverified sources and surface the reason in the dependency page.
 
-  - [ ] 2.4 Section - Enrich public dependencies through bounded Req metadata lookup.
+  - [x] 2.4 Section - Enrich public dependencies through bounded Req metadata lookup.
 
     This section adds useful general package information while keeping remote
     metadata observational, cached, attributable, and non-authoritative.
 
-    - [ ] 2.4.1 Task {#rwi-p02-hex-metadata} [repo: jido_code] [after: {#rwi-p02-special-dependencies}] - Implement `hex-req/1.0.0` metadata acquisition.
+    - [x] 2.4.1 Task {#rwi-p02-hex-metadata} [repo: jido_code] [after: {#rwi-p02-special-dependencies}] - Implement `hex-req/1.0.0` metadata acquisition.
 
       This task uses the existing Req client and closed endpoint registry to
       fetch bounded metadata for eligible public Hex packages.
 
-      - [ ] 2.4.1.1 Subtask - Register exact HTTPS origins, routes, request headers, redirects, TLS policy, timeouts, response limits, retry policy, concurrency, and cache behavior.
-      - [ ] 2.4.1.2 Subtask - Fetch package and exact release metadata with Req; capture request profile, endpoint identity, status, validators, retrieval time, body digest, and parse diagnostics.
-      - [ ] 2.4.1.3 Subtask - Parse bounded summary, licenses, maintainers, links, retirement, release date, requirements, and checksum fields without interpreting remote HTML or executable content.
-      - [ ] 2.4.1.4 Subtask - Implement immutable fixture replay and positive/negative cache entries with TTL, stale-if-error display, rate-limit handling, and no live-network dependency in ordinary CI.
-      - [ ] 2.4.1.5 Subtask - Label remote data as observed metadata, preserve unavailable/stale states, and prevent it from overriding project or lock truth.
+      - [x] 2.4.1.1 Subtask - Register exact HTTPS origins, routes, request headers, redirects, TLS policy, timeouts, response limits, retry policy, concurrency, and cache behavior.
+      - [x] 2.4.1.2 Subtask - Fetch package and exact release metadata with Req; capture request profile, endpoint identity, status, validators, retrieval time, body digest, and parse diagnostics.
+      - [x] 2.4.1.3 Subtask - Parse bounded summary, licenses, maintainers, links, retirement, release date, requirements, and checksum fields without interpreting remote HTML or executable content.
+      - [x] 2.4.1.4 Subtask - Implement immutable fixture replay and positive/negative cache entries with TTL, stale-if-error display, rate-limit handling, and no live-network dependency in ordinary CI.
+      - [x] 2.4.1.5 Subtask - Label remote data as observed metadata, preserve unavailable/stale states, and prevent it from overriding project or lock truth.
 
-    - [ ] 2.4.2 Task {#rwi-p02-dependency-links} [repo: jido_code] [after: {#rwi-p02-hex-metadata}] - Produce safe verified dependency links.
+    - [x] 2.4.2 Task {#rwi-p02-dependency-links} [repo: jido_code] [after: {#rwi-p02-hex-metadata}] - Produce safe verified dependency links.
 
       This task exposes useful package, documentation, source, and license
       destinations only after deterministic validation.
 
-      - [ ] 2.4.2.1 Subtask - Generate Hex package/release and HexDocs version links from verified public package identity and resolved version.
-      - [ ] 2.4.2.2 Subtask - Validate remote-provided source, homepage, changelog, and license links against scheme, length, control-character, credential, and display-text policy.
-      - [ ] 2.4.2.3 Subtask - Record link kind, origin, verification state, retrieval time, and provenance; render unverified values as text rather than clickable destinations.
-      - [ ] 2.4.2.4 Subtask - Prevent link redirects, Unicode lookalikes, encoded credentials, or repository content from creating privileged or application-internal navigation.
+      - [x] 2.4.2.1 Subtask - Generate Hex package/release and HexDocs version links from verified public package identity and resolved version.
+      - [x] 2.4.2.2 Subtask - Validate remote-provided source, homepage, changelog, and license links against scheme, length, control-character, credential, and display-text policy.
+      - [x] 2.4.2.3 Subtask - Record link kind, origin, verification state, retrieval time, and provenance; render unverified values as text rather than clickable destinations.
+      - [x] 2.4.2.4 Subtask - Prevent link redirects, Unicode lookalikes, encoded credentials, or repository content from creating privileged or application-internal navigation.
 
   - [ ] 2.5 Section - Compile and qualify deterministic Mix and dependency pages.
 

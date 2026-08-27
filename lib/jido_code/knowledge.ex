@@ -94,6 +94,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
   alias JidoCode.Knowledge.RepositoryWiki.LockParser, as: RepositoryWikiLockParser
   alias JidoCode.Knowledge.RepositoryWiki.DependencyResolver, as: RepositoryWikiDependencyResolver
+  alias JidoCode.Knowledge.RepositoryWiki.DependencyLinks, as: RepositoryWikiDependencyLinks
   alias JidoCode.Knowledge.RepositoryWiki.MixReconciler, as: RepositoryWikiMixReconciler
   alias JidoCode.Knowledge.RepositoryWiki.MixStatic, as: RepositoryWikiMixStatic
   alias JidoCode.Knowledge.RepositoryWiki.Recovery, as: RepositoryWikiRecovery
@@ -476,6 +477,11 @@ defmodule JidoCode.Knowledge do
 
   def resolve_repository_wiki_dependencies(reconciliation, attributes),
     do: RepositoryWikiDependencyResolver.resolve(reconciliation, attributes)
+
+  def repository_wiki_dependency_links(node, metadata, attributes),
+    do: RepositoryWikiDependencyLinks.build(node, metadata, attributes)
+
+  def repository_wiki_digest(value), do: JidoCode.Knowledge.RepositoryWiki.Contract.digest(value)
 
   def reconcile_repository_wiki_mix(
         static,
