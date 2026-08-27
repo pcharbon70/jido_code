@@ -1,8 +1,9 @@
 defmodule JidoCode.Knowledge.RepositoryWiki.Compiler do
-  @moduledoc "Deterministic zero-model compiler for the Phase 1 repository wiki pages."
+  @moduledoc "Deterministic zero-model compiler for repository wiki pages and extensions."
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.RepositoryWiki.Contract
+  alias JidoCode.Knowledge.RepositoryWiki.DependencyPages
   alias JidoCode.Knowledge.RepositoryWiki.Protocol
   alias JidoCode.Knowledge.RepositoryWiki.SemanticContract
   alias JidoCode.Knowledge.ResourceIdentity
@@ -92,6 +93,19 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Compiler do
   end
 
   def compile(_inventory, _attributes), do: invalid(:repository_wiki_compile)
+
+  @spec compile_dependencies(map(), map(), map(), map(), map(), map()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def compile_dependencies(compilation, reconciliation, catalog, metadata, link_sets, attributes),
+    do:
+      DependencyPages.compile(
+        compilation,
+        reconciliation,
+        catalog,
+        metadata,
+        link_sets,
+        attributes
+      )
 
   defp edition_root(inventory, attributes) do
     Contract.digest(%{

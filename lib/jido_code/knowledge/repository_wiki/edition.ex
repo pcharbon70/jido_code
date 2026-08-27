@@ -275,14 +275,19 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
     blocking = Enum.count(normalized, &(&1[:severity] == :blocking))
     digest = Contract.digest(normalized)
 
+    profile_digest =
+      attributes[:lint_profile_digest] || Contract.digest(%{revision: "wiki-lint/1.0.0"})
+
     with true <- Enum.all?(normalized, &valid_finding?/1),
          true <- is_integer(revision) and revision > 0,
+         true <- Contract.digest?(profile_digest),
          {:ok, report_iri} <-
            ResourceIdentity.deterministic(:wiki_lint_report, edition.iri <> digest),
          report = %{
            iri: report_iri,
            edition_iri: edition.iri,
            profile: "wiki-lint/1.0.0",
+           profile_digest: profile_digest,
            digest: digest,
            blocking_count: blocking,
            findings: normalized,
@@ -556,6 +561,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Edition do
       {report.iri, @rdf_type, RDF.iri(@jf <> "WikiLintReport")},
       {report.iri, @jf <> "wikiEdition", RDF.iri(report.edition_iri)},
       {report.iri, @jf <> "lintProfile", RDF.XSD.String.new(report.profile)},
+      {report.iri, @jf <> "lintProfileDigest", RDF.XSD.String.new(report.profile_digest)},
       {report.iri, @jf <> "contentDigest", RDF.XSD.String.new(report.digest)},
       {report.iri, @jf <> "blockingFindingCount",
        RDF.XSD.NonNegativeInteger.new(report.blocking_count)},

@@ -39,6 +39,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolverTest do
 
     assert node(first, "beta").parents == ["alpha"]
     assert node(first, "beta").canonical_path == ["alpha", "beta"]
+    assert ["alpha", "beta"] in node(first, "beta").root_paths
     assert node(first, "alpha").parents == ["beta"]
     assert node(first, "alpha").cycle
     assert node(first, "beta").cycle

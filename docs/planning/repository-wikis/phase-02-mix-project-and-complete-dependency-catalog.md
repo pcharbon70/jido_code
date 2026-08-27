@@ -126,31 +126,31 @@ Back to plan: [README](./README.md)
       - [x] 2.4.2.3 Subtask - Record link kind, origin, verification state, retrieval time, and provenance; render unverified values as text rather than clickable destinations.
       - [x] 2.4.2.4 Subtask - Prevent link redirects, Unicode lookalikes, encoded credentials, or repository content from creating privileged or application-internal navigation.
 
-  - [ ] 2.5 Section - Compile and qualify deterministic Mix and dependency pages.
+  - [x] 2.5 Section - Compile and qualify deterministic Mix and dependency pages.
 
     This section turns reconciled facts into stable wiki navigation with
     completeness and provenance visible to readers.
 
-    - [ ] 2.5.1 Task {#rwi-p02-dependency-pages} [repo: jido_code] [after: {#rwi-p02-dependency-links}] - Extend the deterministic compiler with project and dependency pages.
+    - [x] 2.5.1 Task {#rwi-p02-dependency-pages} [repo: jido_code] [after: {#rwi-p02-dependency-links}] - Extend the deterministic compiler with project and dependency pages.
 
       This task publishes project identity, dependency summaries, and one
       detail page per resolved or explicitly unresolved dependency.
 
-      - [ ] 2.5.1.1 Subtask - Compile Project, Runtime Requirements, Dependency Overview, Direct Dependencies, Transitive Dependencies, Dependency Gaps, and metadata freshness pages.
-      - [ ] 2.5.1.2 Subtask - Compile stable per-dependency pages with general information, declared/locked/observed facts, incoming/outgoing edges, paths from roots, scopes, provenance, and safe links.
-      - [ ] 2.5.1.3 Subtask - Show complete node/edge counts, unsupported entries, metadata availability, source conflicts, and coverage warnings without hiding degraded results.
-      - [ ] 2.5.1.4 Subtask - Keep page ordering, anchors, slugs, link selection, tables, and text deterministic across identical inputs.
-      - [ ] 2.5.1.5 Subtask - Emit explicit zero model-token usage and exact parser, sandbox, resolver, metadata-fixture, compiler, and source digests for the edition.
+      - [x] 2.5.1.1 Subtask - Compile Project, Runtime Requirements, Dependency Overview, Direct Dependencies, Transitive Dependencies, Dependency Gaps, and metadata freshness pages.
+      - [x] 2.5.1.2 Subtask - Compile stable per-dependency pages with general information, declared/locked/observed facts, incoming/outgoing edges, paths from roots, scopes, provenance, and safe links.
+      - [x] 2.5.1.3 Subtask - Show complete node/edge counts, unsupported entries, metadata availability, source conflicts, and coverage warnings without hiding degraded results.
+      - [x] 2.5.1.4 Subtask - Keep page ordering, anchors, slugs, link selection, tables, and text deterministic across identical inputs.
+      - [x] 2.5.1.5 Subtask - Emit explicit zero model-token usage and exact parser, sandbox, resolver, metadata-fixture, compiler, and source digests for the edition.
 
-    - [ ] 2.5.2 Task {#rwi-p02-dependency-lint} [repo: jido_code] [after: {#rwi-p02-dependency-pages}] - Extend `wiki-lint/1.0.0` for Mix and dependency completeness.
+    - [x] 2.5.2 Task {#rwi-p02-dependency-lint} [repo: jido_code] [after: {#rwi-p02-dependency-pages}] - Extend `wiki-lint/1.0.0` for Mix and dependency completeness.
 
       This task blocks activation when supported dependency truth is omitted,
       misrepresented, untraceable, or linked unsafely.
 
-      - [ ] 2.5.2.1 Subtask - Require project-source provenance and a catalog node for every supported lock entry and declaration.
-      - [ ] 2.5.2.2 Subtask - Require all supported dependency edges, stable identities, unique pages, bounded paths, and explicit classifications for unresolved inputs.
-      - [ ] 2.5.2.3 Subtask - Reject unsafe links, missing source labels, silent static/sandbox conflicts, remote metadata represented as authoritative, and nondeterministic output.
-      - [ ] 2.5.2.4 Subtask - Produce machine-readable blocking errors, nonblocking warnings, coverage metrics, and a lint-profile digest attached to the edition.
+      - [x] 2.5.2.1 Subtask - Require project-source provenance and a catalog node for every supported lock entry and declaration.
+      - [x] 2.5.2.2 Subtask - Require all supported dependency edges, stable identities, unique pages, bounded paths, and explicit classifications for unresolved inputs.
+      - [x] 2.5.2.3 Subtask - Reject unsafe links, missing source labels, silent static/sandbox conflicts, remote metadata represented as authoritative, and nondeterministic output.
+      - [x] 2.5.2.4 Subtask - Produce machine-readable blocking errors, nonblocking warnings, coverage metrics, and a lint-profile digest attached to the edition.
 
   - [ ] 2.6 Section - Phase 2 Integration Tests.
 

@@ -34,11 +34,22 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
          adjacency <- adjacency(edges),
          parents <- parents(edges),
          paths <- canonical_paths(roots, adjacency, limits.depth),
+         {root_paths, paths_truncated?} <-
+           all_root_paths(roots, adjacency, limits.depth, limits.paths),
          cycles <- cycle_edges(edges, adjacency, limits.nodes),
          {:ok, nodes} <-
-           nodes(names, declarations, locks, parents, paths, cycles, resolver_attributes),
+           nodes(
+             names,
+             declarations,
+             locks,
+             parents,
+             paths,
+             root_paths,
+             cycles,
+             resolver_attributes
+           ),
          :ok <- verify_closure(nodes, edges, reconciliation.lock_entries),
-         gaps <- gaps(nodes, edges),
+         gaps <- gaps(nodes, edges, paths_truncated?),
          evidence <- completeness(nodes, edges, reconciliation.lock_entries, gaps) do
       catalog = %{
         profile: @profile,
@@ -56,6 +67,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
         node_count: length(nodes),
         edge_count: length(edges),
         maximum_depth: maximum_depth(nodes),
+        path_count: Enum.sum(Enum.map(nodes, &length(&1.root_paths))),
+        paths_truncated: paths_truncated?,
         model_calls: 0,
         model_input_tokens: 0,
         model_output_tokens: 0,
@@ -212,6 +225,39 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
     end
   end
 
+  defp all_root_paths(roots, adjacency, maximum_depth, maximum_paths) do
+    queue = :queue.from_list(Enum.map(roots, &{&1, [&1]}))
+    walk_root_paths(queue, %{}, adjacency, maximum_depth, maximum_paths, 0)
+  end
+
+  defp walk_root_paths(queue, paths, adjacency, maximum_depth, maximum_paths, count) do
+    case :queue.out(queue) do
+      {{:value, {name, path}}, rest} when count < maximum_paths ->
+        if length(path) > maximum_depth do
+          walk_root_paths(rest, paths, adjacency, maximum_depth, maximum_paths, count)
+        else
+          existing = Map.get(paths, name, [])
+          paths = Map.put(paths, name, Enum.sort([path | existing]))
+
+          next =
+            adjacency
+            |> Map.get(name, [])
+            |> Enum.reject(&(&1 in path))
+            |> Enum.reduce(rest, fn child, current ->
+              :queue.in({child, path ++ [child]}, current)
+            end)
+
+          walk_root_paths(next, paths, adjacency, maximum_depth, maximum_paths, count + 1)
+        end
+
+      {{:value, _pending}, _rest} ->
+        {paths, true}
+
+      {:empty, _rest} ->
+        {paths, false}
+    end
+  end
+
   defp cycle_edges(edges, adjacency, node_limit) do
     edges
     |> Enum.filter(fn edge -> reachable?(edge.child, edge.parent, adjacency, node_limit) end)
@@ -241,7 +287,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
     end
   end
 
-  defp nodes(names, declarations, locks, parents, paths, cycles, attributes) do
+  defp nodes(names, declarations, locks, parents, paths, root_paths, cycles, attributes) do
     cycle_names = cycles |> Enum.flat_map(&[&1.from, &1.to]) |> MapSet.new()
 
     Enum.reduce_while(names, {:ok, []}, fn name, {:ok, result} ->
@@ -279,6 +325,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
           lock: lock,
           parents: parent_names,
           canonical_path: path,
+          root_paths: Map.get(root_paths, name, []),
           depth: if(path, do: length(path) - 1, else: nil),
           cycle: MapSet.member?(cycle_names, name),
           provenance: %{
@@ -357,7 +404,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
     end
   end
 
-  defp gaps(nodes, edges) do
+  defp gaps(nodes, edges, paths_truncated?) do
     node_gaps =
       nodes
       |> Enum.filter(&(&1.classification not in [:resolved, :locked_only, :orphaned_lock]))
@@ -383,7 +430,12 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
       end)
       |> Enum.map(&%{kind: :unverifiable_edge, dependency: &1.child, blocking: true})
 
-    (node_gaps ++ cycle_gaps ++ missing_edges)
+    path_gaps =
+      if paths_truncated?,
+        do: [%{kind: :path_limit, dependency: nil, blocking: true}],
+        else: []
+
+    (node_gaps ++ cycle_gaps ++ missing_edges ++ path_gaps)
     |> Enum.uniq()
     |> Enum.sort_by(&{to_string(&1.kind), &1.dependency || ""})
   end

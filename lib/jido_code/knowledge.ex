@@ -95,6 +95,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.LockParser, as: RepositoryWikiLockParser
   alias JidoCode.Knowledge.RepositoryWiki.DependencyResolver, as: RepositoryWikiDependencyResolver
   alias JidoCode.Knowledge.RepositoryWiki.DependencyLinks, as: RepositoryWikiDependencyLinks
+  alias JidoCode.Knowledge.RepositoryWiki.DependencyLint, as: RepositoryWikiDependencyLint
   alias JidoCode.Knowledge.RepositoryWiki.MixReconciler, as: RepositoryWikiMixReconciler
   alias JidoCode.Knowledge.RepositoryWiki.MixStatic, as: RepositoryWikiMixStatic
   alias JidoCode.Knowledge.RepositoryWiki.Recovery, as: RepositoryWikiRecovery
@@ -466,6 +467,24 @@ defmodule JidoCode.Knowledge do
   def compile_repository_wiki(inventory, attributes),
     do: RepositoryWikiCompiler.compile(inventory, attributes)
 
+  def compile_repository_wiki_dependencies(
+        compilation,
+        reconciliation,
+        catalog,
+        metadata,
+        link_sets,
+        attributes
+      ),
+      do:
+        RepositoryWikiCompiler.compile_dependencies(
+          compilation,
+          reconciliation,
+          catalog,
+          metadata,
+          link_sets,
+          attributes
+        )
+
   def inventory_repository_wiki(root, attributes),
     do: RepositoryWikiSourceInventory.scan(root, attributes)
 
@@ -480,6 +499,22 @@ defmodule JidoCode.Knowledge do
 
   def repository_wiki_dependency_links(node, metadata, attributes),
     do: RepositoryWikiDependencyLinks.build(node, metadata, attributes)
+
+  def lint_repository_wiki_dependencies(
+        compilation,
+        reconciliation,
+        catalog,
+        metadata,
+        link_sets
+      ),
+      do:
+        RepositoryWikiDependencyLint.lint(
+          compilation,
+          reconciliation,
+          catalog,
+          metadata,
+          link_sets
+        )
 
   def repository_wiki_digest(value), do: JidoCode.Knowledge.RepositoryWiki.Contract.digest(value)
 

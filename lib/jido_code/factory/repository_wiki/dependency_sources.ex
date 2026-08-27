@@ -1,6 +1,7 @@
 defmodule JidoCode.Factory.RepositoryWiki.DependencySources do
   @moduledoc "Filesystem and source-locator classification for repository wiki dependencies."
 
+  alias JidoCode.Knowledge
   alias JidoCode.Knowledge.Error
 
   @profile "wiki-dependency-sources/1.0.0"
@@ -58,7 +59,8 @@ defmodule JidoCode.Factory.RepositoryWiki.DependencySources do
 
   defp validate(catalog, workspace_root, attributes) do
     cond do
-      catalog[:profile] != "wiki-dependency-resolver/1.0.0" or not digest?(catalog[:digest]) ->
+      catalog[:profile] != "wiki-dependency-resolver/1.0.0" or not digest?(catalog[:digest]) or
+          catalog.digest != Knowledge.repository_wiki_digest(Map.delete(catalog, :digest)) ->
         invalid()
 
       length(catalog[:nodes] || []) > @maximums.nodes ->
@@ -474,12 +476,7 @@ defmodule JidoCode.Factory.RepositoryWiki.DependencySources do
     end
   end
 
-  defp digest(value),
-    do:
-      value
-      |> :erlang.term_to_binary([:deterministic])
-      |> then(&:crypto.hash(:sha256, &1))
-      |> Base.encode16(case: :lower)
+  defp digest(value), do: Knowledge.repository_wiki_digest(value)
 
   defp digest?(value) when is_binary(value), do: Regex.match?(~r/^[a-f0-9]{64}$/, value)
   defp digest?(_value), do: false
