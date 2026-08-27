@@ -92,6 +92,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.Compiler, as: RepositoryWikiCompiler
   alias JidoCode.Knowledge.RepositoryWiki.Edition, as: RepositoryWikiEdition
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
+  alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
+  alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.LockParser, as: RepositoryWikiLockParser
   alias JidoCode.Knowledge.RepositoryWiki.DependencyResolver, as: RepositoryWikiDependencyResolver
   alias JidoCode.Knowledge.RepositoryWiki.DependencyLinks, as: RepositoryWikiDependencyLinks
@@ -487,6 +489,15 @@ defmodule JidoCode.Knowledge do
 
   def inventory_repository_wiki(root, attributes),
     do: RepositoryWikiSourceInventory.scan(root, attributes)
+
+  def discover_repository_wiki_guides(root, attributes),
+    do: RepositoryWikiGuideDiscovery.discover(root, attributes)
+
+  def read_repository_wiki_guide(root, guide),
+    do: RepositoryWikiGuideDiscovery.read(root, guide)
+
+  def render_repository_wiki_guide(source, guide, attributes),
+    do: RepositoryWikiGuideRenderer.render(source, guide, attributes)
 
   def extract_repository_wiki_mix(source, attributes \\ %{}),
     do: RepositoryWikiMixStatic.extract(source, attributes)

@@ -59,6 +59,10 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyLinks do
 
   def build(_node, _metadata, _attributes), do: invalid()
 
+  @doc "Applies the shared wiki external-link policy without creating navigation authority."
+  @spec admit_external_url(term()) :: {:ok, String.t()} | {:error, atom()}
+  def admit_external_url(value), do: safe_external_url(value)
+
   defp validate(node, metadata, attributes) do
     cond do
       ResourceIdentity.validate(node[:iri]) != :ok or

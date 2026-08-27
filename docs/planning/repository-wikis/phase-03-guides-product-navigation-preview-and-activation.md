@@ -19,32 +19,32 @@ Back to plan: [README](./README.md)
   This phase proves RW3 by making guides, freshness, reads, previews, review,
   activation, and product navigation safe under parallel coding sessions.
 
-  - [ ] 3.1 Section - Discover and render user and developer guides safely.
+  - [x] 3.1 Section - Discover and render user and developer guides safely.
 
     This section treats accepted repository documentation as source material,
     never as executable or trusted application markup.
 
-    - [ ] 3.1.1 Task {#rwi-p03-guide-discovery} [repo: jido_code] [after: {#rwi-p02-phase-receipt}] - Implement deterministic guide discovery and classification.
+    - [x] 3.1.1 Task {#rwi-p03-guide-discovery} [repo: jido_code] [after: {#rwi-p02-phase-receipt}] - Implement deterministic guide discovery and classification.
 
       This task finds configured and conventional guides within the registered
       repository root and assigns stable identities and audiences.
 
-      - [ ] 3.1.1.1 Subtask - Discover `README`, contribution, installation, deployment, operations, troubleshooting, API, usage, upgrade, security, architecture, and configured guide roots under fixed file/count/byte limits.
-      - [ ] 3.1.1.2 Subtask - Classify pages as user, developer, operator, contributor, reference, architecture, policy, or unknown using deterministic path/front-matter rules.
-      - [ ] 3.1.1.3 Subtask - Preserve source-relative path, revision, digest, media type, title evidence, audience evidence, order, freshness, and any ambiguous classification.
-      - [ ] 3.1.1.4 Subtask - Reject traversal, outside-root symlinks, device files, binaries, oversized inputs, unsupported encodings, and repository-selected parser extensions.
-      - [ ] 3.1.1.5 Subtask - Detect renames, additions, deletions, duplicates, title collisions, and moved anchors deterministically without relying on process-local history.
+      - [x] 3.1.1.1 Subtask - Discover `README`, contribution, installation, deployment, operations, troubleshooting, API, usage, upgrade, security, architecture, and configured guide roots under fixed file/count/byte limits.
+      - [x] 3.1.1.2 Subtask - Classify pages as user, developer, operator, contributor, reference, architecture, policy, or unknown using deterministic path/front-matter rules.
+      - [x] 3.1.1.3 Subtask - Preserve source-relative path, revision, digest, media type, title evidence, audience evidence, order, freshness, and any ambiguous classification.
+      - [x] 3.1.1.4 Subtask - Reject traversal, outside-root symlinks, device files, binaries, oversized inputs, unsupported encodings, and repository-selected parser extensions.
+      - [x] 3.1.1.5 Subtask - Detect renames, additions, deletions, duplicates, title collisions, and moved anchors deterministically without relying on process-local history.
 
-    - [ ] 3.1.2 Task {#rwi-p03-guide-rendering} [repo: jido_code] [after: {#rwi-p03-guide-discovery}] - Extend `wiki-renderer/1.0.0` with safe guide rendering.
+    - [x] 3.1.2 Task {#rwi-p03-guide-rendering} [repo: jido_code] [after: {#rwi-p03-guide-discovery}] - Extend `wiki-renderer/1.0.0` with safe guide rendering.
 
       This task renders useful documentation without admitting scripts, unsafe
       HTML, credential leaks, or privileged application navigation.
 
-      - [ ] 3.1.2.1 Subtask - Parse the supported Markdown subset under bounded depth, nodes, link count, code-block size, table size, and total output limits.
-      - [ ] 3.1.2.2 Subtask - Escape or remove raw HTML, scripts, event handlers, styles, embeds, forms, iframes, data URLs, dangerous schemes, and unsupported extensions.
-      - [ ] 3.1.2.3 Subtask - Rewrite relative guide, source, and image references through reviewed repository routes; preserve unresolved and external destinations with explicit status.
-      - [ ] 3.1.2.4 Subtask - Generate stable heading anchors, table-of-contents entries, source links, audience labels, freshness labels, and provenance panels.
-      - [ ] 3.1.2.5 Subtask - Scan rendered and source content for known credential forms and high-risk secrets, block unsafe activation, and retain only redacted diagnostics.
+      - [x] 3.1.2.1 Subtask - Parse the supported Markdown subset under bounded depth, nodes, link count, code-block size, table size, and total output limits.
+      - [x] 3.1.2.2 Subtask - Escape or remove raw HTML, scripts, event handlers, styles, embeds, forms, iframes, data URLs, dangerous schemes, and unsupported extensions.
+      - [x] 3.1.2.3 Subtask - Rewrite relative guide, source, and image references through reviewed repository routes; preserve unresolved and external destinations with explicit status.
+      - [x] 3.1.2.4 Subtask - Generate stable heading anchors, table-of-contents entries, source links, audience labels, freshness labels, and provenance panels.
+      - [x] 3.1.2.5 Subtask - Scan rendered and source content for known credential forms and high-risk secrets, block unsafe activation, and retain only redacted diagnostics.
 
   - [ ] 3.2 Section - Compile full deterministic editions and classify source updates.
 
