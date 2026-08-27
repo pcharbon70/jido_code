@@ -36,21 +36,21 @@ Back to plan: [README](./README.md)
       - [x] 4.1.1.4 Subtask - Exclude raw prompts, transcripts, hidden reasoning, unbounded output, credentials, and provider-private state from graph and memory.
       - [x] 4.1.1.5 Subtask - Capture a content-addressed workspace checkpoint at accepted turn boundaries so follow-up and restart do not require provider-session state.
 
-  - [ ] 4.2 Section - Capture and close immutable candidates.
+  - [x] 4.2 Section - Capture and close immutable candidates.
 
     This section derives candidate identity and integrity from the isolated
     workspace rather than trusting the delegated agent.
 
-    - [ ] 4.2.1 Task {#dca-p04-candidate} [repo: jido_code] [after: {#dca-p04-accounting}] - Extend controller-owned candidate closure for Codex workspaces.
+    - [x] 4.2.1 Task {#dca-p04-candidate} [repo: jido_code] [after: {#dca-p04-accounting}] - Extend controller-owned candidate closure for Codex workspaces.
 
       This task produces an immutable proposal with exact provenance and
       explicit accounting omissions.
 
-      - [ ] 4.2.1.1 Subtask - Recompute the normalized patch, resulting tree, ordered path operations, generated artifact identities, and digests from the exact base.
-      - [ ] 4.2.1.2 Subtask - Bind candidate identity to source, attempt, fence, delegated profile, adapter, CLI, model, sandbox, policy, tool manifest, check registry, and candidate protocol.
-      - [ ] 4.2.1.3 Subtask - Attach controller-observed registered-check receipts and secret-scan evidence without trusting CLI-reported success.
-      - [ ] 4.2.1.4 Subtask - Quarantine dirty bases, symlink escapes, special files, forbidden paths, oversized patches, generated-file violations, secrets, and digest mismatches.
-      - [ ] 4.2.1.5 Subtask - Keep candidate, verification, evidence sufficiency, disposition, publication authorization, and goal satisfaction separate.
+      - [x] 4.2.1.1 Subtask - Recompute the normalized patch, resulting tree, ordered path operations, generated artifact identities, and digests from the exact base.
+      - [x] 4.2.1.2 Subtask - Bind candidate identity to source, attempt, fence, delegated profile, adapter, CLI, model, sandbox, policy, tool manifest, check registry, and candidate protocol.
+      - [x] 4.2.1.3 Subtask - Attach controller-observed registered-check receipts and secret-scan evidence without trusting CLI-reported success.
+      - [x] 4.2.1.4 Subtask - Quarantine dirty bases, symlink escapes, special files, forbidden paths, oversized patches, generated-file violations, secrets, and digest mismatches.
+      - [x] 4.2.1.5 Subtask - Keep candidate, verification, evidence sufficiency, disposition, publication authorization, and goal satisfaction separate.
 
   - [ ] 4.3 Section - Implement independent verification and recovery.
 

@@ -44,6 +44,15 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
   def checkpoint(_server, _workspace_iri, _current),
     do: invalid(:delegated_workspace_checkpoint)
 
+  @spec quarantine(GenServer.server(), String.t(), map(), atom()) ::
+          {:ok, map()} | {:error, AdapterError.t()}
+  def quarantine(server, workspace_iri, current, reason)
+      when is_binary(workspace_iri) and is_map(current) and is_atom(reason),
+      do: GenServer.call(server, {:quarantine, workspace_iri, current, reason}, :infinity)
+
+  def quarantine(_server, _workspace_iri, _current, _reason),
+    do: invalid(:delegated_workspace_quarantine)
+
   @spec fetch(GenServer.server(), String.t()) :: {:ok, map()} | {:error, AdapterError.t()}
   def fetch(server, workspace_iri) when is_binary(workspace_iri),
     do: GenServer.call(server, {:fetch, workspace_iri})
@@ -146,6 +155,18 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
     end
   rescue
     _error -> quarantine_reply(state, workspace_iri, :checkpoint_failure)
+  end
+
+  def handle_call({:quarantine, workspace_iri, current, reason}, _from, state) do
+    with {:ok, private} <- Map.fetch(state.workspaces, workspace_iri),
+         :ok <- current(private.spec, current) do
+      _ = GitWorkspace.disposition(state.workspace_server, private.spec, :crash)
+      public = Map.merge(private.public, %{status: :quarantined, quarantine_reason: reason})
+      state = put_in(state, [:workspaces, workspace_iri, :public], public)
+      {:reply, {:ok, public}, state}
+    else
+      _invalid -> {:reply, unauthorized(:delegated_workspace_quarantine), state}
+    end
   end
 
   def handle_call({:check_environment, workspace_iri}, _from, state) do
@@ -375,7 +396,8 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
   end
 
   defp checkpoint_private(private, receipt) do
-    with {:ok, status} <-
+    with :ok <- source_clean(private.spec),
+         {:ok, status} <-
            git(private, [
              "status",
              "--porcelain=v1",
@@ -409,9 +431,32 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
        }}
     else
       false -> {:violation, :diff_limit}
+      {:violation, reason} -> {:violation, reason}
       {:special, reason} -> {:violation, reason}
       {:error, %AdapterError{} = error} -> {:error, error}
       _invalid -> {:violation, :checkpoint_capture}
+    end
+  end
+
+  defp source_clean(spec) do
+    environment = [
+      {"GIT_CONFIG_NOSYSTEM", "1"},
+      {"GIT_CONFIG_GLOBAL", "/dev/null"},
+      {"GIT_TERMINAL_PROMPT", "0"},
+      {"GIT_ASKPASS", "/bin/false"},
+      {"SSH_AUTH_SOCK", nil}
+    ]
+
+    case System.cmd(
+           "git",
+           ["status", "--porcelain=v1", "--untracked-files=all", "--no-renames"],
+           cd: spec.source_root,
+           env: environment,
+           stderr_to_stdout: true
+         ) do
+      {"", 0} -> :ok
+      {_dirty, 0} -> {:violation, :dirty_base}
+      _failure -> unavailable(:delegated_workspace_git)
     end
   end
 
