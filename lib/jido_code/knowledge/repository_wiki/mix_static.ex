@@ -11,7 +11,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
               dependencies: 512,
               diagnostics: 256
             })
-  @option_keys ~w[only targets optional override runtime path git github branch tag ref sparse subdir hex repo app compile depth manager]
+  @option_keys ~w[only targets optional override runtime path in_umbrella git github branch tag ref sparse subdir hex repo app compile depth manager]
 
   @spec profile() :: map()
   def profile do
@@ -484,6 +484,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
   defp dependency_scm(options) do
     cond do
       Map.has_key?(options, "path") -> "path"
+      options["in_umbrella"] == true -> "umbrella"
       Map.has_key?(options, "git") or Map.has_key?(options, "github") -> "git"
       true -> "hex"
     end

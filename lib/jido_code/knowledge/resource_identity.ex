@@ -51,6 +51,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     memory-evaluation-run memory-release-decision memory-product-disable
     delegated-adapter-release delegated-agent-profile delegated-agent-readiness
     repository-wiki-enrollment wiki-generation-profile wiki-edition wiki-edition-segment wiki-page wiki-section
+    wiki-dependency-use
     wiki-source wiki-citation wiki-link wiki-gap wiki-drift-finding wiki-lint-report wiki-preview
     wiki-maintainer wiki-budget wiki-reservation wiki-usage-record wiki-compilation-attempt
   ]

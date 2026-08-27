@@ -74,31 +74,31 @@ Back to plan: [README](./README.md)
       - [x] 2.2.2.3 Subtask - Mark dynamic, incomplete, conflicting, stale, unsupported, and unavailable facts as explicit coverage gaps surfaced by lint and product reads.
       - [x] 2.2.2.4 Subtask - Fence reconciliation to exact source, toolchain, parser, sandbox, and policy revisions so late observations cannot enter a newer edition.
 
-  - [ ] 2.3 Section - Resolve the complete dependency graph and special source classes.
+  - [x] 2.3 Section - Resolve the complete dependency graph and special source classes.
 
     This section ensures the wiki represents the full resolved closure rather
     than only the direct dependencies visible in `mix.exs`.
 
-    - [ ] 2.3.1 Task {#rwi-p02-dependency-resolver} [repo: jido_code] [after: {#rwi-p02-mix-reconciliation}] - Build the complete dependency resolver.
+    - [x] 2.3.1 Task {#rwi-p02-dependency-resolver} [repo: jido_code] [after: {#rwi-p02-mix-reconciliation}] - Build the complete dependency resolver.
 
       This task correlates declarations, lock entries, and resolved edges into
       stable dependency identities and paths.
 
-      - [ ] 2.3.1.1 Subtask - Create stable dependency resources for every direct and transitive node with package or source identity, selected version/revision, managers, scopes, optionality, and provenance.
-      - [ ] 2.3.1.2 Subtask - Build directed dependency edges from lock evidence, retain all parents, compute roots and bounded paths, and detect cycles without recursive explosion.
-      - [ ] 2.3.1.3 Subtask - Distinguish declared-only, locked-only, resolved, missing-lock, orphaned-lock, conflicting, unsupported, and unverifiable dependencies.
-      - [ ] 2.3.1.4 Subtask - Verify every resolved lock node is represented exactly once in the catalog and every supported edge terminates in a represented node.
-      - [ ] 2.3.1.5 Subtask - Emit deterministic counts, completeness evidence, graph digest, maximum-depth observations, and bounded gap summaries.
+      - [x] 2.3.1.1 Subtask - Create stable dependency resources for every direct and transitive node with package or source identity, selected version/revision, managers, scopes, optionality, and provenance.
+      - [x] 2.3.1.2 Subtask - Build directed dependency edges from lock evidence, retain all parents, compute roots and bounded paths, and detect cycles without recursive explosion.
+      - [x] 2.3.1.3 Subtask - Distinguish declared-only, locked-only, resolved, missing-lock, orphaned-lock, conflicting, unsupported, and unverifiable dependencies.
+      - [x] 2.3.1.4 Subtask - Verify every resolved lock node is represented exactly once in the catalog and every supported edge terminates in a represented node.
+      - [x] 2.3.1.5 Subtask - Emit deterministic counts, completeness evidence, graph digest, maximum-depth observations, and bounded gap summaries.
 
-    - [ ] 2.3.2 Task {#rwi-p02-special-dependencies} [repo: jido_code] [after: {#rwi-p02-dependency-resolver}] - Handle path, git, optional, override, and mixed-manager dependencies.
+    - [x] 2.3.2 Task {#rwi-p02-special-dependencies} [repo: jido_code] [after: {#rwi-p02-dependency-resolver}] - Handle path, git, optional, override, and mixed-manager dependencies.
 
       This task gives non-Hex dependencies truthful pages and links without
       assuming registry metadata or unsafe local reachability.
 
-      - [ ] 2.3.2.1 Subtask - Normalize git URLs and immutable revisions for display while redacting credentials, embedded tokens, unsafe schemes, and private endpoint details.
-      - [ ] 2.3.2.2 Subtask - Resolve path dependencies only inside registered repository/workspace envelopes and record outside-root or missing paths as unavailable.
-      - [ ] 2.3.2.3 Subtask - Preserve optional, override, runtime, environment, manager, umbrella, sparse, branch, tag, ref, and subdirectory semantics in nodes and edges.
-      - [ ] 2.3.2.4 Subtask - Avoid external links for private, ambiguous, moving, unsupported, or unverified sources and surface the reason in the dependency page.
+      - [x] 2.3.2.1 Subtask - Normalize git URLs and immutable revisions for display while redacting credentials, embedded tokens, unsafe schemes, and private endpoint details.
+      - [x] 2.3.2.2 Subtask - Resolve path dependencies only inside registered repository/workspace envelopes and record outside-root or missing paths as unavailable.
+      - [x] 2.3.2.3 Subtask - Preserve optional, override, runtime, environment, manager, umbrella, sparse, branch, tag, ref, and subdirectory semantics in nodes and edges.
+      - [x] 2.3.2.4 Subtask - Avoid external links for private, ambiguous, moving, unsupported, or unverified sources and surface the reason in the dependency page.
 
   - [ ] 2.4 Section - Enrich public dependencies through bounded Req metadata lookup.
 
