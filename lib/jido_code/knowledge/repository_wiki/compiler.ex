@@ -4,6 +4,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Compiler do
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.RepositoryWiki.Contract
   alias JidoCode.Knowledge.RepositoryWiki.DependencyPages
+  alias JidoCode.Knowledge.RepositoryWiki.FullCompiler
   alias JidoCode.Knowledge.RepositoryWiki.Protocol
   alias JidoCode.Knowledge.RepositoryWiki.SemanticContract
   alias JidoCode.Knowledge.ResourceIdentity
@@ -93,6 +94,18 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Compiler do
   end
 
   def compile(_inventory, _attributes), do: invalid(:repository_wiki_compile)
+
+  @spec compile_full(map(), map(), [map()], [map()], map()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def compile_full(compilation, guide_manifest, rendered_guides, accepted_documents, attributes),
+    do:
+      FullCompiler.compile(
+        compilation,
+        guide_manifest,
+        rendered_guides,
+        accepted_documents,
+        attributes
+      )
 
   @spec compile_dependencies(map(), map(), map(), map(), map(), map()) ::
           {:ok, map()} | {:error, Error.t()}

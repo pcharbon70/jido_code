@@ -94,6 +94,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
+  alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
   alias JidoCode.Knowledge.RepositoryWiki.LockParser, as: RepositoryWikiLockParser
   alias JidoCode.Knowledge.RepositoryWiki.DependencyResolver, as: RepositoryWikiDependencyResolver
   alias JidoCode.Knowledge.RepositoryWiki.DependencyLinks, as: RepositoryWikiDependencyLinks
@@ -486,6 +487,34 @@ defmodule JidoCode.Knowledge do
           link_sets,
           attributes
         )
+
+  def compile_full_repository_wiki(
+        compilation,
+        guide_manifest,
+        rendered_guides,
+        accepted_documents,
+        attributes
+      ),
+      do:
+        RepositoryWikiCompiler.compile_full(
+          compilation,
+          guide_manifest,
+          rendered_guides,
+          accepted_documents,
+          attributes
+        )
+
+  def repository_wiki_update_manifest(values),
+    do: RepositoryWikiUpdateClassifier.manifest(values)
+
+  def classify_repository_wiki_update(before, successor, attributes),
+    do: RepositoryWikiUpdateClassifier.classify(before, successor, attributes)
+
+  def validate_repository_wiki_update_fence(classification, current_fence),
+    do: RepositoryWikiUpdateClassifier.validate_fence(classification, current_fence)
+
+  def repository_wiki_staleness(edition_fence, authoritative_fence, attributes),
+    do: RepositoryWikiUpdateClassifier.staleness(edition_fence, authoritative_fence, attributes)
 
   def inventory_repository_wiki(root, attributes),
     do: RepositoryWikiSourceInventory.scan(root, attributes)

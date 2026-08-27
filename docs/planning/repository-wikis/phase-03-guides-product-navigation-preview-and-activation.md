@@ -46,32 +46,32 @@ Back to plan: [README](./README.md)
       - [x] 3.1.2.4 Subtask - Generate stable heading anchors, table-of-contents entries, source links, audience labels, freshness labels, and provenance panels.
       - [x] 3.1.2.5 Subtask - Scan rendered and source content for known credential forms and high-risk secrets, block unsafe activation, and retain only redacted diagnostics.
 
-  - [ ] 3.2 Section - Compile full deterministic editions and classify source updates.
+  - [x] 3.2 Section - Compile full deterministic editions and classify source updates.
 
     This section joins inventory, Mix/dependency knowledge, guides, and
     accepted architecture into one reproducible edition.
 
-    - [ ] 3.2.1 Task {#rwi-p03-full-compiler} [repo: jido_code] [after: {#rwi-p03-guide-rendering}] - Complete `wiki-deterministic-elixir/1.0.0` edition compilation.
+    - [x] 3.2.1 Task {#rwi-p03-full-compiler} [repo: jido_code] [after: {#rwi-p03-guide-rendering}] - Complete `wiki-deterministic-elixir/1.0.0` edition compilation.
 
       This task produces the entire navigable page graph with stable routes,
       backlinks, coverage, and provenance.
 
-      - [ ] 3.2.1.1 Subtask - Compile Overview, Getting Started, User Guides, Developer Guides, Architecture, Source Map, Project, Dependencies, Operations, Provenance, Freshness, and Known Gaps collections.
-      - [ ] 3.2.1.2 Subtask - Generate stable slugs, hierarchy, navigation order, cross-links, backlinks, audience labels, source links, and section summaries from deterministic inputs.
-      - [ ] 3.2.1.3 Subtask - Represent source conflicts, missing inputs, stale metadata, unresolved Mix facts, broken links, and unsupported guide content as visible bounded gaps.
-      - [ ] 3.2.1.4 Subtask - Compute edition content, page graph, navigation, source coverage, and render digests so identical admitted inputs produce byte-stable results.
-      - [ ] 3.2.1.5 Subtask - Attach an explicit zero-token usage record and all compiler, parser, renderer, resolver, metadata, policy, and source-profile identities.
+      - [x] 3.2.1.1 Subtask - Compile Overview, Getting Started, User Guides, Developer Guides, Architecture, Source Map, Project, Dependencies, Operations, Provenance, Freshness, and Known Gaps collections.
+      - [x] 3.2.1.2 Subtask - Generate stable slugs, hierarchy, navigation order, cross-links, backlinks, audience labels, source links, and section summaries from deterministic inputs.
+      - [x] 3.2.1.3 Subtask - Represent source conflicts, missing inputs, stale metadata, unresolved Mix facts, broken links, and unsupported guide content as visible bounded gaps.
+      - [x] 3.2.1.4 Subtask - Compute edition content, page graph, navigation, source coverage, and render digests so identical admitted inputs produce byte-stable results.
+      - [x] 3.2.1.5 Subtask - Attach an explicit zero-token usage record and all compiler, parser, renderer, resolver, metadata, policy, and source-profile identities.
 
-    - [ ] 3.2.2 Task {#rwi-p03-update-classifier} [repo: jido_code] [after: {#rwi-p03-full-compiler}] - Implement deterministic update classification and staleness.
+    - [x] 3.2.2 Task {#rwi-p03-update-classifier} [repo: jido_code] [after: {#rwi-p03-full-compiler}] - Implement deterministic update classification and staleness.
 
       This task decides whether an accepted repository change requires no
       action, a page rebuild, a full rebuild, or explicit degraded status.
 
-      - [ ] 3.2.2.1 Subtask - Classify source, manifest, lock, guide, accepted-document, policy, compiler, renderer, metadata, and graph-contract changes from immutable before/after digests.
-      - [ ] 3.2.2.2 Subtask - Map classifications to `no_change`, `metadata_refresh`, `targeted_rebuild`, `full_rebuild`, `stale_only`, or `unsupported` with deterministic reasons.
-      - [ ] 3.2.2.3 Subtask - Record change trigger, causal revisions, affected page identities, requested profile, priority, and coalescing identity without trusting session-local diffs.
-      - [ ] 3.2.2.4 Subtask - Mark the current edition stale when authoritative source or accepted compiler policy advances, while keeping the previous edition readable under configured policy.
-      - [ ] 3.2.2.5 Subtask - Fence classifications and scheduled work to exact enrollment, source, compiler, and policy revisions so later changes force reclassification.
+      - [x] 3.2.2.1 Subtask - Classify source, manifest, lock, guide, accepted-document, policy, compiler, renderer, metadata, and graph-contract changes from immutable before/after digests.
+      - [x] 3.2.2.2 Subtask - Map classifications to `no_change`, `metadata_refresh`, `targeted_rebuild`, `full_rebuild`, `stale_only`, or `unsupported` with deterministic reasons.
+      - [x] 3.2.2.3 Subtask - Record change trigger, causal revisions, affected page identities, requested profile, priority, and coalescing identity without trusting session-local diffs.
+      - [x] 3.2.2.4 Subtask - Mark the current edition stale when authoritative source or accepted compiler policy advances, while keeping the previous edition readable under configured policy.
+      - [x] 3.2.2.5 Subtask - Fence classifications and scheduled work to exact enrollment, source, compiler, and policy revisions so later changes force reclassification.
 
   - [ ] 3.3 Section - Expose reviewed wiki reads, search, and repository navigation.
 
