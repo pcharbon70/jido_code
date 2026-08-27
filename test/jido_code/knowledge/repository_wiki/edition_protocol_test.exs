@@ -192,6 +192,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EditionProtocolTest do
              )
 
     assert linted.report.blocking_count == 0
+    assert String.match?(linted.report.profile_digest, ~r/^[a-f0-9]{64}$/)
 
     metadata = %{hd(start.payload.changes).metadata | graph_revision: 4}
 

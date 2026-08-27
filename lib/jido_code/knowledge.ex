@@ -92,6 +92,12 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.Compiler, as: RepositoryWikiCompiler
   alias JidoCode.Knowledge.RepositoryWiki.Edition, as: RepositoryWikiEdition
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
+  alias JidoCode.Knowledge.RepositoryWiki.LockParser, as: RepositoryWikiLockParser
+  alias JidoCode.Knowledge.RepositoryWiki.DependencyResolver, as: RepositoryWikiDependencyResolver
+  alias JidoCode.Knowledge.RepositoryWiki.DependencyLinks, as: RepositoryWikiDependencyLinks
+  alias JidoCode.Knowledge.RepositoryWiki.DependencyLint, as: RepositoryWikiDependencyLint
+  alias JidoCode.Knowledge.RepositoryWiki.MixReconciler, as: RepositoryWikiMixReconciler
+  alias JidoCode.Knowledge.RepositoryWiki.MixStatic, as: RepositoryWikiMixStatic
   alias JidoCode.Knowledge.RepositoryWiki.Recovery, as: RepositoryWikiRecovery
   alias JidoCode.Knowledge.RepositoryWiki.Retention, as: RepositoryWikiRetention
   alias JidoCode.Knowledge.RepositoryWiki.Segment, as: RepositoryWikiSegment
@@ -461,8 +467,72 @@ defmodule JidoCode.Knowledge do
   def compile_repository_wiki(inventory, attributes),
     do: RepositoryWikiCompiler.compile(inventory, attributes)
 
+  def compile_repository_wiki_dependencies(
+        compilation,
+        reconciliation,
+        catalog,
+        metadata,
+        link_sets,
+        attributes
+      ),
+      do:
+        RepositoryWikiCompiler.compile_dependencies(
+          compilation,
+          reconciliation,
+          catalog,
+          metadata,
+          link_sets,
+          attributes
+        )
+
   def inventory_repository_wiki(root, attributes),
     do: RepositoryWikiSourceInventory.scan(root, attributes)
+
+  def extract_repository_wiki_mix(source, attributes \\ %{}),
+    do: RepositoryWikiMixStatic.extract(source, attributes)
+
+  def parse_repository_wiki_lock(source, attributes \\ %{}),
+    do: RepositoryWikiLockParser.parse(source, attributes)
+
+  def resolve_repository_wiki_dependencies(reconciliation, attributes),
+    do: RepositoryWikiDependencyResolver.resolve(reconciliation, attributes)
+
+  def repository_wiki_dependency_links(node, metadata, attributes),
+    do: RepositoryWikiDependencyLinks.build(node, metadata, attributes)
+
+  def lint_repository_wiki_dependencies(
+        compilation,
+        reconciliation,
+        catalog,
+        metadata,
+        link_sets
+      ),
+      do:
+        RepositoryWikiDependencyLint.lint(
+          compilation,
+          reconciliation,
+          catalog,
+          metadata,
+          link_sets
+        )
+
+  def repository_wiki_digest(value), do: JidoCode.Knowledge.RepositoryWiki.Contract.digest(value)
+
+  def reconcile_repository_wiki_mix(
+        static,
+        lock,
+        observation,
+        accepted_facts \\ [],
+        attributes \\ %{}
+      ),
+      do:
+        RepositoryWikiMixReconciler.reconcile(
+          static,
+          lock,
+          observation,
+          accepted_facts,
+          attributes
+        )
 
   def partition_repository_wiki(edition_iri, statements, recorded_at),
     do: RepositoryWikiSegment.partition(edition_iri, statements, recorded_at)
