@@ -13,7 +13,7 @@ checkout.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Convert an opaque Codex run into a trustworthy candidate workflow.
+- [x] 4 Phase - Convert an opaque Codex run into a trustworthy candidate workflow.
 
   This phase proves DCG4 by recording honest outer accounting, recomputing
   candidates, separating verification, and recovering only from graph state
@@ -78,13 +78,13 @@ Back to plan: [README](./README.md)
       - [x] 4.3.2.4 Subtask - Forbid generic retry after a possibly completed effect and require effect-identity reconciliation plus an accepted recovery classification.
       - [x] 4.3.2.5 Subtask - Reject stale fences and late streams, files, callbacks, artifacts, candidates, verification results, and terminal events before adoption.
 
-  - [ ] 4.4 Section - Phase 4 Integration Tests.
+  - [x] 4.4 Section - Phase 4 Integration Tests.
 
     This final section proves end-to-end candidate integrity, verifier
     independence, cancellation ordering, ambiguity handling, and graph-only
     recovery.
 
-    - [ ] 4.4.1 Task {#dca-p04-integration} [repo: jido_code] [after: {#dca-p04-recovery}] - Execute the candidate and recovery integration matrix.
+    - [x] 4.4.1 Task {#dca-p04-integration} [repo: jido_code] [after: {#dca-p04-recovery}] - Execute the candidate and recovery integration matrix.
 
       This task closes DCG4 only when opaque Codex work becomes independently
       reproducible evidence.
@@ -93,14 +93,14 @@ Back to plan: [README](./README.md)
       - [x] 4.4.1.2 Subtask - Inject malformed output, dirty bases, path attacks, secret findings, digest mismatch, check disagreement, verifier loss, and corrupt checkpoints.
       - [x] 4.4.1.3 Subtask - Inject BEAM restart, worker loss, provider outage, partial output, process crash, cancellation races, ambiguity, stale fences, and late results.
       - [x] 4.4.1.4 Subtask - Prove graph-only reconstruction and prove Codex cannot verify, accept, publish, merge, mutate policy, or adopt knowledge.
-      - [ ] 4.4.1.5 Subtask - Rerun DCG1-DCG3 and prior factory, harness, memory, managed-coding, architecture, Dialyzer, `mix precommit`, and clean-checkout gates.
+      - [x] 4.4.1.5 Subtask - Rerun DCG1-DCG3 and prior factory, harness, memory, managed-coding, architecture, Dialyzer, `mix precommit`, and clean-checkout gates.
 
-    - [ ] 4.4.2 Task {#dca-p04-phase-receipt} [repo: jido_code] [after: {#dca-p04-integration}] - Publish and pin the Phase 4 receipt.
+    - [x] 4.4.2 Task {#dca-p04-phase-receipt} [repo: jido_code] [after: {#dca-p04-integration}] - Publish and pin the Phase 4 receipt.
 
       This task records DCG4 evidence in
       `docs/architecture/delegated-agent-phase-04-receipt.md`.
 
       - [x] 4.4.2.1 Subtask - Record accounting, checkpoint, candidate, verifier, recovery, reconciliation, and adversarial fixture revisions and digests.
       - [x] 4.4.2.2 Subtask - Keep DCG4 open if CLI claims become authoritative, candidate facts are not recomputed, verification reuses the delegated workspace, or restart depends on disposable state.
-      - [ ] 4.4.2.3 Subtask - Attach candidate, verifier, restart, cancellation, ambiguity, late-result, architecture, Dialyzer, precommit, and clean-checkout evidence.
-      - [ ] 4.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 5.
+      - [x] 4.4.2.3 Subtask - Attach candidate, verifier, restart, cancellation, ambiguity, late-result, architecture, Dialyzer, precommit, and clean-checkout evidence.
+      - [x] 4.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 5.

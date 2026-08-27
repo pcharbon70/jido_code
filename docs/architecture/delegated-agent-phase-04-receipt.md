@@ -2,12 +2,10 @@
 
 ## Status
 
-This receipt records the Phase 4 implementation candidate produced from the
-accepted Phase 3 closure baseline
-`1f70d3b1a73fde3a2429c7f99e09f32256a1a75d`. DCG4 remains merge-pending until
-the implementation pull request passes clean-checkout CI, merges, and a
-documentation-only closure commit pins the full merge SHA and merge date.
-Phase 5 is not authorized from this receipt yet.
+This receipt records the Phase 4 implementation accepted after pull request
+#85 passed clean-checkout CI and merged on 2026-08-27 as
+`c64084448772b0dd18b6d6abd7a3d94fc6324852`. DCG4 is accepted at that exact
+merged candidate, which is the authorized baseline for Phase 5.
 
 The candidate accounts only for the observable outer Codex runtime, captures
 accepted turn checkpoints as immutable artifacts, recomputes candidates from
@@ -24,8 +22,8 @@ goal-satisfaction, policy-mutation, or knowledge-adoption authority.
 | Section 4.1 | `cf26aba` - honest outer accounting and content-addressed checkpoints |
 | Section 4.2 | `8879bb5` - controller-recomputed immutable candidate closure |
 | Section 4.3 | `f083146` - fresh-clone verification, cancellation, and graph-only recovery |
-| Section 4.4 | Implementation PR head - integration matrix and merge-pending receipt |
-| Merged candidate | Merge-pending |
+| Section 4.4 | `8005d457969e1a636bf5dcbcdc83d214b21e7aba` - integration matrix and merge-pending receipt |
+| Merged candidate | `c64084448772b0dd18b6d6abd7a3d94fc6324852` - merged 2026-08-27 |
 
 ## Accounting, Candidate, And Verifier Pins
 
@@ -106,8 +104,8 @@ goal-satisfaction, policy-mutation, or knowledge-adoption authority.
 | DCG1-DCG4 delegated-agent and applicable H05-H06 regression matrix | 80 tests, 0 failures |
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 178 existing warnings skipped by policy, zero unignored errors |
-| Repository-wide isolated `mix precommit` | Passed; 985 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | Pending implementation PR |
+| Repository-wide isolated `mix precommit` | Passed at implementation head with 985 tests and at the merged closure baseline with 1,023 tests; 0 failures; compile, architecture, lock, format, and test gates passed |
+| Clean-checkout CI | Passed on implementation pull request #85; CI verify and Dialyzer checks succeeded before merge |
 
 ## Known Limits And Disabled Posture
 
@@ -125,11 +123,12 @@ goal-satisfaction, policy-mutation, or knowledge-adoption authority.
 
 ## Gate DCG4
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-DCG4 becomes accepted only after clean-checkout CI passes, the implementation
-PR merges, and the closure receipt pins the exact merged candidate and merge
-date. Phase 5 is not authorized from this merge-pending state.
+DCG4 is accepted at merged candidate
+`c64084448772b0dd18b6d6abd7a3d94fc6324852`, merged on 2026-08-27 after
+clean-checkout CI passed. Phase 5 is authorized only from this pinned
+baseline.
 
 DCG4 reopens regardless of checklist state if JidoCode claims visibility into
 internal prompts, hidden reasoning, provider context, internal tool mediation,
