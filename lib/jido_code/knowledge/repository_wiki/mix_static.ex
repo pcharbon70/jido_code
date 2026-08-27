@@ -167,7 +167,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
           case name do
             "deps" ->
               case resolve(expression, functions, %{}, [], limits) do
-                {:ok, values} when is_list(values) ->
+                {:ok, resolved} ->
+                  values = dependency_values(resolved)
                   locations = dependency_locations(expression, functions)
 
                   case dependencies(values, locations, field_location, limits) do
@@ -396,6 +397,14 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
   end
 
   defp dependencies(_values, _locations, _location, _limits), do: invalid()
+
+  defp dependency_values(values) when is_list(values), do: values
+
+  defp dependency_values(%{keyword: pairs}) do
+    Enum.map(pairs, fn {name, value} -> %{tuple: [%{atom: name}, value]} end)
+  end
+
+  defp dependency_values(_value), do: :invalid
 
   defp dependency_locations(expression, functions) do
     source_expression =

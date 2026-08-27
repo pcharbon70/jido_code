@@ -48,31 +48,31 @@ Back to plan: [README](./README.md)
       - [x] 2.1.2.4 Subtask - Verify lock source digest, parser profile, checksum syntax, duplicate keys, conflicting identities, and deterministic canonical ordering.
       - [x] 2.1.2.5 Subtask - Reject atom exhaustion, term decoding, code loading, path traversal, remote lookup, and any repository-controlled parser extension.
 
-  - [ ] 2.2 Section - Escalate unresolved Mix facts through one fixed sandbox profile.
+  - [x] 2.2 Section - Escalate unresolved Mix facts through one fixed sandbox profile.
 
     This section permits bounded observation only when static extraction is
     insufficient and current enrollment explicitly allows the profile.
 
-    - [ ] 2.2.1 Task {#rwi-p02-mix-sandbox} [repo: jido_code] [after: {#rwi-p02-lock}] - Implement `mix-sandbox/1.0.0` introspection.
+    - [x] 2.2.1 Task {#rwi-p02-mix-sandbox} [repo: jido_code] [after: {#rwi-p02-lock}] - Implement `mix-sandbox/1.0.0` introspection.
 
       This task runs a controller-owned introspector through the existing
       harness while denying repository-selected launch behavior.
 
-      - [ ] 2.2.1.1 Subtask - Register one immutable executable, argument, environment, filesystem, timeout, CPU, memory, output, and process-count profile for Mix introspection.
-      - [ ] 2.2.1.2 Subtask - Mount an immutable source snapshot and disposable build/cache directories; deny credentials, user configuration, project-local tools, hooks, shells, and unrelated host paths.
-      - [ ] 2.2.1.3 Subtask - Disable network access and dependency fetching; require dependencies and toolchain components to resolve only from controller-approved immutable inputs.
-      - [ ] 2.2.1.4 Subtask - Return a bounded controller-defined schema for observed project and dependency facts, diagnostics, profile digest, source digest, exit status, truncation, and resource usage.
-      - [ ] 2.2.1.5 Subtask - Admit sandbox escalation only for unresolved required facts, label all results `observed`, and retain static conflicts rather than silently replacing them.
+      - [x] 2.2.1.1 Subtask - Register one immutable executable, argument, environment, filesystem, timeout, CPU, memory, output, and process-count profile for Mix introspection.
+      - [x] 2.2.1.2 Subtask - Mount an immutable source snapshot and disposable build/cache directories; deny credentials, user configuration, project-local tools, hooks, shells, and unrelated host paths.
+      - [x] 2.2.1.3 Subtask - Disable network access and dependency fetching; require dependencies and toolchain components to resolve only from controller-approved immutable inputs.
+      - [x] 2.2.1.4 Subtask - Return a bounded controller-defined schema for observed project and dependency facts, diagnostics, profile digest, source digest, exit status, truncation, and resource usage.
+      - [x] 2.2.1.5 Subtask - Admit sandbox escalation only for unresolved required facts, label all results `observed`, and retain static conflicts rather than silently replacing them.
 
-    - [ ] 2.2.2 Task {#rwi-p02-mix-reconciliation} [repo: jido_code] [after: {#rwi-p02-mix-sandbox}] - Reconcile declared, locked, observed, and accepted project facts.
+    - [x] 2.2.2 Task {#rwi-p02-mix-reconciliation} [repo: jido_code] [after: {#rwi-p02-mix-sandbox}] - Reconcile declared, locked, observed, and accepted project facts.
 
       This task creates one provenance-bearing project model without
       flattening disagreements between sources.
 
-      - [ ] 2.2.2.1 Subtask - Define precedence and coexistence rules for literal declarations, lock entries, sandbox observations, accepted graph facts, and missing inputs.
-      - [ ] 2.2.2.2 Subtask - Record every value with source kind, source location, revision, extractor or observer profile, confidence, freshness, and conflict state.
-      - [ ] 2.2.2.3 Subtask - Mark dynamic, incomplete, conflicting, stale, unsupported, and unavailable facts as explicit coverage gaps surfaced by lint and product reads.
-      - [ ] 2.2.2.4 Subtask - Fence reconciliation to exact source, toolchain, parser, sandbox, and policy revisions so late observations cannot enter a newer edition.
+      - [x] 2.2.2.1 Subtask - Define precedence and coexistence rules for literal declarations, lock entries, sandbox observations, accepted graph facts, and missing inputs.
+      - [x] 2.2.2.2 Subtask - Record every value with source kind, source location, revision, extractor or observer profile, confidence, freshness, and conflict state.
+      - [x] 2.2.2.3 Subtask - Mark dynamic, incomplete, conflicting, stale, unsupported, and unavailable facts as explicit coverage gaps surfaced by lint and product reads.
+      - [x] 2.2.2.4 Subtask - Fence reconciliation to exact source, toolchain, parser, sandbox, and policy revisions so late observations cannot enter a newer edition.
 
   - [ ] 2.3 Section - Resolve the complete dependency graph and special source classes.
 
