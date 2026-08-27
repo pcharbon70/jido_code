@@ -52,31 +52,31 @@ Back to plan: [README](./README.md)
       - [x] 4.2.1.4 Subtask - Quarantine dirty bases, symlink escapes, special files, forbidden paths, oversized patches, generated-file violations, secrets, and digest mismatches.
       - [x] 4.2.1.5 Subtask - Keep candidate, verification, evidence sufficiency, disposition, publication authorization, and goal satisfaction separate.
 
-  - [ ] 4.3 Section - Implement independent verification and recovery.
+  - [x] 4.3 Section - Implement independent verification and recovery.
 
     This section proves candidates in a separate environment and makes
     cancellation, restart, timeout, and ambiguity fail closed.
 
-    - [ ] 4.3.1 Task {#dca-p04-verification} [repo: jido_code] [after: {#dca-p04-candidate}] - Verify delegated candidates from a fresh checkout.
+    - [x] 4.3.1 Task {#dca-p04-verification} [repo: jido_code] [after: {#dca-p04-candidate}] - Verify delegated candidates from a fresh checkout.
 
       This task prevents the Codex workspace, process, provider session, or
       reported checks from becoming its own verifier.
 
-      - [ ] 4.3.1.1 Subtask - Reconstruct the exact source and immutable patch in an independently provisioned verifier environment.
-      - [ ] 4.3.1.2 Subtask - Run required checks from the verifier registry and compare expected tree, patch, file, artifact, and secret-scan digests.
-      - [ ] 4.3.1.3 Subtask - Require a distinct verifier identity and prohibit reuse of the delegated workspace, CLI process, provider session, or CLI check reports.
-      - [ ] 4.3.1.4 Subtask - Produce governed evidence and disposition while leaving publication and merge unavailable for the DGA1 profile.
+      - [x] 4.3.1.1 Subtask - Reconstruct the exact source and immutable patch in an independently provisioned verifier environment.
+      - [x] 4.3.1.2 Subtask - Run required checks from the verifier registry and compare expected tree, patch, file, artifact, and secret-scan digests.
+      - [x] 4.3.1.3 Subtask - Require a distinct verifier identity and prohibit reuse of the delegated workspace, CLI process, provider session, or CLI check reports.
+      - [x] 4.3.1.4 Subtask - Produce governed evidence and disposition while leaving publication and merge unavailable for the DGA1 profile.
 
-    - [ ] 4.3.2 Task {#dca-p04-recovery} [repo: jido_code] [after: {#dca-p04-verification}] - Reconcile cancellation, timeout, ambiguity, and restart.
+    - [x] 4.3.2 Task {#dca-p04-recovery} [repo: jido_code] [after: {#dca-p04-verification}] - Reconcile cancellation, timeout, ambiguity, and restart.
 
       This task reconstructs semantic action from graph state and exact
       checkpoint artifacts rather than disposable runtime references.
 
-      - [ ] 4.3.2.1 Subtask - Enforce cancellation order: graph intent, permit revocation, adapter cancel, process-namespace kill, workspace cleanup, late-output rejection, and terminal accounting.
-      - [ ] 4.3.2.2 Subtask - Classify timeout as a failure outcome and ambiguity as an effect or result classification, not an invented lifecycle state.
-      - [ ] 4.3.2.3 Subtask - On restart, discard process and provider-session references and reconstruct only from graph facts, exact source, and accepted workspace checkpoints.
-      - [ ] 4.3.2.4 Subtask - Forbid generic retry after a possibly completed effect and require effect-identity reconciliation plus an accepted recovery classification.
-      - [ ] 4.3.2.5 Subtask - Reject stale fences and late streams, files, callbacks, artifacts, candidates, verification results, and terminal events before adoption.
+      - [x] 4.3.2.1 Subtask - Enforce cancellation order: graph intent, permit revocation, adapter cancel, process-namespace kill, workspace cleanup, late-output rejection, and terminal accounting.
+      - [x] 4.3.2.2 Subtask - Classify timeout as a failure outcome and ambiguity as an effect or result classification, not an invented lifecycle state.
+      - [x] 4.3.2.3 Subtask - On restart, discard process and provider-session references and reconstruct only from graph facts, exact source, and accepted workspace checkpoints.
+      - [x] 4.3.2.4 Subtask - Forbid generic retry after a possibly completed effect and require effect-identity reconciliation plus an accepted recovery classification.
+      - [x] 4.3.2.5 Subtask - Reject stale fences and late streams, files, callbacks, artifacts, candidates, verification results, and terminal events before adoption.
 
   - [ ] 4.4 Section - Phase 4 Integration Tests.
 
