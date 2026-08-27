@@ -21,32 +21,32 @@ Back to plan: [README](./README.md)
   escalation, lock resolution, closed Req metadata lookup, provenance, and
   deterministic dependency pages.
 
-  - [ ] 2.1 Section - Extract project and lock facts without executing repository code.
+  - [x] 2.1 Section - Extract project and lock facts without executing repository code.
 
     This section makes ordinary Mix inventory deterministic and safe for
     untrusted or malformed repositories.
 
-    - [ ] 2.1.1 Task {#rwi-p02-static-mix} [repo: jido_code] [after: {#rwi-p01-phase-receipt}] - Implement `mix-static/1.0.0` project extraction.
+    - [x] 2.1.1 Task {#rwi-p02-static-mix} [repo: jido_code] [after: {#rwi-p01-phase-receipt}] - Implement `mix-static/1.0.0` project extraction.
 
       This task parses the project definition as data and emits facts only
       when the accepted syntax proves their values.
 
-      - [ ] 2.1.1.1 Subtask - Parse bounded `mix.exs` source into an AST without loading, compiling, macro-expanding, or evaluating repository modules.
-      - [ ] 2.1.1.2 Subtask - Extract literal application name, version, Elixir requirement, application settings, aliases, source paths, preferred CLI environment, and dependency declarations.
-      - [ ] 2.1.1.3 Subtask - Preserve dependency requirement, options, declaration location, directness, environment scopes, optionality, override, runtime, path, git, branch, tag, ref, and sparse values.
-      - [ ] 2.1.1.4 Subtask - Classify functions, macros, imports, conditionals, concatenation, environment reads, and other dynamic expressions as unresolved static facts with source locations.
-      - [ ] 2.1.1.5 Subtask - Produce canonical, deterministically ordered extraction output with parser profile, source digest, diagnostics, coverage, and zero-token usage.
+      - [x] 2.1.1.1 Subtask - Parse bounded `mix.exs` source into an AST without loading, compiling, macro-expanding, or evaluating repository modules.
+      - [x] 2.1.1.2 Subtask - Extract literal application name, version, Elixir requirement, application settings, aliases, source paths, preferred CLI environment, and dependency declarations.
+      - [x] 2.1.1.3 Subtask - Preserve dependency requirement, options, declaration location, directness, environment scopes, optionality, override, runtime, path, git, branch, tag, ref, and sparse values.
+      - [x] 2.1.1.4 Subtask - Classify functions, macros, imports, conditionals, concatenation, environment reads, and other dynamic expressions as unresolved static facts with source locations.
+      - [x] 2.1.1.5 Subtask - Produce canonical, deterministically ordered extraction output with parser profile, source digest, diagnostics, coverage, and zero-token usage.
 
-    - [ ] 2.1.2 Task {#rwi-p02-lock} [repo: jido_code] [after: {#rwi-p02-static-mix}] - Implement bounded `mix.lock` parsing and integrity evidence.
+    - [x] 2.1.2 Task {#rwi-p02-lock} [repo: jido_code] [after: {#rwi-p02-static-mix}] - Implement bounded `mix.lock` parsing and integrity evidence.
 
       This task reads resolved lock entries without converting arbitrary input
       into atoms or executable terms.
 
-      - [ ] 2.1.2.1 Subtask - Parse the supported literal lock format under fixed byte, node, depth, string, tuple, and collection bounds without evaluating arbitrary Elixir.
-      - [ ] 2.1.2.2 Subtask - Extract Hex, git, path, and supported SCM identities, resolved versions or revisions, checksums, managers, dependency edges, repository names, and source options.
-      - [ ] 2.1.2.3 Subtask - Preserve unknown or future lock shapes as explicit unsupported entries with source digest and bounded diagnostics instead of dropping them.
-      - [ ] 2.1.2.4 Subtask - Verify lock source digest, parser profile, checksum syntax, duplicate keys, conflicting identities, and deterministic canonical ordering.
-      - [ ] 2.1.2.5 Subtask - Reject atom exhaustion, term decoding, code loading, path traversal, remote lookup, and any repository-controlled parser extension.
+      - [x] 2.1.2.1 Subtask - Parse the supported literal lock format under fixed byte, node, depth, string, tuple, and collection bounds without evaluating arbitrary Elixir.
+      - [x] 2.1.2.2 Subtask - Extract Hex, git, path, and supported SCM identities, resolved versions or revisions, checksums, managers, dependency edges, repository names, and source options.
+      - [x] 2.1.2.3 Subtask - Preserve unknown or future lock shapes as explicit unsupported entries with source digest and bounded diagnostics instead of dropping them.
+      - [x] 2.1.2.4 Subtask - Verify lock source digest, parser profile, checksum syntax, duplicate keys, conflicting identities, and deterministic canonical ordering.
+      - [x] 2.1.2.5 Subtask - Reject atom exhaustion, term decoding, code loading, path traversal, remote lookup, and any repository-controlled parser extension.
 
   - [ ] 2.2 Section - Escalate unresolved Mix facts through one fixed sandbox profile.
 
