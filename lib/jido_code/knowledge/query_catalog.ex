@@ -2020,11 +2020,40 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     ]
   end
 
-  defp repository_wiki_specifications(_graph, resource) do
+  defp repository_wiki_specifications(graph, resource) do
     edition_pair = %{
       control_graph: %{type: :graph_iri, required: true},
       wiki_graph: %{type: :graph_iri, required: true},
       resource: %{type: :resource_iri, required: true}
+    }
+
+    page_by_slug =
+      resource
+      |> Map.put(:edition, %{type: :resource_iri, required: true})
+      |> Map.put(:slug, %{type: :literal, required: true, max_bytes: 160})
+
+    dependency_lookup =
+      resource
+      |> Map.put(:edition, %{type: :resource_iri, required: true})
+      |> Map.put(:dependency, %{type: :literal, required: true, max_bytes: 160})
+
+    guide_collection =
+      resource
+      |> Map.put(:edition, %{type: :resource_iri, required: true})
+      |> Map.put(:audience, %{type: :literal, required: true, max_bytes: 32})
+
+    preview_detail =
+      resource
+      |> Map.put(:edition, %{type: :resource_iri, required: true})
+      |> Map.put(:preview, %{type: :resource_iri, required: true})
+
+    edition_comparison = %{
+      control_graph: %{type: :graph_iri, required: true},
+      left_graph: %{type: :graph_iri, required: true},
+      right_graph: %{type: :graph_iri, required: true},
+      resource: %{type: :resource_iri, required: true},
+      left_edition: %{type: :resource_iri, required: true},
+      right_edition: %{type: :resource_iri, required: true}
     }
 
     [
@@ -2036,6 +2065,17 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:repository_control],
         :table,
         "Read the latest exact repository wiki enrollment, visibility, retention, and cancellation fence.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_generation_profiles,
+        :select,
+        graph,
+        :control,
+        [:factory_catalog],
+        :table,
+        "Read the closed enabled deterministic repository wiki generation profiles.",
         :product,
         :declared
       ),
@@ -2062,6 +2102,28 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         :declared
       ),
       spec(
+        :repository_wiki_edition_comparison,
+        :select,
+        edition_comparison,
+        :observation,
+        [:repository_control, :repository_wiki],
+        :table,
+        "Compare two exact retained edition manifests and their bounded provenance.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_preview_detail,
+        :select,
+        preview_detail,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read one already-authorized opaque session preview without resolving siblings.",
+        :product,
+        :declared
+      ),
+      spec(
         :repository_wiki_page_detail,
         :select,
         resource,
@@ -2069,6 +2131,83 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:repository_wiki],
         :table,
         "Read one bounded wiki page with its exact source references.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_navigation_tree,
+        :select,
+        resource,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read the complete bounded page navigation tree for one exact edition.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_page_by_slug,
+        :select,
+        page_by_slug,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Resolve one stable page slug inside one exact edition.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_backlinks,
+        :select,
+        resource,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read bounded reviewed backlinks for one exact wiki page.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_source_references,
+        :select,
+        resource,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read exact bounded source references for one wiki page.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_dependency_lookup,
+        :select,
+        dependency_lookup,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Resolve one dependency page by its exact admitted package name.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_guide_collection,
+        :select,
+        guide_collection,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read one closed guide audience collection from an exact edition.",
+        :product,
+        :declared
+      ),
+      spec(
+        :repository_wiki_known_gaps,
+        :select,
+        resource,
+        :observation,
+        [:repository_wiki],
+        :table,
+        "Read visible bounded omissions and blocking findings for one edition.",
         :product,
         :declared
       ),

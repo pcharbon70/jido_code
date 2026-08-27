@@ -7,6 +7,9 @@ defmodule JidoCodeWeb.HomeLive do
   alias JidoCode.Product.CommandOutcome
   alias JidoCode.Product.GraphProjectionProvider
   alias JidoCode.Product.Projection
+  alias JidoCode.Product.RepositoryWikiProjection
+  alias JidoCode.Product.RepositoryWikiProjectionProvider
+  alias JidoCode.Product.RepositoryWikiSurfaceContract
   alias JidoCode.Product.SurfaceContract
 
   @impl true
@@ -35,24 +38,50 @@ defmodule JidoCodeWeb.HomeLive do
      |> assign(:enrollment_form, enrollment_form())
      |> assign(:enrollment_preview, nil)
      |> assign(:command_receipt, nil)
+     |> assign(:wiki_projection, RepositoryWikiProjection.unavailable(:unselected))
+     |> assign(:wiki_view, RepositoryWikiSurfaceContract.fetch(nil))
+     |> assign(:wiki_page_slug, nil)
+     |> assign(:wiki_search_query, "")
+     |> assign(:wiki_search_form, to_form(%{"query" => ""}, as: :wiki_search))
+     |> assign(:wiki_settings_form, wiki_settings_form())
+     |> assign(:wiki_command_receipt, nil)
      |> stream_configure(:attempts, dom_id: &"attempt-#{&1["id"]}")
      |> stream_configure(:knowledge, dom_id: &"knowledge-#{&1["id"]}")
+     |> stream_configure(:wiki_navigation, dom_id: &"wiki-page-#{&1.slug}")
+     |> stream_configure(:wiki_search_results, dom_id: &"wiki-search-result-#{&1.slug}")
+     |> stream_configure(:wiki_history, dom_id: &"wiki-history-#{&1["id"]}")
+     |> stream_configure(:wiki_gaps, dom_id: &"wiki-gap-#{&1["id"]}")
+     |> stream_configure(:wiki_sources, dom_id: &"wiki-source-#{&1["id"]}")
+     |> stream_configure(:wiki_backlinks, dom_id: &"wiki-backlink-#{&1["id"]}")
      |> stream(:repositories, [])
      |> stream(:work_items, [])
      |> stream(:attempts, [])
-     |> stream(:knowledge, [])}
+     |> stream(:knowledge, [])
+     |> stream(:wiki_navigation, [])
+     |> stream(:wiki_search_results, [])
+     |> stream(:wiki_history, [])
+     |> stream(:wiki_gaps, [])
+     |> stream(:wiki_sources, [])
+     |> stream(:wiki_backlinks, [])}
   end
 
   @impl true
   def handle_params(params, _uri, socket) do
     surface = SurfaceContract.fetch(params["surface"])
     selected_repository = decode_repository(params["repository"])
+    wiki_view = RepositoryWikiSurfaceContract.fetch(params["wiki_view"])
+    wiki_page_slug = RepositoryWikiSurfaceContract.page_slug(params["wiki_page"], wiki_view)
+    wiki_search_query = RepositoryWikiSurfaceContract.search_query(params["wiki_query"])
 
     {:noreply,
      socket
      |> assign(:surface, surface)
      |> assign(:selected_repository, selected_repository)
      |> assign(:selected_repository_ref, params["repository"])
+     |> assign(:wiki_view, wiki_view)
+     |> assign(:wiki_page_slug, wiki_page_slug)
+     |> assign(:wiki_search_query, wiki_search_query)
+     |> assign(:wiki_search_form, to_form(%{"query" => wiki_search_query}, as: :wiki_search))
      |> load_projection()}
   end
 
@@ -64,6 +93,118 @@ defmodule JidoCodeWeb.HomeLive do
 
     {:noreply,
      push_patch(socket, to: workbench_path(surface.id, socket.assigns.selected_repository_ref))}
+  end
+
+  def handle_event("select-wiki-view", %{"view" => id}, socket) do
+    view = RepositoryWikiSurfaceContract.fetch(id)
+
+    {:noreply,
+     push_patch(socket,
+       to:
+         wiki_path(socket, %{
+           wiki_view: view.id,
+           wiki_page: view.page_slug,
+           wiki_query: nil
+         })
+     )}
+  end
+
+  def handle_event("open-wiki-settings", _params, socket) do
+    {:noreply,
+     push_patch(socket,
+       to: wiki_path(socket, %{wiki_view: "settings", wiki_page: nil, wiki_query: nil})
+     )}
+  end
+
+  def handle_event("open-wiki-page", %{"slug" => slug}, socket) do
+    view = socket.assigns.wiki_view
+    admitted = RepositoryWikiSurfaceContract.page_slug(slug, view)
+
+    {:noreply,
+     push_patch(socket,
+       to: wiki_path(socket, %{wiki_view: view.id, wiki_page: admitted})
+     )}
+  end
+
+  def handle_event("search-wiki", %{"wiki_search" => %{"query" => query}}, socket) do
+    admitted = RepositoryWikiSurfaceContract.search_query(query)
+
+    {:noreply,
+     push_patch(socket,
+       to: wiki_path(socket, %{wiki_view: "search", wiki_page: nil, wiki_query: admitted})
+     )}
+  end
+
+  def handle_event("validate-wiki-settings", %{"wiki_settings" => params}, socket) do
+    {:noreply, assign(socket, :wiki_settings_form, to_form(params, as: :wiki_settings))}
+  end
+
+  def handle_event("save-wiki-settings", %{"wiki_settings" => params}, socket) do
+    gateway = Application.get_env(:jido_code, :product_command_gateway, CommandGateway)
+
+    case socket.assigns.selected_repository do
+      nil ->
+        {:noreply, put_flash(socket, :error, "Select a repository before changing wiki policy.")}
+
+      repository ->
+        case gateway.configure_repository_wiki(
+               socket.assigns.authority,
+               socket.assigns.identity,
+               repository,
+               params
+             ) do
+          {:ok, %CommandOutcome{outcome: outcome} = receipt}
+          when outcome in [:committed, :already_committed] ->
+            {:noreply,
+             socket
+             |> assign(:wiki_command_receipt, receipt_view(receipt))
+             |> put_flash(:info, "Repository wiki policy committed.")
+             |> load_projection()}
+
+          {:ok, %CommandOutcome{} = receipt} ->
+            {:noreply,
+             socket
+             |> assign(:wiki_settings_form, to_form(params, as: :wiki_settings))
+             |> assign(:wiki_command_receipt, receipt_view(receipt))
+             |> put_flash(:error, wiki_command_outcome_message(receipt))}
+
+          {:error, %Error{} = error} ->
+            {:noreply,
+             socket
+             |> assign(:wiki_settings_form, to_form(params, as: :wiki_settings))
+             |> put_flash(:error, wiki_command_error_message(error))}
+        end
+    end
+  end
+
+  def handle_event("regenerate-wiki", _params, socket) do
+    gateway = Application.get_env(:jido_code, :product_command_gateway, CommandGateway)
+
+    case socket.assigns.selected_repository do
+      nil ->
+        {:noreply, put_flash(socket, :error, "Select a repository before regenerating its wiki.")}
+
+      repository ->
+        case gateway.regenerate_repository_wiki(
+               socket.assigns.authority,
+               socket.assigns.identity,
+               repository
+             ) do
+          {:ok, %CommandOutcome{outcome: outcome} = receipt}
+          when outcome in [:committed, :already_committed] ->
+            {:noreply,
+             socket
+             |> assign(:wiki_command_receipt, receipt_view(receipt))
+             |> put_flash(:info, "Deterministic wiki regeneration requested.")
+             |> load_projection()}
+
+          {:ok, %CommandOutcome{} = receipt} ->
+            {:noreply, put_flash(socket, :error, wiki_command_outcome_message(receipt))}
+
+          {:error, %Error{} = error} ->
+            {:noreply, put_flash(socket, :error, wiki_command_error_message(error))}
+        end
+    end
   end
 
   def handle_event("select-repository", %{"repository" => ref}, socket) do
@@ -167,7 +308,9 @@ defmodule JidoCodeWeb.HomeLive do
         >
           <div class="flex gap-1 overflow-x-auto p-2 lg:block lg:space-y-1 lg:p-3">
             <button
-              :for={surface <- SurfaceContract.all()}
+              :for={
+                surface <- SurfaceContract.visible(@selected_repository, @wiki_projection.visible?)
+              }
               id={"factory-nav-#{surface.id}"}
               type="button"
               phx-click="select-surface"
@@ -264,6 +407,16 @@ defmodule JidoCodeWeb.HomeLive do
                   streams={@streams}
                   count={@knowledge_count}
                   selected={@selected_repository}
+                />
+              <% "wiki" -> %>
+                <.repository_wiki_surface
+                  projection={@wiki_projection}
+                  view={@wiki_view}
+                  selected_repository={@selected_repository}
+                  streams={@streams}
+                  search_form={@wiki_search_form}
+                  settings_form={@wiki_settings_form}
+                  command_receipt={@wiki_command_receipt}
                 />
             <% end %>
           </main>
@@ -415,6 +568,27 @@ defmodule JidoCodeWeb.HomeLive do
             {repository.state}
             <.icon name="hero-chevron-right" class="size-4" />
           </span>
+        </button>
+      </div>
+
+      <div
+        :if={@selected}
+        id="selected-repository-wiki-policy"
+        class="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <p class="text-sm font-semibold">Repository wiki policy</p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Opt out, choose deterministic maintenance, or review retained-read posture.
+          </p>
+        </div>
+        <button
+          id="open-wiki-settings"
+          type="button"
+          phx-click="open-wiki-settings"
+          class="inline-flex min-h-10 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-semibold transition-colors hover:bg-muted"
+        >
+          <.icon name="hero-cog-6-tooth" class="mr-2 size-4" /> Configure wiki
         </button>
       </div>
 
@@ -641,6 +815,415 @@ defmodule JidoCodeWeb.HomeLive do
     """
   end
 
+  attr :projection, :any, required: true
+  attr :view, :map, required: true
+  attr :selected_repository, :string, default: nil
+  attr :streams, :map, required: true
+  attr :search_form, :map, required: true
+  attr :settings_form, :map, required: true
+  attr :command_receipt, :map, default: nil
+
+  defp repository_wiki_surface(assigns) do
+    ~H"""
+    <section id="repository-wiki" aria-labelledby="repository-wiki-title" class="grid gap-5">
+      <div class="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div class="min-w-0">
+          <p class="truncate font-mono text-xs text-muted-foreground">
+            {@selected_repository || "No repository selected"}
+          </p>
+          <div class="mt-1 flex items-center gap-2">
+            <h2 id="repository-wiki-title" class="text-xl font-semibold">Repository wiki</h2>
+            <span
+              id="wiki-state"
+              class={[
+                "inline-flex rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold uppercase tracking-wide",
+                @projection.state == :current && "bg-emerald-500/15 text-emerald-700",
+                @projection.state in [:stale, :incomplete, :empty, :rebuilding] &&
+                  "bg-amber-500/15 text-amber-700",
+                @projection.state not in [:current, :stale, :incomplete, :empty, :rebuilding] &&
+                  "bg-muted text-muted-foreground"
+              ]}
+            >
+              {@projection.state}
+            </span>
+          </div>
+        </div>
+        <p class="max-w-xl text-xs leading-5 text-muted-foreground">
+          Deterministic-only generation. This edition records zero model tokens and no model cost.
+        </p>
+      </div>
+
+      <%= if is_nil(@selected_repository) do %>
+        <div
+          id="wiki-unselected"
+          class="grid min-h-64 place-items-center rounded-xl border border-dashed border-border bg-card/40 text-center"
+        >
+          <div class="max-w-md px-6">
+            <.icon name="hero-book-open" class="mx-auto size-8 text-muted-foreground" />
+            <p class="mt-3 font-semibold">Select a repository</p>
+            <p class="mt-1 text-sm leading-6 text-muted-foreground">
+              Wiki visibility, editions, and settings are always evaluated inside one repository scope.
+            </p>
+          </div>
+        </div>
+      <% else %>
+        <%= if not @projection.visible? and @view.id != "settings" do %>
+          <div
+            id={"wiki-state-#{@projection.state}"}
+            role="status"
+            class="grid min-h-64 place-items-center rounded-xl border border-dashed border-border bg-card/40 text-center"
+          >
+            <div class="max-w-lg px-6">
+              <.icon name="hero-shield-exclamation" class="mx-auto size-8 text-muted-foreground" />
+              <p class="mt-3 font-semibold">{wiki_state_title(@projection.state)}</p>
+              <p class="mt-1 text-sm leading-6 text-muted-foreground">
+                {wiki_state_detail(@projection.state)} No cached page or search result is displayed.
+              </p>
+            </div>
+          </div>
+        <% else %>
+          <div
+            id="wiki-edition-status"
+            class="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <.wiki_stat
+              id="source"
+              label="Source revision"
+              value={wiki_edition_value(@projection, :source_fence, "not compiled")}
+            />
+            <.wiki_stat
+              id="edition"
+              label="Edition"
+              value={wiki_edition_value(@projection, :edition_iri, "pending") |> compact_iri()}
+            />
+            <.wiki_stat
+              id="freshness"
+              label="Freshness"
+              value={wiki_edition_value(@projection, :freshness, Atom.to_string(@projection.state))}
+            />
+            <.wiki_stat
+              id="tokens"
+              label="Model usage"
+              value="0 tokens · 0 cost"
+            />
+          </div>
+
+          <nav
+            id="wiki-view-navigation"
+            aria-label="Repository wiki views"
+            class="flex gap-1 overflow-x-auto border-b border-border pb-px"
+          >
+            <button
+              :for={item <- RepositoryWikiSurfaceContract.all()}
+              id={"wiki-view-#{item.id}"}
+              type="button"
+              phx-click="select-wiki-view"
+              phx-value-view={item.id}
+              aria-current={if(@view.id == item.id, do: "page", else: "false")}
+              class={[
+                "inline-flex min-h-10 shrink-0 items-center gap-2 border-b-2 px-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                @view.id == item.id && "border-foreground font-semibold text-foreground",
+                @view.id != item.id &&
+                  "border-transparent text-muted-foreground hover:text-foreground"
+              ]}
+            >
+              <.icon name={item.icon} class="size-4" />
+              {item.label}
+            </button>
+          </nav>
+
+          <%= case @view.id do %>
+            <% "search" -> %>
+              <div id="wiki-search" class="grid gap-4">
+                <.form
+                  for={@search_form}
+                  id="wiki-search-form"
+                  phx-submit="search-wiki"
+                  class="flex gap-2"
+                >
+                  <.input
+                    field={@search_form[:query]}
+                    type="search"
+                    label="Search the current edition"
+                    placeholder="Guide, dependency, architecture…"
+                    autocomplete="off"
+                    class="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-shadow focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    id="wiki-search-submit"
+                    type="submit"
+                    class="mt-7 inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                  >
+                    Search
+                  </button>
+                </.form>
+                <div id="wiki-search-results" phx-update="stream" class="grid gap-2">
+                  <.stream_empty
+                    id="wiki-search-empty"
+                    icon="hero-magnifying-glass"
+                    message="Enter plain words to search the authorized current edition."
+                  />
+                  <button
+                    :for={{id, result} <- @streams.wiki_search_results}
+                    id={id}
+                    type="button"
+                    phx-click="open-wiki-page"
+                    phx-value-slug={result.slug}
+                    class="group rounded-lg border border-border bg-card p-4 text-left transition-colors hover:border-foreground/30 hover:bg-muted/50"
+                  >
+                    <span class="flex items-center justify-between gap-4">
+                      <span class="font-semibold group-hover:underline">{result.title}</span>
+                      <span class="font-mono text-xs text-muted-foreground">
+                        score {result.score}
+                      </span>
+                    </span>
+                    <span class="mt-1 block text-xs text-muted-foreground">{result.snippet}</span>
+                  </button>
+                </div>
+              </div>
+            <% "history" -> %>
+              <div id="wiki-history" phx-update="stream" class="grid gap-2">
+                <.stream_empty
+                  id="wiki-history-empty"
+                  icon="hero-clock"
+                  message="No retained edition history is available."
+                />
+                <article
+                  :for={{id, item} <- @streams.wiki_history}
+                  id={id}
+                  class="grid gap-2 rounded-lg border border-border bg-card p-4 sm:grid-cols-[1fr_auto]"
+                >
+                  <div>
+                    <p class="text-sm font-semibold">Enrollment revision {item["revision"] || "-"}</p>
+                    <p class="mt-1 break-all font-mono text-xs text-muted-foreground">
+                      {item["currentEdition"] || "No current edition"}
+                    </p>
+                  </div>
+                  <span class="text-xs text-muted-foreground">{item["state"] || "unknown"}</span>
+                </article>
+              </div>
+            <% "gaps" -> %>
+              <div id="wiki-known-gaps" phx-update="stream" class="grid gap-2">
+                <.stream_empty
+                  id="wiki-gaps-empty"
+                  icon="hero-check-circle"
+                  message="No visible gaps were reported for this edition."
+                />
+                <article
+                  :for={{id, gap} <- @streams.wiki_gaps}
+                  id={id}
+                  class="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4"
+                >
+                  <p class="text-sm font-semibold">{gap["omissionCode"] || "incomplete"}</p>
+                  <p class="mt-1 font-mono text-xs text-muted-foreground">
+                    {gap["sourceLocator"] || "edition"}
+                  </p>
+                </article>
+              </div>
+            <% "settings" -> %>
+              <div id="wiki-settings" class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                <.form
+                  for={@settings_form}
+                  id="wiki-settings-form"
+                  phx-change="validate-wiki-settings"
+                  phx-submit="save-wiki-settings"
+                  class="grid gap-4 rounded-xl border border-border bg-card p-5"
+                >
+                  <.input
+                    field={@settings_form[:mode]}
+                    type="select"
+                    label="Maintenance mode"
+                    options={[
+                      {"Off", "off"},
+                      {"Manual deterministic", "manual"},
+                      {"Automatic deterministic", "automatic"}
+                    ]}
+                  />
+                  <.input
+                    field={@settings_form[:read_visibility]}
+                    type="select"
+                    label="Retained reads"
+                    options={[
+                      {"Retain current safe edition", "retained"},
+                      {"Hide wiki reads", "hidden"}
+                    ]}
+                  />
+                  <.input
+                    field={@settings_form[:retention]}
+                    type="select"
+                    label="Edition retention"
+                    options={[{"Standard current and history", "standard"}]}
+                  />
+                  <.input
+                    field={@settings_form[:confirmed]}
+                    type="checkbox"
+                    label="I understand this changes repository wiki policy"
+                  />
+                  <button
+                    id="wiki-settings-save"
+                    type="submit"
+                    class="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                  >
+                    Save wiki policy
+                  </button>
+                </.form>
+                <aside id="wiki-cost-posture" class="rounded-xl border border-border bg-muted/40 p-5">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Cost posture
+                  </p>
+                  <p class="mt-2 text-lg font-semibold">Zero model tokens</p>
+                  <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                    Manual and automatic modes use the pinned deterministic compiler. Off opts out of new wiki generation.
+                  </p>
+                  <button
+                    id="wiki-regenerate"
+                    type="button"
+                    phx-click="regenerate-wiki"
+                    disabled={not @projection.settings.regeneration_available?}
+                    class="mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-semibold transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Regenerate deterministically
+                  </button>
+                  <p
+                    :if={@command_receipt}
+                    id="wiki-command-receipt"
+                    class="mt-3 text-xs text-muted-foreground"
+                  >
+                    outcome: {@command_receipt.outcome}
+                  </p>
+                </aside>
+              </div>
+            <% _page_view -> %>
+              <div id="wiki-page-browser" class="grid gap-5 lg:grid-cols-[17rem_minmax(0,1fr)]">
+                <aside class="rounded-xl border border-border bg-card p-2">
+                  <p class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Current edition
+                  </p>
+                  <div id="wiki-navigation-pages" phx-update="stream" class="grid gap-1">
+                    <.stream_empty
+                      id="wiki-navigation-empty"
+                      icon="hero-book-open"
+                      message="This edition has no projected pages."
+                    />
+                    <button
+                      :for={{id, page} <- @streams.wiki_navigation}
+                      id={id}
+                      type="button"
+                      phx-click="open-wiki-page"
+                      phx-value-slug={page.slug}
+                      class={[
+                        "rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
+                        @projection.selected_page && @projection.selected_page.slug == page.slug &&
+                          "bg-muted font-semibold"
+                      ]}
+                    >
+                      <span class="block truncate">{page.title}</span>
+                      <span class="mt-0.5 block truncate text-[0.6875rem] text-muted-foreground">
+                        {page.audience} · {page.kind}
+                      </span>
+                    </button>
+                  </div>
+                </aside>
+                <article
+                  id="wiki-page-detail"
+                  class="min-w-0 rounded-xl border border-border bg-card p-5 sm:p-7"
+                >
+                  <%= if @projection.selected_page do %>
+                    <div class="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {@projection.selected_page.audience} · {@projection.selected_page.kind}
+                        </p>
+                        <h3 id="wiki-page-title" class="mt-2 text-2xl font-semibold tracking-tight">
+                          {@projection.selected_page.title}
+                        </h3>
+                      </div>
+                      <span class="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
+                        {@projection.selected_page.freshness}
+                      </span>
+                    </div>
+                    <div class="mt-6 grid gap-6 xl:grid-cols-2">
+                      <div>
+                        <h4 class="text-sm font-semibold">Exact sources</h4>
+                        <div id="wiki-page-sources" phx-update="stream" class="mt-3 grid gap-2">
+                          <.stream_empty
+                            id="wiki-page-sources-empty"
+                            icon="hero-document-magnifying-glass"
+                            message="No readable source reference is available."
+                          />
+                          <div
+                            :for={{id, source} <- @streams.wiki_sources}
+                            id={id}
+                            class="rounded-md border border-border p-3"
+                          >
+                            <p class="break-all font-mono text-xs">
+                              {source["sourceLocator"] || source["source"]}
+                            </p>
+                            <p class="mt-1 text-[0.6875rem] text-muted-foreground">
+                              {source["sourceAuthority"]} · {source["freshness"]}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-semibold">Backlinks</h4>
+                        <div id="wiki-page-backlinks" phx-update="stream" class="mt-3 grid gap-2">
+                          <.stream_empty
+                            id="wiki-page-backlinks-empty"
+                            icon="hero-arrow-uturn-left"
+                            message="No page links back here."
+                          />
+                          <button
+                            :for={{id, backlink} <- @streams.wiki_backlinks}
+                            id={id}
+                            type="button"
+                            phx-click="open-wiki-page"
+                            phx-value-slug={backlink["sourceSlug"]}
+                            class="rounded-md border border-border p-3 text-left text-sm transition-colors hover:bg-muted"
+                          >
+                            {backlink["sourceTitle"] || backlink["sourceSlug"]}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-6 rounded-lg bg-muted/50 p-4 text-xs leading-5 text-muted-foreground">
+                      Content digest:
+                      <span class="break-all font-mono">
+                        {@projection.selected_page.content_digest || "not exposed"}
+                      </span>
+                    </div>
+                  <% else %>
+                    <div id="wiki-page-empty" class="grid min-h-64 place-items-center text-center">
+                      <div>
+                        <.icon name="hero-document-text" class="mx-auto size-7 text-muted-foreground" />
+                        <p class="mt-3 text-sm text-muted-foreground">
+                          This page is not present in the authorized current edition.
+                        </p>
+                      </div>
+                    </div>
+                  <% end %>
+                </article>
+              </div>
+          <% end %>
+        <% end %>
+      <% end %>
+    </section>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :label, :string, required: true
+  attr :value, :string, required: true
+
+  defp wiki_stat(assigns) do
+    ~H"""
+    <div id={"wiki-stat-#{@id}"} class="min-w-0 bg-card p-4">
+      <p class="text-xs font-medium text-muted-foreground">{@label}</p>
+      <p class="mt-1 truncate font-mono text-sm font-semibold" title={@value}>{@value}</p>
+    </div>
+    """
+  end
+
   attr :id, :string, required: true
   attr :title, :string, required: true
   attr :count, :integer, required: true
@@ -737,21 +1320,54 @@ defmodule JidoCodeWeb.HomeLive do
     work_items = flatten_work(projection.work)
     outcome_count = outcome_count(projection)
     projection_metadata = projection_metadata(projection)
+    repository_index = Map.new(projection.repositories, &{&1.iri, &1})
+    wiki_projection = load_wiki_projection(socket, repository_index)
+    wiki_projection_metadata = wiki_projection_metadata(wiki_projection)
 
     socket
     |> assign(:projection, projection_metadata)
     |> assign(:repository_refs, repository_refs)
-    |> assign(:repository_index, Map.new(projection.repositories, &{&1.iri, &1}))
+    |> assign(:repository_index, repository_index)
     |> assign(:repository_count, length(projection.repositories))
     |> assign(:repository_empty?, projection.repositories == [])
     |> assign(:work_count, length(work_items))
     |> assign(:attempt_count, length(projection.attempts))
     |> assign(:knowledge_count, length(projection.knowledge))
     |> assign(:outcome_count, outcome_count)
+    |> assign(:wiki_projection, wiki_projection_metadata)
+    |> assign(:wiki_settings_form, wiki_settings_form(wiki_projection.settings))
     |> stream(:repositories, projection.repositories, reset: true)
     |> stream(:work_items, work_items, reset: true)
     |> stream(:attempts, projection.attempts, reset: true)
     |> stream(:knowledge, projection.knowledge, reset: true)
+    |> stream(:wiki_navigation, wiki_projection.navigation, reset: true)
+    |> stream(:wiki_search_results, wiki_projection.search_results, reset: true)
+    |> stream(:wiki_history, wiki_projection.history, reset: true)
+    |> stream(:wiki_gaps, wiki_projection.gaps, reset: true)
+    |> stream(:wiki_sources, wiki_projection.sources, reset: true)
+    |> stream(:wiki_backlinks, wiki_projection.backlinks, reset: true)
+  end
+
+  defp load_wiki_projection(socket, repository_index) do
+    provider =
+      Application.get_env(
+        :jido_code,
+        :repository_wiki_projection_provider,
+        RepositoryWikiProjectionProvider
+      )
+
+    repository = socket.assigns.selected_repository
+
+    case provider.load(socket.assigns.authority, socket.assigns.identity,
+           repository: repository,
+           repository_authorized?:
+             is_binary(repository) and Map.has_key?(repository_index, repository),
+           page_slug: socket.assigns.wiki_page_slug,
+           search_query: socket.assigns.wiki_search_query
+         ) do
+      {:ok, %RepositoryWikiProjection{} = projection} -> projection
+      _failure -> RepositoryWikiProjection.unavailable(:unavailable, repository)
+    end
   end
 
   defp flatten_work(work) do
@@ -782,6 +1398,22 @@ defmodule JidoCodeWeb.HomeLive do
 
   defp workbench_path(surface, repository),
     do: ~p"/?#{%{surface: surface, repository: repository}}"
+
+  defp wiki_path(socket, overrides) do
+    params =
+      %{
+        surface: "wiki",
+        repository: socket.assigns.selected_repository_ref,
+        wiki_view: socket.assigns.wiki_view.id,
+        wiki_page: socket.assigns.wiki_page_slug,
+        wiki_query: socket.assigns.wiki_search_query
+      }
+      |> Map.merge(overrides)
+      |> Enum.reject(fn {_key, value} -> is_nil(value) or value == "" end)
+      |> Map.new()
+
+    ~p"/?#{params}"
+  end
 
   defp ref_for(refs, repository) do
     Enum.find_value(refs, fn {ref, iri} -> if iri == repository, do: ref end)
@@ -817,6 +1449,18 @@ defmodule JidoCodeWeb.HomeLive do
     }
   end
 
+  defp wiki_projection_metadata(projection) do
+    %{
+      projection
+      | navigation: [],
+        backlinks: [],
+        sources: [],
+        gaps: [],
+        history: [],
+        search_results: []
+    }
+  end
+
   defp projection_state_title(:stale), do: "Projection is stale"
   defp projection_state_title(:incomplete), do: "Projection is incomplete"
   defp projection_state_title(:truncated), do: "Projection reached its bounded limit"
@@ -849,6 +1493,47 @@ defmodule JidoCodeWeb.HomeLive do
 
   defp projection_state_detail(_state),
     do: "No cached product state is shown while the authoritative graph cannot be read."
+
+  defp wiki_state_title(:hidden), do: "Wiki reads are hidden"
+  defp wiki_state_title(:disabled), do: "Wiki generation is off"
+  defp wiki_state_title(:unauthorized), do: "Wiki is not available"
+  defp wiki_state_title(:unavailable), do: "Wiki state is unavailable"
+  defp wiki_state_title(_state), do: "No current wiki edition"
+
+  defp wiki_state_detail(:hidden),
+    do: "Repository policy does not permit retained wiki reads for this actor."
+
+  defp wiki_state_detail(:disabled),
+    do: "No repository wiki policy is enabled, so no generation work is scheduled."
+
+  defp wiki_state_detail(:unauthorized),
+    do: "The repository or edition may be outside the current actor scope."
+
+  defp wiki_state_detail(_state),
+    do: "The authoritative edition graph could not be projected safely."
+
+  defp wiki_edition_value(%{edition: edition}, key, fallback) when is_map(edition),
+    do: Map.get(edition, key) || fallback
+
+  defp wiki_edition_value(_projection, _key, fallback), do: fallback
+
+  defp compact_iri(value) when is_binary(value) do
+    if byte_size(value) > 24, do: "…" <> String.slice(value, -23, 23), else: value
+  end
+
+  defp compact_iri(_value), do: "-"
+
+  defp wiki_settings_form(settings \\ RepositoryWikiProjection.default_settings()) do
+    to_form(
+      %{
+        "mode" => Atom.to_string(settings.mode),
+        "read_visibility" => Atom.to_string(settings.read_visibility),
+        "retention" => Atom.to_string(settings.retention),
+        "confirmed" => "false"
+      },
+      as: :wiki_settings
+    )
+  end
 
   defp enrollment_form do
     to_form(
@@ -913,4 +1598,25 @@ defmodule JidoCodeWeb.HomeLive do
 
   defp command_outcome_message(_receipt),
     do: "The enrollment command could not be completed."
+
+  defp wiki_command_error_message(%Error{kind: :unauthorized}),
+    do: "The repository wiki policy is not available to this actor."
+
+  defp wiki_command_error_message(%Error{kind: kind})
+       when kind in [:conflict, :stale_precondition],
+       do: "Wiki policy changed. Refresh before trying again."
+
+  defp wiki_command_error_message(%Error{kind: :invalid_input}),
+    do: "Review the wiki mode, retained-read, retention, and confirmation values."
+
+  defp wiki_command_error_message(_error), do: "The wiki command could not be completed."
+
+  defp wiki_command_outcome_message(%CommandOutcome{outcome: outcome})
+       when outcome in [:conflicted, :stale, :competing],
+       do: "Wiki state changed. Refresh before trying again."
+
+  defp wiki_command_outcome_message(%CommandOutcome{outcome: :unauthorized}),
+    do: "The repository wiki policy is not available to this actor."
+
+  defp wiki_command_outcome_message(_receipt), do: "The wiki command was not committed."
 end

@@ -53,6 +53,7 @@ defmodule JidoCode.Knowledge.ResourceIdentity do
     repository-wiki-enrollment wiki-generation-profile wiki-edition wiki-edition-segment wiki-page wiki-section
     wiki-dependency-use
     wiki-source wiki-citation wiki-link wiki-gap wiki-drift-finding wiki-lint-report wiki-preview
+    wiki-review-decision
     wiki-maintainer wiki-budget wiki-reservation wiki-usage-record wiki-compilation-attempt
   ]
   @digest_lengths %{"sha1" => 40, "sha256" => 64, "sha512" => 128}
