@@ -35,6 +35,24 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
   def inspect_workspace(_server, _workspace_iri, _current),
     do: invalid(:delegated_workspace_inspect)
 
+  @spec checkpoint(GenServer.server(), String.t(), map()) ::
+          {:ok, map()} | {:error, AdapterError.t()}
+  def checkpoint(server, workspace_iri, current)
+      when is_binary(workspace_iri) and is_map(current),
+      do: GenServer.call(server, {:checkpoint, workspace_iri, current}, :infinity)
+
+  def checkpoint(_server, _workspace_iri, _current),
+    do: invalid(:delegated_workspace_checkpoint)
+
+  @spec quarantine(GenServer.server(), String.t(), map(), atom()) ::
+          {:ok, map()} | {:error, AdapterError.t()}
+  def quarantine(server, workspace_iri, current, reason)
+      when is_binary(workspace_iri) and is_map(current) and is_atom(reason),
+      do: GenServer.call(server, {:quarantine, workspace_iri, current, reason}, :infinity)
+
+  def quarantine(_server, _workspace_iri, _current, _reason),
+    do: invalid(:delegated_workspace_quarantine)
+
   @spec fetch(GenServer.server(), String.t()) :: {:ok, map()} | {:error, AdapterError.t()}
   def fetch(server, workspace_iri) when is_binary(workspace_iri),
     do: GenServer.call(server, {:fetch, workspace_iri})
@@ -121,6 +139,34 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
       end
 
     {:reply, reply, state}
+  end
+
+  def handle_call({:checkpoint, workspace_iri, current}, _from, state) do
+    with {:ok, private} <- Map.fetch(state.workspaces, workspace_iri),
+         :ready <- private.public.status,
+         :ok <- current(private.spec, current),
+         {:ok, receipt} <- inspect_private(private),
+         {:ok, checkpoint} <- checkpoint_private(private, receipt) do
+      {:reply, {:ok, checkpoint}, state}
+    else
+      {:violation, reason} -> quarantine_reply(state, workspace_iri, reason)
+      {:error, %AdapterError{} = error} -> {:reply, {:error, error}, state}
+      _invalid -> {:reply, unauthorized(:delegated_workspace_checkpoint), state}
+    end
+  rescue
+    _error -> quarantine_reply(state, workspace_iri, :checkpoint_failure)
+  end
+
+  def handle_call({:quarantine, workspace_iri, current, reason}, _from, state) do
+    with {:ok, private} <- Map.fetch(state.workspaces, workspace_iri),
+         :ok <- current(private.spec, current) do
+      _ = GitWorkspace.disposition(state.workspace_server, private.spec, :crash)
+      public = Map.merge(private.public, %{status: :quarantined, quarantine_reason: reason})
+      state = put_in(state, [:workspaces, workspace_iri, :public], public)
+      {:reply, {:ok, public}, state}
+    else
+      _invalid -> {:reply, unauthorized(:delegated_workspace_quarantine), state}
+    end
   end
 
   def handle_call({:check_environment, workspace_iri}, _from, state) do
@@ -349,7 +395,177 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
     end
   end
 
+  defp checkpoint_private(private, receipt) do
+    with :ok <- source_clean(private.spec),
+         {:ok, status} <-
+           git(private, [
+             "status",
+             "--porcelain=v1",
+             "-z",
+             "--untracked-files=all",
+             "--no-renames"
+           ]),
+         {:ok, tracked_patch} <-
+           git(private, ["diff", "--binary", "--no-ext-diff", "--no-renames", "HEAD", "--"]),
+         {:ok, untracked_patch} <- untracked_patch(private, status),
+         patch <- normalized_patch(tracked_patch, untracked_patch),
+         true <- byte_size(patch) <= private.spec.limits.diff_bytes,
+         {:ok, files} <- checkpoint_files(private, status) do
+      {:ok,
+       %{
+         attempt_iri: private.spec.attempt_iri,
+         lease_iri: private.spec.lease_iri,
+         fencing_token: private.spec.fencing_token,
+         source_snapshot_iri: private.spec.snapshot_iri,
+         base_commit: private.spec.base_commit,
+         workspace_iri: private.spec.iri,
+         workspace_digest: receipt.workspace_digest,
+         patch: patch,
+         patch_digest: content_digest(patch),
+         patch_bytes: byte_size(patch),
+         tree_digest: receipt.current_tree_digest,
+         changed_paths: receipt.changed_paths,
+         changed_files: files,
+         secret_scan: :clean,
+         generated_artifacts: []
+       }}
+    else
+      false -> {:violation, :diff_limit}
+      {:violation, reason} -> {:violation, reason}
+      {:special, reason} -> {:violation, reason}
+      {:error, %AdapterError{} = error} -> {:error, error}
+      _invalid -> {:violation, :checkpoint_capture}
+    end
+  end
+
+  defp source_clean(spec) do
+    environment = [
+      {"GIT_CONFIG_NOSYSTEM", "1"},
+      {"GIT_CONFIG_GLOBAL", "/dev/null"},
+      {"GIT_TERMINAL_PROMPT", "0"},
+      {"GIT_ASKPASS", "/bin/false"},
+      {"SSH_AUTH_SOCK", nil}
+    ]
+
+    case System.cmd(
+           "git",
+           ["status", "--porcelain=v1", "--untracked-files=all", "--no-renames"],
+           cd: spec.source_root,
+           env: environment,
+           stderr_to_stdout: true
+         ) do
+      {"", 0} -> :ok
+      {_dirty, 0} -> {:violation, :dirty_base}
+      _failure -> unavailable(:delegated_workspace_git)
+    end
+  end
+
+  defp untracked_patch(private, status) do
+    status
+    |> status_entries()
+    |> Enum.filter(&(&1.code == "??"))
+    |> Enum.reduce_while({:ok, []}, fn entry, {:ok, patches} ->
+      case git_status(
+             private,
+             [
+               "diff",
+               "--no-index",
+               "--binary",
+               "--no-ext-diff",
+               "--src-prefix=a/",
+               "--dst-prefix=b/",
+               "--",
+               "/dev/null",
+               entry.path
+             ],
+             [1]
+           ) do
+        {:ok, patch} -> {:cont, {:ok, [patch | patches]}}
+        {:error, %AdapterError{} = error} -> {:halt, {:error, error}}
+      end
+    end)
+    |> case do
+      {:ok, patches} -> {:ok, patches |> Enum.reverse() |> Enum.join("\n")}
+      error -> error
+    end
+  end
+
+  defp normalized_patch(tracked, untracked) do
+    [tracked, untracked]
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.trim_trailing/1)
+    |> Enum.join("\n")
+    |> case do
+      "" -> ""
+      patch -> patch <> "\n"
+    end
+  end
+
+  defp checkpoint_files(private, status) do
+    status
+    |> status_entries()
+    |> Enum.reduce_while({:ok, []}, fn entry, {:ok, files} ->
+      case checkpoint_file(private, entry) do
+        {:ok, file} -> {:cont, {:ok, [file | files]}}
+        error -> {:halt, error}
+      end
+    end)
+    |> case do
+      {:ok, files} -> {:ok, Enum.sort_by(files, & &1.path)}
+      error -> error
+    end
+  end
+
+  defp checkpoint_file(private, %{code: code, path: path}) when code in [" D", "D "] do
+    with {:ok, content} <- git(private, ["show", "HEAD:#{path}"]) do
+      {:ok,
+       %{
+         path: path,
+         operation: :delete,
+         digest: WorkspaceDigest.digest(content),
+         size: byte_size(content),
+         mode: :deleted,
+         binary?: not String.valid?(content)
+       }}
+    end
+  end
+
+  defp checkpoint_file(private, %{code: code, path: path}) do
+    absolute = Path.join(private.workspace.root, path)
+
+    with {:ok, %File.Stat{type: :regular, size: size, mode: mode}} <- File.lstat(absolute),
+         true <- size <= private.spec.limits.input_bytes,
+         {:ok, content} <- File.read(absolute) do
+      operation = if code == "??" or code in ["A ", " A"], do: :add, else: :modify
+
+      {:ok,
+       %{
+         path: path,
+         operation: operation,
+         digest: WorkspaceDigest.digest(content),
+         size: size,
+         mode: if(Bitwise.band(mode, 0o111) == 0, do: 0o644, else: 0o755),
+         binary?: not String.valid?(content)
+       }}
+    else
+      _invalid -> {:special, :filesystem_race}
+    end
+  end
+
+  defp status_entries(status) do
+    status
+    |> String.split(<<0>>, trim: true)
+    |> Enum.map(fn entry ->
+      %{code: binary_part(entry, 0, 2), path: binary_part(entry, 3, byte_size(entry) - 3)}
+    end)
+    |> Enum.sort_by(& &1.path)
+  end
+
   defp git(private, arguments) do
+    git_status(private, arguments, [0])
+  end
+
+  defp git_status(private, arguments, accepted_statuses) do
     environment = [
       {"GIT_CONFIG_NOSYSTEM", "1"},
       {"GIT_CONFIG_GLOBAL", "/dev/null"},
@@ -360,14 +576,16 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
       {"GIT_WORK_TREE", private.workspace.root}
     ]
 
-    case System.cmd("git", arguments,
-           cd: private.workspace.root,
-           env: environment,
-           stderr_to_stdout: true
-         ) do
-      {output, 0} -> {:ok, output}
-      _failure -> unavailable(:delegated_workspace_git)
-    end
+    {output, status} =
+      System.cmd("git", arguments,
+        cd: private.workspace.root,
+        env: environment,
+        stderr_to_stdout: true
+      )
+
+    if status in accepted_statuses,
+      do: {:ok, output},
+      else: unavailable(:delegated_workspace_git)
   end
 
   defp public_workspace(private, receipt) do
@@ -436,6 +654,9 @@ defmodule JidoCode.Integrations.DelegatedWorkspaceController do
     Path.type(relative) != :absolute and relative != "." and relative != ".." and
       not String.starts_with?(relative, "../")
   end
+
+  defp content_digest(content),
+    do: :sha256 |> :crypto.hash(content) |> Base.encode16(case: :lower)
 
   defp invalid(operation), do: {:error, AdapterError.new(:invalid_input, operation)}
   defp unauthorized(operation), do: {:error, AdapterError.new(:unauthorized, operation)}

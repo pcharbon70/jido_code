@@ -4,7 +4,7 @@ defmodule JidoCode.Factory.DelegatedResultGate do
   alias JidoCode.Factory.AdapterError
   alias JidoCode.Factory.Execution.Request
 
-  @kinds ~w[event diff artifact callback result]a
+  @kinds ~w[event stream file diff artifact candidate callback verification result terminal]a
 
   @spec dispatch(Request.t(), map(), atom(), term(), keyword()) ::
           {:ok, map()} | {:error, AdapterError.t()}
