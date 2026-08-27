@@ -50,7 +50,7 @@ defmodule JidoCode.Product.ManagedCodingControlGateway do
     do: {:error, JidoCode.Factory.AdapterError.new(:invalid_input, :managed_coding_control)}
 
   defp confirmation(action, params) when action in [:cancel, :recovery, :retry] do
-    if params["confirmed"] == "true", do: :ok, else: :error
+    if params["confirmed"] in [true, "true", "on", "1"], do: :ok, else: :error
   end
 
   defp confirmation(_action, _params), do: :ok

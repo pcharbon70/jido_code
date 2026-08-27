@@ -87,10 +87,10 @@ Back to plan: [README](./README.md)
       This task closes DCG5 only when a developer can complete the supported
       DGA1 workflow through every public surface.
 
-      - [ ] 5.4.1.1 Subtask - Test catalog filtering, explicit selection, submission, consent, billing, readiness expiry, duplicate requests, stale offerings, and incompatible profiles.
-      - [ ] 5.4.1.2 Subtask - Test LiveView forms, streams, empty states, loading states, and controls through stable element IDs without raw HTML assertions.
-      - [ ] 5.4.1.3 Subtask - Test JSON and CLI parity for catalog, submit, status, clarification, steering, cancellation, handoff, recovery, and bounded errors.
-      - [ ] 5.4.1.4 Subtask - Prove graph IRIs, process IDs, workspace paths, prompts, transcripts, hidden reasoning, credentials, and unbounded output are not displayed or returned.
+      - [x] 5.4.1.1 Subtask - Test catalog filtering, explicit selection, submission, consent, billing, readiness expiry, duplicate requests, stale offerings, and incompatible profiles.
+      - [x] 5.4.1.2 Subtask - Test LiveView forms, streams, empty states, loading states, and controls through stable element IDs without raw HTML assertions.
+      - [x] 5.4.1.3 Subtask - Test JSON and CLI parity for catalog, submit, status, clarification, steering, cancellation, handoff, recovery, and bounded errors.
+      - [x] 5.4.1.4 Subtask - Prove graph IRIs, process IDs, workspace paths, prompts, transcripts, hidden reasoning, credentials, and unbounded output are not displayed or returned.
       - [ ] 5.4.1.5 Subtask - Prove no browser, API, or CLI route can publish or merge, then rerun DCG1-DCG4, architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
     - [ ] 5.4.2 Task {#dca-p05-phase-receipt} [repo: jido_code] [after: {#dca-p05-integration}] - Publish and pin the Phase 5 receipt.
@@ -98,7 +98,7 @@ Back to plan: [README](./README.md)
       This task records DCG5 evidence in
       `docs/architecture/delegated-agent-phase-05-receipt.md`.
 
-      - [ ] 5.4.2.1 Subtask - Record product gateway, route, LiveView, CLI, API, authentication, projection, redaction, and UI contract revisions.
-      - [ ] 5.4.2.2 Subtask - Keep DCG5 open if a surface bypasses semantic admission, differs in authority, leaks prohibited details, or exposes publication or merge.
+      - [x] 5.4.2.1 Subtask - Record product gateway, route, LiveView, CLI, API, authentication, projection, redaction, and UI contract revisions.
+      - [x] 5.4.2.2 Subtask - Keep DCG5 open if a surface bypasses semantic admission, differs in authority, leaks prohibited details, or exposes publication or merge.
       - [ ] 5.4.2.3 Subtask - Attach surface-parity, authorization, redaction, accessibility, LiveView, API, CLI, precommit, Dialyzer, and clean-checkout evidence.
       - [ ] 5.4.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, integration, receipt, and pinning checkboxes before authorizing Phase 6.
