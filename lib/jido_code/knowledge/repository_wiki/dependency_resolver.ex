@@ -3,20 +3,24 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.RepositoryWiki.Contract
+  alias JidoCode.Knowledge.RepositoryWiki.MixReconciler
   alias JidoCode.Knowledge.ResourceIdentity
 
   @profile "wiki-dependency-resolver/1.0.0"
   @maximums %{nodes: 2_048, edges: 16_384, depth: 64, paths: 2_048}
 
   @spec profile() :: map()
-  def profile,
-    do: %{
+  def profile do
+    value = %{
       revision: @profile,
       limits: @maximums,
       traversal: :cycle_safe_breadth_first,
       root_path: :lexicographically_canonical_shortest,
       model_calls: 0
     }
+
+    Map.put(value, :digest, Contract.digest(value))
+  end
 
   @spec resolve(map(), map()) :: {:ok, map()} | {:error, Error.t()}
   def resolve(reconciliation, attributes)
@@ -53,6 +57,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
          evidence <- completeness(nodes, edges, reconciliation.lock_entries, gaps) do
       catalog = %{
         profile: @profile,
+        profile_digest: profile().digest,
         repository_iri: attributes.repository_iri,
         tenant_iri: attributes.tenant_iri,
         edition_iri: attributes.edition_iri,
@@ -91,7 +96,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
 
     cond do
       reconciliation[:profile] != "mix-reconcile/1.0.0" or
-          not Contract.digest?(reconciliation[:digest]) ->
+        not Contract.digest?(reconciliation[:digest]) or
+          reconciliation[:profile_digest] != MixReconciler.profile().digest ->
         invalid()
 
       reconciliation[:source_fence] != attributes[:source_fence] ->
@@ -266,7 +272,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
   end
 
   defp reachable?(start, target, adjacency, node_limit) do
-    reachable?([start], target, adjacency, MapSet.new(), node_limit)
+    reachable?([start], target, adjacency, %{}, node_limit)
   end
 
   defp reachable?([], _target, _adjacency, _visited, _node_limit), do: false
@@ -275,15 +281,15 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolver do
 
   defp reachable?([current | rest], target, adjacency, visited, node_limit) do
     cond do
-      MapSet.size(visited) > node_limit ->
+      map_size(visited) > node_limit ->
         false
 
-      MapSet.member?(visited, current) ->
+      Map.has_key?(visited, current) ->
         reachable?(rest, target, adjacency, visited, node_limit)
 
       true ->
         next = Map.get(adjacency, current, []) ++ rest
-        reachable?(next, target, adjacency, MapSet.put(visited, current), node_limit)
+        reachable?(next, target, adjacency, Map.put(visited, current, true), node_limit)
     end
   end
 

@@ -162,11 +162,11 @@ Back to plan: [README](./README.md)
       This task closes RW2 only when all supported lock nodes and edges appear
       in the wiki and no extraction path grants repository code authority.
 
-      - [ ] 2.6.1.1 Subtask - Exercise literal, dynamic, malformed, hostile, oversized, Unicode, umbrella, missing-lock, future-lock, and changing-source Mix fixtures.
-      - [ ] 2.6.1.2 Subtask - Exercise sandbox admission, denial, limits, network isolation, credential isolation, timeout, truncation, crash, source drift, and conflicting observations through the real harness seam.
-      - [ ] 2.6.1.3 Subtask - Exercise direct, transitive, cyclic, optional, override, path, git, mixed-manager, missing, orphaned, private, and unsupported dependency graphs.
-      - [ ] 2.6.1.4 Subtask - Exercise Req success, redirect, TLS failure, timeout, rate limit, malformed JSON, oversized bodies, cache revalidation, stale fallback, unsafe links, and fixture replay.
-      - [ ] 2.6.1.5 Subtask - Prove deterministic editions, exact lock closure, zero-token evidence, safe links, graph/source fencing, and no cross-repository cache disclosure.
+      - [x] 2.6.1.1 Subtask - Exercise literal, dynamic, malformed, hostile, oversized, Unicode, umbrella, missing-lock, future-lock, and changing-source Mix fixtures.
+      - [x] 2.6.1.2 Subtask - Exercise sandbox admission, denial, limits, network isolation, credential isolation, timeout, truncation, crash, source drift, and conflicting observations through the real harness seam.
+      - [x] 2.6.1.3 Subtask - Exercise direct, transitive, cyclic, optional, override, path, git, mixed-manager, missing, orphaned, private, and unsupported dependency graphs.
+      - [x] 2.6.1.4 Subtask - Exercise Req success, redirect, TLS failure, timeout, rate limit, malformed JSON, oversized bodies, cache revalidation, stale fallback, unsafe links, and fixture replay.
+      - [x] 2.6.1.5 Subtask - Prove deterministic editions, exact lock closure, zero-token evidence, safe links, graph/source fencing, and no cross-repository cache disclosure.
       - [ ] 2.6.1.6 Subtask - Rerun RW1 and applicable harness/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
     - [ ] 2.6.2 Task {#rwi-p02-phase-receipt} [repo: jido_code] [after: {#rwi-p02-integration}] - Publish and pin the Phase 2 receipt.
@@ -174,7 +174,7 @@ Back to plan: [README](./README.md)
       This task records RW2 evidence in
       `docs/architecture/repository-wiki-phase-02-receipt.md`.
 
-      - [ ] 2.6.2.1 Subtask - Record parser, lock, sandbox, resolver, Req, cache, compiler, lint, fixture, source, and protocol revisions and digests.
-      - [ ] 2.6.2.2 Subtask - Keep RW2 open if repository code escapes the fixed sandbox, any supported lock node or edge is omitted, metadata overrides source truth, or an unsafe/unverified link becomes clickable.
+      - [x] 2.6.2.1 Subtask - Record parser, lock, sandbox, resolver, Req, cache, compiler, lint, fixture, source, and protocol revisions and digests.
+      - [x] 2.6.2.2 Subtask - Keep RW2 open if repository code escapes the fixed sandbox, any supported lock node or edge is omitted, metadata overrides source truth, or an unsafe/unverified link becomes clickable.
       - [ ] 2.6.2.3 Subtask - Preserve every gate reopening condition and attach extraction, containment, completeness, metadata, rendering, precommit, Dialyzer, and clean-checkout evidence.
       - [ ] 2.6.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 2 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 3.

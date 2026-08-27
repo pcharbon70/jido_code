@@ -12,7 +12,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.LockParser do
 
   @spec profile() :: map()
   def profile do
-    %{
+    value = %{
       revision: @profile,
       parser: System.version(),
       limits: @maximums,
@@ -21,6 +21,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.LockParser do
       atom_creation: :forbidden,
       network: :forbidden
     }
+
+    Map.put(value, :digest, Contract.digest(value))
   end
 
   @spec parse(String.t(), map()) :: {:ok, map()} | {:error, Error.t()}
@@ -44,6 +46,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.LockParser do
 
       result = %{
         profile: @profile,
+        profile_digest: profile().digest,
         parser_version: System.version(),
         source_path: source_path,
         source_digest: sha256(source),

@@ -13,6 +13,8 @@ defmodule JidoCode.Factory.RepositoryWiki.HexMetadataTest do
 
     assert {:ok, first} = HexMetadata.fetch("demo_pkg", "1.2.3", context, fixture: fixture())
     assert first.profile == "hex-req/1.0.0"
+    assert HexMetadata.profile().cache_profile == "wiki-metadata-cache/1.0.0"
+    assert HexMetadata.profile().cache_profile_digest == MetadataCache.profile().digest
     assert first.state == :available
     assert first.authority == :observed
     assert first.cache_state == :miss

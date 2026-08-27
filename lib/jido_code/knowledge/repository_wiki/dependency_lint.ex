@@ -70,7 +70,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyLint do
       {:ok, Map.put(report, :digest, Contract.digest(report))}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid()
     end
   rescue
     _error -> invalid()

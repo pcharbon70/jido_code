@@ -138,8 +138,11 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyPagesTest do
     assert extension.model_output_tokens == 0
     assert extension.usage_cost_microunits == 0
     assert extension.parser_profile == "mix-static/1.0.0"
+    assert extension.parser_profile_digest == fixture.static.profile_digest
     assert extension.lock_profile == "mix-lock/1.0.0"
+    assert extension.lock_profile_digest == fixture.lock.profile_digest
     assert extension.resolver_profile == "wiki-dependency-resolver/1.0.0"
+    assert extension.resolver_profile_digest == fixture.catalog.profile_digest
     assert extension.source_profile == "wiki-dependency-sources/1.0.0"
     assert extension.source_profile_digest
     assert extension.compiler_digest

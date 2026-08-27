@@ -20,6 +20,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.LockParserTest do
     assert {:ok, first} = LockParser.parse(source)
     assert {:ok, second} = LockParser.parse(source)
     assert first == second
+    assert first.profile_digest == LockParser.profile().digest
     assert first.entry_count == 4
     assert first.edge_count == 1
     assert first.supported_count == 4

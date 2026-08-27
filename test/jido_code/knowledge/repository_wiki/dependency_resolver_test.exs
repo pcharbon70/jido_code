@@ -17,6 +17,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyResolverTest do
     assert {:ok, first} = DependencyResolver.resolve(reconciliation, attributes)
     assert {:ok, second} = DependencyResolver.resolve(reconciliation, attributes)
     assert first == second
+    assert first.profile_digest == DependencyResolver.profile().digest
 
     assert first.node_count == 11
     assert first.edge_count == 3

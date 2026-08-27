@@ -58,6 +58,9 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixReconcilerTest do
              )
 
     assert result.profile == "mix-reconcile/1.0.0"
+    assert result.profile_digest == MixReconciler.profile().digest
+    assert result.parser_profile_digest == context.static.profile_digest
+    assert result.lock_profile_digest == context.lock.profile_digest
     assert result.completeness.state == :complete
     assert result.model_calls == 0
     assert result.declared_dependencies |> hd() |> Map.fetch!(:name) == "alpha"

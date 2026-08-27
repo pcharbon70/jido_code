@@ -131,13 +131,16 @@ defmodule JidoCode.Knowledge.RepositoryWiki.SafeAst do
       length(values) > limits.collection_items ->
         {:unresolved, :collection_limit}
 
-      encoded_keyword?(values) ->
-        with {:ok, pairs} <- literal_keyword(values, limits) do
-          {:ok, %{keyword: pairs}}
-        end
-
       true ->
-        literal_collection(values, limits)
+        case keyword_entries(values) do
+          {:ok, entries} ->
+            with {:ok, pairs} <- literal_keyword(entries, limits) do
+              {:ok, %{keyword: pairs}}
+            end
+
+          :error ->
+            literal_collection(values, limits)
+        end
     end
   end
 
@@ -145,14 +148,12 @@ defmodule JidoCode.Knowledge.RepositoryWiki.SafeAst do
 
   @spec encoded_keyword(term()) :: {:ok, [{String.t(), term(), map()}]} | :error
   def encoded_keyword(values) when is_list(values) do
-    if encoded_keyword?(values) do
-      {:ok,
-       Enum.map(values, fn {key, value} ->
-         {:ok, name} = atom_name(key)
-         {name, value, location(key)}
-       end)}
-    else
-      :error
+    case keyword_entries(values) do
+      {:ok, entries} ->
+        {:ok, Enum.map(entries, fn {name, key, value} -> {name, value, location(key)} end)}
+
+      :error ->
+        :error
     end
   end
 
@@ -174,19 +175,24 @@ defmodule JidoCode.Knowledge.RepositoryWiki.SafeAst do
     end
   end
 
-  defp validate_limits(limits, operation) do
-    required = [:source_bytes, :ast_nodes, :ast_depth, :string_bytes, :collection_items]
+  defp validate_limits(
+         %{
+           source_bytes: source_bytes,
+           ast_nodes: ast_nodes,
+           ast_depth: ast_depth,
+           string_bytes: string_bytes,
+           collection_items: collection_items
+         },
+         _operation
+       )
+       when is_integer(source_bytes) and source_bytes > 0 and is_integer(ast_nodes) and
+              ast_nodes > 0 and is_integer(ast_depth) and ast_depth > 0 and
+              is_integer(string_bytes) and string_bytes > 0 and is_integer(collection_items) and
+              collection_items > 0,
+       do: :ok
 
-    if is_map(limits) and
-         Enum.all?(required, fn key ->
-           value = limits[key]
-           is_integer(value) and value > 0
-         end) do
-      :ok
-    else
-      {:error, Error.new(:invalid_input, operation)}
-    end
-  end
+  defp validate_limits(_limits, operation),
+    do: {:error, Error.new(:invalid_input, operation)}
 
   defp measure(ast, limits, operation) do
     case measure_term(ast, 1, 0, limits) do
@@ -270,10 +276,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.SafeAst do
     end
   end
 
-  defp literal_keyword(values, limits) do
-    Enum.reduce_while(values, {:ok, []}, fn {key, value}, {:ok, result} ->
-      {:ok, name} = atom_name(key)
-
+  defp literal_keyword(entries, limits) do
+    Enum.reduce_while(entries, {:ok, []}, fn {name, _key, value}, {:ok, result} ->
       case literal(value, limits) do
         {:ok, normalized} -> {:cont, {:ok, [{name, normalized} | result]}}
         {:unresolved, _reason} = unresolved -> {:halt, unresolved}
@@ -285,12 +289,23 @@ defmodule JidoCode.Knowledge.RepositoryWiki.SafeAst do
     end
   end
 
-  defp encoded_keyword?(values) do
-    values != [] and
-      Enum.all?(values, fn
-        {key, _value} -> match?({:ok, _name}, atom_name(key))
-        _other -> false
-      end)
+  defp keyword_entries([]), do: :error
+
+  defp keyword_entries(values) do
+    Enum.reduce_while(values, {:ok, []}, fn
+      {key, value}, {:ok, result} ->
+        case atom_name(key) do
+          {:ok, name} -> {:cont, {:ok, [{name, key, value} | result]}}
+          :error -> {:halt, :error}
+        end
+
+      _other, _result ->
+        {:halt, :error}
+    end)
+    |> case do
+      {:ok, entries} -> {:ok, Enum.reverse(entries)}
+      :error -> :error
+    end
   end
 
   defp concatenate(left, right, limits) do

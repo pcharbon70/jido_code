@@ -49,6 +49,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStaticTest do
 
     assert first == second
     assert first.profile == "mix-static/1.0.0"
+    assert first.profile_digest == MixStatic.profile().digest
     assert first.digest == second.digest
     assert first.dependency_count == 3
     assert first.model_calls == 0

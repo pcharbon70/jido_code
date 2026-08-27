@@ -3,8 +3,23 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixReconciler do
 
   alias JidoCode.Knowledge.Error
   alias JidoCode.Knowledge.RepositoryWiki.Contract
+  alias JidoCode.Knowledge.RepositoryWiki.LockParser
+  alias JidoCode.Knowledge.RepositoryWiki.MixStatic
 
   @profile "mix-reconcile/1.0.0"
+
+  @spec profile() :: map()
+  def profile do
+    value = %{
+      revision: @profile,
+      precedence: [:accepted_graph, :literal_declaration, :sandbox_observation],
+      conflicts: :preserve_all_candidates,
+      source_fencing: :exact,
+      model_calls: 0
+    }
+
+    Map.put(value, :digest, Contract.digest(value))
+  end
 
   @spec reconcile(map(), map() | nil, map() | nil, list(), map()) ::
           {:ok, map()} | {:error, Error.t()}
@@ -19,12 +34,15 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixReconciler do
          gaps <- gaps(static, lock, observation, field_gaps) do
       result = %{
         profile: @profile,
+        profile_digest: profile().digest,
         source_digest: static.source_digest,
         lock_digest: if(lock, do: lock.source_digest, else: nil),
         source_fence: attributes.source_fence,
         toolchain_digest: attributes.toolchain_digest,
         parser_profile: static.profile,
+        parser_profile_digest: static.profile_digest,
         lock_profile: if(lock, do: lock.profile, else: nil),
+        lock_profile_digest: if(lock, do: lock.profile_digest, else: nil),
         sandbox_profile: if(observation, do: observation.profile, else: nil),
         sandbox_profile_digest: if(observation, do: observation.profile_digest, else: nil),
         policy_revision: attributes.policy_revision,
@@ -43,7 +61,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixReconciler do
       {:ok, Map.put(result, :digest, Contract.digest(result))}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid()
     end
   rescue
     _error -> invalid()
@@ -54,7 +71,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixReconciler do
   defp validate_inputs(static, lock, observation, accepted_facts, attributes) do
     cond do
       static[:profile] != "mix-static/1.0.0" or not Contract.digest?(static[:digest]) or
-          not Contract.digest?(static[:source_digest]) ->
+        not Contract.digest?(static[:source_digest]) or
+          static[:profile_digest] != MixStatic.profile().digest ->
         invalid()
 
       attributes[:source_digest] != static.source_digest or
@@ -65,6 +83,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixReconciler do
 
       lock &&
           (lock[:profile] != "mix-lock/1.0.0" or not Contract.digest?(lock[:digest]) or
+             lock[:profile_digest] != LockParser.profile().digest or
              attributes[:lock_digest] != lock.source_digest) ->
         conflict()
 

@@ -69,10 +69,13 @@ defmodule JidoCode.Knowledge.RepositoryWiki.DependencyPages do
         link_digests:
           link_sets |> Enum.map(fn {name, value} -> {name, value.digest} end) |> Enum.sort(),
         parser_profile: reconciliation.parser_profile,
+        parser_profile_digest: reconciliation.parser_profile_digest,
         lock_profile: reconciliation.lock_profile,
+        lock_profile_digest: reconciliation.lock_profile_digest,
         sandbox_profile: reconciliation.sandbox_profile,
         sandbox_profile_digest: reconciliation.sandbox_profile_digest,
         resolver_profile: catalog.profile,
+        resolver_profile_digest: catalog.profile_digest,
         source_profile: catalog[:source_profile],
         source_fence: catalog.source_fence,
         toolchain_digest: reconciliation.toolchain_digest,

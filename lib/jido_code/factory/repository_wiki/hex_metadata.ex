@@ -43,6 +43,8 @@ defmodule JidoCode.Factory.RepositoryWiki.HexMetadata do
       retry: :deny,
       limits: @limits,
       cache: @cache_policy,
+      cache_profile: MetadataCache.profile().revision,
+      cache_profile_digest: MetadataCache.profile().digest,
       authority: :observed_only,
       html_interpretation: :forbidden,
       model_calls: 0
@@ -64,7 +66,6 @@ defmodule JidoCode.Factory.RepositoryWiki.HexMetadata do
       {:ok, result}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid()
     end
   rescue
     _error -> invalid()
@@ -328,9 +329,6 @@ defmodule JidoCode.Factory.RepositoryWiki.HexMetadata do
        retry_after: nil
      }}
   end
-
-  defp normalize_response(kind, route, _response, retrieved_at),
-    do: normalize_response(kind, route, {:error, :invalid_response}, retrieved_at)
 
   defp endpoint_error(kind, route, status, reason, response, retrieved_at) do
     {:error,

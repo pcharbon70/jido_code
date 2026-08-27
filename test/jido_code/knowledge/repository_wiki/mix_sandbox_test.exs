@@ -102,6 +102,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixSandboxTest do
     assert profile.isolation.docker_socket == false
     assert profile.isolation.network == :deny
     assert profile.digest == JidoCode.Factory.Sandbox.IsolationProfile.digest(profile.isolation)
+    assert String.match?(profile.contract_digest, ~r/^[a-f0-9]{64}$/)
   end
 
   test "runs the fixed command through the sandbox seam and normalizes observed facts", context do

@@ -36,7 +36,6 @@ defmodule JidoCode.Factory.RepositoryWiki.DependencySources do
       {:ok, Map.put(result, :digest, digest(Map.delete(result, :digest)))}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid()
     end
   rescue
     _error -> invalid()

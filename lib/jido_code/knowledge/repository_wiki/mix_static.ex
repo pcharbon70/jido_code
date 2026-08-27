@@ -15,7 +15,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
 
   @spec profile() :: map()
   def profile do
-    %{
+    value = %{
       revision: @profile,
       parser: System.version(),
       limits: @maximums,
@@ -24,6 +24,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
       code_loading: :forbidden,
       network: :forbidden
     }
+
+    Map.put(value, :digest, Contract.digest(value))
   end
 
   @spec extract(String.t(), map()) :: {:ok, map()} | {:error, Error.t()}
@@ -49,6 +51,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
 
       result = %{
         profile: @profile,
+        profile_digest: profile().digest,
         parser_version: System.version(),
         source_path: source_path,
         source_digest: sha256(source),
@@ -67,7 +70,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MixStatic do
       {:ok, Map.put(result, :digest, Contract.digest(result))}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid()
     end
   rescue
     _error -> invalid()

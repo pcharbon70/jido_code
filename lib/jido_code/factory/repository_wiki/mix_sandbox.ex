@@ -5,6 +5,7 @@ defmodule JidoCode.Factory.RepositoryWiki.MixSandbox do
   alias JidoCode.Factory.Sandbox
   alias JidoCode.Factory.Sandbox.IsolationProfile
   alias JidoCode.Factory.Sandbox.Request
+  alias JidoCode.Knowledge
   alias JidoCode.Knowledge.Error
 
   @profile "mix-sandbox/1.0.0"
@@ -64,7 +65,7 @@ defmodule JidoCode.Factory.RepositoryWiki.MixSandbox do
         limits: @limits
       })
 
-    %{
+    value = %{
       revision: @profile,
       executable: @command,
       argv: ["--schema", @profile, "--format", "json"],
@@ -82,6 +83,9 @@ defmodule JidoCode.Factory.RepositoryWiki.MixSandbox do
       isolation: isolation,
       digest: IsolationProfile.digest(isolation)
     }
+
+    contract_value = Map.put(value, :isolation, Map.from_struct(isolation))
+    Map.put(value, :contract_digest, Knowledge.repository_wiki_digest(contract_value))
   end
 
   @spec observe(map(), map(), keyword()) :: {:ok, map()} | {:error, Error.t()}
@@ -156,7 +160,8 @@ defmodule JidoCode.Factory.RepositoryWiki.MixSandbox do
     requested = Map.get(attributes, :requested_fields, [])
 
     cond do
-      static[:profile] != "mix-static/1.0.0" or not digest?(static[:digest]) ->
+      static[:profile] != "mix-static/1.0.0" or not digest?(static[:digest]) or
+          not digest?(static[:profile_digest]) ->
         invalid()
 
       not digest?(static[:source_digest]) ->
@@ -210,12 +215,11 @@ defmodule JidoCode.Factory.RepositoryWiki.MixSandbox do
 
   defp fixed_snapshot(%{snapshot_iri: snapshot_iri, files: files}, %Request{} = request, static)
        when is_map(files) do
-    allowed = MapSet.new([@mix_path, @lock_path])
     paths = Map.keys(files)
     mix_source = files[@mix_path]
 
     if snapshot_iri == request.base_snapshot_iri and paths != [] and
-         Enum.all?(paths, &MapSet.member?(allowed, &1)) and is_binary(mix_source) and
+         Enum.all?(paths, &(&1 in [@mix_path, @lock_path])) and is_binary(mix_source) and
          sha256(mix_source) == static.source_digest and
          Enum.all?(files, fn {_path, content} ->
            is_binary(content) and byte_size(content) <= 262_144
@@ -261,7 +265,7 @@ defmodule JidoCode.Factory.RepositoryWiki.MixSandbox do
          false <- forbidden_payload?(payload) do
       result = %{
         profile: @profile,
-        profile_digest: profile().digest,
+        profile_digest: profile().contract_digest,
         source_digest: static.source_digest,
         source_fence: attributes.source_fence,
         toolchain_digest: attributes.toolchain_digest,

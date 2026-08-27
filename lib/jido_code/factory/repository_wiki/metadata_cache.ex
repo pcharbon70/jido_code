@@ -3,7 +3,23 @@ defmodule JidoCode.Factory.RepositoryWiki.MetadataCache do
 
   use Agent
 
+  alias JidoCode.Knowledge
+
+  @profile "wiki-metadata-cache/1.0.0"
+
   @type key :: {String.t(), String.t(), atom(), String.t(), String.t(), String.t()}
+
+  @spec profile() :: map()
+  def profile do
+    value = %{
+      revision: @profile,
+      backend: :disposable_agent,
+      persistence: :none,
+      scope: [:tenant, :repository, :authorization_class, :package, :version, :request_profile]
+    }
+
+    Map.put(value, :digest, Knowledge.repository_wiki_digest(value))
+  end
 
   @spec start_link(keyword()) :: Agent.on_start()
   def start_link(options \\ []) when is_list(options) do
