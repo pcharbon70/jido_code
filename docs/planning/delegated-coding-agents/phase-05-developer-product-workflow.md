@@ -61,21 +61,21 @@ Back to plan: [README](./README.md)
       - [x] 5.2.1.4 Subtask - Extend the attempt experience to show normalized progress, clarification, boundary steering, workspace effects, checks, candidate, verification, disposition, and cleanup.
       - [x] 5.2.1.5 Subtask - Show controls only in valid states and omit publication, protected-branch, and merge controls for the DGA1 profile.
 
-  - [ ] 5.3 Section - Add the developer CLI.
+  - [x] 5.3 Section - Add the developer CLI.
 
     This section provides a scriptable local interface without placing task
     context or authentication material in command arguments.
 
-    - [ ] 5.3.1 Task {#dca-p05-cli} [repo: jido_code] [after: {#dca-p05-browser}] - Implement `mix jido_code.agent`.
+    - [x] 5.3.1 Task {#dca-p05-cli} [repo: jido_code] [after: {#dca-p05-browser}] - Implement `mix jido_code.agent`.
 
       This task invokes the same authenticated product gateways as the browser
       and JSON API.
 
-      - [ ] 5.3.1.1 Subtask - Add `catalog`, `submit`, `show`, `steer`, `answer`, `cancel`, and `handoff` subcommands.
-      - [ ] 5.3.1.2 Subtask - Accept bounded JSON requests through stdin or a protected regular file and never accept semantic task content or credentials directly in argv.
-      - [ ] 5.3.1.3 Subtask - Emit bounded machine-readable JSON with stable outcome codes and redacted diagnostics.
-      - [ ] 5.3.1.4 Subtask - Require authenticated local operator context for every query and action and reuse exact product authorization.
-      - [ ] 5.3.1.5 Subtask - Reject unknown fields, raw commands, executable paths, provider options, credentials, and stale offering references.
+      - [x] 5.3.1.1 Subtask - Add `catalog`, `submit`, `show`, `steer`, `answer`, `cancel`, and `handoff` subcommands.
+      - [x] 5.3.1.2 Subtask - Accept bounded JSON requests through stdin or a protected regular file and never accept semantic task content or credentials directly in argv.
+      - [x] 5.3.1.3 Subtask - Emit bounded machine-readable JSON with stable outcome codes and redacted diagnostics.
+      - [x] 5.3.1.4 Subtask - Require authenticated local operator context for every query and action and reuse exact product authorization.
+      - [x] 5.3.1.5 Subtask - Reject unknown fields, raw commands, executable paths, provider options, credentials, and stale offering references.
 
   - [ ] 5.4 Section - Phase 5 Integration Tests.
 
