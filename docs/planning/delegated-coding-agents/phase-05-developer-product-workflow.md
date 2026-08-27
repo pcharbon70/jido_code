@@ -44,22 +44,22 @@ Back to plan: [README](./README.md)
       - [x] 5.1.2.3 Subtask - Use bounded bearer authentication mapped to the existing product identity and authority context and never persist or echo the credential.
       - [x] 5.1.2.4 Subtask - Return stable outcome codes for admitted, duplicate, stale, unauthorized, incompatible, unavailable, rejected, and conflict cases.
 
-  - [ ] 5.2 Section - Build the browser catalog, submission, and attempt experience.
+  - [x] 5.2 Section - Build the browser catalog, submission, and attempt experience.
 
     This section presents native and delegated coding agents together while
     making their different trust, billing, readiness, rollout, and authority
     boundaries unmistakable.
 
-    - [ ] 5.2.1 Task {#dca-p05-browser} [repo: jido_code] [after: {#dca-p05-api}] - Implement the authenticated coding-agent workflow.
+    - [x] 5.2.1 Task {#dca-p05-browser} [repo: jido_code] [after: {#dca-p05-api}] - Implement the authenticated coding-agent workflow.
 
       This task gives developers a polished foreground workflow with explicit
       selection, consent, billing acknowledgement, and honest runtime status.
 
-      - [ ] 5.2.1.1 Subtask - Add an agent catalog and task-submission LiveView using `<Layouts.app>`, `current_scope`, streams, `to_form`, `<.input>`, and stable DOM IDs.
-      - [ ] 5.2.1.2 Subtask - Display runtime class, provider, deployment, billing, capability, readiness age, rollout stage, repository envelope, and material limitations.
-      - [ ] 5.2.1.3 Subtask - Require explicit profile selection plus foreground consent and billing acknowledgement before submission.
-      - [ ] 5.2.1.4 Subtask - Extend the attempt experience to show normalized progress, clarification, boundary steering, workspace effects, checks, candidate, verification, disposition, and cleanup.
-      - [ ] 5.2.1.5 Subtask - Show controls only in valid states and omit publication, protected-branch, and merge controls for the DGA1 profile.
+      - [x] 5.2.1.1 Subtask - Add an agent catalog and task-submission LiveView using `<Layouts.app>`, `current_scope`, streams, `to_form`, `<.input>`, and stable DOM IDs.
+      - [x] 5.2.1.2 Subtask - Display runtime class, provider, deployment, billing, capability, readiness age, rollout stage, repository envelope, and material limitations.
+      - [x] 5.2.1.3 Subtask - Require explicit profile selection plus foreground consent and billing acknowledgement before submission.
+      - [x] 5.2.1.4 Subtask - Extend the attempt experience to show normalized progress, clarification, boundary steering, workspace effects, checks, candidate, verification, disposition, and cleanup.
+      - [x] 5.2.1.5 Subtask - Show controls only in valid states and omit publication, protected-branch, and merge controls for the DGA1 profile.
 
   - [ ] 5.3 Section - Add the developer CLI.
 

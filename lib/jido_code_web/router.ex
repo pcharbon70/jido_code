@@ -48,6 +48,7 @@ defmodule JidoCodeWeb.Router do
     live_session :authenticated,
       on_mount: [{JidoCodeWeb.ProductAuth, :require_authenticated}] do
       live "/", HomeLive
+      live "/coding-agents", CodingAgentLive
       live "/managed-coding/:attempt_ref", ManagedCodingAttemptLive, :show
     end
   end

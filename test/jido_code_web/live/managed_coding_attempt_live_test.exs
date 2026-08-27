@@ -51,7 +51,20 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLiveTest do
     assert has_element?(view, "#managed-interactions > [id]")
     assert has_element?(view, "#managed-tools > [id]")
     assert has_element?(view, "#managed-checks > [id]")
+    assert has_element?(view, "#managed-attempt-agent")
+    assert has_element?(view, "#managed-attempt-profile")
+    assert has_element?(view, "#managed-workspace-evidence")
+    assert has_element?(view, "#managed-candidate-evidence")
+    assert has_element?(view, "#managed-verification-evidence")
+    assert has_element?(view, "#managed-disposition-evidence")
     assert has_element?(view, "#managed-control-form")
+    assert has_element?(view, "#managed-control-steer")
+    assert has_element?(view, "#managed-control-answer")
+    assert has_element?(view, "#managed-control-cancel")
+    assert has_element?(view, "#managed-control-handoff")
+    refute has_element?(view, "#managed-control-recovery")
+    refute has_element?(view, "[id*='publish']")
+    refute has_element?(view, "[id*='merge']")
 
     html = render(view)
     refute html =~ context.attempt.attempt_iri
@@ -131,6 +144,20 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLiveTest do
       verification: :pending,
       disposition: nil,
       evidence_iris: [iri("evidence")],
+      runtime_class: :delegated_cli,
+      profile_label: "Codex CLI workspace editor",
+      provider: :openai_codex,
+      deployment_class: :developer_local,
+      billing_mode: :subscription,
+      readiness: :ready,
+      readiness_age_seconds: 2,
+      rollout_stage: :evaluation,
+      repository_envelope: "isolated_worktree",
+      limitations: ["candidate_only", "no_publication_authority"],
+      workspace: %{"status" => "changed"},
+      candidate: %{"status" => "present"},
+      verification_details: %{"status" => "pending"},
+      disposition_details: %{"status" => "not_requested"},
       updated_at: ~U[2026-08-25 13:00:00Z]
     }
   end
