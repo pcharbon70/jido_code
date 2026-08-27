@@ -2,21 +2,21 @@
 
 ## Status
 
-This merge-pending receipt records the Phase 2 implementation built from
+This accepted receipt records the Phase 2 implementation built from
 repository main commit `1f70d3b1a73fde3a2429c7f99e09f32256a1a75d`, which
 contains the accepted RW1 merged candidate at
-`606f646440a5e3cc60285143395638d9e951b69a`. The implementation candidate is
-not accepted until its single implementation pull request passes clean-checkout
-CI, merges, and this receipt is updated in the required closure pull request
-with the full merge commit and merge date.
+`606f646440a5e3cc60285143395638d9e951b69a`. The implementation passed
+clean-checkout CI and merged through pull request #86 on 2026-08-27 as
+`81dd898dc92c757360c142661b30f88ce8df8c30`; RW2 is accepted at that exact
+merged candidate.
 
 The candidate implements bounded non-executing Mix and lock extraction, one
 fixed network-denied sandbox escalation profile, exact source reconciliation,
 complete represented lock closure, special-source containment, fixed Req Hex
 metadata acquisition, repository-scoped positive and negative caching, safe
 dependency links, deterministic dependency pages, and dependency-completeness
-lint. It emits zero model calls, tokens, and model cost. Phase 3 remains
-unauthorized while this receipt is merge-pending.
+lint. It emits zero model calls, tokens, and model cost. Phase 3 is authorized
+only from the exact pinned merged candidate.
 
 ## Candidate Provenance
 
@@ -29,8 +29,8 @@ unauthorized while this receipt is merge-pending.
 | Section 2.3 | `efe1f27195543d7de012c3fe14be545a43849461` - complete dependency resolution and special sources |
 | Section 2.4 | `86be4ec8f96568d29ff694afb675cedffc07ccad` - bounded metadata and safe links |
 | Section 2.5 | `91a7087806fe8690d740fa3f41e675ef891c67fa` - deterministic pages and dependency lint |
-| Section 2.6 | Merge-pending candidate commit containing this receipt |
-| Merged candidate | Pending implementation pull request, clean-checkout CI, and merge |
+| Section 2.6 | `e3ddd939a686f60b3e487283200bd01b03e6b3c0` - integration proof and merge-pending receipt |
+| Merged candidate | `81dd898dc92c757360c142661b30f88ce8df8c30` - pull request #86, merged 2026-08-27 |
 
 ## Governing Document Pins
 
@@ -155,7 +155,7 @@ unauthorized while this receipt is merge-pending.
 | Compile with warnings as errors | Passed |
 | Repository-wide isolated `mix precommit` | Passed; 1,005 tests, 0 failures in 605.4 seconds |
 | Dialyzer | Passed; 178 existing warnings skipped by policy, zero unignored errors |
-| Clean-checkout CI | Pending implementation pull request |
+| Clean-checkout CI | Passed at pull request #86 head `e3ddd939a686f60b3e487283200bd01b03e6b3c0`: CI run `33087387508` and Dialyzer run `33087387225` |
 
 ## Known Limits And Disabled Posture
 
@@ -168,17 +168,17 @@ unauthorized while this receipt is merge-pending.
   token-priced synthesis, or automated source mutation is enabled. Those remain
   Phase 4 or later work, and repository enrollment remains default-off under
   the accepted RW1 contract.
-- Clean-checkout CI, implementation merge provenance, the full Section 2.6
-  commit, merge date, and closure checklist pins remain intentionally open.
+- Clean-checkout CI, the implementation head, the full Section 2.6 commit,
+  merged candidate, merge date, and closure checklist state are pinned above.
 
 ## Gate RW2
 
-Status: **merge-pending**
+Status: **accepted at merged candidate**
 
-RW2 remains open until the implementation pull request passes clean-checkout
-CI and merges, after which the closure pull request must record the full merge
-commit and merge date and tick only the closure-authorized plan boxes. Phase 3
-is not authorized from this merge-pending receipt.
+RW2 is accepted at merge commit
+`81dd898dc92c757360c142661b30f88ce8df8c30`, merged on 2026-08-27 after
+clean-checkout CI passed. Phase 3 is authorized only from this exact pinned
+baseline.
 
 RW2 reopens regardless of checklist state if repository code executes on the
 host or escapes the exact fixed sandbox; a repository can select an executable,

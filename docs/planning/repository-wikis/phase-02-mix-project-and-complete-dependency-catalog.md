@@ -15,7 +15,7 @@ truth.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Compile Mix project identity and the complete dependency closure.
+- [x] 2 Phase - Compile Mix project identity and the complete dependency closure.
 
   This phase proves RW2 by combining safe static extraction, fixed sandbox
   escalation, lock resolution, closed Req metadata lookup, provenance, and
@@ -152,12 +152,12 @@ Back to plan: [README](./README.md)
       - [x] 2.5.2.3 Subtask - Reject unsafe links, missing source labels, silent static/sandbox conflicts, remote metadata represented as authoritative, and nondeterministic output.
       - [x] 2.5.2.4 Subtask - Produce machine-readable blocking errors, nonblocking warnings, coverage metrics, and a lint-profile digest attached to the edition.
 
-  - [ ] 2.6 Section - Phase 2 Integration Tests.
+  - [x] 2.6 Section - Phase 2 Integration Tests.
 
     This final section proves Mix and dependency knowledge is complete,
     bounded, deterministic, safe, and honest about uncertainty.
 
-    - [ ] 2.6.1 Task {#rwi-p02-integration} [repo: jido_code] [after: {#rwi-p02-dependency-lint}] - Execute the RW2 extraction, resolution, metadata, and rendering matrix.
+    - [x] 2.6.1 Task {#rwi-p02-integration} [repo: jido_code] [after: {#rwi-p02-dependency-lint}] - Execute the RW2 extraction, resolution, metadata, and rendering matrix.
 
       This task closes RW2 only when all supported lock nodes and edges appear
       in the wiki and no extraction path grants repository code authority.
@@ -167,14 +167,14 @@ Back to plan: [README](./README.md)
       - [x] 2.6.1.3 Subtask - Exercise direct, transitive, cyclic, optional, override, path, git, mixed-manager, missing, orphaned, private, and unsupported dependency graphs.
       - [x] 2.6.1.4 Subtask - Exercise Req success, redirect, TLS failure, timeout, rate limit, malformed JSON, oversized bodies, cache revalidation, stale fallback, unsafe links, and fixture replay.
       - [x] 2.6.1.5 Subtask - Prove deterministic editions, exact lock closure, zero-token evidence, safe links, graph/source fencing, and no cross-repository cache disclosure.
-      - [ ] 2.6.1.6 Subtask - Rerun RW1 and applicable harness/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
+      - [x] 2.6.1.6 Subtask - Rerun RW1 and applicable harness/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 2.6.2 Task {#rwi-p02-phase-receipt} [repo: jido_code] [after: {#rwi-p02-integration}] - Publish and pin the Phase 2 receipt.
+    - [x] 2.6.2 Task {#rwi-p02-phase-receipt} [repo: jido_code] [after: {#rwi-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records RW2 evidence in
       `docs/architecture/repository-wiki-phase-02-receipt.md`.
 
       - [x] 2.6.2.1 Subtask - Record parser, lock, sandbox, resolver, Req, cache, compiler, lint, fixture, source, and protocol revisions and digests.
       - [x] 2.6.2.2 Subtask - Keep RW2 open if repository code escapes the fixed sandbox, any supported lock node or edge is omitted, metadata overrides source truth, or an unsafe/unverified link becomes clickable.
-      - [ ] 2.6.2.3 Subtask - Preserve every gate reopening condition and attach extraction, containment, completeness, metadata, rendering, precommit, Dialyzer, and clean-checkout evidence.
-      - [ ] 2.6.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 2 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 3.
+      - [x] 2.6.2.3 Subtask - Preserve every gate reopening condition and attach extraction, containment, completeness, metadata, rendering, precommit, Dialyzer, and clean-checkout evidence.
+      - [x] 2.6.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 2 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 3.
