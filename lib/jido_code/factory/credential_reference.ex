@@ -34,6 +34,16 @@ defmodule JidoCode.Factory.CredentialReference do
 
   def new(_attributes), do: {:error, Error.new(:invalid_input, :credential_reference)}
 
+  @spec durable_record(t(), pos_integer()) :: map()
+  def durable_record(%__MODULE__{} = reference, revocation_generation)
+      when is_integer(revocation_generation) and revocation_generation > 0 do
+    %{
+      iri: reference.iri,
+      provider: reference.provider,
+      revocation_generation: revocation_generation
+    }
+  end
+
   defp valid_text?(value, maximum) do
     is_binary(value) and byte_size(value) in 1..maximum and
       not Regex.match?(~r/[\x00-\x1F\x7F]/u, value)

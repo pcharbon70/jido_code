@@ -336,7 +336,8 @@ defmodule JidoCode.Factory.DelegatedAgentPhase02TurnsTest do
       cli_version: CodexRelease.cli_version(),
       provider_version: CodexRelease.model(),
       context_digest: digest("context-#{run_id}"),
-      occurred_at: ~U[2026-08-26 14:30:00Z]
+      occurred_at: ~U[2026-08-26 14:30:00Z],
+      credential_attachment_digest: String.duplicate("b", 64)
     }
   end
 

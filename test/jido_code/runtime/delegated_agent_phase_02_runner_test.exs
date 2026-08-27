@@ -42,7 +42,8 @@ defmodule JidoCode.Runtime.DelegatedAgentPhase02RunnerTest do
       cli_version: CodexRelease.cli_version(),
       provider_version: CodexRelease.model(),
       context_digest: String.duplicate("a", 64),
-      occurred_at: @now
+      occurred_at: @now,
+      credential_attachment_digest: String.duplicate("b", 64)
     }
 
     options = [

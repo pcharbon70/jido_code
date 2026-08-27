@@ -264,13 +264,24 @@ defmodule JidoCodeWeb.Phase10ProductAcceptanceTest do
         :ok
 
       _pid ->
-        if StoreServer.summary(server).ready? do
-          Process.sleep(10)
-          await_unavailable!(server, attempts - 1)
-        else
-          :ok
+        case safe_summary(server) do
+          {:ok, %{ready?: true}} ->
+            Process.sleep(10)
+            await_unavailable!(server, attempts - 1)
+
+          {:ok, _summary} ->
+            :ok
+
+          :unavailable ->
+            :ok
         end
     end
+  end
+
+  defp safe_summary(server) do
+    {:ok, StoreServer.summary(server)}
+  catch
+    :exit, _reason -> :unavailable
   end
 
   defp stop_process(server) do
