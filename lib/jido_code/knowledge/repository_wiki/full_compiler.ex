@@ -978,7 +978,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.FullCompiler do
       {page.iri, @jf <> "completenessState", RDF.iri(Contract.concept(page.completeness))},
       {page.iri, @jf <> "audience", RDF.XSD.String.new(to_string(page.audience))}
       | Enum.map(page.source_iris, &{page.iri, @jf <> "wikiSource", RDF.iri(&1)})
-    ]
+    ] ++ optional_literal(page.iri, @jf <> "parentSlug", page.parent_slug)
   end
 
   defp link_statements(link) do
@@ -1001,6 +1001,11 @@ defmodule JidoCode.Knowledge.RepositoryWiki.FullCompiler do
       {gap.iri, @jf <> "omissionCode", RDF.XSD.String.new(to_string(gap.reason))}
     ]
   end
+
+  defp optional_literal(_subject, _predicate, nil), do: []
+
+  defp optional_literal(subject, predicate, value),
+    do: [{subject, predicate, RDF.XSD.String.new(value)}]
 
   defp guide_slug_index(guides) do
     base =

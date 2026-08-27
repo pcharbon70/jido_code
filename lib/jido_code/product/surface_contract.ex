@@ -50,6 +50,13 @@ defmodule JidoCode.Product.SurfaceContract do
       icon: "hero-light-bulb",
       projection: :accepted_knowledge,
       description: "Adopted assertions, provenance, and contradiction"
+    },
+    %{
+      id: "wiki",
+      label: "Wiki",
+      icon: "hero-book-open",
+      projection: :repository_wiki,
+      description: "Current repository guides, architecture, dependencies, and provenance"
     }
   ]
 
@@ -65,6 +72,13 @@ defmodule JidoCode.Product.SurfaceContract do
   @spec fetch(String.t() | nil) :: map()
   def fetch(id) when id in @surface_ids, do: Enum.find(@surfaces, &(&1.id == id))
   def fetch(_id), do: default()
+
+  @spec visible(String.t() | nil, boolean()) :: [map()]
+  def visible(repository_iri, wiki_visible?) when is_binary(repository_iri) and wiki_visible?,
+    do: @surfaces
+
+  def visible(_repository_iri, _wiki_visible?),
+    do: Enum.reject(@surfaces, &(&1.id == "wiki"))
 
   @spec encode_resource(String.t()) :: {:ok, String.t()} | :error
   def encode_resource(iri) when is_binary(iri) do

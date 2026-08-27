@@ -5,6 +5,7 @@ defmodule JidoCodeWeb.HomeLiveTest do
 
   alias JidoCode.Product.CommandOutcome
   alias JidoCode.Product.Projection
+  alias JidoCode.Product.RepositoryWikiProjection
   alias JidoCode.Product.SurfaceContract
 
   setup %{conn: conn} do
@@ -13,6 +14,8 @@ defmodule JidoCodeWeb.HomeLiveTest do
     prior_pid = Application.get_env(:jido_code, :product_projection_test_pid)
     prior_gateway = Application.get_env(:jido_code, :product_command_gateway)
     prior_command = Application.get_env(:jido_code, :product_command_fixture)
+    prior_wiki_provider = Application.get_env(:jido_code, :repository_wiki_projection_provider)
+    prior_wiki_fixture = Application.get_env(:jido_code, :repository_wiki_projection_fixture)
 
     Application.put_env(
       :jido_code,
@@ -31,12 +34,22 @@ defmodule JidoCodeWeb.HomeLiveTest do
 
     Application.put_env(:jido_code, :product_command_fixture, {:ok, command_receipt()})
 
+    Application.put_env(
+      :jido_code,
+      :repository_wiki_projection_provider,
+      JidoCode.TestSupport.FakeRepositoryWikiProjectionProvider
+    )
+
+    Application.put_env(:jido_code, :repository_wiki_projection_fixture, wiki_projection())
+
     on_exit(fn ->
       restore_env(:product_projection_provider, prior_provider)
       restore_env(:product_projection_fixture, prior_fixture)
       restore_env(:product_projection_test_pid, prior_pid)
       restore_env(:product_command_gateway, prior_gateway)
       restore_env(:product_command_fixture, prior_command)
+      restore_env(:repository_wiki_projection_provider, prior_wiki_provider)
+      restore_env(:repository_wiki_projection_fixture, prior_wiki_fixture)
     end)
 
     conn =
@@ -179,6 +192,104 @@ defmodule JidoCodeWeb.HomeLiveTest do
     refute render(view) =~ "Repository enrollment committed"
   end
 
+  test "shows an authorized repository wiki with current status, navigation, sources, and backlinks",
+       %{conn: conn} do
+    {:ok, ref} = SurfaceContract.encode_resource("https://jido.run/id/repository/alpha")
+
+    {:ok, view, _html} =
+      live(
+        conn,
+        ~p"/?#{%{repository: ref, surface: "wiki", wiki_page: "overview", wiki_view: "overview"}}"
+      )
+
+    assert has_element?(view, "#factory-nav-wiki[aria-current='page']")
+    assert has_element?(view, "#repository-wiki")
+    assert has_element?(view, "#wiki-state", "current")
+    assert has_element?(view, "#wiki-stat-source", "source-fence-41")
+    assert has_element?(view, "#wiki-stat-tokens", "0 tokens · 0 cost")
+    assert has_element?(view, "#wiki-view-guides")
+    assert has_element?(view, "#wiki-navigation-pages > [id]")
+    assert has_element?(view, "#wiki-page-title", "Overview")
+    assert has_element?(view, "#wiki-page-sources > [id]", "README.md")
+    assert has_element?(view, "#wiki-page-backlinks > [id]", "Getting Started")
+
+    assert_receive {:repository_wiki_projection_load, authority, identity, options}
+    assert authority.actor_iri == identity.actor_iri
+    assert options[:repository] == "https://jido.run/id/repository/alpha"
+    assert options[:repository_authorized?]
+    assert options[:page_slug] == "overview"
+  end
+
+  test "uses bounded semantic events for wiki views, search, settings, and regeneration", %{
+    conn: conn
+  } do
+    {:ok, ref} = SurfaceContract.encode_resource("https://jido.run/id/repository/alpha")
+    {:ok, view, _html} = live(conn, ~p"/?#{%{repository: ref, surface: "wiki"}}")
+
+    view |> element("#wiki-view-search") |> render_click()
+
+    assert_patch(
+      view,
+      ~p"/?#{%{repository: ref, surface: "wiki", wiki_view: "search"}}"
+    )
+
+    assert has_element?(view, "#wiki-search-form")
+
+    view
+    |> form("#wiki-search-form", wiki_search: %{query: "getting started"})
+    |> render_submit()
+
+    assert_patch(
+      view,
+      ~p"/?#{%{repository: ref, surface: "wiki", wiki_query: "getting started", wiki_view: "search"}}"
+    )
+
+    assert has_element?(view, "#wiki-search-results > [id]", "Getting Started")
+
+    view |> element("#wiki-view-settings") |> render_click()
+    assert has_element?(view, "#wiki-settings-form")
+    assert has_element?(view, "#wiki-cost-posture", "Zero model tokens")
+
+    params = %{
+      mode: "automatic",
+      read_visibility: "retained",
+      retention: "standard",
+      confirmed: "true"
+    }
+
+    view
+    |> form("#wiki-settings-form", wiki_settings: params)
+    |> render_submit()
+
+    assert_receive {:configure_repository_wiki, authority, identity, repository, submitted}
+    assert authority.actor_iri == identity.actor_iri
+    assert repository == "https://jido.run/id/repository/alpha"
+    assert submitted["mode"] == "automatic"
+    assert has_element?(view, "#wiki-command-receipt", "committed")
+
+    view |> element("#wiki-regenerate") |> render_click()
+
+    assert_receive {:regenerate_repository_wiki, _authority, _identity,
+                    "https://jido.run/id/repository/alpha"}
+  end
+
+  test "renders disabled, stale, failed, and rebuilding wiki posture without leaking cached pages",
+       %{conn: conn} do
+    {:ok, ref} = SurfaceContract.encode_resource("https://jido.run/id/repository/alpha")
+
+    for state <- [:disabled, :hidden, :unauthorized, :unavailable] do
+      Application.put_env(
+        :jido_code,
+        :repository_wiki_projection_fixture,
+        RepositoryWikiProjection.unavailable(state, "https://jido.run/id/repository/alpha")
+      )
+
+      {:ok, view, _html} = live(conn, ~p"/?#{%{repository: ref, surface: "wiki"}}")
+      assert has_element?(view, "#wiki-state-#{state}")
+      refute has_element?(view, "#wiki-navigation-pages > [id]")
+    end
+  end
+
   defp projection do
     %Projection{
       state: :ready,
@@ -218,6 +329,117 @@ defmodule JidoCodeWeb.HomeLiveTest do
         state: "enrolled"
       }
     ]
+  end
+
+  defp wiki_projection do
+    %RepositoryWikiProjection{
+      state: :current,
+      visible?: true,
+      repository_iri: "https://jido.run/id/repository/alpha",
+      dataset_revision: 41,
+      enrollment: %{
+        state: :automatic,
+        read_visibility: :retained,
+        revision: 3
+      },
+      edition: %{
+        edition_iri: "https://jido.run/id/repo/alpha/wiki/edition/current",
+        source_fence: "source-fence-41",
+        compiler_profile: "wiki-deterministic-elixir/1.0.0",
+        compiler_digest: String.duplicate("a", 64),
+        freshness: "fresh",
+        generation_mode: :deterministic_only,
+        model_tokens: 0,
+        usage_cost_microunits: 0
+      },
+      navigation: [
+        %{
+          page_iri: "https://jido.run/id/repo/alpha/wiki/edition/current/page/overview",
+          slug: "overview",
+          title: "Overview",
+          kind: "project_overview",
+          audience: "user",
+          order: 0,
+          parent_slug: nil,
+          freshness: "fresh",
+          completeness: "complete",
+          content_digest: String.duplicate("b", 64)
+        },
+        %{
+          page_iri: "https://jido.run/id/repo/alpha/wiki/edition/current/page/getting-started",
+          slug: "getting-started",
+          title: "Getting Started",
+          kind: "user_guide",
+          audience: "user",
+          order: 1,
+          parent_slug: "user-guides",
+          freshness: "fresh",
+          completeness: "complete",
+          content_digest: String.duplicate("c", 64)
+        }
+      ],
+      selected_page: %{
+        page_iri: "https://jido.run/id/repo/alpha/wiki/edition/current/page/overview",
+        slug: "overview",
+        title: "Overview",
+        kind: "project_overview",
+        audience: "user",
+        order: 0,
+        freshness: "fresh",
+        completeness: "complete",
+        content_digest: String.duplicate("b", 64)
+      },
+      backlinks: [
+        %{
+          "id" => "backlink-1",
+          "sourceSlug" => "getting-started",
+          "sourceTitle" => "Getting Started"
+        }
+      ],
+      sources: [
+        %{
+          "id" => "source-1",
+          "source" => "source-1",
+          "sourceLocator" => "README.md",
+          "sourceAuthority" => "exact_git_snapshot",
+          "freshness" => "fresh"
+        }
+      ],
+      gaps: [
+        %{
+          "id" => "gap-1",
+          "sourceLocator" => "docs/missing.md",
+          "omissionCode" => "absent"
+        }
+      ],
+      history: [
+        %{
+          "id" => "history-1",
+          "revision" => 3,
+          "state" => "automatic",
+          "currentEdition" => "current"
+        }
+      ],
+      search_results: [
+        %{
+          slug: "getting-started",
+          title: "Getting Started",
+          audience: "user",
+          kind: "user_guide",
+          score: 16,
+          snippet: "Getting Started · user · user_guide"
+        }
+      ],
+      settings: %{
+        mode: :automatic,
+        read_visibility: :retained,
+        retention: :standard,
+        generation_mode: :deterministic_only,
+        token_posture: :zero_model_tokens,
+        regeneration_available?: true
+      },
+      warnings: []
+    }
   end
 
   defp restore_env(key, nil), do: Application.delete_env(:jido_code, key)

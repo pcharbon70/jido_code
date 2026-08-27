@@ -73,32 +73,32 @@ Back to plan: [README](./README.md)
       - [x] 3.2.2.4 Subtask - Mark the current edition stale when authoritative source or accepted compiler policy advances, while keeping the previous edition readable under configured policy.
       - [x] 3.2.2.5 Subtask - Fence classifications and scheduled work to exact enrollment, source, compiler, and policy revisions so later changes force reclassification.
 
-  - [ ] 3.3 Section - Expose reviewed wiki reads, search, and repository navigation.
+  - [x] 3.3 Section - Expose reviewed wiki reads, search, and repository navigation.
 
     This section gives people a coherent wiki product without exposing raw
     graph access or introducing another authorization model.
 
-    - [ ] 3.3.1 Task {#rwi-p03-reviewed-reads} [repo: jido_code] [after: {#rwi-p03-update-classifier}] - Implement bounded current-edition reads and deterministic search.
+    - [x] 3.3.1 Task {#rwi-p03-reviewed-reads} [repo: jido_code] [after: {#rwi-p03-update-classifier}] - Implement bounded current-edition reads and deterministic search.
 
       This task serves only an authorized current or explicitly selected
       preview edition through semantic query gateways.
 
-      - [ ] 3.3.1.1 Subtask - Add reviewed queries for navigation tree, page by stable slug, backlinks, source references, dependency lookup, guide collections, edition status, and known gaps.
-      - [ ] 3.3.1.2 Subtask - Build disposable per-edition search indexes from accepted page fields with deterministic tokenization, bounded query syntax, ranking, limits, and snippets.
-      - [ ] 3.3.1.3 Subtask - Authorize every read by actor, tenant, repository, enrollment visibility, edition or preview scope, and retained-read policy.
-      - [ ] 3.3.1.4 Subtask - Reject raw SPARQL, graph IRIs, arbitrary predicates, cross-edition joins, unbounded search, hidden previews, and stale opaque references.
-      - [ ] 3.3.1.5 Subtask - Rebuild search and navigation projections from graph state after restart and prove neither projection is durable authority.
+      - [x] 3.3.1.1 Subtask - Add reviewed queries for navigation tree, page by stable slug, backlinks, source references, dependency lookup, guide collections, edition status, and known gaps.
+      - [x] 3.3.1.2 Subtask - Build disposable per-edition search indexes from accepted page fields with deterministic tokenization, bounded query syntax, ranking, limits, and snippets.
+      - [x] 3.3.1.3 Subtask - Authorize every read by actor, tenant, repository, enrollment visibility, edition or preview scope, and retained-read policy.
+      - [x] 3.3.1.4 Subtask - Reject raw SPARQL, graph IRIs, arbitrary predicates, cross-edition joins, unbounded search, hidden previews, and stale opaque references.
+      - [x] 3.3.1.5 Subtask - Rebuild search and navigation projections from graph state after restart and prove neither projection is durable authority.
 
-    - [ ] 3.3.2 Task {#rwi-p03-product} [repo: jido_code] [after: {#rwi-p03-reviewed-reads}] - Add repository wiki navigation, status, and settings to the authenticated product.
+    - [x] 3.3.2 Task {#rwi-p03-product} [repo: jido_code] [after: {#rwi-p03-reviewed-reads}] - Add repository wiki navigation, status, and settings to the authenticated product.
 
       This task gives users one repository-scoped entry point for current
       knowledge, enrollment, freshness, history, and generation controls.
 
-      - [ ] 3.3.2.1 Subtask - Add a Wiki destination to the existing repository navigation only when the current actor has retained-read permission and the repository policy permits visibility.
-      - [ ] 3.3.2.2 Subtask - Add Overview, Guides, Architecture, Project, Dependencies, Source, Search, History, and Known Gaps views using the same reviewed query gateway.
-      - [ ] 3.3.2.3 Subtask - Display current source revision, edition revision, freshness, compiler profile, generation mode, zero-token usage, degraded coverage, and last successful update.
-      - [ ] 3.3.2.4 Subtask - Add authorized settings for Off, Manual, and Automatic deterministic enrollment, retained reads, retention, and deterministic regeneration with explicit cost posture.
-      - [ ] 3.3.2.5 Subtask - Provide accessible loading, empty, disabled, stale, failed, rebuilding, preview, and current states with stable DOM identifiers and responsive navigation.
+      - [x] 3.3.2.1 Subtask - Add a Wiki destination to the existing repository navigation only when the current actor has retained-read permission and the repository policy permits visibility.
+      - [x] 3.3.2.2 Subtask - Add Overview, Guides, Architecture, Project, Dependencies, Source, Search, History, and Known Gaps views using the same reviewed query gateway.
+      - [x] 3.3.2.3 Subtask - Display current source revision, edition revision, freshness, compiler profile, generation mode, zero-token usage, degraded coverage, and last successful update.
+      - [x] 3.3.2.4 Subtask - Add authorized settings for Off, Manual, and Automatic deterministic enrollment, retained reads, retention, and deterministic regeneration with explicit cost posture.
+      - [x] 3.3.2.5 Subtask - Provide accessible loading, empty, disabled, stale, failed, rebuilding, preview, and current states with stable DOM identifiers and responsive navigation.
 
   - [ ] 3.4 Section - Isolate previews, review editions, and serialize activation.
 

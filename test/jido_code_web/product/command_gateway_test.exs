@@ -4,6 +4,8 @@ defmodule JidoCode.Product.CommandGatewayTest do
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.CommandEnvelope
   alias JidoCode.Knowledge.CommandReceipt
+  alias JidoCode.Knowledge.QueryResult
+  alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile
   alias JidoCode.Product.CommandGateway
   alias JidoCode.Product.CommandOutcome
 
@@ -101,6 +103,132 @@ defmodule JidoCode.Product.CommandGatewayTest do
     refute Map.has_key?(command.payload, :sparql)
   end
 
+  test "constructs a revision-fenced deterministic wiki policy transition from reviewed state" do
+    test_pid = self()
+    approved_at = ~U[2026-08-01 00:00:00Z]
+    {:ok, profile} = GenerationProfile.new(:manual_deterministic, %{approved_at: approved_at})
+
+    query = fn
+      :repository_wiki_enrollment_detail,
+      "2.10.0",
+      %{graph: _, resource: repository},
+      _authority,
+      scope,
+      [] ->
+        assert scope == repository
+        {:ok, query_result(:repository_wiki_enrollment_detail, [])}
+
+      :repository_wiki_generation_profiles,
+      "2.10.0",
+      %{graph: _graph},
+      _authority,
+      factory_scope,
+      [] ->
+        assert factory_scope == identity().factory_scope_iri
+
+        {:ok,
+         query_result(:repository_wiki_generation_profiles, [
+           %{
+             "profile" => term(profile.iri),
+             "profileKey" => term("manual_deterministic"),
+             "compilerProfile" => term(profile.compiler_profile),
+             "compilerDigest" => term(profile.compiler_digest),
+             "approved" => term(DateTime.to_iso8601(approved_at))
+           }
+         ])}
+    end
+
+    execute = fn command ->
+      send(test_pid, {:execute_wiki, command})
+      {:ok, receipt(command)}
+    end
+
+    params = %{
+      "mode" => "manual",
+      "read_visibility" => "retained",
+      "retention" => "standard",
+      "confirmed" => "true",
+      "graph" => "https://attacker.invalid/raw",
+      "command_type" => "RawSparql"
+    }
+
+    repository = "https://jido.run/id/repository/alpha"
+
+    assert {:ok, %CommandOutcome{outcome: :committed}} =
+             CommandGateway.configure_repository_wiki(
+               authority(),
+               identity(),
+               repository,
+               params,
+               clock: fn -> ~U[2026-08-04 11:00:00Z] end,
+               summary: fn -> %{dataset_revision: 22} end,
+               metadata: fn _graph -> {:ok, %{graph_revision: 8}} end,
+               query: query,
+               execute: execute
+             )
+
+    assert_receive {:execute_wiki, command}
+    assert command.command_type == "TransitionRepositoryWikiEnrollment"
+    assert command.command_version == "2.10.0"
+    assert command.scope_iri == repository
+    assert command.actor_iri == authority().actor_iri
+    assert command.expected_dataset_revision == 22
+    assert map_size(command.expected_graph_revisions) == 2
+    refute Map.has_key?(command.payload, :sparql)
+    assert command.payload.disable_effects == []
+  end
+
+  test "rejects unconfirmed or unregistered wiki settings before executing a write" do
+    repository = "https://jido.run/id/repository/alpha"
+
+    assert {:error, %{kind: :invalid_input}} =
+             CommandGateway.configure_repository_wiki(
+               authority(),
+               identity(),
+               repository,
+               %{
+                 "mode" => "automatic",
+                 "read_visibility" => "retained",
+                 "retention" => "standard",
+                 "confirmed" => "false"
+               },
+               summary: fn -> flunk("graph state must not be read") end
+             )
+
+    assert {:error, %{kind: :invalid_input}} =
+             CommandGateway.configure_repository_wiki(
+               authority(),
+               identity(),
+               repository,
+               %{
+                 "mode" => "synthesis",
+                 "read_visibility" => "retained",
+                 "retention" => "forever",
+                 "confirmed" => "true"
+               },
+               summary: fn -> flunk("graph state must not be read") end
+             )
+  end
+
+  test "admits regeneration only through an installed finite deterministic requester" do
+    repository = "https://jido.run/id/repository/alpha"
+
+    assert {:error, %{kind: :unavailable}} =
+             CommandGateway.regenerate_repository_wiki(authority(), identity(), repository)
+
+    requester = fn received_authority, received_repository, profile ->
+      assert received_authority.actor_iri == authority().actor_iri
+      assert received_repository == repository
+      assert profile == :manual_deterministic
+      {:ok, %CommandOutcome{outcome: :committed, retry: :never, dataset_revision: 23}}
+    end
+
+    assert {:ok, %CommandOutcome{outcome: :committed}} =
+             CommandGateway.regenerate_repository_wiki(authority(), identity(), repository,
+               requester: requester
+             )
+  end
+
   defp receipt(command) do
     CommandReceipt.success(:committed, %{
       command_iri: command.command_iri,
@@ -134,9 +262,31 @@ defmodule JidoCode.Product.CommandGatewayTest do
       factory_iri: "https://jido.run/id/repository-factory/default",
       factory_scope_iri: "https://jido.run/id/scope/factory/default",
       policy_boundary_iri: "https://jido.run/id/policy-boundary/default",
-      policy_iris: ["https://jido.run/id/policy/default"]
+      policy_iris: ["https://jido.run/id/policy/default"],
+      actor_iri: authority().actor_iri
     }
   end
+
+  defp query_result(name, data) do
+    %QueryResult{
+      query_name: name,
+      query_version: "2.10.0",
+      dataset_revision: 22,
+      graph_revisions: %{},
+      ontology_version: "1.5.0",
+      completeness: %{complete?: true},
+      freshness: %{state: :current},
+      truncated?: false,
+      cursor: nil,
+      warnings: [],
+      execution_class: :product,
+      consistency: :snapshot,
+      evaluated_at: ~U[2026-08-04 11:00:00Z],
+      data: data
+    }
+  end
+
+  defp term(value), do: %{type: :literal, value: value}
 
   defp authority do
     {:ok, authority} =

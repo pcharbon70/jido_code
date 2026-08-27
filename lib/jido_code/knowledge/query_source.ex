@@ -227,10 +227,12 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:repository_wiki_enrollment_detail) do
     """
-    SELECT ?enrollment ?revision ?state ?generation ?preview ?profile ?readVisibility ?accountingRetention ?auditRetention ?cancellationGeneration ?currentEdition ?recorded WHERE {
+    SELECT ?enrollment ?wiki ?tenant ?transition ?revision ?state ?generation ?preview ?profile ?readVisibility ?accountingRetention ?auditRetention ?cancellationGeneration ?currentEdition ?recorded WHERE {
       GRAPH {{graph}} {
         ?enrollment a <#{@jf}RepositoryWikiEnrollment> ;
                     <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}tenantScope> ?tenant ;
+                    <#{@jf}repositoryWiki> ?wiki ;
                     <#{@jf}enrollmentRevision> ?revision ;
                     <#{@jf}enrollmentState> ?state ;
                     <#{@jf}generationMode> ?generation ;
@@ -240,12 +242,39 @@ defmodule JidoCode.Knowledge.QuerySource do
                     <#{@jf}wikiAuditRetention> ?auditRetention ;
                     <#{@jf}wikiCancellationGeneration> ?cancellationGeneration ;
                     <#{@prov}generatedAtTime> ?recorded .
+        ?transition a <#{@jf}StateTransition> ;
+                    <#{@jf}transitionSubject> ?wiki ;
+                    <#{@jf}subjectRevision> ?revision .
         OPTIONAL { ?enrollment <#{@jf}wikiGenerationProfile> ?profile }
         OPTIONAL { ?enrollment <#{@jf}currentWikiEdition> ?currentEdition }
       }
     }
     ORDER BY DESC(?revision)
     LIMIT 1
+    """
+  end
+
+  def fetch(:repository_wiki_generation_profiles) do
+    """
+    SELECT ?profile ?profileKey ?revision ?maintenance ?generation ?preview ?readVisibility ?accountingRetention ?auditRetention ?compilerProfile ?compilerDigest ?approved ?expires WHERE {
+      GRAPH {{graph}} {
+        ?profile a <#{@jf}WikiGenerationProfile> ;
+                 <#{@jf}profileKey> ?profileKey ;
+                 <#{@jf}profileRevision> ?revision ;
+                 <#{@jf}maintenanceMode> ?maintenance ;
+                 <#{@jf}generationMode> ?generation ;
+                 <#{@jf}previewMode> ?preview ;
+                 <#{@jf}wikiReadVisibility> ?readVisibility ;
+                 <#{@jf}wikiAccountingRetention> ?accountingRetention ;
+                 <#{@jf}wikiAuditRetention> ?auditRetention ;
+                 <#{@jf}compilerProfile> ?compilerProfile ;
+                 <#{@jf}compilerDigest> ?compilerDigest ;
+                 <#{@jf}approvedAt> ?approved .
+        OPTIONAL { ?profile <#{@jf}expiresAt> ?expires }
+      }
+    }
+    ORDER BY ?profileKey ?profile
+    LIMIT {{row_limit}}
     """
   end
 
@@ -306,6 +335,146 @@ defmodule JidoCode.Knowledge.QuerySource do
       }
     }
     ORDER BY ?predicate ?source
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_navigation_tree) do
+    """
+    SELECT ?page ?kind ?stableKey ?slug ?title ?pageOrder ?audience ?parentSlug ?freshness ?completeness WHERE {
+      GRAPH {{graph}} {
+        ?page a <#{@jf}WikiPage> ;
+              <#{@jf}wikiEdition> {{resource}} ;
+              <#{@jf}pageKind> ?kind ;
+              <#{@jf}stableKey> ?stableKey ;
+              <#{@jf}slug> ?slug ;
+              <#{@jf}title> ?title ;
+              <#{@jf}pageOrder> ?pageOrder ;
+              <#{@jf}freshnessState> ?freshness ;
+              <#{@jf}completenessState> ?completeness .
+        OPTIONAL { ?page <#{@jf}audience> ?audience }
+        OPTIONAL { ?page <#{@jf}parentSlug> ?parentSlug }
+      }
+    }
+    ORDER BY ?pageOrder ?slug
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_page_by_slug) do
+    """
+    SELECT ?page ?kind ?stableKey ?slug ?title ?pageOrder ?audience ?parentSlug ?contentDigest ?freshness ?completeness WHERE {
+      GRAPH {{graph}} {
+        ?page a <#{@jf}WikiPage> ;
+              <#{@jf}wikiEdition> {{edition}} ;
+              <#{@jf}repositoryScope> {{resource}} ;
+              <#{@jf}pageKind> ?kind ;
+              <#{@jf}stableKey> ?stableKey ;
+              <#{@jf}slug> {{slug}} ;
+              <#{@jf}slug> ?slug ;
+              <#{@jf}title> ?title ;
+              <#{@jf}pageOrder> ?pageOrder ;
+              <#{@jf}contentDigest> ?contentDigest ;
+              <#{@jf}freshnessState> ?freshness ;
+              <#{@jf}completenessState> ?completeness .
+        OPTIONAL { ?page <#{@jf}audience> ?audience }
+        OPTIONAL { ?page <#{@jf}parentSlug> ?parentSlug }
+      }
+    }
+    LIMIT 1
+    """
+  end
+
+  def fetch(:repository_wiki_backlinks) do
+    """
+    SELECT ?link ?kind ?sourcePage ?sourceSlug ?sourceTitle WHERE {
+      GRAPH {{graph}} {
+        ?link a <#{@jf}WikiLink> ;
+              <#{@jf}linkKind> ?kind ;
+              <#{@jf}sourcePage> ?sourcePage ;
+              <#{@jf}targetPage> {{resource}} .
+        ?sourcePage a <#{@jf}WikiPage> ;
+                    <#{@jf}slug> ?sourceSlug ;
+                    <#{@jf}title> ?sourceTitle .
+      }
+    }
+    ORDER BY ?sourceSlug ?link
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_source_references) do
+    """
+    SELECT ?source ?sourceKind ?sourceAuthority ?sourceLocator ?sourceDigest ?freshness WHERE {
+      GRAPH {{graph}} {
+        {{resource}} a <#{@jf}WikiPage> ; <#{@jf}wikiSource> ?source .
+        ?source a <#{@jf}WikiSource> ;
+                <#{@jf}sourceKind> ?sourceKind ;
+                <#{@jf}sourceAuthority> ?sourceAuthority ;
+                <#{@jf}sourceContentDigest> ?sourceDigest ;
+                <#{@jf}freshnessState> ?freshness .
+        OPTIONAL { ?source <#{@jf}sourceLocator> ?sourceLocator }
+      }
+    }
+    ORDER BY ?sourceLocator ?source
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_dependency_lookup) do
+    """
+    SELECT ?page ?slug ?title ?contentDigest ?freshness ?completeness WHERE {
+      GRAPH {{graph}} {
+        ?page a <#{@jf}WikiPage> ;
+              <#{@jf}wikiEdition> {{edition}} ;
+              <#{@jf}repositoryScope> {{resource}} ;
+              <#{@jf}pageKind> <https://jido.run/ontology/concept/WikiDependency> ;
+              <#{@jf}title> {{dependency}} ;
+              <#{@jf}title> ?title ;
+              <#{@jf}slug> ?slug ;
+              <#{@jf}contentDigest> ?contentDigest ;
+              <#{@jf}freshnessState> ?freshness ;
+              <#{@jf}completenessState> ?completeness .
+      }
+    }
+    LIMIT 1
+    """
+  end
+
+  def fetch(:repository_wiki_guide_collection) do
+    """
+    SELECT ?page ?kind ?slug ?title ?pageOrder ?audience ?freshness ?completeness WHERE {
+      GRAPH {{graph}} {
+        ?page a <#{@jf}WikiPage> ;
+              <#{@jf}wikiEdition> {{edition}} ;
+              <#{@jf}repositoryScope> {{resource}} ;
+              <#{@jf}pageKind> ?kind ;
+              <#{@jf}slug> ?slug ;
+              <#{@jf}title> ?title ;
+              <#{@jf}pageOrder> ?pageOrder ;
+              <#{@jf}audience> {{audience}} ;
+              <#{@jf}audience> ?audience ;
+              <#{@jf}freshnessState> ?freshness ;
+              <#{@jf}completenessState> ?completeness .
+      }
+    }
+    ORDER BY ?pageOrder ?slug
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_known_gaps) do
+    """
+    SELECT ?gap ?gapKind ?sourceLocator ?omissionCode WHERE {
+      GRAPH {{graph}} {
+        ?gap a <#{@jf}WikiGap> ;
+             <#{@jf}wikiEdition> {{resource}} ;
+             <#{@jf}gapKind> ?gapKind ;
+             <#{@jf}sourceLocator> ?sourceLocator ;
+             <#{@jf}omissionCode> ?omissionCode .
+      }
+    }
+    ORDER BY ?sourceLocator ?gap
     LIMIT {{row_limit}}
     """
   end
