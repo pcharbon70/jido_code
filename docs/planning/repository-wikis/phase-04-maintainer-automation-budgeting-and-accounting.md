@@ -14,7 +14,7 @@ hosted synthesis provider and price profile disabled for V1.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Automate bounded wiki maintenance and prove complete cost governance.
+- [x] 4 Phase - Automate bounded wiki maintenance and prove complete cost governance.
 
   This phase proves RW4 by coordinating at most one current maintainer owner
   per repository, coalescing update work, enforcing opt-out, and recording
@@ -165,12 +165,12 @@ Back to plan: [README](./README.md)
       - [x] 4.5.2.3 Subtask - Recover incomplete editions, reservations, usage-pending attempts, metadata refreshes, and activation candidates under their exact original fences.
       - [x] 4.5.2.4 Subtask - Enter explicit degraded status when store, harness, artifact, profile, or accounting dependencies are unavailable and resume only after current revalidation.
 
-  - [ ] 4.6 Section - Phase 4 Integration Tests.
+  - [x] 4.6 Section - Phase 4 Integration Tests.
 
     This final section proves maintenance is optional, concurrency-safe,
     budgeted, fully accountable, recoverable, and synthesis-disabled in V1.
 
-    - [ ] 4.6.1 Task {#rwi-p04-integration} [repo: jido_code] [after: {#rwi-p04-maintainer-recovery}] - Execute the RW4 maintainer, budget, accounting, and opt-out matrix.
+    - [x] 4.6.1 Task {#rwi-p04-integration} [repo: jido_code] [after: {#rwi-p04-maintainer-recovery}] - Execute the RW4 maintainer, budget, accounting, and opt-out matrix.
 
       This task closes RW4 only when every admitted attempt reaches terminal
       usage evidence and disabling a repository prevents every later effect.
@@ -181,14 +181,14 @@ Back to plan: [README](./README.md)
       - [x] 4.6.1.4 Subtask - Exercise synthesis requests through fake adapters for missing opt-in, missing/disabled profile, no price, insufficient budget, stale reservation, provider failure, malformed output, usage drift, and late response.
       - [x] 4.6.1.5 Subtask - Prove production has no enabled hosted profile, no fake call reaches a real network, and all unavailable cases fail before token-bearing effect.
       - [x] 4.6.1.6 Subtask - Exercise disable during queued, compiling, sandbox, metadata, reserved, invoked, usage-pending, preview, activation, and recovery states; prove old-generation results are rejected.
-      - [ ] 4.6.1.7 Subtask - Rerun RW1-RW3 and applicable harness/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
+      - [x] 4.6.1.7 Subtask - Rerun RW1-RW3 and applicable harness/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 4.6.2 Task {#rwi-p04-phase-receipt} [repo: jido_code] [after: {#rwi-p04-integration}] - Publish and pin the Phase 4 receipt.
+    - [x] 4.6.2 Task {#rwi-p04-phase-receipt} [repo: jido_code] [after: {#rwi-p04-integration}] - Publish and pin the Phase 4 receipt.
 
       This task records RW4 evidence in
       `docs/architecture/repository-wiki-phase-04-receipt.md`.
 
       - [x] 4.6.2.1 Subtask - Record generation, price, budget, reservation, usage, cost, maintainer, scheduler, synthesis-boundary, cancellation, recovery, and fixture revisions and digests.
       - [x] 4.6.2.2 Subtask - Keep RW4 open if an unconfigured repository starts maintenance, concurrent attempts overspend, usage can disappear, synthesis reaches an effect without every gate, or disable accepts an old-generation result.
-      - [ ] 4.6.2.3 Subtask - Preserve every gate reopening condition and attach concurrency, zero-token, reservation, accounting, disabled-synthesis, opt-out, recovery, precommit, Dialyzer, and clean-checkout evidence.
-      - [ ] 4.6.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 4 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 5.
+      - [x] 4.6.2.3 Subtask - Preserve every gate reopening condition and attach concurrency, zero-token, reservation, accounting, disabled-synthesis, opt-out, recovery, precommit, Dialyzer, and clean-checkout evidence.
+      - [x] 4.6.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 4 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 5.
