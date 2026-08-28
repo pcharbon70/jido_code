@@ -351,7 +351,8 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   @memory_evaluation_version "2.7.0"
   @managed_coding_version "2.8.0"
   @delegated_agent_version "2.9.0"
-  @repository_wiki_version "2.10.0"
+  @repository_wiki_phase_3_version "2.10.0"
+  @repository_wiki_version "2.11.0"
   @phase_h01_contract_commands %{
     "EnrollModelAccessProfile" => %{
       owner: :runtime,
@@ -984,6 +985,60 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     }
   }
   @version_2_10 Map.merge(@version_2_9, @repository_wiki_commands)
+  @repository_wiki_accounting_commands %{
+    "AcquireWikiMaintainerLease" => %{
+      owner: :runtime,
+      capability: :wiki_writer,
+      graph_families: [:repository_control],
+      preconditions: [
+        :repository_scope_exact,
+        :enrollment_revision_exact,
+        :maintainer_profile_exact,
+        :lease_expired_or_absent,
+        :cancellation_generation_exact,
+        :next_fence_exact
+      ]
+    },
+    "ReserveWikiModelBudget" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:factory_catalog, :repository_control],
+      preconditions: [
+        :repository_scope_exact,
+        :budget_revision_exact,
+        :price_profile_exact,
+        :reservation_absent,
+        :aggregate_liability_available,
+        :invocation_identity_exact
+      ]
+    },
+    "RecordWikiModelUsage" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [
+        :reservation_identity_exact,
+        :attempt_identity_exact,
+        :accounting_fence_exact,
+        :terminal_usage_absent
+      ]
+    },
+    "InvokeWikiSynthesis" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [
+        :repository_scope_exact,
+        :synthesis_opt_in_exact,
+        :provider_profile_exact,
+        :price_profile_exact,
+        :reservation_identity_exact,
+        :source_fence_exact,
+        :invocation_before_effect_absent
+      ]
+    }
+  }
+  @version_2_11 Map.merge(@version_2_10, @repository_wiki_accounting_commands)
 
   @spec version() :: String.t()
   def version, do: @version
@@ -1053,7 +1108,8 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   def names(@memory_evaluation_version), do: @version_2_7 |> Map.keys() |> Enum.sort()
   def names(@managed_coding_version), do: @version_2_8 |> Map.keys() |> Enum.sort()
   def names(@delegated_agent_version), do: @version_2_9 |> Map.keys() |> Enum.sort()
-  def names(@repository_wiki_version), do: @version_2_10 |> Map.keys() |> Enum.sort()
+  def names(@repository_wiki_phase_3_version), do: @version_2_10 |> Map.keys() |> Enum.sort()
+  def names(@repository_wiki_version), do: @version_2_11 |> Map.keys() |> Enum.sort()
   def names(_version), do: []
 
   @spec resolve(String.t(), String.t()) :: {:ok, map()} | {:error, Error.t()}
@@ -1244,8 +1300,18 @@ defmodule JidoCode.Knowledge.CommandRegistry do
     end
   end
 
-  def resolve(name, @repository_wiki_version) when is_binary(name) do
+  def resolve(name, @repository_wiki_phase_3_version) when is_binary(name) do
     case Map.fetch(@version_2_10, name) do
+      {:ok, definition} ->
+        {:ok, Map.merge(definition, %{name: name, version: @repository_wiki_phase_3_version})}
+
+      :error ->
+        invalid(:command_type)
+    end
+  end
+
+  def resolve(name, @repository_wiki_version) when is_binary(name) do
+    case Map.fetch(@version_2_11, name) do
       {:ok, definition} ->
         {:ok, Map.merge(definition, %{name: name, version: @repository_wiki_version})}
 

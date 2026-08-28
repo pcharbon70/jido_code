@@ -92,6 +92,17 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.Compiler, as: RepositoryWikiCompiler
   alias JidoCode.Knowledge.RepositoryWiki.Edition, as: RepositoryWikiEdition
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
+  alias JidoCode.Knowledge.RepositoryWiki.GenerationCatalog, as: WikiGenerationCatalog
+  alias JidoCode.Knowledge.RepositoryWiki.PriceProfile, as: WikiPriceProfile
+  alias JidoCode.Knowledge.RepositoryWiki.Budget, as: WikiBudget
+  alias JidoCode.Knowledge.RepositoryWiki.Reservation, as: WikiReservation
+  alias JidoCode.Knowledge.RepositoryWiki.UsageAccounting, as: WikiUsageAccounting
+  alias JidoCode.Knowledge.RepositoryWiki.MaintainerProfile, as: WikiMaintainerProfile
+  alias JidoCode.Knowledge.RepositoryWiki.MaintainerLease, as: WikiMaintainerLease
+  alias JidoCode.Knowledge.RepositoryWiki.UpdateTrigger, as: WikiUpdateTrigger
+  alias JidoCode.Knowledge.RepositoryWiki.SynthesisRequest, as: WikiSynthesisRequest
+  alias JidoCode.Knowledge.RepositoryWiki.Cancellation, as: WikiCancellation
+  alias JidoCode.Knowledge.RepositoryWiki.MaintainerRecovery, as: WikiMaintainerRecovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
@@ -446,6 +457,84 @@ defmodule JidoCode.Knowledge do
 
   def register_wiki_generation_profile(profile, attributes, options \\ []),
     do: WikiGenerationProfile.register_command(profile, attributes, options)
+
+  def repository_wiki_generation_catalog_profile(key, attributes),
+    do: WikiGenerationCatalog.deterministic_profile(key, attributes)
+
+  def repository_wiki_disabled_synthesis_profile(key, attributes),
+    do: WikiGenerationCatalog.disabled_synthesis_profile(key, attributes)
+
+  def resolve_repository_wiki_generation_profile(key, attributes, evaluated_at),
+    do: WikiGenerationCatalog.resolve(key, attributes, evaluated_at)
+
+  def repository_wiki_price_profile(attributes), do: WikiPriceProfile.new(attributes)
+  def repository_wiki_budget(attributes), do: WikiBudget.new(attributes)
+
+  def reserve_repository_wiki_budget(request, context),
+    do: WikiReservation.admit(request, context)
+
+  def reserve_repository_wiki_budget_command(reservation, budget, attributes, options \\ []),
+    do: WikiReservation.reserve_command(reservation, budget, attributes, options)
+
+  def transition_repository_wiki_reservation(reservation, next_state, recorded_at),
+    do: WikiReservation.transition(reservation, next_state, recorded_at)
+
+  def repository_wiki_deterministic_usage(attributes),
+    do: WikiUsageAccounting.deterministic(attributes)
+
+  def repository_wiki_measured_usage(raw, price_profile, attributes),
+    do: WikiUsageAccounting.measured(raw, price_profile, attributes)
+
+  def reconcile_repository_wiki_usage(reservation, usage, context),
+    do: WikiUsageAccounting.reconcile(reservation, usage, context)
+
+  def record_repository_wiki_usage(usage, attributes, options \\ []),
+    do: WikiUsageAccounting.record_command(usage, attributes, options)
+
+  def repository_wiki_maintainer_profile(approved_at, expires_at \\ nil),
+    do: WikiMaintainerProfile.profile(approved_at, expires_at)
+
+  def repository_wiki_maintainer_eligibility(profile, enrollment, context),
+    do: WikiMaintainerProfile.eligible?(profile, enrollment, context)
+
+  def repository_wiki_manual_maintainer_eligibility(profile, enrollment, context),
+    do: WikiMaintainerProfile.manual_eligible?(profile, enrollment, context)
+
+  def acquire_repository_wiki_maintainer_lease(attributes, current \\ nil),
+    do: WikiMaintainerLease.acquire(attributes, current)
+
+  def renew_repository_wiki_maintainer_lease(lease, attributes),
+    do: WikiMaintainerLease.renew(lease, attributes)
+
+  def revoke_repository_wiki_maintainer_lease(lease, cancellation_generation, recorded_at),
+    do: WikiMaintainerLease.revoke(lease, cancellation_generation, recorded_at)
+
+  def acquire_repository_wiki_maintainer_lease_command(lease, attributes, options \\ []),
+    do: WikiMaintainerLease.acquire_command(lease, attributes, options)
+
+  def repository_wiki_update_trigger(type, payload, context),
+    do: WikiUpdateTrigger.new(type, payload, context)
+
+  def repository_wiki_trigger_priority(priority),
+    do: WikiUpdateTrigger.priority_weight(priority)
+
+  def repository_wiki_synthesis_request(attributes, context),
+    do: WikiSynthesisRequest.new(attributes, context)
+
+  def invoke_repository_wiki_synthesis_command(request, attributes, options \\ []),
+    do: WikiSynthesisRequest.invocation_command(request, attributes, options)
+
+  def plan_repository_wiki_cancellation(attributes),
+    do: WikiCancellation.plan(attributes)
+
+  def valid_repository_wiki_cancellation_plan?(plan),
+    do: WikiCancellation.valid_plan?(plan)
+
+  def repository_wiki_result_current?(result, current),
+    do: WikiCancellation.result_current?(result, current)
+
+  def plan_repository_wiki_maintainer_recovery(enrollment, facts, evaluated_at),
+    do: WikiMaintainerRecovery.plan(enrollment, facts, evaluated_at)
 
   def repository_wiki_default(repository_iri, tenant_iri),
     do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)

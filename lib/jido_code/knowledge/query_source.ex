@@ -619,6 +619,93 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:repository_wiki_maintainer_status) do
+    """
+    SELECT ?maintainer ?state ?generation ?profileDigest ?enrollmentRevision ?cancellationGeneration ?fence ?heartbeat ?started ?expires WHERE {
+      GRAPH {{graph}} {
+        ?maintainer a <#{@jf}WikiMaintainer> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}maintainerState> ?state ;
+                    <#{@jf}profileRevision> ?generation ;
+                    <#{@jf}profileDigest> ?profileDigest ;
+                    <#{@jf}enrollmentRevision> ?enrollmentRevision ;
+                    <#{@jf}wikiCancellationGeneration> ?cancellationGeneration ;
+                    <#{@jf}fencingToken> ?fence ;
+                    <#{@jf}heartbeatAt> ?heartbeat ;
+                    <#{@prov}generatedAtTime> ?started ;
+                    <#{@jf}expiresAt> ?expires .
+        FILTER(?started <= {{instant}})
+      }
+    }
+    ORDER BY DESC(?generation)
+    LIMIT 1
+    """
+  end
+
+  def fetch(:repository_wiki_pending_accounting) do
+    """
+    SELECT ?attempt ?invocation ?reservation ?providerRequest ?model ?priceRevision ?invoked WHERE {
+      GRAPH {{graph}} {
+        ?invocation a <#{@jf}ModelInvocation> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}wikiCompilationAttempt> ?attempt ;
+                    <#{@jf}wikiReservation> ?reservation ;
+                    <#{@prov}generatedAtTime> ?invoked .
+        OPTIONAL { ?invocation <#{@jf}providerRequest> ?providerRequest }
+        OPTIONAL { ?invocation <#{@jf}modelName> ?model }
+        OPTIONAL { ?invocation <#{@jf}priceRevision> ?priceRevision }
+        FILTER(?invoked <= {{instant}})
+        FILTER NOT EXISTS { ?usage <#{@jf}wikiCompilationAttempt> ?attempt ; a <#{@jf}WikiUsageRecord> }
+      }
+    }
+    ORDER BY ?invoked ?attempt
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_cost_records) do
+    """
+    SELECT ?usage ?attempt ?reservation ?state ?input ?output ?cached ?reasoning ?currency ?cost ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?usage a <#{@jf}WikiUsageRecord> ;
+               <#{@jf}repositoryScope> {{resource}} ;
+               <#{@jf}wikiCompilationAttempt> ?attempt ;
+               <#{@jf}accountingState> ?state ;
+               <#{@jf}modelInputTokens> ?input ;
+               <#{@jf}modelOutputTokens> ?output ;
+               <#{@jf}modelCachedTokens> ?cached ;
+               <#{@jf}modelReasoningTokens> ?reasoning ;
+               <#{@jf}usageCurrency> ?currency ;
+               <#{@jf}usageCost> ?cost ;
+               <#{@prov}generatedAtTime> ?recorded .
+        OPTIONAL { ?usage <#{@jf}wikiReservation> ?reservation }
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY ?recorded ?usage
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_recovery_status) do
+    """
+    SELECT ?observation ?status ?dependency ?enrollmentRevision ?cancellationGeneration ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?observation a <#{@jf}WikiRecoveryObservation> ;
+                     <#{@jf}repositoryScope> {{resource}} ;
+                     <#{@jf}recoveryStatus> ?status ;
+                     <#{@jf}enrollmentRevision> ?enrollmentRevision ;
+                     <#{@jf}wikiCancellationGeneration> ?cancellationGeneration ;
+                     <#{@prov}generatedAtTime> ?recorded .
+        OPTIONAL { ?observation <#{@jf}degradedDependency> ?dependency }
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY DESC(?recorded) ?dependency
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:resource_description) do
     """
     CONSTRUCT { {{resource}} ?predicate ?value }

@@ -13,11 +13,20 @@ defmodule JidoCode.Runtime.Supervisor do
       JidoCode.Runtime.JidoInstance,
       JidoCode.Runtime.JidoHarness.RunRegistry,
       {Registry, keys: :unique, name: JidoCode.Runtime.AttemptRegistry},
+      {Registry, keys: :unique, name: JidoCode.Runtime.RepositoryWikiMaintainerRegistry},
       {DynamicSupervisor,
        name: JidoCode.Runtime.AttemptSupervisor,
        strategy: :one_for_one,
        max_restarts: 20,
-       max_seconds: 10}
+       max_seconds: 10},
+      {DynamicSupervisor,
+       name: JidoCode.Runtime.RepositoryWikiMaintainerDynamicSupervisor,
+       strategy: :one_for_one,
+       max_restarts: 20,
+       max_seconds: 10},
+      JidoCode.Factory.RepositoryWiki.Coordinator,
+      JidoCode.Factory.RepositoryWiki.Scheduler,
+      JidoCode.Factory.RepositoryWiki.RecoveryCoordinator
     ]
 
     recovery = Application.get_env(:jido_code, :attempt_recovery, [])
