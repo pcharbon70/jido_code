@@ -7,6 +7,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
   alias JidoCode.Knowledge.RepositoryWiki.QualificationCorpus
   alias JidoCode.Knowledge.RepositoryWiki.QualityEvaluation
   alias JidoCode.Knowledge.RepositoryWiki.SecurityEvaluation
+  alias JidoCode.Knowledge.RepositoryWiki.SignedEvidence
   alias JidoCode.RepositoryWikiRelease
 
   @secret "rw5-pilot-release-signing-key-for-tests"
@@ -110,6 +111,30 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
 
     assert Map.has_key?(release.rollback_profiles, :stop_new_work)
     assert Map.has_key?(release.rollback_profiles, :immediate_disable)
+  end
+
+  test "rejects a validly signed pilot with inconsistent race evidence", %{pilot: pilot} do
+    forged_payload =
+      put_in(
+        pilot.payload,
+        [:race, :outcomes],
+        Enum.map(pilot.payload.race.outcomes, &%{&1 | outcome: :activated})
+      )
+
+    forged_payload = %{
+      forged_payload
+      | pilot_digest:
+          Contract.digest(
+            {forged_payload.compilation, forged_payload.review, forged_payload.race,
+             forged_payload.lifecycle}
+          )
+    }
+
+    assert {:ok, forged} =
+             SignedEvidence.sign(:jido_code_wiki_pilot_report, forged_payload, &sign/1)
+
+    assert {:error, %Error{kind: :unauthorized}} = Pilot.verify(forged, &verify/2)
+    refute Pilot.admitted?(forged)
   end
 
   test "admits and verifies the exact signed corpus, reports, and pilot tuple", fixture do

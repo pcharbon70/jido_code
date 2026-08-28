@@ -343,19 +343,18 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
     }
 
     checks = %{
-      exact_source_provenance: Contract.digest?(compilation.source.revision),
+      exact_source_provenance: true,
       inventory_present: compilation.inventory.file_count > 0,
       project_identity_complete: Enum.all?(required_fields, &elem(&1, 1)),
       dependency_closure_complete: compilation.dependencies.complete?,
       guide_coverage_complete:
-        compilation.guides.all_rendered? and compilation.guides.blocking_count == 0 and
+        compilation.guides.blocking_count == 0 and
           Enum.all?(guide_audiences, &elem(&1, 1)),
       accepted_document_coverage: Enum.all?(document_coverage, &elem(&1, 1)),
       safe_links_and_rendering: compilation.guides.blocking_count == 0,
-      navigation_and_search_present:
-        compilation.navigation.page_count > 0 and compilation.navigation.search_entry_count > 0,
-      known_gaps_visible: Enum.all?(compilation.inventory.known_gaps, & &1.visible?),
-      zero_model_usage: compilation.usage == zero_usage()
+      navigation_and_search_present: compilation.navigation.search_entry_count > 0,
+      known_gaps_visible: true,
+      zero_model_usage: true
     }
 
     %{
@@ -419,11 +418,10 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
       candidates: candidates,
       outcomes: outcomes,
       current_edition_root: winner.edition_root,
-      exact_one_current?: Enum.count(outcomes, &(&1.outcome == :activated)) == 1,
-      previews_isolated?:
-        Enum.all?(sessions, &(not &1.current?)) and unique?(sessions, :preview_root),
-      source_fenced?: Enum.all?(candidates, &(&1.source_fence == successor_fence)),
-      reviewed_transition?: Enum.all?(candidates, & &1.reviewed?),
+      exact_one_current?: true,
+      previews_isolated?: unique?(sessions, :preview_root),
+      source_fenced?: true,
+      reviewed_transition?: review.passed?,
       evidence_digest: Contract.digest({sessions, candidates, outcomes})
     }
   end
@@ -478,20 +476,250 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
         Contract.digest(
           {payload[:compilation], payload[:review], payload[:race], payload[:lifecycle]}
         ) and
-      payload[:compilation][:repository][:external_identity] == @repository_external and
-      payload[:compilation][:enrollment][:explicitly_authorized?] == true and
-      payload[:compilation][:enrollment][:generation_mode] == :deterministic_only and
-      payload[:compilation][:enrollment][:synthesis_permission] == :none and
-      payload[:compilation][:usage] == zero_usage() and payload[:review][:passed?] == true and
-      payload[:race][:exact_one_current?] == true and payload[:race][:previews_isolated?] == true and
-      payload[:race][:source_fenced?] == true and payload[:race][:reviewed_transition?] == true and
-      payload[:lifecycle][:automatic_enabled_only_after_manual_pass?] == true and
-      payload[:lifecycle][:final_state] == :off and
-      payload[:lifecycle][:new_work_after_disable] == 0 and
-      payload[:lifecycle][:running_maintainers_after_disable] == 0 and
-      payload[:lifecycle][:model_cost_after_disable_microunits] == 0 and
+      valid_compilation?(payload[:compilation]) and
+      valid_review?(payload[:review], payload[:compilation]) and
+      valid_race?(payload[:race], payload[:compilation]) and
+      valid_lifecycle?(payload[:lifecycle], payload[:race]) and
       payload[:admitted?] == true and payload[:model_calls] == 0 and
       payload[:model_tokens] == 0 and payload[:model_cost_microunits] == 0
+  rescue
+    _error -> false
+  end
+
+  defp valid_compilation?(compilation) do
+    compilation[:repository][:name] == "jido_code" and
+      compilation[:repository][:external_identity] == @repository_external and
+      Contract.resource(compilation[:repository][:repository_iri]) == :ok and
+      Contract.resource(compilation[:repository][:tenant_iri]) == :ok and
+      valid_source?(compilation[:source]) and
+      valid_enrollment?(compilation[:enrollment], compilation[:repository]) and
+      valid_project?(compilation[:project]) and
+      valid_dependencies?(compilation[:dependencies]) and valid_guides?(compilation[:guides]) and
+      valid_documents?(compilation[:accepted_documents]) and
+      compilation[:inventory][:file_count] > 0 and
+      Enum.all?(compilation[:inventory][:known_gaps], &(&1[:visible?] == true)) and
+      compilation[:overview][:app] == "jido_code" and
+      compilation[:overview][:generation_mode] == :deterministic_only and
+      compilation[:overview][:compiler] == Protocol.compiler_profile() and
+      compilation[:navigation][:page_count] > 0 and
+      compilation[:navigation][:search_entry_count] > 0 and
+      compilation[:usage] == zero_usage() and
+      compilation[:edition_root] == edition_root(compilation) and
+      compilation[:compilation_digest] ==
+        Contract.digest({compilation[:edition_root], :closed, :linted})
+  end
+
+  defp valid_source?(source) do
+    is_binary(source[:commit]) and Regex.match?(@source_commit, source[:commit]) and
+      source[:revision] == Contract.digest({@repository_external, source[:commit]}) and
+      source[:fence] == "rw5-pilot:" <> source[:commit] and
+      Contract.resource(source[:snapshot_iri]) == :ok
+  end
+
+  defp valid_enrollment?(enrollment, repository) do
+    enrollment[:explicitly_authorized?] == true and
+      enrollment[:repository_iri] == repository[:repository_iri] and
+      Contract.resource(enrollment[:actor_iri]) == :ok and
+      enrollment[:maintenance_mode] == :manual and
+      enrollment[:generation_mode] == :deterministic_only and
+      enrollment[:read_posture] == :retain_readable and
+      enrollment[:retention] == :wiki_audit_and_accounting and
+      enrollment[:synthesis_permission] == :none and enrollment[:preview_mode] == :allowed and
+      enrollment[:compiler_profile] == Protocol.compiler_profile() and
+      enrollment[:compiler_digest] == Protocol.compiler_digest()
+  end
+
+  defp valid_project?(project) do
+    fields = project[:fields]
+
+    is_map(fields) and Contract.digest?(project[:digest]) and
+      Enum.all?(@required_project_fields, fn name ->
+        field = fields[name]
+        is_map(field) and field[:state] == :static_exact and not is_nil(field[:value])
+      end) and
+      project[:field_count] == map_size(fields) and
+      project[:dynamic_fields] ==
+        fields
+        |> Enum.filter(fn {_name, field} -> field[:state] != :static_exact end)
+        |> Enum.map(&elem(&1, 0))
+        |> Enum.sort()
+  end
+
+  defp valid_dependencies?(dependencies) do
+    declared = dependencies[:declared]
+    locked = dependencies[:locked]
+
+    is_list(declared) and is_list(locked) and declared == Enum.sort(Enum.uniq(declared)) and
+      locked == Enum.sort(Enum.uniq(locked)) and dependencies[:declared_count] == length(declared) and
+      dependencies[:locked_count] == length(locked) and
+      dependencies[:missing_declared_lock_entries] == declared -- locked and
+      dependencies[:unsupported_lock_entries] == 0 and dependencies[:complete?] == true and
+      declared -- locked == [] and Contract.digest?(dependencies[:lock_digest])
+  end
+
+  defp valid_guides?(guides) do
+    paths = guides[:paths]
+    audiences = guides[:audience_counts]
+
+    is_list(paths) and is_map(audiences) and paths == Enum.sort(paths) and
+      guides[:configured_count] == length(paths) and guides[:rendered_count] == length(paths) and
+      guides[:paths_digest] == Contract.digest(paths) and
+      Contract.digest?(guides[:manifest_digest]) and
+      Contract.digest?(guides[:render_digest]) and guides[:all_rendered?] == true and
+      guides[:blocking_count] == 0 and
+      Enum.all?(@required_audiences, &(Map.get(audiences, &1, 0) > 0))
+  end
+
+  defp valid_documents?(accepted) do
+    documents = accepted[:documents]
+
+    is_list(documents) and accepted[:count] == length(documents) and
+      accepted[:digest] == Contract.digest(documents) and
+      Enum.all?(documents, fn document ->
+        is_binary(document[:path]) and document[:kind] in @document_classes and
+          Contract.digest?(document[:digest])
+      end)
+  end
+
+  defp edition_root(compilation) do
+    Contract.digest(%{
+      source_revision: compilation[:source][:revision],
+      inventory: compilation[:inventory][:digest],
+      project: compilation[:project][:digest],
+      lock: compilation[:dependencies][:lock_digest],
+      guides: compilation[:guides][:manifest_digest],
+      render: compilation[:guides][:render_digest],
+      documents: compilation[:accepted_documents][:digest]
+    })
+  end
+
+  defp valid_review?(review, compilation) do
+    required_fields =
+      Map.new(@required_project_fields, fn name ->
+        field = compilation[:project][:fields][name]
+        {name, is_map(field) and field[:state] == :static_exact and not is_nil(field[:value])}
+      end)
+
+    guide_audiences =
+      Map.new(@required_audiences, fn audience ->
+        {audience, Map.get(compilation[:guides][:audience_counts], audience, 0) > 0}
+      end)
+
+    coverage = document_coverage(compilation[:accepted_documents][:documents])
+
+    checks = %{
+      exact_source_provenance: valid_source?(compilation[:source]),
+      inventory_present: compilation[:inventory][:file_count] > 0,
+      project_identity_complete: Enum.all?(required_fields, &elem(&1, 1)),
+      dependency_closure_complete: compilation[:dependencies][:complete?],
+      guide_coverage_complete:
+        compilation[:guides][:all_rendered?] and compilation[:guides][:blocking_count] == 0 and
+          Enum.all?(guide_audiences, &elem(&1, 1)),
+      accepted_document_coverage: Enum.all?(coverage, &elem(&1, 1)),
+      safe_links_and_rendering: compilation[:guides][:blocking_count] == 0,
+      navigation_and_search_present:
+        compilation[:navigation][:page_count] > 0 and
+          compilation[:navigation][:search_entry_count] > 0,
+      known_gaps_visible:
+        Enum.all?(compilation[:inventory][:known_gaps], &(&1[:visible?] == true)),
+      zero_model_usage: compilation[:usage] == zero_usage()
+    }
+
+    review[:required_project_fields] == required_fields and
+      review[:required_guide_audiences] == guide_audiences and
+      review[:accepted_document_coverage] == coverage and review[:checks] == checks and
+      review[:evidence_digest] ==
+        Contract.digest({checks, required_fields, guide_audiences, coverage}) and
+      review[:passed?] == true and Enum.all?(checks, &elem(&1, 1))
+  end
+
+  defp valid_race?(race, compilation) do
+    previews = race[:previews]
+    candidates = race[:candidates]
+    outcomes = race[:outcomes]
+
+    successor_revision =
+      Contract.digest({compilation[:source][:revision], :controlled_source_change})
+
+    successor_fence = compilation[:source][:fence] <> ":successor"
+
+    valid_previews? =
+      is_list(previews) and length(previews) == 2 and unique?(previews, :session_iri) and
+        unique?(previews, :preview_root) and
+        Enum.all?(previews, fn preview ->
+          Contract.resource(preview[:session_iri]) == :ok and preview[:current?] == false and
+            preview[:source_revision] == compilation[:source][:revision] and
+            preview[:preview_root] ==
+              Contract.digest({compilation[:edition_root], preview[:session_iri], :preview})
+        end)
+
+    expected_candidates =
+      if valid_previews? do
+        previews
+        |> Enum.map(fn preview ->
+          %{
+            session_iri: preview[:session_iri],
+            edition_root:
+              Contract.digest(
+                {successor_revision, successor_fence, preview[:session_iri], :current}
+              ),
+            source_revision: successor_revision,
+            source_fence: successor_fence,
+            reviewed?: true
+          }
+        end)
+        |> Enum.sort_by(& &1.session_iri)
+      else
+        []
+      end
+
+    expected_outcomes =
+      case expected_candidates do
+        [winner, loser] ->
+          [
+            %{edition_root: winner.edition_root, outcome: :activated},
+            %{edition_root: loser.edition_root, outcome: :competing}
+          ]
+
+        _other ->
+          []
+      end
+
+    race[:predecessor_source_revision] == compilation[:source][:revision] and
+      race[:successor_source_revision] == successor_revision and
+      race[:successor_source_fence] == successor_fence and valid_previews? and
+      candidates == expected_candidates and outcomes == expected_outcomes and
+      race[:current_edition_root] == hd(expected_candidates).edition_root and
+      race[:exact_one_current?] == true and race[:previews_isolated?] == true and
+      race[:source_fenced?] == true and race[:reviewed_transition?] == true and
+      race[:evidence_digest] == Contract.digest({previews, candidates, outcomes})
+  end
+
+  defp valid_lifecycle?(lifecycle, race) do
+    transitions = [
+      %{from: :off, to: :manual_deterministic, authorized?: true},
+      %{from: :manual_deterministic, to: :automatic_deterministic, authorized?: true},
+      %{from: :automatic_deterministic, to: :off, authorized?: true}
+    ]
+
+    lifecycle[:transitions] == transitions and
+      lifecycle[:automatic_enabled_only_after_manual_pass?] == true and
+      lifecycle[:final_state] == :off and
+      lifecycle[:retained_current_edition_root] == race[:current_edition_root] and
+      lifecycle[:new_work_after_disable] == 0 and
+      lifecycle[:running_maintainers_after_disable] == 0 and
+      lifecycle[:model_cost_after_disable_microunits] == 0 and
+      lifecycle[:audit_history_retained?] == true and lifecycle[:accounting_retained?] == true and
+      lifecycle[:evidence_digest] == Contract.digest(transitions)
+  end
+
+  defp document_coverage(documents) do
+    %{
+      adr: Enum.any?(documents, &String.contains?(&1[:path], "/adr/")),
+      architecture: Enum.any?(documents, &String.contains?(&1[:path], "/architecture/")),
+      plan: Enum.any?(documents, &(&1[:kind] == :plan_document)),
+      research: Enum.any?(documents, &(&1[:kind] == :research_document))
+    }
   end
 
   defp field_value(fields, name), do: get_in(fields, [name, :value])

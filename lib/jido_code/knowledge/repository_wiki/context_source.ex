@@ -393,11 +393,10 @@ defmodule JidoCode.Knowledge.RepositoryWiki.ContextSource do
      fragment.page_iri, fragment.iri}
   end
 
-  defp safe_fragment_key(fragment) when is_map(fragment) do
+  defp safe_fragment_key(fragment) do
     Contract.digest({Map.get(fragment, :page_kind), Map.get(fragment, :page_iri)})
   end
 
-  defp safe_fragment_key(_fragment), do: Contract.digest(:invalid_fragment)
   defp token_estimate(value), do: div(byte_size(value) + 3, 4)
   defp nonnegative?(value), do: is_integer(value) and value >= 0
   defp bounded_text?(value, maximum), do: is_binary(value) and byte_size(value) in 1..maximum
