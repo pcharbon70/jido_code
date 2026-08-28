@@ -16,7 +16,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Command do
            CommandEnvelope.new(
              %{
                command_type: type,
-               command_version: Protocol.semantic_version(),
+               command_version:
+                 Map.get(attributes, :command_version, Protocol.semantic_version()),
                command_iri: command_iri,
                principal_iri: attributes[:principal_iri],
                actor_iri: attributes[:actor_iri],

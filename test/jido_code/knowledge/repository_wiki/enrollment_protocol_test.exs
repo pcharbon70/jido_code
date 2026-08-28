@@ -145,7 +145,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
              Knowledge.register_wiki_generation_profile(manual, attributes, clock: fn -> @now end)
 
     assert command.command_type == "RegisterWikiGenerationProfile"
-    assert command.command_version == "2.11.0"
+    assert command.command_version == "2.10.0"
     assert command.ontology_version == "1.5.0"
     assert get_in(command.payload, [:changes, Access.at(0), :family]) == :factory_catalog
   end

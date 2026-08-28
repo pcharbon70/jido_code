@@ -1,19 +1,18 @@
 defmodule JidoCode.Knowledge.RepositoryWiki.Protocol do
   @moduledoc "Pinned repository-wiki semantic and deterministic compiler identities."
 
-  @semantic_version "2.11.0"
-  @phase_3_semantic_version "2.10.0"
+  @semantic_version "2.10.0"
+  @runtime_semantic_version "2.11.0"
   @ontology_version "1.5.0"
   @compiler_profile "wiki-deterministic-elixir/1.0.0"
   @compiler_digest :crypto.hash(:sha256, @compiler_profile) |> Base.encode16(case: :lower)
   @profile_keys [:manual_deterministic, :automatic_deterministic]
   @reserved_commands [
-    "AcquireWikiMaintainerLease",
     "InvokeWikiSynthesis"
   ]
 
   def semantic_version, do: @semantic_version
-  def phase_3_semantic_version, do: @phase_3_semantic_version
+  def runtime_semantic_version, do: @runtime_semantic_version
   def ontology_version, do: @ontology_version
   def compiler_profile, do: @compiler_profile
   def compiler_digest, do: @compiler_digest

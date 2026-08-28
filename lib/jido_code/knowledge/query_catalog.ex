@@ -27,6 +27,7 @@ defmodule JidoCode.Knowledge.QueryCatalog do
   @managed_coding_version "2.8.0"
   @delegated_agent_version "2.9.0"
   @repository_wiki_version "2.10.0"
+  @repository_wiki_runtime_version "2.11.0"
   @versions [
     @version,
     @repository_version,
@@ -43,7 +44,8 @@ defmodule JidoCode.Knowledge.QueryCatalog do
     @dataset_version,
     @managed_coding_version,
     @delegated_agent_version,
-    @repository_wiki_version
+    @repository_wiki_version,
+    @repository_wiki_runtime_version
   ]
   @default_limits %{
     timeout_ms: 5_000,
@@ -102,6 +104,9 @@ defmodule JidoCode.Knowledge.QueryCatalog do
 
   @spec repository_wiki_version() :: String.t()
   def repository_wiki_version, do: @repository_wiki_version
+
+  @spec repository_wiki_runtime_version() :: String.t()
+  def repository_wiki_runtime_version, do: @repository_wiki_runtime_version
 
   @spec names() :: [atom()]
   def names, do: names(@version)
@@ -581,6 +586,30 @@ defmodule JidoCode.Knowledge.QueryCatalog do
           managed_coding_specifications(resource) ++
           delegated_agent_specifications(graph, resource) ++
           repository_wiki_specifications(graph, resource)
+
+      @repository_wiki_runtime_version ->
+        base ++
+          repository_specifications(resource) ++
+          source_specifications(graph) ++
+          work_specifications(graph) ++
+          governance_specifications(resource) ++
+          reconciliation_specifications(graph, resource) ++
+          scheduling_specifications(graph, resource) ++
+          execution_boundary_specifications(resource) ++
+          evidence_specifications(resource) ++
+          decision_specifications(resource) ++
+          memory_specifications(resource) ++
+          insight_specifications(resource) ++
+          history_specifications(resource) ++
+          experience_specifications(resource) ++
+          artifact_claim_specifications(resource) ++
+          procedure_specifications(resource) ++
+          content_specifications(resource) ++
+          dataset_specifications(resource) ++
+          managed_coding_specifications(resource) ++
+          delegated_agent_specifications(graph, resource) ++
+          repository_wiki_specifications(graph, resource) ++
+          repository_wiki_runtime_specifications(resource)
     end
   end
 
@@ -2241,6 +2270,22 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         [:repository_wiki],
         :table,
         "Read one bounded compilation attempt status without exposing process-local state.",
+        :diagnostic,
+        :declared
+      )
+    ]
+  end
+
+  defp repository_wiki_runtime_specifications(resource) do
+    [
+      spec(
+        :repository_wiki_maintainer_status,
+        :select,
+        Map.put(resource, :instant, %{type: :datetime, required: true}),
+        :observation,
+        [:repository_control],
+        :table,
+        "Read bounded graph-backed maintainer lease and health status for one repository.",
         :diagnostic,
         :declared
       )

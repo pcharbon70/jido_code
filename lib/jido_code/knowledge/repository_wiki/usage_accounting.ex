@@ -6,6 +6,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
   alias JidoCode.Knowledge.RepositoryWiki.Command
   alias JidoCode.Knowledge.RepositoryWiki.Contract
   alias JidoCode.Knowledge.RepositoryWiki.PriceProfile
+  alias JidoCode.Knowledge.RepositoryWiki.Protocol
   alias JidoCode.Knowledge.RepositoryWiki.Reservation
   alias JidoCode.Knowledge.ResourceIdentity
 
@@ -129,6 +130,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
              reservation_guard(control_graph, usage[:reservation_iri]),
          command_attributes <-
            attributes
+           |> Map.put(:command_version, Protocol.runtime_semantic_version())
            |> Map.put(:repository_iri, usage.repository_iri)
            |> Map.put(:source_fence, usage.source_revision)
            |> Map.put(:expected_graph_revisions, %{

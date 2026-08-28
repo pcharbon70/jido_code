@@ -986,6 +986,19 @@ defmodule JidoCode.Knowledge.CommandRegistry do
   }
   @version_2_10 Map.merge(@version_2_9, @repository_wiki_commands)
   @repository_wiki_accounting_commands %{
+    "AcquireWikiMaintainerLease" => %{
+      owner: :runtime,
+      capability: :wiki_writer,
+      graph_families: [:repository_control],
+      preconditions: [
+        :repository_scope_exact,
+        :enrollment_revision_exact,
+        :maintainer_profile_exact,
+        :lease_expired_or_absent,
+        :cancellation_generation_exact,
+        :next_fence_exact
+      ]
+    },
     "ReserveWikiModelBudget" => %{
       owner: :runtime,
       capability: :execution,

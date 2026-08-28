@@ -58,31 +58,31 @@ Back to plan: [README](./README.md)
       - [x] 4.1.3.4 Subtask - Commit one terminal accounting state for success, rejected-before-effect, failed-before-effect, failed-after-effect, cancelled, timed-out, usage-pending, or usage-unknown.
       - [x] 4.1.3.5 Subtask - Reconcile reservation release/consumption idempotently and prevent retries, duplicate callbacks, late results, or process restarts from double charging or erasing liability.
 
-  - [ ] 4.2 Section - Coordinate one optional maintainer owner per enrolled repository.
+  - [x] 4.2 Section - Coordinate one optional maintainer owner per enrolled repository.
 
     This section introduces a disposable runtime owner without making process
     identity, mailbox state, queue state, or timers durable truth.
 
-    - [ ] 4.2.1 Task {#rwi-p04-maintainer-profile} [repo: jido_code] [after: {#rwi-p04-usage-accounting}] - Implement closed maintainer profiles and eligibility.
+    - [x] 4.2.1 Task {#rwi-p04-maintainer-profile} [repo: jido_code] [after: {#rwi-p04-usage-accounting}] - Implement closed maintainer profiles and eligibility.
 
       This task controls when a repository may run a maintainer and which
       deterministic actions that owner may coordinate.
 
-      - [ ] 4.2.1.1 Subtask - Define maintainer profile identity, supported generation modes, trigger classes, debounce, coalescing, concurrency, limits, retry, backoff, lease, heartbeat, cancellation, and recovery rules.
-      - [ ] 4.2.1.2 Subtask - Require current automatic enrollment, exact repository scope, eligible deterministic generation profile, current policy, worker readiness, and no disable fence before ownership admission.
-      - [ ] 4.2.1.3 Subtask - Keep manual repositories process-free except during an admitted request and keep off repositories process-free with no queued work.
-      - [ ] 4.2.1.4 Subtask - Resolve every executable behavior from closed application registries and immutable profile digests rather than graph-selected modules or repository configuration.
+      - [x] 4.2.1.1 Subtask - Define maintainer profile identity, supported generation modes, trigger classes, debounce, coalescing, concurrency, limits, retry, backoff, lease, heartbeat, cancellation, and recovery rules.
+      - [x] 4.2.1.2 Subtask - Require current automatic enrollment, exact repository scope, eligible deterministic generation profile, current policy, worker readiness, and no disable fence before ownership admission.
+      - [x] 4.2.1.3 Subtask - Keep manual repositories process-free except during an admitted request and keep off repositories process-free with no queued work.
+      - [x] 4.2.1.4 Subtask - Resolve every executable behavior from closed application registries and immutable profile digests rather than graph-selected modules or repository configuration.
 
-    - [ ] 4.2.2 Task {#rwi-p04-maintainer-coordinator} [repo: jido_code] [after: {#rwi-p04-maintainer-profile}] - Implement the per-repository maintainer coordinator and leases.
+    - [x] 4.2.2 Task {#rwi-p04-maintainer-coordinator} [repo: jido_code] [after: {#rwi-p04-maintainer-profile}] - Implement the per-repository maintainer coordinator and leases.
 
       This task serializes ownership and current-source transitions while
       allowing the factory to run many different repositories concurrently.
 
-      - [ ] 4.2.2.1 Subtask - Start maintainers under a named DynamicSupervisor/Registry tuple keyed by canonical tenant and repository identity.
-      - [ ] 4.2.2.2 Subtask - Acquire a graph-backed lease with generation and fence before work; renew under current enrollment/profile revision and reject stale owners after takeover.
-      - [ ] 4.2.2.3 Subtask - Enforce at most one current owner and one current-source transition per repository while allowing bounded previews and unrelated repositories in parallel.
-      - [ ] 4.2.2.4 Subtask - Treat mailbox, local debounce state, timers, cursors, caches, and task processes as disposable projections rebuilt from graph state.
-      - [ ] 4.2.2.5 Subtask - Expose bounded status, health, lease age, queued/coalesced trigger count, active attempt, last result, and disabled reason through reviewed queries.
+      - [x] 4.2.2.1 Subtask - Start maintainers under a named DynamicSupervisor/Registry tuple keyed by canonical tenant and repository identity.
+      - [x] 4.2.2.2 Subtask - Acquire a graph-backed lease with generation and fence before work; renew under current enrollment/profile revision and reject stale owners after takeover.
+      - [x] 4.2.2.3 Subtask - Enforce at most one current owner and one current-source transition per repository while allowing bounded previews and unrelated repositories in parallel.
+      - [x] 4.2.2.4 Subtask - Treat mailbox, local debounce state, timers, cursors, caches, and task processes as disposable projections rebuilt from graph state.
+      - [x] 4.2.2.5 Subtask - Expose bounded status, health, lease age, queued/coalesced trigger count, active attempt, last result, and disabled reason through reviewed queries.
 
   - [ ] 4.3 Section - Schedule automatic deterministic updates and coalesce parallel triggers.
 

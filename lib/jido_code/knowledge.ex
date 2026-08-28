@@ -97,6 +97,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.Budget, as: WikiBudget
   alias JidoCode.Knowledge.RepositoryWiki.Reservation, as: WikiReservation
   alias JidoCode.Knowledge.RepositoryWiki.UsageAccounting, as: WikiUsageAccounting
+  alias JidoCode.Knowledge.RepositoryWiki.MaintainerProfile, as: WikiMaintainerProfile
+  alias JidoCode.Knowledge.RepositoryWiki.MaintainerLease, as: WikiMaintainerLease
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
@@ -484,6 +486,24 @@ defmodule JidoCode.Knowledge do
 
   def record_repository_wiki_usage(usage, attributes, options \\ []),
     do: WikiUsageAccounting.record_command(usage, attributes, options)
+
+  def repository_wiki_maintainer_profile(approved_at, expires_at \\ nil),
+    do: WikiMaintainerProfile.profile(approved_at, expires_at)
+
+  def repository_wiki_maintainer_eligibility(profile, enrollment, context),
+    do: WikiMaintainerProfile.eligible?(profile, enrollment, context)
+
+  def repository_wiki_manual_maintainer_eligibility(profile, enrollment, context),
+    do: WikiMaintainerProfile.manual_eligible?(profile, enrollment, context)
+
+  def acquire_repository_wiki_maintainer_lease(attributes, current \\ nil),
+    do: WikiMaintainerLease.acquire(attributes, current)
+
+  def renew_repository_wiki_maintainer_lease(lease, attributes),
+    do: WikiMaintainerLease.renew(lease, attributes)
+
+  def acquire_repository_wiki_maintainer_lease_command(lease, attributes, options \\ []),
+    do: WikiMaintainerLease.acquire_command(lease, attributes, options)
 
   def repository_wiki_default(repository_iri, tenant_iri),
     do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)

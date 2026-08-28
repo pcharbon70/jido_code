@@ -7,6 +7,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Reservation do
   alias JidoCode.Knowledge.RepositoryWiki.Command
   alias JidoCode.Knowledge.RepositoryWiki.Contract
   alias JidoCode.Knowledge.RepositoryWiki.PriceProfile
+  alias JidoCode.Knowledge.RepositoryWiki.Protocol
   alias JidoCode.Knowledge.ResourceIdentity
 
   @enforce_keys [
@@ -119,6 +120,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Reservation do
          ],
          command_attributes <-
            attributes
+           |> Map.put(:command_version, Protocol.runtime_semantic_version())
            |> Map.put(:repository_iri, reservation.repository_iri)
            |> Map.put(:source_fence, reservation.source_revision)
            |> Map.put(:expected_graph_revisions, %{graph => revision}),

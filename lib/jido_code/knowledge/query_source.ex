@@ -619,6 +619,25 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:repository_wiki_maintainer_status) do
+    """
+    SELECT ?maintainer ?state ?generation ?profileDigest ?started ?expires WHERE {
+      GRAPH {{graph}} {
+        ?maintainer a <#{@jf}WikiMaintainer> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}maintainerState> ?state ;
+                    <#{@jf}profileRevision> ?generation ;
+                    <#{@jf}profileDigest> ?profileDigest ;
+                    <#{@prov}generatedAtTime> ?started ;
+                    <#{@jf}expiresAt> ?expires .
+        FILTER(?started <= {{instant}})
+      }
+    }
+    ORDER BY DESC(?generation)
+    LIMIT 1
+    """
+  end
+
   def fetch(:resource_description) do
     """
     CONSTRUCT { {{resource}} ?predicate ?value }
