@@ -20,43 +20,43 @@ Back to plan: [README](./README.md)
   agent workflows without becoming authority, leaking across sessions, or
   weakening fleet safety, recovery, cost, and opt-out guarantees.
 
-  - [ ] 5.1 Section - Add reviewed wiki knowledge to bounded agent context.
+  - [x] 5.1 Section - Add reviewed wiki knowledge to bounded agent context.
 
     This section makes current wiki pages available as attributable context
     candidates while preserving the existing context assembler's authority and
     budgets.
 
-    - [ ] 5.1.1 Task {#rwi-p05-context-source} [repo: jido_code] [after: {#rwi-p04-phase-receipt}] - Implement the repository-wiki context source.
+    - [x] 5.1.1 Task {#rwi-p05-context-source} [repo: jido_code] [after: {#rwi-p04-phase-receipt}] - Implement the repository-wiki context source.
 
       This task exposes only current, authorized, source-fenced page fragments
       through the existing reviewed knowledge/context interfaces.
 
-      - [ ] 5.1.1.1 Subtask - Register a closed wiki context-source profile with eligible page kinds, freshness requirements, confidence threshold, fragment limits, byte/token estimates, ranking features, and source labels.
-      - [ ] 5.1.1.2 Subtask - Query current-edition Overview, Architecture, Project, Dependencies, Guides, Source, and Known Gaps fragments by exact actor, tenant, repository, task, source revision, and enrollment visibility.
-      - [ ] 5.1.1.3 Subtask - Attach edition, page, source, compiler, freshness, confidence, dependency, guide, and known-gap provenance to every candidate fragment.
-      - [ ] 5.1.1.4 Subtask - Reject previews, superseded/invalid editions, stale opaque references, hidden reads, cross-repository content, unsupported page classes, and fragments over profile bounds.
-      - [ ] 5.1.1.5 Subtask - Keep wiki candidates advisory: they cannot create graph facts, policies, commands, credentials, runtime selections, checks, publication decisions, or merge authority.
+      - [x] 5.1.1.1 Subtask - Register a closed wiki context-source profile with eligible page kinds, freshness requirements, confidence threshold, fragment limits, byte/token estimates, ranking features, and source labels.
+      - [x] 5.1.1.2 Subtask - Query current-edition Overview, Architecture, Project, Dependencies, Guides, Source, and Known Gaps fragments by exact actor, tenant, repository, task, source revision, and enrollment visibility.
+      - [x] 5.1.1.3 Subtask - Attach edition, page, source, compiler, freshness, confidence, dependency, guide, and known-gap provenance to every candidate fragment.
+      - [x] 5.1.1.4 Subtask - Reject previews, superseded/invalid editions, stale opaque references, hidden reads, cross-repository content, unsupported page classes, and fragments over profile bounds.
+      - [x] 5.1.1.5 Subtask - Keep wiki candidates advisory: they cannot create graph facts, policies, commands, credentials, runtime selections, checks, publication decisions, or merge authority.
 
-    - [ ] 5.1.2 Task {#rwi-p05-context-assembly} [repo: jido_code] [after: {#rwi-p05-context-source}] - Integrate wiki candidates into deterministic context assembly.
+    - [x] 5.1.2 Task {#rwi-p05-context-assembly} [repo: jido_code] [after: {#rwi-p05-context-source}] - Integrate wiki candidates into deterministic context assembly.
 
       This task combines wiki and existing memory/source candidates under one
       budget, deduplication, ranking, and provenance policy.
 
-      - [ ] 5.1.2.1 Subtask - Deduplicate wiki fragments against accepted source, architecture, memory, and task facts by source/digest relationships rather than display text alone.
-      - [ ] 5.1.2.2 Subtask - Rank current repository-specific wiki candidates below direct accepted task/source constraints and above only profile-approved lower-confidence summaries.
-      - [ ] 5.1.2.3 Subtask - Allocate bounded context bytes/tokens by page class, preserve known gaps and contradictory source evidence, and emit deterministic omission reasons.
-      - [ ] 5.1.2.4 Subtask - Record selected wiki edition/page/source identities in compiled-context provenance while keeping full page bodies out of launch metadata and diagnostics.
-      - [ ] 5.1.2.5 Subtask - Invalidate assembled context when current edition, source fence, enrollment visibility, task authorization, compiler profile, or context-source profile changes.
+      - [x] 5.1.2.1 Subtask - Deduplicate wiki fragments against accepted source, architecture, memory, and task facts by source/digest relationships rather than display text alone.
+      - [x] 5.1.2.2 Subtask - Rank current repository-specific wiki candidates below direct accepted task/source constraints and above only profile-approved lower-confidence summaries.
+      - [x] 5.1.2.3 Subtask - Allocate bounded context bytes/tokens by page class, preserve known gaps and contradictory source evidence, and emit deterministic omission reasons.
+      - [x] 5.1.2.4 Subtask - Record selected wiki edition/page/source identities in compiled-context provenance while keeping full page bodies out of launch metadata and diagnostics.
+      - [x] 5.1.2.5 Subtask - Invalidate assembled context when current edition, source fence, enrollment visibility, task authorization, compiler profile, or context-source profile changes.
 
-    - [ ] 5.1.3 Task {#rwi-p05-session-isolation} [repo: jido_code] [after: {#rwi-p05-context-assembly}] - Prove context isolation across parallel coding sessions.
+    - [x] 5.1.3 Task {#rwi-p05-session-isolation} [repo: jido_code] [after: {#rwi-p05-context-assembly}] - Prove context isolation across parallel coding sessions.
 
       This task ensures session-specific previews and concurrent repository
       updates never contaminate another agent's compiled context.
 
-      - [ ] 5.1.3.1 Subtask - Bind context queries to the managed-coding attempt's exact repository, accepted source snapshot, actor, tenant, session, task, and current wiki edition.
-      - [ ] 5.1.3.2 Subtask - Prevent session preview content from entering ordinary current-edition context; introduce no preview-context mode in V1.
-      - [ ] 5.1.3.3 Subtask - Race context assembly with wiki activation, disable, source drift, repository deletion/archive policy, and session cancellation; return stale/retry rather than mixed editions.
-      - [ ] 5.1.3.4 Subtask - Prove caches, search indexes, fragment identifiers, logs, and telemetry cannot disclose another actor, tenant, repository, session, or preview.
+      - [x] 5.1.3.1 Subtask - Bind context queries to the managed-coding attempt's exact repository, accepted source snapshot, actor, tenant, session, task, and current wiki edition.
+      - [x] 5.1.3.2 Subtask - Prevent session preview content from entering ordinary current-edition context; introduce no preview-context mode in V1.
+      - [x] 5.1.3.3 Subtask - Race context assembly with wiki activation, disable, source drift, repository deletion/archive policy, and session cancellation; return stale/retry rather than mixed editions.
+      - [x] 5.1.3.4 Subtask - Prove caches, search indexes, fragment identifiers, logs, and telemetry cannot disclose another actor, tenant, repository, session, or preview.
 
   - [ ] 5.2 Section - Complete fleet operations, observability, and cost reporting.
 
