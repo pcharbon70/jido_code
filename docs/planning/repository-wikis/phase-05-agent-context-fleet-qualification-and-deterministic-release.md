@@ -58,33 +58,33 @@ Back to plan: [README](./README.md)
       - [x] 5.1.3.3 Subtask - Race context assembly with wiki activation, disable, source drift, repository deletion/archive policy, and session cancellation; return stale/retry rather than mixed editions.
       - [x] 5.1.3.4 Subtask - Prove caches, search indexes, fragment identifiers, logs, and telemetry cannot disclose another actor, tenant, repository, session, or preview.
 
-  - [ ] 5.2 Section - Complete fleet operations, observability, and cost reporting.
+  - [x] 5.2 Section - Complete fleet operations, observability, and cost reporting.
 
     This section gives operators bounded evidence for wiki freshness, failures,
     resource usage, reservations, and costs without exposing repository content
     or credentials.
 
-    - [ ] 5.2.1 Task {#rwi-p05-cost-product} [repo: jido_code] [after: {#rwi-p05-session-isolation}] - Add repository wiki usage, budget, and cost views.
+    - [x] 5.2.1 Task {#rwi-p05-cost-product} [repo: jido_code] [after: {#rwi-p05-session-isolation}] - Add repository wiki usage, budget, and cost views.
 
       This task makes the cost of documentation generation visible even when
       the deterministic result is exactly zero model tokens.
 
-      - [ ] 5.2.1.1 Subtask - Display repository and period totals for attempts, deterministic local work, input/output/cached/reasoning tokens, reserved liability, measured cost, unknown liability, and currency.
-      - [ ] 5.2.1.2 Subtask - Break down usage by trigger, manual/automatic mode, generation profile, edition, actor, status, and source revision through reviewed bounded projections.
-      - [ ] 5.2.1.3 Subtask - Show budget limit, remaining amount, live reservations, expiration, profile availability, and why synthesis is unavailable in V1 without exposing provider credentials or internal prompts.
-      - [ ] 5.2.1.4 Subtask - Export audit-safe machine-readable evidence through an existing authorized operations surface only if one exists; add no new public API solely for V1 wiki release.
-      - [ ] 5.2.1.5 Subtask - Add accessibility, empty, partial, usage-pending, usage-unknown, multicurrency, and zero-token display tests using stable DOM identifiers.
+      - [x] 5.2.1.1 Subtask - Display repository and period totals for attempts, deterministic local work, input/output/cached/reasoning tokens, reserved liability, measured cost, unknown liability, and currency.
+      - [x] 5.2.1.2 Subtask - Break down usage by trigger, manual/automatic mode, generation profile, edition, actor, status, and source revision through reviewed bounded projections.
+      - [x] 5.2.1.3 Subtask - Show budget limit, remaining amount, live reservations, expiration, profile availability, and why synthesis is unavailable in V1 without exposing provider credentials or internal prompts.
+      - [x] 5.2.1.4 Subtask - Export audit-safe machine-readable evidence through an existing authorized operations surface only if one exists; add no new public API solely for V1 wiki release.
+      - [x] 5.2.1.5 Subtask - Add accessibility, empty, partial, usage-pending, usage-unknown, multicurrency, and zero-token display tests using stable DOM identifiers.
 
-    - [ ] 5.2.2 Task {#rwi-p05-operations} [repo: jido_code] [after: {#rwi-p05-cost-product}] - Add fleet health, alerts, runbooks, backup, and disaster-recovery evidence.
+    - [x] 5.2.2 Task {#rwi-p05-operations} [repo: jido_code] [after: {#rwi-p05-cost-product}] - Add fleet health, alerts, runbooks, backup, and disaster-recovery evidence.
 
       This task makes multi-repository wiki maintenance operable without
       treating ephemeral process state as the source of truth.
 
-      - [ ] 5.2.2.1 Subtask - Publish reviewed fleet summaries for enrollment states, current/stale ages, maintainer/lease health, queue pressure, compilation outcomes, coverage, reservations, usage terminality, and storage retention.
-      - [ ] 5.2.2.2 Subtask - Add alerts for stale current editions, repeated deterministic failure, abandoned editions, expired leases, stuck reservations, usage-pending/unknown, restore drift, and cross-scope invariant violations.
-      - [ ] 5.2.2.3 Subtask - Write runbooks for enrollment, manual regeneration, automatic maintenance, stale recovery, disable/teardown, reservation reconciliation, graph repair, backup/restore, and V1 synthesis-unavailable incidents.
-      - [ ] 5.2.2.4 Subtask - Execute backup and restore across multiple repository wiki graphs, rebuild disposable projections, restart eligible maintainers, and verify current/source/accounting fences.
-      - [ ] 5.2.2.5 Subtask - Bound telemetry labels and redact paths, source bodies, prompts, credentials, provider payloads, private dependency endpoints, and high-cardinality repository-controlled values.
+      - [x] 5.2.2.1 Subtask - Publish reviewed fleet summaries for enrollment states, current/stale ages, maintainer/lease health, queue pressure, compilation outcomes, coverage, reservations, usage terminality, and storage retention.
+      - [x] 5.2.2.2 Subtask - Add alerts for stale current editions, repeated deterministic failure, abandoned editions, expired leases, stuck reservations, usage-pending/unknown, restore drift, and cross-scope invariant violations.
+      - [x] 5.2.2.3 Subtask - Write runbooks for enrollment, manual regeneration, automatic maintenance, stale recovery, disable/teardown, reservation reconciliation, graph repair, backup/restore, and V1 synthesis-unavailable incidents.
+      - [x] 5.2.2.4 Subtask - Execute backup and restore across multiple repository wiki graphs, rebuild disposable projections, restart eligible maintainers, and verify current/source/accounting fences.
+      - [x] 5.2.2.5 Subtask - Bound telemetry labels and redact paths, source bodies, prompts, credentials, provider payloads, private dependency endpoints, and high-cardinality repository-controlled values.
 
   - [ ] 5.3 Section - Qualify security, determinism, usefulness, and fleet isolation.
 

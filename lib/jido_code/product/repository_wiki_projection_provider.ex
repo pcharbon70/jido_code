@@ -17,6 +17,7 @@ defmodule JidoCode.Product.RepositoryWikiProjectionProvider do
   alias JidoCode.Knowledge.QueryRunner
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Product.RepositoryWikiProjection
+  alias JidoCode.Product.RepositoryWikiOperationsProjection
   alias JidoCode.Product.RepositoryWikiQuerySecurity
   alias JidoCode.Product.RepositoryWikiSearchIndex
 
@@ -229,6 +230,8 @@ defmodule JidoCode.Product.RepositoryWikiProjectionProvider do
          gaps: gaps,
          history: history,
          search_results: search_results,
+         usage: operations_projection(repository, Keyword.get(options, :operations_projection)),
+         operations: fleet_projection(Keyword.get(options, :fleet_projection)),
          settings: settings(enrollment, Keyword.get(options, :regeneration_available?, false)),
          warnings:
            [enrollment_result, edition_result, navigation_result, gap_result, history_result]
@@ -300,10 +303,29 @@ defmodule JidoCode.Product.RepositoryWikiProjectionProvider do
       gaps: [],
       history: [],
       search_results: [],
+      usage: RepositoryWikiOperationsProjection.empty(repository, :empty),
+      operations: RepositoryWikiProjection.default_operations(:empty),
       settings: settings(enrollment, true),
       warnings: Enum.map(result.warnings, &safe_warning/1)
     }
   end
+
+  defp operations_projection(
+         repository,
+         %RepositoryWikiOperationsProjection{repository_iri: repository} = projection
+       ),
+       do: projection
+
+  defp operations_projection(repository, _projection),
+    do: RepositoryWikiOperationsProjection.empty(repository, :unavailable)
+
+  defp fleet_projection(%{repositories: repositories, alerts: alerts} = projection)
+       when is_list(repositories) and is_list(alerts) do
+    Map.merge(RepositoryWikiProjection.default_operations(:ready), projection)
+  end
+
+  defp fleet_projection(_projection),
+    do: RepositoryWikiProjection.default_operations(:unavailable)
 
   defp enrollment(%QueryResult{} = result) do
     result

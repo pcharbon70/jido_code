@@ -51,6 +51,11 @@ threat model for credential, cross-scope, sandbox, provider, or restore
 incidents. Rotate `JIDO_CODE_SESSION_GENERATION` after suspected browser-session
 compromise.
 
+Repository wiki enrollment, deterministic regeneration, automatic maintenance,
+opt-out, reservation reconciliation, graph repair, backup/restore verification,
+and V1 synthesis-unavailable incidents use the
+[repository wiki deterministic V1 runbook](./repository-wiki-v1-runbook.md).
+
 ## Architecture Map
 
 The Knowledge plane owns TripleStore, ontology, graph topology, semantic

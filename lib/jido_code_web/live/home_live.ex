@@ -53,6 +53,11 @@ defmodule JidoCodeWeb.HomeLive do
      |> stream_configure(:wiki_gaps, dom_id: &"wiki-gap-#{&1["id"]}")
      |> stream_configure(:wiki_sources, dom_id: &"wiki-source-#{&1["id"]}")
      |> stream_configure(:wiki_backlinks, dom_id: &"wiki-backlink-#{&1["id"]}")
+     |> stream_configure(:wiki_currency_totals, dom_id: &"wiki-currency-#{&1.id}")
+     |> stream_configure(:wiki_usage_breakdowns, dom_id: &"wiki-usage-breakdown-#{&1.id}")
+     |> stream_configure(:wiki_reservations, dom_id: &"wiki-reservation-#{&1.id}")
+     |> stream_configure(:wiki_fleet_repositories, dom_id: &"wiki-fleet-repository-#{&1.id}")
+     |> stream_configure(:wiki_alerts, dom_id: &"wiki-alert-#{&1.id}")
      |> stream(:repositories, [])
      |> stream(:work_items, [])
      |> stream(:attempts, [])
@@ -62,7 +67,12 @@ defmodule JidoCodeWeb.HomeLive do
      |> stream(:wiki_history, [])
      |> stream(:wiki_gaps, [])
      |> stream(:wiki_sources, [])
-     |> stream(:wiki_backlinks, [])}
+     |> stream(:wiki_backlinks, [])
+     |> stream(:wiki_currency_totals, [])
+     |> stream(:wiki_usage_breakdowns, [])
+     |> stream(:wiki_reservations, [])
+     |> stream(:wiki_fleet_repositories, [])
+     |> stream(:wiki_alerts, [])}
   end
 
   @impl true
@@ -913,7 +923,7 @@ defmodule JidoCodeWeb.HomeLive do
             <.wiki_stat
               id="tokens"
               label="Model usage"
-              value="0 tokens · 0 cost"
+              value={wiki_model_usage_value(@projection)}
             />
           </div>
 
@@ -1029,6 +1039,258 @@ defmodule JidoCodeWeb.HomeLive do
                   </p>
                 </article>
               </div>
+            <% "usage" -> %>
+              <section id="wiki-usage" aria-labelledby="wiki-usage-title" class="grid gap-5">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Accounting state
+                    </p>
+                    <h3 id="wiki-usage-title" class="mt-1 text-xl font-semibold">
+                      Repository usage and cost
+                    </h3>
+                  </div>
+                  <span
+                    id="wiki-usage-state"
+                    class="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground"
+                  >
+                    {@projection.usage.state}
+                  </span>
+                </div>
+
+                <div
+                  id="wiki-usage-totals"
+                  class="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 xl:grid-cols-4"
+                >
+                  <.wiki_stat
+                    id="usage-attempts"
+                    label="Attempts"
+                    value={Integer.to_string(@projection.usage.totals.attempts)}
+                  />
+                  <.wiki_stat
+                    id="usage-tokens"
+                    label="Model tokens"
+                    value={Integer.to_string(wiki_total_tokens(@projection.usage.totals))}
+                  />
+                  <.wiki_stat
+                    id="usage-reserved"
+                    label="Reserved liability"
+                    value={format_microunits(@projection.usage.totals.reserved_liability_microunits)}
+                  />
+                  <.wiki_stat
+                    id="usage-unknown"
+                    label="Unknown liability"
+                    value={format_microunits(@projection.usage.totals.unknown_liability_microunits)}
+                  />
+                </div>
+
+                <div class="grid gap-5 xl:grid-cols-2">
+                  <div class="rounded-xl border border-border bg-card p-5">
+                    <h4 class="font-semibold">Cost by currency</h4>
+                    <div id="wiki-currency-totals" phx-update="stream" class="mt-3 grid gap-2">
+                      <.stream_empty
+                        id="wiki-currency-empty"
+                        icon="hero-banknotes"
+                        message="No model-token usage or reservation is recorded for this period."
+                      />
+                      <article
+                        :for={{id, currency} <- @streams.wiki_currency_totals}
+                        id={id}
+                        class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-lg border border-border p-3"
+                      >
+                        <p class="font-mono text-sm font-semibold">{currency.currency}</p>
+                        <p class="text-right text-sm">
+                          measured {format_microunits(currency.measured)}
+                        </p>
+                        <p class="col-start-2 text-right text-xs text-muted-foreground">
+                          reserved {format_microunits(currency.reserved)} · unknown {format_microunits(
+                            currency.unknown
+                          )}
+                        </p>
+                      </article>
+                    </div>
+                  </div>
+
+                  <div id="wiki-budget" class="rounded-xl border border-border bg-card p-5">
+                    <h4 class="font-semibold">Budget and profile</h4>
+                    <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
+                      <dt class="text-muted-foreground">State</dt>
+                      <dd id="wiki-budget-state" class="text-right font-semibold">
+                        {@projection.usage.budget.state}
+                      </dd>
+                      <dt class="text-muted-foreground">Remaining</dt>
+                      <dd id="wiki-budget-remaining" class="text-right font-mono">
+                        {format_optional_microunits(
+                          @projection.usage.budget.remaining,
+                          @projection.usage.budget.currency
+                        )}
+                      </dd>
+                      <dt class="text-muted-foreground">Live reservations</dt>
+                      <dd id="wiki-budget-live" class="text-right font-mono">
+                        {@projection.usage.budget.live}
+                      </dd>
+                    </dl>
+                    <p
+                      id="wiki-synthesis-availability"
+                      class="mt-4 text-xs leading-5 text-muted-foreground"
+                    >
+                      Hosted synthesis is unavailable in deterministic V1. No provider credential, prompt, or endpoint is exposed here.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="grid gap-5 xl:grid-cols-2">
+                  <div class="rounded-xl border border-border bg-card p-5">
+                    <h4 class="font-semibold">Bounded breakdowns</h4>
+                    <div id="wiki-usage-breakdowns" phx-update="stream" class="mt-3 grid gap-2">
+                      <.stream_empty
+                        id="wiki-usage-breakdowns-empty"
+                        icon="hero-chart-bar"
+                        message="No usage breakdown is available."
+                      />
+                      <article
+                        :for={{id, item} <- @streams.wiki_usage_breakdowns}
+                        id={id}
+                        class="flex items-center justify-between gap-4 rounded-lg border border-border p-3 text-sm"
+                      >
+                        <span class="min-w-0 truncate">
+                          <span class="text-xs text-muted-foreground">{item.dimension}</span>
+                          <span class="ml-2 font-mono">{compact_iri(item.value)}</span>
+                        </span>
+                        <span class="shrink-0 text-xs text-muted-foreground">
+                          {item.attempts} attempts · {item.tokens} tokens
+                        </span>
+                      </article>
+                    </div>
+                  </div>
+
+                  <div class="rounded-xl border border-border bg-card p-5">
+                    <h4 class="font-semibold">Live reservations</h4>
+                    <div id="wiki-live-reservations" phx-update="stream" class="mt-3 grid gap-2">
+                      <.stream_empty
+                        id="wiki-reservations-empty"
+                        icon="hero-check-circle"
+                        message="No live model-cost reservation is held."
+                      />
+                      <article
+                        :for={{id, reservation} <- @streams.wiki_reservations}
+                        id={id}
+                        class="rounded-lg border border-border p-3 text-sm"
+                      >
+                        <div class="flex items-center justify-between gap-4">
+                          <span class="font-semibold">{reservation.state}</span>
+                          <span class="font-mono">
+                            {reservation.cost_microunits} {reservation.currency} µ
+                          </span>
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                          expires {format_datetime(reservation.expires_at)}
+                        </p>
+                      </article>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            <% "operations" -> %>
+              <section id="wiki-operations" aria-labelledby="wiki-operations-title" class="grid gap-5">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Graph-derived fleet posture
+                  </p>
+                  <h3 id="wiki-operations-title" class="mt-1 text-xl font-semibold">
+                    Repository wiki operations
+                  </h3>
+                </div>
+
+                <div
+                  id="wiki-fleet-summary"
+                  class="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 xl:grid-cols-4"
+                >
+                  <.wiki_stat
+                    id="fleet-repositories"
+                    label="Repositories"
+                    value={@projection.operations.repository_count}
+                  />
+                  <.wiki_stat
+                    id="fleet-stale"
+                    label="Stale"
+                    value={@projection.operations.stale_count}
+                  />
+                  <.wiki_stat
+                    id="fleet-queue"
+                    label="Queued"
+                    value={@projection.operations.queue_pending}
+                  />
+                  <.wiki_stat
+                    id="fleet-alerts"
+                    label="Alerts"
+                    value={@projection.operations.alert_count}
+                  />
+                </div>
+
+                <div class="grid gap-5 xl:grid-cols-2">
+                  <div class="rounded-xl border border-border bg-card p-5">
+                    <h4 class="font-semibold">Repository health</h4>
+                    <div id="wiki-fleet-repositories" phx-update="stream" class="mt-3 grid gap-2">
+                      <.stream_empty
+                        id="wiki-fleet-repositories-empty"
+                        icon="hero-server-stack"
+                        message="No authorized fleet health rows are available."
+                      />
+                      <article
+                        :for={{id, repository} <- @streams.wiki_fleet_repositories}
+                        id={id}
+                        class="rounded-lg border border-border p-3"
+                      >
+                        <div class="flex items-center justify-between gap-4 text-sm">
+                          <span class="truncate font-mono">
+                            {compact_iri(repository.repository_iri)}
+                          </span>
+                          <span class="font-semibold">{repository.current_state}</span>
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                          {repository.enrollment} · {repository.maintainer} · {repository.queue.pending} queued · {repository.accounting.live_reservations} reservations
+                        </p>
+                      </article>
+                    </div>
+                  </div>
+
+                  <div class="rounded-xl border border-border bg-card p-5">
+                    <h4 class="font-semibold">Active alerts</h4>
+                    <div id="wiki-operations-alerts" phx-update="stream" class="mt-3 grid gap-2">
+                      <.stream_empty
+                        id="wiki-alerts-empty"
+                        icon="hero-check-circle"
+                        message="No repository wiki operations alert is active."
+                      />
+                      <article
+                        :for={{id, alert} <- @streams.wiki_alerts}
+                        id={id}
+                        class={[
+                          "rounded-lg border p-3",
+                          alert.severity == :critical && "border-red-500/30 bg-red-500/5",
+                          alert.severity != :critical && "border-amber-500/30 bg-amber-500/5"
+                        ]}
+                      >
+                        <div class="flex items-center justify-between gap-4 text-sm">
+                          <span class="font-semibold">{alert.type}</span>
+                          <span class="text-xs uppercase tracking-wide">{alert.severity}</span>
+                        </div>
+                        <p class="mt-1 truncate font-mono text-xs text-muted-foreground">
+                          {compact_iri(alert.repository_iri)}
+                        </p>
+                      </article>
+                    </div>
+                  </div>
+                </div>
+
+                <aside
+                  id="wiki-runbook-note"
+                  class="rounded-xl border border-border bg-muted/40 p-5 text-sm leading-6 text-muted-foreground"
+                >
+                  Recovery uses the existing store backup, then rebuilds disposable navigation/search projections and restarts only eligible maintainers after current-edition, source, enrollment, cancellation, and accounting fences verify.
+                </aside>
+              </section>
             <% "settings" -> %>
               <div id="wiki-settings" class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
                 <.form
@@ -1355,6 +1617,11 @@ defmodule JidoCodeWeb.HomeLive do
     |> stream(:wiki_gaps, wiki_projection.gaps, reset: true)
     |> stream(:wiki_sources, wiki_projection.sources, reset: true)
     |> stream(:wiki_backlinks, wiki_projection.backlinks, reset: true)
+    |> stream(:wiki_currency_totals, wiki_projection.usage.currency_totals, reset: true)
+    |> stream(:wiki_usage_breakdowns, wiki_projection.usage.breakdowns, reset: true)
+    |> stream(:wiki_reservations, wiki_projection.usage.reservations, reset: true)
+    |> stream(:wiki_fleet_repositories, wiki_projection.operations.repositories, reset: true)
+    |> stream(:wiki_alerts, wiki_projection.operations.alerts, reset: true)
   end
 
   defp load_wiki_projection(socket, repository_index) do
@@ -1459,6 +1726,9 @@ defmodule JidoCodeWeb.HomeLive do
   end
 
   defp wiki_projection_metadata(projection) do
+    usage = %{projection.usage | currency_totals: [], breakdowns: [], reservations: []}
+    operations = %{projection.operations | repositories: [], alerts: []}
+
     %{
       projection
       | navigation: [],
@@ -1466,7 +1736,9 @@ defmodule JidoCodeWeb.HomeLive do
         sources: [],
         gaps: [],
         history: [],
-        search_results: []
+        search_results: [],
+        usage: usage,
+        operations: operations
     }
   end
 
@@ -1525,6 +1797,37 @@ defmodule JidoCodeWeb.HomeLive do
     do: Map.get(edition, key) || fallback
 
   defp wiki_edition_value(_projection, _key, fallback), do: fallback
+
+  defp wiki_model_usage_value(%{usage: %{totals: totals}}) do
+    tokens = wiki_total_tokens(totals)
+    cost = totals.measured_cost_microunits
+
+    if tokens == 0 and cost == 0,
+      do: "0 tokens · 0 cost",
+      else: "#{tokens} tokens · #{format_microunits(cost)}"
+  end
+
+  defp wiki_model_usage_value(_projection), do: "usage unavailable"
+
+  defp wiki_total_tokens(totals) do
+    totals.input_tokens + totals.output_tokens + totals.cached_tokens + totals.reasoning_tokens
+  end
+
+  defp format_microunits(value) when is_integer(value) and value >= 0,
+    do: "#{value} µunits"
+
+  defp format_microunits(_value), do: "unavailable"
+
+  defp format_optional_microunits(nil, _currency), do: "unavailable"
+
+  defp format_optional_microunits(value, currency)
+       when is_integer(value) and value >= 0 and is_binary(currency),
+       do: "#{value} #{currency} µ"
+
+  defp format_optional_microunits(_value, _currency), do: "unavailable"
+
+  defp format_datetime(%DateTime{} = value), do: DateTime.to_iso8601(value)
+  defp format_datetime(_value), do: "unavailable"
 
   defp compact_iri(value) when is_binary(value) do
     if byte_size(value) > 24, do: "…" <> String.slice(value, -23, 23), else: value
