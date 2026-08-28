@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_repository_wikis_phase_05
 parent_plan: plan.jido_code_repository_wikis
-status: approved
+status: completed
 intent: feature
 ---
 
@@ -14,7 +14,7 @@ synthesis remains unavailable after release.
 
 Back to plan: [README](./README.md)
 
-- [ ] 5 Phase - Qualify and release deterministic repository wikis across the coding factory.
+- [x] 5 Phase - Qualify and release deterministic repository wikis across the coding factory.
 
   This phase proves RW5 by showing reviewed wiki knowledge improves product and
   agent workflows without becoming authority, leaking across sessions, or
@@ -152,12 +152,12 @@ Back to plan: [README](./README.md)
       - [x] 5.4.2.4 Subtask - Publish operator/user/developer documentation, limitations, supported repository envelope, cost semantics, privacy behavior, retention, opt-out, rollback, and gate reopening conditions.
       - [x] 5.4.2.5 Subtask - Record rollback profiles that stop new work and maintainers without corrupting current editions, retained reads, usage, accounting, or audit history.
 
-  - [ ] 5.5 Section - Phase 5 Integration Tests.
+  - [x] 5.5 Section - Phase 5 Integration Tests.
 
     This final section proves deterministic repository wikis are safe and
     useful across the coding factory and ready for controlled opt-in release.
 
-    - [ ] 5.5.1 Task {#rwi-p05-integration} [repo: jido_code] [after: {#rwi-p05-release}] - Execute the RW5 context, fleet, pilot, and release matrix.
+    - [x] 5.5.1 Task {#rwi-p05-integration} [repo: jido_code] [after: {#rwi-p05-release}] - Execute the RW5 context, fleet, pilot, and release matrix.
 
       This task closes RW5 only when signed evidence proves every prior gate,
       V1 has no token-bearing provider path, and the pilot is reproducible from
@@ -165,17 +165,17 @@ Back to plan: [README](./README.md)
 
       - [x] 5.5.1.1 Subtask - Exercise wiki context selection, ranking, deduplication, budgets, provenance, staleness, activation races, opt-out, prompt injection, and cross-session/repository isolation.
       - [x] 5.5.1.2 Subtask - Exercise cost product views, zero-token reporting, pending/unknown liability, fleet summaries, alerts, runbooks, telemetry redaction, backup, restore, and maintainer restart.
-      - [ ] 5.5.1.3 Subtask - Run the signed security, completeness, determinism, usefulness, concurrency, performance, retention, recovery, and accounting corpus in a clean checkout.
-      - [ ] 5.5.1.4 Subtask - Rebuild the `jido_code` pilot from its pinned source and profile digests, compare canonical outputs, and verify its complete dependencies and guide coverage.
+      - [x] 5.5.1.3 Subtask - Run the signed security, completeness, determinism, usefulness, concurrency, performance, retention, recovery, and accounting corpus in a clean checkout.
+      - [x] 5.5.1.4 Subtask - Rebuild the `jido_code` pilot from its pinned source and profile digests, compare canonical outputs, and verify its complete dependencies and guide coverage.
       - [x] 5.5.1.5 Subtask - Prove all repositories remain Off unless explicitly enrolled, disabled repositories create no work or model cost, and no hosted synthesis profile can be selected or invoked.
-      - [ ] 5.5.1.6 Subtask - Rerun RW1-RW4 and applicable factory, harness, memory, managed-coding, delegated-agent, architecture, security, Dialyzer, `mix precommit`, and clean-checkout CI gates.
+      - [x] 5.5.1.6 Subtask - Rerun RW1-RW4 and applicable factory, harness, memory, managed-coding, delegated-agent, architecture, security, Dialyzer, `mix precommit`, and clean-checkout CI gates.
 
-    - [ ] 5.5.2 Task {#rwi-p05-phase-receipt} [repo: jido_code] [after: {#rwi-p05-integration}] - Publish and pin the Phase 5 receipt.
+    - [x] 5.5.2 Task {#rwi-p05-phase-receipt} [repo: jido_code] [after: {#rwi-p05-integration}] - Publish and pin the Phase 5 receipt.
 
       This task records RW5 evidence in
       `docs/architecture/repository-wiki-phase-05-receipt.md`.
 
-      - [ ] 5.5.2.1 Subtask - Record context, product, operations, corpus, evaluator, security, quality, pilot, release, rollback, profile, and clean-checkout revisions and digests.
+      - [x] 5.5.2.1 Subtask - Record context, product, operations, corpus, evaluator, security, quality, pilot, release, rollback, profile, and clean-checkout revisions and digests.
       - [x] 5.5.2.2 Subtask - Keep RW5 open if wiki context gains authority, sessions or repositories leak, deterministic replay differs, required knowledge is missing, opt-out creates work/cost, or any hosted synthesis path is enabled.
-      - [ ] 5.5.2.3 Subtask - Preserve every RW1-RW5 reopening condition and attach signed corpus, pilot, operations, recovery, cost, security, precommit, Dialyzer, and clean-checkout evidence.
-      - [ ] 5.5.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 5 Integration Tests section, receipt task, and pinning checkboxes before declaring the repository-wikis plan complete.
+      - [x] 5.5.2.3 Subtask - Preserve every RW1-RW5 reopening condition and attach signed corpus, pilot, operations, recovery, cost, security, precommit, Dialyzer, and clean-checkout evidence.
+      - [x] 5.5.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 5 Integration Tests section, receipt task, and pinning checkboxes before declaring the repository-wikis plan complete.

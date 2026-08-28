@@ -1,6 +1,6 @@
 ---
 id: plan.jido_code_repository_wikis
-status: approved
+status: completed
 intent: feature
 source:
   - docs/research/11-repository-wikis-as-compiled-knowledge-projections.md
