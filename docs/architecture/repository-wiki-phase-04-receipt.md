@@ -2,13 +2,13 @@
 
 ## Status
 
-This merge-pending receipt records the Phase 4 implementation built from
+This accepted receipt records the Phase 4 implementation built from
 repository main commit `28cc2c8c06f738db9f0d9f1b78c8b729b62b27f8`, which
 contains the accepted RW3 merged candidate at
-`b57b1d7eb19406d73a8fe8ca16948b62a9746f3a`. The implementation candidate is
-not accepted until its single implementation pull request passes exact-head
-clean-checkout CI, merges, and this receipt is updated in the required closure
-pull request with the full merge commit and merge date.
+`b57b1d7eb19406d73a8fe8ca16948b62a9746f3a`. Implementation pull request #93
+passed exact-head clean-checkout CI and Dialyzer and merged on 2026-08-28 as
+commit `255baefc0f3c3726e639104038a714ddacb85562`. RW4 is accepted at that exact
+merged candidate.
 
 The candidate installs optional per-repository maintainer ownership, bounded
 fleet scheduling, deterministic automatic updates, finite budgets and
@@ -16,8 +16,8 @@ reservations, terminal token and monetary accounting, a structurally disabled
 production synthesis boundary, accounting reconciliation, authoritative
 opt-out, and graph-derived recovery. Different repositories can progress in
 parallel, but one repository has at most one current maintainer owner and one
-current-source transition. Phase 5 remains unauthorized while this receipt is
-merge-pending.
+current-source transition. Repository Wiki Phase 5 is authorized only from the
+pinned merged candidate recorded here.
 
 ## Candidate Provenance
 
@@ -30,8 +30,8 @@ merge-pending.
 | Section 4.3 | `edb82a182728ce9c02ec412e2dbc5e9dfdba7c81` - authenticated triggers, bounded scheduling, coalescing, and automatic deterministic updates |
 | Section 4.4 | `043bcb61d06495bd81e02335a911881ea37822e2` - disabled synthesis invocation and accounting reconciliation |
 | Section 4.5 | `67c70a74a44906b2cc1d94454c72d3da4211594a` - authoritative cancellation, scheduler fencing, and graph-derived recovery |
-| Section 4.6 | Merge-pending candidate commit containing this receipt |
-| Merged candidate | Pending implementation pull request, clean-checkout CI, and merge |
+| Section 4.6 | `2be55f2d727f6b7f23fc81c80c5759a2c095a1ae` - integration proof and merge-pending receipt |
+| Merged candidate | `255baefc0f3c3726e639104038a714ddacb85562` - implementation pull request #93, merged 2026-08-28 |
 
 The shared-main baseline intentionally includes independent parallel-session
 work merged after RW3. RW3 remains the repository-wiki authorization
@@ -165,7 +165,7 @@ workspace state is used as durable wiki truth.
 | Compile with warnings as errors | Passed |
 | Dialyzer | Passed; 178 existing warnings skipped by policy, zero unignored errors, and zero unused filters |
 | Repository-wide `mix precommit` | Passed; 1,126 tests, 0 failures in 591.1 seconds; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | Pending implementation pull request |
+| Clean-checkout CI | Passed at exact implementation head `2be55f2d727f6b7f23fc81c80c5759a2c095a1ae`; CI run `33168801533` completed in 16m0s and Dialyzer run `33168801577` completed in 1m46s before merge |
 
 Before the clean full result, one run completed with a pre-existing
 command-pipeline temporary-directory teardown collision; that exact test
@@ -185,16 +185,17 @@ weakened by the local reruns.
 - Scheduler and worker state is disposable. Production persistence adapters
   must execute the semantic commands and reviewed graph queries pinned here;
   local queue state is never recovery truth.
-- This receipt remains merge-pending until exact-head clean-checkout CI, merge,
-  full merge SHA, merge date, and closure checklist pins are recorded.
+- Repository Wiki Phase 5 must start from merged candidate
+  `255baefc0f3c3726e639104038a714ddacb85562`; every reopening condition below
+  supersedes the accepted checklist state.
 
 ## Gate RW4
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-RW4 remains open. Phase 5 is unauthorized until the implementation candidate
-passes exact-head clean-checkout CI, merges, and this receipt is accepted at
-the exact merged candidate in the required closure pull request.
+RW4 is accepted at merged candidate
+`255baefc0f3c3726e639104038a714ddacb85562` on 2026-08-28. Repository Wiki
+Phase 5 is authorized only from that pinned baseline.
 
 RW4 reopens regardless of checklist state if an unconfigured, Off, Manual, or
 ineligible repository starts an automatic maintainer; more than one current
