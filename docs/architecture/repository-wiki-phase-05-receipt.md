@@ -2,21 +2,21 @@
 
 ## Status
 
-This merge-pending receipt records the Phase 5 implementation built from
-repository main commit `56a3687a1238629af8d8d636e1b2f68857d3dc92`, which
-contains the accepted RW4 merged candidate at
-`255baefc0f3c3726e639104038a714ddacb85562`. The implementation candidate is
-not accepted until its single implementation pull request passes exact-head
-clean-checkout CI and Dialyzer, merges, and this receipt is updated in the
-required closure pull request with the full merge commit and merge date.
+This accepted receipt records the Phase 5 implementation built from repository
+main commit `56a3687a1238629af8d8d636e1b2f68857d3dc92`, which contains the
+accepted RW4 merged candidate at
+`255baefc0f3c3726e639104038a714ddacb85562`. Implementation pull request #95
+passed exact-head clean-checkout CI and Dialyzer and merged on 2026-08-28 as
+commit `574808c1ab8f5ae002c0e7e77af95b53f611b72a`. RW5 is accepted at that exact
+merged candidate.
 
 The candidate adds advisory current-edition wiki context to parallel coding
 sessions, repository and fleet usage/cost/health projections, multi-repository
 backup and recovery evidence, a signed adversarial qualification corpus,
 fail-closed security and quality evaluators, the self-hosted `jido_code` pilot,
 and a closed deterministic V1 release catalog. Every repository remains Off by
-default. Hosted model synthesis remains unavailable. This repository-wikis
-plan remains open while the receipt is merge-pending.
+default. Hosted model synthesis remains unavailable. The five-phase
+repository-wikis plan is complete at this pinned deterministic V1 baseline.
 
 ## Candidate Provenance
 
@@ -28,8 +28,8 @@ plan remains open while the receipt is merge-pending.
 | Section 5.2 | `1769571dcdaff6a0cf5b3fac8d14f830ea837e1d` - fleet operations, observability, backup, and cost reporting |
 | Section 5.3 | `18ec29028ca43fabc02b137975a0f9bd0941a414` - signed corpus and fail-closed security/quality evidence |
 | Section 5.4 | `fb684d57e286b25517739b8976f0deda14e46cd7` - self-hosted pilot and deterministic V1 release catalog |
-| Section 5.5 | Merge-pending candidate commit containing integration proof and this receipt |
-| Merged candidate | Pending implementation pull request, clean-checkout CI, Dialyzer, and merge |
+| Section 5.5 | `a5c4802d4f7d10a216ec8962daadcfbaf7b0dbb7` - integration proof and merge-pending receipt |
+| Merged candidate | `574808c1ab8f5ae002c0e7e77af95b53f611b72a` - implementation pull request #95, merged 2026-08-28 |
 
 The shared workspace contained independent parallel-session work in a
 different worktree. Phase 5 changed only its own feature branch. No other
@@ -96,6 +96,7 @@ resource ceilings.
 | Contract | Revision, digest, and candidate source SHA-256 |
 | --- | --- |
 | Self-hosted pilot | `jido-code-repository-wiki-pilot/1.0.0`; source `f15877aa6f907d70bb1fc8521ac6a8b51e8b3f929914098504ed9343810c8b01` |
+| Signed merged-checkout pilot | Source `574808c1ab8f5ae002c0e7e77af95b53f611b72a`; source revision `26a26852b644ab0cdf649e64919d2fc32f14c6799dd92b13cf2e7a8fb37231eb`; report digest `15427aec26aac22c6b8ab838a01103f39f00a38474eeec39de321fa3b33d928d`; pilot digest `f68d0f4e8b8a17119da3d23ce216e67df834cc9816c987a6b4f7bab8784dcc8e`; edition root `496ac512f9ec4c00f89e16327cc48eddcc15eee43e9944de72c11795f1aa832c`; Ed25519 public key `iBswLc9fbPcu+pAbzW3FvUqxQwZjKpVtJ+l/g+/9irQ=`; signature `tceDtcwCW+LOIU1zqiNE6zrzxEGmtc5v3h8yKPMsWRxY+FqhUU1h2Rr3x/xx1IOHXJ40tXRZkNIw5HYLxmiwAw==` |
 | Deterministic release catalog | `1.0.0`; catalog digest `c823ece63afd8233f83cc9ec354e81dad750b5a450c5a5c9c35c92c85e117d77`; source `d193e7f25fe9d8da13c75388d5c19fa4610b751bf5dfbc3134c59b59707c8b06` |
 | Compiler | `wiki-full-edition/1.0.0`; `7e12132efbe688b7e0473ef8b6e20ebe9cfde7889d4d35749e428eb7a02a4b93` |
 | Mix parser | `mix-static/1.0.0`; `1eae1d90b27c0f5231ab81cc8bd87bac61fdc3325300a2a1b57a36376aaa3af5` |
@@ -112,6 +113,9 @@ architecture/plan/research coverage, safe rendering and links, visible gaps,
 navigation, search, and exact zero model usage. The accepted inventory ceiling
 covers `lib` and normative documentation and exposes the deliberately omitted
 test-tree inventory as a visible gap; the test tree remains Git-authoritative.
+The signed merged-candidate replay admitted 915 inventory files, 25 declared
+dependencies, all 83 supported lock entries, all 182 configured guides, and
+181 accepted documents with zero model tokens and zero model cost.
 
 The pilot then records two isolated session previews, a controlled successor
 source, two reviewed source-fenced activation candidates, exactly one current
@@ -152,10 +156,11 @@ synthesis, qualification, rollback, and reopening conditions.
 | Compile with warnings as errors | Passed |
 | Dialyzer | Passed; 178 existing warnings skipped by policy, zero unignored findings, and zero unused filters |
 | Repository-wide `mix precommit` | Passed; 1,152 tests, 0 failures in 579.4 seconds; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | Pending implementation pull request |
+| Clean-checkout CI | Passed at exact implementation head `a5c4802d4f7d10a216ec8962daadcfbaf7b0dbb7`; CI run `33182221473` completed in 16m56s and Dialyzer run `33182221719` completed in 1m42s before merge |
+| Signed merged-checkout pilot | Passed and admitted at exact merge commit `574808c1ab8f5ae002c0e7e77af95b53f611b72a`; report and Ed25519 verification evidence are pinned above |
 
-Exact-head clean-checkout CI and Dialyzer remain required. Local success cannot
-replace, waive, or weaken the merged-candidate gate.
+Exact-head clean-checkout CI and Dialyzer passed before merge. The signed pilot
+was rebuilt from the clean merged checkout; future failures still reopen RW5.
 
 ## Known Limits And Disabled Posture
 
@@ -169,21 +174,21 @@ replace, waive, or weaken the merged-candidate gate.
 - V1 supports bounded Elixir single-application and umbrella repositories.
   Dynamic Mix facts, unsupported content, missing/private metadata, oversized
   trees, and external outages remain visible gaps or failures.
-- The pilot's signed output must be regenerated from the exact merged
-  implementation checkout and pinned in closure evidence. A report from a
-  dirty, different, or moving source is not acceptance evidence.
-- This receipt remains merge-pending until exact-head clean-checkout CI,
-  Dialyzer, merge, full merge SHA, merge date, signed merged-candidate pilot,
-  and closure checklist pins are recorded.
+- The accepted pilot output is pinned to exact merged implementation commit
+  `574808c1ab8f5ae002c0e7e77af95b53f611b72a`; a report from a dirty, different,
+  or moving source is not acceptance evidence.
+- Any later implementation, governing-contract, compiler, qualification,
+  release, source, or pilot digest change requires reevaluation under the gate
+  conditions below.
 
 ## Gate RW5
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-RW5 remains open. The repository-wikis plan is incomplete until the
-implementation candidate passes exact-head clean-checkout CI and Dialyzer,
-merges, and this receipt is accepted at the exact merged candidate in the
-required closure pull request.
+RW5 is accepted at merged candidate
+`574808c1ab8f5ae002c0e7e77af95b53f611b72a` after exact-head clean-checkout CI,
+Dialyzer, merge, and signed merged-checkout pilot replay on 2026-08-28. The
+five-phase repository-wikis plan is complete at this exact pinned baseline.
 
 All reopening conditions in accepted RW1, RW2, RW3, and RW4 receipts remain
 normative, cumulative, and incorporated here without deletion, replacement,
