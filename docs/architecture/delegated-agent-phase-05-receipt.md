@@ -2,12 +2,10 @@
 
 ## Status
 
-This receipt records the Phase 5 implementation candidate produced from the
-accepted Phase 4 closure baseline
-`513b64427f0af8ee5bb07bb5c205baa042c6185b`. DCG5 remains merge-pending until
-the implementation pull request passes clean-checkout CI, merges, and a
-documentation-only closure commit pins the full merge SHA and merge date.
-Phase 6 is not authorized from this receipt yet.
+This receipt records the Phase 5 implementation accepted after pull request
+#90 passed clean-checkout CI and merged on 2026-08-28 as
+`a006652de7788950acdbaf4f07d19eb2438485fa`. DCG5 is accepted at that exact
+merged candidate, which is the authorized baseline for Phase 6.
 
 The candidate exposes one authenticated, scope-bounded coding-agent catalog,
 semantic submission, attempt, and finite-control workflow through browser,
@@ -25,8 +23,8 @@ authority.
 | Section 5.1 | `27b06569285b7822c4cbdb4de48bc55dea7b93c2` - product gateways and versioned JSON API |
 | Section 5.2 | `05709a3bf139940e1bcb9aba5d736d50d8ebb404` - authenticated browser workflow and attempt experience |
 | Section 5.3 | `358aafcf13d93d923a9775a6f3a2889736287944` - protected authenticated developer CLI |
-| Section 5.4 | Implementation PR head - integration matrix and merge-pending receipt |
-| Merged candidate | Merge-pending |
+| Section 5.4 | `4543f7f9718105a004759491ae8f3017bcf84c8f` - integration matrix and merge-pending receipt |
+| Merged candidate | `a006652de7788950acdbaf4f07d19eb2438485fa` - merged 2026-08-28 |
 
 ## Product Surface Pins
 
@@ -95,7 +93,7 @@ authority.
 | Architecture checks | Passed; zero findings |
 | Dialyzer | Passed; 178 existing warnings skipped by policy, zero unignored errors, zero unnecessary skips |
 | Repository-wide `mix precommit` | Passed at implementation candidate with 1,046 tests, 0 failures; compile, architecture, lock, format, and test gates passed |
-| Clean-checkout CI | Merge-pending; must pass on the implementation pull request before DCG5 can close |
+| Clean-checkout CI | Passed on implementation pull request #90; CI verify and Dialyzer checks succeeded before merge |
 
 ## Known Limits And Disabled Posture
 
@@ -116,11 +114,12 @@ authority.
 
 ## Gate DCG5
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-DCG5 becomes accepted only after clean-checkout CI passes, the implementation
-PR merges, and the closure receipt pins the exact merged candidate and merge
-date. Phase 6 is not authorized from this merge-pending state.
+DCG5 is accepted at merged candidate
+`a006652de7788950acdbaf4f07d19eb2438485fa`, merged on 2026-08-28 after
+clean-checkout CI passed. Phase 6 is authorized only from this pinned
+baseline.
 
 DCG5 reopens regardless of checklist state if browser, API, or CLI behavior
 bypasses the shared product gateways, reviewed queries, semantic admission, or
