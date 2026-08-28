@@ -111,33 +111,33 @@ Back to plan: [README](./README.md)
       - [x] 4.3.2.4 Subtask - Mark current editions stale and surface bounded failure status when automatic rebuilding cannot complete, without hiding the last accepted edition.
       - [x] 4.3.2.5 Subtask - Rescan current graph state after crash or ownership change and resume or supersede work without trusting the predecessor's queue or cursor.
 
-  - [ ] 4.4 Section - Build and disable the future synthesis boundary.
+  - [x] 4.4 Section - Build and disable the future synthesis boundary.
 
     This section validates that a future model-backed compiler cannot bypass
     opt-in, reservation, accounting, source fencing, or qualification, while
     deliberately enabling no provider in V1.
 
-    - [ ] 4.4.1 Task {#rwi-p04-synthesis-boundary} [repo: jido_code] [after: {#rwi-p04-automatic-updates}] - Implement the provider-neutral synthesis invocation boundary in disabled mode.
+    - [x] 4.4.1 Task {#rwi-p04-synthesis-boundary} [repo: jido_code] [after: {#rwi-p04-automatic-updates}] - Implement the provider-neutral synthesis invocation boundary in disabled mode.
 
       This task defines the exact invocation contract and denies it unless all
       profile, budget, reservation, and deployment requirements are present.
 
-      - [ ] 4.4.1.1 Subtask - Define a controller-owned request containing bounded source facts, retrieval context, prompt/template digest, output schema, token limits, reservation identity, source fence, and redaction policy.
-      - [ ] 4.4.1.2 Subtask - Require exact repository synthesis opt-in distinct from wiki enrollment, an enabled closed provider/model profile, enabled current price profile, worker readiness, and successful reservation.
-      - [ ] 4.4.1.3 Subtask - Commit invocation-before-effect before adapter dispatch and reject any call lacking a current reservation or using caller-selected model, endpoint, credential, prompt, tool, or limit.
-      - [ ] 4.4.1.4 Subtask - Normalize bounded structured output and provider usage as observations; require deterministic lint, source/provenance checks, human/approved review policy, and current-source activation fencing.
-      - [ ] 4.4.1.5 Subtask - Keep the adapter catalog empty or disabled in production configuration and prove every synthesis request returns a stable unavailable outcome before network or token effect.
+      - [x] 4.4.1.1 Subtask - Define a controller-owned request containing bounded source facts, retrieval context, prompt/template digest, output schema, token limits, reservation identity, source fence, and redaction policy.
+      - [x] 4.4.1.2 Subtask - Require exact repository synthesis opt-in distinct from wiki enrollment, an enabled closed provider/model profile, enabled current price profile, worker readiness, and successful reservation.
+      - [x] 4.4.1.3 Subtask - Commit invocation-before-effect before adapter dispatch and reject any call lacking a current reservation or using caller-selected model, endpoint, credential, prompt, tool, or limit.
+      - [x] 4.4.1.4 Subtask - Normalize bounded structured output and provider usage as observations; require deterministic lint, source/provenance checks, human/approved review policy, and current-source activation fencing.
+      - [x] 4.4.1.5 Subtask - Keep the adapter catalog empty or disabled in production configuration and prove every synthesis request returns a stable unavailable outcome before network or token effect.
 
-    - [ ] 4.4.2 Task {#rwi-p04-accounting-reconciliation} [repo: jido_code] [after: {#rwi-p04-synthesis-boundary}] - Implement usage recovery and accounting reconciliation.
+    - [x] 4.4.2 Task {#rwi-p04-accounting-reconciliation} [repo: jido_code] [after: {#rwi-p04-synthesis-boundary}] - Implement usage recovery and accounting reconciliation.
 
       This task prevents a crash or incomplete provider response from making
       consumed tokens disappear from repository and fleet cost views.
 
-      - [ ] 4.4.2.1 Subtask - Reconstruct attempts with committed invocation but no terminal usage from graph state and immutable provider evidence references.
-      - [ ] 4.4.2.2 Subtask - Retry supported usage retrieval under bounded policy or close as `usage_unknown` with reserved liability retained according to finance policy.
-      - [ ] 4.4.2.3 Subtask - Reconcile late usage only against the exact attempt, reservation, provider request, model, price revision, and current accounting fence.
-      - [ ] 4.4.2.4 Subtask - Emit repository, tenant, actor, profile, trigger, edition, period, token-class, and currency rollups as disposable reviewed projections.
-      - [ ] 4.4.2.5 Subtask - Alert on expired live reservations, invocation-without-terminal-usage, cost arithmetic errors, profile/price drift, and impossible zero/nonzero token combinations.
+      - [x] 4.4.2.1 Subtask - Reconstruct attempts with committed invocation but no terminal usage from graph state and immutable provider evidence references.
+      - [x] 4.4.2.2 Subtask - Retry supported usage retrieval under bounded policy or close as `usage_unknown` with reserved liability retained according to finance policy.
+      - [x] 4.4.2.3 Subtask - Reconcile late usage only against the exact attempt, reservation, provider request, model, price revision, and current accounting fence.
+      - [x] 4.4.2.4 Subtask - Emit repository, tenant, actor, profile, trigger, edition, period, token-class, and currency rollups as disposable reviewed projections.
+      - [x] 4.4.2.5 Subtask - Alert on expired live reservations, invocation-without-terminal-usage, cost arithmetic errors, profile/price drift, and impossible zero/nonzero token combinations.
 
   - [ ] 4.5 Section - Make opt-out, cancellation, and recovery authoritative.
 

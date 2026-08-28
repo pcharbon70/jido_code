@@ -7,9 +7,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Protocol do
   @compiler_profile "wiki-deterministic-elixir/1.0.0"
   @compiler_digest :crypto.hash(:sha256, @compiler_profile) |> Base.encode16(case: :lower)
   @profile_keys [:manual_deterministic, :automatic_deterministic]
-  @reserved_commands [
-    "InvokeWikiSynthesis"
-  ]
+  @reserved_commands []
 
   def semantic_version, do: @semantic_version
   def runtime_semantic_version, do: @runtime_semantic_version

@@ -1022,6 +1022,20 @@ defmodule JidoCode.Knowledge.CommandRegistry do
         :accounting_fence_exact,
         :terminal_usage_absent
       ]
+    },
+    "InvokeWikiSynthesis" => %{
+      owner: :runtime,
+      capability: :execution,
+      graph_families: [:repository_control, :run_attempt],
+      preconditions: [
+        :repository_scope_exact,
+        :synthesis_opt_in_exact,
+        :provider_profile_exact,
+        :price_profile_exact,
+        :reservation_identity_exact,
+        :source_fence_exact,
+        :invocation_before_effect_absent
+      ]
     }
   }
   @version_2_11 Map.merge(@version_2_10, @repository_wiki_accounting_commands)

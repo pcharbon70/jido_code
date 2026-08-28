@@ -100,6 +100,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.MaintainerProfile, as: WikiMaintainerProfile
   alias JidoCode.Knowledge.RepositoryWiki.MaintainerLease, as: WikiMaintainerLease
   alias JidoCode.Knowledge.RepositoryWiki.UpdateTrigger, as: WikiUpdateTrigger
+  alias JidoCode.Knowledge.RepositoryWiki.SynthesisRequest, as: WikiSynthesisRequest
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
@@ -511,6 +512,12 @@ defmodule JidoCode.Knowledge do
 
   def repository_wiki_trigger_priority(priority),
     do: WikiUpdateTrigger.priority_weight(priority)
+
+  def repository_wiki_synthesis_request(attributes, context),
+    do: WikiSynthesisRequest.new(attributes, context)
+
+  def invoke_repository_wiki_synthesis_command(request, attributes, options \\ []),
+    do: WikiSynthesisRequest.invocation_command(request, attributes, options)
 
   def repository_wiki_default(repository_iri, tenant_iri),
     do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)

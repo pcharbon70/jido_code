@@ -638,6 +638,51 @@ defmodule JidoCode.Knowledge.QuerySource do
     """
   end
 
+  def fetch(:repository_wiki_pending_accounting) do
+    """
+    SELECT ?attempt ?invocation ?reservation ?providerRequest ?model ?priceRevision ?invoked WHERE {
+      GRAPH {{graph}} {
+        ?invocation a <#{@jf}ModelInvocation> ;
+                    <#{@jf}repositoryScope> {{resource}} ;
+                    <#{@jf}wikiCompilationAttempt> ?attempt ;
+                    <#{@jf}wikiReservation> ?reservation ;
+                    <#{@prov}generatedAtTime> ?invoked .
+        OPTIONAL { ?invocation <#{@jf}providerRequest> ?providerRequest }
+        OPTIONAL { ?invocation <#{@jf}modelName> ?model }
+        OPTIONAL { ?invocation <#{@jf}priceRevision> ?priceRevision }
+        FILTER(?invoked <= {{instant}})
+        FILTER NOT EXISTS { ?usage <#{@jf}wikiCompilationAttempt> ?attempt ; a <#{@jf}WikiUsageRecord> }
+      }
+    }
+    ORDER BY ?invoked ?attempt
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_cost_records) do
+    """
+    SELECT ?usage ?attempt ?reservation ?state ?input ?output ?cached ?reasoning ?currency ?cost ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?usage a <#{@jf}WikiUsageRecord> ;
+               <#{@jf}repositoryScope> {{resource}} ;
+               <#{@jf}wikiCompilationAttempt> ?attempt ;
+               <#{@jf}accountingState> ?state ;
+               <#{@jf}modelInputTokens> ?input ;
+               <#{@jf}modelOutputTokens> ?output ;
+               <#{@jf}modelCachedTokens> ?cached ;
+               <#{@jf}modelReasoningTokens> ?reasoning ;
+               <#{@jf}usageCurrency> ?currency ;
+               <#{@jf}usageCost> ?cost ;
+               <#{@prov}generatedAtTime> ?recorded .
+        OPTIONAL { ?usage <#{@jf}wikiReservation> ?reservation }
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY ?recorded ?usage
+    LIMIT {{row_limit}}
+    """
+  end
+
   def fetch(:resource_description) do
     """
     CONSTRUCT { {{resource}} ?predicate ?value }

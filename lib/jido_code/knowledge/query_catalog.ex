@@ -2288,6 +2288,28 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         "Read bounded graph-backed maintainer lease and health status for one repository.",
         :diagnostic,
         :declared
+      ),
+      spec(
+        :repository_wiki_pending_accounting,
+        :select,
+        Map.put(resource, :instant, %{type: :datetime, required: true}),
+        :execution,
+        [:run_attempt],
+        :table,
+        "Read bounded invocation-before-effect attempts without terminal usage.",
+        :diagnostic,
+        :declared
+      ),
+      spec(
+        :repository_wiki_cost_records,
+        :select,
+        Map.put(resource, :instant, %{type: :datetime, required: true}),
+        :observation,
+        [:run_attempt],
+        :table,
+        "Read bounded exact usage records for disposable authorized cost rollups.",
+        :product,
+        :declared
       )
     ]
   end
