@@ -9,6 +9,11 @@ Hosted synthesis is unavailable in V1. An incident that appears to involve a
 production model call is a release-blocking invariant violation, not a normal
 provider outage.
 
+See the [user guide](../guides/repository-wiki-v1-user-guide.md) for product,
+cost, opt-out, retention, and privacy behavior, and the
+[developer guide](../guides/repository-wiki-v1-developer-guide.md) for the
+compiler, context, qualification, profile, and rollback contracts.
+
 ## Observe Before Acting
 
 Use the authorized repository Wiki `Usage & cost` and `Operations` views. Pin

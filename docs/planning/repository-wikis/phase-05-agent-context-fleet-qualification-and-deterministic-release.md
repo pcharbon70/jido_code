@@ -124,33 +124,33 @@ Back to plan: [README](./README.md)
       - [x] 5.3.3.4 Subtask - Prove current-edition reads and agent context never mix source revisions or previews under concurrent activation and source churn.
       - [x] 5.3.3.5 Subtask - Establish signed performance and resource ceilings for inventory, parsing, graph statements, rendering, search, maintainer concurrency, storage, and recovery.
 
-  - [ ] 5.4 Section - Pilot `jido_code` and prepare deterministic V1 release.
+  - [x] 5.4 Section - Pilot `jido_code` and prepare deterministic V1 release.
 
     This section enrolls the first repository deliberately, validates its
     actual wiki, and publishes only the profiles proven by the qualification
     corpus.
 
-    - [ ] 5.4.1 Task {#rwi-p05-pilot} [repo: jido_code] [after: {#rwi-p05-quality-evaluation}] - Run the `jido_code` deterministic repository-wiki pilot.
+    - [x] 5.4.1 Task {#rwi-p05-pilot} [repo: jido_code] [after: {#rwi-p05-quality-evaluation}] - Run the `jido_code` deterministic repository-wiki pilot.
 
       This task compiles and reviews the factory's own knowledge as the first
       production-shaped repository edition.
 
-      - [ ] 5.4.1.1 Subtask - Record explicit authorized enrollment for `jido_code`, initially manual deterministic, with retained reads, retention, zero synthesis permission, and current policy revisions.
-      - [ ] 5.4.1.2 Subtask - Compile repository overview, source inventory, accepted ADR/spec/plan architecture, full Mix project identity, complete dependency catalog, and all configured user/developer/operator guides.
-      - [ ] 5.4.1.3 Subtask - Review source provenance, dependency closure, links, guide safety, known gaps, freshness, zero-token usage, navigation, search, and context candidates against the actual repository revision.
-      - [ ] 5.4.1.4 Subtask - Exercise a controlled source change and parallel preview race, then activate exactly one current edition through the source-fenced review transition.
-      - [ ] 5.4.1.5 Subtask - Optionally transition the pilot to automatic deterministic maintenance only after manual evidence passes; verify disable returns it to process-free, cost-free operation.
+      - [x] 5.4.1.1 Subtask - Record explicit authorized enrollment for `jido_code`, initially manual deterministic, with retained reads, retention, zero synthesis permission, and current policy revisions.
+      - [x] 5.4.1.2 Subtask - Compile repository overview, source inventory, accepted ADR/spec/plan architecture, full Mix project identity, complete dependency catalog, and all configured user/developer/operator guides.
+      - [x] 5.4.1.3 Subtask - Review source provenance, dependency closure, links, guide safety, known gaps, freshness, zero-token usage, navigation, search, and context candidates against the actual repository revision.
+      - [x] 5.4.1.4 Subtask - Exercise a controlled source change and parallel preview race, then activate exactly one current edition through the source-fenced review transition.
+      - [x] 5.4.1.5 Subtask - Optionally transition the pilot to automatic deterministic maintenance only after manual evidence passes; verify disable returns it to process-free, cost-free operation.
 
-    - [ ] 5.4.2 Task {#rwi-p05-release} [repo: jido_code] [after: {#rwi-p05-pilot}] - Publish the deterministic V1 profile catalog and rollout decision.
+    - [x] 5.4.2 Task {#rwi-p05-release} [repo: jido_code] [after: {#rwi-p05-pilot}] - Publish the deterministic V1 profile catalog and rollout decision.
 
       This task releases only the closed component tuples proven by signed
       pilot and corpus evidence.
 
-      - [ ] 5.4.2.1 Subtask - Pin ontology `1.5.0`, GraphRegistry `2.5.0`, semantic protocol `2.10.0`, wiki protocol `1.0.0`, and exact compiler/parser/sandbox/metadata/lint/renderer digests.
-      - [ ] 5.4.2.2 Subtask - Enable manual and automatic deterministic profiles as policy-authorized offerings while preserving per-repository default Off and explicit enrollment.
-      - [ ] 5.4.2.3 Subtask - Keep all hosted synthesis providers, models, prices, and production adapters disabled and document the evidence required for a separate future enablement decision.
-      - [ ] 5.4.2.4 Subtask - Publish operator/user/developer documentation, limitations, supported repository envelope, cost semantics, privacy behavior, retention, opt-out, rollback, and gate reopening conditions.
-      - [ ] 5.4.2.5 Subtask - Record rollback profiles that stop new work and maintainers without corrupting current editions, retained reads, usage, accounting, or audit history.
+      - [x] 5.4.2.1 Subtask - Pin ontology `1.5.0`, GraphRegistry `2.5.0`, semantic protocol `2.10.0`, wiki protocol `1.0.0`, and exact compiler/parser/sandbox/metadata/lint/renderer digests.
+      - [x] 5.4.2.2 Subtask - Enable manual and automatic deterministic profiles as policy-authorized offerings while preserving per-repository default Off and explicit enrollment.
+      - [x] 5.4.2.3 Subtask - Keep all hosted synthesis providers, models, prices, and production adapters disabled and document the evidence required for a separate future enablement decision.
+      - [x] 5.4.2.4 Subtask - Publish operator/user/developer documentation, limitations, supported repository envelope, cost semantics, privacy behavior, retention, opt-out, rollback, and gate reopening conditions.
+      - [x] 5.4.2.5 Subtask - Record rollback profiles that stop new work and maintainers without corrupting current editions, retained reads, usage, accounting, or audit history.
 
   - [ ] 5.5 Section - Phase 5 Integration Tests.
 

@@ -12,7 +12,8 @@ defmodule JidoCode.ReleaseAuditTest do
     assert audit.compatibility_facades == 0
     assert audit.source_file_count > 100
     assert byte_size(audit.source_manifest_sha256) == 64
-    assert length(audit.representative_traces) == 5
+    assert length(audit.representative_traces) == 6
     assert Enum.all?(audit.representative_traces, &is_binary(&1.command))
+    assert Enum.any?(audit.representative_traces, &(&1.fact == :current_repository_wiki))
   end
 end

@@ -11,6 +11,7 @@ defmodule JidoCode.ReleaseContract do
   alias JidoCode.Knowledge.Reasoning.Profiles
   alias JidoCode.Knowledge.Validation.ShapeCatalog
   alias JidoCode.ManagedCodingRelease
+  alias JidoCode.RepositoryWikiRelease
 
   @application_version "0.1.0"
   @migration_contract "1.0.0"
@@ -29,6 +30,7 @@ defmodule JidoCode.ReleaseContract do
       backend_schema: Metadata.backend_schema_version(),
       runtime_contract: JidoCode.Runtime.Version.current(),
       managed_coding: ManagedCodingRelease.digest(),
+      repository_wiki: RepositoryWikiRelease.digest(),
       migration_contract: @migration_contract
     }
   end
@@ -51,6 +53,7 @@ defmodule JidoCode.ReleaseContract do
          :ok <- QueryCatalog.verify(),
          :ok <- verify_reasoning_profiles(),
          :ok <- ManagedCodingRelease.verify(),
+         :ok <- RepositoryWikiRelease.verify(),
          true <- byte_size(digest()) == 64 do
       :ok
     else
@@ -72,6 +75,7 @@ defmodule JidoCode.ReleaseContract do
       :graphs,
       :derived_rebuild,
       :managed_coding,
+      :repository_wiki,
       :acceptance
     ]
   end

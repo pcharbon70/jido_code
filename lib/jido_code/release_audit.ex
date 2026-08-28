@@ -92,7 +92,12 @@ defmodule JidoCode.ReleaseAudit do
       %{fact: :current_work_state, command: "TransitionControlState", graph: :repository_control},
       %{fact: :execution_outcome, command: "FinalizeExecutionRun", graph: :run_attempt},
       %{fact: :accepted_decision, command: "RecordGoalOutcome", graph: :evidence},
-      %{fact: :accepted_knowledge, command: "AdoptKnowledgeAssertion", graph: :memory}
+      %{fact: :accepted_knowledge, command: "AdoptKnowledgeAssertion", graph: :memory},
+      %{
+        fact: :current_repository_wiki,
+        command: "ActivateRepositoryWikiEdition",
+        graph: :repository_control
+      }
     ]
   end
 end

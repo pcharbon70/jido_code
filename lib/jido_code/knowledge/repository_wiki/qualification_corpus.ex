@@ -241,7 +241,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.QualificationCorpus do
     }
 
     Map.new(profiles, fn {name, profile} ->
-      {name, %{profile: profile, digest: Contract.digest(profile)}}
+      {name, %{profile: profile, digest: profile[:digest] || Contract.digest(profile)}}
     end)
   end
 
