@@ -99,12 +99,24 @@ defmodule JidoCode.Knowledge.RepositoryWiki.CancellationRecoveryTest do
       retained_read_policy: :allow,
       current_edition_iri: edition,
       queued_triggers: [item(base, :wiki_compilation_attempt, "queued", %{})],
-      active_effects: [item(base, :wiki_compilation_attempt, "active", %{})],
+      active_effects:
+        Enum.map(
+          [:compilation, :sandbox, :metadata, :invoked, :preview, :activation, :recovery],
+          fn effect_class ->
+            item(base, :wiki_compilation_attempt, "active-#{effect_class}", %{
+              effect_class: effect_class
+            })
+          end
+        ),
       leases: [item(base, :wiki_maintainer, "lease", %{state: :active})],
       reservations: [
         item(base, :wiki_reservation, "unconsumed", %{state: :reserved, invoked?: false}),
         item(base, :wiki_reservation, "invoked", %{state: :reserved, invoked?: true}),
-        item(base, :wiki_reservation, "consumed", %{state: :consumed, invoked?: true})
+        item(base, :wiki_reservation, "consumed", %{state: :consumed, invoked?: true}),
+        item(base, :wiki_reservation, "usage-pending", %{
+          state: :usage_pending,
+          invoked?: true
+        })
       ],
       attempts: [
         item(base, :wiki_compilation_attempt, "deterministic", %{
@@ -153,8 +165,11 @@ defmodule JidoCode.Knowledge.RepositoryWiki.CancellationRecoveryTest do
     assert Enum.map(plan.actions.reconcile_accounting.reservations, & &1.action) == [
              :release_unconsumed,
              :retain_unknown_liability,
-             :retain_consumed_liability
+             :retain_consumed_liability,
+             :retain_unknown_liability
            ]
+
+    assert length(plan.actions.cancel_active_effects) == 7
 
     assert Enum.map(plan.actions.reconcile_accounting.attempts, & &1.action) == [
              :record_cancelled_zero_usage,

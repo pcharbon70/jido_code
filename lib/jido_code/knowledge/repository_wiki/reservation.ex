@@ -53,7 +53,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Reservation do
       {:duplicate, %__MODULE__{} = reservation} -> {:duplicate, reservation}
       {:error, %Error{} = error} -> {:error, error}
       {:error, outcome} when is_atom(outcome) -> {:error, outcome}
-      _invalid -> {:error, :invalid}
     end
   rescue
     _error -> {:error, :invalid}

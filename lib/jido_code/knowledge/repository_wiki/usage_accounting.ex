@@ -40,7 +40,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
   def measured(raw, %PriceProfile{} = price, attributes)
       when is_map(raw) and is_map(attributes) do
     with :ok <- measured_usage(raw),
-         true <- raw.provider == price.provider and raw.model == price.model,
+         :ok <- matching_price(raw, price),
          {:ok, charged} <- PriceProfile.cost(price, raw, attributes.recorded_at),
          costs = %{
            reserved: attributes.reserved_cost,
@@ -68,7 +68,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
        })}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:wiki_measured_usage)
     end
   end
 
@@ -80,24 +79,40 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
           | {:error, atom()}
   def reconcile(%Reservation{} = reservation, usage, context)
       when is_map(usage) and is_map(context) do
-    with true <- usage.reservation_iri == reservation.iri,
-         true <- usage.attempt_iri == reservation.attempt_iri,
-         true <- usage.invocation_iri == reservation.invocation_iri,
-         true <- usage.price_revision == reservation.price_revision,
-         true <- usage.accounting_fence == context[:accounting_fence],
-         :none <- existing(usage, context),
-         {:ok, transitioned} <-
-           Reservation.transition(reservation, reservation_state(usage), usage.recorded_at) do
-      {:ok, %{reservation: transitioned, usage: usage}}
+    if mismatched?(reservation, usage, context) do
+      {:error, :mismatched_usage}
     else
-      {:duplicate, existing} -> {:duplicate, existing}
-      false -> {:error, :mismatched_usage}
-      {:error, reason} when is_atom(reason) -> {:error, reason}
-      _invalid -> {:error, :invalid}
+      reconcile_current(reservation, usage, context)
     end
   end
 
   def reconcile(_reservation, _usage, _context), do: {:error, :invalid}
+
+  defp reconcile_current(reservation, usage, context) do
+    case existing(usage, context) do
+      {:duplicate, existing} ->
+        {:duplicate, existing}
+
+      :none ->
+        case Reservation.transition(reservation, reservation_state(usage), usage.recorded_at) do
+          {:ok, transitioned} -> {:ok, %{reservation: transitioned, usage: usage}}
+          {:error, reason} -> {:error, reason}
+        end
+    end
+  end
+
+  defp mismatched?(reservation, usage, context) do
+    Enum.any?(
+      [
+        {usage.reservation_iri, reservation.iri},
+        {usage.attempt_iri, reservation.attempt_iri},
+        {usage.invocation_iri, reservation.invocation_iri},
+        {usage.price_revision, reservation.price_revision},
+        {usage.accounting_fence, context[:accounting_fence]}
+      ],
+      fn {observed, expected} -> observed != expected end
+    )
+  end
 
   @spec record_command(map(), map(), keyword()) ::
           {:ok, JidoCode.Knowledge.CommandEnvelope.t()} | {:error, Error.t()}
@@ -112,9 +127,9 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
 
     with {:ok, :run_attempt} <- GraphRegistry.identify(run_graph),
          {:ok, :repository_control} <- GraphRegistry.identify(control_graph),
-         true <- is_integer(run_revision) and run_revision > 0,
-         true <- is_integer(control_revision) and control_revision > 0,
-         true <- usage.state in @terminal_states,
+         :ok <- positive_revision(run_revision),
+         :ok <- positive_revision(control_revision),
+         {:ok, _state} <- terminal_state(usage.state),
          target = %{
            family: :run_attempt,
            graph_iri: run_graph,
@@ -180,10 +195,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
 
   defp build(attributes, tokens, costs, generation_mode) do
     with :ok <- common(attributes),
-         state when state in @terminal_states <- attributes[:state],
-         true <- nonnegative_map?(tokens),
-         true <- nonnegative_map?(costs),
-         true <- generation_mode != :deterministic_only or zero?(tokens, costs),
+         {:ok, state} <- terminal_state(attributes[:state]),
+         :ok <- nonnegative(tokens, costs),
          material <- %{
            repository_iri: attributes.repository_iri,
            tenant_iri: attributes.tenant_iri,
@@ -208,7 +221,6 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
       {:ok, material |> Map.put(:iri, iri) |> Map.put(:digest, digest)}
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:wiki_usage_record)
     end
   rescue
     _error -> invalid(:wiki_usage_record)
@@ -217,37 +229,28 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
   defp common(attributes) do
     resource_keys = ~w[repository_iri tenant_iri actor_iri attempt_iri edition_iri profile_iri]a
 
-    with true <- Enum.all?(resource_keys, &(Contract.resource(attributes[&1]) == :ok)),
+    with :ok <- required_resources(resource_keys, attributes),
          :ok <- Contract.optional_resource(attributes[:reservation_iri]),
          :ok <- Contract.optional_resource(attributes[:invocation_iri]),
-         true <- is_binary(attributes[:trigger]) and byte_size(attributes.trigger) in 1..128,
-         true <-
-           is_binary(attributes[:source_revision]) and
-             byte_size(attributes.source_revision) in 1..512,
-         true <-
-           is_binary(attributes[:currency]) and Regex.match?(~r/^[A-Z]{3}$/, attributes.currency),
-         true <- is_map(attributes[:local_work]),
-         true <- match?(%DateTime{}, attributes[:recorded_at]) do
+         :ok <- bounded_text(attributes[:trigger], 128),
+         :ok <- bounded_text(attributes[:source_revision], 512),
+         :ok <- currency(attributes[:currency]),
+         :ok <- local_work(attributes[:local_work]),
+         :ok <- recorded_at(attributes[:recorded_at]) do
       :ok
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:wiki_usage_record)
     end
   end
 
   defp measured_usage(raw) do
-    with true <- nonnegative_map?(Map.take(raw, [:input, :output, :cached, :reasoning])),
-         true <-
-           Enum.all?(
-             [:provider, :model, :region],
-             &(is_binary(raw[&1]) and byte_size(raw[&1]) in 1..128)
-           ),
+    with :ok <- nonnegative(Map.take(raw, [:input, :output, :cached, :reasoning]), nil),
+         :ok <- required_texts([:provider, :model, :region], raw, 128),
          :ok <- Contract.resource(raw[:provider_request_iri]),
-         true <- Contract.digest?(raw[:raw_evidence_digest]) do
+         :ok <- digest(raw[:raw_evidence_digest]) do
       :ok
     else
       {:error, %Error{} = error} -> {:error, error}
-      _invalid -> invalid(:wiki_measured_usage)
     end
   end
 
@@ -284,10 +287,56 @@ defmodule JidoCode.Knowledge.RepositoryWiki.UsageAccounting do
       is_map(value) and map_size(value) > 0 and
         Enum.all?(value, fn {_key, count} -> is_integer(count) and count >= 0 end)
 
-  defp zero?(tokens, costs),
-    do:
-      Enum.all?(tokens, fn {_key, value} -> value == 0 end) and
-        Enum.all?(costs, fn {_key, value} -> value == 0 end)
+  defp matching_price(raw, price) do
+    if raw.provider == price.provider and raw.model == price.model,
+      do: :ok,
+      else: invalid(:wiki_measured_usage)
+  end
+
+  defp positive_revision(value) when is_integer(value) and value > 0, do: :ok
+  defp positive_revision(_value), do: invalid(:record_wiki_model_usage)
+
+  defp terminal_state(state) when state in @terminal_states, do: {:ok, state}
+  defp terminal_state(_state), do: invalid(:wiki_usage_record)
+
+  defp nonnegative(first, second) do
+    if nonnegative_map?(first) and (is_nil(second) or nonnegative_map?(second)),
+      do: :ok,
+      else: invalid(:wiki_usage_record)
+  end
+
+  defp required_resources(keys, attributes) do
+    if Enum.all?(keys, &(Contract.resource(attributes[&1]) == :ok)),
+      do: :ok,
+      else: invalid(:wiki_usage_record)
+  end
+
+  defp bounded_text(value, maximum)
+       when is_binary(value) and byte_size(value) >= 1 and byte_size(value) <= maximum,
+       do: :ok
+
+  defp bounded_text(_value, _maximum), do: invalid(:wiki_usage_record)
+
+  defp required_texts(keys, attributes, maximum) do
+    if Enum.all?(keys, fn key ->
+         is_binary(attributes[key]) and byte_size(attributes[key]) in 1..maximum
+       end),
+       do: :ok,
+       else: invalid(:wiki_measured_usage)
+  end
+
+  defp currency(value) when is_binary(value) do
+    if Regex.match?(~r/^[A-Z]{3}$/, value), do: :ok, else: invalid(:wiki_usage_record)
+  end
+
+  defp currency(_value), do: invalid(:wiki_usage_record)
+  defp local_work(value) when is_map(value), do: :ok
+  defp local_work(_value), do: invalid(:wiki_usage_record)
+  defp recorded_at(%DateTime{}), do: :ok
+  defp recorded_at(_value), do: invalid(:wiki_usage_record)
+
+  defp digest(value),
+    do: if(Contract.digest?(value), do: :ok, else: invalid(:wiki_measured_usage))
 
   defp invalid(operation), do: {:error, Error.new(:invalid_input, operation)}
 end

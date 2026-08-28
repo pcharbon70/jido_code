@@ -175,12 +175,12 @@ Back to plan: [README](./README.md)
       This task closes RW4 only when every admitted attempt reaches terminal
       usage evidence and disabling a repository prevents every later effect.
 
-      - [ ] 4.6.1.1 Subtask - Race maintainer starts, lease renewals, takeovers, same-repository sessions, different repositories, trigger bursts, source supersession, retries, crashes, and late results.
-      - [ ] 4.6.1.2 Subtask - Exercise budget boundaries, concurrent reservations, checked arithmetic, price intervals, expiration, duplicate callbacks, partial usage, unknown usage, refund/release, and cost rollups.
-      - [ ] 4.6.1.3 Subtask - Prove deterministic manual and automatic attempts always record zero model tokens/cost while still recording attributable local work and terminal status.
-      - [ ] 4.6.1.4 Subtask - Exercise synthesis requests through fake adapters for missing opt-in, missing/disabled profile, no price, insufficient budget, stale reservation, provider failure, malformed output, usage drift, and late response.
-      - [ ] 4.6.1.5 Subtask - Prove production has no enabled hosted profile, no fake call reaches a real network, and all unavailable cases fail before token-bearing effect.
-      - [ ] 4.6.1.6 Subtask - Exercise disable during queued, compiling, sandbox, metadata, reserved, invoked, usage-pending, preview, activation, and recovery states; prove old-generation results are rejected.
+      - [x] 4.6.1.1 Subtask - Race maintainer starts, lease renewals, takeovers, same-repository sessions, different repositories, trigger bursts, source supersession, retries, crashes, and late results.
+      - [x] 4.6.1.2 Subtask - Exercise budget boundaries, concurrent reservations, checked arithmetic, price intervals, expiration, duplicate callbacks, partial usage, unknown usage, refund/release, and cost rollups.
+      - [x] 4.6.1.3 Subtask - Prove deterministic manual and automatic attempts always record zero model tokens/cost while still recording attributable local work and terminal status.
+      - [x] 4.6.1.4 Subtask - Exercise synthesis requests through fake adapters for missing opt-in, missing/disabled profile, no price, insufficient budget, stale reservation, provider failure, malformed output, usage drift, and late response.
+      - [x] 4.6.1.5 Subtask - Prove production has no enabled hosted profile, no fake call reaches a real network, and all unavailable cases fail before token-bearing effect.
+      - [x] 4.6.1.6 Subtask - Exercise disable during queued, compiling, sandbox, metadata, reserved, invoked, usage-pending, preview, activation, and recovery states; prove old-generation results are rejected.
       - [ ] 4.6.1.7 Subtask - Rerun RW1-RW3 and applicable harness/security suites, then run architecture checks, Dialyzer, `mix precommit`, and clean-checkout CI.
 
     - [ ] 4.6.2 Task {#rwi-p04-phase-receipt} [repo: jido_code] [after: {#rwi-p04-integration}] - Publish and pin the Phase 4 receipt.
@@ -188,7 +188,7 @@ Back to plan: [README](./README.md)
       This task records RW4 evidence in
       `docs/architecture/repository-wiki-phase-04-receipt.md`.
 
-      - [ ] 4.6.2.1 Subtask - Record generation, price, budget, reservation, usage, cost, maintainer, scheduler, synthesis-boundary, cancellation, recovery, and fixture revisions and digests.
-      - [ ] 4.6.2.2 Subtask - Keep RW4 open if an unconfigured repository starts maintenance, concurrent attempts overspend, usage can disappear, synthesis reaches an effect without every gate, or disable accepts an old-generation result.
+      - [x] 4.6.2.1 Subtask - Record generation, price, budget, reservation, usage, cost, maintainer, scheduler, synthesis-boundary, cancellation, recovery, and fixture revisions and digests.
+      - [x] 4.6.2.2 Subtask - Keep RW4 open if an unconfigured repository starts maintenance, concurrent attempts overspend, usage can disappear, synthesis reaches an effect without every gate, or disable accepts an old-generation result.
       - [ ] 4.6.2.3 Subtask - Preserve every gate reopening condition and attach concurrency, zero-token, reservation, accounting, disabled-synthesis, opt-out, recovery, precommit, Dialyzer, and clean-checkout evidence.
       - [ ] 4.6.2.4 Subtask - Pin the merged candidate commit and merge date, then tick the phase, final Phase 4 Integration Tests section, receipt task, and pinning checkboxes before authorizing Phase 5.
