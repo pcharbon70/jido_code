@@ -8,7 +8,7 @@ defmodule JidoCode.Product.ManagedCodingControlGateway do
   alias JidoCode.Product.ManagedCodingAttempt
   alias JidoCode.Security.Redactor
 
-  @actions ~w[steer answer cancel retry]a
+  @actions ~w[steer answer cancel handoff recovery retry]a
 
   @spec submit(AuthorityContext.t(), map(), ManagedCodingAttempt.t(), atom(), map(), keyword()) ::
           ManagedCoding.result()
@@ -30,6 +30,7 @@ defmodule JidoCode.Product.ManagedCodingControlGateway do
 
     with true <- authority.actor_iri == attempt.actor_iri,
          true <- identity.actor_iri == authority.actor_iri,
+         true <- state_allows?(attempt, action),
          :ok <- confirmation(action, params),
          :ok <- Redactor.reject_sensitive(params),
          {:ok, payload} <- payload(action, params),
@@ -48,8 +49,8 @@ defmodule JidoCode.Product.ManagedCodingControlGateway do
   def submit(_authority, _identity, _attempt, _action, _params, _options),
     do: {:error, JidoCode.Factory.AdapterError.new(:invalid_input, :managed_coding_control)}
 
-  defp confirmation(action, params) when action in [:cancel, :retry] do
-    if params["confirmed"] == "true", do: :ok, else: :error
+  defp confirmation(action, params) when action in [:cancel, :recovery, :retry] do
+    if params["confirmed"] in [true, "true", "on", "1"], do: :ok, else: :error
   end
 
   defp confirmation(_action, _params), do: :ok
@@ -62,7 +63,10 @@ defmodule JidoCode.Product.ManagedCodingControlGateway do
       else: :error
   end
 
-  defp payload(action, _params) when action in [:cancel, :retry], do: {:ok, %{control: action}}
+  defp payload(:handoff, _params), do: {:ok, %{control: :candidate_handoff}}
+
+  defp payload(action, _params) when action in [:cancel, :recovery, :retry],
+    do: {:ok, %{control: normalized_action(action)}}
 
   defp command_identity(attempt, action, params) do
     idempotency_key = params["idempotency_key"]
@@ -92,7 +96,18 @@ defmodule JidoCode.Product.ManagedCodingControlGateway do
     })
   end
 
+  defp state_allows?(attempt, :retry),
+    do: ManagedCodingAttempt.control_available?(attempt, :recovery)
+
+  defp state_allows?(attempt, action),
+    do: ManagedCodingAttempt.control_available?(attempt, action)
+
+  defp normalized_action(:retry), do: :accepted_recovery
+  defp normalized_action(:recovery), do: :accepted_recovery
+  defp normalized_action(action), do: action
+
   defp operation(:retry), do: :start
+  defp operation(:recovery), do: :start
   defp operation(:answer), do: :steer
   defp operation(action), do: action
 end

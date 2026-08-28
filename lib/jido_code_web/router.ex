@@ -14,6 +14,11 @@ defmodule JidoCodeWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :require_authenticated_api do
+    plug JidoCodeWeb.ProductAuth, :fetch_api_scope
+    plug JidoCodeWeb.ProductAuth, :require_authenticated_api
+  end
+
   pipeline :require_authenticated_operator do
     plug JidoCodeWeb.ProductAuth, :fetch_current_scope
     plug JidoCodeWeb.ProductAuth, :require_authenticated_operator
@@ -27,12 +32,23 @@ defmodule JidoCodeWeb.Router do
     delete "/sign-out", AuthController, :delete
   end
 
+  scope "/api/v1", JidoCodeWeb.Api.V1 do
+    pipe_through [:api, :require_authenticated_api]
+
+    get "/agent-offerings", AgentOfferingController, :index
+    post "/coding-attempts", CodingAttemptController, :create
+    get "/coding-attempts/:attempt_ref", CodingAttemptController, :show
+    post "/coding-attempts/:attempt_ref/refresh", CodingAttemptController, :refresh
+    post "/coding-attempts/:attempt_ref/controls/:control", CodingAttemptController, :control
+  end
+
   scope "/", JidoCodeWeb do
     pipe_through [:browser, :require_authenticated_operator]
 
     live_session :authenticated,
       on_mount: [{JidoCodeWeb.ProductAuth, :require_authenticated}] do
       live "/", HomeLive
+      live "/coding-agents", CodingAgentLive
       live "/managed-coding/:attempt_ref", ManagedCodingAttemptLive, :show
     end
   end

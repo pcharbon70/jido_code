@@ -105,6 +105,41 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLive do
             <.status_cell label="Disposition" value={@attempt_view.disposition || "pending"} />
           </section>
 
+          <section
+            id="managed-attempt-agent"
+            aria-label="Selected coding agent"
+            class="overflow-hidden rounded-xl border border-border bg-card"
+          >
+            <div class="flex flex-col gap-2 border-b border-border bg-primary/[0.04] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                  Exact agent profile
+                </p>
+                <h2 id="managed-attempt-profile" class="mt-1 text-lg font-semibold">
+                  {@attempt_view.profile_label}
+                </h2>
+              </div>
+              <span class="rounded-full border border-border bg-background px-3 py-1 font-mono text-xs text-muted-foreground">
+                {@attempt_view.runtime_class}
+              </span>
+            </div>
+            <div class="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
+              <.status_cell label="Provider" value={@attempt_view.provider} />
+              <.status_cell label="Deployment" value={@attempt_view.deployment_class} />
+              <.status_cell label="Billing" value={@attempt_view.billing_mode} />
+              <.status_cell label="Readiness" value={readiness_value(@attempt_view)} />
+              <.status_cell label="Rollout" value={@attempt_view.rollout_stage} />
+              <.status_cell label="Repository" value={@attempt_view.repository_envelope} />
+              <.status_cell label="Interaction" value={@attempt_view.interaction_state} />
+              <.status_cell label="Authority" value="candidate only · no merge" />
+            </div>
+            <div id="managed-attempt-limitations" class="border-t border-border px-5 py-4">
+              <p class="text-xs leading-5 text-muted-foreground">
+                {limitations_label(@attempt_view.limitations)}
+              </p>
+            </div>
+          </section>
+
           <section id="managed-attempt-evidence" class="grid gap-4 lg:grid-cols-3">
             <.summary_stream
               id="managed-interactions"
@@ -123,6 +158,36 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLive do
               title="Checks"
               stream={@streams.checks}
               icon="hero-check-circle"
+            />
+          </section>
+
+          <section
+            id="managed-attempt-handoff-evidence"
+            class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <.evidence_cell
+              id="workspace"
+              label="Workspace effects"
+              value={detail_summary(@attempt_view.workspace)}
+              source="controller observed"
+            />
+            <.evidence_cell
+              id="candidate"
+              label="Candidate"
+              value={detail_summary(@attempt_view.candidate)}
+              source="controller recomputed"
+            />
+            <.evidence_cell
+              id="verification"
+              label="Independent verification"
+              value={detail_summary(@attempt_view.verification_details)}
+              source="fresh checkout"
+            />
+            <.evidence_cell
+              id="disposition"
+              label="Disposition"
+              value={detail_summary(@attempt_view.disposition_details)}
+              source="governed decision"
             />
           </section>
 
@@ -157,26 +222,34 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLive do
               <.input
                 field={@control_form[:confirmed]}
                 type="checkbox"
-                label="Confirm cancellation or retry"
+                label="Confirm cancellation or accepted recovery"
               />
               <div class="flex flex-wrap gap-2">
-                <button
-                  :for={
-                    {action, label} <- [
-                      {"steer", "Steer"},
-                      {"answer", "Answer"},
-                      {"cancel", "Cancel"},
-                      {"retry", "Retry"}
-                    ]
-                  }
-                  id={"managed-control-#{action}"}
-                  name="action"
-                  value={action}
-                  type="submit"
-                  class="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {label}
-                </button>
+                <.control_button
+                  :if={control_available?(@attempt, :steer)}
+                  action="steer"
+                  label="Steer"
+                />
+                <.control_button
+                  :if={control_available?(@attempt, :answer)}
+                  action="answer"
+                  label="Answer"
+                />
+                <.control_button
+                  :if={control_available?(@attempt, :cancel)}
+                  action="cancel"
+                  label="Cancel"
+                />
+                <.control_button
+                  :if={control_available?(@attempt, :handoff)}
+                  action="handoff"
+                  label="Request handoff"
+                />
+                <.control_button
+                  :if={control_available?(@attempt, :recovery)}
+                  action="recovery"
+                  label="Accepted recovery"
+                />
               </div>
             </.form>
           </section>
@@ -195,6 +268,38 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLive do
       <p class="text-xs font-medium text-muted-foreground">{@label}</p>
       <p class="mt-2 text-sm font-semibold">{@value}</p>
     </div>
+    """
+  end
+
+  attr :action, :string, required: true
+  attr :label, :string, required: true
+
+  defp control_button(assigns) do
+    ~H"""
+    <button
+      id={"managed-control-#{@action}"}
+      name="action"
+      value={@action}
+      type="submit"
+      class="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {@label}
+    </button>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :label, :string, required: true
+  attr :value, :string, required: true
+  attr :source, :string, required: true
+
+  defp evidence_cell(assigns) do
+    ~H"""
+    <article id={"managed-#{@id}-evidence"} class="rounded-xl border border-border bg-card p-4">
+      <p class="text-xs font-medium text-muted-foreground">{@label}</p>
+      <p class="mt-2 line-clamp-2 text-sm font-semibold">{@value}</p>
+      <p class="mt-3 text-[0.6875rem] uppercase tracking-wide text-muted-foreground">{@source}</p>
+    </article>
     """
   end
 
@@ -266,7 +371,8 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLive do
   defp control_action("steer"), do: {:ok, :steer}
   defp control_action("answer"), do: {:ok, :answer}
   defp control_action("cancel"), do: {:ok, :cancel}
-  defp control_action("retry"), do: {:ok, :retry}
+  defp control_action("handoff"), do: {:ok, :handoff}
+  defp control_action("recovery"), do: {:ok, :recovery}
   defp control_action(_action), do: :error
 
   defp control_key(attempt, action, params) do
@@ -297,7 +403,55 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLive do
       verification: :unavailable,
       disposition: nil,
       evidence_refs: [],
+      runtime_class: :host_controlled,
+      profile_label: "Managed coding",
+      provider: "unavailable",
+      deployment_class: :managed_fleet,
+      billing_mode: :unknown,
+      readiness: :unavailable,
+      readiness_age_seconds: nil,
+      rollout_stage: :disabled,
+      repository_envelope: "unavailable",
+      limitations: ["attempt unavailable"],
+      interaction_state: :none,
+      workspace: %{},
+      candidate: %{},
+      verification_details: %{},
+      disposition_details: %{},
+      recovery: %{},
       updated_at: nil
     }
   end
+
+  defp control_available?(%ManagedCodingAttempt{} = attempt, action),
+    do: ManagedCodingAttempt.control_available?(attempt, action)
+
+  defp control_available?(_attempt, _action), do: false
+
+  defp readiness_value(view) do
+    age =
+      if is_integer(view.readiness_age_seconds), do: "#{view.readiness_age_seconds}s", else: "n/a"
+
+    "#{view.readiness} · #{age}"
+  end
+
+  defp detail_summary(details) when is_map(details) and map_size(details) == 0,
+    do: "Not available"
+
+  defp detail_summary(details) when is_map(details) do
+    details
+    |> Enum.sort_by(fn {key, _value} -> to_string(key) end)
+    |> Enum.take(3)
+    |> Enum.map_join(" · ", fn {key, value} -> "#{humanize(key)}: #{value}" end)
+    |> String.slice(0, 180)
+  end
+
+  defp limitations_label([]), do: "No additional projected limitations."
+
+  defp limitations_label(limitations) do
+    limitations
+    |> Enum.map_join(" · ", &humanize/1)
+  end
+
+  defp humanize(value), do: value |> to_string() |> String.replace("_", " ")
 end

@@ -728,12 +728,21 @@ defmodule JidoCodeWeb.HomeLive do
   defp execution_surface(assigns) do
     ~H"""
     <section id="execution-activity" aria-labelledby="execution-title" class="grid gap-4">
-      <.selection_header
-        id="execution-title"
-        title="Execution activity"
-        count={@count}
-        selected={@selected}
-      />
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <.selection_header
+          id="execution-title"
+          title="Execution activity"
+          count={@count}
+          selected={@selected}
+        />
+        <.link
+          id="open-coding-agent-workbench"
+          navigate={~p"/coding-agents"}
+          class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <.icon name="hero-sparkles" class="size-4" /> New coding task
+        </.link>
+      </div>
       <div id="attempts" phx-update="stream" class="grid gap-2">
         <.stream_empty
           id="attempts-empty"
