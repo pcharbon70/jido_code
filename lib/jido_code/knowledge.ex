@@ -101,6 +101,8 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.MaintainerLease, as: WikiMaintainerLease
   alias JidoCode.Knowledge.RepositoryWiki.UpdateTrigger, as: WikiUpdateTrigger
   alias JidoCode.Knowledge.RepositoryWiki.SynthesisRequest, as: WikiSynthesisRequest
+  alias JidoCode.Knowledge.RepositoryWiki.Cancellation, as: WikiCancellation
+  alias JidoCode.Knowledge.RepositoryWiki.MaintainerRecovery, as: WikiMaintainerRecovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
@@ -504,6 +506,9 @@ defmodule JidoCode.Knowledge do
   def renew_repository_wiki_maintainer_lease(lease, attributes),
     do: WikiMaintainerLease.renew(lease, attributes)
 
+  def revoke_repository_wiki_maintainer_lease(lease, cancellation_generation, recorded_at),
+    do: WikiMaintainerLease.revoke(lease, cancellation_generation, recorded_at)
+
   def acquire_repository_wiki_maintainer_lease_command(lease, attributes, options \\ []),
     do: WikiMaintainerLease.acquire_command(lease, attributes, options)
 
@@ -518,6 +523,18 @@ defmodule JidoCode.Knowledge do
 
   def invoke_repository_wiki_synthesis_command(request, attributes, options \\ []),
     do: WikiSynthesisRequest.invocation_command(request, attributes, options)
+
+  def plan_repository_wiki_cancellation(attributes),
+    do: WikiCancellation.plan(attributes)
+
+  def valid_repository_wiki_cancellation_plan?(plan),
+    do: WikiCancellation.valid_plan?(plan)
+
+  def repository_wiki_result_current?(result, current),
+    do: WikiCancellation.result_current?(result, current)
+
+  def plan_repository_wiki_maintainer_recovery(enrollment, facts, evaluated_at),
+    do: WikiMaintainerRecovery.plan(enrollment, facts, evaluated_at)
 
   def repository_wiki_default(repository_iri, tenant_iri),
     do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)

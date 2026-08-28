@@ -2310,6 +2310,17 @@ defmodule JidoCode.Knowledge.QueryCatalog do
         "Read bounded exact usage records for disposable authorized cost rollups.",
         :product,
         :declared
+      ),
+      spec(
+        :repository_wiki_recovery_status,
+        :select,
+        Map.put(resource, :instant, %{type: :datetime, required: true}),
+        :observation,
+        [:repository_control],
+        :table,
+        "Read bounded graph-derived recovery, degraded dependency, and cancellation status.",
+        :diagnostic,
+        :declared
       )
     ]
   end

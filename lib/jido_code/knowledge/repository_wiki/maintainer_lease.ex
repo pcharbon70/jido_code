@@ -160,10 +160,17 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MaintainerLease do
       {lease.iri, jf <> "repositoryScope", RDF.iri(lease.repository_iri)},
       {lease.iri, jf <> "tenantScope", RDF.iri(lease.tenant_iri)},
       {lease.iri, jf <> "repositoryWiki", RDF.iri(wiki_iri)},
+      {lease.iri, jf <> "leaseHolder", RDF.iri(lease.holder_iri)},
       {lease.iri, jf <> "profileRevision", RDF.XSD.NonNegativeInteger.new(lease.generation)},
       {lease.iri, jf <> "profileDigest", RDF.XSD.String.new(lease.profile_digest)},
-      {lease.iri, jf <> "maintainerState", RDF.iri(Contract.concept(:wiki_maintainer_active))},
+      {lease.iri, jf <> "enrollmentRevision",
+       RDF.XSD.NonNegativeInteger.new(lease.enrollment_revision)},
+      {lease.iri, jf <> "wikiCancellationGeneration",
+       RDF.XSD.NonNegativeInteger.new(lease.cancellation_generation)},
+      {lease.iri, jf <> "fencingToken", RDF.XSD.String.new(lease.fence)},
+      {lease.iri, jf <> "maintainerState", RDF.iri(maintainer_state(lease.state))},
       {lease.iri, jf <> "generatedAtTime", RDF.XSD.DateTime.new(lease.acquired_at)},
+      {lease.iri, jf <> "heartbeatAt", RDF.XSD.DateTime.new(lease.heartbeat_at)},
       {lease.iri, jf <> "expiresAt", RDF.XSD.DateTime.new(lease.expires_at)}
     ]
   end
@@ -215,4 +222,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.MaintainerLease do
 
   defp lease_digest(lease),
     do: lease |> Map.from_struct() |> Map.delete(:digest) |> Contract.digest()
+
+  defp maintainer_state(:active), do: Contract.concept(:wiki_maintainer_running)
+  defp maintainer_state(:revoked), do: Contract.concept(:wiki_maintainer_stopped)
 end

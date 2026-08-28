@@ -139,31 +139,31 @@ Back to plan: [README](./README.md)
       - [x] 4.4.2.4 Subtask - Emit repository, tenant, actor, profile, trigger, edition, period, token-class, and currency rollups as disposable reviewed projections.
       - [x] 4.4.2.5 Subtask - Alert on expired live reservations, invocation-without-terminal-usage, cost arithmetic errors, profile/price drift, and impossible zero/nonzero token combinations.
 
-  - [ ] 4.5 Section - Make opt-out, cancellation, and recovery authoritative.
+  - [x] 4.5 Section - Make opt-out, cancellation, and recovery authoritative.
 
     This section proves an owner can stop future cost and maintenance promptly
     without losing audit or accounting evidence.
 
-    - [ ] 4.5.1 Task {#rwi-p04-opt-out} [repo: jido_code] [after: {#rwi-p04-accounting-reconciliation}] - Implement disable, cancellation, reservation release, and teardown.
+    - [x] 4.5.1 Task {#rwi-p04-opt-out} [repo: jido_code] [after: {#rwi-p04-accounting-reconciliation}] - Implement disable, cancellation, reservation release, and teardown.
 
       This task turns an accepted Off transition into an immediate fence
       against queued, running, retrying, preview, and late-result work.
 
-      - [ ] 4.5.1.1 Subtask - Commit enrollment disable and a new cancellation fence before signaling maintainers, compilation tasks, sandbox jobs, metadata refreshes, or future provider invocations.
-      - [ ] 4.5.1.2 Subtask - Stop admission, discard or terminally record pending triggers, cancel active effects, revoke leases, and reject every result from an older enrollment or lease generation.
-      - [ ] 4.5.1.3 Subtask - Release unconsumed reservations, retain consumed/unknown liability, close deterministic attempts with zero-token evidence, and preserve required usage/audit records.
-      - [ ] 4.5.1.4 Subtask - Apply configured retained-read and artifact-retention policy independently from generation disable and remove product navigation when reads are not permitted.
-      - [ ] 4.5.1.5 Subtask - Prove re-enrollment creates a new generation and cannot revive stale leases, previews, reservations, attempts, callbacks, or source fences.
+      - [x] 4.5.1.1 Subtask - Commit enrollment disable and a new cancellation fence before signaling maintainers, compilation tasks, sandbox jobs, metadata refreshes, or future provider invocations.
+      - [x] 4.5.1.2 Subtask - Stop admission, discard or terminally record pending triggers, cancel active effects, revoke leases, and reject every result from an older enrollment or lease generation.
+      - [x] 4.5.1.3 Subtask - Release unconsumed reservations, retain consumed/unknown liability, close deterministic attempts with zero-token evidence, and preserve required usage/audit records.
+      - [x] 4.5.1.4 Subtask - Apply configured retained-read and artifact-retention policy independently from generation disable and remove product navigation when reads are not permitted.
+      - [x] 4.5.1.5 Subtask - Prove re-enrollment creates a new generation and cannot revive stale leases, previews, reservations, attempts, callbacks, or source fences.
 
-    - [ ] 4.5.2 Task {#rwi-p04-maintainer-recovery} [repo: jido_code] [after: {#rwi-p04-opt-out}] - Implement maintainer restart, takeover, and degraded-mode recovery.
+    - [x] 4.5.2 Task {#rwi-p04-maintainer-recovery} [repo: jido_code] [after: {#rwi-p04-opt-out}] - Implement maintainer restart, takeover, and degraded-mode recovery.
 
       This task recovers automatic maintenance from durable state while
       preserving one-owner and one-current-source invariants.
 
-      - [ ] 4.5.2.1 Subtask - Scan eligible automatic enrollments on startup, validate profiles and readiness, and acquire only expired or absent leases.
-      - [ ] 4.5.2.2 Subtask - Reconstruct pending necessity from current source, current edition, staleness, terminal attempts, and trigger evidence rather than a persisted process queue.
-      - [ ] 4.5.2.3 Subtask - Recover incomplete editions, reservations, usage-pending attempts, metadata refreshes, and activation candidates under their exact original fences.
-      - [ ] 4.5.2.4 Subtask - Enter explicit degraded status when store, harness, artifact, profile, or accounting dependencies are unavailable and resume only after current revalidation.
+      - [x] 4.5.2.1 Subtask - Scan eligible automatic enrollments on startup, validate profiles and readiness, and acquire only expired or absent leases.
+      - [x] 4.5.2.2 Subtask - Reconstruct pending necessity from current source, current edition, staleness, terminal attempts, and trigger evidence rather than a persisted process queue.
+      - [x] 4.5.2.3 Subtask - Recover incomplete editions, reservations, usage-pending attempts, metadata refreshes, and activation candidates under their exact original fences.
+      - [x] 4.5.2.4 Subtask - Enter explicit degraded status when store, harness, artifact, profile, or accounting dependencies are unavailable and resume only after current revalidation.
 
   - [ ] 4.6 Section - Phase 4 Integration Tests.
 

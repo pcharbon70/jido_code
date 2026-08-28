@@ -621,13 +621,17 @@ defmodule JidoCode.Knowledge.QuerySource do
 
   def fetch(:repository_wiki_maintainer_status) do
     """
-    SELECT ?maintainer ?state ?generation ?profileDigest ?started ?expires WHERE {
+    SELECT ?maintainer ?state ?generation ?profileDigest ?enrollmentRevision ?cancellationGeneration ?fence ?heartbeat ?started ?expires WHERE {
       GRAPH {{graph}} {
         ?maintainer a <#{@jf}WikiMaintainer> ;
                     <#{@jf}repositoryScope> {{resource}} ;
                     <#{@jf}maintainerState> ?state ;
                     <#{@jf}profileRevision> ?generation ;
                     <#{@jf}profileDigest> ?profileDigest ;
+                    <#{@jf}enrollmentRevision> ?enrollmentRevision ;
+                    <#{@jf}wikiCancellationGeneration> ?cancellationGeneration ;
+                    <#{@jf}fencingToken> ?fence ;
+                    <#{@jf}heartbeatAt> ?heartbeat ;
                     <#{@prov}generatedAtTime> ?started ;
                     <#{@jf}expiresAt> ?expires .
         FILTER(?started <= {{instant}})
@@ -679,6 +683,25 @@ defmodule JidoCode.Knowledge.QuerySource do
       }
     }
     ORDER BY ?recorded ?usage
+    LIMIT {{row_limit}}
+    """
+  end
+
+  def fetch(:repository_wiki_recovery_status) do
+    """
+    SELECT ?observation ?status ?dependency ?enrollmentRevision ?cancellationGeneration ?recorded WHERE {
+      GRAPH {{graph}} {
+        ?observation a <#{@jf}WikiRecoveryObservation> ;
+                     <#{@jf}repositoryScope> {{resource}} ;
+                     <#{@jf}recoveryStatus> ?status ;
+                     <#{@jf}enrollmentRevision> ?enrollmentRevision ;
+                     <#{@jf}wikiCancellationGeneration> ?cancellationGeneration ;
+                     <#{@prov}generatedAtTime> ?recorded .
+        OPTIONAL { ?observation <#{@jf}degradedDependency> ?dependency }
+        FILTER(?recorded <= {{instant}})
+      }
+    }
+    ORDER BY DESC(?recorded) ?dependency
     LIMIT {{row_limit}}
     """
   end

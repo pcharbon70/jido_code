@@ -17,6 +17,34 @@ defmodule JidoCode.Factory.RepositoryWiki.Scheduler do
   def complete(server \\ __MODULE__, tenant_iri, repository_iri, result),
     do: GenServer.call(server, {:complete, tenant_iri, repository_iri, result})
 
+  def disable_repository(
+        server \\ __MODULE__,
+        tenant_iri,
+        repository_iri,
+        enrollment_revision,
+        cancellation_generation
+      ),
+      do:
+        GenServer.call(
+          server,
+          {:disable_repository, tenant_iri, repository_iri, enrollment_revision,
+           cancellation_generation}
+        )
+
+  def enable_repository(
+        server \\ __MODULE__,
+        tenant_iri,
+        repository_iri,
+        enrollment_revision,
+        cancellation_generation
+      ),
+      do:
+        GenServer.call(
+          server,
+          {:enable_repository, tenant_iri, repository_iri, enrollment_revision,
+           cancellation_generation}
+        )
+
   def hydrate(server \\ __MODULE__, triggers), do: GenServer.call(server, {:hydrate, triggers})
   def status(server \\ __MODULE__), do: GenServer.call(server, :status)
 
@@ -30,6 +58,7 @@ defmodule JidoCode.Factory.RepositoryWiki.Scheduler do
        revalidator: Keyword.get(options, :revalidator, &default_revalidator/2),
        pending: [],
        active: %{},
+       disabled: %{},
        terminal: [],
        sequence: 0
      }}
@@ -42,6 +71,95 @@ defmodule JidoCode.Factory.RepositoryWiki.Scheduler do
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
   end
+
+  def handle_call(
+        {:disable_repository, tenant_iri, repository_iri, enrollment_revision,
+         cancellation_generation},
+        _from,
+        state
+      )
+      when is_integer(enrollment_revision) and enrollment_revision >= 0 and
+             is_integer(cancellation_generation) and cancellation_generation >= 0 do
+    key = {tenant_iri, repository_iri}
+
+    {pending, retained} =
+      Enum.split_with(state.pending, fn trigger ->
+        trigger.tenant_iri == tenant_iri and trigger.repository_iri == repository_iri
+      end)
+
+    {active_trigger, active} = Map.pop(state.active, key)
+    cancelled = pending ++ if(is_nil(active_trigger), do: [], else: [active_trigger])
+
+    terminal =
+      Enum.reduce(cancelled, state.terminal, fn trigger, evidence ->
+        terminal =
+          terminal_evidence(trigger, :cancelled, %{
+            enrollment_revision: enrollment_revision,
+            cancellation_generation: cancellation_generation
+          })
+
+        bounded_prepend(terminal, evidence)
+      end)
+
+    fence = %{
+      enrollment_revision: enrollment_revision,
+      cancellation_generation: cancellation_generation
+    }
+
+    next = %{
+      state
+      | pending: retained,
+        active: active,
+        terminal: terminal,
+        disabled: Map.put(state.disabled, key, fence)
+    }
+
+    {:reply,
+     {:ok,
+      %{
+        pending_cancelled: length(pending),
+        active_cancelled?: not is_nil(active_trigger),
+        fence: fence
+      }}, next}
+  end
+
+  def handle_call(
+        {:enable_repository, tenant_iri, repository_iri, enrollment_revision,
+         cancellation_generation},
+        _from,
+        state
+      )
+      when is_integer(enrollment_revision) and enrollment_revision >= 0 and
+             is_integer(cancellation_generation) and cancellation_generation >= 0 do
+    key = {tenant_iri, repository_iri}
+
+    case Map.fetch(state.disabled, key) do
+      {:ok, fence}
+      when enrollment_revision > fence.enrollment_revision and
+             cancellation_generation >= fence.cancellation_generation ->
+        {:reply, :ok, %{state | disabled: Map.delete(state.disabled, key)}}
+
+      {:ok, _fence} ->
+        {:reply, {:error, :stale_generation}, state}
+
+      :error ->
+        {:reply, :ok, state}
+    end
+  end
+
+  def handle_call(
+        {:disable_repository, _tenant, _repository, _revision, _generation},
+        _from,
+        state
+      ),
+      do: {:reply, {:error, :invalid_fence}, state}
+
+  def handle_call(
+        {:enable_repository, _tenant, _repository, _revision, _generation},
+        _from,
+        state
+      ),
+      do: {:reply, {:error, :invalid_fence}, state}
 
   def handle_call({:hydrate, triggers}, _from, state) when is_list(triggers) do
     if length(triggers) <= state.maximum_pending do
@@ -81,12 +199,16 @@ defmodule JidoCode.Factory.RepositoryWiki.Scheduler do
        pending_count: length(state.pending),
        active_count: map_size(state.active),
        terminal_count: length(state.terminal),
+       disabled_count: map_size(state.disabled),
        repositories: state.active |> Map.keys() |> Enum.sort()
      }, state}
   end
 
   defp enqueue_trigger(state, trigger) when is_map(trigger) do
     cond do
+      Map.has_key?(state.disabled, {trigger[:tenant_iri], trigger[:repository_iri]}) ->
+        {:error, :disabled}
+
       Enum.any?(state.pending, &(&1.idempotency_key == trigger[:idempotency_key])) ->
         {:ok, :duplicate, state}
 
