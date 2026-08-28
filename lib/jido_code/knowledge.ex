@@ -103,6 +103,9 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.SynthesisRequest, as: WikiSynthesisRequest
   alias JidoCode.Knowledge.RepositoryWiki.Cancellation, as: WikiCancellation
   alias JidoCode.Knowledge.RepositoryWiki.MaintainerRecovery, as: WikiMaintainerRecovery
+  alias JidoCode.Knowledge.RepositoryWiki.ContextProfile, as: WikiContextProfile
+  alias JidoCode.Knowledge.RepositoryWiki.ContextPacket, as: WikiContextPacket
+  alias JidoCode.Knowledge.RepositoryWiki.ContextSource, as: WikiContextSource
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
@@ -535,6 +538,18 @@ defmodule JidoCode.Knowledge do
 
   def plan_repository_wiki_maintainer_recovery(enrollment, facts, evaluated_at),
     do: WikiMaintainerRecovery.plan(enrollment, facts, evaluated_at)
+
+  def repository_wiki_context_profile, do: WikiContextProfile.profile()
+
+  def repository_wiki_context_packet?(packet), do: WikiContextPacket.valid?(packet)
+
+  def repository_wiki_context_revision, do: WikiContextPacket.revision()
+
+  def repository_wiki_context(request, options \\ []),
+    do: WikiContextSource.load(request, options)
+
+  def repository_wiki_context_current?(packet, current),
+    do: WikiContextSource.current?(packet, current)
 
   def repository_wiki_default(repository_iri, tenant_iri),
     do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)

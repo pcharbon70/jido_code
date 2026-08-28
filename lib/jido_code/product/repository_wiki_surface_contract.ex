@@ -21,6 +21,8 @@ defmodule JidoCode.Product.RepositoryWikiSurfaceContract do
     %{id: "search", label: "Search", icon: "hero-magnifying-glass", page_slug: nil},
     %{id: "history", label: "History", icon: "hero-clock", page_slug: nil},
     %{id: "gaps", label: "Known gaps", icon: "hero-exclamation-triangle", page_slug: nil},
+    %{id: "usage", label: "Usage & cost", icon: "hero-banknotes", page_slug: nil},
+    %{id: "operations", label: "Operations", icon: "hero-signal", page_slug: nil},
     %{id: "settings", label: "Settings", icon: "hero-cog-6-tooth", page_slug: nil}
   ]
   @ids Enum.map(@views, & &1.id)

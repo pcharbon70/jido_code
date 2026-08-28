@@ -6,6 +6,8 @@ defmodule JidoCode.Product.RepositoryWikiProjection do
   are disposable and never act as edition, enrollment, or authorization state.
   """
 
+  alias JidoCode.Product.RepositoryWikiOperationsProjection
+
   @enforce_keys [
     :state,
     :visible?,
@@ -20,6 +22,8 @@ defmodule JidoCode.Product.RepositoryWikiProjection do
     :gaps,
     :history,
     :search_results,
+    :usage,
+    :operations,
     :settings,
     :warnings
   ]
@@ -58,6 +62,8 @@ defmodule JidoCode.Product.RepositoryWikiProjection do
       gaps: [],
       history: [],
       search_results: [],
+      usage: RepositoryWikiOperationsProjection.empty(repository_iri, state),
+      operations: default_operations(state),
       settings: default_settings(),
       warnings: [Atom.to_string(state)]
     }
@@ -72,6 +78,25 @@ defmodule JidoCode.Product.RepositoryWikiProjection do
       generation_mode: :deterministic_only,
       token_posture: :zero_model_tokens,
       regeneration_available?: false
+    }
+  end
+
+  @spec default_operations(atom()) :: map()
+  def default_operations(state \\ :unavailable) do
+    %{
+      state: state,
+      repository_count: 0,
+      current_count: 0,
+      stale_count: 0,
+      queue_pending: 0,
+      queue_active: 0,
+      reservations_live: 0,
+      usage_pending: 0,
+      usage_unknown: 0,
+      retained_bytes: 0,
+      alert_count: 0,
+      repositories: [],
+      alerts: []
     }
   end
 end

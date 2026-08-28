@@ -5,6 +5,7 @@ defmodule JidoCodeWeb.HomeLiveTest do
 
   alias JidoCode.Product.CommandOutcome
   alias JidoCode.Product.Projection
+  alias JidoCode.Product.RepositoryWikiOperationsProjection
   alias JidoCode.Product.RepositoryWikiProjection
   alias JidoCode.Product.SurfaceContract
 
@@ -290,6 +291,31 @@ defmodule JidoCodeWeb.HomeLiveTest do
     end
   end
 
+  test "renders accessible wiki usage, budgets, fleet health, and alerts", %{conn: conn} do
+    {:ok, ref} = SurfaceContract.encode_resource("https://jido.run/id/repository/alpha")
+    {:ok, view, _html} = live(conn, ~p"/?#{%{repository: ref, surface: "wiki"}}")
+
+    view |> element("#wiki-view-usage") |> render_click()
+    assert has_element?(view, "#wiki-usage")
+    assert has_element?(view, "#wiki-usage-state", "ready")
+    assert has_element?(view, "#wiki-stat-usage-attempts", "2")
+    assert has_element?(view, "#wiki-stat-usage-tokens", "0")
+    assert has_element?(view, "#wiki-budget-state", "available")
+    assert has_element?(view, "#wiki-budget-remaining", "CAD")
+    assert has_element?(view, "#wiki-synthesis-availability", "unavailable")
+    assert has_element?(view, "#wiki-currency-totals > [id]", "CAD")
+    assert has_element?(view, "#wiki-usage-breakdowns > [id]", "manual")
+    assert has_element?(view, "#wiki-live-reservations > [id]", "reserved")
+
+    view |> element("#wiki-view-operations") |> render_click()
+    assert has_element?(view, "#wiki-operations")
+    assert has_element?(view, "#wiki-stat-fleet-repositories", "2")
+    assert has_element?(view, "#wiki-stat-fleet-alerts", "1")
+    assert has_element?(view, "#wiki-fleet-repositories > [id]", "automatic")
+    assert has_element?(view, "#wiki-operations-alerts > [id]", "usage_unknown")
+    assert has_element?(view, "#wiki-runbook-note", "existing store backup")
+  end
+
   defp projection do
     %Projection{
       state: :ready,
@@ -430,6 +456,105 @@ defmodule JidoCodeWeb.HomeLiveTest do
           snippet: "Getting Started · user · user_guide"
         }
       ],
+      usage: %RepositoryWikiOperationsProjection{
+        state: :ready,
+        repository_iri: "https://jido.run/id/repository/alpha",
+        tenant_iri: "https://jido.run/id/tenant/alpha",
+        evaluated_at: ~U[2026-08-28 16:00:00Z],
+        period: %{start_at: ~U[2026-08-01 00:00:00Z], end_at: ~U[2026-08-28 16:00:00Z]},
+        totals: %{
+          attempts: 2,
+          deterministic_attempts: 2,
+          local_elapsed_ms: 40,
+          local_input_bytes: 8_192,
+          input_tokens: 0,
+          output_tokens: 0,
+          cached_tokens: 0,
+          reasoning_tokens: 0,
+          measured_cost_microunits: 0,
+          reserved_liability_microunits: 10,
+          unknown_liability_microunits: 0
+        },
+        currency_totals: [
+          %{id: "cad", currency: "CAD", measured: 0, reserved: 10, unknown: 0}
+        ],
+        breakdowns: [
+          %{
+            id: "trigger-manual",
+            dimension: :trigger,
+            value: "manual",
+            attempts: 2,
+            tokens: 0,
+            measured_cost_microunits: 0,
+            unknown_liability_microunits: 0
+          }
+        ],
+        budget: %{
+          state: :available,
+          limit: 100,
+          remaining: 90,
+          currency: "CAD",
+          live: 1,
+          window_start: ~U[2026-08-01 00:00:00Z],
+          window_end: ~U[2026-09-01 00:00:00Z]
+        },
+        profile: %{
+          deterministic_available?: true,
+          synthesis_available?: false,
+          unavailable_reason: :hosted_synthesis_disabled_in_v1
+        },
+        reservations: [
+          %{
+            id: "reservation-one",
+            state: :reserved,
+            cost_microunits: 10,
+            currency: "CAD",
+            expires_at: ~U[2026-08-28 17:00:00Z]
+          }
+        ],
+        warnings: []
+      },
+      operations: %{
+        state: :ready,
+        repository_count: 2,
+        current_count: 1,
+        stale_count: 1,
+        queue_pending: 2,
+        queue_active: 1,
+        reservations_live: 1,
+        usage_pending: 0,
+        usage_unknown: 1,
+        retained_bytes: 12_000,
+        alert_count: 1,
+        repositories: [
+          %{
+            id: "repository-alpha-health",
+            repository_iri: "https://jido.run/id/repository/alpha",
+            tenant_iri: "https://jido.run/id/tenant/alpha",
+            enrollment: :automatic,
+            current_state: :current,
+            current_age_seconds: 60,
+            maintainer: :running,
+            lease: %{state: :active, expires_at: ~U[2026-08-28 17:00:00Z]},
+            queue: %{pending: 0, active: 1},
+            compilation: %{success: 2, failed: 0, abandoned: 0},
+            coverage: %{pages: 10, dependencies: 20, guides: 4, gaps: 0},
+            accounting: %{live_reservations: 1, usage_pending: 0, usage_unknown: 0},
+            storage: %{edition_count: 2, retained_bytes: 12_000},
+            restore: :verified,
+            alerts: []
+          }
+        ],
+        alerts: [
+          %{
+            id: "alert-usage-unknown",
+            repository_iri: "https://jido.run/id/repository/beta",
+            tenant_iri: "https://jido.run/id/tenant/alpha",
+            type: :usage_unknown,
+            severity: :critical
+          }
+        ]
+      },
       settings: %{
         mode: :automatic,
         read_visibility: :retained,
