@@ -92,6 +92,11 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.Compiler, as: RepositoryWikiCompiler
   alias JidoCode.Knowledge.RepositoryWiki.Edition, as: RepositoryWikiEdition
   alias JidoCode.Knowledge.RepositoryWiki.GenerationProfile, as: WikiGenerationProfile
+  alias JidoCode.Knowledge.RepositoryWiki.GenerationCatalog, as: WikiGenerationCatalog
+  alias JidoCode.Knowledge.RepositoryWiki.PriceProfile, as: WikiPriceProfile
+  alias JidoCode.Knowledge.RepositoryWiki.Budget, as: WikiBudget
+  alias JidoCode.Knowledge.RepositoryWiki.Reservation, as: WikiReservation
+  alias JidoCode.Knowledge.RepositoryWiki.UsageAccounting, as: WikiUsageAccounting
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
@@ -446,6 +451,39 @@ defmodule JidoCode.Knowledge do
 
   def register_wiki_generation_profile(profile, attributes, options \\ []),
     do: WikiGenerationProfile.register_command(profile, attributes, options)
+
+  def repository_wiki_generation_catalog_profile(key, attributes),
+    do: WikiGenerationCatalog.deterministic_profile(key, attributes)
+
+  def repository_wiki_disabled_synthesis_profile(key, attributes),
+    do: WikiGenerationCatalog.disabled_synthesis_profile(key, attributes)
+
+  def resolve_repository_wiki_generation_profile(key, attributes, evaluated_at),
+    do: WikiGenerationCatalog.resolve(key, attributes, evaluated_at)
+
+  def repository_wiki_price_profile(attributes), do: WikiPriceProfile.new(attributes)
+  def repository_wiki_budget(attributes), do: WikiBudget.new(attributes)
+
+  def reserve_repository_wiki_budget(request, context),
+    do: WikiReservation.admit(request, context)
+
+  def reserve_repository_wiki_budget_command(reservation, budget, attributes, options \\ []),
+    do: WikiReservation.reserve_command(reservation, budget, attributes, options)
+
+  def transition_repository_wiki_reservation(reservation, next_state, recorded_at),
+    do: WikiReservation.transition(reservation, next_state, recorded_at)
+
+  def repository_wiki_deterministic_usage(attributes),
+    do: WikiUsageAccounting.deterministic(attributes)
+
+  def repository_wiki_measured_usage(raw, price_profile, attributes),
+    do: WikiUsageAccounting.measured(raw, price_profile, attributes)
+
+  def reconcile_repository_wiki_usage(reservation, usage, context),
+    do: WikiUsageAccounting.reconcile(reservation, usage, context)
+
+  def record_repository_wiki_usage(usage, attributes, options \\ []),
+    do: WikiUsageAccounting.record_command(usage, attributes, options)
 
   def repository_wiki_default(repository_iri, tenant_iri),
     do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)

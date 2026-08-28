@@ -20,43 +20,43 @@ Back to plan: [README](./README.md)
   per repository, coalescing update work, enforcing opt-out, and recording
   terminal zero-token or measured usage for every admitted attempt.
 
-  - [ ] 4.1 Section - Define generation profiles, price catalogs, budgets, and reservations.
+  - [x] 4.1 Section - Define generation profiles, price catalogs, budgets, and reservations.
 
     This section ensures the factory can answer whether a generation attempt
     is allowed and funded before any token-bearing effect can occur.
 
-    - [ ] 4.1.1 Task {#rwi-p04-generation-profiles} [repo: jido_code] [after: {#rwi-p03-phase-receipt}] - Implement the closed generation and price profile catalogs.
+    - [x] 4.1.1 Task {#rwi-p04-generation-profiles} [repo: jido_code] [after: {#rwi-p03-phase-receipt}] - Implement the closed generation and price profile catalogs.
 
       This task separates deterministic compiler identity from any future
       provider/model synthesis identity and price schedule.
 
-      - [ ] 4.1.1.1 Subtask - Register manual and automatic deterministic profiles with compiler, renderer, resolver, limits, zero-token behavior, eligibility, and immutable component digests.
-      - [ ] 4.1.1.2 Subtask - Define disabled synthesis profile shapes with exact provider, model, region, tokenizer/accounting basis, prompt/template digest, tool policy, retention policy, and maximum input/output/cache/reasoning tokens.
-      - [ ] 4.1.1.3 Subtask - Define immutable price profiles with currency, effective interval, input/output/cached/reasoning unit prices, rounding, source provenance, and supersession.
-      - [ ] 4.1.1.4 Subtask - Make profile resolution closed and fail-safe; graph values cannot select modules, endpoints, credentials, prompts, prices, tokenizers, or fallback providers.
-      - [ ] 4.1.1.5 Subtask - Publish V1 with no enabled hosted synthesis or provider/model price profile and prove unavailable profiles cannot be selected indirectly.
+      - [x] 4.1.1.1 Subtask - Register manual and automatic deterministic profiles with compiler, renderer, resolver, limits, zero-token behavior, eligibility, and immutable component digests.
+      - [x] 4.1.1.2 Subtask - Define disabled synthesis profile shapes with exact provider, model, region, tokenizer/accounting basis, prompt/template digest, tool policy, retention policy, and maximum input/output/cache/reasoning tokens.
+      - [x] 4.1.1.3 Subtask - Define immutable price profiles with currency, effective interval, input/output/cached/reasoning unit prices, rounding, source provenance, and supersession.
+      - [x] 4.1.1.4 Subtask - Make profile resolution closed and fail-safe; graph values cannot select modules, endpoints, credentials, prompts, prices, tokenizers, or fallback providers.
+      - [x] 4.1.1.5 Subtask - Publish V1 with no enabled hosted synthesis or provider/model price profile and prove unavailable profiles cannot be selected indirectly.
 
-    - [ ] 4.1.2 Task {#rwi-p04-budget-reservation} [repo: jido_code] [after: {#rwi-p04-generation-profiles}] - Implement repository-scoped budget and reservation admission.
+    - [x] 4.1.2 Task {#rwi-p04-budget-reservation} [repo: jido_code] [after: {#rwi-p04-generation-profiles}] - Implement repository-scoped budget and reservation admission.
 
       This task reserves worst-case liability atomically before a token-bearing
       attempt and prevents concurrent sessions from overspending one budget.
 
-      - [ ] 4.1.2.1 Subtask - Define repository, tenant, actor, profile, period, per-attempt, token, and currency budget limits with exact revision and effective interval.
-      - [ ] 4.1.2.2 Subtask - Compute worst-case token and monetary liability from the exact generation and price profiles using deterministic checked arithmetic and explicit rounding.
-      - [ ] 4.1.2.3 Subtask - Atomically reserve against committed usage plus live reservations using revision/fence preconditions, idempotency, expiration, and stable duplicate/insufficient/stale outcomes.
-      - [ ] 4.1.2.4 Subtask - Bind reservation to actor, tenant, repository, session, source revision, edition attempt, profile, provider/model, price revision, prompt digest, and invocation-before-effect identity.
-      - [ ] 4.1.2.5 Subtask - Reject missing, disabled, expired, mismatched, cross-scope, underfunded, or already-consumed reservations before any model invocation.
+      - [x] 4.1.2.1 Subtask - Define repository, tenant, actor, profile, period, per-attempt, token, and currency budget limits with exact revision and effective interval.
+      - [x] 4.1.2.2 Subtask - Compute worst-case token and monetary liability from the exact generation and price profiles using deterministic checked arithmetic and explicit rounding.
+      - [x] 4.1.2.3 Subtask - Atomically reserve against committed usage plus live reservations using revision/fence preconditions, idempotency, expiration, and stable duplicate/insufficient/stale outcomes.
+      - [x] 4.1.2.4 Subtask - Bind reservation to actor, tenant, repository, session, source revision, edition attempt, profile, provider/model, price revision, prompt digest, and invocation-before-effect identity.
+      - [x] 4.1.2.5 Subtask - Reject missing, disabled, expired, mismatched, cross-scope, underfunded, or already-consumed reservations before any model invocation.
 
-    - [ ] 4.1.3 Task {#rwi-p04-usage-accounting} [repo: jido_code] [after: {#rwi-p04-budget-reservation}] - Implement durable token usage and cost accounting.
+    - [x] 4.1.3 Task {#rwi-p04-usage-accounting} [repo: jido_code] [after: {#rwi-p04-budget-reservation}] - Implement durable token usage and cost accounting.
 
       This task makes every admitted attempt terminally attributable, including
       deterministic work, failures, cancellation, and missing provider usage.
 
-      - [ ] 4.1.3.1 Subtask - Record deterministic attempts with exact zero input, output, cached, and reasoning tokens; zero model cost; local work metrics; trigger; source; edition; and profile identity.
-      - [ ] 4.1.3.2 Subtask - Define normalized measured usage for input, output, cached input, reasoning, total, provider request, model, region, currency, price revision, and raw evidence digest.
-      - [ ] 4.1.3.3 Subtask - Calculate attributable cost with checked decimal arithmetic, price effective-time rules, explicit rounding, and separate reserved, measured, charged, refunded, and unknown values.
-      - [ ] 4.1.3.4 Subtask - Commit one terminal accounting state for success, rejected-before-effect, failed-before-effect, failed-after-effect, cancelled, timed-out, usage-pending, or usage-unknown.
-      - [ ] 4.1.3.5 Subtask - Reconcile reservation release/consumption idempotently and prevent retries, duplicate callbacks, late results, or process restarts from double charging or erasing liability.
+      - [x] 4.1.3.1 Subtask - Record deterministic attempts with exact zero input, output, cached, and reasoning tokens; zero model cost; local work metrics; trigger; source; edition; and profile identity.
+      - [x] 4.1.3.2 Subtask - Define normalized measured usage for input, output, cached input, reasoning, total, provider request, model, region, currency, price revision, and raw evidence digest.
+      - [x] 4.1.3.3 Subtask - Calculate attributable cost with checked decimal arithmetic, price effective-time rules, explicit rounding, and separate reserved, measured, charged, refunded, and unknown values.
+      - [x] 4.1.3.4 Subtask - Commit one terminal accounting state for success, rejected-before-effect, failed-before-effect, failed-after-effect, cancelled, timed-out, usage-pending, or usage-unknown.
+      - [x] 4.1.3.5 Subtask - Reconcile reservation release/consumption idempotently and prevent retries, duplicate callbacks, late results, or process restarts from double charging or erasing liability.
 
   - [ ] 4.2 Section - Coordinate one optional maintainer owner per enrolled repository.
 

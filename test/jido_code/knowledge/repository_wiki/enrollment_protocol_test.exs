@@ -27,8 +27,9 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
     }
   end
 
-  test "publishes reviewed protocol 2.10.0 and keeps later-effect commands disabled", context do
-    assert CommandRegistry.repository_wiki_version() == "2.10.0"
+  test "preserves reviewed Phase 3 commands and enables only Phase 4 accounting effects",
+       context do
+    assert CommandRegistry.repository_wiki_version() == "2.11.0"
     assert QueryCatalog.repository_wiki_version() == "2.10.0"
 
     for command <- [
@@ -45,7 +46,15 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
           "RecordWikiReviewDecision",
           "ActivateWikiEdition"
         ] do
-      assert {:ok, %{name: ^command, version: "2.10.0"}} =
+      assert {:ok, %{name: ^command, version: "2.11.0"}} =
+               CommandRegistry.resolve(command, "2.11.0")
+    end
+
+    for command <- ["ReserveWikiModelBudget", "RecordWikiModelUsage"] do
+      assert {:ok, %{name: ^command, version: "2.11.0"}} =
+               CommandRegistry.resolve(command, "2.11.0")
+
+      assert {:ok, %{availability: :reserved_disabled, version: "2.10.0"}} =
                CommandRegistry.resolve(command, "2.10.0")
     end
 
@@ -136,7 +145,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.EnrollmentProtocolTest do
              Knowledge.register_wiki_generation_profile(manual, attributes, clock: fn -> @now end)
 
     assert command.command_type == "RegisterWikiGenerationProfile"
-    assert command.command_version == "2.10.0"
+    assert command.command_version == "2.11.0"
     assert command.ontology_version == "1.5.0"
     assert get_in(command.payload, [:changes, Access.at(0), :family]) == :factory_catalog
   end
