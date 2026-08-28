@@ -84,32 +84,32 @@ Back to plan: [README](./README.md)
       - [x] 4.2.2.4 Subtask - Treat mailbox, local debounce state, timers, cursors, caches, and task processes as disposable projections rebuilt from graph state.
       - [x] 4.2.2.5 Subtask - Expose bounded status, health, lease age, queued/coalesced trigger count, active attempt, last result, and disabled reason through reviewed queries.
 
-  - [ ] 4.3 Section - Schedule automatic deterministic updates and coalesce parallel triggers.
+  - [x] 4.3 Section - Schedule automatic deterministic updates and coalesce parallel triggers.
 
     This section turns accepted repository changes into bounded work without
     rebuilding once per coding session or accepting a stale trigger.
 
-    - [ ] 4.3.1 Task {#rwi-p04-scheduling} [repo: jido_code] [after: {#rwi-p04-maintainer-coordinator}] - Implement deterministic trigger admission, debounce, and coalescing.
+    - [x] 4.3.1 Task {#rwi-p04-scheduling} [repo: jido_code] [after: {#rwi-p04-maintainer-coordinator}] - Implement deterministic trigger admission, debounce, and coalescing.
 
       This task combines many source events into the minimum safe sequence of
       source-fenced wiki updates.
 
-      - [ ] 4.3.1.1 Subtask - Accept only controller-authenticated repository-change, accepted-document, dependency-metadata, policy, compiler, manual, recovery, and scheduled-refresh triggers.
-      - [ ] 4.3.1.2 Subtask - Normalize triggers to canonical repository, source, policy, profile, classification, priority, and idempotency identities before enqueueing.
-      - [ ] 4.3.1.3 Subtask - Debounce bursts and coalesce superseded source revisions while retaining causal provenance for every contributing event.
-      - [ ] 4.3.1.4 Subtask - Maintain bounded per-repository pending work with fair fleet-wide concurrency and back-pressure; never use an unbounded process mailbox as the queue of record.
-      - [ ] 4.3.1.5 Subtask - Reclassify against current graph/source state immediately before admission and skip no-op, disabled, already-current, stale, or unsupported work with terminal evidence.
+      - [x] 4.3.1.1 Subtask - Accept only controller-authenticated repository-change, accepted-document, dependency-metadata, policy, compiler, manual, recovery, and scheduled-refresh triggers.
+      - [x] 4.3.1.2 Subtask - Normalize triggers to canonical repository, source, policy, profile, classification, priority, and idempotency identities before enqueueing.
+      - [x] 4.3.1.3 Subtask - Debounce bursts and coalesce superseded source revisions while retaining causal provenance for every contributing event.
+      - [x] 4.3.1.4 Subtask - Maintain bounded per-repository pending work with fair fleet-wide concurrency and back-pressure; never use an unbounded process mailbox as the queue of record.
+      - [x] 4.3.1.5 Subtask - Reclassify against current graph/source state immediately before admission and skip no-op, disabled, already-current, stale, or unsupported work with terminal evidence.
 
-    - [ ] 4.3.2 Task {#rwi-p04-automatic-updates} [repo: jido_code] [after: {#rwi-p04-scheduling}] - Execute automatic deterministic updates through the edition protocol.
+    - [x] 4.3.2 Task {#rwi-p04-automatic-updates} [repo: jido_code] [after: {#rwi-p04-scheduling}] - Execute automatic deterministic updates through the edition protocol.
 
       This task reuses the same compiler, lint, review policy, accounting, and
       activation gates as manual deterministic generation.
 
-      - [ ] 4.3.2.1 Subtask - Bind each attempt to current enrollment, lease generation, source fence, classifier result, generation profile, zero-token reservation posture, and invocation-before-effect identity.
-      - [ ] 4.3.2.2 Subtask - Compile, lint, render, record zero-token usage, and activate only under the existing exact current-source compare-and-swap transition.
-      - [ ] 4.3.2.3 Subtask - Retry only profile-approved transient outcomes with bounded backoff and stable idempotency; never retry policy, source, qualification, or authorization failures blindly.
-      - [ ] 4.3.2.4 Subtask - Mark current editions stale and surface bounded failure status when automatic rebuilding cannot complete, without hiding the last accepted edition.
-      - [ ] 4.3.2.5 Subtask - Rescan current graph state after crash or ownership change and resume or supersede work without trusting the predecessor's queue or cursor.
+      - [x] 4.3.2.1 Subtask - Bind each attempt to current enrollment, lease generation, source fence, classifier result, generation profile, zero-token reservation posture, and invocation-before-effect identity.
+      - [x] 4.3.2.2 Subtask - Compile, lint, render, record zero-token usage, and activate only under the existing exact current-source compare-and-swap transition.
+      - [x] 4.3.2.3 Subtask - Retry only profile-approved transient outcomes with bounded backoff and stable idempotency; never retry policy, source, qualification, or authorization failures blindly.
+      - [x] 4.3.2.4 Subtask - Mark current editions stale and surface bounded failure status when automatic rebuilding cannot complete, without hiding the last accepted edition.
+      - [x] 4.3.2.5 Subtask - Rescan current graph state after crash or ownership change and resume or supersede work without trusting the predecessor's queue or cursor.
 
   - [ ] 4.4 Section - Build and disable the future synthesis boundary.
 

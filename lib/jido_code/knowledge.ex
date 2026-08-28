@@ -99,6 +99,7 @@ defmodule JidoCode.Knowledge do
   alias JidoCode.Knowledge.RepositoryWiki.UsageAccounting, as: WikiUsageAccounting
   alias JidoCode.Knowledge.RepositoryWiki.MaintainerProfile, as: WikiMaintainerProfile
   alias JidoCode.Knowledge.RepositoryWiki.MaintainerLease, as: WikiMaintainerLease
+  alias JidoCode.Knowledge.RepositoryWiki.UpdateTrigger, as: WikiUpdateTrigger
   alias JidoCode.Knowledge.RepositoryWiki.GuideDiscovery, as: RepositoryWikiGuideDiscovery
   alias JidoCode.Knowledge.RepositoryWiki.GuideRenderer, as: RepositoryWikiGuideRenderer
   alias JidoCode.Knowledge.RepositoryWiki.UpdateClassifier, as: RepositoryWikiUpdateClassifier
@@ -504,6 +505,12 @@ defmodule JidoCode.Knowledge do
 
   def acquire_repository_wiki_maintainer_lease_command(lease, attributes, options \\ []),
     do: WikiMaintainerLease.acquire_command(lease, attributes, options)
+
+  def repository_wiki_update_trigger(type, payload, context),
+    do: WikiUpdateTrigger.new(type, payload, context)
+
+  def repository_wiki_trigger_priority(priority),
+    do: WikiUpdateTrigger.priority_weight(priority)
 
   def repository_wiki_default(repository_iri, tenant_iri),
     do: RepositoryWikiEnrollment.default(repository_iri, tenant_iri)

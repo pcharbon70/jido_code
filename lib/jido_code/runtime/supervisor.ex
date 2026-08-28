@@ -24,7 +24,8 @@ defmodule JidoCode.Runtime.Supervisor do
        strategy: :one_for_one,
        max_restarts: 20,
        max_seconds: 10},
-      JidoCode.Factory.RepositoryWiki.Coordinator
+      JidoCode.Factory.RepositoryWiki.Coordinator,
+      JidoCode.Factory.RepositoryWiki.Scheduler
     ]
 
     recovery = Application.get_env(:jido_code, :attempt_recovery, [])
