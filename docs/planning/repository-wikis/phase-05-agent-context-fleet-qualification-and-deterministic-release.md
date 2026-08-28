@@ -86,43 +86,43 @@ Back to plan: [README](./README.md)
       - [x] 5.2.2.4 Subtask - Execute backup and restore across multiple repository wiki graphs, rebuild disposable projections, restart eligible maintainers, and verify current/source/accounting fences.
       - [x] 5.2.2.5 Subtask - Bound telemetry labels and redact paths, source bodies, prompts, credentials, provider payloads, private dependency endpoints, and high-cardinality repository-controlled values.
 
-  - [ ] 5.3 Section - Qualify security, determinism, usefulness, and fleet isolation.
+  - [x] 5.3 Section - Qualify security, determinism, usefulness, and fleet isolation.
 
     This section evaluates the complete system against a signed corpus rather
     than treating happy-path rendering as release evidence.
 
-    - [ ] 5.3.1 Task {#rwi-p05-qualification-corpus} [repo: jido_code] [after: {#rwi-p05-operations}] - Build the signed repository-wiki qualification corpus and evaluator.
+    - [x] 5.3.1 Task {#rwi-p05-qualification-corpus} [repo: jido_code] [after: {#rwi-p05-operations}] - Build the signed repository-wiki qualification corpus and evaluator.
 
       This task covers representative and adversarial repositories, changes,
       documentation, dependencies, sessions, budgets, and recovery events.
 
-      - [ ] 5.3.1.1 Subtask - Create immutable fixtures for simple, umbrella, dynamic Mix, complete/incomplete lock, Hex, git, path, private, optional, cyclic, malformed, oversized, Unicode, and hostile repositories.
-      - [ ] 5.3.1.2 Subtask - Create guide fixtures for user/developer/operator content, renames, broken links, raw HTML, scripts, unsafe schemes, secret-like values, huge documents, and anchor collisions.
-      - [ ] 5.3.1.3 Subtask - Create concurrency fixtures for many repositories, competing same-repository sessions, previews, source churn, activation races, maintainer takeover, opt-out, retries, and late results.
-      - [ ] 5.3.1.4 Subtask - Create accounting fixtures for zero-token attempts, reservations, exact/partial/missing usage, price changes, currency/rounding, duplicate callbacks, crash recovery, and unknown liability.
-      - [ ] 5.3.1.5 Subtask - Sign corpus, evaluator, expected graph/page/usage outputs, component profiles, clocks, and release thresholds with immutable digests.
+      - [x] 5.3.1.1 Subtask - Create immutable fixtures for simple, umbrella, dynamic Mix, complete/incomplete lock, Hex, git, path, private, optional, cyclic, malformed, oversized, Unicode, and hostile repositories.
+      - [x] 5.3.1.2 Subtask - Create guide fixtures for user/developer/operator content, renames, broken links, raw HTML, scripts, unsafe schemes, secret-like values, huge documents, and anchor collisions.
+      - [x] 5.3.1.3 Subtask - Create concurrency fixtures for many repositories, competing same-repository sessions, previews, source churn, activation races, maintainer takeover, opt-out, retries, and late results.
+      - [x] 5.3.1.4 Subtask - Create accounting fixtures for zero-token attempts, reservations, exact/partial/missing usage, price changes, currency/rounding, duplicate callbacks, crash recovery, and unknown liability.
+      - [x] 5.3.1.5 Subtask - Sign corpus, evaluator, expected graph/page/usage outputs, component profiles, clocks, and release thresholds with immutable digests.
 
-    - [ ] 5.3.2 Task {#rwi-p05-security-evaluation} [repo: jido_code] [after: {#rwi-p05-qualification-corpus}] - Execute the security and authority evaluation.
+    - [x] 5.3.2 Task {#rwi-p05-security-evaluation} [repo: jido_code] [after: {#rwi-p05-qualification-corpus}] - Execute the security and authority evaluation.
 
       This task attempts to turn repository, guide, dependency, remote, graph,
       preview, and process inputs into unauthorized authority or disclosure.
 
-      - [ ] 5.3.2.1 Subtask - Test path traversal, symlink escape, parser bombs, atom exhaustion, code execution, Mix hooks, credential access, network escape, endpoint injection, unsafe redirects, and content injection.
-      - [ ] 5.3.2.2 Subtask - Test graph IRI injection, raw query bypass, cross-tenant/repository joins, preview disclosure, cache collisions, stale opaque references, forged source fences, and multiple-current attempts.
-      - [ ] 5.3.2.3 Subtask - Test budget bypass, reservation races, profile/price substitution, usage suppression, duplicate charging, arithmetic overflow, late provider results, and disable-after-invocation behavior.
-      - [ ] 5.3.2.4 Subtask - Test wiki-to-agent prompt injection and authority confusion; prove retrieved text remains quoted, attributable context and cannot select commands, tools, policies, credentials, runtimes, or merges.
-      - [ ] 5.3.2.5 Subtask - Require zero critical/high findings, documented bounded residual risks, and signed evidence for every non-negotiable invariant before release admission.
+      - [x] 5.3.2.1 Subtask - Test path traversal, symlink escape, parser bombs, atom exhaustion, code execution, Mix hooks, credential access, network escape, endpoint injection, unsafe redirects, and content injection.
+      - [x] 5.3.2.2 Subtask - Test graph IRI injection, raw query bypass, cross-tenant/repository joins, preview disclosure, cache collisions, stale opaque references, forged source fences, and multiple-current attempts.
+      - [x] 5.3.2.3 Subtask - Test budget bypass, reservation races, profile/price substitution, usage suppression, duplicate charging, arithmetic overflow, late provider results, and disable-after-invocation behavior.
+      - [x] 5.3.2.4 Subtask - Test wiki-to-agent prompt injection and authority confusion; prove retrieved text remains quoted, attributable context and cannot select commands, tools, policies, credentials, runtimes, or merges.
+      - [x] 5.3.2.5 Subtask - Require zero critical/high findings, documented bounded residual risks, and signed evidence for every non-negotiable invariant before release admission.
 
-    - [ ] 5.3.3 Task {#rwi-p05-quality-evaluation} [repo: jido_code] [after: {#rwi-p05-security-evaluation}] - Execute deterministic completeness, usefulness, and regression evaluation.
+    - [x] 5.3.3 Task {#rwi-p05-quality-evaluation} [repo: jido_code] [after: {#rwi-p05-security-evaluation}] - Execute deterministic completeness, usefulness, and regression evaluation.
 
       This task proves the wiki contains what the specifications promise and
       remains reproducible across clean machines and process restarts.
 
-      - [ ] 5.3.3.1 Subtask - Require exact supported dependency-node/edge coverage, required project fields or visible gaps, guide/source provenance, safe links, page reachability, and lint/render success.
-      - [ ] 5.3.3.2 Subtask - Compile the corpus repeatedly across clean checkouts, randomized input enumeration, restarts, and supported runtime environments; require identical canonical graph/page digests.
-      - [ ] 5.3.3.3 Subtask - Evaluate representative user and developer retrieval tasks for page discoverability, navigation, source tracing, dependency explanation, known-gap visibility, and bounded search quality.
-      - [ ] 5.3.3.4 Subtask - Prove current-edition reads and agent context never mix source revisions or previews under concurrent activation and source churn.
-      - [ ] 5.3.3.5 Subtask - Establish signed performance and resource ceilings for inventory, parsing, graph statements, rendering, search, maintainer concurrency, storage, and recovery.
+      - [x] 5.3.3.1 Subtask - Require exact supported dependency-node/edge coverage, required project fields or visible gaps, guide/source provenance, safe links, page reachability, and lint/render success.
+      - [x] 5.3.3.2 Subtask - Compile the corpus repeatedly across clean checkouts, randomized input enumeration, restarts, and supported runtime environments; require identical canonical graph/page digests.
+      - [x] 5.3.3.3 Subtask - Evaluate representative user and developer retrieval tasks for page discoverability, navigation, source tracing, dependency explanation, known-gap visibility, and bounded search quality.
+      - [x] 5.3.3.4 Subtask - Prove current-edition reads and agent context never mix source revisions or previews under concurrent activation and source churn.
+      - [x] 5.3.3.5 Subtask - Establish signed performance and resource ceilings for inventory, parsing, graph statements, rendering, search, maintainer concurrency, storage, and recovery.
 
   - [ ] 5.4 Section - Pilot `jido_code` and prepare deterministic V1 release.
 
