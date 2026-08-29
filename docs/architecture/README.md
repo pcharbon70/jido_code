@@ -11,6 +11,9 @@ planning:
 4. [`docs/planning`](../planning/) sequences implementation work but does not
    override an accepted ADR or tested backend constraint.
 
+Current consolidated view:
+[Current coding factory architecture, agent flows, and gap analysis](./current-coding-factory-architecture-and-agent-flows.md).
+
 ## Phase 1 Baseline
 
 - [Current-state inventory](./current-state-inventory.md)
