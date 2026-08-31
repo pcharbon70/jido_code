@@ -138,3 +138,29 @@ corresponding phase receipts are accepted at merged candidates.
 - [Repository wiki product and qualification](./repository-wiki-product-and-qualification.md)
 - [Repository wikis implementation plan](../planning/repository-wikis/README.md)
 - [Repository wiki governance baseline](./repository-wiki-governance-baseline.md)
+
+## Proposed Secure Hypermedia Control Plane UI
+
+These proposed decisions and specifications translate the secure hypermedia UI
+research into an eight-phase delivery program. They preserve the accepted graph
+and command authority model and do not become binding until accepted through
+Gate HUI1 and the normal merged-candidate receipt process.
+
+- [Secure hypermedia control plane UI research](../research/12-secure-hypermedia-coding-factory-ui.md)
+- [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
+- [ADR 0009: Human identity, scoped authorization, and separation of duty](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
+- [ADR 0010: ShadcnUI as the product component primitive layer](../adr/0010-shadcnui-as-product-component-primitive-layer.md)
+- [ADR 0011: Attention-oriented control plane and knowledge lenses](../adr/0011-attention-oriented-control-plane-and-knowledge-lenses.md)
+- [Hypermedia product governance baseline](./hypermedia-product-governance-baseline.md)
+- [Human identity, scope, and authorization contract](./human-identity-scope-and-authorization-contract.md)
+- [ShadcnUI adoption and component contract](./shadcn-ui-adoption-and-component-contract.md)
+- [Datastar and Dstar dependency and consumer qualification](./datastar-dstar-dependency-and-consumer-qualification.md)
+- [Secure product shell and information architecture](./secure-product-shell-and-information-architecture.md)
+- [Datastar request, signal, fragment, and stream contract](./datastar-request-signal-fragment-and-stream-contract.md)
+- [Agent attempt workspace and command contract](./agent-attempt-workspace-and-command-contract.md)
+- [Graph lens and visualization contract](./graph-lens-and-visualization-contract.md)
+- [Hypermedia UI security, privacy, and threat model](./ui-security-privacy-and-threat-model.md)
+- [Incident control plane contract](./incident-control-plane-contract.md)
+- [UI accessibility, usability, and release qualification](./ui-accessibility-usability-and-release-qualification.md)
+- [Hypermedia runtime migration and rollback](./hypermedia-runtime-migration-and-rollback.md)
+- [Secure hypermedia control plane UI implementation plan](../planning/secure-hypermedia-control-plane-ui/README.md)

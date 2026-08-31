@@ -16,3 +16,7 @@ consequences.
 - [ADR 0005: Repository wikis as compiled knowledge projections](./0005-repository-wikis-as-compiled-knowledge-projections.md)
 - [ADR 0006: Per-repository wiki maintainer agents](./0006-per-repository-wiki-maintainer-agents.md)
 - [ADR 0007: Repository wiki enrollment and cost governance](./0007-repository-wiki-enrollment-and-cost-governance.md)
+- [ADR 0008: Server-rendered HEEx and Datastar product runtime](./0008-server-rendered-heex-and-datastar-product-runtime.md)
+- [ADR 0009: Human identity, scoped authorization, and separation of duty](./0009-human-identity-scoped-authorization-and-separation-of-duty.md)
+- [ADR 0010: ShadcnUI as the product component primitive layer](./0010-shadcnui-as-product-component-primitive-layer.md)
+- [ADR 0011: Attention-oriented control plane and knowledge lenses](./0011-attention-oriented-control-plane-and-knowledge-lenses.md)
