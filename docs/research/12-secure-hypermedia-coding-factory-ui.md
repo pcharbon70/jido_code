@@ -15,6 +15,28 @@
   events, LiveView streams, LiveVue islands, or client-authoritative application
   state
 
+## Follow-On Architecture Proposals
+
+The research has been translated into proposed ADRs, architecture
+specifications, and an implementation plan. These documents remain proposals
+until accepted through Gate HUI1 and the repository's merged-candidate receipt
+process:
+
+- [ADRs 0008–0011](../adr/README.md)
+- [Hypermedia product governance baseline](../architecture/hypermedia-product-governance-baseline.md)
+- [Human identity, scope, and authorization contract](../architecture/human-identity-scope-and-authorization-contract.md)
+- [ShadcnUI adoption and component contract](../architecture/shadcn-ui-adoption-and-component-contract.md)
+- [Datastar and Dstar dependency and consumer qualification](../architecture/datastar-dstar-dependency-and-consumer-qualification.md)
+- [Secure product shell and information architecture](../architecture/secure-product-shell-and-information-architecture.md)
+- [Datastar request, signal, fragment, and stream contract](../architecture/datastar-request-signal-fragment-and-stream-contract.md)
+- [Agent attempt workspace and command contract](../architecture/agent-attempt-workspace-and-command-contract.md)
+- [Graph lens and visualization contract](../architecture/graph-lens-and-visualization-contract.md)
+- [Hypermedia UI security, privacy, and threat model](../architecture/ui-security-privacy-and-threat-model.md)
+- [Incident control plane contract](../architecture/incident-control-plane-contract.md)
+- [UI accessibility, usability, and release qualification](../architecture/ui-accessibility-usability-and-release-qualification.md)
+- [Hypermedia runtime migration and rollback](../architecture/hypermedia-runtime-migration-and-rollback.md)
+- [Eight-phase secure hypermedia control plane UI implementation plan](../planning/secure-hypermedia-control-plane-ui/README.md)
+
 ## Executive Conclusion
 
 JidoCode should present the coding factory as an **attention-oriented,
