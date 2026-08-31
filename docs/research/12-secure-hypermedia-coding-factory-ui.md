@@ -92,7 +92,7 @@ This document combines four evidence classes:
   established operational guidance.
 - **Recommendations** apply that evidence to JidoCode. They are not accepted
   until translated into ADRs/specifications and qualified through the normal
-  phase-receipt process.
+  merged-candidate receipt process.
 
 The research does not authorize a new graph family, role grant, semantic
 command, dependency, or runtime change. In particular, labels such as
@@ -270,7 +270,7 @@ service are not default-composed, coding product loaders are unset, the DGA1
 rollout is disabled, and wiki production gateways remain unwired. The UI must
 represent `not configured`, disabled, unavailable, and contract-only posture
 honestly; it cannot infer production operability from implemented modules or
-accepted phase receipts.
+accepted implementation receipts.
 
 ## Evidence-Based Design Principles
 
@@ -1713,25 +1713,25 @@ Test with developers, maintainers, verifiers, operators, and auditors:
 | Accessibility completion | Equivalent task success across required input/display modes |
 | Isolation | Zero cross-project, cross-attempt, cross-interaction-session, cross-graph, or cross-role disclosure |
 
-## Migration Strategy
+## Milestone-Based Migration Strategy
 
 The presentation migration should be incremental and preserve the accepted
 graph/product contracts throughout:
 
 ```mermaid
 flowchart LR
-    P0[0. ADR and security contracts]
-    P1[1. Dependency and asset proof]
-    P2[2. Controller/HEEx read-only shell]
-    P3[3. Datastar fragments and SSE]
-    P4[4. Agent/attempt command workbench]
-    P5[5. Knowledge lenses and wiki]
-    P6[6. Multi-user security and qualification]
-    P7[7. Remove superseded runtime]
-    P0 --> P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7
+    MA[A. ADR and security contracts]
+    MB[B. Dependency and asset proof]
+    MC[C. Controller/HEEx read-only shell]
+    MD[D. Datastar fragments and SSE]
+    ME[E. Agent/attempt command workbench]
+    MF[F. Knowledge lenses and wiki]
+    MG[G. Multi-user security and qualification]
+    MH[H. Remove superseded runtime]
+    MA --> MB --> MC --> MD --> ME --> MF --> MG --> MH
 ```
 
-### Phase 0: Architectural Authority
+### Milestone A: Architectural Authority
 
 - Accept an ADR replacing LiveView/LiveVue product runtime with
   controller-rendered HEEx and Datastar.
@@ -1745,7 +1745,7 @@ flowchart LR
   conflict with the requested target and would otherwise recreate migration
   debt.
 
-### Phase 1: Dependency And Consumer Proof
+### Milestone B: Dependency And Consumer Proof
 
 - Reconcile ShadcnUI namespace, proprietary license/usage authority, CI, exact
   SHA, and accessibility status.
@@ -1762,7 +1762,7 @@ flowchart LR
 - Add architecture checks for allowed asset/runtime dependencies and forbidden
   LiveView/LiveVue product constructs.
 
-### Phase 2: Read-Only Hypermedia Shell
+### Milestone C: Read-Only Hypermedia Shell
 
 - Implement named human accounts, authentication assurance, trusted
   identity/scope/authority construction for controllers and streams,
@@ -1775,7 +1775,7 @@ flowchart LR
   server pagination and safe provenance.
 - Preserve no-JS navigation and qualify responsive/accessibility baselines.
 
-### Phase 3: Datastar Delivery
+### Milestone D: Datastar Delivery
 
 - Add bounded filters/search/pagination with closed signal schemas.
 - Add one authorized multiplexed stream per page/tab, Dstar patches/nudges,
@@ -1783,7 +1783,7 @@ flowchart LR
 - Add connection/freshness state without conflating it with data truth.
 - Qualify HTTP/2/proxy/backpressure/multi-tab behavior.
 
-### Phase 4: Governed Agent Control
+### Milestone E: Governed Agent Control
 
 - Implement the per-attempt workspace and normalized causal timeline.
 - Adapt only already accepted steer, answer, cancel, handoff, recovery, retry,
@@ -1792,7 +1792,7 @@ flowchart LR
   and transport-loss recovery.
 - Add review/evidence and cost/budget workspaces.
 
-### Phase 5: Knowledge And Wiki Lenses
+### Milestone F: Knowledge And Wiki Lenses
 
 - Add source, project-domain, execution, evidence, memory, wiki/dependency,
   audit, dataset, and derived-diagnostic reviewed lenses.
@@ -1801,7 +1801,7 @@ flowchart LR
 - Add private preview isolation, guide/dependency coverage, wiki opt-out,
   maintainer status, and separately attributed wiki token/cost controls.
 
-### Phase 6: Security And Release Qualification
+### Milestone G: Security And Release Qualification
 
 - Complete and qualify phishing-resistant assurance where required,
   roles/delegations, project memberships, restricted areas, live revocation,
@@ -1810,9 +1810,9 @@ flowchart LR
 - Complete cross-browser, manual assistive-technology, usability, load,
   recovery, and real-adapter qualification.
 - Record release receipts at a clean merged candidate under the repository's
-  normal phase closure pattern.
+  normal merged-candidate closure invariants.
 
-### Phase 7: Remove Superseded Product Runtime
+### Milestone H: Remove Superseded Product Runtime
 
 - Remove LiveView routes/socket/product modules, LiveVue, SaladUI, and Vue
   assets only after read/command/accessibility/security equivalence is
@@ -1893,8 +1893,9 @@ Before implementation, produce at least:
 10. **Incident control-plane specification** — read posture, freeze/revoke/stop
     command admission, exact scopes, handoff, evidence, separation of duty,
     recovery, and reopen criteria.
-11. **Phased migration and rollback plan** — section/task/subtask checklists,
-    clean-checkout gates, phase receipts, dependency removal, and rollback.
+11. **Milestone-based migration and rollback plan** —
+    milestone/section/task/subtask checklists, clean-checkout gates, milestone
+    receipts, dependency removal, and rollback.
 
 ## Recommended Architecture In One View
 
@@ -2038,6 +2039,6 @@ owned HEEx components for factory workflows, Datastar/Dstar for progressive
 hypermedia delivery, and the triple-store query/command boundaries for truth
 and authority. Resolve the governance, identity, dependency, streaming, and
 component gaps before implementation. The safest next step is to translate
-this proposal into the ten ADR/specification artifacts above and then create a
-phased phase/section/task/subtask implementation plan with clean merged-candidate
-gates.
+this proposal into the eleven ADR/specification artifacts above and then create
+a milestone/section/task/subtask implementation plan with clean
+merged-candidate gates.
