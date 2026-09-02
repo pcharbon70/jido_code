@@ -1,7 +1,7 @@
 # Hypermedia Product Governance Baseline
 
 - Status: Proposed; non-normative until ADRs 0008–0011 are accepted
-- Specification version: `0.1.0`
+- Specification version: `0.2.0`
 - Owners: JidoCode architecture, product, security, and operations maintainers
 - Milestone: A — Architectural Authority
 - Research: [Secure hypermedia control plane](../research/12-secure-hypermedia-coding-factory-ui.md)
@@ -63,14 +63,16 @@ projection, command, recovery, accessibility, or evidence invariant.
 | B | Qualify immutable dependencies, assets, and consumer spike | ShadcnUI contract; Dstar/Datastar qualification |
 | C | Implement named identity and read-only shell/projections | Identity contract; shell/IA contract |
 | D | Add bounded Datastar requests, fragments, and SSE | Datastar interaction contract |
-| E | Add admitted attempt controls and receipts | Attempt workspace/command contract |
+| E | Add bounded agent conversation, admitted attempt controls, and receipts | Attempt workspace/command contract |
 | F | Add reviewed graph and wiki lenses | Graph-lens contract |
 | G | Qualify security, incident, accessibility, usability, and release | Threat, incident, and qualification contracts |
 | H | Remove superseded runtime and close rollback | Migration/rollback contract |
 
-Each milestone is implemented by the correspondingly ordered numbered phase in
-the implementation plan. A later milestone cannot begin until the prior phase
-receipt pins a full merged candidate.
+Each milestone owns a separate phased plan directory. Every implementation
+phase has its own document and receipt; phase numbering restarts within the
+milestone. A later phase cannot begin until the immediately preceding phase
+receipt pins a full merged candidate, and a later milestone cannot begin until
+the preceding milestone's final phase receipt is pinned.
 
 ## Non-Negotiable Invariants
 
@@ -86,10 +88,13 @@ receipt pins a full merged candidate.
    the governed effect and returns/reconciles an immutable receipt.
 7. Attempts, interaction sessions, candidates, projects/repositories, browser
    sessions, provider threads, and OS processes remain distinct identities.
-8. Current unconfigured/disabled/contract-only posture is rendered honestly.
-9. No dependency is selected from a mutable branch at runtime or by graph or
+8. Conversation projects only authorized durable semantic messages and routes
+   exact answer/steer intent through admitted gateways; browser or provider chat
+   state never becomes authority or delivery evidence.
+9. Current unconfigured/disabled/contract-only posture is rendered honestly.
+10. No dependency is selected from a mutable branch at runtime or by graph or
    browser data.
-10. Existing phase/receipt reopening conditions remain effective regardless of
+11. Existing phase/receipt reopening conditions remain effective regardless of
     new checklist state.
 
 ## Evidence And Drift Control
@@ -119,10 +124,10 @@ Milestone A closes only when:
    inventoried;
 3. vocabulary and scope collisions are resolved;
 4. current readiness gaps are recorded as release blockers;
-5. milestone-to-phase and specification mapping is complete;
+5. milestone-plan, phase, and specification mapping is complete;
 6. architecture checks cover new prohibited boundaries; and
-7. the Phase 1 integration section passes and its receipt pins the merged
-   candidate.
+7. Milestone A Phase 4 integration passes and its receipt pins the merged
+   candidate after Phases 1–3 have closed from their pinned receipts.
 
 ## Gate Reopening Conditions
 

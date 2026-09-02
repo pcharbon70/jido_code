@@ -142,9 +142,10 @@ corresponding phase receipts are accepted at merged candidates.
 ## Proposed Secure Hypermedia Control Plane UI
 
 These proposed decisions and specifications translate the secure hypermedia UI
-research into an eight-phase delivery program. They preserve the accepted graph
-and command authority model and do not become binding until accepted through
-Gate HUI1 and the normal merged-candidate receipt process.
+research into eight milestone plans containing thirty-seven implementation
+phases. They preserve the accepted graph and command authority model and do not
+become binding until accepted through Gate HUI1 and the normal merged-candidate
+receipt process.
 
 - [Secure hypermedia control plane UI research](../research/12-secure-hypermedia-coding-factory-ui.md)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
@@ -163,4 +164,4 @@ Gate HUI1 and the normal merged-candidate receipt process.
 - [Incident control plane contract](./incident-control-plane-contract.md)
 - [UI accessibility, usability, and release qualification](./ui-accessibility-usability-and-release-qualification.md)
 - [Hypermedia runtime migration and rollback](./hypermedia-runtime-migration-and-rollback.md)
-- [Secure hypermedia control plane UI implementation plan](../planning/secure-hypermedia-control-plane-ui/README.md)
+- [Secure hypermedia control plane UI milestone-plan portfolio](../planning/secure-hypermedia-control-plane-ui/README.md)

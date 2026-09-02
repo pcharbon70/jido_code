@@ -1,5 +1,5 @@
 ---
-id: plan.jido_code_secure_hypermedia_control_plane_ui
+id: program.jido_code_secure_hypermedia_control_plane_ui
 status: proposed
 intent: feature
 source:
@@ -8,190 +8,150 @@ source:
   - docs/adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md
   - docs/adr/0010-shadcnui-as-product-component-primitive-layer.md
   - docs/adr/0011-attention-oriented-control-plane-and-knowledge-lenses.md
-  - docs/architecture/hypermedia-product-governance-baseline.md
-  - docs/architecture/human-identity-scope-and-authorization-contract.md
-  - docs/architecture/shadcn-ui-adoption-and-component-contract.md
-  - docs/architecture/datastar-dstar-dependency-and-consumer-qualification.md
-  - docs/architecture/secure-product-shell-and-information-architecture.md
-  - docs/architecture/datastar-request-signal-fragment-and-stream-contract.md
-  - docs/architecture/agent-attempt-workspace-and-command-contract.md
-  - docs/architecture/graph-lens-and-visualization-contract.md
-  - docs/architecture/ui-security-privacy-and-threat-model.md
-  - docs/architecture/incident-control-plane-contract.md
-  - docs/architecture/ui-accessibility-usability-and-release-qualification.md
-  - docs/architecture/hypermedia-runtime-migration-and-rollback.md
 ---
 
-# Secure Hypermedia Control Plane UI Implementation Plan
+# Secure Hypermedia Control Plane UI Program Index
 
-This eight-phase plan implements the research milestones in their preserved
-order. Milestones use alphabetic product architecture labels; implementation
-phases use the repository's usual numeric phase/section/task/subtask delivery
-pattern:
+This directory is the program index for eight independent implementation
+plans. Each plan implements exactly one research milestone and owns several
+numbered implementation phases, one phase document per delivery pull request.
+Milestones retain their alphabetic product-architecture names; phase numbering
+restarts at `1` inside each milestone plan.
+
+This corrects the invalid earlier decomposition in which one phase represented
+an entire milestone. The delivery hierarchy is now:
 
 ```text
-Milestone A -> Phase 1
-Milestone B -> Phase 2
-Milestone C -> Phase 3
-Milestone D -> Phase 4
-Milestone E -> Phase 5
-Milestone F -> Phase 6
-Milestone G -> Phase 7
-Milestone H -> Phase 8
+Program
+  Milestone plan directory
+    README and milestone gates
+    Phase document
+      Phase description
+      Section description
+        Task description
+          Subtasks
+      Final Phase N Integration Tests section
 ```
 
-The plan replaces the current LiveView/LiveVue product runtime incrementally
-with named human identity, explicit Phoenix controller/HEEx pages, qualified
-ShadcnUI primitives, Datastar/Dstar delivery, durable attempt workspaces,
-reviewed graph lenses, and a security/accessibility-qualified release. It does
-not change TripleStore authority, allow raw graph access, or treat browser/SSE
-state as durable truth.
+## Program Goal
 
-## Goal
+Replace the current LiveView/LiveVue product runtime incrementally with a
+server-authoritative coding-factory control plane built from explicit Phoenix
+controllers, HEEx templates, qualified ShadcnUI primitives, and bounded
+Datastar/Dstar delivery. The program must preserve TripleStore authority,
+reviewed projections, governed semantic commands, parallel repository/session
+isolation, bounded agent conversation, wiki enrollment and token-cost
+governance, accessibility, and rollback at every intermediate merged candidate.
 
-Deliver a secure factory control plane that:
+## Milestone Plans
 
-1. gives named humans exact role/delegation/project scope with step-up and live
-   revocation;
-2. renders ordinary authenticated HEEx pages with meaningful native fallback;
-3. uses a pinned ShadcnUI primitive layer behind JidoCode-owned components;
-4. uses pinned Datastar/Dstar for bounded fragments and authorized SSE without
-   LiveView product routes/processes/state;
-5. directs attention to durable exceptions across parallel repositories and
-   attempts;
-6. gives each attempt a durable workspace correlating plan, interactions,
-   effects, evidence, costs, controls, and receipts;
-7. exposes all graph domains only through reviewed, bounded, accessible lenses;
-8. provides separately authorized security, incident, cost, knowledge, and
-   governance areas;
-9. proves cross-scope isolation, accessibility, usability, reconnect,
-   revocation, recovery, and rollback with real adapters; and
-10. removes superseded LiveView/LiveVue/SaladUI product runtime only after
-    parity and rollback evidence.
+| Order | Milestone plan | Phases | Program gate |
+|---|---|---:|---|
+| A | [Architectural Authority](./milestone-a-architectural-authority/README.md) | 4 | HUI1 |
+| B | [Dependency And Consumer Proof](./milestone-b-dependency-and-consumer-proof/README.md) | 4 | HUI2 |
+| C | [Read-Only Hypermedia Shell](./milestone-c-read-only-hypermedia-shell/README.md) | 5 | HUI3 |
+| D | [Datastar Delivery](./milestone-d-datastar-delivery/README.md) | 4 | HUI4 |
+| E | [Governed Agent Control](./milestone-e-governed-agent-control/README.md) | 6 | HUI5 |
+| F | [Knowledge And Wiki Lenses](./milestone-f-knowledge-and-wiki-lenses/README.md) | 5 | HUI6 |
+| G | [Security And Release Qualification](./milestone-g-security-and-release-qualification/README.md) | 5 | HUI7 |
+| H | [Remove Superseded Product Runtime](./milestone-h-remove-superseded-product-runtime/README.md) | 4 | HUI8 |
 
-## Governing Inputs And Baseline
+Milestone order is strict. A milestone's first phase depends on the pinned
+final-phase receipt of the preceding milestone; later phases depend on the
+immediately preceding phase receipt inside their own plan. No downstream work
+is authorized merely because a checklist was edited.
 
-The proposed ADRs and specifications listed in the front matter are the
-governing inputs. They are not binding until accepted. Phase 1 accepts or
-narrows them, pins the exact merged baseline, and records all current route,
-dependency, asset, identity, graph, runtime, test, and operations owners.
+## Governing Architecture
 
-The accepted graph-native factory, secure harness, total memory, managed coding,
-delegated-agent, and repository-wiki contracts remain binding. Their gate
-reopening conditions cannot be weakened or deleted by this plan.
+- [Secure hypermedia control plane research](../../research/12-secure-hypermedia-coding-factory-ui.md)
+- [ADR 0008: Server-rendered HEEx and Datastar product runtime](../../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
+- [ADR 0009: Human identity, scoped authorization, and separation of duty](../../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
+- [ADR 0010: ShadcnUI as the product component primitive layer](../../adr/0010-shadcnui-as-product-component-primitive-layer.md)
+- [ADR 0011: Attention-oriented control plane and knowledge lenses](../../adr/0011-attention-oriented-control-plane-and-knowledge-lenses.md)
+- [Hypermedia product governance baseline](../../architecture/hypermedia-product-governance-baseline.md)
+- [Human identity, scope, and authorization contract](../../architecture/human-identity-scope-and-authorization-contract.md)
+- [ShadcnUI adoption and component contract](../../architecture/shadcn-ui-adoption-and-component-contract.md)
+- [Datastar and Dstar dependency and consumer qualification](../../architecture/datastar-dstar-dependency-and-consumer-qualification.md)
+- [Secure product shell and information architecture](../../architecture/secure-product-shell-and-information-architecture.md)
+- [Datastar request, signal, fragment, and stream contract](../../architecture/datastar-request-signal-fragment-and-stream-contract.md)
+- [Agent attempt workspace and command contract](../../architecture/agent-attempt-workspace-and-command-contract.md)
+- [Graph lens and visualization contract](../../architecture/graph-lens-and-visualization-contract.md)
+- [Hypermedia UI security, privacy, and threat model](../../architecture/ui-security-privacy-and-threat-model.md)
+- [Incident control plane contract](../../architecture/incident-control-plane-contract.md)
+- [UI accessibility, usability, and release qualification](../../architecture/ui-accessibility-usability-and-release-qualification.md)
+- [Hypermedia runtime migration and rollback](../../architecture/hypermedia-runtime-migration-and-rollback.md)
 
-The current product is not a fully composed production fleet. Scheduler/
-reconciler, managed service, coding loaders, delegated rollout, publication,
-wiki gateways, named identity, and Datastar live delivery MUST expose honest
-disabled, unconfigured, unavailable, evaluation, or contract-only posture until
-their own release evidence exists.
+These ADRs and specifications remain proposed until Milestone A accepts or
+narrows them. Existing accepted graph-native factory, secure harness, total
+memory, managed coding, delegated-agent, and repository-wiki decisions and
+gate reopening conditions remain binding throughout the program.
 
-## Milestone, Gate, And Phase Mapping
-
-| Milestone | Gate | Required result | Implementation phase |
-|---|---|---|---|
-| A — Architectural Authority | HUI1 | Decisions, vocabulary, current-state inventory, supersession, identity model, and architecture checks are accepted | Phase 1 |
-| B — Dependency And Consumer Proof | HUI2 | Immutable ShadcnUI/Dstar/Datastar provenance and real consumer/browser/CSP evidence pass | Phase 2 |
-| C — Read-Only Hypermedia Shell | HUI3 | Named identity, authorized controller/HEEx shell, attention/fleet/project/attempt reads, native fallback pass | Phase 3 |
-| D — Datastar Delivery | HUI4 | Bounded signals/fragments/SSE, server subscription, reconnect, revocation, backpressure, and convergence pass | Phase 4 |
-| E — Governed Agent Control | HUI5 | Attempt timeline, admitted controls, canonical approvals, costs, idempotency, conflicts, and receipts pass | Phase 5 |
-| F — Knowledge And Wiki Lenses | HUI6 | All enabled graph domains have reviewed bounded lenses, provenance, accessible views, and wiki isolation | Phase 6 |
-| G — Security And Release Qualification | HUI7 | Threat, incident, accessibility, usability, load, real-adapter, operations, and rollback gates pass | Phase 7 |
-| H — Remove Superseded Runtime | HUI8 | Old route/runtime/dependency/assets/docs are removed or explicitly retained, rollback closes, final release is pinned | Phase 8 |
-
-## Phase Plans
-
-1. [Phase 1 — Architectural Authority And Governance](./phase-01-architectural-authority-and-governance.md)
-2. [Phase 2 — Dependency, Asset, And Consumer Proof](./phase-02-dependency-asset-and-consumer-proof.md)
-3. [Phase 3 — Secure Read-Only Hypermedia Shell](./phase-03-secure-read-only-hypermedia-shell.md)
-4. [Phase 4 — Datastar Delivery And Stream Convergence](./phase-04-datastar-delivery-and-stream-convergence.md)
-5. [Phase 5 — Governed Agent Attempt Control](./phase-05-governed-agent-attempt-control.md)
-6. [Phase 6 — Knowledge And Wiki Lenses](./phase-06-knowledge-and-wiki-lenses.md)
-7. [Phase 7 — Security, Incident, Accessibility, And Release Qualification](./phase-07-security-incident-accessibility-and-release-qualification.md)
-8. [Phase 8 — Superseded Runtime Removal And Rollback Closure](./phase-08-superseded-runtime-removal-and-rollback-closure.md)
-
-Phase evidence is recorded in
-`docs/architecture/hypermedia-ui-phase-01-receipt.md` through
-`docs/architecture/hypermedia-ui-phase-08-receipt.md`. Receipt files are created
-by their phase and do not claim acceptance before clean-checkout CI and merge.
-
-## Planning Structure And Closure
-
-Every phase follows this hierarchy:
-
-~~~text
-Phase
-  description
-  Section
-    description
-    Task
-      description
-      Subtask
-~~~
+## Shared Planning And Closure Pattern
 
 - Phases use `N`; sections use `N.M`; tasks use `N.M.K`; subtasks use
-  `N.M.K.L`.
-- Every phase, section, and task begins with its own description.
-- Stable anchors use `hui-pNN-*`; every task declares `[repo: jido_code]`.
-- Phase 1 pins the accepted baseline. Each later phase depends on the prior
-  hypermedia-UI phase receipt.
+  `N.M.K.L` within each milestone plan.
+- Every phase, section, and task begins with a description before its child
+  work.
+- Every task has a stable milestone-qualified anchor and declares
+  `[repo: jido_code]`; dependencies name stable anchors.
 - Every phase ends with a section named `Phase N Integration Tests`.
-- Implementation uses one intentional commit per section and one implementation
-  pull request per phase.
-- After the implementation PR passes clean-checkout CI and merges, a
-  documentation-only closure PR records the full merge SHA/date, changes the
-  receipt and gate from merge-pending to accepted-at-merged-candidate, and
-  checks the phase, final integration section, receipt task, and merged-
-  candidate pinning subtask.
-- The next phase starts only from that pinned merged closure. Any gate reopens
-  if a listed invariant fails regardless of checklist state.
+- Every section is one intentional implementation commit. Every phase is one
+  implementation pull request.
+- Each phase creates its own namespaced receipt in
+  `docs/architecture/hypermedia-ui-milestone-<letter>-phase-NN-receipt.md`.
+- The implementation PR receipt remains merge-pending. After clean-checkout CI
+  passes and the PR merges, a documentation-only closure PR records the full
+  merge SHA/date, changes the receipt and phase gate to
+  accepted-at-merged-candidate, and checks the phase, final integration
+  section, receipt task, and candidate-pinning subtask.
+- The next phase starts only from that pinned closure. Any invariant or listed
+  reopening condition failing reopens the gate regardless of checkbox state.
 
-## Non-Negotiable Invariants
+## Parallel Work Rule
+
+The factory may run many repositories, attempts, agents, browser sessions,
+and human sessions concurrently. Phase implementation may also use parallel
+development sessions only when their file/module/contract ownership is
+explicitly disjoint and their integration baseline is the same pinned receipt.
+Parallel work never bypasses the declared phase dependency chain, one-current-
+edition wiki fence, command compare-and-set semantics, scope isolation, or the
+one-PR-per-phase closure rule.
+
+## Program-Wide Invariants
 
 1. TripleStore remains the only application-owned durable semantic authority.
-2. Product web code uses Product/Factory public projections and gateways, never
-   raw Knowledge internals or unrestricted SPARQL.
-3. Browser signals, DOM, URLs, opaque refs, tab IDs, cookies before validation,
-   streams, caches, and processes never grant authority.
-4. Every page, field, query, stream, patch, command, approval, export, and
-   incident operation is independently authorized and redacted.
-5. Unknown and unauthorized resources remain concealed; unavailable
-   projections clear rows; stale data is labeled and bounded.
-6. Project initially aliases conceptual repository scope. Attempt,
+2. Product code uses reviewed Product/Factory projections and governed
+   gateways, never raw Knowledge internals or unrestricted SPARQL.
+3. Browser state, signals, DOM, URLs, streams, caches, tab IDs, and processes
+   never grant authority or become durable truth.
+4. Pages, fields, queries, streams, patches, commands, approvals, exports, and
+   incident operations are independently authorized and redacted.
+5. Project initially aliases conceptual repository scope; task, attempt,
    `InteractionSession`, candidate, browser session, provider thread, runtime,
    and process remain distinct.
-7. Datastar requests/signals/events/patches and SSE queues/retries/connections
-   are closed, bounded, and CSP/CSRF-qualified.
-8. ShadcnUI, Dstar, Datastar, assets, and browser profiles are immutable,
-   locally served, licensed, and qualified before product use.
-9. The UI exposes only accepted semantic commands with current state,
-   revision, lease/fence, profile, idempotency, step-up, and receipt bindings.
-10. Execution, candidate, verification, decision, draft publication, external
-    application, re-observation, post-change verification, follow-up, and
-    satisfaction remain distinct.
-11. Graph families appear only through reviewed bounded lenses with provenance,
-    states, truncation, and accessible alternatives.
-12. Current disabled/unconfigured/contract-only capability is never presented
-    as production-ready.
-13. LiveView/LiveVue/SaladUI removal occurs only after qualified parity and
-    rollback. Vite may remain as the asset compiler.
-14. Existing accepted ADR/spec/receipt reopening conditions remain binding.
+6. ShadcnUI, Dstar, Datastar, assets, browser profiles, and production
+   configurations are pinned, locally served, licensed, and qualified.
+7. Only accepted semantic commands may appear as controls, with exact state,
+   revision, fence, profile, idempotency, assurance, and receipt bindings.
+8. Conversation is a bounded authorized projection over exact attempt/
+   `InteractionSession`/audience identity; it exposes only admitted answer/steer
+   actions and never substitutes browser/provider chat state for graph facts.
+9. Every graph family appears only through a reviewed bounded lens with safe
+   provenance, projection state, truncation, and accessible alternatives.
+10. Repository wiki generation remains opt-in; generation mode, maintainer
+   activity, tokens, attributable cost, reservations, and budgets remain
+   visible and governed per repository.
+11. Disabled, unconfigured, evaluation-only, or contract-only capabilities are
+    never presented as production-ready.
+12. LiveView/LiveVue/SaladUI removal occurs only after qualified parity and a
+    successful rollback rehearsal; Vite may remain as the asset compiler.
+13. Existing accepted gate reopening conditions are never weakened or deleted.
 
-## Test And Evidence Rules
+## Program Completion
 
-- Unit tests accompany every parser, Plug, authority builder, query, view model,
-  component, handler, signal schema, stream transition, command adapter,
-  redactor, and limit.
-- Integration sections exercise real TripleStore and owned filesystem/runtime
-  seams. Mocks cannot close identity, authorization, graph isolation, command,
-  stream revocation/convergence, receipt, accessibility, or rollback gates.
-- Network tests use closed Req adapters and immutable fixtures; ordinary CI does
-  not depend on a live third-party service.
-- Browser evidence covers supported engines, native fallback, Datastar mode,
-  keyboard, screen reader, zoom/reflow, touch, RTL, reduced motion, forced
-  colors, several tabs/users, stream loss/reconnect, and stale assets.
-- Security tests cover IDOR, signals, injection, CSRF, CSP, Origin, approval
-  spoofing, concurrent humans, revocation, replay, resource exhaustion, cache/
-  log leakage, graph inference, and supply-chain drift.
-- Fixed clocks, deterministic IDs, pinned dependencies/assets/profiles, bounded
-  fixtures, and exact release digests make evidence reproducible.
+The program completes only when the final Milestone H phase is accepted at its
+merged candidate, all 37 phase receipts are pinned, HUI1 through HUI8 remain
+closed, superseded product runtime consumers are removed or explicitly
+qualified as retained exceptions, the observation window is reconciled, and
+the final control plane passes clean installation, real-adapter, security,
+accessibility, usability, load, recovery, and clean-checkout CI evidence.
