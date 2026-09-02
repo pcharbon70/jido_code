@@ -189,6 +189,16 @@
     }
   ],
   "supervision": {
+    "application_child_ids": [
+      "DNSCluster",
+      "JidoCode.Factory.Model.StreamSupervisor",
+      "JidoCode.Knowledge.Supervisor",
+      "JidoCode.Runtime.Supervisor",
+      "JidoCodeWeb.Endpoint",
+      "JidoCodeWeb.Telemetry",
+      "Phoenix.PubSub.Supervisor",
+      "TwMerge.Cache"
+    ],
     "application_children": [
       "JidoCodeWeb.Telemetry",
       "TwMerge.Cache",

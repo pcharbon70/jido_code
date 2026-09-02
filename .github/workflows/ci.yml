@@ -18,6 +18,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # HUI-A1 reproduces the accepted starting candidate from Git objects.
+          fetch-depth: 0
 
       - name: Install native build prerequisites
         run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config
