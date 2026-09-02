@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "7c91977921c7b170d6def6bd390af93ddd4af09e",
+  "recorded_on": "2026-09-02",
+  "routes": [
+    {
+      "id": "browser_sign_in_form",
+      "method": "GET",
+      "path": "/sign-in",
+      "pipelines": ["browser"],
+      "owner": "JidoCodeWeb.AuthController.new/2",
+      "state_owner": "Plug session only after successful authentication",
+      "authorization": "public form with CSRF protection",
+      "readiness": "live",
+      "replacement_disposition": "preserve behavior through a controller/HEEx named-human replacement",
+      "rollback_consequence": "loss of the only browser authentication entry point",
+      "tests": ["test/jido_code_web/controllers/auth_controller_test.exs"],
+      "operations": ["docs/operations/operator-handbook.md"]
+    },
+    {
+      "id": "browser_sign_in_submit",
+      "method": "POST",
+      "path": "/sign-in",
+      "pipelines": ["browser"],
+      "owner": "JidoCodeWeb.AuthController.create/2",
+      "state_owner": "JidoCodeWeb.ProductAuth signed session",
+      "authorization": "external configured operator credential plus CSRF",
+      "readiness": "live",
+      "replacement_disposition": "supersede shared-operator authentication only after named-human parity",
+      "rollback_consequence": "invalidates browser sign-in and session renewal",
+      "tests": ["test/jido_code_web/controllers/auth_controller_test.exs", "test/jido_code_web/product_auth_test.exs"],
+      "operations": ["docs/operations/operator-handbook.md"]
+    },
+    {
+      "id": "browser_sign_out",
+      "method": "DELETE",
+      "path": "/sign-out",
+      "pipelines": ["browser"],
+      "owner": "JidoCodeWeb.AuthController.delete/2",
+      "state_owner": "JidoCodeWeb.ProductAuth signed session",
+      "authorization": "browser session plus CSRF",
+      "readiness": "live",
+      "replacement_disposition": "preserve explicit session destruction and revocation behavior",
+      "rollback_consequence": "operators cannot terminate the browser session safely",
+      "tests": ["test/jido_code_web/controllers/auth_controller_test.exs"],
+      "operations": ["docs/operations/operator-handbook.md"]
+    },
+    {
+      "id": "api_agent_offerings",
+      "method": "GET",
+      "path": "/api/v1/agent-offerings",
+      "pipelines": ["api", "require_authenticated_api"],
+      "owner": "JidoCodeWeb.Api.V1.AgentOfferingController.index/2",
+      "state_owner": "bounded Product projection; no controller state",
+      "authorization": "bearer credential mapped to Product authority",
+      "readiness": "implemented_fail_closed_without_graph_loader",
+      "replacement_disposition": "preserve as an authenticated bounded API consumer",
+      "rollback_consequence": "CLI and external bounded catalog consumers lose parity",
+      "tests": ["test/jido_code_web/controllers/coding_agent_api_controller_test.exs"],
+      "operations": ["docs/operations/managed-coding-runtime.md"]
+    },
+    {
+      "id": "api_attempt_create",
+      "method": "POST",
+      "path": "/api/v1/coding-attempts",
+      "pipelines": ["api", "require_authenticated_api"],
+      "owner": "JidoCodeWeb.Api.V1.CodingAttemptController.create/2",
+      "state_owner": "governed Product/Factory admission result",
+      "authorization": "bearer Product authority plus exact profile/scope checks",
+      "readiness": "implemented_fail_closed_without_submission_admitter",
+      "replacement_disposition": "preserve API parity with the canonical command gateway",
+      "rollback_consequence": "non-browser attempt admission becomes unavailable",
+      "tests": ["test/jido_code_web/controllers/coding_agent_api_controller_test.exs"],
+      "operations": ["docs/operations/managed-coding-runtime.md"]
+    },
+    {
+      "id": "api_attempt_show",
+      "method": "GET",
+      "path": "/api/v1/coding-attempts/:attempt_ref",
+      "pipelines": ["api", "require_authenticated_api"],
+      "owner": "JidoCodeWeb.Api.V1.CodingAttemptController.show/2",
+      "state_owner": "bounded graph projection",
+      "authorization": "bearer Product authority plus opaque attempt resolution",
+      "readiness": "implemented_fail_closed_without_attempt_loader",
+      "replacement_disposition": "preserve API projection and concealment semantics",
+      "rollback_consequence": "API and CLI cannot inspect an admitted attempt",
+      "tests": ["test/jido_code_web/controllers/coding_agent_api_controller_test.exs"],
+      "operations": ["docs/operations/managed-coding-runtime.md"]
+    },
+    {
+      "id": "api_attempt_refresh",
+      "method": "POST",
+      "path": "/api/v1/coding-attempts/:attempt_ref/refresh",
+      "pipelines": ["api", "require_authenticated_api"],
+      "owner": "JidoCodeWeb.Api.V1.CodingAttemptController.refresh/2",
+      "state_owner": "no durable controller state; refresh re-queries authority",
+      "authorization": "bearer Product authority and current attempt visibility",
+      "readiness": "implemented_fail_closed_without_attempt_loader",
+      "replacement_disposition": "preserve explicit re-query semantics",
+      "rollback_consequence": "clients may mistake stale projections for current state",
+      "tests": ["test/jido_code_web/controllers/coding_agent_api_controller_test.exs"],
+      "operations": ["docs/operations/managed-coding-runtime.md"]
+    },
+    {
+      "id": "api_attempt_control",
+      "method": "POST",
+      "path": "/api/v1/coding-attempts/:attempt_ref/controls/:control",
+      "pipelines": ["api", "require_authenticated_api"],
+      "owner": "JidoCodeWeb.Api.V1.CodingAttemptController.control/2",
+      "state_owner": "governed control receipt in the graph",
+      "authorization": "bearer Product authority, closed control vocabulary, exact attempt/fence",
+      "readiness": "implemented_fail_closed_without_managed_adapter",
+      "replacement_disposition": "preserve only controls represented by the canonical gateway",
+      "rollback_consequence": "control parity or receipt recovery can diverge across surfaces",
+      "tests": ["test/jido_code_web/controllers/coding_agent_api_controller_test.exs"],
+      "operations": ["docs/operations/managed-coding-runtime.md"]
+    },
+    {
+      "id": "browser_factory_workbench",
+      "method": "GET",
+      "path": "/",
+      "pipelines": ["browser", "require_authenticated_operator", "live_session:authenticated"],
+      "owner": "JidoCodeWeb.HomeLive",
+      "state_owner": "LiveView owns disposable projection, navigation, form, and stream state",
+      "authorization": "signed operator session plus Product authority on mount/event",
+      "readiness": "live",
+      "replacement_disposition": "supersede with controller/HEEx pages only after route and behavior parity",
+      "rollback_consequence": "removes repository enrollment, factory views, and wiki browsing",
+      "tests": ["test/jido_code_web/live/home_live_test.exs", "test/jido_code_web/phase_10_product_acceptance_test.exs"],
+      "operations": ["docs/operations/operator-handbook.md", "docs/operations/repository-wiki-v1-runbook.md"]
+    },
+    {
+      "id": "browser_agent_catalog",
+      "method": "GET",
+      "path": "/coding-agents",
+      "pipelines": ["browser", "require_authenticated_operator", "live_session:authenticated"],
+      "owner": "JidoCodeWeb.CodingAgentLive",
+      "state_owner": "LiveView form and bounded offering projections",
+      "authorization": "signed operator session plus Product authority",
+      "readiness": "ui_live_backend_fail_closed_without_graph_callbacks",
+      "replacement_disposition": "supersede after controller/HEEx catalog and submission parity",
+      "rollback_consequence": "developers lose the browser catalog and submission workflow",
+      "tests": ["test/jido_code_web/live/coding_agent_live_test.exs", "test/jido_code/product/delegated_agent_phase_05_integration_test.exs"],
+      "operations": ["docs/operations/managed-coding-runtime.md"]
+    },
+    {
+      "id": "browser_attempt_workspace",
+      "method": "GET",
+      "path": "/managed-coding/:attempt_ref",
+      "pipelines": ["browser", "require_authenticated_operator", "live_session:authenticated"],
+      "owner": "JidoCodeWeb.ManagedCodingAttemptLive.show",
+      "state_owner": "LiveView projection/control state; durable attempt remains graph-owned",
+      "authorization": "signed operator session, Product authority, opaque attempt reference",
+      "readiness": "ui_live_backend_fail_closed_without_attempt_loader_and_adapter",
+      "replacement_disposition": "supersede after bounded attempt, conversation, evidence, and control parity",
+      "rollback_consequence": "operators lose attempt inspection and finite controls",
+      "tests": ["test/jido_code_web/live/managed_coding_attempt_live_test.exs", "test/jido_code/product/delegated_agent_phase_05_integration_test.exs"],
+      "operations": ["docs/operations/managed-coding-runtime.md"]
+    },
+    {
+      "id": "development_dashboard",
+      "method": "GET",
+      "path": "/dev/dashboard[/css-:md5|/js-:md5|/:page|/:node/:page]",
+      "route_variants": [
+        "GET /dev/dashboard/css-:md5",
+        "GET /dev/dashboard/js-:md5",
+        "GET /dev/dashboard",
+        "GET /dev/dashboard/:page",
+        "GET /dev/dashboard/:node/:page"
+      ],
+      "pipelines": ["browser", "require_authenticated_operator", "compile_env:dev_routes"],
+      "owner": "Phoenix.LiveDashboard.Router and Phoenix.LiveDashboard.PageLive",
+      "state_owner": "development-only LiveDashboard processes and telemetry",
+      "authorization": "signed operator session; development compile-time gate",
+      "readiness": "development_only",
+      "replacement_disposition": "explicitly retain as a qualified exception or remove in HUI8",
+      "rollback_consequence": "development diagnostics disappear if removed without replacement",
+      "tests": ["test/jido_code_web/product_auth_test.exs"],
+      "operations": ["docs/operations/operator-handbook.md"]
+    }
+  ],
+  "endpoint_transports": [
+    {
+      "paths": ["WS /live/websocket", "GET /live/longpoll", "POST /live/longpoll"],
+      "owner": "Phoenix.LiveView.Socket via JidoCodeWeb.Endpoint",
+      "state_owner": "disposable socket/LiveView processes",
+      "replacement_disposition": "remove only after controller/Datastar parity and rollback observation",
+      "evidence": ["lib/jido_code_web/endpoint.ex", "assets/js/app.js"]
+    }
+  ],
+  "supervision": {
+    "application_children": [
+      "JidoCodeWeb.Telemetry",
+      "TwMerge.Cache",
+      "DNSCluster",
+      "JidoCode.Knowledge.Supervisor",
+      "JidoCode.Factory.Model.StreamSupervisor",
+      "JidoCode.Runtime.Supervisor",
+      "JidoCode.PubSub",
+      "JidoCodeWeb.Endpoint"
+    ],
+    "knowledge_children": [
+      "JidoCode.Knowledge.Readiness",
+      "JidoCode.Knowledge.StoreServer",
+      "JidoCode.Knowledge.QueryRunner",
+      "JidoCode.Knowledge.Writer",
+      "JidoCode.Knowledge.Maintenance"
+    ],
+    "runtime_children": [
+      "JidoCode.Runtime.JidoInstance",
+      "JidoCode.Runtime.JidoHarness.RunRegistry",
+      "JidoCode.Runtime.AttemptRegistry",
+      "JidoCode.Runtime.RepositoryWikiMaintainerRegistry",
+      "JidoCode.Runtime.AttemptSupervisor",
+      "JidoCode.Runtime.RepositoryWikiMaintainerDynamicSupervisor",
+      "JidoCode.Factory.RepositoryWiki.Coordinator",
+      "JidoCode.Factory.RepositoryWiki.Scheduler",
+      "JidoCode.Factory.RepositoryWiki.RecoveryCoordinator"
+    ],
+    "conditional_children": [
+      "JidoCode.Factory.AttemptRecovery when :attempt_recovery enabled"
+    ],
+    "not_default_supervised": [
+      "JidoCode.Factory.Reconciler",
+      "JidoCode.Factory.Scheduler",
+      "JidoCode.Factory.ManagedCoding.Service",
+      "JidoCode.Factory.SandboxSupervisor",
+      "JidoCode.Factory.CredentialBroker",
+      "JidoCode.Factory.EgressBroker",
+      "continuous provider observation/source refresh",
+      "production verifier/publication/post-change verification adapters"
+    ]
+  },
+  "assets_and_dependencies": {
+    "entry_points": [
+      "assets/js/app.js",
+      "assets/js/server.js",
+      "assets/css/app.css"
+    ],
+    "browser_consumers": [
+      "phoenix_html",
+      "phoenix",
+      "phoenix_live_view",
+      "live_vue",
+      "salad_ui",
+      "topbar",
+      "phoenix-colocated hooks",
+      "theme.js localStorage preference"
+    ],
+    "vue_components": [
+      "assets/vue/product/FactoryFlowIsland.vue",
+      "assets/vue/runtime/HeartbeatStatusIsland.vue",
+      "assets/vue/runtime/ToolchainStatusIsland.vue",
+      "assets/vue/components/ui/badge/Badge.vue",
+      "assets/vue/components/ui/button/Button.vue"
+    ],
+    "server_components": [
+      "JidoCodeWeb.CoreComponents",
+      "JidoCodeWeb.Layouts",
+      "JidoCodeWeb.LiveVueComponents",
+      "JidoCodeWeb.UI"
+    ],
+    "build": "Vite client and LiveVue SSR manifests followed by phx.digest",
+    "target_absent": [
+      "Datastar client",
+      "Dstar SSE consumer/server dependency",
+      "qualified pcharbon70/shadcn_ui dependency",
+      "controller-owned product page templates"
+    ]
+  },
+  "identity_and_authority": {
+    "credential_owner": "JIDO_CODE_OPERATOR_TOKEN external environment configuration",
+    "session_fields": [
+      "authenticated_at",
+      "session_generation",
+      "random nonce"
+    ],
+    "fixed_identity_fields": [
+      "factory_iri",
+      "factory_scope_iri",
+      "principal_iri",
+      "actor_iri",
+      "policy_boundary_iri",
+      "policy_iris"
+    ],
+    "browser_mapping": "ProductAuth on_mount rebuilds scope and Product.authority; every LiveView event rechecks session validity",
+    "api_mapping": "bearer token rebuilds the same fixed Product identity and authority",
+    "delegation": "not represented by the current fixed identity",
+    "revocation": "session generation and expiry; no named-human or per-membership revocation",
+    "accepted_limit": "one configured operator and default factory scope"
+  },
+  "semantic_surface": {
+    "graph_registry_revision": "2.5.0",
+    "graph_family_count": 17,
+    "graph_families": [
+      "content_lifecycle",
+      "derived",
+      "episode_content",
+      "evidence",
+      "experience",
+      "factory_catalog",
+      "factory_policy",
+      "memory",
+      "memory_dataset",
+      "observation_batch",
+      "ontology",
+      "repository_control",
+      "repository_wiki",
+      "run_attempt",
+      "run_event_segment",
+      "security_audit",
+      "source_revision"
+    ],
+    "latest_command_protocol": "2.11.0",
+    "semantic_command_count": 117,
+    "latest_query_protocol": "2.11.0",
+    "reviewed_query_count": 158,
+    "browser_rule": "Product/Factory projections and governed gateways only; no raw SPARQL or raw Knowledge handle",
+    "projection_states": ["ready", "empty", "unavailable", "degraded", "stale", "forbidden", "truncated"]
+  },
+  "state_holders": [
+    {"holder": "TripleStore quad dataset", "classification": "sole application-owned durable authority", "survives_restart": true},
+    {"holder": "Git/provider systems", "classification": "external source/evidence authority", "survives_restart": true},
+    {"holder": "secret provider/environment", "classification": "external secret-byte authority", "survives_restart": true},
+    {"holder": "signed browser session", "classification": "framework security/session material, not product truth", "survives_restart": true},
+    {"holder": "LiveView assigns/streams/mailboxes", "classification": "disposable projection and interaction state", "survives_restart": false},
+    {"holder": "LiveVue props/component state and DOM", "classification": "disposable browser state", "survives_restart": false},
+    {"holder": "PubSub, caches, registries, scheduler memory", "classification": "hints and disposable runtime coordination", "survives_restart": false},
+    {"holder": "worktrees, sandboxes, runtime workers", "classification": "disposable effects bound to exact identities/digests", "survives_restart": false},
+    {"holder": "telemetry/logs", "classification": "operational diagnostics unless explicitly adopted as bounded graph evidence", "survives_restart": false},
+    {"holder": "localStorage phx:theme", "classification": "device-local presentation preference only", "survives_restart": true}
+  ],
+  "capability_readiness": [
+    {"capability": "knowledge substrate and semantic protocols", "status": "live", "owner": "Knowledge", "blocker": "none at accepted scope"},
+    {"capability": "operator authentication and workbench", "status": "live_single_operator", "owner": "Product/Web", "blocker": "named-human identity, roles, assurance, and live revocation absent"},
+    {"capability": "repository enrollment", "status": "live", "owner": "Product/Knowledge", "blocker": "none at accepted scope"},
+    {"capability": "provider observation and source analysis", "status": "implemented_not_continuous", "owner": "Integrations/Factory", "blocker": "no default webhook/poller/source-refresh loop"},
+    {"capability": "reconciliation scheduling and leases", "status": "implemented_not_default_supervised", "owner": "Factory/Knowledge.Control", "blocker": "production graph discovery/acquisition composition absent"},
+    {"capability": "native managed coding", "status": "release_enabled_not_default_composed", "owner": "Factory/Runtime", "blocker": "graph ledgers, model, verifier, and product adapter composition absent"},
+    {"capability": "delegated Codex DGA1", "status": "disabled", "owner": "Delegated-agent release owners", "blocker": "DCG6 qualification and release receipt absent"},
+    {"capability": "production sandbox credentials and egress", "status": "contract_only_or_reference", "owner": "Factory/Integrations/Security", "blocker": "no qualified real deployment adapters"},
+    {"capability": "candidate verification and disposition", "status": "mixed", "owner": "Factory/Knowledge.Evidence/Decision", "blocker": "generic production verifier and post-change composition absent"},
+    {"capability": "draft publication and merge", "status": "contract_only_human_merge", "owner": "Factory/Integrations", "blocker": "no production publication adapter; autonomous merge prohibited"},
+    {"capability": "governed memory", "status": "implemented_not_fully_composed", "owner": "Knowledge/Factory", "blocker": "production key/sink and per-attempt capture/retrieval wiring absent"},
+    {"capability": "repository wiki", "status": "read_ui_live_maintenance_not_composed", "owner": "Knowledge/Factory/Product", "blocker": "default lease/fact/compiler/activation gateways unavailable"},
+    {"capability": "incident controls", "status": "proposed_contract_only", "owner": "Security/Operations/Product", "blocker": "no accepted incident resources or commands"},
+    {"capability": "Datastar Dstar hypermedia runtime", "status": "absent", "owner": "Milestones B and D", "blocker": "dependency, consumer, delivery, security, and load qualification not started"}
+  ],
+  "gaps": [
+    {"id": "HUI-GAP-01", "priority": "P0", "name": "accepted UI documents mandate LiveView and LiveVue", "owner": "Milestones A and H", "blocking_gate": "HUI1 and HUI8", "status": "open", "closure_evidence": "accepted supersession plus parity, removal, and rollback receipts", "rollback_consequence": "removal before parity loses accepted product behavior"},
+    {"id": "HUI-GAP-02", "priority": "P0", "name": "shared operator has no named-human roles MFA or separation of duty", "owner": "Milestones A, C, and G", "blocking_gate": "HUI1 authority and HUI3 use", "status": "open", "closure_evidence": "accepted identity/ABAC contract, named-principal routes, assurance, SoD, and revocation evidence", "rollback_consequence": "multi-human sensitive actions remain unsafe"},
+    {"id": "HUI-GAP-03", "priority": "P0", "name": "browser Plug path lacks target identity and authority parity", "owner": "Milestones A, C, and G", "blocking_gate": "HUI3", "status": "open", "closure_evidence": "one trusted mapping with controller/SSE parity, delegation, concealment, and revocation tests", "rollback_consequence": "new pages or streams can authorize inconsistently"},
+    {"id": "HUI-GAP-04", "priority": "P0", "name": "factory services and real adapters are not default production-composed", "owner": "Milestones A, C, and G", "blocking_gate": "HUI3 presentation and HUI7 release", "status": "open", "closure_evidence": "honest readiness projections plus exact real-adapter release evidence", "rollback_consequence": "UI can falsely imply a runnable factory"},
+    {"id": "HUI-GAP-05", "priority": "P0", "name": "Datastar and Dstar implementation absent", "owner": "Milestones B, D, and G", "blocking_gate": "HUI2", "status": "open", "closure_evidence": "pinned dependencies, consumer, CSP, proxy, reconnect, load, and revocation qualification", "rollback_consequence": "target transport failure and security semantics remain unproven"},
+    {"id": "HUI-GAP-06", "priority": "P0", "name": "ShadcnUI namespace license release and CI ambiguous", "owner": "Milestone B", "blocking_gate": "HUI2", "status": "open", "closure_evidence": "usage authority, canonical source/SHA/license, dependency proof, and green consumer CI", "rollback_consequence": "legal and supply-chain risk enters the product"},
+    {"id": "HUI-GAP-07", "priority": "P0", "name": "Phoenix component version conflict", "owner": "Milestone B", "blocking_gate": "HUI2", "status": "open", "closure_evidence": "qualified Phoenix.Component upgrade or reviewed ShadcnUI compatibility change", "rollback_consequence": "dependency resolution or component behavior becomes unstable"},
+    {"id": "HUI-GAP-08", "priority": "P0", "name": "fleet-wide attempt and attention control plane absent", "owner": "Milestones C and G", "blocking_gate": "HUI3", "status": "open", "closure_evidence": "factory/project/attempt projections, bounded attention, parallel resume, and role-usability results", "rollback_consequence": "developers cannot supervise parallel work safely"},
+    {"id": "HUI-GAP-09", "priority": "P0", "name": "SSE revocation backpressure and reconnect absent", "owner": "Milestones D and G", "blocking_gate": "HUI4", "status": "open", "closure_evidence": "reauthorization, expiry, bounded queues, proxy/load, and re-query convergence tests", "rollback_consequence": "long-lived streams can leak or misstate authority"},
+    {"id": "HUI-GAP-10", "priority": "P0", "name": "command surface lacks consistent gateway controls", "owner": "Milestones E and G", "blocking_gate": "HUI5", "status": "open", "closure_evidence": "closed control vocabulary, gateway parity, previews, idempotency, receipts, conflicts, and recovery", "rollback_consequence": "UI and semantic capability drift"},
+    {"id": "HUI-GAP-11", "priority": "P0", "name": "bounded agent conversation surface absent", "owner": "Milestones E and G", "blocking_gate": "HUI5", "status": "open", "closure_evidence": "authorized session projection, exact answer/steer routing, concurrency, security, accessibility, and browser evidence", "rollback_consequence": "a human can inspect or steer the wrong session"},
+    {"id": "HUI-GAP-12", "priority": "P0", "name": "canonical high-risk approval and step-up absent", "owner": "Milestones E and G", "blocking_gate": "HUI5", "status": "open", "closure_evidence": "canonical action digest, current assurance, exact consequence, immutable receipt, and hostile tests", "rollback_consequence": "stale or spoofed approvals can affect the wrong scope"},
+    {"id": "HUI-GAP-13", "priority": "P0", "name": "admitted incident resources and commands absent", "owner": "Milestone G", "blocking_gate": "HUI7", "status": "open", "closure_evidence": "accepted incident semantics or explicitly disabled UI plus receipts, recovery, and two-person evidence", "rollback_consequence": "decorative incident controls create false safety"},
+    {"id": "HUI-GAP-14", "priority": "P1", "name": "outcomes and graph domains lack complete product projections", "owner": "Milestones C and F", "blocking_gate": "HUI3 core and HUI6 lenses", "status": "open", "closure_evidence": "reviewed lenses with authorization, bounds, provenance, and all projection states", "rollback_consequence": "factory truth remains fragmented or invisible"},
+    {"id": "HUI-GAP-15", "priority": "P1", "name": "Project and session vocabulary conflates durable identities", "owner": "Milestones A, C, and E", "blocking_gate": "HUI1", "status": "open", "closure_evidence": "repository-backed project alias and explicit attempt-to-InteractionSession cardinality, routing, and audit", "rollback_consequence": "routes, previews, and audits can cross scopes"},
+    {"id": "HUI-GAP-16", "priority": "P1", "name": "operational data table timeline diff and graph composites absent", "owner": "Milestones B through G", "blocking_gate": "HUI2 ownership and HUI7 release", "status": "open", "closure_evidence": "application-owned component contracts with browser, accessibility, volume, and update tests", "rollback_consequence": "primitive components cannot support safe operations"},
+    {"id": "HUI-GAP-17", "priority": "P1", "name": "raw conceptual IRIs appear in current UI", "owner": "Milestones C and F", "blocking_gate": "HUI3", "status": "open", "closure_evidence": "opaque references, authorized resolution, safe labels, provenance, and concealment tests", "rollback_consequence": "implementation identity and scope information leaks"},
+    {"id": "HUI-GAP-18", "priority": "P1", "name": "cost capacity and provider dashboard incomplete", "owner": "Milestones E, F, and G", "blocking_gate": "HUI5", "status": "open", "closure_evidence": "attributable usage, estimates/unavailable states, reservations, budgets, alerts, privacy, and outcome metrics", "rollback_consequence": "token and monetary exposure is not governable"},
+    {"id": "HUI-GAP-19", "priority": "P1", "name": "attempt resume and since-you-left model absent", "owner": "Milestones E and G", "blocking_gate": "HUI5", "status": "open", "closure_evidence": "bounded durable summary with coverage, source links, convergence, and usability evidence", "rollback_consequence": "parallel attempts increase confusion and intervention errors"},
+    {"id": "HUI-GAP-20", "priority": "P1", "name": "graph visualization selection and accessibility absent", "owner": "Milestones F and G", "blocking_gate": "HUI6", "status": "open", "closure_evidence": "task/lens matrix, hard bounds, safe provenance, and synchronized nonvisual alternatives", "rollback_consequence": "visualizations become hairballs or inaccessible authority views"},
+    {"id": "HUI-GAP-21", "priority": "P1", "name": "browser tests are LiveView-centric", "owner": "Milestones B and G", "blocking_gate": "HUI2 consumer and HUI7 release", "status": "open", "closure_evidence": "controller/HEEx/Dstar harness plus real browser, proxy, and accessibility evidence", "rollback_consequence": "the target stack is not qualified"},
+    {"id": "HUI-GAP-22", "priority": "P1", "name": "LiveDashboard remains a LiveView development route", "owner": "Milestones A and H", "blocking_gate": "HUI1 disposition and HUI8 removal", "status": "open", "closure_evidence": "qualified retained exception or removed/replaced route and dependency", "rollback_consequence": "zero-LiveView claims become false or diagnostics disappear"},
+    {"id": "HUI-GAP-23", "priority": "P2", "name": "accessibility evidence predates agent and wiki UI", "owner": "Milestone G", "blocking_gate": "HUI7", "status": "open", "closure_evidence": "composed AT, keyboard, zoom/reflow, touch, RTL, forced-colors, reduced-motion, and role-task results", "rollback_consequence": "primitive evidence is misrepresented as product accessibility"},
+    {"id": "HUI-GAP-24", "priority": "P2", "name": "product docs and operator handbook retain stale UI terms", "owner": "Milestone H", "blocking_gate": "HUI8", "status": "open", "closure_evidence": "documentation inventory, terminology/route migration checks, and final clean-checkout evidence", "rollback_consequence": "humans and agents implement conflicting product patterns"}
+  ],
+  "inventory_deltas": []
+}
