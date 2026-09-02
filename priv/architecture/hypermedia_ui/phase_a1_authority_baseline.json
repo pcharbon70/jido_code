@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "snapshot_kind": "starting_candidate",
+  "recorded_on": "2026-09-02",
+  "baseline": {
+    "commit": "7c91977921c7b170d6def6bd390af93ddd4af09e",
+    "branch": "main",
+    "merge_subject": "Merge pull request #100 from pcharbon70/docs/secure-hypermedia-ui-architecture-plan",
+    "merge_parent": "2f287a423acb1cc7265b4ad75eab7a1842165c1b",
+    "topic_parent": "7b81c05ec4a995d87d3f0a8b4947907105f0c05b",
+    "first_parent_lineage": [
+      "7c91977921c7b170d6def6bd390af93ddd4af09e",
+      "2f287a423acb1cc7265b4ad75eab7a1842165c1b",
+      "c64d9c3ae6786e3a50b806db6e467d170fe4f9d5",
+      "b66a60c036327efbfd78dd289a66034be3159ecf",
+      "2d1898aa569bbee0144199420322255c1f7ac006",
+      "574808c1ab8f5ae002c0e7e77af95b53f611b72a",
+      "56a3687a1238629af8d8d636e1b2f68857d3dc92",
+      "255baefc0f3c3726e639104038a714ddacb85562",
+      "28cc2c8c06f738db9f0d9f1b78c8b729b62b27f8",
+      "a006652de7788950acdbaf4f07d19eb2438485fa"
+    ]
+  },
+  "content_manifests": {
+    "governing_documents": {
+      "roots": [
+        "AGENTS.md",
+        "README.md",
+        "docs/adr",
+        "docs/architecture",
+        "docs/contributing",
+        "docs/operations",
+        "docs/planning",
+        "docs/research"
+      ],
+      "entry_count": 245,
+      "git_tree_digest": "4a538d6a02359fd536f7e4db7dfd97920ccdfb316e6346222b7b5a7f21038c44",
+      "digest_definition": "sha256 of the byte-exact git ls-tree -r output for the listed roots at baseline.commit"
+    },
+    "implementation_and_build": {
+      "roots": [
+        ".tool-versions",
+        "assets",
+        "config",
+        "lib",
+        "mix.exs",
+        "mix.lock",
+        "package-lock.json",
+        "package.json",
+        "rust-toolchain.toml"
+      ],
+      "entry_count": 761,
+      "git_tree_digest": "ce73aad3e129592cd279148a70683bc52a27bd93395fc67d28231660c1b2909a",
+      "digest_definition": "sha256 of the byte-exact git ls-tree -r output for the listed roots at baseline.commit"
+    }
+  },
+  "pinned_files": [
+    {"path": "mix.lock", "sha256": "edad33db3aa4387b2f21970214eb8b9cd6680f7073eb2499629e5647d3a07c38"},
+    {"path": "package-lock.json", "sha256": "597085163703c02ba831aec86e335ada9f577021da748fa6225f29f718a9868f"},
+    {"path": "package.json", "sha256": "7f591835bbd701538c7352dcbc54b7f6e9f8930b94ded856bb67128023b48da3"},
+    {"path": ".tool-versions", "sha256": "b29a5dd1f6fa9458f975335f31963d78f4d76edd2fbc3cbbce1db63286460a1d"},
+    {"path": "rust-toolchain.toml", "sha256": "b0679f65f3abbfc3719b40235d03822bd1fe610fe4492eeabef48ff27a594e7d"},
+    {"path": "config/config.exs", "sha256": "58d0d8cc65649c593a239a42f85b9f0b9a6cf1dcd85039466dd1eba900ceca33"},
+    {"path": "config/runtime.exs", "sha256": "fdfb485e97d6fd7bf70a1bfe0ee80924077fc2c627ed5a55637dda080d26e190"},
+    {"path": "config/prod.exs", "sha256": "39bd59ddff9d33e6e50938f16b6e40c66590a229fd0431e3e21f012fb6e77248"},
+    {"path": "assets/js/app.js", "sha256": "9b412cc6aed09720186d85fd901a9569ab6fe68a15ee538a6fd746c881c1f283"},
+    {"path": "assets/js/server.js", "sha256": "59150e00528d72babe13664f7592577f8573fb467d2796f89c3cd5b96c2d9b76"},
+    {"path": "assets/css/app.css", "sha256": "9a2d120a389d8c686cfbde58c0dc2d954a22325b404d5258a356b2e8ea92d4e8"}
+  ],
+  "toolchain": {
+    "erlang": "28.3.1",
+    "elixir": "1.19.5-otp-28",
+    "rust": "1.92.0",
+    "cargo": "1.92.0",
+    "node": "24.3.0",
+    "npm": "11.4.2",
+    "git": "2.49.0",
+    "cmake": "3.28.3",
+    "pkg_config": "1.8.1",
+    "cc": "GCC 13.3.0",
+    "canonical_platform": "Ubuntu 24.04 x86_64"
+  },
+  "production_profile": {
+    "required_environment": [
+      "JIDO_CODE_OPERATOR_TOKEN",
+      "SECRET_KEY_BASE"
+    ],
+    "paired_environment": [
+      "JIDO_CODE_STORE_ROOT",
+      "JIDO_CODE_BACKUP_ROOT"
+    ],
+    "optional_environment": [
+      "DNS_CLUSTER_QUERY",
+      "JIDO_CODE_SESSION_GENERATION",
+      "JIDO_CODE_SESSION_TTL_SECONDS",
+      "PHX_HOST",
+      "PHX_SERVER",
+      "PORT"
+    ],
+    "knowledge_store": {
+      "enabled": true,
+      "schema": "quad",
+      "schema_version": 1,
+      "durability": "sync",
+      "open_timeout_ms": 15000,
+      "default_root": "/var/lib/jido_code/knowledge",
+      "default_backup_root": "/var/lib/jido_code/backups"
+    },
+    "browser_runtime": "Phoenix LiveView with LiveVue islands and SaladUI hooks",
+    "asset_pipeline": "Vite client manifest, Vite SSR manifest, then Phoenix digest",
+    "authentication": "one configured operator credential projected to one default factory scope",
+    "transport_security": "deployment TLS/network controls are required; the endpoint advertises HTTPS URLs"
+  },
+  "governing_document_classes": [
+    {
+      "id": "accepted_core_adrs",
+      "status": "accepted",
+      "owner": "JidoCode maintainers named by each ADR",
+      "paths": [
+        "docs/adr/0001-graph-only-source-of-truth.md",
+        "docs/adr/0002-triple-store-backend-contract.md",
+        "docs/adr/0003-first-class-delegated-coding-agents.md",
+        "docs/adr/0004-delegated-agent-credentials-and-isolation.md",
+        "docs/adr/0005-repository-wikis-as-compiled-knowledge-projections.md",
+        "docs/adr/0006-per-repository-wiki-maintainer-agents.md",
+        "docs/adr/0007-repository-wiki-enrollment-and-cost-governance.md"
+      ],
+      "supersession_rule": "only a later accepted ADR that names the affected decision and its migration and rollback consequences",
+      "reopening_condition": "any named invariant or accepted receipt gate fails",
+      "evidence": "accepted ADR status plus the pinned merged phase receipts"
+    },
+    {
+      "id": "proposed_hypermedia_adrs",
+      "status": "proposed",
+      "owner": "Milestone A decision owners",
+      "paths": [
+        "docs/adr/0008-server-rendered-heex-and-datastar-product-runtime.md",
+        "docs/adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md",
+        "docs/adr/0010-shadcnui-as-product-component-primitive-layer.md",
+        "docs/adr/0011-attention-oriented-control-plane-and-knowledge-lenses.md"
+      ],
+      "supersession_rule": "none until explicitly accepted or narrowed by Milestone A",
+      "reopening_condition": "not applicable while proposed; existing accepted product authority remains in force",
+      "evidence": "PRs #98 through #100 provide planning evidence only"
+    },
+    {
+      "id": "accepted_phase_receipts",
+      "status": "accepted_at_merged_candidate",
+      "owner": "the plan-family maintainers named in each receipt",
+      "path_patterns": [
+        "docs/architecture/phase-??-receipt.md",
+        "docs/architecture/harness-phase-??-receipt.md",
+        "docs/architecture/memory-phase-??-receipt.md",
+        "docs/architecture/managed-coding-phase-??-receipt.md",
+        "docs/architecture/delegated-agent-phase-0[1-5]-receipt.md",
+        "docs/architecture/repository-wiki-phase-??-receipt.md"
+      ],
+      "counts": {"core": 10, "harness": 8, "memory": 7, "managed_coding": 7, "delegated_agents": 5, "repository_wiki": 5, "total": 42},
+      "supersession_rule": "a later receipt may advance a contract but cannot erase an earlier reopening condition",
+      "reopening_condition": "the receipt's listed invariant, gate, or accepted limitation is violated",
+      "evidence": "full merge SHAs and verification records embedded in each receipt"
+    },
+    {
+      "id": "proposed_hypermedia_contracts",
+      "status": "proposed",
+      "owner": "Milestone A contract owners",
+      "paths": [
+        "docs/architecture/hypermedia-product-governance-baseline.md",
+        "docs/architecture/human-identity-scope-and-authorization-contract.md",
+        "docs/architecture/shadcn-ui-adoption-and-component-contract.md",
+        "docs/architecture/datastar-dstar-dependency-and-consumer-qualification.md",
+        "docs/architecture/secure-product-shell-and-information-architecture.md",
+        "docs/architecture/datastar-request-signal-fragment-and-stream-contract.md",
+        "docs/architecture/agent-attempt-workspace-and-command-contract.md",
+        "docs/architecture/graph-lens-and-visualization-contract.md",
+        "docs/architecture/ui-security-privacy-and-threat-model.md",
+        "docs/architecture/incident-control-plane-contract.md",
+        "docs/architecture/ui-accessibility-usability-and-release-qualification.md",
+        "docs/architecture/hypermedia-runtime-migration-and-rollback.md"
+      ],
+      "supersession_rule": "Milestone A must accept, narrow, defer, or reject each clause without silently overriding accepted product contracts",
+      "reopening_condition": "not applicable until accepted",
+      "evidence": "research 12, the four proposed ADRs, and program plan PR #100"
+    },
+    {
+      "id": "current_architecture_and_evidence",
+      "status": "current_evidence",
+      "owner": "the architecture and module owners named by each document",
+      "path_patterns": ["docs/architecture/*.md"],
+      "excluded_paths": [
+        "the proposed_hypermedia_contracts paths",
+        "receipt paths classified separately"
+      ],
+      "supersession_rule": "accepted ADRs and merged receipts win over stale narrative; conflicts must be corrected explicitly",
+      "reopening_condition": "a binding contract or receipt invariant is contradicted by source or another accepted document",
+      "evidence": "source, tests, release manifests, and the current architecture evidence map"
+    },
+    {
+      "id": "delivery_plans",
+      "status": "execution_structure",
+      "owner": "the repository and phase owners declared in each plan",
+      "path_patterns": ["docs/planning/**/*.md"],
+      "supersession_rule": "plans never override accepted ADRs, contracts, tested backend constraints, or receipts",
+      "reopening_condition": "the prerequisite receipt is absent or an earlier invariant fails",
+      "evidence": "phase checklists plus receipts; unchecked text alone grants no completion credit"
+    },
+    {
+      "id": "research",
+      "status": "nonbinding_analysis",
+      "owner": "research authors and reviewing maintainers",
+      "path_patterns": ["docs/research/*.md"],
+      "supersession_rule": "research becomes binding only through an accepted ADR and gated implementation",
+      "reopening_condition": "not applicable",
+      "evidence": "citations, repository analysis, and recorded recommendations"
+    },
+    {
+      "id": "operations_and_contributor_rules",
+      "status": "current_operational_and_contributor_guidance",
+      "owner": "operations, security, release, and repository maintainers",
+      "paths": [
+        "AGENTS.md",
+        "README.md"
+      ],
+      "path_patterns": [
+        "docs/contributing/*.md",
+        "docs/operations/*.md"
+      ],
+      "supersession_rule": "must be updated with the accepted contract and cannot weaken a gate",
+      "reopening_condition": "guidance permits an operation forbidden by an accepted ADR or receipt",
+      "evidence": "checked-in commands, runbooks, release tasks, and clean-checkout gates"
+    }
+  ],
+  "explicit_exceptions": [
+    {
+      "id": "single_configured_operator",
+      "status": "accepted_current_limit",
+      "owner": "product and security maintainers",
+      "evidence": "JidoCodeWeb.ProductAuth and docs/architecture/current-coding-factory-architecture-and-agent-flows.md",
+      "exit_gate": "HUI-A2 plus later identity implementation and qualification"
+    },
+    {
+      "id": "delegated_codex_disabled",
+      "status": "release_gated",
+      "owner": "delegated-agent release owners",
+      "evidence": "docs/architecture/delegated-agent-phase-05-receipt.md",
+      "exit_gate": "DCG6 accepted at a pinned merged candidate"
+    },
+    {
+      "id": "factory_not_default_composed",
+      "status": "known_operability_gap",
+      "owner": "Factory, runtime, integration, and operations maintainers",
+      "evidence": "docs/architecture/current-coding-factory-architecture-and-agent-flows.md",
+      "exit_gate": "default graph-backed adapters and real deployment evidence"
+    },
+    {
+      "id": "hypermedia_ui_nonbinding",
+      "status": "proposed_only",
+      "owner": "Milestone A owners",
+      "evidence": "docs/planning/secure-hypermedia-control-plane-ui/README.md",
+      "exit_gate": "HUI1 accepted at the Milestone A Phase 4 merged candidate"
+    }
+  ],
+  "update_procedure": [
+    "Treat this file as the immutable starting-candidate record for HUI-A1.",
+    "When a fact changes before HUI1 closes, record the changed path, old value, new value, commit, owner, and disposition in the Phase 1 runtime inventory and receipt.",
+    "Never replace a starting hash silently; advance schema_version and record both the old and new digest if the baseline itself is corrected.",
+    "Reproduce git-tree digests from baseline.commit, not from a dirty working tree.",
+    "A missing path, count mismatch, ambiguous document class, or unowned exception keeps HUI-A1 merge-pending."
+  ]
+}
