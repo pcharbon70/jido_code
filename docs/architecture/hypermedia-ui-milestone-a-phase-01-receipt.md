@@ -7,10 +7,11 @@ This receipt records the HUI-A1 implementation candidate verified locally on
 identity, graph/query/command, readiness, research-gap, vocabulary, and
 supersession inventories are implemented and enforced by architecture tests.
 
-Status remains **merge-pending**. The implementation pull request must pass
-clean-checkout CI and merge before a documentation-only closure may pin the
-full merge commit and authorize Milestone A Phase 2. ADRs 0008 through 0011 and
-the proposed hypermedia specifications remain nonbinding.
+Pull request #101 passed clean-checkout CI and merged on 2026-09-02 as
+`ba5066896daafdc9a55dd147dc099e54f96185a9`. HUI-A1 is accepted at that exact
+merged candidate, which is the authorized baseline for Milestone A Phase 2.
+ADRs 0008 through 0011 and the proposed hypermedia specifications remain
+nonbinding.
 
 ## Candidate Provenance
 
@@ -20,8 +21,8 @@ the proposed hypermedia specifications remain nonbinding.
 | Section 1.1 | `01ee499387d10affcc6b3f6734b3efe730387346` - pin authority and toolchain baseline |
 | Section 1.2 | `da6a24696f28bdb325f806f757fb9038429ad5c7` - inventory runtime, semantic surfaces, readiness, and gaps |
 | Section 1.3 | `a170b8db2bef399a11497107f9d0ebb7033bda28` - freeze vocabulary and supersession ownership |
-| Section 1.4 | Merge-pending implementation commit containing this receipt |
-| Merged candidate | Merge-pending |
+| Section 1.4 | `cbd74c5d5e2280d3c23751bd10a50b90fa0ffc6c` - integration gates, merge-pending receipt, and reproducible clean-checkout CI |
+| Merged candidate | `ba5066896daafdc9a55dd147dc099e54f96185a9` - PR #101 merged 2026-09-02 |
 
 ## Inventory Identity
 
@@ -74,8 +75,8 @@ Both are reproducible from Git objects at the PR #100 merge commit.
 | Architecture plus operator authentication/session regression matrix | 28 tests, 0 failures |
 | `mix architecture.check` | Passed; source guardrails, Git baseline reproduction, inventory schema, ownership, links, anchors, vocabulary, and supersession checks returned zero findings |
 | `mix precommit` | Passed; 1,158 tests, 0 failures, with formatting, unused-dependency, compile, and architecture gates clean |
-| Dependency audits and production asset build | Pending clean-checkout CI |
-| Clean-checkout CI | Merge-pending |
+| Dependency audits and production asset build | Passed in PR #101 clean-checkout `verify` job |
+| Clean-checkout CI | Passed; `verify` completed in 16m58s and `dialyzer` completed in 1m45s at implementation commit `cbd74c5d5e2280d3c23751bd10a50b90fa0ffc6c` |
 
 ## Discrepancies And Accepted Limits
 
@@ -89,16 +90,18 @@ Both are reproducible from Git objects at the PR #100 merge commit.
 - The current one-operator deployment, disabled DGA1 profile, incomplete
   default factory composition, and absent target hypermedia runtime remain
   visible limitations.
-- Clean-checkout CI and the merged implementation SHA cannot be recorded until
-  the implementation pull request completes.
+- The accepted implementation is pinned to PR #101's merge commit. Later
+  changes require a new owned delta and may not rewrite this receipt's
+  candidate provenance.
 
 ## Gate HUI-A1
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-HUI-A1 remains open until clean-checkout CI passes, the implementation pull
-request merges, and a closure receipt pins the exact merge SHA and date.
-Milestone A Phase 2 is not authorized from this merge-pending candidate.
+HUI-A1 is accepted at merged candidate
+`ba5066896daafdc9a55dd147dc099e54f96185a9`, merged on 2026-09-02 after
+clean-checkout CI passed. Milestone A Phase 2 is authorized only from this
+pinned baseline.
 
 HUI-A1 reopens regardless of checklist state if a current route, dependency,
 asset, process, identity path, graph family, query, command, projection,
