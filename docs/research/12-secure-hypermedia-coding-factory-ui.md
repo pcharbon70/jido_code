@@ -35,7 +35,7 @@ process:
 - [Incident control plane contract](../architecture/incident-control-plane-contract.md)
 - [UI accessibility, usability, and release qualification](../architecture/ui-accessibility-usability-and-release-qualification.md)
 - [Hypermedia runtime migration and rollback](../architecture/hypermedia-runtime-migration-and-rollback.md)
-- [Eight-phase secure hypermedia control plane UI implementation plan](../planning/secure-hypermedia-control-plane-ui/README.md)
+- [Eight-milestone, 37-phase secure hypermedia control plane UI program](../planning/secure-hypermedia-control-plane-ui/README.md)
 
 ## Executive Conclusion
 
@@ -286,6 +286,15 @@ specification must define its cardinality and links to attempts rather than
 collapsing the two concepts. Every open route and stream has independent scope,
 cursor, freshness, and authorization.
 
+The current LiveView attempt surface already provides one combined textarea for
+steering or a clarification response and separate `Steer` and `Answer` buttons.
+That proves a product gateway exists, but it is not a complete conversation
+design: it does not provide an independently navigable authorized transcript,
+explicit interaction-session selection, reply context, durable delivery state,
+pagination, or conversation-specific accessibility and multi-tab behavior. The
+target HEEx/Datastar surface must migrate the accepted gateway behavior without
+copying this control form as the final interaction model.
+
 This describes the accepted isolation model, not a currently runnable default
 fleet. At the inspected revision, the general scheduler/reconciler and managed
 service are not default-composed, coding product loaders are unset, the DGA1
@@ -415,6 +424,59 @@ system-demo paper does not establish that this improves debugging outcomes
 ([AutoGen Studio](https://aclanthology.org/2024.emnlp-demo.8/)). JidoCode should
 test the hypothesis with redacted, governed records rather than copy a raw
 runtime-log view.
+
+The v1 conversation is deliberately **bounded interaction**, not unrestricted
+multi-turn provider chat. It projects graph-scoped `InteractionSession` and
+`Message` records and may submit only an `answer` to the current clarification
+or a `steer` operation admitted by the current gateway/profile/state. The
+browser cannot choose a sender, audience, classification, sequence, capability,
+provider session, or delivery result. A runtime may reconstruct a new bounded
+turn after admission; the UI must not imply that a live provider connection was
+resumed.
+
+| Conversation concern | Authoritative source | UI behavior | Update stage |
+|---|---|---|---|
+| Session purpose, participants, audience, state | Authorized `InteractionSession` projection | Show safe labels; require explicit selection when several sessions are related | Initial page and fresh re-query |
+| Message text, sender, intent, sequence, reply | Authorized durable message projection | Escaped plain text, bounded pages, redaction/gap/truncation labels | After durable message observation |
+| Current agent question | Clarification observation plus session/attempt state | Specific question card and `Answer` mode only while admissible | When clarification is observed or superseded |
+| Human answer or steer | Governed Product/Factory gateway | Canonical preview and exact attempt/session/audience binding | After server admission; never optimistic |
+| Command and continuation | Immutable receipt plus runtime observations | Distinguish recorded, admitted, conflicted, uncertain, continuation observed, and terminal output | Receipt lookup and projection refresh |
+| Tokens and cost | Attempt/profile/provider accounting | Reported, estimated, or unavailable; never infer cost from message length | When durable accounting arrives |
+
+Message content is limited to the accepted 4,096-byte normalized plain-text
+contract. V1 has no attachments, executable HTML/Markdown, typing indicator,
+read receipt, or generic `Send` operation. Those would need their own semantic,
+classification, retention, budget, runtime, and qualification decisions.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant H as Authorized human
+    participant P as HEEx conversation panel
+    participant G as Product/Factory gateway
+    participant K as TripleStore authority
+    participant R as Bounded agent runtime
+
+    P->>K: Query authorized attempt + InteractionSession + messages
+    K-->>P: Bounded projection, revisions, availability
+    H->>P: Select Answer or Steer and enter plain text
+    P->>G: Preview with opaque refs and current bindings
+    G->>K: Reauthorize and re-query state/fence/audience
+    K-->>G: Canonical current facts
+    G-->>P: Action digest and consequence
+    H->>P: Confirm
+    P->>G: Idempotent non-GET admission
+    G->>K: Commit semantic message/command and receipt
+    K-->>P: Authorized receipt projection
+    K-->>R: Controller observes admitted continuation
+    R-->>K: Bounded runtime observations/outcome
+    K-->>P: Revision hint; panel re-queries and converges
+```
+
+The sequence is causal rather than a synchronous chat request. A transport
+timeout after admission is `uncertain` until receipt lookup resolves it. A
+recorded message does not prove that an agent consumed it, and a running process
+does not prove that a reply is being generated.
 
 ### 6. Use Progressive Disclosure And Durable Routes
 
@@ -687,7 +749,7 @@ flowchart TB
     CT[Causal timeline<br/>plans · interactions · effects · checks · interventions · receipts]
     IN[Contextual inspector]
     CT --- IN
-    IN --> C1[Conversation / steering]
+    IN --> C1[Bounded conversation / answer / steer]
     IN --> C2[Changes / diff / artifacts]
     IN --> C3[Checks / evidence]
     IN --> C4[Knowledge / wiki / memory used]
@@ -726,6 +788,95 @@ Draft publication is currently contract-only because no production publication
 provider is configured. The outcome rail must continue through external human
 application/merge, new source observation, post-change verification, follow-up,
 and final satisfaction; it must never stop at an agent's publication request.
+
+### Bounded Agent Conversation Panel
+
+Conversation belongs inside the attempt workspace but remains an independently
+addressable panel with its own authorized session context, pagination, and
+freshness. A developer moving among parallel projects or agents must always see
+the project, task, attempt, logical agent/profile, session purpose, participants,
+audience, and wait state beside the composer. When several authorized
+`InteractionSession` resources relate to one attempt, the UI presents an
+explicit selector or session list; it never silently chooses the newest or the
+provider thread associated with the current browser tab.
+
+```text
+┌──────────────────────────────────────────────────────────────────────────┐
+│ Project A / Task A1 / Attempt A1.2 · Agent: DGA1 · Waiting for answer   │
+│ Interaction: “Clarify target module” · participants · audience · fresh  │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Earlier messages                                           Load earlier │
+│                                                                          │
+│ Agent · Clarification · sequence 12 · 14:31                              │
+│ Which authentication boundary should own the new policy check?           │
+│ Context: current attempt · expires 15:01                                 │
+│                                                                          │
+│ You · Answer · sequence 13 · recorded                                    │
+│ Keep it in the controller authority plug.                                │
+│ ↳ command admitted · continuation observed                               │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Mode: Answer current clarification                                       │
+│ [ Plain-text response, 0 / 4096 bytes                                  ] │
+│ Current attempt/session/audience · budget impact unavailable              │
+│ [Review answer]                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+The transcript is a semantic list rather than a decorative bubble stream. Each
+entry exposes safe sender class, intent, sequence/time, reply context,
+classification/redaction, provenance, and receipt/continuation link when
+authorized. Agent and human messages may use different visual alignment, but
+text labels and document order carry the distinction. Tool effects, diffs,
+verification evidence, approvals, and costs remain linked timeline/inspector
+records rather than synthetic chat messages.
+
+The composer has no ambiguous `Send` button. It enters one of two server-derived
+modes:
+
+- **Answer current clarification** binds the only current answerable question,
+  exact audience, reply target, attempt, interaction session, sequence,
+  revisions, fence/lease, profile, actor, and idempotency key.
+- **Steer attempt** appears only when the current Product/Factory gateway says
+  steering is admitted. Some profiles reject steering while a process is
+  running or after their turn bound is exhausted; the UI displays that reason
+  instead of leaving a decorative disabled control.
+
+Submitting first requests a server-generated canonical preview. Confirmation
+commits through the semantic gateway and renders the immutable receipt; the
+transcript changes only after authorized re-observation. Drafts can survive a
+recoverable Datastar failure or step-up in the same scope, but clear on identity,
+project, attempt, session, or audience change. They are never placed in URLs,
+logs, telemetry, or cross-tab shared storage.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Viewing
+    Viewing --> Drafting: choose admitted Answer or Steer
+    Drafting --> Previewed: server reauthorizes current bindings
+    Previewed --> Rejected: stale / denied / expired
+    Previewed --> Admitting: confirm exact digest
+    Admitting --> Recorded: durable receipt found
+    Admitting --> Uncertain: transport outcome unknown
+    Uncertain --> Recorded: receipt lookup succeeds
+    Uncertain --> Rejected: authoritative denial/conflict
+    Recorded --> ContinuationObserved: runtime observation arrives
+    ContinuationObserved --> Viewing: fresh message/outcome projection
+    Rejected --> Drafting: current posture permits correction
+```
+
+Neither `Recorded` nor `ContinuationObserved` is called “read” or “seen.” There
+is no typing animation because the accepted runtimes do not expose that
+semantic. Live delivery provides a restrained new-updates indicator and does not
+steal focus, move reading position, or announce token-level output. Ordinary
+links and forms retain the full read, page, preview, confirm, receipt, and error
+journey without JavaScript.
+
+Conversation security is message- and field-specific. The server authorizes the
+session, each message, the clarification, the reply target, and each action
+independently; reauthorization occurs on page, pagination, preview, admission,
+receipt lookup, fragment refresh, and stream delivery. Hostile human or agent
+text is untrusted plain text and cannot select tools, widen capabilities,
+override policy, construct an approval, or choose a different audience.
 
 ### Review And Evidence Workspace
 
@@ -1620,6 +1771,10 @@ Required practices include:
   deliberately bounded `role="log"` region is used, accept that additions are
   live announcements and coalesce only the meaningful events intended for that
   audience;
+- a normally navigable semantic list for conversation history, specific
+  `Answer current clarification` and `Steer attempt` form labels, accessible
+  reply context and delivery/conflict state, no token-level live announcements,
+  and no focus or scroll theft when new messages arrive;
 - pause/stop/hide controls for nonessential auto-updating content that persists
   alongside other content, as required by WCAG 2.2.2; pausing visual updates
   does not pause an agent and the page must show its resulting freshness state;
@@ -1682,8 +1837,9 @@ classification/redaction
 | Parallel isolation | Cross-project/attempt/interaction-session/candidate/preview probes, scope switching, several tabs, copied opaque refs, cursor/replay isolation |
 | Authorization | Deny by default, every route/query/command, IDOR, role/delegation change, scope revocation while streaming, step-up expiry |
 | Command integrity | Exact action/resource/fence/profile, idempotency, stale preview, canonical approval hash, transport-loss recovery, receipt lookup |
+| Bounded conversation | Exact attempt/session/audience/reply routing, transcript paging, current clarification, answer/steer availability, 4,096-byte plain text, receipts, continuation observation, uncertain delivery, draft preservation/clearing |
 | Concurrent humans | Two authorized users steer/cancel/handoff/decide the same attempt; exactly one conflicting transition commits and the loser receives the current safe receipt/state |
-| Injection | Agent text, source/wiki content, graph literals, Markdown/HTML, Datastar expressions, headers, filenames, links |
+| Injection | Human/agent conversation text, source/wiki content, graph literals, Markdown/HTML, Datastar expressions, headers, filenames, links |
 | Browser security | CSRF, Origin/Fetch Metadata, CSP nonce mode, no inline/external runtime, cookies, referrer/log leakage, caching |
 | Accessibility | Keyboard, screen reader, zoom/reflow, touch, RTL, focus, status announcements, reduced motion, forced colors, tables/graphs |
 | Load/capacity | Large fleet, long timeline, bounded graph, rapid hints, pagination, many tabs/users, HTTP/2/proxy limits |
@@ -1699,8 +1855,9 @@ Test with developers, maintainers, verifiers, operators, and auditors:
    each one's current state and next action.
 3. Detect a dangerous or runaway attempt and select the safest admitted
    control without exposing unrelated project content.
-4. Answer a bounded agent question and confirm which task/attempt consumed the
-   answer.
+4. Select the correct agent conversation, answer a bounded question, and
+   distinguish which task/attempt/session recorded the answer from whether a
+   runtime continuation was actually observed.
 5. Review a candidate, distinguish agent claim from verifier evidence, and
    avoid approving a stale or spoofed transaction.
 6. Trace a wiki statement or memory proposition back to source/evidence and
@@ -1808,6 +1965,15 @@ flowchart LR
 ### Milestone E: Governed Agent Control
 
 - Implement the per-attempt workspace and normalized causal timeline.
+- Add a dedicated bounded agent-conversation phase between the timeline and the
+  general command surface: authorized session/message projections, explicit
+  session routing, clarification cards, paginated transcript, accessible
+  plain-text composer, and live/reconnect convergence.
+- Activate only exact `answer` and `steer` composer modes through canonical
+  previews, current attempt/session/audience/fence/profile bindings,
+  idempotency, receipts, and transport-loss recovery. Do not claim unrestricted
+  provider chat, typing/read state, attachments, or runtime continuation before
+  durable observation.
 - Adapt only already accepted steer, answer, cancel, handoff, recovery, retry,
   and draft-publication commands after resolving existing exposure gaps.
 - Add canonical command previews, step-up, idempotency, receipts, conflicts,
@@ -1852,72 +2018,82 @@ flowchart LR
 
 ## Gap Register
 
-| Priority | Gap | Why it matters | Required closure evidence |
+Priority is not implementation order. Every gap must receive an owner,
+disposition, evidence class, closure milestone, and reopening condition during
+Milestone A. A gap need not be implemented before all work begins, but it blocks
+the first gate that depends on its missing behavior. No later milestone can
+bypass it because milestone and phase receipts form a strict merged-candidate
+chain.
+
+All gaps below remain open until their listed implementation and qualification
+evidence is accepted. “Contract produced” means a proposed document exists; it
+does not mean the implementation or release gate is closed.
+
+| Priority | Gap | Why it matters | First blocking gate | Planned closure | Current disposition and required evidence |
+|---|---|---|---|---|---|
+| P0 | Accepted UI documents mandate LiveView/LiveVue | Requested implementation would violate accepted authority | HUI1 | [A](../planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md) authority; [H](../planning/secure-hypermedia-control-plane-ui/milestone-h-remove-superseded-product-runtime/README.md) final removal | Open — superseding ADR/spec acceptance and architecture checks at HUI1; migration parity and removal evidence at HUI8 |
+| P0 | Current shared operator identity has no human roles/MFA/SoD | Sensitive areas cannot be reserved safely for multiple users | HUI1 for authority; HUI3 for use | [A](../planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md) contract → [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) qualification | Open — accepted identity/ABAC model, named-principal routes, query/command tests, assurance, separation of duty, and live revocation |
+| P0 | Browser Plug path does not construct the same trusted identity/authority as API and legacy paths | Controller pages and streams could authorize inconsistently; delegation is currently fixed to nil | HUI3 | [A](../planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md) interface freeze → [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) qualification | Open — one trusted mapping Plug/helper with controller/SSE parity, delegation, concealment, and revocation tests |
+| P0 | Scheduler/managed service, coding loaders, DGA1 rollout, publication, and wiki gateways are not default production-composed | A polished UI could falsely imply a runnable factory | HUI3 for presentation; HUI7 for release claims | [A](../planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md) inventory → [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md) readiness projection → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) real-adapter evidence | Open — honest composed/disabled/evaluation/contract-only states and exact real-adapter release evidence |
+| P0 | No Dstar/Datastar implementation | Target transport and failure/security behavior is unproven | HUI2 | [B](../planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/README.md) qualification → [D](../planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/README.md) delivery → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) release | Open — pinned dependency/client, real consumer, CSP, proxy, loss/reconnect, load, and revocation evidence |
+| P0 | ShadcnUI namespace/license/release/CI ambiguity | Supply-chain and legal/qualification risk | HUI2 | [B](../planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/README.md) | Open — usage authority, canonical repository/SHA/license metadata, dependency proof, and green pinned consumer CI |
+| P0 | Phoenix component version conflict | Current constraints cannot resolve with the selected library | HUI2 | [B](../planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/README.md) | Open — qualify the compatible Phoenix.Component upgrade or an explicitly reviewed ShadcnUI change before consumer adoption |
+| P0 | No fleet-wide attempt/attention control plane | Developers cannot supervise parallel work efficiently | HUI3 | [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) usability | Open — factory/project/attempt projections, bounded attention derivation, parallel-resume behavior, and role-usability results |
+| P0 | No SSE revocation/backpressure/reconnect implementation | Long-lived streams can leak or lie after scope change | HUI4 | [D](../planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) qualification | Open — stream authorization, expiry, reauthorization, bounded queues, proxy/load behavior, and re-query convergence tests |
+| P0 | Command surface does not consistently expose gateway controls | UI and semantic capability drift | HUI5 | [E](../planning/secure-hypermedia-control-plane-ui/milestone-e-governed-agent-control/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) qualification | Open — closed vocabulary, gateway parity, canonical previews, idempotency, receipts, conflicts, and recovery tests |
+| P0 | No complete bounded agent-conversation surface | Developers cannot reliably inspect, answer, or steer the correct agent/session across parallel attempts | HUI5 | [E](../planning/secure-hypermedia-control-plane-ui/milestone-e-governed-agent-control/README.md) Phase 3 → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) qualification | Open — authorized session/transcript projection, exact answer/steer routing, receipt/continuation distinctions, concurrency, security, accessibility, and browser evidence |
+| P0 | No canonical high-risk approval/step-up flow | Susceptible to stale, spoofed, or wrong-scope action | HUI5 | [E](../planning/secure-hypermedia-control-plane-ui/milestone-e-governed-agent-control/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) hostile qualification | Open — canonical action digest, current assurance, exact target/consequence, immutable receipt, and hostile approval tests |
+| P0 | No admitted incident-mode resources/commands | Freeze/revoke/quarantine UI would otherwise be decorative or unsafe | HUI7 | [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) | Open — accepted incident state/capability/command semantics or an explicitly disabled surface, plus receipts, recovery, and two-person evidence |
+| P1 | Outcomes and several graph domains lack product projections | Factory truth remains fragmented or invisible | HUI3 for core attempt facts; HUI6 for lenses | [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md) core projections → [F](../planning/secure-hypermedia-control-plane-ui/milestone-f-knowledge-and-wiki-lenses/README.md) domain lenses | Open — reviewed query/lens contracts and full projection-state, authorization, bounds, and provenance coverage |
+| P1 | Product “Project” and “session” language does not map cleanly to conceptual repository and `InteractionSession` identities | Routes, previews, and audits could conflate scopes | HUI1 | [A](../planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md) vocabulary → [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md)/[E](../planning/secure-hypermedia-control-plane-ui/milestone-e-governed-agent-control/README.md) implementation | Open — repository-backed project alias decision and explicit attempt↔interaction-session query/cardinality, routing, and audit evidence |
+| P1 | No data table/timeline/diff/graph composites in ShadcnUI | The primitive library cannot supply operational UX alone | HUI2 for ownership; HUI7 for release | [B](../planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/README.md) facade proof → [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md)–[F](../planning/secure-hypermedia-control-plane-ui/milestone-f-knowledge-and-wiki-lenses/README.md) composites → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) qualification | Open — application-owned component contracts plus real browser, accessibility, volume, and update tests |
+| P1 | Raw conceptual IRIs appear in the current UI | Leaks implementation concepts and weakens the mental model | HUI3 | [C](../planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/README.md) shell → [F](../planning/secure-hypermedia-control-plane-ui/milestone-f-knowledge-and-wiki-lenses/README.md) lenses | Open — opaque references, authorized resolution, safe human labels, provenance, and concealment tests |
+| P1 | No complete cost/capacity/provider dashboard | Token/cost risk, including wiki generation, is hard to govern | HUI5 | [E](../planning/secure-hypermedia-control-plane-ui/milestone-e-governed-agent-control/README.md) attempt/control accounting → [F](../planning/secure-hypermedia-control-plane-ui/milestone-f-knowledge-and-wiki-lenses/README.md) wiki lenses → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) release | Open — attributable reported/estimated/unavailable usage, reservations, budgets, alerts, privacy, and cost/outcome metrics |
+| P1 | No attempt-workspace resume/since-you-left model | Parallel attempts increase confusion and oversight burden | HUI5 | [E](../planning/secure-hypermedia-control-plane-ui/milestone-e-governed-agent-control/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) usability | Open — durable bounded summary with coverage, source links, restart/reconnect convergence, and user-study evidence |
+| P1 | No graph visualization selection/accessibility implementation | Likely hairball, overload, and inaccessible knowledge | HUI6 | [F](../planning/secure-hypermedia-control-plane-ui/milestone-f-knowledge-and-wiki-lenses/README.md) implementation → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) qualification | Open — task/lens matrix, hard bounds, safe provenance, and synchronized table/outline alternatives |
+| P1 | Current browser tests are LiveView-centric | They cannot qualify the target stack | HUI2 for consumer proof; HUI7 for release | [B](../planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/README.md) harness → [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) full matrix | Open — controller/HEEx/Dstar harness and supported real-browser/proxy/accessibility evidence |
+| P1 | LiveDashboard remains a LiveView development route | Literal zero-LiveView runtime cannot retain it silently | HUI1 for disposition; HUI8 for removal | [A](../planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md) retain/remove decision → [H](../planning/secure-hypermedia-control-plane-ui/milestone-h-remove-superseded-product-runtime/README.md) closure | Open — explicitly narrow and qualify the exception or remove/replace the route and dependency |
+| P2 | Historical accessibility evidence predates the new agent/wiki UI | Primitive evidence does not cover factory compositions | HUI7 | [G](../planning/secure-hypermedia-control-plane-ui/milestone-g-security-and-release-qualification/README.md) | Open — composed manual AT, keyboard, zoom/reflow, touch, RTL, forced-colors, reduced-motion, and role-task results |
+| P2 | Product docs and operator handbook contain stale UI terms | Humans and agents will implement conflicting patterns | HUI8 | [H](../planning/secure-hypermedia-control-plane-ui/milestone-h-remove-superseded-product-runtime/README.md) | Open — documentation inventory, migration, terminology/route drift checks, and final clean-checkout evidence |
+
+### Gate Ordering And Gap Closure
+
+1. Milestone A performs no target UI implementation. It accepts, narrows,
+   defers, or rejects every proposed decision/specification; inventories every
+   gap; assigns its owner, blocking gate, evidence, and rollback consequence;
+   and pins HUI1 at a merged candidate.
+2. Milestone B may begin only from that pinned authority baseline. Each later
+   phase and milestone likewise depends on the immediately preceding pinned
+   receipt.
+3. A gap stays open until the milestone named above produces its required
+   implementation and integration evidence. Merely writing or accepting its
+   specification does not close the product gap.
+4. Unsupported capability remains absent or explicitly disabled. A later plan
+   may not simulate it in the browser to make a gate appear complete.
+5. Any failed invariant reopens the owning gate regardless of table status or
+   checked plan boxes.
+
+## Produced Follow-On Decisions And Specifications Pending Acceptance
+
+The research originally required the following artifacts before target product
+implementation. They now exist and are linked below, but remain proposed until
+Milestone A accepts, narrows, defers, or rejects them and pins the complete HUI1
+authority baseline. Production of a document is therefore complete;
+architectural acceptance and implementation are not.
+
+| Required artifact | Produced document(s) | Current state | HUI1 action |
 |---|---|---|---|
-| P0 | Accepted UI documents mandate LiveView/LiveVue | Requested implementation would violate accepted authority | Superseding ADR/specs and architecture checks |
-| P0 | Current shared operator identity has no human roles/MFA/SoD | Cannot reserve sensitive areas safely for multiple users | Identity/ABAC model, route/query/command tests, live revocation |
-| P0 | Browser Plug path does not yet construct the same trusted identity/authority as API and LiveView paths | Controller pages and streams could authorize inconsistently; delegation is currently fixed to nil | One trusted mapping Plug/helper with controller/SSE parity and delegation tests |
-| P0 | Scheduler/managed service, coding loaders, DGA1 rollout, publication, and wiki gateways are not default production-composed | A polished UI could falsely imply a runnable factory | Composition/readiness projections, `not configured` states, and real-adapter release evidence |
-| P0 | No Dstar/Datastar implementation | Target transport and failure/security behavior is unproven | Pinned dependency/client, real consumer tests, proxy/reconnect evidence |
-| P0 | ShadcnUI namespace/license/release/CI ambiguity | Supply-chain and legal/qualification risk | Usage authority, canonical metadata, green pinned CI, accepted risk record |
-| P0 | Phoenix component version conflict | Current constraints cannot resolve with selected library | Qualified `~> 1.2` upgrade or qualified ShadcnUI change |
-| P0 | No fleet-wide attempt/attention control plane | Developers cannot supervise parallel work efficiently | Factory/project/attempt projections and usability results |
-| P0 | No SSE revocation/backpressure/reconnect contract | Long-lived streams can leak or lie after scope change | Stream authorization, expiry, load, and convergence tests |
-| P0 | Command surface does not consistently expose gateway controls | UI and semantic capability drift | Closed control vocabulary and parity tests |
-| P0 | No canonical high-risk approval/step-up flow | Susceptible to stale/spoofed/wrong-scope action | Action-bound receipt and hostile approval tests |
-| P0 | No admitted incident-mode resources/commands | Freeze/revoke/quarantine UI would otherwise be decorative or unsafe | Incident state machine, capabilities, receipts, recovery and two-person tests |
-| P1 | Outcomes and several graph domains lack product projections | Factory truth remains fragmented or invisible | Reviewed query/lens contracts and projection-state coverage |
-| P1 | Product “Project” and “session” language does not map cleanly to conceptual repository and `InteractionSession` identities | Routes, previews, and audits could conflate scopes | Repository-backed project alias decision and explicit attempt↔interaction-session query/cardinality contract |
-| P1 | No data table/timeline/diff/graph components in ShadcnUI | Primitive library cannot supply operational UX alone | Application component specs, browser/a11y/load tests |
-| P1 | Raw conceptual IRIs appear in current UI | Leaks implementation concepts and weakens mental model | Opaque references and human label/provenance policy |
-| P1 | No complete cost/capacity/provider dashboard | Token/cost risk, including wiki generation, is hard to govern | Complete accounting projections, budgets, alerts, cost/outcome metrics |
-| P1 | No attempt-workspace resume/since-you-left model | Parallel attempts increase confusion and oversight burden | Durable summary with source links and user-study evidence |
-| P1 | No graph visualization selection/accessibility contract | Likely hairball, overload, and inaccessible knowledge | Lens/task matrix, hard bounds, synchronized table alternatives |
-| P1 | Current browser tests are LiveView-centric | They cannot qualify the target stack | Controller/HEEx/Dstar test harness and real-browser matrix |
-| P1 | LiveDashboard remains a LiveView development route | Literal zero-LiveView runtime cannot retain it silently | Remove/replace it or explicitly narrow and qualify the exception |
-| P2 | Historical accessibility evidence predates new agent/wiki UI | Primitive evidence does not cover factory compositions | Manual AT, zoom, touch, RTL, forced-colors, reduced-motion results |
-| P2 | Product docs and operator handbook contain stale UI terms | Humans and agents will implement conflicting patterns | Documentation migration and drift checks |
-
-## Required Follow-On Decisions And Specifications
-
-Before implementation, produce at least:
-
-1. **ADR: Server-rendered HEEx and Datastar product runtime** — supersede the
-   LiveView/LiveVue ownership decision; define allowed Phoenix.Component
-   dependency and prohibited runtime constructs.
-2. **ADR: Human identity, scoped authorization, and separation of duty** —
-   replace the single-operator release limit with named principals, assurance,
-   roles/delegations, ABAC attributes, step-up, and revocation.
-3. **Product shell and information-architecture specification** — routes,
-   scopes, global/project/attempt navigation, attention queue, responsive
-   behavior, durable URLs, and the boundary between derived attention,
-   URL/signed-browser-session preferences, and any proposed durable
-   acknowledgement resource.
-4. **Datastar request, signal, patch, and stream specification** — exact client
-   and Dstar versions, CSRF/CSP, request schemas, fragment identity, nudge,
-   reconnect, revocation, queue/connection bounds, and forbidden APIs.
-5. **Agent attempt workspace and command specification** — interaction-session
-   mapping, timeline vocabulary, trust
-   header, admitted controls, canonical previews, idempotency, receipts,
-   conflicts, and recovery.
-6. **Graph-lens and visualization specification** — reviewed queries, graph
-   family grouping, projection states, safe provenance, visualization/task
-   selection, truncation, and accessible alternatives.
-7. **ShadcnUI adoption and component specification** — exact provenance,
-   license, dependency constraints, assets/tokens, facade, app composites,
-   overlays, and upstream qualification.
-8. **UI security, privacy, and threat-model amendment** — cross-project IDOR,
-   signal tampering, SSE lifetime, approval spoofing, injection, telemetry,
-   caching, and concealed resources.
-9. **Accessibility and usability qualification specification** — WCAG 2.2 AA,
-   assistive technology, parallel-attempt tasks, attention burden, and outcome
-   metrics.
-10. **Incident control-plane specification** — read posture, freeze/revoke/stop
-    command admission, exact scopes, handoff, evidence, separation of duty,
-    recovery, and reopen criteria.
-11. **Milestone-based migration and rollback plan** —
-    milestone/section/task/subtask checklists, clean-checkout gates, milestone
-    receipts, dependency removal, and rollback.
+| Server-rendered HEEx and Datastar product-runtime decision | [ADR 0008](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md), [runtime migration and rollback](../architecture/hypermedia-runtime-migration-and-rollback.md) | Proposed | Accept or narrow allowed Phoenix.Component use, prohibited LiveView product runtime, migration ownership, and rollback |
+| Human identity, scoped authorization, and separation-of-duty decision | [ADR 0009](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md), [identity/scope/authorization contract](../architecture/human-identity-scope-and-authorization-contract.md) | Proposed | Accept or narrow principal, assurance, role/delegation, scope, step-up, session, and revocation authority |
+| Product shell and information architecture | [ADR 0011](../adr/0011-attention-oriented-control-plane-and-knowledge-lenses.md), [secure product shell and information architecture](../architecture/secure-product-shell-and-information-architecture.md) | Proposed | Freeze project/task/attempt/session vocabulary, routes, attention derivation, durable navigation, and responsive ownership |
+| Datastar request, signal, patch, and stream contract | [Datastar request, signal, fragment, and stream contract](../architecture/datastar-request-signal-fragment-and-stream-contract.md), [Dstar/Datastar dependency and consumer qualification](../architecture/datastar-dstar-dependency-and-consumer-qualification.md) | Proposed | Accept or narrow closed schemas, CSRF/CSP, fragments, hints, SSE lifetime, bounds, reconnect, and forbidden APIs |
+| Agent attempt workspace, conversation, and command contract | [Agent attempt workspace and command contract](../architecture/agent-attempt-workspace-and-command-contract.md) | Proposed | Freeze attempt↔interaction-session routing, timeline/conversation vocabulary, answer/steer mapping, controls, previews, receipts, conflicts, cost, and recovery |
+| Graph-lens and visualization contract | [Graph lens and visualization contract](../architecture/graph-lens-and-visualization-contract.md) | Proposed | Accept or narrow graph-family lenses, reviewed queries, states, provenance, visualization selection, bounds, and accessible alternatives |
+| ShadcnUI adoption and component ownership | [ADR 0010](../adr/0010-shadcnui-as-product-component-primitive-layer.md), [ShadcnUI adoption and component contract](../architecture/shadcn-ui-adoption-and-component-contract.md) | Proposed | Accept or narrow repository/provenance/license authority, dependency constraints, facade ownership, assets/tokens, overlays, and qualification |
+| UI security, privacy, and threat-model amendment | [Hypermedia UI security, privacy, and threat model](../architecture/ui-security-privacy-and-threat-model.md) | Proposed | Accept threat boundaries and zero-tolerance outcomes for identity, signals, streams, conversations, approvals, graphs, caches, and telemetry |
+| Accessibility and usability qualification | [UI accessibility, usability, and release qualification](../architecture/ui-accessibility-usability-and-release-qualification.md) | Proposed | Accept WCAG target, supported browser/AT matrix, parallel-attempt/conversation tasks, metrics, evidence, and reopening rules |
+| Incident control-plane contract | [Incident control plane contract](../architecture/incident-control-plane-contract.md) | Proposed | Accept or narrow incident read/command semantics, exact scopes, separation of duty, receipts, evidence, recovery, and disabled posture |
+| Milestone migration, implementation, and rollback portfolio | [37-phase secure hypermedia control plane UI program](../planning/secure-hypermedia-control-plane-ui/README.md), [hypermedia product governance baseline](../architecture/hypermedia-product-governance-baseline.md) | Proposed | Verify every requirement/gap has a milestone/phase/evidence owner and accept the strict merged-receipt chain |
 
 ## Recommended Architecture In One View
 

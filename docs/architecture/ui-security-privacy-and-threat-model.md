@@ -1,7 +1,7 @@
 # Hypermedia UI Security, Privacy, And Threat Model
 
 - Status: Proposed under ADRs 0008, 0009, and 0011
-- Specification version: `0.1.0`
+- Specification version: `0.2.0`
 - Owners: JidoCode security, identity, product, Knowledge, and operations
   maintainers
 - Milestone: G — Security And Release Qualification
@@ -11,9 +11,9 @@
 
 This specification extends the accepted threat model for named humans,
 controller-rendered HEEx, Datastar signals, Dstar/SSE, attempt workspaces,
-canonical approvals, graph lenses, several tabs, and restricted governance
-areas. Existing classification, concealment, credential, graph authorization,
-and audit requirements remain binding.
+bounded agent conversations, canonical approvals, graph lenses, several tabs,
+and restricted governance areas. Existing classification, concealment,
+credential, graph authorization, and audit requirements remain binding.
 
 ## Assets And Trust Boundaries
 
@@ -49,6 +49,11 @@ classification, and immutable receipts.
 | Supply-chain drift | Exact versions/SHAs/digests/licenses, local assets, CSP, clean-checkout evidence |
 | Clickjacking/base/form abuse | CSP frame-ancestors/base-uri/form-action and canonical target/consequence |
 | Concurrent-human overwrite | Compare-and-set semantic commands and immutable conflict receipts |
+| Cross-attempt/session message delivery | Resolve containment and audience server-side; exact attempt/session/reply binding; conceal unauthorized sessions |
+| Prompt/message injection | Treat every human/agent message as bounded untrusted text; escape output; no executable HTML/Markdown or message-derived authority |
+| Stale or duplicate answer | Bind current clarification, sequence, revision, lease/fence, profile, digest, and idempotency; return conflict/current receipt |
+| False delivery/read state | Derive labels only from durable message, command receipt, and runtime observations; no typing/read/seen inference |
+| Draft disclosure | Keep drafts tab-local, omit them from URLs/logs/telemetry, clear on identity/scope/session change, and reauthorize after step-up |
 
 ## Privacy And Classification
 
@@ -76,15 +81,18 @@ activity are separate retention/access classes.
 
 ## Security Test Program
 
-The release corpus covers hostile repositories/wiki/memory/graph/model/tool
-content, XSS/expression injection, IDOR, role/grant/delegation churn, step-up
-bypass, CSRF, Origin, clickjacking, cache/log leak, aggregate inference,
-reconnect/replay, live revocation, stream/query exhaustion, malformed fragments,
-concurrent humans, approval mismatch, supply-chain drift, and incident/recovery.
+The release corpus covers hostile repositories/wiki/memory/graph/model/tool and
+conversation content, XSS/expression/prompt injection, cross-attempt/session
+message delivery, stale/duplicate clarification answers, draft leakage, false
+delivery state, IDOR, role/grant/delegation churn, step-up bypass, CSRF, Origin,
+clickjacking, cache/log leak, aggregate inference, reconnect/replay, live
+revocation, stream/query exhaustion, malformed fragments, concurrent humans,
+approval mismatch, supply-chain drift, and incident/recovery.
 
-Unsafe effect, credential disclosure, cross-scope disclosure, authority
-escalation, approval mismatch, protected reconnect after revocation, and
-unbounded graph/export have zero tolerance.
+Unsafe effect, credential disclosure, cross-scope or cross-session disclosure/
+delivery, authority escalation through message content, approval mismatch,
+protected reconnect after revocation, and unbounded graph/export have zero
+tolerance.
 
 ## Acceptance And Reopening
 

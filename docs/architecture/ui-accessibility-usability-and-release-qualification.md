@@ -1,7 +1,7 @@
 # UI Accessibility, Usability, And Release Qualification
 
 - Status: Proposed under ADRs 0008–0011
-- Specification version: `0.1.0`
+- Specification version: `0.2.0`
 - Owners: JidoCode product, accessibility, security, evaluation, and operations
   maintainers
 - Milestone: G — Security And Release Qualification
@@ -28,6 +28,8 @@ The target is WCAG 2.2 AA. The supported matrix covers:
 - focus and reading-position preservation across fragments;
 - non-color status and projection states;
 - semantic tables/trees/timelines and graph table/outline alternatives; and
+- bounded conversation transcripts, specifically labelled clarification and
+  steer forms, preserved drafts, and non-color delivery/conflict state; and
 - pause/freeze/new-updates behavior for nonessential auto-updating content.
 
 Event timelines are normal lists/tables by default. Only batched meaningful
@@ -43,7 +45,9 @@ cost observers. Tasks include:
 1. identify a stalled/risky attempt without opening every workspace;
 2. resume and correctly explain three parallel attempts;
 3. choose the safest admitted intervention;
-4. answer a bounded clarification in the correct attempt/session;
+4. locate the correct agent conversation, answer a bounded clarification in the
+   correct attempt/session/audience, and distinguish recorded, admitted,
+   observed, conflicted, and uncertain state;
 5. distinguish agent claim from verifier evidence and avoid stale/spoofed
    approval;
 6. trace wiki/memory facts to provenance and contradiction;
@@ -71,6 +75,8 @@ and failure review.
 - exact supported browsers/OS/AT and responsive modes;
 - TLS/HTTP2/proxy/CSP/CSRF/cookie/cache behavior;
 - multi-user/tab/project/attempt/interaction-session isolation;
+- transcript pagination, session selection, reply context, composer recovery,
+  and answer/steer races without focus, draft, or reading-position loss;
 - live hints, loss/reorder/duplicate, reconnect, revocation, and deploy restart;
 - large fleet/timeline/graph, pagination, virtualization, and backpressure;
 - exact ShadcnUI/Dstar/Datastar/Phoenix/assets/dependency provenance;

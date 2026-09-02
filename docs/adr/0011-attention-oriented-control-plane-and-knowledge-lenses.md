@@ -65,7 +65,13 @@ attempt lifecycle, last meaningful effect, wait reason, lease/fence, budget,
 candidate, verification, decision, draft publication, external application,
 re-observation, post-change verification, follow-up, and satisfaction.
 
-Chat is an interaction panel, not authority or the only evidence record.
+Chat is a bounded interaction panel, not authority or the only evidence record.
+It renders authorized durable `InteractionSession` messages and may submit only
+the currently admitted `answer` or `steer` intent. It does not expose raw
+provider transcripts, private reasoning, a caller-selected audience, or an
+unrestricted multi-turn provider channel. Message recording, command admission,
+runtime continuation, and observed agent output remain distinct receipt-backed
+states.
 
 ### Knowledge Lenses
 
@@ -106,6 +112,9 @@ acknowledgement state before their semantic resources and commands exist.
 
 - developers can supervise parallel work by exception instead of reading every
   transcript;
+- developers can answer or steer the correct bounded agent interaction without
+  confusing a browser conversation with an attempt, provider session, or
+  authority boundary;
 - durable attempt routes support multiple browser tabs and interruption/
   resumption;
 - execution, verification, decision, source application, and wiki activation
@@ -118,6 +127,9 @@ acknowledgement state before their semantic resources and commands exist.
 
 - attention, fleet, attempt timeline, review, cost, and graph-lens projections
   need new reviewed queries and components;
+- conversation projections, session routing, composer admission, delivery
+  reconciliation, and accessible transcript behavior require dedicated product
+  work even though their semantic message and control primitives already exist;
 - saved views, acknowledgement, assignment, incident, and bulk actions require
   semantic contracts before becoming durable;
 - large collections need server pagination and bounded visualization; and
@@ -163,7 +175,11 @@ This ADR may move to `Accepted` only when:
    accessible alternatives;
 6. parallel tabs, scope switching, interruption/resumption, and concurrent
    human controls preserve isolation and compare-and-set outcomes;
-7. controls do not overclaim currently unconfigured scheduler, loader,
+7. the conversation panel binds every message and composer action to the exact
+   authorized attempt, `InteractionSession`, audience, sequence, and admitted
+   `answer` or `steer` operation without exposing raw provider transcripts or
+   inventing delivery/read state;
+8. controls do not overclaim currently unconfigured scheduler, loader,
    publication, wiki, provider, or runtime posture; and
-8. usability, accessibility, security, clean-checkout, and merged-candidate
+9. usability, accessibility, security, clean-checkout, and merged-candidate
    evidence passes the signed qualification profile.
