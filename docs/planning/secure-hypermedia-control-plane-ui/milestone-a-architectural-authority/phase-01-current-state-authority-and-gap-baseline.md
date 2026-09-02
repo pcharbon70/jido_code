@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_a_phase_01
 parent_plan: plan.jido_code_hypermedia_ui_milestone_a
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -13,7 +13,7 @@ implementation, and prevents later phases from erasing still-active consumers.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Establish the accountable current-state and authority baseline.
+- [x] 1 Phase - Establish the accountable current-state and authority baseline.
 
   This phase closes HUI-A1 by replacing assumptions with reproducible route,
   runtime, dependency, identity, graph, command, test, documentation, and
@@ -72,7 +72,7 @@ Back to plan: [README](./README.md)
       - [x] 1.3.1.3 Subtask - Identify every accepted clause that assigns product authority to LiveView/LiveVue/SaladUI or the shared operator and classify it as preserve, supersede, amend, or defer.
       - [x] 1.3.1.4 Subtask - Publish a no-silent-supersession matrix with old owner, proposed owner, migration evidence, rollback dependency, and removal phase.
 
-  - [ ] 1.4 Section - Phase 1 Integration Tests.
+  - [x] 1.4 Section - Phase 1 Integration Tests.
 
     This final section proves the baseline is complete, reproducible, and
     sufficient to prevent an accidental legacy consumer or authority gap.
@@ -87,11 +87,11 @@ Back to plan: [README](./README.md)
       - [x] 1.4.1.3 Subtask - Verify vocabulary collisions and orphaned supersession clauses fail architecture validation.
       - [x] 1.4.1.4 Subtask - Run architecture checks, documentation link/anchor checks, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 1.4.2 Task {#huia-p01-phase-receipt} [repo: jido_code] [after: {#huia-p01-integration}] - Publish and pin the Phase 1 receipt.
+    - [x] 1.4.2 Task {#huia-p01-phase-receipt} [repo: jido_code] [after: {#huia-p01-integration}] - Publish and pin the Phase 1 receipt.
 
       This task records HUI-A1 evidence in
       `docs/architecture/hypermedia-ui-milestone-a-phase-01-receipt.md`.
 
       - [x] 1.4.2.1 Subtask - Keep HUI-A1 merge-pending on an unowned route, dependency, identity path, graph/command surface, capability, document, operation, or supersession clause.
       - [x] 1.4.2.2 Subtask - Record exact inventory digests, commands, fixtures, discrepancies, accepted limitations, and every reopening condition.
-      - [ ] 1.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 1 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 2.
+      - [x] 1.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 1 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 2.
