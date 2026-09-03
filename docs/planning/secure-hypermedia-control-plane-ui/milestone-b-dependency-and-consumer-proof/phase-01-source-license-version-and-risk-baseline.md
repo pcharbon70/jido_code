@@ -17,20 +17,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-B1 by making every selected input independently
   identifiable, reviewable, reproducible, and replaceable.
 
-  - [ ] 1.1 Section - Qualify ShadcnUI source and usage authority.
+  - [x] 1.1 Section - Qualify ShadcnUI source and usage authority.
 
     This section resolves repository identity, namespace, license, metadata,
     CI, accessibility, and component-surface ambiguity.
 
-    - [ ] 1.1.1 Task {#huib-p01-shadcn} [repo: jido_code] [after: {#huia-p04-phase-receipt}] - Freeze the ShadcnUI adoption record.
+    - [x] 1.1.1 Task {#huib-p01-shadcn} [repo: jido_code] [after: {#huia-p04-phase-receipt}] - Freeze the ShadcnUI adoption record.
 
       This task treats `pcharbon70/shadcn_ui` as reviewed source, not a mutable
       package-name assumption.
 
-      - [ ] 1.1.1.1 Subtask - Record canonical repository URL, owner, exact commit/tag, archive and tree digests, package name/version/namespace, provenance, release and maintenance status.
-      - [ ] 1.1.1.2 Subtask - Obtain and record license/usage authority for source, compiled CSS, icons, examples, copied code, modifications, and redistribution; block adoption on unresolved proprietary terms.
-      - [ ] 1.1.1.3 Subtask - Inventory components, public APIs, dependencies, generated assets, CSS variables, Datastar attribute handling, namespace collisions, and missing application composites.
-      - [ ] 1.1.1.4 Subtask - Record upstream CI results, tests, advisories, accessibility evidence/gaps, issue risk, update policy, fork/patch disposition, owner, and expiry.
+      - [x] 1.1.1.1 Subtask - Record canonical repository URL, owner, exact commit/tag, archive and tree digests, package name/version/namespace, provenance, release and maintenance status.
+      - [x] 1.1.1.2 Subtask - Obtain and record license/usage authority for source, compiled CSS, icons, examples, copied code, modifications, and redistribution; block adoption on unresolved proprietary terms.
+      - [x] 1.1.1.3 Subtask - Inventory components, public APIs, dependencies, generated assets, CSS variables, Datastar attribute handling, namespace collisions, and missing application composites.
+      - [x] 1.1.1.4 Subtask - Record upstream CI results, tests, advisories, accessibility evidence/gaps, issue risk, update policy, fork/patch disposition, owner, and expiry.
 
   - [ ] 1.2 Section - Qualify Dstar and Datastar source/protocol pairing.
 
