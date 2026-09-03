@@ -3,14 +3,16 @@
   "phase": "HUI-A4",
   "suite_version": "hui.a4.acceptance/1.0.0",
   "recorded_on": "2026-09-03",
-  "status": "merge_pending_acceptance_matrix",
+  "status": "accepted_at_merged_candidate",
   "baseline": {
     "accepted_candidate": "167c6cac0dd148bc919b4969f3c6fb691c0863a1",
     "closure_commit": "e9da1fe3a9f0a1017f35fcb29136f390e2da954f",
     "section_4_1": "ab4e6dc1f90d804edcb4dd9266414ba8bf0c7e95",
     "section_4_2": "9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71",
     "section_4_3": "29f9fe276797fab918b8d1672f7dea1ed60746ba",
-    "section_4_4": "af98c32b5ac6a5a8e0a2f38b8620475ae71d1e45"
+    "section_4_4": "af98c32b5ac6a5a8e0a2f38b8620475ae71d1e45",
+    "implementation_pr_head": "0469ba0b0cd7b2fe773e28b72cb8aba06083d74e",
+    "merged_candidate": "59ffca10f3ac9f262a81ce46b9f9f0e61550697c"
   },
   "coverage": [
     {
@@ -119,7 +121,7 @@
       "mix architecture.check",
       "mix precommit"
     ],
-    "clean_checkout_ci": "required_at_implementation_PR_head"
+    "clean_checkout_ci": "passed_on_PR_107_at_implementation_head_0469ba0b0cd7b2fe773e28b72cb8aba06083d74e"
   },
   "source_documents": [
     "AGENTS.md",
