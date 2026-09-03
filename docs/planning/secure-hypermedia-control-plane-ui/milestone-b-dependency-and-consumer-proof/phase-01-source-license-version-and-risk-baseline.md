@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_b_phase_01
 parent_plan: plan.jido_code_hypermedia_ui_milestone_b
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -12,7 +12,7 @@ before any lockfile or product consumer changes.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Establish immutable dependency, asset, license, and risk provenance.
+- [x] 1 Phase - Establish immutable dependency, asset, license, and risk provenance.
 
   This phase closes HUI-B1 by making every selected input independently
   identifiable, reviewable, reproducible, and replaceable.
@@ -60,7 +60,7 @@ Back to plan: [README](./README.md)
       - [x] 1.3.1.3 Subtask - Define offline/cache verification, trusted publication/channel policy, update cadence, drift detection, and emergency advisory response.
       - [x] 1.3.1.4 Subtask - Define expected lockfiles, asset manifest, SBOM, integrity metadata, and signed/reviewed evidence outputs for a clean checkout.
 
-  - [ ] 1.4 Section - Phase 1 Integration Tests.
+  - [x] 1.4 Section - Phase 1 Integration Tests.
 
     This final section proves the provenance ledger can reproduce and verify
     all inputs without silently selecting a mutable or unauthorized artifact.
@@ -75,11 +75,11 @@ Back to plan: [README](./README.md)
       - [x] 1.4.1.3 Subtask - Verify the compatibility matrix names every behavior the consumer spike must prove and contains no inferred/versionless client claim.
       - [x] 1.4.1.4 Subtask - Run dependency/license/security/documentation checks, `mix precommit`, and clean-checkout CI without introducing product consumers.
 
-    - [ ] 1.4.2 Task {#huib-p01-phase-receipt} [repo: jido_code] [after: {#huib-p01-integration}] - Publish and pin the Phase 1 receipt.
+    - [x] 1.4.2 Task {#huib-p01-phase-receipt} [repo: jido_code] [after: {#huib-p01-integration}] - Publish and pin the Phase 1 receipt.
 
       This task records HUI-B1 evidence in
       `docs/architecture/hypermedia-ui-milestone-b-phase-01-receipt.md`.
 
       - [x] 1.4.2.1 Subtask - Keep HUI-B1 merge-pending on mutable provenance, unresolved usage authority, digest mismatch, unknown consumer, unsupported constraint, open critical advisory, or unowned accessibility/CI risk.
       - [x] 1.4.2.2 Subtask - Record exact sources, digests, licenses, SBOM, risk ledger, exceptions, reviewers, and all reopening conditions.
-      - [ ] 1.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 1 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 2.
+      - [x] 1.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 1 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 2.
