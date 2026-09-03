@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_a_phase_02
 parent_plan: plan.jido_code_hypermedia_ui_milestone_a
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -13,7 +13,7 @@ implemented.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Establish named-human identity and exact scoped authorization authority.
+- [x] 2 Phase - Establish named-human identity and exact scoped authorization authority.
 
   This phase closes HUI-A2 with one deny-by-default decision model shared by
   ordinary requests, fragments, streams, commands, approvals, exports, and
@@ -74,7 +74,7 @@ Back to plan: [README](./README.md)
       - [x] 2.3.1.3 Subtask - Define generation/revision events for account, session, role, delegation, project, tenant, graph, and incident revocation.
       - [x] 2.3.1.4 Subtask - Define terminal stream close, protected-fragment replacement, reconnect suppression, download invalidation, and audit behavior after revocation.
 
-  - [ ] 2.4 Section - Phase 2 Integration Tests.
+  - [x] 2.4 Section - Phase 2 Integration Tests.
 
     This final section proves the proposed security model is complete,
     non-escalating, and compatible with accepted graph and command authority.
@@ -89,11 +89,11 @@ Back to plan: [README](./README.md)
       - [x] 2.4.1.3 Subtask - Exercise two-human approvals, concurrent transitions, session/role/delegation revocation, open streams, reconnect, and export retrieval in deterministic state models.
       - [x] 2.4.1.4 Subtask - Run architecture/spec consistency, threat-model traceability, documentation validation, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 2.4.2 Task {#huia-p02-phase-receipt} [repo: jido_code] [after: {#huia-p02-integration}] - Publish and pin the Phase 2 receipt.
+    - [x] 2.4.2 Task {#huia-p02-phase-receipt} [repo: jido_code] [after: {#huia-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records HUI-A2 evidence in
       `docs/architecture/hypermedia-ui-milestone-a-phase-02-receipt.md`.
 
       - [x] 2.4.2.1 Subtask - Keep HUI-A2 merge-pending on shared-human identity, implicit role union, missing operation authorization, stale approval, incomplete revocation, or a widened graph grant.
       - [x] 2.4.2.2 Subtask - Record exact decision tables, fixtures, reviewers, unresolved risks, limitations, and all reopening conditions.
-      - [ ] 2.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.
+      - [x] 2.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.

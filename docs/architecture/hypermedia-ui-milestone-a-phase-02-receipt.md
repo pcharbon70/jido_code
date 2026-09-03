@@ -8,9 +8,9 @@ architecture authority only. Named-human adapters, multi-user route admission,
 live delivery, approval UI, incident controls, exports, and release use remain
 unavailable until their later milestone gates close.
 
-Status remains **merge-pending**. The implementation pull request must pass
-clean-checkout CI and merge before a documentation-only closure may pin the
-full merge commit and authorize Milestone A Phase 3.
+Pull request #103 passed clean-checkout CI and merged on 2026-09-03 as
+`911b8d7c8a25abf998af832f7ae8e6766e971962`. HUI-A2 is accepted at that exact
+merged candidate, which is the authorized baseline for Milestone A Phase 3.
 
 ## Candidate Provenance
 
@@ -20,8 +20,8 @@ full merge commit and authorize Milestone A Phase 3.
 | Section 2.1 | `3dfc6460a5348a384229a97d2a96a4c75e745c15` - accepted identity, assurance, session, and compatibility authority |
 | Section 2.2 | `5213b771441cf74ae4caaf3a02e204fd39df5363` - frozen scope, role, delegation, and operation authorization matrix |
 | Section 2.3 | `175af1a0096a9df3d770ffeae8118ca97be2c1b3` - deterministic approval, concurrency, and live revocation authority |
-| Section 2.4 | Merge-pending implementation commit containing this receipt |
-| Merged candidate | Merge-pending |
+| Section 2.4 | `e4e213874e19086ab1164b55558edcb9348586e8` - integration gates, threat trace, scenarios, merge-pending receipt, and clean-checkout audit compatibility |
+| Merged candidate | `911b8d7c8a25abf998af832f7ae8e6766e971962` - PR #103 merged 2026-09-03 |
 
 ## Artifact Identity
 
@@ -36,7 +36,7 @@ full merge commit and authorize Milestone A Phase 3.
 | Operation authorization document | `ae27faad7614ebfd7eb57e8d5eb912079926f546b1ed97b509928b5786d3f308` |
 | Approval and revocation document | `00d10063350ea38f431e9f57b6e28aa722d6e5838c3ad8dd859a15e049c62c22` |
 | HUI-A2 threat trace | `744e98c5c4ad31a3d914d2f4a047620e5ce0a422ae1ccdf872e5d7f29a3f51b2` |
-| HUI-A2 validator source | `90c4ebda7619f27276027ea589a46e8ed77875ea1b183e688385970dae524996` |
+| HUI-A2 validator source after closure-state transition | `95ffa0afec04c9037b6906aa67618bbd135d84f47e78d14869e8169c37c63e7e` |
 | HUI-A2 integration test | `35bba77431fa017c2708dbe3a0559de95adb3864b70ac02e7f6d0e0fa38219f5` |
 
 ## Accepted Decision Tables
@@ -100,9 +100,10 @@ real-adapter and browser security review remains a Milestone G release block.
 | Focused HUI-A2 schema, registry, policy, hostile, concurrency, and falsification suite | 7 tests, 0 failures |
 | Existing authority, approval, authentication, memory-authorization, and query-concealment regression matrix | 36 tests, 0 failures |
 | `mix architecture.check` | Passed with source, HUI-A1, and HUI-A2 gates returning zero findings |
+| Closure-state validation | Requires a coherent proposed/merge-pending state or the completed checklist plus exact implementation commit, merged candidate, and merge date; mixed states fail closed |
 | `mix precommit` | Passed; 1,165 tests, 0 failures, with formatting, unused-dependency, compile, and combined architecture gates clean |
-| Dependency audits and production asset build | Pending clean-checkout CI |
-| Clean-checkout CI | Merge-pending |
+| Dependency audits and production asset build | Passed in PR #103 clean-checkout `verify` job; Hex reported no retired or advisory packages after the `erlexec` 2.4.0 compatibility override, npm reported zero vulnerabilities, and both production Vite builds passed |
+| Clean-checkout CI | Passed; `verify` completed in 14m37s and `dialyzer` completed in 4m16s at implementation commit `e4e213874e19086ab1164b55558edcb9348586e8` |
 
 ## Unresolved Risks And Accepted Limits
 
@@ -123,11 +124,12 @@ real-adapter and browser security review remains a Milestone G release block.
 
 ## Gate HUI-A2
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-HUI-A2 remains open until clean-checkout CI passes, the implementation pull
-request merges, and a closure receipt pins the exact merge SHA and date.
-Milestone A Phase 3 is not authorized from this merge-pending candidate.
+HUI-A2 is accepted at merged candidate
+`911b8d7c8a25abf998af832f7ae8e6766e971962`, merged on 2026-09-03 after
+clean-checkout CI passed. Milestone A Phase 3 is authorized only from this
+pinned baseline.
 
 HUI-A2 reopens regardless of checklist state if human, service, and agent
 principal classes conflate; a shared human or compatibility operator enters a
