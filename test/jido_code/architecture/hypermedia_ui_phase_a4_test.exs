@@ -9,7 +9,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
   test "tracked sources, exceptions, requirements, gaps, plans, and receipts satisfy HUI-A4" do
     assert {:ok, []} = HypermediaUIPhaseA4.check()
 
-    assert {:ok, %{dossier: dossier, guardrails: guardrails, traceability: traceability}} =
+    assert {:ok,
+            %{
+              acceptance: acceptance,
+              dossier: dossier,
+              guardrails: guardrails,
+              traceability: traceability
+            }} =
              HypermediaUIPhaseA4.load()
 
     assert guardrails["phase"] == "HUI-A4"
@@ -19,6 +25,35 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
     assert length(dossier["surface_authority_reconciliation"]) == 8
     assert length(dossier["residual_risks"]) == 10
     assert length(dossier["milestone_b_blockers"]) == 8
+    assert length(acceptance["coverage"]) == 12
+    assert length(acceptance["failure_scenarios"]) == 9
+  end
+
+  test "acceptance matrix rejects missing coverage and false milestone-a claims" do
+    assert {:ok, manifests} = HypermediaUIPhaseA4.load()
+
+    missing_coverage = update_in(manifests, [:acceptance, "coverage"], &tl/1)
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate(missing_coverage, File.cwd!()),
+             "coverage classes"
+           )
+
+    leaked_implementation =
+      put_in(manifests, [:acceptance, "reproduction", "target_implementation_added"], true)
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate(leaked_implementation, File.cwd!()),
+             "target implementation"
+           )
+
+    unsupported_readiness =
+      put_in(manifests, [:acceptance, "reproduction", "unsupported_readiness_claim"], true)
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate(unsupported_readiness, File.cwd!()),
+             "readiness claim"
+           )
   end
 
   test "dossier rejects missing consumers, incomplete surface authority, and released blockers" do
@@ -169,6 +204,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
     unowned = put_in(traceability, ["requirements", Access.at(0), "authority_owner"], "")
     assert has_error?(HypermediaUIPhaseA4.validate_program(unowned), "authority_owner")
 
+    silent_supersession =
+      put_in(traceability, ["requirements", Access.at(0), "owner_documents"], [])
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate_program(silent_supersession),
+             "owner_documents"
+           )
+
     browser_version =
       put_in(traceability, ["parallel_version_policy", "caller_selected_versions"], true)
 
@@ -198,6 +241,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
 
     assert HypermediaUIPhaseA4.validate_closure(plan, milestone, merge_pending_receipt) == []
 
+    assert has_error?(
+             HypermediaUIPhaseA4.validate_closure(plan, milestone, ""),
+             "exactly one coherent"
+           )
+
     accepted_plan =
       plan
       |> String.replace("status: proposed", "status: completed")
@@ -218,6 +266,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
              accepted_milestone,
              accepted_receipt
            ) == []
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate_closure(plan, milestone, accepted_receipt),
+             "completed plan status"
+           )
 
     mixed_receipt = accepted_receipt <> "\nStatus: **merge-pending**\n"
 

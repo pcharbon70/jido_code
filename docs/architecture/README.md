@@ -173,6 +173,7 @@ its clean-checkout implementation candidate merges and is pinned.
 - [HUI-A4 governance guardrail manifest](../../priv/architecture/hypermedia_ui/phase_a4_governance_guardrails.json)
 - [HUI-A4 program traceability manifest](../../priv/architecture/hypermedia_ui/phase_a4_program_traceability.json)
 - [HUI-A4 authority dossier manifest](../../priv/architecture/hypermedia_ui/phase_a4_authority_dossier.json)
+- [HUI-A4 acceptance matrix](../../priv/architecture/hypermedia_ui/phase_a4_acceptance_matrix.json)
 - [Milestone A authority dossier](./hypermedia-ui-milestone-a-authority-dossier.md)
 - [HUI-A4 merge-pending Phase 4 receipt](./hypermedia-ui-milestone-a-phase-04-receipt.md)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)

@@ -3,6 +3,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
 
   @manifest_directory "priv/architecture/hypermedia_ui"
   @manifest_files %{
+    acceptance: "phase_a4_acceptance_matrix.json",
     dossier: "phase_a4_authority_dossier.json",
     guardrails: "phase_a4_governance_guardrails.json",
     traceability: "phase_a4_program_traceability.json"
@@ -22,6 +23,10 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
   @mapping_fields ~w[id authority_owner owner_documents milestone phase_task test_evidence_class reopening_condition]
   @consumer_fields ~w[path current_kind target_disposition replacement_owner removal_owner evidence reopening_condition]
   @surface_fields ~w[id interface authority_builder authorization_points safe_outcomes implementation_owner evidence reopening_condition]
+  @coverage_classes ~w[
+    runtime dependency asset identity authority query command stream export documentation
+    receipt concurrency
+  ]
   @contract_fields ~w[
     kind interface authority_builder exact_resource_action query_catalog concealment redaction
     stable_dom csrf_origin command_gateway receipt native_fallback availability
@@ -68,7 +73,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
      "web product code must reach runtime effects only through the governed command gateway"}
   ]
 
-  @type manifests :: %{dossier: map(), guardrails: map(), traceability: map()}
+  @type manifests :: %{acceptance: map(), dossier: map(), guardrails: map(), traceability: map()}
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
   def check(root \\ File.cwd!()) do
@@ -106,16 +111,88 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
   end
 
   @spec validate(manifests(), Path.t()) :: [String.t()]
-  def validate(%{dossier: dossier, guardrails: guardrails, traceability: traceability}, root) do
+  def validate(
+        %{
+          acceptance: acceptance,
+          dossier: dossier,
+          guardrails: guardrails,
+          traceability: traceability
+        },
+        root
+      ) do
     []
     |> validate_guardrails(guardrails, root)
     |> validate_program_traceability(traceability, root)
     |> validate_dossier(dossier, guardrails, root)
+    |> validate_acceptance(acceptance, root)
     |> validate_product_sources(guardrails, root)
     |> Enum.reverse()
   end
 
   def validate(_incomplete, _root), do: ["HUI-A4 manifest set is incomplete"]
+
+  defp validate_acceptance(errors, acceptance, root) do
+    coverage = acceptance["coverage"] || []
+    failures = acceptance["failure_scenarios"] || []
+    failure_ids = Enum.map(failures, & &1["id"])
+
+    errors =
+      errors
+      |> require_equal(acceptance["schema_version"], 1, "acceptance matrix schema_version")
+      |> require_equal(acceptance["phase"], "HUI-A4", "acceptance matrix phase")
+      |> require_equal(
+        get_in(acceptance, ["baseline", "closure_commit"]),
+        "e9da1fe3a9f0a1017f35fcb29136f390e2da954f",
+        "acceptance matrix baseline"
+      )
+      |> require_exact_set(
+        Enum.map(coverage, & &1["class"]),
+        @coverage_classes,
+        "acceptance coverage classes"
+      )
+      |> require_unique(Enum.map(coverage, & &1["class"]), "acceptance coverage class")
+      |> require_exact_set(
+        failure_ids,
+        ~w[stale_receipt missing_receipt duplicate_anchor broken_dependency missing_integration_section unowned_requirement silent_supersession expired_exception parallel_version_race],
+        "acceptance failure scenarios"
+      )
+      |> require_unique(failure_ids, "acceptance failure scenario")
+      |> require_equal(
+        get_in(acceptance, ["reproduction", "target_implementation_added"]),
+        false,
+        "Milestone A target implementation"
+      )
+      |> require_equal(
+        get_in(acceptance, ["reproduction", "unsupported_readiness_claim"]),
+        false,
+        "Milestone A readiness claim"
+      )
+      |> require_member(
+        "mix architecture.check",
+        get_in(acceptance, ["reproduction", "commands"]) || [],
+        "architecture reproduction command"
+      )
+      |> require_member(
+        "mix precommit",
+        get_in(acceptance, ["reproduction", "commands"]) || [],
+        "precommit reproduction command"
+      )
+
+    errors =
+      Enum.reduce(coverage, errors, fn record, acc ->
+        acc
+        |> require_nonempty(record["allowed"], "#{record["class"]} allowed coverage is empty")
+        |> require_nonempty(
+          record["prohibited"],
+          "#{record["class"]} prohibited coverage is empty"
+        )
+        |> require_nonempty(record["evidence"], "#{record["class"]} evidence is empty")
+      end)
+
+    Enum.reduce(acceptance["source_documents"] || [], errors, fn path, acc ->
+      require_path(acc, root, path, "acceptance source document")
+    end)
+  end
 
   defp validate_dossier(errors, dossier, guardrails, root) do
     consumers = dossier["consumer_reconciliation"] || []

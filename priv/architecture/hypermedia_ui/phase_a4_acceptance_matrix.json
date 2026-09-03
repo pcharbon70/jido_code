@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A4",
+  "suite_version": "hui.a4.acceptance/1.0.0",
+  "recorded_on": "2026-09-03",
+  "status": "merge_pending_acceptance_matrix",
+  "baseline": {
+    "accepted_candidate": "167c6cac0dd148bc919b4969f3c6fb691c0863a1",
+    "closure_commit": "e9da1fe3a9f0a1017f35fcb29136f390e2da954f",
+    "section_4_1": "ab4e6dc1f90d804edcb4dd9266414ba8bf0c7e95",
+    "section_4_2": "9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71",
+    "section_4_3": "29f9fe276797fab918b8d1672f7dea1ed60746ba"
+  },
+  "coverage": [
+    {
+      "class": "runtime",
+      "allowed": ["explicit_controller", "Phoenix.Component", "server_rendered_HEEx", "native_link_and_form"],
+      "prohibited": ["product_LiveView", "product_LiveComponent", "LiveView_event_stream_hook", "LiveVue_Vue_bridge", "SaladUI_consumer", "unauthorized_LiveDashboard"],
+      "evidence": ["test/fixtures/architecture/hypermedia_ui/permitted", "test/fixtures/architecture/hypermedia_ui/prohibited", "phase_a4_governance_guardrails.json"]
+    },
+    {
+      "class": "dependency",
+      "allowed": ["Req_for_HTTP", "qualified_compile_time_Phoenix.Component", "pinned_reviewed_future_dependency"],
+      "prohibited": ["new_live_vue", "new_salad_ui", "unreviewed_runtime_consumer", "mutable_or_unlicensed_dependency"],
+      "evidence": ["AGENTS.md", "docs/contributing/hypermedia-product-work.md", "phase_a4_authority_dossier.json"]
+    },
+    {
+      "class": "asset",
+      "allowed": ["local_app_js", "local_app_css", "static_reviewed_expression", "HEEx_escaped_content"],
+      "prohibited": ["remote_CDN_asset", "inline_HEEx_script", "dynamic_untrusted_expression", "unidentified_bundle"],
+      "evidence": ["remote_asset.heex", "inline_script.heex", "docs/contributing/hypermedia-product-work.md"]
+    },
+    {
+      "class": "identity",
+      "allowed": ["trusted_named_human_mapping", "exact_session_and_assurance", "server_owned_delegation"],
+      "prohibited": ["shared_operator_target_authority", "browser_derived_grant", "browser_derived_assurance", "role_union"],
+      "evidence": ["phase_a2_identity_and_assurance.json", "phase_a2_policy_scenarios.json", "browser_authority.js"]
+    },
+    {
+      "class": "authority",
+      "allowed": ["exact_resource_action", "concealment", "redaction", "step_up", "reauthorization"],
+      "prohibited": ["caller_selected_graph", "caller_selected_revision", "route_only_authorization", "disabled_button_as_control"],
+      "evidence": ["phase_a2_authorization_matrix.json", "caller_graph.ex", "missing_contract.ex"]
+    },
+    {
+      "class": "query",
+      "allowed": ["reviewed_catalog", "bounded_projection", "authorized_graph_set", "freshness_and_revision_labels"],
+      "prohibited": ["raw_Knowledge_internal", "raw_SPARQL", "direct_TripleStore", "unrestricted_graph_browser"],
+      "evidence": ["raw_knowledge.ex", "direct_graph_write.ex", "phase_a4_program_traceability.json"]
+    },
+    {
+      "class": "command",
+      "allowed": ["closed_type_version", "server_recomputed_authority", "command_gateway", "optimistic_revision", "immutable_receipt"],
+      "prohibited": ["GET_effect", "direct_runtime_effect", "direct_graph_write", "optimistic_browser_success"],
+      "evidence": ["get_effect.ex", "direct_runtime.ex", "direct_graph_write.ex", "phase_a4_authority_dossier.json"]
+    },
+    {
+      "class": "stream",
+      "allowed": ["authorized_initial_snapshot", "bounded_lifetime", "pre_patch_reauthorization_and_requery", "terminal_revocation"],
+      "prohibited": ["LiveView_stream_target", "unbounded_SSE", "patch_without_reauthorization", "privileged_reconnect_after_revocation"],
+      "evidence": ["event_stream.ex", "phase_a3_interface_registry.json", "phase_a4_authority_dossier.json"]
+    },
+    {
+      "class": "export",
+      "allowed": ["authorized_creation", "authorized_each_retrieval", "bounded_redacted_dataset", "expiry_and_revocation"],
+      "prohibited": ["browser_selected_graph_export", "unredacted_download", "retrieval_after_revocation", "unsigned_unbounded_export"],
+      "evidence": ["phase_a2_authorization_matrix.json", "phase_a3_interface_registry.json", "phase_a4_authority_dossier.json"]
+    },
+    {
+      "class": "documentation",
+      "allowed": ["accepted_or_explicitly_historical_status", "stable_links_and_anchors", "one_owner_and_reopening_condition"],
+      "prohibited": ["silent_supersession", "broken_dependency", "missing_integration_section", "unsupported_readiness"],
+      "evidence": ["phase_a4_program_traceability.json", "docs/architecture/hypermedia-ui-milestone-a-authority-dossier.md"]
+    },
+    {
+      "class": "receipt",
+      "allowed": ["merge_pending_coherent", "accepted_full_merge_SHA_and_date", "preserved_reopening_conditions"],
+      "prohibited": ["missing_receipt", "stale_receipt", "mixed_state", "checkbox_only_authorization"],
+      "evidence": ["docs/architecture/hypermedia-ui-milestone-a-phase-04-receipt.md", "phase_a4_program_traceability.json"]
+    },
+    {
+      "class": "concurrency",
+      "allowed": ["server_owned_interface_version", "optimistic_revision", "explicit_conflict_receipt", "consumer_rebase_fence"],
+      "prohibited": ["caller_selected_version", "shared_mutable_browser_authority", "last_writer_wins", "silent_major_reinterpretation"],
+      "evidence": ["phase_a3_interface_registry.json", "phase_a4_program_traceability.json"]
+    }
+  ],
+  "failure_scenarios": [
+    {"id": "stale_receipt", "expected": "dependent phase remains unauthorized and closure validation fails"},
+    {"id": "missing_receipt", "expected": "completed status and dependent authorization fail closed"},
+    {"id": "duplicate_anchor", "expected": "plan graph rejects duplicate task identity"},
+    {"id": "broken_dependency", "expected": "plan graph rejects an unresolved after anchor"},
+    {"id": "missing_integration_section", "expected": "phase-file validation rejects missing final integration section"},
+    {"id": "unowned_requirement", "expected": "traceability rejects missing ADR/spec authority owner"},
+    {"id": "silent_supersession", "expected": "traceability rejects an unregistered or missing owner document/task mapping"},
+    {"id": "expired_exception", "expected": "source scan ignores the exception and emits the underlying prohibited rule"},
+    {"id": "parallel_version_race", "expected": "caller-selected versions and shared browser authority are rejected; conflicts require receipts"}
+  ],
+  "reproduction": {
+    "timezone": "Etc/UTC",
+    "source_date_epoch": 0,
+    "ordering": "lexicographic_paths_and_ids",
+    "target_implementation_added": false,
+    "unsupported_readiness_claim": false,
+    "inventory_counts": {
+      "milestones": 8,
+      "phase_files": 37,
+      "requirements": 12,
+      "gaps": 24,
+      "consumer_groups": 13,
+      "surface_classes": 8,
+      "compatibility_exceptions": 26,
+      "residual_risks": 10,
+      "milestone_b_blockers": 8
+    },
+    "commands": [
+      "mix test test/jido_code/architecture/hypermedia_ui_phase_a4_test.exs",
+      "mix architecture.check",
+      "mix precommit"
+    ],
+    "clean_checkout_ci": "required_at_implementation_PR_head"
+  },
+  "source_documents": [
+    "AGENTS.md",
+    "docs/contributing/hypermedia-product-work.md",
+    "docs/architecture/hypermedia-ui-milestone-a-authority-dossier.md",
+    "docs/architecture/hypermedia-ui-milestone-a-phase-04-receipt.md",
+    "docs/architecture/hypermedia-ui-runtime-contract-supersession.md",
+    "docs/architecture/hypermedia-ui-validation-and-release-evidence-contract.md",
+    "docs/planning/secure-hypermedia-control-plane-ui/README.md",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/phase-04-governance-guardrails-and-authority-acceptance.md"
+  ]
+}

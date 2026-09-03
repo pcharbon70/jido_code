@@ -23,7 +23,7 @@ runtime removal, or final release evidence.
 | Accepted HUI-A3 closure baseline | `e9da1fe3a9f0a1017f35fcb29136f390e2da954f` - PR #106 merged 2026-09-03 |
 | Section 4.1 | `ab4e6dc1f90d804edcb4dd9266414ba8bf0c7e95` - contributor and target implementation guidance |
 | Section 4.2 | `9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71` - architecture guardrails, traceability, fixtures, and tests |
-| Section 4.3 | `merge-pending` - authority dossier and this receipt |
+| Section 4.3 | `29f9fe276797fab918b8d1672f7dea1ed60746ba` - authority dossier and merge-pending receipt |
 | Section 4.4 | `merge-pending` - final acceptance matrix and candidate evidence |
 | Implementation PR head | `merge-pending` |
 | Merged candidate | `merge-pending` |
@@ -33,20 +33,30 @@ Merge date: `merge-pending`
 
 ## Artifact Identity
 
-The final implementation candidate will replace every merge-pending digest in
-this table before the implementation pull request is opened.
-
 | Artifact | SHA-256 |
 | --- | --- |
-| `AGENTS.md` | `merge-pending` |
-| Hypermedia product contribution contract | `merge-pending` |
-| HUI-A4 governance guardrail manifest | `merge-pending` |
-| HUI-A4 program traceability manifest | `merge-pending` |
-| HUI-A4 authority dossier manifest | `merge-pending` |
-| Milestone A authority dossier | `merge-pending` |
-| HUI-A4 validator source | `merge-pending` |
-| HUI-A4 integration test | `merge-pending` |
-| Allowed/prohibited fixture tree | `merge-pending` |
+| `AGENTS.md` | `150f7fbfded79ef63af18c302f7fb1d23e24c015a4caa152494d572076488a54` |
+| Hypermedia product contribution contract | `ccca1097171f286680f05d80eba327c1a380514076e2753ea7016ef35dfe4926` |
+| HUI-A4 governance guardrail manifest | `8ee74ebdcd5ffa0896f4918b4437e064bb22e688ef0b6495bbeea84493eea5d6` |
+| HUI-A4 program traceability manifest | `8378cb971f72b2a05ca35b79736890b0972a10abd31176b5ef334c35011312c7` |
+| HUI-A4 authority dossier manifest | `5435838660be57d8cbaf96ef392127a2ec38a8d4364f9537203918a97e03e70c` |
+| HUI-A4 acceptance matrix | `b51475119950d563de5035188fe4e6315680c50ee24f2c510cf56a77c1ddff91` |
+| Milestone A authority dossier | `c8e744270c28d9952be8ede56d016a3b8157b6da24cd5002e415e59634216c17` |
+| HUI-A4 validator source | `e2fcc6775a1559dec507ded0ae4bace4d885962ba24667eeb9e7972255dde0e9` |
+| HUI-A4 integration test | `81baa1c4363de96521a7b0eb4031bfaa8fe409cbdea97343cef50b84b7a78b83` |
+| Allowed/prohibited fixture tree | `bf5ae8588abbcfa61b0c20ca2e177fa275159817618a1b537eff9a883eb4e186` |
+
+## Toolchain Identity
+
+| Tool | Candidate version |
+| --- | --- |
+| Erlang/OTP | 28 / ERTS 16.2 |
+| Elixir | 1.19.5 compiled with Erlang/OTP 28 |
+| Mix | 1.19.5 compiled with Erlang/OTP 28 |
+| Node.js | 24.3.0 |
+| npm | 11.4.2 |
+| Rust | 1.92.0 (`ded5c06cf`, 2025-12-08) |
+| CMake | 3.28.3 |
 
 ## Contributor And Implementation Guidance
 
@@ -170,10 +180,10 @@ milestone, exact phase task, evidence class, and reopening condition.
 
 | Command or gate | Candidate result |
 | --- | --- |
-| HUI-A4 focused guardrail/traceability/dossier suite | `merge-pending-final-matrix` |
-| `mix architecture.check` | Passed after Section 4.2; final candidate rerun pending |
-| Architecture/security/documentation suites | `merge-pending-final-matrix` |
-| `mix precommit` | `merge-pending` |
+| HUI-A4 focused guardrail/traceability/dossier/acceptance suite | Passed; 9 tests, 0 failures |
+| `mix architecture.check` | Passed with graph-native source and HUI-A1 through HUI-A4 gates returning zero findings |
+| Architecture/security/documentation regression suites | Passed; 72 tests, 0 failures |
+| `mix precommit` | Passed; 1,180 tests, 0 failures, with formatting, unused-dependency, compile, and combined architecture gates clean |
 | Clean-checkout CI | `merge-pending` |
 
 The `mix conformance` task remains unconfigured for this repository layout and

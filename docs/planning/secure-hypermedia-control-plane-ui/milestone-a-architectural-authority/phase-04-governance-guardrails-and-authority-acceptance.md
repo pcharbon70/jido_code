@@ -78,21 +78,21 @@ Back to plan: [README](./README.md)
     This final section proves the target authority is internally consistent,
     enforceable, reproducible, and safe to use as the dependency baseline.
 
-    - [ ] 4.4.1 Task {#huia-p04-integration} [repo: jido_code] [after: {#huia-p04-dossier}] - Execute the HUI-A4/HUI1 governance acceptance matrix.
+    - [x] 4.4.1 Task {#huia-p04-integration} [repo: jido_code] [after: {#huia-p04-dossier}] - Execute the HUI-A4/HUI1 governance acceptance matrix.
 
       This task closes Milestone A only if positive and negative fixtures prove
       contributor rules and architecture checks match accepted documents.
 
-      - [ ] 4.4.1.1 Subtask - Exercise every allowed/prohibited runtime, dependency, asset, identity, authority, query, command, stream, export, and documentation pattern.
-      - [ ] 4.4.1.2 Subtask - Exercise stale/missing receipt, duplicate anchor, broken dependency, missing integration section, unowned requirement, silent supersession, expired exception, and parallel version-race failures.
-      - [ ] 4.4.1.3 Subtask - Reproduce the full authority dossier and inventory from a clean checkout and verify no target implementation or unsupported readiness claim leaked into Milestone A.
-      - [ ] 4.4.1.4 Subtask - Run full architecture/security/documentation suites, `mix precommit`, and clean-checkout CI.
+      - [x] 4.4.1.1 Subtask - Exercise every allowed/prohibited runtime, dependency, asset, identity, authority, query, command, stream, export, and documentation pattern.
+      - [x] 4.4.1.2 Subtask - Exercise stale/missing receipt, duplicate anchor, broken dependency, missing integration section, unowned requirement, silent supersession, expired exception, and parallel version-race failures.
+      - [x] 4.4.1.3 Subtask - Reproduce the full authority dossier and inventory from a clean checkout and verify no target implementation or unsupported readiness claim leaked into Milestone A.
+      - [x] 4.4.1.4 Subtask - Run full architecture/security/documentation suites, `mix precommit`, and clean-checkout CI.
 
     - [ ] 4.4.2 Task {#huia-p04-phase-receipt} [repo: jido_code] [after: {#huia-p04-integration}] - Publish and pin the Phase 4 receipt and HUI1 closure.
 
       This task records HUI-A4/HUI1 evidence in
       `docs/architecture/hypermedia-ui-milestone-a-phase-04-receipt.md`.
 
-      - [ ] 4.4.2.1 Subtask - Keep HUI1 merge-pending on an unaccepted decision, contradictory contract, stale contributor rule, bypassable check, incomplete traceability, unowned risk, or unpinned evidence input.
-      - [ ] 4.4.2.2 Subtask - Record exact document/check/fixture/toolchain digests, full findings, exceptions, reviewers, limitations, and every gate reopening condition.
+      - [x] 4.4.2.1 Subtask - Keep HUI1 merge-pending on an unaccepted decision, contradictory contract, stale contributor rule, bypassable check, incomplete traceability, unowned risk, or unpinned evidence input.
+      - [x] 4.4.2.2 Subtask - Record exact document/check/fixture/toolchain digests, full findings, exceptions, reviewers, limitations, and every gate reopening condition.
       - [ ] 4.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 4 Integration Tests section, receipt task, pinning subtask, and Milestone A completion before authorizing Milestone B Phase 1.
