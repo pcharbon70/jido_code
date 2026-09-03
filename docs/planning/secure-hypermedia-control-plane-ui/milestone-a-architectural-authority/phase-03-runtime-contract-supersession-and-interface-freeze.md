@@ -87,21 +87,21 @@ Back to plan: [README](./README.md)
     This final section proves every affected contract tells one coherent story
     and every target interface is owned, versioned, testable, and reversible.
 
-    - [ ] 3.4.1 Task {#huia-p03-integration} [repo: jido_code] [after: {#huia-p03-evidence}] - Execute the HUI-A3 supersession and interface matrix.
+    - [x] 3.4.1 Task {#huia-p03-integration} [repo: jido_code] [after: {#huia-p03-evidence}] - Execute the HUI-A3 supersession and interface matrix.
 
       This task detects stale ownership, unversioned interfaces, unauthorized
       semantics, and evidence gaps before implementation begins.
 
-      - [ ] 3.4.1.1 Subtask - Trace every preserved/superseded/deferred clause from old document through new owner, interface, phase, test class, rollback dependency, and removal condition.
-      - [ ] 3.4.1.2 Subtask - Verify no accepted document requires LiveView/LiveVue/SaladUI product use or contradicts the named-human, graph-only, reviewed-query, or governed-command model.
-      - [ ] 3.4.1.3 Subtask - Verify all interfaces, versions, ownership, compatibility, parallel-edit boundaries, evidence classes, and receipt rules are complete and link-valid.
-      - [ ] 3.4.1.4 Subtask - Run architecture/spec drift checks, docs validation, `mix precommit`, and clean-checkout CI.
+      - [x] 3.4.1.1 Subtask - Trace every preserved/superseded/deferred clause from old document through new owner, interface, phase, test class, rollback dependency, and removal condition.
+      - [x] 3.4.1.2 Subtask - Verify no accepted document requires LiveView/LiveVue/SaladUI product use or contradicts the named-human, graph-only, reviewed-query, or governed-command model.
+      - [x] 3.4.1.3 Subtask - Verify all interfaces, versions, ownership, compatibility, parallel-edit boundaries, evidence classes, and receipt rules are complete and link-valid.
+      - [x] 3.4.1.4 Subtask - Run architecture/spec drift checks, docs validation, `mix precommit`, and clean-checkout CI.
 
     - [ ] 3.4.2 Task {#huia-p03-phase-receipt} [repo: jido_code] [after: {#huia-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records HUI-A3 evidence in
       `docs/architecture/hypermedia-ui-milestone-a-phase-03-receipt.md`.
 
-      - [ ] 3.4.2.1 Subtask - Keep HUI-A3 merge-pending on contradictory ownership, silent supersession, unowned/unversioned interface, weakened invariant, missing rollback dependency, or mock-only required evidence.
-      - [ ] 3.4.2.2 Subtask - Record accepted ADR/spec revisions, supersession matrix, interface/version manifest, evidence schema, limitations, and all reopening conditions.
+      - [x] 3.4.2.1 Subtask - Keep HUI-A3 merge-pending on contradictory ownership, silent supersession, unowned/unversioned interface, weakened invariant, missing rollback dependency, or mock-only required evidence.
+      - [x] 3.4.2.2 Subtask - Record accepted ADR/spec revisions, supersession matrix, interface/version manifest, evidence schema, limitations, and all reopening conditions.
       - [ ] 3.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.
