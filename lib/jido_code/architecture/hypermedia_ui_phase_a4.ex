@@ -3,6 +3,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
 
   @manifest_directory "priv/architecture/hypermedia_ui"
   @manifest_files %{
+    dossier: "phase_a4_authority_dossier.json",
     guardrails: "phase_a4_governance_guardrails.json",
     traceability: "phase_a4_program_traceability.json"
   }
@@ -19,6 +20,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
   ]
   @exception_fields ~w[id owner reason path symbol rules expires_on evidence reopening_condition sha256]
   @mapping_fields ~w[id authority_owner owner_documents milestone phase_task test_evidence_class reopening_condition]
+  @consumer_fields ~w[path current_kind target_disposition replacement_owner removal_owner evidence reopening_condition]
+  @surface_fields ~w[id interface authority_builder authorization_points safe_outcomes implementation_owner evidence reopening_condition]
   @contract_fields ~w[
     kind interface authority_builder exact_resource_action query_catalog concealment redaction
     stable_dom csrf_origin command_gateway receipt native_fallback availability
@@ -65,7 +68,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
      "web product code must reach runtime effects only through the governed command gateway"}
   ]
 
-  @type manifests :: %{guardrails: map(), traceability: map()}
+  @type manifests :: %{dossier: map(), guardrails: map(), traceability: map()}
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
   def check(root \\ File.cwd!()) do
@@ -103,15 +106,146 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
   end
 
   @spec validate(manifests(), Path.t()) :: [String.t()]
-  def validate(%{guardrails: guardrails, traceability: traceability}, root) do
+  def validate(%{dossier: dossier, guardrails: guardrails, traceability: traceability}, root) do
     []
     |> validate_guardrails(guardrails, root)
     |> validate_program_traceability(traceability, root)
+    |> validate_dossier(dossier, guardrails, root)
     |> validate_product_sources(guardrails, root)
     |> Enum.reverse()
   end
 
   def validate(_incomplete, _root), do: ["HUI-A4 manifest set is incomplete"]
+
+  defp validate_dossier(errors, dossier, guardrails, root) do
+    consumers = dossier["consumer_reconciliation"] || []
+    surfaces = dossier["surface_authority_reconciliation"] || []
+    proposals = dossier["proposal_dispositions"] || []
+    risks = dossier["residual_risks"] || []
+    blockers = dossier["milestone_b_blockers"] || []
+
+    interface_registry =
+      read_json!(root, "priv/architecture/hypermedia_ui/phase_a3_interface_registry.json")
+
+    expected_consumers =
+      Enum.map(interface_registry["current_consumer_manifest"] || [], & &1["path"])
+
+    exception_ids = Enum.map(guardrails["exceptions"] || [], & &1["id"])
+
+    errors =
+      errors
+      |> require_equal(dossier["schema_version"], 1, "authority dossier schema_version")
+      |> require_equal(dossier["phase"], "HUI-A4", "authority dossier phase")
+      |> require_equal(
+        get_in(dossier, ["baseline", "closure_commit"]),
+        "e9da1fe3a9f0a1017f35fcb29136f390e2da954f",
+        "authority dossier baseline"
+      )
+      |> require_exact_set(
+        Enum.map(consumers, & &1["path"]),
+        expected_consumers,
+        "current consumer reconciliation"
+      )
+      |> require_unique(Enum.map(consumers, & &1["path"]), "consumer reconciliation path")
+      |> require_exact_set(
+        Enum.map(surfaces, & &1["id"]),
+        ~w[page fragment stream command approval export incident revocation],
+        "surface authority reconciliation"
+      )
+      |> require_exact_set(
+        get_in(dossier, ["exception_register", "ids"]) || [],
+        exception_ids,
+        "dossier exception register"
+      )
+      |> require_equal(
+        get_in(dossier, ["exception_register", "count"]),
+        length(exception_ids),
+        "dossier exception count"
+      )
+      |> require_nonempty(proposals, "proposal disposition register is missing")
+      |> require_nonempty(risks, "residual risk register is missing")
+      |> require_nonempty(blockers, "Milestone B blocker register is missing")
+      |> require_exact_set(
+        Enum.map(proposals, & &1["disposition"]),
+        ~w[accepted deferred rejected],
+        "proposal disposition classes"
+      )
+
+    errors =
+      Enum.reduce(consumers, errors, fn consumer, acc ->
+        require_fields(acc, consumer, @consumer_fields, "consumer #{consumer["path"]}")
+      end)
+
+    errors =
+      Enum.reduce(surfaces, errors, fn surface, acc ->
+        acc
+        |> require_fields(surface, @surface_fields, "surface #{surface["id"]}")
+        |> require_nonempty(
+          surface["authorization_points"],
+          "#{surface["id"]} authorization points are empty"
+        )
+        |> require_nonempty(surface["safe_outcomes"], "#{surface["id"]} safe outcomes are empty")
+      end)
+
+    errors =
+      Enum.reduce(proposals, errors, fn proposal, acc ->
+        acc
+        |> require_fields(
+          proposal,
+          ~w[id item disposition owner evidence reopening_condition],
+          "proposal #{proposal["id"]}"
+        )
+        |> require_member(
+          proposal["disposition"],
+          ~w[accepted deferred rejected],
+          "#{proposal["id"]} disposition"
+        )
+      end)
+
+    errors =
+      Enum.reduce(risks, errors, fn risk, acc ->
+        require_fields(
+          acc,
+          risk,
+          ~w[id severity owner status mitigation expiry reopening_condition],
+          "risk #{risk["id"]}"
+        )
+      end)
+
+    errors =
+      Enum.reduce(blockers, errors, fn blocker, acc ->
+        acc
+        |> require_fields(
+          blocker,
+          ~w[id owner required_evidence status reopening_condition],
+          "Milestone B blocker #{blocker["id"]}"
+        )
+        |> require_equal(blocker["status"], "blocking", "#{blocker["id"]} blocker status")
+      end)
+
+    plan =
+      read(
+        root,
+        "docs/planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/phase-04-governance-guardrails-and-authority-acceptance.md"
+      )
+
+    milestone_plan =
+      read(
+        root,
+        "docs/planning/secure-hypermedia-control-plane-ui/milestone-a-architectural-authority/README.md"
+      )
+
+    receipt =
+      read(root, "docs/architecture/hypermedia-ui-milestone-a-phase-04-receipt.md")
+
+    errors
+    |> require_path(
+      root,
+      "docs/architecture/hypermedia-ui-milestone-a-authority-dossier.md",
+      "Milestone A authority dossier"
+    )
+    |> then(&(&1 ++ validate_closure(plan, milestone_plan, receipt)))
+  end
 
   @spec check_sources([{String.t(), String.t()}], keyword()) ::
           {:ok, []} | {:error, [String.t()]}

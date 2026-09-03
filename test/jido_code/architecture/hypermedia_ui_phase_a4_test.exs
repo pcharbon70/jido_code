@@ -9,12 +9,51 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
   test "tracked sources, exceptions, requirements, gaps, plans, and receipts satisfy HUI-A4" do
     assert {:ok, []} = HypermediaUIPhaseA4.check()
 
-    assert {:ok, %{guardrails: guardrails, traceability: traceability}} =
+    assert {:ok, %{dossier: dossier, guardrails: guardrails, traceability: traceability}} =
              HypermediaUIPhaseA4.load()
 
     assert guardrails["phase"] == "HUI-A4"
     assert length(traceability["gap_mappings"]) == 24
     assert length(traceability["requirements"]) == 12
+    assert length(dossier["consumer_reconciliation"]) == 13
+    assert length(dossier["surface_authority_reconciliation"]) == 8
+    assert length(dossier["residual_risks"]) == 10
+    assert length(dossier["milestone_b_blockers"]) == 8
+  end
+
+  test "dossier rejects missing consumers, incomplete surface authority, and released blockers" do
+    assert {:ok, manifests} = HypermediaUIPhaseA4.load()
+
+    missing_consumer = update_in(manifests, [:dossier, "consumer_reconciliation"], &tl/1)
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate(missing_consumer, File.cwd!()),
+             "consumer reconciliation"
+           )
+
+    incomplete_surface =
+      put_in(
+        manifests,
+        [:dossier, "surface_authority_reconciliation", Access.at(0), "authorization_points"],
+        []
+      )
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate(incomplete_surface, File.cwd!()),
+             "authorization points"
+           )
+
+    released_blocker =
+      put_in(
+        manifests,
+        [:dossier, "milestone_b_blockers", Access.at(0), "status"],
+        "released"
+      )
+
+    assert has_error?(
+             HypermediaUIPhaseA4.validate(released_blocker, File.cwd!()),
+             "blocker status"
+           )
   end
 
   test "allowed controller HEEx contract and native component fixture pass" do
@@ -146,6 +185,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
     milestone_path = Path.join(@plan_root, "milestone-a-architectural-authority/README.md")
     plan = File.read!(plan_path)
     milestone = File.read!(milestone_path)
+    receipt = File.read!("docs/architecture/hypermedia-ui-milestone-a-phase-04-receipt.md")
+
+    assert HypermediaUIPhaseA4.validate_closure(plan, milestone, receipt) == []
 
     merge_pending_receipt = """
     Status: **merge-pending**

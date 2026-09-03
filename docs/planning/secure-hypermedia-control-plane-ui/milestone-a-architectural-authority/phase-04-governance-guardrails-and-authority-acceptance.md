@@ -58,20 +58,20 @@ Back to plan: [README](./README.md)
       - [x] 4.2.2.3 Subtask - Verify proposed/accepted/superseded status consistency and reject phase authorization from merge-pending or unpinned receipts.
       - [x] 4.2.2.4 Subtask - Publish architecture-check fixtures for allowed Phoenix.Component use and each prohibited product/runtime/authority construct.
 
-  - [ ] 4.3 Section - Assemble the accepted authority dossier.
+  - [x] 4.3 Section - Assemble the accepted authority dossier.
 
     This section reconciles all Milestone A evidence and records residual risks
     before dependency acquisition is permitted.
 
-    - [ ] 4.3.1 Task {#huia-p04-dossier} [repo: jido_code] [after: {#huia-p04-traceability}] - Review and sign the HUI1 authority dossier.
+    - [x] 4.3.1 Task {#huia-p04-dossier} [repo: jido_code] [after: {#huia-p04-traceability}] - Review and sign the HUI1 authority dossier.
 
       This task binds decisions, contracts, guidance, checks, inventories, and
       risks to one exact candidate.
 
-      - [ ] 4.3.1.1 Subtask - Reconcile Phase 1 inventories with accepted supersession and confirm every current consumer has a later replacement/removal/retention disposition.
-      - [ ] 4.3.1.2 Subtask - Reconcile identity/security authority with route, stream, command, approval, export, incident, and revocation contracts.
-      - [ ] 4.3.1.3 Subtask - Record accepted/deferred/rejected proposal items, residual risks, exceptions, owners, expiry, and explicit Milestone B blockers.
-      - [ ] 4.3.1.4 Subtask - Create `hypermedia-ui-milestone-a-phase-04-receipt.md` in merge-pending state with HUI-A4/HUI1 evidence and all reopening conditions.
+      - [x] 4.3.1.1 Subtask - Reconcile Phase 1 inventories with accepted supersession and confirm every current consumer has a later replacement/removal/retention disposition.
+      - [x] 4.3.1.2 Subtask - Reconcile identity/security authority with route, stream, command, approval, export, incident, and revocation contracts.
+      - [x] 4.3.1.3 Subtask - Record accepted/deferred/rejected proposal items, residual risks, exceptions, owners, expiry, and explicit Milestone B blockers.
+      - [x] 4.3.1.4 Subtask - Create `hypermedia-ui-milestone-a-phase-04-receipt.md` in merge-pending state with HUI-A4/HUI1 evidence and all reopening conditions.
 
   - [ ] 4.4 Section - Phase 4 Integration Tests.
 

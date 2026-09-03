@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A4",
+  "recorded_on": "2026-09-03",
+  "status": "merge_pending_authority_dossier",
+  "baseline": {
+    "accepted_candidate": "167c6cac0dd148bc919b4969f3c6fb691c0863a1",
+    "closure_commit": "e9da1fe3a9f0a1017f35fcb29136f390e2da954f",
+    "section_4_1": "ab4e6dc1f90d804edcb4dd9266414ba8bf0c7e95",
+    "section_4_2": "9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71"
+  },
+  "consumer_reconciliation": [
+    {
+      "path": "lib/jido_code_web/router.ex",
+      "current_kind": "live_routes_and_live_session",
+      "target_disposition": "replace_with_explicit_controller_routes_then_remove_live_routes",
+      "replacement_owner": "HUI-C",
+      "removal_owner": "HUI-H",
+      "evidence": "route parity manifest, controller/browser tests, and exact post-cutover route scan",
+      "reopening_condition": "a target route lacks explicit ownership or a LiveView route is added or removed without parity proof"
+    },
+    {
+      "path": "lib/jido_code_web/endpoint.ex",
+      "current_kind": "liveview_socket",
+      "target_disposition": "replace_with_qualified_http_sse_then_remove_live_socket",
+      "replacement_owner": "HUI-D",
+      "removal_owner": "HUI-H",
+      "evidence": "real proxy/SSE/revocation qualification and endpoint consumer scan",
+      "reopening_condition": "the socket widens, protected SSE is unqualified, or removal precedes equivalent delivery evidence"
+    },
+    {
+      "path": "lib/jido_code_web/product_auth.ex",
+      "current_kind": "liveview_mount_and_event_hook",
+      "target_disposition": "replace_with_named_identity_and_authority_plugs_helpers_then_remove_hooks",
+      "replacement_owner": "HUI-C",
+      "removal_owner": "HUI-H",
+      "evidence": "controller/API parity, exact-scope, concealment, reauthorization, and revocation tests",
+      "reopening_condition": "browser authority differs from accepted named-human authority or a hook remains authoritative after cutover"
+    },
+    {
+      "path": "lib/jido_code_web/live/home_live.ex",
+      "current_kind": "product_route_owner",
+      "target_disposition": "replace_with_factory_project_and_lens_controller_surfaces",
+      "replacement_owner": "HUI-C,HUI-F",
+      "removal_owner": "HUI-H",
+      "evidence": "read/interaction parity, projection-state, wiki/lens, accessibility, and browser evidence",
+      "reopening_condition": "replacement loses current governed behavior or removal leaves an unowned route or projection"
+    },
+    {
+      "path": "lib/jido_code_web/live/coding_agent_live.ex",
+      "current_kind": "product_route_owner",
+      "target_disposition": "replace_with_agent_catalog_and_governed_submission_controllers",
+      "replacement_owner": "HUI-C,HUI-E",
+      "removal_owner": "HUI-H",
+      "evidence": "catalog, submission, command, receipt, failure, and native/enhanced browser parity",
+      "reopening_condition": "task submission bypasses the governed command adapter or parity is incomplete"
+    },
+    {
+      "path": "lib/jido_code_web/live/managed_coding_attempt_live.ex",
+      "current_kind": "product_route_owner",
+      "target_disposition": "replace_with_attempt_workspace_projection_fragment_stream_and_command_controllers",
+      "replacement_owner": "HUI-C,HUI-D,HUI-E",
+      "removal_owner": "HUI-H",
+      "evidence": "attempt summary/timeline/control/resume/stream/receipt parity and security evidence",
+      "reopening_condition": "attempt state or control becomes browser-authoritative, unbounded, unreceipted, or unrevocable"
+    },
+    {
+      "path": "lib/jido_code_web/components/live_vue_components.ex",
+      "current_kind": "livevue_mount_facade",
+      "target_disposition": "replace_with_server_rendered_application_components_and_ephemeral_signals",
+      "replacement_owner": "HUI-B,HUI-C,HUI-D",
+      "removal_owner": "HUI-H",
+      "evidence": "component facade, Datastar consumer, accessibility, and exact no-LiveVue scan",
+      "reopening_condition": "a target component or signal bridge depends on LiveVue or owns semantic state"
+    },
+    {
+      "path": "lib/jido_code_web/components/ui.ex",
+      "current_kind": "saladui_facade",
+      "target_disposition": "retain_facade_identity_replace_implementation_with_qualified_jidocode_components",
+      "replacement_owner": "HUI-B",
+      "removal_owner": "HUI-H",
+      "evidence": "pinned primitive registry, supported usage, component tests, asset build, license, and SaladUI removal scan",
+      "reopening_condition": "the facade widens, upstream internals leak, or SaladUI remains after the qualified replacement"
+    },
+    {
+      "path": "assets/js/app.js",
+      "current_kind": "livesocket_livevue_and_saladui_assets",
+      "target_disposition": "replace_with_pinned_local_datastar_and_application_javascript",
+      "replacement_owner": "HUI-B,HUI-D",
+      "removal_owner": "HUI-H",
+      "evidence": "asset source/version/license/digest, CSP, clean build, consumer, and no-runtime-import scan",
+      "reopening_condition": "an unpinned/remote asset or superseded runtime import enters the application bundle"
+    },
+    {
+      "path": "assets/css/app.css",
+      "current_kind": "saladui_and_current_theme_assets",
+      "target_disposition": "replace_saladui_sources_and_liveview_variants_with_owned_tokens_and_components",
+      "replacement_owner": "HUI-B",
+      "removal_owner": "HUI-H",
+      "evidence": "theme/component visual, accessibility, responsive, local-asset, and no-SaladUI source evidence",
+      "reopening_condition": "target styling imports SaladUI/remote assets or loses qualified accessibility and theme behavior"
+    },
+    {
+      "path": "assets/vue",
+      "current_kind": "livevue_product_sources",
+      "target_disposition": "remove_after_server_rendered_component_and_signal_parity",
+      "replacement_owner": "HUI-B,HUI-C,HUI-D",
+      "removal_owner": "HUI-H",
+      "evidence": "exact Vue consumer inventory empty plus browser/accessibility parity at the merged candidate",
+      "reopening_condition": "a Vue source is added, changes authority, or is removed before its replacement qualifies"
+    },
+    {
+      "path": "test/jido_code_web/live",
+      "current_kind": "liveview_product_tests",
+      "target_disposition": "retain_as_compatibility_regression_until_replaced_by_controller_native_datastar_and_browser_suites",
+      "replacement_owner": "HUI-B,HUI-C,HUI-D,HUI-E,HUI-F,HUI-G",
+      "removal_owner": "HUI-H",
+      "evidence": "test-class parity matrix and exact target consumer evidence",
+      "reopening_condition": "LiveView-only tests are used to qualify the target or compatibility tests disappear before replacement coverage"
+    },
+    {
+      "path": "mix.exs",
+      "current_kind": "liveview_livevue_saladui_dashboard_dependencies",
+      "target_disposition": "qualify_compile_time_phoenix_component_need_remove_livevue_saladui_dashboard_and_unneeded_liveview_runtime",
+      "replacement_owner": "HUI-B",
+      "removal_owner": "HUI-H",
+      "evidence": "clean dependency tree/lock/consumer scan, compile/runtime trace, license, and removal manifest",
+      "reopening_condition": "a dependency gains unreviewed target use, mutable identity, unsupported license, or unproved runtime retention"
+    }
+  ],
+  "surface_authority_reconciliation": [
+    {
+      "id": "page",
+      "interface": "hui.product_projection.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["route_admission", "before_query", "before_field_shaping", "before_response_start"],
+      "safe_outcomes": ["allowed", "concealed_not_found", "redacted", "denied", "unavailable", "step_up_required"],
+      "implementation_owner": "HUI-C",
+      "evidence": "controller, query, field-shaping, concealment, redaction, native-browser, and accessibility tests",
+      "reopening_condition": "a page starts rendering before trusted authority or exposes an unauthorized resource or field"
+    },
+    {
+      "id": "fragment",
+      "interface": "hui.signal_fragment.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["route_admission", "before_signal_parse", "before_query", "before_field_shaping", "before_patch"],
+      "safe_outcomes": ["allowed", "concealed_not_found", "redacted", "denied", "unavailable", "revoked", "step_up_required"],
+      "implementation_owner": "HUI-D",
+      "evidence": "closed signal, stable root, patch bound, CSRF/Origin, native fallback, and injection tests",
+      "reopening_condition": "signals become authority or a patch skips query/field authorization, stable roots, or safe failure"
+    },
+    {
+      "id": "stream",
+      "interface": "hui.stream.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["before_response_start", "before_subscription", "before_each_protected_patch"],
+      "safe_outcomes": ["allowed", "redacted", "unavailable", "revoked", "terminal_replacement", "closed"],
+      "implementation_owner": "HUI-D",
+      "evidence": "identity, proxy, current snapshot, periodic/pre-patch reauthorization, revocation, capacity, reconnect, and fault tests",
+      "reopening_condition": "a stream outlives authority, patches stale data, omits terminal revocation, or reconnects privileged state"
+    },
+    {
+      "id": "command",
+      "interface": "hui.command_adapter.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["route_admission", "before_preview", "before_command_construction", "inside_command_gateway"],
+      "safe_outcomes": ["committed", "idempotent_duplicate", "conflict", "stale", "revoked", "denied", "step_up_required", "failed"],
+      "implementation_owner": "HUI-E",
+      "evidence": "closed mapping, server-recomputed authority, preview, CSRF/Origin, optimistic revision, atomic receipt, conflict, and recovery tests",
+      "reopening_condition": "a command trusts browser authority/revisions, bypasses the gateway, or reports success without its immutable receipt"
+    },
+    {
+      "id": "approval",
+      "interface": "hui.command_adapter.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["before_approval_record", "before_quorum_evaluation", "before_approval_commit", "inside_command_gateway"],
+      "safe_outcomes": ["pending", "quorum_met", "rejected", "expired", "invalidated", "committed", "conflict_loser", "revoked"],
+      "implementation_owner": "HUI-E,HUI-G",
+      "evidence": "action digest, unique independent approver, step-up, quorum, expiry/invalidation, compare-and-set, and audit tests",
+      "reopening_condition": "self-approval, duplicated identity, stale quorum, missing step-up, or non-atomic approval commit is possible"
+    },
+    {
+      "id": "export",
+      "interface": "hui.audit_export.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["before_export_creation", "before_each_export_or_download_retrieval", "before_field_shaping"],
+      "safe_outcomes": ["created", "ready", "redacted", "concealed_not_found", "expired", "revoked", "denied", "failed"],
+      "implementation_owner": "HUI-F,HUI-G",
+      "evidence": "bounded dataset, classification/redaction, signed retrieval, expiry/revocation, audit, injection, and download tests",
+      "reopening_condition": "an export outlives authority, leaks unauthorized fields, or remains retrievable after expiry or revocation"
+    },
+    {
+      "id": "incident",
+      "interface": "hui.incident.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["route_admission", "before_query", "before_field_shaping", "before_command_construction", "inside_command_gateway"],
+      "safe_outcomes": ["allowed", "concealed_not_found", "redacted", "denied", "step_up_required", "committed", "conflict", "revoked"],
+      "implementation_owner": "HUI-G",
+      "evidence": "incident posture/resource/action, step-up, separation, command receipt, audit, concealment, runbook, and recovery tests",
+      "reopening_condition": "incident controls are unavailable, bypassable, unreceipted, unaudited, or expose protected incident data"
+    },
+    {
+      "id": "revocation",
+      "interface": "hui.identity_authority.v1",
+      "authority_builder": "hui.identity_authority.v1",
+      "authorization_points": ["every_request", "before_query", "before_patch", "inside_command_gateway", "before_approval_commit", "before_export_retrieval"],
+      "safe_outcomes": ["revoked", "terminal_replacement", "closed", "reconnect_suppressed", "signed_link_invalidated", "privileged_state_cleared"],
+      "implementation_owner": "HUI-C,HUI-D,HUI-E,HUI-G",
+      "evidence": "account/session/role/delegation/project/tenant/graph/incident revocation across pages, streams, commands, approvals, and exports",
+      "reopening_condition": "any protected surface continues delivery or effect after its bound authority is revoked"
+    }
+  ],
+  "proposal_dispositions": [
+    {"id": "HUI-PROP-01", "item": "server_rendered_HEEx_and_Datastar_target_runtime", "disposition": "accepted", "owner": "ADR-0008", "evidence": "docs/adr/0008-server-rendered-heex-and-datastar-product-runtime.md", "reopening_condition": "target ownership changes or is claimed implemented before its milestone receipts"},
+    {"id": "HUI-PROP-02", "item": "named_human_scoped_authorization_and_separation_of_duty", "disposition": "accepted", "owner": "ADR-0009", "evidence": "docs/adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md", "reopening_condition": "identity, assurance, delegation, exact scope, or separation invariants weaken"},
+    {"id": "HUI-PROP-03", "item": "application_owned_ShacdnUI_primitive_facade", "disposition": "accepted", "owner": "ADR-0010", "evidence": "docs/adr/0010-shadcnui-as-product-component-primitive-layer.md", "reopening_condition": "the facade or supported component boundary widens without qualification"},
+    {"id": "HUI-PROP-04", "item": "attention_control_plane_attempt_workspace_and_closed_lenses", "disposition": "accepted", "owner": "ADR-0011", "evidence": "docs/adr/0011-attention-oriented-control-plane-and-knowledge-lenses.md", "reopening_condition": "attention, workspace, lens, or evidence ownership becomes ambiguous or unbounded"},
+    {"id": "HUI-PROP-05", "item": "Dstar_Datastar_dependency_and_asset_adoption", "disposition": "deferred", "owner": "HUI-B", "evidence": "docs/architecture/datastar-dstar-dependency-and-consumer-qualification.md", "reopening_condition": "the dependency or asset is acquired before HUI-B pins source, version, license, digest, risk, and consumer proof"},
+    {"id": "HUI-PROP-06", "item": "ShadcnUI_source_and_component_adoption", "disposition": "deferred", "owner": "HUI-B", "evidence": "docs/architecture/shadcn-ui-adoption-and-component-contract.md", "reopening_condition": "source or components are adopted before the exact namespace/license/usage/CI record"},
+    {"id": "HUI-PROP-07", "item": "LiveDashboard_final_remove_replace_or_retain_decision", "disposition": "deferred", "owner": "HUI-H", "evidence": "docs/architecture/hypermedia-runtime-migration-and-rollback.md", "reopening_condition": "the exception widens or a zero-LiveView claim is made before the decision and proof"},
+    {"id": "HUI-PROP-08", "item": "browser_authoritative_signals_grants_revisions_or_workflow_state", "disposition": "rejected", "owner": "HUI-A", "evidence": "docs/architecture/hypermedia-ui-runtime-contract-supersession.md", "reopening_condition": "browser state becomes authoritative for a graph, grant, revision, command, or workflow"},
+    {"id": "HUI-PROP-09", "item": "product_LiveView_LiveVue_or_SaladUI_target_ownership", "disposition": "rejected", "owner": "HUI-A", "evidence": "docs/adr/0008-server-rendered-heex-and-datastar-product-runtime.md", "reopening_condition": "a superseded runtime gains a new target consumer"},
+    {"id": "HUI-PROP-10", "item": "unrestricted_universal_graph_browser", "disposition": "rejected", "owner": "HUI-F", "evidence": "docs/architecture/graph-lens-and-visualization-contract.md", "reopening_condition": "a lens bypasses the closed catalog, scope, bounds, task, or accessible alternative"}
+  ],
+  "exception_register": {
+    "source": "priv/architecture/hypermedia_ui/phase_a4_governance_guardrails.json",
+    "count": 26,
+    "ids": ["HUI-A4-EX-001", "HUI-A4-EX-002", "HUI-A4-EX-003", "HUI-A4-EX-004", "HUI-A4-EX-005", "HUI-A4-EX-006", "HUI-A4-EX-007", "HUI-A4-EX-008", "HUI-A4-EX-009", "HUI-A4-EX-010", "HUI-A4-EX-011", "HUI-A4-EX-012", "HUI-A4-EX-013", "HUI-A4-EX-014", "HUI-A4-EX-015", "HUI-A4-EX-016", "HUI-A4-EX-017", "HUI-A4-EX-018", "HUI-A4-EX-019", "HUI-A4-EX-020", "HUI-A4-EX-021", "HUI-A4-EX-022", "HUI-A4-EX-023", "HUI-A4-EX-024", "HUI-A4-EX-025", "HUI-A4-EX-026"],
+    "owners": ["HUI-B", "HUI-C", "HUI-D", "HUI-H"],
+    "expiry": "2027-03-31",
+    "renewal": "new_review_new_digest_and_narrower_or_equal_scope"
+  },
+  "residual_risks": [
+    {"id": "HUI-RISK-01", "severity": "P0", "owner": "HUI-H", "status": "open", "mitigation": "exact digest-bound compatibility exceptions and parity-before-removal gates", "expiry": "2027-03-31", "reopening_condition": "a compatibility consumer changes, widens, or survives beyond expiry without review"},
+    {"id": "HUI-RISK-02", "severity": "P0", "owner": "HUI-B", "status": "blocked", "mitigation": "pin and qualify Dstar, Datastar, ShadcnUI, Phoenix component dependencies, licenses, and local assets", "expiry": "HUI-B4", "reopening_condition": "dependency acquisition begins without the complete source/risk/consumer evidence"},
+    {"id": "HUI-RISK-03", "severity": "P0", "owner": "HUI-C", "status": "contract_only", "mitigation": "implement named account/session/authority mapping with exact controller/API parity", "expiry": "HUI-C1", "reopening_condition": "a target page or stream launches using shared operator or browser-derived authority"},
+    {"id": "HUI-RISK-04", "severity": "P0", "owner": "HUI-D", "status": "contract_only", "mitigation": "qualify closed signals, patches, authorized SSE, proxy, revocation, backpressure, and reconnect", "expiry": "HUI-D4", "reopening_condition": "Datastar delivery gains production credit without real browser/proxy/failure evidence"},
+    {"id": "HUI-RISK-05", "severity": "P0", "owner": "HUI-E", "status": "contract_only", "mitigation": "implement typed command adapter, previews, exact authority, optimistic revisions, atomic receipts, approval, and recovery", "expiry": "HUI-E6", "reopening_condition": "a target command or approval path bypasses the accepted gateway/state machine"},
+    {"id": "HUI-RISK-06", "severity": "P1", "owner": "HUI-F", "status": "contract_only", "mitigation": "implement closed reviewed lenses with bounded datasets and accessible alternatives", "expiry": "HUI-F5", "reopening_condition": "a raw/unrestricted graph browser or inaccessible visualization enters the product"},
+    {"id": "HUI-RISK-07", "severity": "P0", "owner": "HUI-G", "status": "unqualified", "mitigation": "run identity/security/accessibility/usability/load/fault/install/upgrade/rollback/real-adapter release matrices", "expiry": "HUI-G5", "reopening_condition": "production readiness is claimed without exact merged-candidate evidence and required real seams"},
+    {"id": "HUI-RISK-08", "severity": "P1", "owner": "HUI-H", "status": "deferred_decision", "mitigation": "remove, replace, or separately approve LiveDashboard and prove the final runtime consumer graph", "expiry": "HUI-H2", "reopening_condition": "the dashboard exception widens or a zero-LiveView claim precedes the decision"},
+    {"id": "HUI-RISK-09", "severity": "P1", "owner": "HUI-A", "status": "tooling_limit", "mitigation": "maintain deterministic architecture fixtures, exception digests, plan graph validation, and clean-checkout CI", "expiry": "continuous", "reopening_condition": "a guardrail becomes bypassable, stale, non-deterministic, or detached from contributor guidance"},
+    {"id": "HUI-RISK-10", "severity": "P1", "owner": "HUI-A,HUI-B", "status": "merge_pending", "mitigation": "keep Milestone B unauthorized until this receipt pins the clean-checkout merged candidate", "expiry": "HUI1", "reopening_condition": "Milestone B begins from merge-pending, mixed, unmerged, or unpinned HUI-A4 evidence"}
+  ],
+  "milestone_b_blockers": [
+    {"id": "HUI-BLOCK-B01", "owner": "HUI-B1", "required_evidence": "exact Dstar source, release, lock/archive identity, license, API surface, and risk record", "status": "blocking", "reopening_condition": "Dstar is fetched, added, or used before this evidence is reviewed"},
+    {"id": "HUI-BLOCK-B02", "owner": "HUI-B1", "required_evidence": "exact Datastar client source commit, version, bundle filename, digest, license, security mode, and local-hosting decision", "status": "blocking", "reopening_condition": "a mutable, remote, unlicensed, or unidentified Datastar asset is introduced"},
+    {"id": "HUI-BLOCK-B03", "owner": "HUI-B1", "required_evidence": "exact ShadcnUI source namespace, provenance, license, supported component usage, generated source identity, and update policy", "status": "blocking", "reopening_condition": "ShadcnUI source enters the facade before its provenance and supported-use record"},
+    {"id": "HUI-BLOCK-B04", "owner": "HUI-B2", "required_evidence": "clean dependency resolution proving Phoenix.Component/HEEx support without an unintended LiveView product runtime consumer", "status": "blocking", "reopening_condition": "dependency resolution is ambiguous, conflicts, or hides a runtime consumer"},
+    {"id": "HUI-BLOCK-B05", "owner": "HUI-B2", "required_evidence": "reproducible local app.js/app.css build with lock, asset digests, CSP, no remote assets, and no inline scripts", "status": "blocking", "reopening_condition": "asset identity, build reproducibility, CSP mode, or local-only delivery is unproved"},
+    {"id": "HUI-BLOCK-B06", "owner": "HUI-B3", "required_evidence": "isolated controller/HEEx consumer proving native form and enhanced Datastar request/fragment/SSE behavior", "status": "blocking", "reopening_condition": "qualification relies on a fake, unit-only, or LiveView consumer"},
+    {"id": "HUI-BLOCK-B07", "owner": "HUI-B3", "required_evidence": "real browser evidence for CSRF/Origin, CSP, injection, stable roots, focus, keyboard, accessibility, disconnect, reconnect, and native fallback", "status": "blocking", "reopening_condition": "consumer proof omits security, failure, accessibility, or native behavior"},
+    {"id": "HUI-BLOCK-B08", "owner": "HUI-B4", "required_evidence": "architecture/consumer/license/asset allowlists, full qualification dossier, precommit, and clean-checkout merged-candidate receipt", "status": "blocking", "reopening_condition": "Milestone B closes without exact consumer/asset evidence and a pinned merged candidate"}
+  ]
+}
