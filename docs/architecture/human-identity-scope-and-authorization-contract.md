@@ -127,6 +127,15 @@ The same builder serves full pages, fragments, streams, APIs, commands, and
 exports. It MUST NOT accept actor, role, tenant, project, graph, capability,
 delegation, or authority fields from browser parameters or signals.
 
+The closed builder and operation matrix are pinned in
+[Hypermedia UI operation authorization matrix](./hypermedia-ui-operation-authorization-matrix.md)
+and its machine-readable companion. The builder accepts only verified session
+identity, server-resolved resource identity, current policy/graph state, and
+server-observed request context. It returns a transient scope, product
+identity, exact `AuthorityContext`, obligations, decision reason, policy
+revision, audit correlation, and concealment/redaction posture. It never
+returns a durable grant or browser-storable permission snapshot.
+
 ## Role Vocabulary And Capability Mapping
 
 The initial role vocabulary is organizational metadata:
@@ -146,10 +155,49 @@ resource scope, action, classification, environment, and obligations. A role
 with no exact current grant yields no access. Exactly matching grants and graph
 ownership checks remain authoritative.
 
+Roles are navigation and explanation labels only. Combining role labels never
+unions capabilities. Observer, project developer, project maintainer,
+independent verifier, factory operator, security auditor, factory
+administrator, knowledge steward, and cost observer each have an owned
+navigation vocabulary in the matrix, but every `exact_grants` set is empty by
+design. An operation succeeds only through the current graph capability,
+membership, delegation, and resource decision.
+
 Complete-memory content, security audit detail, identity/policy
 administration, provider/credential operations, source publication/application,
 verification, decision, incident control, backup/restore, export, and erasure
 use distinct capabilities.
+
+## Delegation Contract
+
+A human delegation records an immutable delegation reference, issuer subject,
+delegate subject, exact resource set, actions, graph families, environment,
+valid-from/to interval, policy revision, delegation revision, attenuation
+parent when present, and revocation generation. It is non-transitive by
+default. A delegate cannot widen resources, actions, graph families,
+environment, validity, assurance, classification, or obligations; attenuation
+can only narrow them.
+
+Delegation never follows a role label, project navigation, browser state, or
+agent relationship. Agent execution continues to require the distinct
+`delegated_agent_iri` and `delegation_iri` pair already enforced by
+`JidoCode.Knowledge.Authorization`. Expired, revoked, ambiguous, multiply
+matching, or revision-stale delegation denies the operation.
+
+## Deny-By-Default Decision
+
+Every operation intersects the authenticated subject/session, account status,
+current membership, exact graph grant, optional exact delegation, assurance
+and authentication age, resource containment, classification, environment,
+lifecycle, policy revision, graph revisions, incident posture, and fence when
+the operation is fenced. Missing or non-unique evidence denies.
+
+Decision output uses only the closed outcomes `allowed`,
+`concealed_not_found`, `redacted`, `denied`, `unavailable`, `revoked`, and
+`step_up_required`. Unknown and unauthorized concealed resources share an
+exterior class. Redaction is permitted only after the enclosing resource is
+authorized. Safe reasons identify policy categories, not protected resource,
+grant, role, graph, or delegation facts.
 
 ## Authentication Assurance And Step-Up
 

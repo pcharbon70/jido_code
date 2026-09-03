@@ -1,0 +1,382 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A2",
+  "baseline_commit": "133b66187828668b61a65b4d2ab5a9033fe56a15",
+  "query_protocol": "2.11.0",
+  "command_protocol": "2.11.0",
+  "authority_builder": {
+    "trusted_inputs": [
+      "verified_session_identity",
+      "server_resolved_resource_identity",
+      "current_account_status",
+      "current_memberships",
+      "current_exact_grants",
+      "current_exact_delegation",
+      "current_assurance_and_authentication_age",
+      "server_observed_environment",
+      "resource_classification",
+      "resource_lifecycle",
+      "current_policy_revision",
+      "current_graph_revisions",
+      "current_incident_posture",
+      "current_fence_when_applicable"
+    ],
+    "untrusted_browser_fields": [
+      "actor",
+      "role",
+      "tenant",
+      "project",
+      "graph",
+      "capability",
+      "delegation",
+      "assurance",
+      "policy_revision",
+      "graph_revision",
+      "fence",
+      "classification",
+      "environment",
+      "incident_posture"
+    ],
+    "outputs": [
+      "current_scope",
+      "product_identity",
+      "authority_context",
+      "obligations",
+      "safe_decision_reason",
+      "policy_revision",
+      "audit_correlation_ref",
+      "concealment_posture",
+      "redaction_posture"
+    ],
+    "entry_points": [
+      "controller",
+      "page",
+      "fragment",
+      "query",
+      "field",
+      "search",
+      "detail",
+      "stream",
+      "patch",
+      "api",
+      "command",
+      "approval",
+      "incident",
+      "export",
+      "download"
+    ]
+  },
+  "mandatory_binding_dimensions": [
+    "subject_and_session",
+    "current_account_status",
+    "tenant_and_project_membership",
+    "exact_graph_grant",
+    "exact_optional_delegation",
+    "assurance_and_authentication_age",
+    "resource_containment",
+    "classification",
+    "environment",
+    "lifecycle",
+    "policy_revision",
+    "graph_revisions",
+    "incident_posture",
+    "fence_when_applicable"
+  ],
+  "roles": [
+    {"id": "observer", "navigation": ["project_summary", "authorized_status"], "exact_grants": []},
+    {"id": "project_developer", "navigation": ["workspace", "attempt", "source", "wiki"], "exact_grants": []},
+    {"id": "project_maintainer", "navigation": ["repository_policy", "lifecycle", "review"], "exact_grants": []},
+    {"id": "independent_verifier", "navigation": ["evidence", "verification"], "exact_grants": []},
+    {"id": "factory_operator", "navigation": ["runtime", "queue", "lease", "incident"], "exact_grants": []},
+    {"id": "security_auditor", "navigation": ["security_audit"], "exact_grants": []},
+    {"id": "factory_administrator", "navigation": ["identity_admin", "policy_admin"], "exact_grants": []},
+    {"id": "knowledge_steward", "navigation": ["wiki_quality", "memory_quality", "citation", "retention"], "exact_grants": []},
+    {"id": "cost_observer", "navigation": ["cost", "capacity"], "exact_grants": []}
+  ],
+  "delegation": {
+    "required_fields": [
+      "delegation_ref",
+      "issuer_subject_ref",
+      "delegate_subject_ref",
+      "resource_refs",
+      "actions",
+      "graph_families",
+      "environment",
+      "valid_from",
+      "valid_to",
+      "policy_revision",
+      "delegation_revision",
+      "attenuation_parent_ref",
+      "revocation_generation"
+    ],
+    "transitive_by_default": false,
+    "attenuation": "may_only_narrow_resources_actions_graphs_environment_validity_assurance_classification_and_obligations",
+    "deny_when": ["expired", "revoked", "ambiguous", "multiple_matches", "revision_stale", "role_inferred", "browser_supplied"]
+  },
+  "outcomes": [
+    {"id": "allowed", "safe_exterior": "minimum_authorized_projection_only"},
+    {"id": "concealed_not_found", "safe_exterior": "unknown_and_unauthorized_share_status_body_and_timing_class"},
+    {"id": "redacted", "safe_exterior": "authorized_resource_remains_and_protected_field_is_omitted_before_render"},
+    {"id": "denied", "safe_exterior": "known_non_concealed_operation_refused_without_protected_policy_detail"},
+    {"id": "unavailable", "safe_exterior": "capability_or_adapter_not_composed_without_target_inference"},
+    {"id": "revoked", "safe_exterior": "terminal_protected_delivery_and_no_privileged_reconnect"},
+    {"id": "step_up_required", "safe_exterior": "accessible_action_bound_challenge_without_target_existence_disclosure"}
+  ],
+  "reauthorization_points": [
+    "before_response_start",
+    "before_query_execution",
+    "before_field_shaping",
+    "before_stream_subscription",
+    "before_each_protected_patch",
+    "before_command_construction",
+    "inside_command_gateway",
+    "before_approval_commit",
+    "before_export_creation",
+    "before_each_export_or_download_retrieval"
+  ],
+  "operations": [
+    {
+      "id": "project_home_page",
+      "surface": "page",
+      "resource": "conceptual_repository",
+      "role_explanations": ["observer", "project_developer", "project_maintainer"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "observation", "query": {"name": "repository_description", "version": "2.11.0"}},
+      "additional_bindings": ["repository_scope"],
+      "reauthorize_at": ["before_response_start", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "agent_catalog_page",
+      "surface": "page",
+      "resource": "factory_scope",
+      "role_explanations": ["project_developer", "project_maintainer", "factory_operator"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "harness", "query": {"name": "selectable_agent_offerings_by_scope", "version": "2.11.0"}},
+      "additional_bindings": ["factory_scope", "repository_scope", "rollout_stage"],
+      "reauthorize_at": ["before_response_start", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "attempt_page",
+      "surface": "page",
+      "resource": "attempt",
+      "role_explanations": ["project_developer", "project_maintainer", "independent_verifier", "factory_operator"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "execution", "query": {"name": "managed_coding_attempt", "version": "2.11.0"}},
+      "additional_bindings": ["attempt_containment", "interaction_session_containment"],
+      "reauthorize_at": ["before_response_start", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "wiki_page",
+      "surface": "page",
+      "resource": "wiki_edition",
+      "role_explanations": ["observer", "project_developer", "project_maintainer", "knowledge_steward"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "observation", "query": {"name": "repository_wiki_current_edition", "version": "2.11.0"}},
+      "additional_bindings": ["repository_scope", "edition_scope"],
+      "reauthorize_at": ["before_response_start", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "repository_summary_fragment",
+      "surface": "fragment",
+      "resource": "conceptual_repository",
+      "role_explanations": ["observer", "project_developer", "project_maintainer"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "observation", "query": {"name": "repository_description", "version": "2.11.0"}},
+      "additional_bindings": ["repository_scope"],
+      "reauthorize_at": ["before_response_start", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "attempt_timeline_fragment",
+      "surface": "fragment",
+      "resource": "attempt",
+      "role_explanations": ["project_developer", "project_maintainer", "independent_verifier", "factory_operator"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "execution", "query": {"name": "attempt_timeline", "version": "2.11.0"}},
+      "additional_bindings": ["attempt_containment"],
+      "reauthorize_at": ["before_response_start", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "repository_search",
+      "surface": "search",
+      "resource": "authorized_repository_cohort",
+      "role_explanations": ["observer", "project_developer", "project_maintainer"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "observation", "query": {"name": "factory_repository_cohort", "version": "2.11.0"}},
+      "additional_bindings": ["authorized_cohort_only", "bounded_search"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "evidence_query",
+      "surface": "query",
+      "resource": "attempt_evidence",
+      "role_explanations": ["independent_verifier", "project_maintainer"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "evidence", "query": {"name": "evidence_by_attempt", "version": "2.11.0"}},
+      "additional_bindings": ["attempt_containment", "evidence_classification"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "policy_query",
+      "surface": "query",
+      "resource": "factory_policy",
+      "role_explanations": ["project_maintainer", "factory_administrator", "security_auditor"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "control", "query": {"name": "policy_description", "version": "2.11.0"}},
+      "additional_bindings": ["policy_scope", "policy_revision"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "source_field",
+      "surface": "field",
+      "resource": "source_revision",
+      "role_explanations": ["project_developer", "project_maintainer", "independent_verifier"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "source", "query": {"name": "source_modules", "version": "2.11.0"}},
+      "additional_bindings": ["source_revision", "source_classification"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "security_audit_field",
+      "surface": "field",
+      "resource": "audit_event",
+      "role_explanations": ["security_auditor"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "security", "query": {"name": "audit_reference", "version": "2.11.0"}},
+      "additional_bindings": ["audit_scope", "audit_classification"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "cost_field",
+      "surface": "field",
+      "resource": "wiki_cost_record",
+      "role_explanations": ["cost_observer", "project_maintainer"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "observation", "query": {"name": "repository_wiki_cost_records", "version": "2.11.0"}},
+      "additional_bindings": ["repository_scope", "bounded_aggregate", "no_global_count"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "wiki_detail",
+      "surface": "detail",
+      "resource": "wiki_page",
+      "role_explanations": ["observer", "project_developer", "project_maintainer", "knowledge_steward"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "observation", "query": {"name": "repository_wiki_page_detail", "version": "2.11.0"}},
+      "additional_bindings": ["repository_scope", "edition_scope", "page_scope"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "graph_health_detail",
+      "surface": "detail",
+      "resource": "graph_family",
+      "role_explanations": ["factory_operator", "security_auditor", "factory_administrator"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "administrative", "query": {"name": "graph_health", "version": "2.11.0"}},
+      "additional_bindings": ["graph_family", "graph_metadata_classification"],
+      "reauthorize_at": ["before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "attempt_stream",
+      "surface": "stream",
+      "resource": "attempt",
+      "role_explanations": ["project_developer", "project_maintainer", "independent_verifier", "factory_operator"],
+      "binding": {"status": "current_registry_no_product_stream_adapter", "capability": "execution", "query": {"name": "attempt_status", "version": "2.11.0"}},
+      "additional_bindings": ["attempt_containment", "stream_generation", "hard_expiry"],
+      "reauthorize_at": ["before_stream_subscription", "before_each_protected_patch"]
+    },
+    {
+      "id": "wiki_stream",
+      "surface": "stream",
+      "resource": "wiki_edition",
+      "role_explanations": ["observer", "project_developer", "project_maintainer", "knowledge_steward"],
+      "binding": {"status": "current_registry_no_product_stream_adapter", "capability": "observation", "query": {"name": "repository_wiki_freshness", "version": "2.11.0"}},
+      "additional_bindings": ["repository_scope", "edition_scope", "stream_generation", "hard_expiry"],
+      "reauthorize_at": ["before_stream_subscription", "before_each_protected_patch"]
+    },
+    {
+      "id": "attempt_patch",
+      "surface": "patch",
+      "resource": "attempt",
+      "role_explanations": ["project_developer", "project_maintainer", "independent_verifier", "factory_operator"],
+      "binding": {"status": "current_registry_no_product_stream_adapter", "capability": "execution", "query": {"name": "managed_coding_attempt", "version": "2.11.0"}},
+      "additional_bindings": ["attempt_containment", "stream_generation", "projection_revision"],
+      "reauthorize_at": ["before_each_protected_patch", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "policy_patch",
+      "surface": "patch",
+      "resource": "factory_policy",
+      "role_explanations": ["factory_administrator", "security_auditor"],
+      "binding": {"status": "current_registry_no_product_stream_adapter", "capability": "control", "query": {"name": "policy_description", "version": "2.11.0"}},
+      "additional_bindings": ["policy_scope", "stream_generation", "policy_revision"],
+      "reauthorize_at": ["before_each_protected_patch", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "request_approval_command",
+      "surface": "command",
+      "resource": "canonical_action",
+      "role_explanations": ["project_developer", "project_maintainer", "independent_verifier", "factory_operator"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "harness", "command": {"name": "CreateApprovalRequest", "version": "2.11.0"}},
+      "additional_bindings": ["canonical_action_digest", "expected_revisions", "fence_when_applicable"],
+      "reauthorize_at": ["before_command_construction", "inside_command_gateway"]
+    },
+    {
+      "id": "cancel_attempt_command",
+      "surface": "command",
+      "resource": "attempt",
+      "role_explanations": ["project_developer", "project_maintainer", "factory_operator"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "execution", "command": {"name": "RequestExecutionCancellation", "version": "2.11.0"}},
+      "additional_bindings": ["attempt_containment", "expected_attempt_revision", "current_fence"],
+      "reauthorize_at": ["before_command_construction", "inside_command_gateway"]
+    },
+    {
+      "id": "wiki_review_command",
+      "surface": "command",
+      "resource": "wiki_edition",
+      "role_explanations": ["project_maintainer", "knowledge_steward"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "control", "command": {"name": "RecordWikiReviewDecision", "version": "2.11.0"}},
+      "additional_bindings": ["repository_scope", "edition_scope", "expected_edition_revision"],
+      "reauthorize_at": ["before_command_construction", "inside_command_gateway"]
+    },
+    {
+      "id": "policy_transition_command",
+      "surface": "command",
+      "resource": "factory_policy",
+      "role_explanations": ["factory_administrator"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "control", "command": {"name": "TransitionPolicy", "version": "2.11.0"}},
+      "additional_bindings": ["action_bound_step_up", "canonical_action_digest", "expected_policy_revision"],
+      "reauthorize_at": ["before_command_construction", "inside_command_gateway"]
+    },
+    {
+      "id": "memory_export_creation",
+      "surface": "export",
+      "resource": "memory_dataset",
+      "role_explanations": ["knowledge_steward", "security_auditor"],
+      "binding": {"status": "current_registry_no_named_human_adapter", "capability": "dataset_exporter", "command": {"name": "AuthorizeMemoryDatasetExport", "version": "2.11.0"}},
+      "additional_bindings": ["dataset_scope", "action_bound_step_up", "canonical_action_digest", "export_expiry"],
+      "reauthorize_at": ["before_export_creation", "before_command_construction", "inside_command_gateway"]
+    },
+    {
+      "id": "export_download_retrieval",
+      "surface": "download",
+      "resource": "export_artifact",
+      "role_explanations": ["knowledge_steward", "security_auditor", "cost_observer"],
+      "binding": {"status": "future_contract_only", "required_capability": "dataset_exporter", "owner": "Milestones E, F, and G", "unavailable_reason": "no versioned browser retrieval gateway"},
+      "additional_bindings": ["export_subject", "export_scope", "export_generation", "export_expiry", "single_use_when_policy_requires"],
+      "reauthorize_at": ["before_each_export_or_download_retrieval"]
+    },
+    {
+      "id": "approval_commit",
+      "surface": "approval",
+      "resource": "canonical_action",
+      "role_explanations": ["project_maintainer", "independent_verifier", "factory_operator", "factory_administrator"],
+      "binding": {"status": "future_contract_only", "required_capability": "harness", "owner": "Milestones E and G", "unavailable_reason": "no versioned named-human approval commit command"},
+      "additional_bindings": ["eligible_approver", "distinct_maker_checker", "action_bound_step_up", "canonical_action_digest", "approval_expiry", "expected_revisions", "fence_when_applicable"],
+      "reauthorize_at": ["before_approval_commit", "inside_command_gateway"]
+    },
+    {
+      "id": "incident_read",
+      "surface": "incident",
+      "resource": "incident",
+      "role_explanations": ["factory_operator", "security_auditor"],
+      "binding": {"status": "current_registry_no_incident_product_adapter", "capability": "evidence", "query": {"name": "incident_linkage", "version": "2.11.0"}},
+      "additional_bindings": ["incident_scope", "least_disclosure", "no_unrelated_project_content"],
+      "reauthorize_at": ["before_response_start", "before_query_execution", "before_field_shaping"]
+    },
+    {
+      "id": "incident_control",
+      "surface": "incident",
+      "resource": "incident",
+      "role_explanations": ["factory_operator", "security_auditor", "factory_administrator"],
+      "binding": {"status": "future_contract_only", "required_capability": "security", "owner": "Milestone G", "unavailable_reason": "no versioned incident semantic command"},
+      "additional_bindings": ["incident_scope", "action_bound_step_up", "canonical_action_digest", "two_person_when_policy_requires", "expected_incident_revision", "partial_outcome_receipt"],
+      "reauthorize_at": ["before_command_construction", "inside_command_gateway"]
+    }
+  ]
+}

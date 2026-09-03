@@ -34,30 +34,30 @@ Back to plan: [README](./README.md)
       - [x] 2.1.1.3 Subtask - Define session fixation prevention, rotation, hard/idle expiry, cookie/security attributes, logout-all, account disable, and generation-based revocation.
       - [x] 2.1.1.4 Subtask - Define bootstrap, break-glass, recovery, and identity-provider outage behavior without restoring a shared omnipotent operator.
 
-  - [ ] 2.2 Section - Freeze scope, role, delegation, and capability semantics.
+  - [x] 2.2 Section - Freeze scope, role, delegation, and capability semantics.
 
     This section makes roles understandable without allowing them to replace
     exact graph capabilities or cross project and tenant boundaries.
 
-    - [ ] 2.2.1 Task {#huia-p02-scope} [repo: jido_code] [after: {#huia-p02-identity}] - Ratify the trusted authority-builder inputs and outputs.
+    - [x] 2.2.1 Task {#huia-p02-scope} [repo: jido_code] [after: {#huia-p02-identity}] - Ratify the trusted authority-builder inputs and outputs.
 
       This task defines the single server-owned mapping from authenticated
       identity and requested resource to exact current authority.
 
-      - [ ] 2.2.1.1 Subtask - Define tenant, repository/project membership, role, exact graph/action grants, delegation, clearance, environment, lifecycle, fence, and assurance inputs.
-      - [ ] 2.2.1.2 Subtask - Define observer, developer, maintainer, verifier, operator, security auditor, administrator, knowledge steward, and cost observer as navigation/explanation roles only.
-      - [ ] 2.2.1.3 Subtask - Define delegation issuer, subject, resources/actions, graph families, environment, validity, revision, attenuation, revocation, and non-transitive defaults.
-      - [ ] 2.2.1.4 Subtask - Define deny-by-default intersection, concealment, field redaction, decision reason, policy revision, audit correlation, and safe error output.
+      - [x] 2.2.1.1 Subtask - Define tenant, repository/project membership, role, exact graph/action grants, delegation, clearance, environment, lifecycle, fence, and assurance inputs.
+      - [x] 2.2.1.2 Subtask - Define observer, developer, maintainer, verifier, operator, security auditor, administrator, knowledge steward, and cost observer as navigation/explanation roles only.
+      - [x] 2.2.1.3 Subtask - Define delegation issuer, subject, resources/actions, graph families, environment, validity, revision, attenuation, revocation, and non-transitive defaults.
+      - [x] 2.2.1.4 Subtask - Define deny-by-default intersection, concealment, field redaction, decision reason, policy revision, audit correlation, and safe error output.
 
-    - [ ] 2.2.2 Task {#huia-p02-authz-matrix} [repo: jido_code] [after: {#huia-p02-scope}] - Publish the route, field, stream, command, and export authorization matrix.
+    - [x] 2.2.2 Task {#huia-p02-authz-matrix} [repo: jido_code] [after: {#huia-p02-scope}] - Publish the route, field, stream, command, and export authorization matrix.
 
       This task makes every product operation independently reviewable and
       forbids navigation visibility or browser state from acting as a grant.
 
-      - [ ] 2.2.2.1 Subtask - Enumerate page/fragment/query/field/search/detail/stream/patch/export and command/approval/incident actions by resource and role explanation.
-      - [ ] 2.2.2.2 Subtask - Bind every operation to exact grants, current membership/delegation, assurance, resource scope, classification, environment, lifecycle, revision, and fence where applicable.
-      - [ ] 2.2.2.3 Subtask - Define concealed-not-found, redacted, denied, unavailable, revoked, and step-up-required outcomes without cross-scope inference.
-      - [ ] 2.2.2.4 Subtask - Define reauthorization points before response start, query execution, field shaping, each patch, command admission, approval commit, and export retrieval.
+      - [x] 2.2.2.1 Subtask - Enumerate page/fragment/query/field/search/detail/stream/patch/export and command/approval/incident actions by resource and role explanation.
+      - [x] 2.2.2.2 Subtask - Bind every operation to exact grants, current membership/delegation, assurance, resource scope, classification, environment, lifecycle, revision, and fence where applicable.
+      - [x] 2.2.2.3 Subtask - Define concealed-not-found, redacted, denied, unavailable, revoked, and step-up-required outcomes without cross-scope inference.
+      - [x] 2.2.2.4 Subtask - Define reauthorization points before response start, query execution, field shaping, each patch, command admission, approval commit, and export retrieval.
 
   - [ ] 2.3 Section - Define approval separation and live revocation.
 
