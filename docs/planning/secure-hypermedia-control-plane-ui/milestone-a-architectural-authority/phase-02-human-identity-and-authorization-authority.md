@@ -19,20 +19,20 @@ Back to plan: [README](./README.md)
   ordinary requests, fragments, streams, commands, approvals, exports, and
   revocation.
 
-  - [ ] 2.1 Section - Accept the identity, assurance, and session contract.
+  - [x] 2.1 Section - Accept the identity, assurance, and session contract.
 
     This section defines who a human principal is and how authentication state
     is established, renewed, stepped up, revoked, and audited.
 
-    - [ ] 2.1.1 Task {#huia-p02-identity} [repo: jido_code] [after: {#huia-p01-phase-receipt}] - Ratify named account and authentication assurance semantics.
+    - [x] 2.1.1 Task {#huia-p02-identity} [repo: jido_code] [after: {#huia-p01-phase-receipt}] - Ratify named account and authentication assurance semantics.
 
       This task replaces shared-operator assumptions with accountable human
       identity while keeping service and agent principals distinct.
 
-      - [ ] 2.1.1.1 Subtask - Define human account, authenticator, session, assurance level, authentication age, recovery, disablement, and audit identities with immutable subject references.
-      - [ ] 2.1.1.2 Subtask - Define phishing-resistant and step-up requirements by action risk, environment, data classification, and incident posture.
-      - [ ] 2.1.1.3 Subtask - Define session fixation prevention, rotation, hard/idle expiry, cookie/security attributes, logout-all, account disable, and generation-based revocation.
-      - [ ] 2.1.1.4 Subtask - Define bootstrap, break-glass, recovery, and identity-provider outage behavior without restoring a shared omnipotent operator.
+      - [x] 2.1.1.1 Subtask - Define human account, authenticator, session, assurance level, authentication age, recovery, disablement, and audit identities with immutable subject references.
+      - [x] 2.1.1.2 Subtask - Define phishing-resistant and step-up requirements by action risk, environment, data classification, and incident posture.
+      - [x] 2.1.1.3 Subtask - Define session fixation prevention, rotation, hard/idle expiry, cookie/security attributes, logout-all, account disable, and generation-based revocation.
+      - [x] 2.1.1.4 Subtask - Define bootstrap, break-glass, recovery, and identity-provider outage behavior without restoring a shared omnipotent operator.
 
   - [ ] 2.2 Section - Freeze scope, role, delegation, and capability semantics.
 

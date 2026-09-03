@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A2",
+  "baseline": {
+    "commit": "133b66187828668b61a65b4d2ab5a9033fe56a15",
+    "receipt": "docs/architecture/hypermedia-ui-milestone-a-phase-01-receipt.md",
+    "status": "accepted-at-merged-candidate"
+  },
+  "decision": {
+    "adr": "docs/adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md",
+    "contract": "docs/architecture/human-identity-scope-and-authorization-contract.md",
+    "status": "accepted_architecture_authority",
+    "runtime_status": "unavailable_until_later_gates",
+    "does_not_accept": [
+      "ADR 0008",
+      "a browser transport",
+      "named-account implementation",
+      "multi-user route admission",
+      "live revocation implementation",
+      "two-human approval implementation"
+    ]
+  },
+  "principal_classes": [
+    {
+      "id": "human",
+      "identity_field": "subject_ref",
+      "accountable": true,
+      "may_authenticate_browser": true,
+      "substitution": "none"
+    },
+    {
+      "id": "service",
+      "identity_field": "service_principal_ref",
+      "accountable": true,
+      "may_authenticate_browser": false,
+      "substitution": "none"
+    },
+    {
+      "id": "agent",
+      "identity_field": "agent_principal_ref",
+      "accountable": false,
+      "may_authenticate_browser": false,
+      "substitution": "requires a distinct accountable actor and exact delegation"
+    }
+  ],
+  "identity_records": [
+    {
+      "id": "human_account",
+      "immutable_reference": "subject_ref",
+      "required_fields": ["subject_ref", "status", "account_generation", "policy_revision"],
+      "prohibited_fields": ["credential", "graph_grants", "cached_roles", "authorization_result"]
+    },
+    {
+      "id": "authenticator",
+      "immutable_reference": "authenticator_ref",
+      "required_fields": ["authenticator_ref", "subject_ref", "kind", "phishing_resistant", "enrolled_at", "verified_at", "status", "revision"],
+      "prohibited_fields": ["reusable_secret", "private_key"]
+    },
+    {
+      "id": "browser_session",
+      "immutable_reference": "session_ref",
+      "required_fields": ["session_ref", "subject_ref", "issued_at", "last_seen_at", "last_authenticated_at", "assurance", "nonce", "session_generation", "account_generation", "policy_revision", "hard_expires_at", "idle_expires_at"],
+      "prohibited_fields": ["credential", "grant", "delegation", "cached_authorization"]
+    },
+    {
+      "id": "authentication_event",
+      "immutable_reference": "authentication_event_ref",
+      "required_fields": ["authentication_event_ref", "subject_ref", "method_class", "assurance", "outcome", "occurred_at", "correlation_ref", "policy_revision"],
+      "prohibited_fields": ["raw_assertion", "token", "credential", "recovery_answer"]
+    },
+    {
+      "id": "recovery_event",
+      "immutable_reference": "recovery_event_ref",
+      "required_fields": ["recovery_event_ref", "initiator_ref", "subject_ref", "method_class", "approval_refs", "outcome", "generation_before", "generation_after", "occurred_at"],
+      "prohibited_fields": ["recovery_secret", "hidden_evidence_content"]
+    },
+    {
+      "id": "audit_event",
+      "immutable_reference": "audit_event_ref",
+      "required_fields": ["audit_event_ref", "actor_ref", "action_ref", "object_ref", "outcome", "policy_revision", "receipt_ref", "occurred_at"],
+      "prohibited_fields": ["credential", "raw_token", "hidden_reasoning", "unnecessary_protected_content"]
+    }
+  ],
+  "assurance_levels": [
+    {
+      "id": "baseline",
+      "phishing_resistant": false,
+      "action_bound": false
+    },
+    {
+      "id": "phishing_resistant",
+      "phishing_resistant": true,
+      "action_bound": false
+    },
+    {
+      "id": "action_bound_step_up",
+      "phishing_resistant": true,
+      "action_bound": true
+    }
+  ],
+  "risk_rules": [
+    {
+      "id": "internal_read",
+      "actions": ["page", "fragment", "query", "field", "search", "detail"],
+      "classifications": ["public", "internal"],
+      "environments": ["development", "test", "production"],
+      "incident_posture": ["normal", "heightened"],
+      "minimum_assurance": "baseline",
+      "maximum_authentication_age_seconds": 43200
+    },
+    {
+      "id": "confidential_read_or_ordinary_command",
+      "actions": ["confidential_read", "source_inspect", "ordinary_command"],
+      "classifications": ["internal", "confidential"],
+      "environments": ["development", "test", "production"],
+      "incident_posture": ["normal", "heightened"],
+      "minimum_assurance": "phishing_resistant",
+      "maximum_authentication_age_seconds": 14400
+    },
+    {
+      "id": "high_risk_effect",
+      "actions": ["publish", "apply", "final_decision", "policy_admin", "identity_admin", "export", "restore", "high_risk_incident"],
+      "classifications": ["internal", "confidential", "secret_reference", "audit", "personal"],
+      "environments": ["development", "test", "production"],
+      "incident_posture": ["normal", "heightened", "active_severe"],
+      "minimum_assurance": "action_bound_step_up",
+      "maximum_authentication_age_seconds": 600
+    },
+    {
+      "id": "secret_or_severe_incident",
+      "actions": ["secret_reference_admin", "active_severe_incident_control"],
+      "classifications": ["secret_reference", "audit"],
+      "environments": ["development", "test", "production"],
+      "incident_posture": ["heightened", "active_severe"],
+      "minimum_assurance": "action_bound_step_up",
+      "maximum_authentication_age_seconds": 300
+    }
+  ],
+  "session_policy": {
+    "hard_lifetime_seconds": 43200,
+    "idle_lifetime_seconds": 1800,
+    "idle_warning_seconds": 300,
+    "sliding_beyond_hard_expiry": false,
+    "rotate_on": ["login", "recovery", "privilege_elevation", "authenticator_replacement", "step_up"],
+    "login_clears_anonymous_session": true,
+    "cookie": {
+      "secure": true,
+      "http_only": true,
+      "host_only": true,
+      "path": "/",
+      "same_site_minimum": "Lax",
+      "domain_attribute": false
+    },
+    "tls_required": true,
+    "logout": "revoke_current_session",
+    "logout_all": "increment_account_generation_and_revoke_all_sessions",
+    "account_disable": "increment_account_generation_and_revoke_all_sessions"
+  },
+  "exceptional_flows": [
+    {
+      "id": "bootstrap",
+      "fail_closed_rules": ["one_time_local_ceremony", "named_subject_only", "bootstrap_material_expires", "authenticator_enrollment_required", "no_shared_account"]
+    },
+    {
+      "id": "recovery",
+      "fail_closed_rules": ["independent_authenticated_path", "rotate_affected_authenticators", "increment_all_session_generations", "immutable_security_event", "no_knowledge_questions", "no_reusable_answers"]
+    },
+    {
+      "id": "break_glass",
+      "fail_closed_rules": ["named_subject", "time_bounded", "reason_bound", "distinct_policy_revision", "phishing_resistant_step_up", "no_unrelated_project_content", "cannot_self_check", "mandatory_review"]
+    },
+    {
+      "id": "identity_provider_outage",
+      "fail_closed_rules": ["deny_new_login", "deny_recovery", "deny_elevation", "deny_expired_session_renewal", "current_sessions_keep_only_exact_current_grants", "no_shared_operator_fallback"]
+    }
+  ],
+  "compatibility_operator": {
+    "status": "isolated_single_operator_only",
+    "may_enter_multi_user_routes": false,
+    "may_delegate_human_authority": false,
+    "may_satisfy_separation_of_duty": false,
+    "may_satisfy_recovery_or_break_glass": false,
+    "exit_gate": "named-account implementation and qualification in Milestones C and G"
+  },
+  "implementation_gates": [
+    {
+      "milestone": "C",
+      "evidence": "real named-account, authenticator, session, authority-builder, route, and audit adapters"
+    },
+    {
+      "milestone": "D",
+      "evidence": "stream admission, periodic and pre-patch reauthorization, expiry, and reconnect suppression"
+    },
+    {
+      "milestone": "E",
+      "evidence": "action-bound step-up, canonical approvals, two-human policy, and command receipts"
+    },
+    {
+      "milestone": "G",
+      "evidence": "independent security, browser, proxy, recovery, accessibility, and audit qualification"
+    }
+  ]
+}
