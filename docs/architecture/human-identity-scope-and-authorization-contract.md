@@ -1,7 +1,7 @@
 # Human Identity, Scope, And Authorization Contract
 
-- Status: Proposed under ADR 0009
-- Specification version: `0.1.0`
+- Status: Accepted architecture contract under ADR 0009; implementation and release gated
+- Specification version: `1.0.0`
 - Owners: JidoCode identity, security, product, and audit maintainers
 - Milestones: A, C, and G
 - Decision: [ADR 0009](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
@@ -13,6 +13,97 @@ authenticated named human into current Product scope and exact graph authority.
 It defines sessions, roles, memberships, delegations, step-up, approvals,
 revocation, concealment, and audit without making UI visibility an access
 control.
+
+The machine-readable identity and assurance companion is
+[`priv/architecture/hypermedia_ui/phase_a2_identity_and_assurance.json`](../../priv/architecture/hypermedia_ui/phase_a2_identity_and_assurance.json).
+It pins the exact identity fields, assurance classes, session limits,
+exceptional flows, audit fields, and deferred implementation gates accepted by
+HUI-A2.
+
+## Authority Status And Boundaries
+
+This contract is binding for all later hypermedia identity and authorization
+design. It creates no account store, authenticator, route, grant, delegation,
+stream, command, or release capability. Named-human operation remains
+unavailable until the corresponding Milestones C through G receipts prove the
+real adapters and product surfaces.
+
+The current configured operator remains an isolated single-operator
+compatibility profile. It is not a named-human account, cannot enter a
+multi-user production posture, cannot delegate human authority, and cannot
+satisfy maker/checker, independent-verifier, recovery, or break-glass
+separation.
+
+Human accounts, service principals, and agent principals are disjoint. They
+never share an identifier class or silently substitute for one another.
+
+## Canonical Identity Records
+
+| Record | Immutable identity | Required mutable state | Prohibited content |
+| --- | --- | --- | --- |
+| Human account | opaque `subject_ref` | status, tenant memberships, authenticator refs, account generation, policy revision | credentials, graph grants, role cache |
+| Authenticator | opaque `authenticator_ref` bound to one subject | kind, phishing resistance, enrolled/verified/revoked times, revision | reusable secret or private key |
+| Browser session | opaque `session_ref` bound to one subject | issued/last-seen/last-auth times, assurance, nonce, session/account generations, hard/idle expiry | credentials, grants, delegation, cached authorization |
+| Authentication event | immutable `authentication_event_ref` | safe method class, assurance, outcome, time, correlation, policy revision | raw assertion, token, credential, recovery answer |
+| Recovery event | immutable `recovery_event_ref` | initiator, subject, method class, approvals, outcome, generations, time | recovery secret, hidden evidence content |
+| Audit event | immutable `audit_event_ref` | safe actor/action/object/outcome/policy/receipt refs and time | credential, raw token, hidden reasoning, unnecessary protected content |
+
+Display names, email addresses, provider handles, and mutable account labels are
+presentation attributes. Only the opaque subject reference identifies the
+human principal in authority and audit records.
+
+## Assurance And Action Risk
+
+The accepted assurance vocabulary is `baseline`, `phishing_resistant`, and
+`action_bound_step_up`. A higher label is not inferred from an authenticator
+name: the trusted authentication adapter must supply a verified result under
+the current policy revision.
+
+| Risk class | Minimum assurance | Maximum authentication age | Additional rule |
+| --- | --- | ---: | --- |
+| Public or internal read | `baseline` | 12 hours | exact current resource grant still required |
+| Confidential read, source inspection, ordinary admitted command | `phishing_resistant` | 4 hours | classification and environment must permit the operation |
+| Publication/application, final decision, policy/identity administration, export, restore, high-risk incident action | `action_bound_step_up` | 10 minutes | bind the challenge to the canonical action digest; separation policy may require another principal |
+| Secret reference administration or active severe-incident control | `action_bound_step_up` | 5 minutes | phishing-resistant authenticator, explicit consequence, current incident posture |
+
+Production policy may shorten these maxima or require stronger assurance; it
+may not lengthen or weaken them without advancing this contract. Step-up
+failure, timeout, cancellation, downgrade, or target concealment commits no
+command and reveals no target existence.
+
+## Session Security Profile
+
+The default qualified browser-session profile has a 12-hour hard lifetime, a
+30-minute idle lifetime, a warning no later than five minutes before idle
+expiry, and no sliding extension beyond the hard expiry. Login, recovery,
+privilege elevation, authenticator replacement, and step-up rotate the session
+identifier and CSRF material. Successful login renews and clears any anonymous
+session before authenticated state is written.
+
+The cookie is Secure, HTTP-only, host-only, path `/`, and SameSite=Lax or
+stricter; it has no Domain attribute. TLS is mandatory. Session state contains
+only opaque identity, timestamps, nonce, assurance, and generation/revision
+values. Logout revokes the current session; logout-all and account disable
+increment the subject generation and terminally invalidate every session and
+protected reconnect.
+
+## Bootstrap, Recovery, Break-Glass, And Provider Outage
+
+- Bootstrap is a one-time, locally controlled ceremony that creates the first
+  named administrator subject and immediately expires its bootstrap material.
+  It cannot create a shared account or bypass authenticator enrollment.
+- Recovery requires an independently authenticated recovery path, rotates
+  affected authenticators and all session generations, and produces immutable
+  security/audit events. Knowledge questions and reusable recovery answers are
+  prohibited.
+- Break-glass creates a named, time-bounded, reason-bound emergency elevation
+  under a distinct policy revision. It requires phishing-resistant step-up,
+  cannot grant unrelated project content, cannot satisfy its own checker, and
+  must trigger review and explicit expiry.
+- Identity-provider outage denies new login, recovery, elevation, and expired
+  session renewal. A still-current session may perform only operations already
+  permitted by its exact grants and assurance. No shared operator fallback is
+  activated for multi-user routes.
 
 ## Identity And Session Model
 
@@ -36,6 +127,15 @@ The same builder serves full pages, fragments, streams, APIs, commands, and
 exports. It MUST NOT accept actor, role, tenant, project, graph, capability,
 delegation, or authority fields from browser parameters or signals.
 
+The closed builder and operation matrix are pinned in
+[Hypermedia UI operation authorization matrix](./hypermedia-ui-operation-authorization-matrix.md)
+and its machine-readable companion. The builder accepts only verified session
+identity, server-resolved resource identity, current policy/graph state, and
+server-observed request context. It returns a transient scope, product
+identity, exact `AuthorityContext`, obligations, decision reason, policy
+revision, audit correlation, and concealment/redaction posture. It never
+returns a durable grant or browser-storable permission snapshot.
+
 ## Role Vocabulary And Capability Mapping
 
 The initial role vocabulary is organizational metadata:
@@ -55,10 +155,49 @@ resource scope, action, classification, environment, and obligations. A role
 with no exact current grant yields no access. Exactly matching grants and graph
 ownership checks remain authoritative.
 
+Roles are navigation and explanation labels only. Combining role labels never
+unions capabilities. Observer, project developer, project maintainer,
+independent verifier, factory operator, security auditor, factory
+administrator, knowledge steward, and cost observer each have an owned
+navigation vocabulary in the matrix, but every `exact_grants` set is empty by
+design. An operation succeeds only through the current graph capability,
+membership, delegation, and resource decision.
+
 Complete-memory content, security audit detail, identity/policy
 administration, provider/credential operations, source publication/application,
 verification, decision, incident control, backup/restore, export, and erasure
 use distinct capabilities.
+
+## Delegation Contract
+
+A human delegation records an immutable delegation reference, issuer subject,
+delegate subject, exact resource set, actions, graph families, environment,
+valid-from/to interval, policy revision, delegation revision, attenuation
+parent when present, and revocation generation. It is non-transitive by
+default. A delegate cannot widen resources, actions, graph families,
+environment, validity, assurance, classification, or obligations; attenuation
+can only narrow them.
+
+Delegation never follows a role label, project navigation, browser state, or
+agent relationship. Agent execution continues to require the distinct
+`delegated_agent_iri` and `delegation_iri` pair already enforced by
+`JidoCode.Knowledge.Authorization`. Expired, revoked, ambiguous, multiply
+matching, or revision-stale delegation denies the operation.
+
+## Deny-By-Default Decision
+
+Every operation intersects the authenticated subject/session, account status,
+current membership, exact graph grant, optional exact delegation, assurance
+and authentication age, resource containment, classification, environment,
+lifecycle, policy revision, graph revisions, incident posture, and fence when
+the operation is fenced. Missing or non-unique evidence denies.
+
+Decision output uses only the closed outcomes `allowed`,
+`concealed_not_found`, `redacted`, `denied`, `unavailable`, `revoked`, and
+`step_up_required`. Unknown and unauthorized concealed resources share an
+exterior class. Redaction is permitted only after the enclosing resource is
+authorized. Safe reasons identify policy categories, not protected resource,
+grant, role, graph, or delegation facts.
 
 ## Authentication Assurance And Step-Up
 
@@ -97,6 +236,14 @@ Revocation stops future delivery and best-effort replaces protected fragments
 for connected clients. The server does not claim it can erase bytes already
 delivered to an offline or malicious browser.
 
+The exact revocation dimensions, event fields, delivery states, terminal
+client actions, reconnect suppression, export invalidation, and audit outcomes
+are pinned in
+[Hypermedia UI approval and live revocation authority](./hypermedia-ui-approval-and-live-revocation-authority.md).
+Account, session, role, delegation, project membership, tenant membership,
+graph grant, and incident-policy revisions each invalidate an older protected
+decision independently.
+
 ## Canonical Approval And Separation Of Duty
 
 Approval records contain principal, assurance, action digest, target, scope,
@@ -107,6 +254,21 @@ cannot supply these fields.
 Policy can require two distinct principals for exact actions. The verifier,
 decider, publisher/applicator, security administrator, or incident reopen actor
 MUST satisfy explicit independence rules rather than a UI role label.
+
+The canonical action digest is SHA-256 over an Erlang deterministic term using
+the versioned `hui_action_v1` tuple pinned by the approval/revocation manifest.
+Only the server constructs this tuple. It binds action, target, scope,
+parameters/effect digest, expected revisions and fence, policy revision,
+environment, classification, expiry, and idempotency identity. A change to any
+bound input invalidates every collected approval.
+
+When separation is required, maker and checker are distinct current human
+subjects, every checker is independently eligible and sufficiently assured,
+and only unique current approvals count toward policy quorum. Self-approval is
+prohibited. Approval does not commit an effect: commit reauthorizes and uses a
+compare-and-set over the exact revisions, generations, lifecycle, digest, and
+fence. One conflicting transition wins; losers receive the same safe current
+winner receipt without effect redispatch.
 
 ## Concealment And Field Security
 
@@ -137,8 +299,16 @@ credentials, raw tokens, hidden reasoning, and unnecessary protected content.
 
 ## Acceptance And Reopening
 
-The contract closes only with named-account real-adapter evidence and zero
-cross-scope disclosure. It reopens if any browser field becomes authority; a
-role widens exact grants; session revocation leaves future delivery open; a
-high-risk action bypasses current assurance or separation; aggregates leak
-concealed data; or controller, SSE, API, and command identities diverge.
+The architecture contract is accepted by HUI-A2 only with its exact manifests,
+policy fixtures, deterministic state models, architecture checks, and pinned
+merged-candidate receipt. Named-human product use remains unavailable until
+real-adapter evidence and zero cross-scope disclosure close the later
+implementation and release gates.
+
+The contract reopens if any browser field becomes authority; an identity class
+is conflated; a role widens exact grants; a session lifetime or assurance age
+exceeds the accepted ceiling; bootstrap, recovery, break-glass, or provider
+outage restores shared authority; session revocation leaves future delivery
+open; a high-risk action bypasses current assurance or separation; aggregates
+leak concealed data; or controller, fragment, stream, API, export, and command
+identities diverge.

@@ -55,6 +55,30 @@ classification, and immutable receipts.
 | False delivery/read state | Derive labels only from durable message, command receipt, and runtime observations; no typing/read/seen inference |
 | Draft disclosure | Keep drafts tab-local, omit them from URLs/logs/telemetry, clear on identity/scope/session change, and reauthorize after step-up |
 
+## HUI-A2 Accepted Threat Trace
+
+The overall browser/runtime threat model remains release-gated under
+Milestone G. HUI-A2 accepts the following identity, authorization, approval,
+and revocation threats as binding architecture constraints. Their deterministic
+fixtures live in
+[`phase_a2_policy_scenarios.json`](../../priv/architecture/hypermedia_ui/phase_a2_policy_scenarios.json).
+
+| Threat ID | Binding HUI-A2 requirement |
+| --- | --- |
+| `HUI-T02-IDOR` | Cross-tenant, project, attempt, interaction-session, graph, and copied-reference probes conceal and commit no effect |
+| `HUI-T02-ROLE-UNION` | Role labels and browser role arrays never create or union exact grants |
+| `HUI-T02-DELEGATION` | Expired, revoked, ambiguous, stale, or transitive delegation fails closed |
+| `HUI-T02-ASSURANCE` | High-risk actions require current action-bound phishing-resistant step-up |
+| `HUI-T02-APPROVAL` | Self approval, duplicate checkers, ineligible principals, and stale digests never make quorum or commit |
+| `HUI-T02-CONCURRENCY` | Compare-and-set admits at most one conflicting winner and returns a safe current receipt to losers |
+| `HUI-T02-REVOCATION` | Changed account/session/role/delegation/project/tenant/graph/incident authority terminally stops future protected delivery |
+| `HUI-T02-EXPORT` | Export creation and every retrieval reauthorize; generation or scope change invalidates access |
+| `HUI-T02-CONCEALMENT` | Safe outcomes reveal no protected existence, count, label, role, grant, delegation, graph, or policy fact |
+
+These fixtures prove contract completeness, not adapter or browser readiness.
+Real identity, proxy, stream, accessibility, recovery, and audit qualification
+remain mandatory in Milestones C through G.
+
 ## Privacy And Classification
 
 The server classifies/redacts before HEEx rendering. CSS, collapsed content,

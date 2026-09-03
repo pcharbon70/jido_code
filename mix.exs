@@ -72,6 +72,9 @@ defmodule JidoCode.MixProject do
       {:jido_harness,
        git: "https://github.com/agentjido/jido_harness.git",
        ref: "e41fc1651282469f2db4219a48d9f7feef1b0dbc"},
+      # JidoHarness 2.0 constrains erlexec to the now-retired 2.3 line.
+      # Keep its process boundary on the supported 2.4 release.
+      {:erlexec, "~> 2.4", override: true},
       {:req_llm, "== 1.20.0"},
       {:triple_store,
        git: "https://github.com/pcharbon70/triple_store.git",

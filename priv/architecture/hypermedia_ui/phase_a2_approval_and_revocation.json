@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A2",
+  "baseline_commit": "133b66187828668b61a65b4d2ab5a9033fe56a15",
+  "current_backend_boundary": {
+    "request_module": "JidoCode.Factory.Approval.Request",
+    "gateway_module": "JidoCode.Factory.Approval.Gateway",
+    "accepted_capabilities": ["single_use_digest_binding", "invocation_before_effect", "current_state_revalidation", "separation_flag", "immutable_receipts"],
+    "not_claimed": ["named_human_accounts", "browser_quorum", "multi_human_policy", "live_client_revocation"]
+  },
+  "action_digest": {
+    "version": "hui_action_v1",
+    "algorithm": "sha256",
+    "encoding": "erlang_term_to_binary_deterministic",
+    "tuple_fields": [
+      "version",
+      "action",
+      "target_refs",
+      "scope_refs",
+      "parameters_digest",
+      "effect_digest",
+      "expected_revisions",
+      "fence",
+      "policy_revision",
+      "environment",
+      "classification",
+      "expires_at",
+      "idempotency_key_digest"
+    ],
+    "normalization": ["bounded_collections", "unique_collections", "sorted_collections", "utc_times", "microsecond_truncation"],
+    "constructed_by": "trusted_server_only",
+    "invalidate_on_any_field_change": true
+  },
+  "approval_request_fields": [
+    "approval_request_ref",
+    "maker_subject_ref",
+    "action_digest",
+    "target_refs",
+    "scope_refs",
+    "consequence",
+    "required_capability",
+    "policy_revision",
+    "expected_resource_revisions",
+    "fence_when_applicable",
+    "evidence_refs",
+    "required_assurance",
+    "required_unique_checker_count",
+    "expires_at",
+    "idempotency_key_digest"
+  ],
+  "checker_rules": {
+    "principal_class": "human",
+    "distinct_from_maker": true,
+    "distinct_from_other_counted_checkers": true,
+    "eligibility_source": "exact_current_capability_and_resource_decision",
+    "role_is_eligibility": false,
+    "must_reauthenticate": true,
+    "must_see_exact_consequence": true,
+    "signs_only_action_digest": true,
+    "deny": ["self_approval", "agent_approval", "stale_assurance", "expired_membership", "revoked_membership", "expired_delegation", "revoked_delegation", "changed_input", "duplicate_principal_quorum"]
+  },
+  "approval_states": [
+    {"id": "pending", "terminal": false},
+    {"id": "quorum_met", "terminal": false},
+    {"id": "rejected", "terminal": true},
+    {"id": "expired", "terminal": true},
+    {"id": "invalidated", "terminal": true},
+    {"id": "committed", "terminal": true}
+  ],
+  "approval_transitions": [
+    {
+      "id": "record_unique_approval",
+      "from": ["pending"],
+      "event": "eligible_unique_checker_approval",
+      "to": ["pending", "quorum_met"],
+      "guard": "unique_current_approvals_reach_policy_quorum"
+    },
+    {
+      "id": "reject",
+      "from": ["pending", "quorum_met"],
+      "event": "eligible_checker_rejection",
+      "to": ["rejected"],
+      "guard": "request_current"
+    },
+    {
+      "id": "expire",
+      "from": ["pending", "quorum_met"],
+      "event": "clock_reaches_expiry",
+      "to": ["expired"],
+      "guard": "now_not_before_expires_at"
+    },
+    {
+      "id": "invalidate",
+      "from": ["pending", "quorum_met"],
+      "event": "bound_input_or_authority_changes",
+      "to": ["invalidated"],
+      "guard": "digest_revision_generation_lifecycle_or_fence_mismatch"
+    },
+    {
+      "id": "commit",
+      "from": ["quorum_met"],
+      "event": "reauthorized_compare_and_set",
+      "to": ["committed"],
+      "guard": "all_bound_inputs_current_and_compare_and_set_wins"
+    }
+  ],
+  "commit_compare_and_set": {
+    "compares": ["action_digest", "policy_revision", "resource_revisions", "account_generation", "session_generation", "role_revision", "delegation_generation", "project_membership_generation", "tenant_membership_generation", "graph_grant_generation", "incident_policy_generation", "lifecycle", "fence"],
+    "outcomes": [
+      {"id": "winner", "effect_dispatch_count": 1, "receipt": "immutable_winner_receipt"},
+      {"id": "idempotent_duplicate", "effect_dispatch_count": 0, "receipt": "same_immutable_winner_receipt"},
+      {"id": "conflict_loser", "effect_dispatch_count": 0, "receipt": "conflict_current_receipt_referencing_safe_winner"},
+      {"id": "stale_or_revoked", "effect_dispatch_count": 0, "receipt": "closed_safe_outcome_receipt"}
+    ],
+    "maximum_conflicting_winners": 1
+  },
+  "revocation_dimensions": [
+    {"id": "account", "counter": "account_generation", "scope": "subject"},
+    {"id": "session", "counter": "session_generation", "scope": "session"},
+    {"id": "role", "counter": "role_revision", "scope": "subject_and_tenant", "note": "invalidates explanation only; roles do not grant"},
+    {"id": "delegation", "counter": "delegation_generation", "scope": "delegation"},
+    {"id": "project", "counter": "project_membership_generation", "scope": "subject_and_project"},
+    {"id": "tenant", "counter": "tenant_membership_generation", "scope": "subject_and_tenant"},
+    {"id": "graph", "counter": "graph_grant_generation", "scope": "subject_capability_scope_and_graph_family"},
+    {"id": "incident", "counter": "incident_policy_generation", "scope": "incident_and_affected_resources"}
+  ],
+  "revocation_event": {
+    "required_fields": ["revocation_event_ref", "dimension", "subject_or_resource_scope", "prior_generation", "next_generation", "policy_revision", "cause", "accountable_actor_ref", "occurred_at", "audit_correlation_ref", "receipt_ref"],
+    "next_generation_rule": "prior_plus_one",
+    "delivery_path": "independent_of_projection_hints",
+    "invalidates_older_decisions": true
+  },
+  "protected_delivery_states": [
+    {"id": "active", "terminal": false},
+    {"id": "revocation_observed", "terminal": false},
+    {"id": "terminal_replacement", "terminal": false},
+    {"id": "closed", "terminal": true},
+    {"id": "reconnect_suppressed", "terminal": true}
+  ],
+  "protected_delivery_transitions": [
+    {"id": "observe_revocation", "from": "active", "event": "revocation_event_or_generation_mismatch", "to": "revocation_observed"},
+    {"id": "prepare_safe_replacement", "from": "revocation_observed", "event": "safe_replacement_prepared", "to": "terminal_replacement"},
+    {"id": "terminal_close", "from": "terminal_replacement", "event": "replacement_sent_or_connection_unavailable", "to": "closed"},
+    {"id": "suppress_reconnect", "from": "closed", "event": "reconnect_with_revoked_generation", "to": "reconnect_suppressed"}
+  ],
+  "terminal_client_actions": [
+    "stop_future_protected_delivery",
+    "best_effort_replace_protected_fragment",
+    "close_stream",
+    "suppress_privileged_reconnect",
+    "invalidate_signed_links",
+    "invalidate_export_and_download_retrieval",
+    "clear_privileged_browser_state",
+    "record_safe_security_and_audit_evidence"
+  ],
+  "reauthorization": {
+    "before_each_protected_patch": true,
+    "before_each_export_or_download_retrieval": true,
+    "periodic_checks_are_defense_in_depth": true,
+    "hard_expiry_is_defense_in_depth": true,
+    "revocation_waits_for_periodic_check": false,
+    "revocation_waits_for_projection_hint": false
+  },
+  "offline_limit": "bytes_already_delivered_to_an_offline_or_malicious_client_cannot_be_erased"
+}

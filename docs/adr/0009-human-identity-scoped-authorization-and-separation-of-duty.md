@@ -1,15 +1,15 @@
 # ADR 0009: Human Identity, Scoped Authorization, And Separation Of Duty
 
-- Status: Proposed
+- Status: Accepted for architecture authority; implementation and release gated
 - Date: 2026-08-31
+- Accepted: 2026-09-03 through HUI-A2 merged-candidate governance
 - Owners: JidoCode security, product, identity, and operations maintainers
 - Decision scope: Human accounts, authentication assurance, product roles,
   graph capabilities, delegations, step-up, live revocation, and approval
   separation
 - Depends on:
   [ADR 0001](./0001-graph-only-source-of-truth.md),
-  [ADR 0004](./0004-delegated-agent-credentials-and-isolation.md), and
-  [ADR 0008](./0008-server-rendered-heex-and-datastar-product-runtime.md)
+  [ADR 0004](./0004-delegated-agent-credentials-and-isolation.md)
 - Research:
   [Secure hypermedia control plane](../research/12-secure-hypermedia-coding-factory-ui.md)
 - Specifications:
@@ -32,6 +32,17 @@ named human identities and an understandable role model without replacing or
 widening those exact graph decisions.
 
 ## Decision
+
+This decision is binding for identity, assurance, authorization, delegation,
+approval, and revocation contract design. It does not claim that named-human
+authentication, multi-user route admission, live delivery, or two-human
+approval is implemented or release-qualified. Those capabilities remain
+blocked on Milestones C through G and their merged-candidate receipts.
+
+The decision is presentation-runtime neutral. Controller, fragment, stream,
+API, and command adapters must converge on the same authority-builder
+contract, but acceptance of this ADR does not accept ADR 0008 or select a
+browser transport.
 
 JidoCode will authenticate named human principals and authorize every product
 operation through a deny-by-default intersection of:
@@ -149,22 +160,27 @@ Rollback disables new multi-user route admission and returns to the last
 qualified isolated posture. It cannot merge principals, erase receipts, widen
 the shared operator, revive revoked sessions, or reinterpret prior approvals.
 
-## Acceptance Conditions
+## Decision Acceptance And Implementation Gates
 
-This ADR may move to `Accepted` only when:
+HUI-A2 accepts this decision only after machine-readable schemas, a closed
+operation matrix, hostile policy fixtures, deterministic approval/revocation
+models, documentation validation, and clean-checkout CI are pinned at its
+merged candidate. The compatibility operator remains isolated and cannot
+satisfy a named-human or separation-of-duty requirement.
 
-1. identity, authentication, scope, authority, role, exact-capability,
-   delegation, assurance, and session-generation schemas are specified;
-2. one trusted mapping boundary is shared by controller, SSE, API, and command
-   entry points;
-3. every proposed role/action/lens is mapped to exact current or explicitly
-   versioned capabilities and reviewed queries;
+Operational use remains gated. Milestones C through G must prove that:
+
+1. one trusted implementation constructs identity and authority consistently
+   for controller, fragment, stream, API, export, and command entry points;
+2. named accounts, authenticators, recovery, assurance, session inventory,
+   generation revocation, and audit work with real adapters;
+3. every route, field, query, stream, patch, command, approval, incident, and
+   export binds an exact current grant without role union;
 4. step-up, single-use approvals, two-person policy, session expiry, and live
    revocation are fail-closed and accessible;
-5. cross-tenant/project/attempt/session/graph/role probes reveal no protected
-   data, counts, labels, timing distinctions, or effects;
+5. cross-tenant/project/attempt/interaction-session/graph probes reveal no
+   protected data, counts, labels, timing distinctions, or effects;
 6. simultaneous authorized human commands commit at most one conflicting
-   transition and return the current safe receipt to losers;
-7. the compatibility operator cannot enter multi-user production posture; and
-8. clean-checkout security, browser, recovery, and audit evidence is pinned at
-   the merged candidate.
+   transition and return a safe immutable receipt to losers; and
+7. independent security/browser/recovery/audit evidence passes at the exact
+   release candidate.

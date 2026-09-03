@@ -139,19 +139,25 @@ corresponding phase receipts are accepted at merged candidates.
 - [Repository wikis implementation plan](../planning/repository-wikis/README.md)
 - [Repository wiki governance baseline](./repository-wiki-governance-baseline.md)
 
-## Proposed Secure Hypermedia Control Plane UI
+## Secure Hypermedia Control Plane UI Program
 
-These proposed decisions and specifications translate the secure hypermedia UI
-research into eight milestone plans containing thirty-seven implementation
-phases. They preserve the accepted graph and command authority model and do not
-become binding until accepted through Gate HUI1 and the normal merged-candidate
+These decisions and specifications translate the secure hypermedia UI research
+into eight milestone plans containing thirty-seven implementation phases. HUI-A1
+pins current authority. ADR 0009 and its identity/authorization contract are
+accepted as architecture authority through HUI-A2 while their runtime and
+release capabilities remain gated. The remaining proposed decisions do not
+become binding until accepted or narrowed through the normal merged-candidate
 receipt process.
 
 - [Secure hypermedia control plane UI research](../research/12-secure-hypermedia-coding-factory-ui.md)
 - [HUI-A1 current-state authority baseline](./hypermedia-ui-current-state-authority-baseline.md)
 - [HUI-A1 runtime and authority inventory](./hypermedia-ui-runtime-and-authority-inventory.md)
 - [HUI-A1 vocabulary and supersession matrix](./hypermedia-ui-vocabulary-and-supersession.md)
-- [HUI-A1 merge-pending Phase 1 receipt](./hypermedia-ui-milestone-a-phase-01-receipt.md)
+- [HUI-A1 accepted Phase 1 receipt](./hypermedia-ui-milestone-a-phase-01-receipt.md)
+- [HUI-A2 identity and assurance manifest](../../priv/architecture/hypermedia_ui/phase_a2_identity_and_assurance.json)
+- [HUI-A2 operation authorization matrix](./hypermedia-ui-operation-authorization-matrix.md)
+- [HUI-A2 approval and live revocation authority](./hypermedia-ui-approval-and-live-revocation-authority.md)
+- [HUI-A2 merge-pending Phase 2 receipt](./hypermedia-ui-milestone-a-phase-02-receipt.md)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
 - [ADR 0009: Human identity, scoped authorization, and separation of duty](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
 - [ADR 0010: ShadcnUI as the product component primitive layer](../adr/0010-shadcnui-as-product-component-primitive-layer.md)
