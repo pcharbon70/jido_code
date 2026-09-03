@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A3",
+  "contract_version": "hui.evidence/1.0.0",
+  "status": "accepted_architecture_contract",
+  "evidence_classes": [
+    {
+      "id": "unit",
+      "owner": "component_or_protocol_owner",
+      "independent_reviewer": "quality_or_peer_maintainer",
+      "required_artifacts": ["test_source_digest", "command", "result", "case_count", "failure_count"],
+      "real_required": false,
+      "mock_limit": "isolated_semantics_only"
+    },
+    {
+      "id": "integration",
+      "owner": "application_boundary_owner",
+      "independent_reviewer": "architecture_or_quality_maintainer",
+      "required_artifacts": ["application_build_digest", "boundary_manifest", "command", "result", "case_count", "failure_count"],
+      "real_required": true,
+      "mock_limit": "external_seam_may_be_fake_only_when_real_adapter_class_is_separate_and_gate_remains_open"
+    },
+    {
+      "id": "browser",
+      "owner": "web_quality_maintainer",
+      "independent_reviewer": "product_or_accessibility_maintainer",
+      "required_artifacts": ["browser_name_version_digest", "asset_digest", "scenario_manifest", "semantic_assertions", "trace_digest"],
+      "real_required": true,
+      "mock_limit": "DOM_unit_render_does_not_replace_supported_browser"
+    },
+    {
+      "id": "accessibility",
+      "owner": "accessibility_maintainer",
+      "independent_reviewer": "independent_accessibility_reviewer",
+      "required_artifacts": ["browser_and_assistive_technology_versions", "task_matrix", "automated_results", "manual_results", "findings_and_disposition"],
+      "real_required": true,
+      "mock_limit": "automated_scan_does_not_replace_keyboard_screen_reader_zoom_reflow_forced_colors_or_reduced_motion"
+    },
+    {
+      "id": "security",
+      "owner": "security_maintainer",
+      "independent_reviewer": "independent_security_reviewer",
+      "required_artifacts": ["threat_scenario_manifest", "identity_policy_and_generation_digests", "hostile_fixture_digests", "zero_tolerance_results", "findings_and_remediation"],
+      "real_required": true,
+      "mock_limit": "policy_fixtures_do_not_replace_real_identity_browser_proxy_and_revocation"
+    },
+    {
+      "id": "usability",
+      "owner": "product_research_maintainer",
+      "independent_reviewer": "independent_product_or_accessibility_reviewer",
+      "required_artifacts": ["participant_or_expert_profile", "task_protocol_digest", "completion_and_error_results", "comprehension_results", "findings_and_disposition"],
+      "real_required": true,
+      "mock_limit": "maintainer_self_review_does_not_replace_representative_human_task_evidence"
+    },
+    {
+      "id": "load",
+      "owner": "performance_and_operations_maintainer",
+      "independent_reviewer": "independent_operations_maintainer",
+      "required_artifacts": ["capacity_profile", "dataset_and_workload_digest", "environment_digest", "resource_and_latency_results", "limit_and_backpressure_results"],
+      "real_required": true,
+      "mock_limit": "synthetic_function_timing_does_not_replace_selected_store_server_proxy_and_browser_path"
+    },
+    {
+      "id": "fault",
+      "owner": "runtime_and_operations_maintainer",
+      "independent_reviewer": "quality_or_security_maintainer",
+      "required_artifacts": ["fault_schedule_digest", "environment_digest", "recovery_results", "ambiguity_and_cleanup_results", "residual_failures"],
+      "real_required": true,
+      "mock_limit": "simulated_error_return_does_not_replace_process_network_deploy_and_adapter_faults"
+    },
+    {
+      "id": "real_adapter",
+      "owner": "selected_adapter_owner",
+      "independent_reviewer": "security_operations_or_release_maintainer",
+      "required_artifacts": ["adapter_source_version_and_digest", "configuration_digest", "credential_class_without_value", "live_scenario_manifest", "results_and_cost", "limitations"],
+      "real_required": true,
+      "mock_limit": "no_fake_may_satisfy_this_class"
+    },
+    {
+      "id": "install",
+      "owner": "release_maintainer",
+      "independent_reviewer": "operations_maintainer",
+      "required_artifacts": ["pristine_environment_digest", "toolchain_and_dependency_digests", "build_and_asset_results", "bootstrap_and_start_results", "release_manifest_digest"],
+      "real_required": true,
+      "mock_limit": "incremental_or_dirty_checkout_does_not_satisfy_install"
+    },
+    {
+      "id": "upgrade",
+      "owner": "release_and_migration_maintainer",
+      "independent_reviewer": "operations_and_Knowledge_maintainer",
+      "required_artifacts": ["supported_predecessor_manifest", "target_manifest", "backup_digest", "migration_and_rebuild_results", "integrity_and_projection_results"],
+      "real_required": true,
+      "mock_limit": "schema_plan_only_does_not_replace_supported_predecessor_upgrade"
+    },
+    {
+      "id": "rollback",
+      "owner": "release_and_operations_maintainer",
+      "independent_reviewer": "security_or_architecture_maintainer",
+      "required_artifacts": ["last_qualified_artifact_digest", "route_dependency_asset_config_manifest", "fault_or_partial_deploy_scenario", "authoritative_state_preservation", "post_rollback_verification"],
+      "real_required": true,
+      "mock_limit": "configuration_toggle_without_complete_artifact_restore_does_not_satisfy_rollback"
+    },
+    {
+      "id": "observation",
+      "owner": "operations_and_product_maintainer",
+      "independent_reviewer": "release_security_or_quality_maintainer",
+      "required_artifacts": ["release_manifest_digest", "window_start_end", "traffic_and_scope_profile", "SLO_and_incident_results", "capability_truth_and_consumer_inventory", "removal_readiness_decision"],
+      "real_required": true,
+      "mock_limit": "pre_release_simulation_does_not_replace_declared_post_deploy_window"
+    }
+  ],
+  "qualification_identity": {
+    "digest_algorithm": "sha256",
+    "required": [
+      "full_candidate_commit",
+      "candidate_tree",
+      "pull_request",
+      "merge_state_and_merged_candidate_when_available",
+      "toolchain",
+      "dependency_and_lock",
+      "source_archive_and_package",
+      "app_js_and_app_css_assets",
+      "runtime_configuration_without_secrets",
+      "browser",
+      "assistive_technology",
+      "proxy_and_tls",
+      "fixtures_corpus_and_expected_results",
+      "ontology_shapes_graph_registry_query_command_and_schema_versions",
+      "adapter_provider_and_profile"
+    ],
+    "nontransferable_on_change": true
+  },
+  "determinism": {
+    "fixed_or_captured": [
+      "clock",
+      "identifier_generator",
+      "random_seed",
+      "enumeration_order",
+      "locale",
+      "timezone",
+      "test_principal_session_and_generations",
+      "repository_source_and_candidate_revisions",
+      "dataset_and_graph_revisions",
+      "policy_revision",
+      "network_and_fault_schedule"
+    ],
+    "timezone": "Etc/UTC",
+    "secret_values_in_artifacts": false,
+    "raw_prompts_or_private_reasoning_in_artifacts": false
+  },
+  "evidence_manifest": {
+    "schema_version": "hui.evidence.manifest/1.0.0",
+    "required_fields": [
+      "manifest_id",
+      "milestone_phase_gate",
+      "candidate_commit_and_tree",
+      "pull_request_and_merge_state",
+      "qualification_identity_digests",
+      "fixed_inputs_and_environment",
+      "commands_exit_results_counts_and_durations",
+      "evidence_class_artifact_refs_and_digests",
+      "owners_and_independent_reviewers",
+      "limitations_failures_and_nonzero_risks",
+      "retention_class",
+      "all_reopening_conditions"
+    ],
+    "screenshots_primary_proof": false,
+    "badges_primary_proof": false,
+    "unchecked_prose_primary_proof": false
+  },
+  "real_seams": [
+    {"id": "triple_store", "milestone": "HUI-C-through-G", "requires": "selected_native_backend_and_graph_data", "fake_replacement": false},
+    {"id": "identity", "milestone": "HUI-C-through-G", "requires": "selected_authenticator_session_assurance_and_revocation_adapter", "fake_replacement": false},
+    {"id": "filesystem", "milestone": "HUI-E-through-H", "requires": "isolated_workspace_candidate_capture_backup_and_restore_filesystem", "fake_replacement": false},
+    {"id": "command", "milestone": "HUI-E-through-G", "requires": "semantic_gateway_atomic_receipt_and_status_recovery", "fake_replacement": false},
+    {"id": "network_adapter", "milestone": "HUI-B-through-G", "requires": "selected_Dstar_Datastar_provider_or_external_adapter_as_applicable", "fake_replacement": false},
+    {"id": "browser", "milestone": "HUI-B-through-G", "requires": "each_supported_engine_with_real_assets_and_server", "fake_replacement": false},
+    {"id": "assistive_technology", "milestone": "HUI-B-through-G", "requires": "selected_screen_reader_keyboard_zoom_reflow_forced_colors_and_reduced_motion", "fake_replacement": false},
+    {"id": "proxy", "milestone": "HUI-D-through-G", "requires": "selected_TLS_HTTP2_reverse_proxy_buffering_keepalive_and_restart_path", "fake_replacement": false}
+  ],
+  "retention": [
+    {"class": "receipts_manifests_digest_indexes_reviews_and_reopening_conditions", "duration": "repository_lifetime"},
+    {"class": "release_security_accessibility_real_adapter_install_upgrade_rollback_observation", "duration": "supported_release_plus_rollback_horizon_and_at_least_one_year"},
+    {"class": "bounded_raw_CI_browser_and_proxy_traces", "duration": "90_days_unless_incident_or_legal_hold"},
+    {"class": "secrets_credentials_raw_prompts_private_reasoning_and_unbounded_sensitive_content", "duration": "never_retain"}
+  ],
+  "receipt_state_machine": {
+    "states": ["merge-pending", "accepted-at-merged-candidate"],
+    "merge_pending": {
+      "plan_status": "proposed",
+      "receipt_status": "merge-pending",
+      "merged_candidate": null,
+      "merge_date": null,
+      "closure_checkboxes_checked": false,
+      "required": ["section_commits", "implementation_candidate", "pull_request", "evidence_digests", "clean_checkout_status", "limitations", "all_reopening_conditions"]
+    },
+    "accepted_at_merged_candidate": {
+      "plan_status": "completed",
+      "receipt_status": "accepted-at-merged-candidate",
+      "merged_candidate": "full_40_character_merge_commit",
+      "merge_date": "YYYY-MM-DD",
+      "closure_checkboxes_checked": true,
+      "required": ["implementation_pull_request_passed_clean_checkout_CI", "exact_merged_candidate", "merge_date", "preserved_reopening_conditions"]
+    },
+    "phase_a3_closure_checkboxes": ["3", "3.4", "3.4.2", "3.4.2.3"],
+    "mixed_state": "invalid"
+  },
+  "reopening_rules": {
+    "preserve_verbatim_at_closure": true,
+    "checkboxes_override_invariant_failure": false,
+    "triggers": [
+      "mandatory_evidence_class_missing",
+      "required_real_seam_replaced_by_fake",
+      "qualification_identity_or_digest_narrowed",
+      "uncontrolled_clock_identifier_fixture_or_fault_schedule",
+      "evidence_transferred_across_incompatible_unit",
+      "screenshot_badge_or_prose_replaces_primary_proof",
+      "reviewer_independence_weakened",
+      "retention_loses_durable_provenance",
+      "receipt_accepts_unmerged_or_different_candidate",
+      "mixed_closure_state",
+      "reopening_condition_changed_or_deleted",
+      "clean_checkout_CI_failure"
+    ]
+  }
+}

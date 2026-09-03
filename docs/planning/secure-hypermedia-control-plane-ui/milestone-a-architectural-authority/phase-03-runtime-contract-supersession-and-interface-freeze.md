@@ -68,19 +68,19 @@ Back to plan: [README](./README.md)
       - [x] 3.2.2.3 Subtask - Define which phase owns every shared file/module/route/schema and how parallel worktrees reconcile without concurrent version assignment.
       - [x] 3.2.2.4 Subtask - Bind removal and rollback decisions to an exact consumer manifest and accepted evidence rather than milestone completion labels alone.
 
-  - [ ] 3.3 Section - Freeze validation and release evidence contracts.
+  - [x] 3.3 Section - Freeze validation and release evidence contracts.
 
     This section defines what later phases must prove and which evidence cannot
     be replaced by mocks, screenshots, or unchecked prose.
 
-    - [ ] 3.3.1 Task {#huia-p03-evidence} [repo: jido_code] [after: {#huia-p03-versioning}] - Publish the program test, evidence, and receipt schema.
+    - [x] 3.3.1 Task {#huia-p03-evidence} [repo: jido_code] [after: {#huia-p03-versioning}] - Publish the program test, evidence, and receipt schema.
 
       This task makes every HUI gate reproducible at a clean merged candidate.
 
-      - [ ] 3.3.1.1 Subtask - Define unit, integration, browser, accessibility, security, usability, load, fault, real-adapter, install, upgrade, rollback, and observation evidence classes.
-      - [ ] 3.3.1.2 Subtask - Define immutable candidate/dependency/asset/config/browser/proxy/fixture digests, fixed clocks/IDs, evidence manifests, reviewers, and retention.
-      - [ ] 3.3.1.3 Subtask - Define which seams require real TripleStore, identity, filesystem, command, network adapter, browser, assistive technology, and proxy evidence.
-      - [ ] 3.3.1.4 Subtask - Define merge-pending and accepted-at-merged-candidate receipt states, reopening conditions, and the exact checkboxes required for phase closure.
+      - [x] 3.3.1.1 Subtask - Define unit, integration, browser, accessibility, security, usability, load, fault, real-adapter, install, upgrade, rollback, and observation evidence classes.
+      - [x] 3.3.1.2 Subtask - Define immutable candidate/dependency/asset/config/browser/proxy/fixture digests, fixed clocks/IDs, evidence manifests, reviewers, and retention.
+      - [x] 3.3.1.3 Subtask - Define which seams require real TripleStore, identity, filesystem, command, network adapter, browser, assistive technology, and proxy evidence.
+      - [x] 3.3.1.4 Subtask - Define merge-pending and accepted-at-merged-candidate receipt states, reopening conditions, and the exact checkboxes required for phase closure.
 
   - [ ] 3.4 Section - Phase 3 Integration Tests.
 

@@ -110,6 +110,10 @@ the preceding milestone's final phase receipt is pinned.
 
 ## Evidence And Drift Control
 
+Evidence classes, immutable qualification identity, real-seam requirements,
+review, retention, and receipt closure follow the accepted
+[HUI validation and release evidence contract](./hypermedia-ui-validation-and-release-evidence-contract.md).
+
 The first implementation section MUST record SHA-256 digests for all proposed
 ADRs, specifications, research, and plan documents. Architecture fitness checks
 MUST reject:
