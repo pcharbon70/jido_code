@@ -46,19 +46,19 @@ Back to plan: [README](./README.md)
       - [x] 1.2.1.3 Subtask - Map server event/action/attribute encodings to exact selected client behavior for requests, signals, fragments, SSE events, retries, morphing, and error handling.
       - [x] 1.2.1.4 Subtask - Record protocol gaps, undocumented assumptions, browser support, security advisories, patch/fork needs, update policy, and incompatible combinations.
 
-  - [ ] 1.3 Section - Build the dependency and supply-chain decision ledger.
+  - [x] 1.3 Section - Build the dependency and supply-chain decision ledger.
 
     This section gives every selected or rejected version an explicit rationale,
     risk owner, integrity input, and replacement path.
 
-    - [ ] 1.3.1 Task {#huib-p01-ledger} [repo: jido_code] [after: {#huib-p01-datastar}] - Publish the immutable dependency/asset bill of materials.
+    - [x] 1.3.1 Task {#huib-p01-ledger} [repo: jido_code] [after: {#huib-p01-datastar}] - Publish the immutable dependency/asset bill of materials.
 
       This task is the sole version-selection input for Phases 2–4.
 
-      - [ ] 1.3.1.1 Subtask - Record direct/transitive Hex/npm/source dependencies, checksums, licenses, advisories, source URLs, build inputs, runtime/compile-only roles, and consumers.
-      - [ ] 1.3.1.2 Subtask - Record alternatives considered, version constraint conflicts, exceptions, compensating controls, owners, expiry, and rollback/replacement triggers.
-      - [ ] 1.3.1.3 Subtask - Define offline/cache verification, trusted publication/channel policy, update cadence, drift detection, and emergency advisory response.
-      - [ ] 1.3.1.4 Subtask - Define expected lockfiles, asset manifest, SBOM, integrity metadata, and signed/reviewed evidence outputs for a clean checkout.
+      - [x] 1.3.1.1 Subtask - Record direct/transitive Hex/npm/source dependencies, checksums, licenses, advisories, source URLs, build inputs, runtime/compile-only roles, and consumers.
+      - [x] 1.3.1.2 Subtask - Record alternatives considered, version constraint conflicts, exceptions, compensating controls, owners, expiry, and rollback/replacement triggers.
+      - [x] 1.3.1.3 Subtask - Define offline/cache verification, trusted publication/channel policy, update cadence, drift detection, and emergency advisory response.
+      - [x] 1.3.1.4 Subtask - Define expected lockfiles, asset manifest, SBOM, integrity metadata, and signed/reviewed evidence outputs for a clean checkout.
 
   - [ ] 1.4 Section - Phase 1 Integration Tests.
 

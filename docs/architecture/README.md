@@ -180,6 +180,7 @@ binding.
 - [HUI-A4 accepted Phase 4 receipt](./hypermedia-ui-milestone-a-phase-04-receipt.md)
 - [HUI-B1 ShadcnUI source, license, and risk baseline](./hypermedia-ui-shadcn-source-license-risk-baseline.md)
 - [HUI-B1 Dstar and Datastar source/protocol baseline](./hypermedia-ui-datastar-dstar-source-protocol-baseline.md)
+- [HUI-B1 dependency and supply-chain decision ledger](./hypermedia-ui-dependency-supply-chain-ledger.md)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
 - [ADR 0009: Human identity, scoped authorization, and separation of duty](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
 - [ADR 0010: ShadcnUI as the product component primitive layer](../adr/0010-shadcnui-as-product-component-primitive-layer.md)
