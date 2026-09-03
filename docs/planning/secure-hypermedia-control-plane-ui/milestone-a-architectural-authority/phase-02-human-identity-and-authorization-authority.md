@@ -79,21 +79,21 @@ Back to plan: [README](./README.md)
     This final section proves the proposed security model is complete,
     non-escalating, and compatible with accepted graph and command authority.
 
-    - [ ] 2.4.1 Task {#huia-p02-integration} [repo: jido_code] [after: {#huia-p02-approval-revocation}] - Execute the HUI-A2 policy and authority model matrix.
+    - [x] 2.4.1 Task {#huia-p02-integration} [repo: jido_code] [after: {#huia-p02-approval-revocation}] - Execute the HUI-A2 policy and authority model matrix.
 
       This task validates normative examples and hostile counterexamples before
       implementation code may rely on the contract.
 
-      - [ ] 2.4.1.1 Subtask - Trace representative pages, fields, streams, patches, commands, approvals, incidents, and exports from named principal to exact graph/gateway decision.
-      - [ ] 2.4.1.2 Subtask - Exercise cross-tenant/project/attempt/interaction/graph probes, copied opaque refs, role union attempts, expired delegation, stale step-up, and concealed resources in contract fixtures.
-      - [ ] 2.4.1.3 Subtask - Exercise two-human approvals, concurrent transitions, session/role/delegation revocation, open streams, reconnect, and export retrieval in deterministic state models.
-      - [ ] 2.4.1.4 Subtask - Run architecture/spec consistency, threat-model traceability, documentation validation, `mix precommit`, and clean-checkout CI.
+      - [x] 2.4.1.1 Subtask - Trace representative pages, fields, streams, patches, commands, approvals, incidents, and exports from named principal to exact graph/gateway decision.
+      - [x] 2.4.1.2 Subtask - Exercise cross-tenant/project/attempt/interaction/graph probes, copied opaque refs, role union attempts, expired delegation, stale step-up, and concealed resources in contract fixtures.
+      - [x] 2.4.1.3 Subtask - Exercise two-human approvals, concurrent transitions, session/role/delegation revocation, open streams, reconnect, and export retrieval in deterministic state models.
+      - [x] 2.4.1.4 Subtask - Run architecture/spec consistency, threat-model traceability, documentation validation, `mix precommit`, and clean-checkout CI.
 
     - [ ] 2.4.2 Task {#huia-p02-phase-receipt} [repo: jido_code] [after: {#huia-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records HUI-A2 evidence in
       `docs/architecture/hypermedia-ui-milestone-a-phase-02-receipt.md`.
 
-      - [ ] 2.4.2.1 Subtask - Keep HUI-A2 merge-pending on shared-human identity, implicit role union, missing operation authorization, stale approval, incomplete revocation, or a widened graph grant.
-      - [ ] 2.4.2.2 Subtask - Record exact decision tables, fixtures, reviewers, unresolved risks, limitations, and all reopening conditions.
+      - [x] 2.4.2.1 Subtask - Keep HUI-A2 merge-pending on shared-human identity, implicit role union, missing operation authorization, stale approval, incomplete revocation, or a widened graph grant.
+      - [x] 2.4.2.2 Subtask - Record exact decision tables, fixtures, reviewers, unresolved risks, limitations, and all reopening conditions.
       - [ ] 2.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.

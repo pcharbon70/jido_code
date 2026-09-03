@@ -3,6 +3,7 @@ defmodule Mix.Tasks.Architecture.Check do
 
   alias JidoCode.Architecture.Checker
   alias JidoCode.Architecture.HypermediaUIPhaseA1
+  alias JidoCode.Architecture.HypermediaUIPhaseA2
   alias JidoCode.Architecture.Violation
 
   @shortdoc "Checks graph-only persistence and module boundaries"
@@ -11,23 +12,19 @@ defmodule Mix.Tasks.Architecture.Check do
   def run(_args) do
     Mix.Task.run("compile")
 
-    source_result = Checker.check()
-    hui_result = HypermediaUIPhaseA1.check()
+    violations = Checker.check() |> errors()
+    hui_a1_errors = HypermediaUIPhaseA1.check() |> errors()
+    hui_a2_errors = HypermediaUIPhaseA2.check() |> errors()
 
-    case {source_result, hui_result} do
-      {{:ok, []}, {:ok, []}} ->
-        Mix.shell().info("Architecture checks passed")
+    Enum.each(violations, &Mix.shell().error(Violation.format(&1)))
+    Enum.each(hui_a1_errors, &Mix.shell().error("HUI-A1: #{&1}"))
+    Enum.each(hui_a2_errors, &Mix.shell().error("HUI-A2: #{&1}"))
 
-      {source_result, hui_result} ->
-        violations = errors(source_result)
-        hui_errors = errors(hui_result)
+    count = length(violations) + length(hui_a1_errors) + length(hui_a2_errors)
 
-        Enum.each(violations, &Mix.shell().error(Violation.format(&1)))
-        Enum.each(hui_errors, &Mix.shell().error("HUI-A1: #{&1}"))
-
-        count = length(violations) + length(hui_errors)
-        Mix.raise("architecture checks failed with #{count} violation(s)")
-    end
+    if count == 0,
+      do: Mix.shell().info("Architecture checks passed"),
+      else: Mix.raise("architecture checks failed with #{count} violation(s)")
   end
 
   defp errors({:ok, []}), do: []

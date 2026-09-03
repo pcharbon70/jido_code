@@ -157,6 +157,7 @@ receipt process.
 - [HUI-A2 identity and assurance manifest](../../priv/architecture/hypermedia_ui/phase_a2_identity_and_assurance.json)
 - [HUI-A2 operation authorization matrix](./hypermedia-ui-operation-authorization-matrix.md)
 - [HUI-A2 approval and live revocation authority](./hypermedia-ui-approval-and-live-revocation-authority.md)
+- [HUI-A2 merge-pending Phase 2 receipt](./hypermedia-ui-milestone-a-phase-02-receipt.md)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
 - [ADR 0009: Human identity, scoped authorization, and separation of duty](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
 - [ADR 0010: ShadcnUI as the product component primitive layer](../adr/0010-shadcnui-as-product-component-primitive-layer.md)

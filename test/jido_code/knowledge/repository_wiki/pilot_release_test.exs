@@ -48,7 +48,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
     assert compilation.dependencies.complete?
     assert compilation.dependencies.missing_declared_lock_entries == []
     assert compilation.dependencies.unsupported_lock_entries == 0
-    assert compilation.dependencies.declared_count == 25
+    assert compilation.dependencies.declared_count == 26
     assert compilation.dependencies.locked_count >= compilation.dependencies.declared_count
 
     assert compilation.guides.configured_count == compilation.guides.rendered_count
