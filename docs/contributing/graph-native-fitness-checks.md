@@ -3,6 +3,9 @@
 Before adding a predicate, graph family, command, query, projection, adapter,
 dependency, or route, answer every applicable check.
 
+New browser-product work also follows the
+[hypermedia product contribution contract](./hypermedia-product-work.md).
+
 ## Semantic Contract
 
 1. Is the predicate relationship-oriented, namespaced, documented, shaped,
@@ -36,6 +39,36 @@ dependency, or route, answer every applicable check.
    fallback without product LiveView/LiveVue/SaladUI runtime use?
 7. If `phoenix_live_view` remains, does the exact consumer manifest prove it is
    qualified compile-time `Phoenix.Component`/HEEx use only?
+
+## Product Security And Delivery Contract
+
+1. Does the trusted boundary reconstruct named human identity, exact scope,
+   assurance, delegation, policy revision, graph revisions, and incident
+   posture without accepting browser-derived grants or revisions?
+2. Does each route, fragment, stream, command, approval, export, and download
+   repeat exact resource/action authorization and apply required concealment,
+   redaction, step-up, and receipt behavior?
+3. Are effects non-GET, CSRF- and Origin-protected, closed-schema,
+   idempotent/revision-aware, command-gateway-owned, and receipt-driven?
+4. Are Datastar signals untrusted and bounded, patch roots stable, expressions
+   static, SSE reauthorized before each patch, and native fallback preserved?
+5. Are assets local and pinned, CSP and escaping/sanitization explicit, inline
+   scripts forbidden, and source/wiki/graph/log/agent content always data?
+6. Do parallel sessions return explicit conflict/stale/revoked receipts and do
+   accessibility, graph-lens alternatives, wiki isolation, and wiki cost
+   accounting remain intact?
+
+## Change And Evidence Contract
+
+1. Is every exception narrow, reviewed, owned, evidenced, expiring, bound to an
+   exact path and symbol, and paired with a reopening condition?
+2. Do tests cover native/controller outcomes plus applicable enhancement,
+   browser, accessibility, security, failure, revocation, and concurrency
+   behavior using the real seam required by the evidence class?
+3. Are dependency/source/license/lock/asset identities pinned, and are threat,
+   capacity, CSP/proxy, operations, migration, and rollback records current?
+4. Does each plan section have one commit, the phase one implementation pull
+   request, and the post-merge closure transition required to pin its receipt?
 
 ## Required Verification
 
