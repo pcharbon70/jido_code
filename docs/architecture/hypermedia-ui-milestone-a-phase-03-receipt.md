@@ -21,10 +21,10 @@ authorized.
 | --- | --- |
 | Accepted HUI-A2 implementation candidate | `911b8d7c8a25abf998af832f7ae8e6766e971962` - PR #103 merged 2026-09-03 |
 | Accepted HUI-A2 closure baseline | `02e16cbb6cd4c56fb93c19db8c9f4a535e580dcb` - PR #104 merged 2026-09-03 |
-| Section 3.1 | `9e8a66f` - accepted target runtime, component, product, and lens authority |
-| Section 3.2 | `6244fb6` - superseded presentation ownership and froze versioned target interfaces |
-| Section 3.3 | `23b1c52` - froze validation, real-seam, evidence, retention, and receipt contracts |
-| Section 3.4 | `merge-pending` - integration validator, hostile matrix, receipt, and full verification |
+| Section 3.1 | `9e8a66fa34f18ccd4b178f47531ec63d0056eb03` - accepted target runtime, component, product, and lens authority |
+| Section 3.2 | `6244fb6d119a207aea1ce6e3faeb64fa4c05d6e4` - superseded presentation ownership and froze versioned target interfaces |
+| Section 3.3 | `23b1c52ca2888d05e6e97464f9d843e1eb863e27` - froze validation, real-seam, evidence, retention, and receipt contracts |
+| Section 3.4 | `c754aca3ac77830f0ffbb3c791697d0515b337ee` - integration validator, hostile matrix, receipt, and full verification |
 | Merged candidate | `merge-pending` |
 
 Merged candidate: `merge-pending`
