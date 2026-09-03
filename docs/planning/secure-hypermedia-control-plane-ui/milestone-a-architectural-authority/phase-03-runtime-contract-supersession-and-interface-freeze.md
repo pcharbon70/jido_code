@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_a_phase_03
 parent_plan: plan.jido_code_hypermedia_ui_milestone_a
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -13,7 +13,7 @@ interfaces Milestones B–H must implement without prematurely changing runtime.
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Supersede conflicting runtime ownership and freeze target interfaces.
+- [x] 3 Phase - Supersede conflicting runtime ownership and freeze target interfaces.
 
   This phase closes HUI-A3 by making controller/HEEx/Datastar ownership
   coherent across accepted documentation while preserving durable authority.
@@ -82,7 +82,7 @@ Back to plan: [README](./README.md)
       - [x] 3.3.1.3 Subtask - Define which seams require real TripleStore, identity, filesystem, command, network adapter, browser, assistive technology, and proxy evidence.
       - [x] 3.3.1.4 Subtask - Define merge-pending and accepted-at-merged-candidate receipt states, reopening conditions, and the exact checkboxes required for phase closure.
 
-  - [ ] 3.4 Section - Phase 3 Integration Tests.
+  - [x] 3.4 Section - Phase 3 Integration Tests.
 
     This final section proves every affected contract tells one coherent story
     and every target interface is owned, versioned, testable, and reversible.
@@ -97,11 +97,11 @@ Back to plan: [README](./README.md)
       - [x] 3.4.1.3 Subtask - Verify all interfaces, versions, ownership, compatibility, parallel-edit boundaries, evidence classes, and receipt rules are complete and link-valid.
       - [x] 3.4.1.4 Subtask - Run architecture/spec drift checks, docs validation, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 3.4.2 Task {#huia-p03-phase-receipt} [repo: jido_code] [after: {#huia-p03-integration}] - Publish and pin the Phase 3 receipt.
+    - [x] 3.4.2 Task {#huia-p03-phase-receipt} [repo: jido_code] [after: {#huia-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records HUI-A3 evidence in
       `docs/architecture/hypermedia-ui-milestone-a-phase-03-receipt.md`.
 
       - [x] 3.4.2.1 Subtask - Keep HUI-A3 merge-pending on contradictory ownership, silent supersession, unowned/unversioned interface, weakened invariant, missing rollback dependency, or mock-only required evidence.
       - [x] 3.4.2.2 Subtask - Record accepted ADR/spec revisions, supersession matrix, interface/version manifest, evidence schema, limitations, and all reopening conditions.
-      - [ ] 3.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.
+      - [x] 3.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.

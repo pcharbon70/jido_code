@@ -2,7 +2,7 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 This receipt records the HUI-A3 implementation candidate prepared on
 2026-09-03. ADRs 0008, 0010, and 0011 and their linked target contracts are
@@ -11,9 +11,9 @@ named-human identity, target routes, streams, attempt controls, knowledge
 lenses, incident controls, exports, and runtime removal remain unavailable
 until their later milestone gates close.
 
-The implementation pull request and clean-checkout CI have not yet merged.
-HUI-A3 therefore remains merge-pending and Milestone A Phase 4 is not
-authorized.
+Pull request #105 passed clean-checkout CI and merged on 2026-09-03 as
+`167c6cac0dd148bc919b4969f3c6fb691c0863a1`. HUI-A3 is accepted at that exact
+merged candidate, which is the authorized baseline for Milestone A Phase 4.
 
 ## Candidate Provenance
 
@@ -25,10 +25,11 @@ authorized.
 | Section 3.2 | `6244fb6d119a207aea1ce6e3faeb64fa4c05d6e4` - superseded presentation ownership and froze versioned target interfaces |
 | Section 3.3 | `23b1c52ca2888d05e6e97464f9d843e1eb863e27` - froze validation, real-seam, evidence, retention, and receipt contracts |
 | Section 3.4 | `c754aca3ac77830f0ffbb3c791697d0515b337ee` - integration validator, hostile matrix, receipt, and full verification |
-| Merged candidate | `merge-pending` |
+| Implementation PR head | `05415b04adfb2a3b29a9f85db7519527d6ad8d57` - PR #105 clean-checkout candidate |
+| Merged candidate | `167c6cac0dd148bc919b4969f3c6fb691c0863a1` |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `167c6cac0dd148bc919b4969f3c6fb691c0863a1`
+Merge date: `2026-09-03`
 
 ## Artifact Identity
 
@@ -42,7 +43,8 @@ Merge date: `merge-pending`
 | Runtime supersession contract | `cfcd2253e275535883d7e500b5a55a8267c3e0152ead355bbf3471729ad6dcd9` |
 | Validation and release evidence contract | `b331b75cb4146095db7b1260f8d9bdcef3ea07364f7558954932c565baaee5a7` |
 | HUI-A3 validator source | `bc76bc6b1237241c4eaf64171d44e2360dd70f97f82e07ed3772ddca62b36c5e` |
-| HUI-A3 integration test | `1ce539782c6d0bd9d7b6e1da029c2a782da6b8fb34cefdff2fe9252cd865591e` |
+| HUI-A3 integration test at implementation candidate | `1ce539782c6d0bd9d7b6e1da029c2a782da6b8fb34cefdff2fe9252cd865591e` |
+| HUI-A3 closure-state test after accepted transition | `fa6ea8f063edd7ae82b9f6c989fa5dec5f5378418aad3705b019adf726983f9f` |
 
 ## Accepted Decision And Interface Record
 
@@ -134,7 +136,7 @@ reopening conditions survive closure verbatim.
 | Focused HUI-A3 validation, hostile mutation, and closure-state suite | 6 tests, 0 failures |
 | `mix architecture.check` | Passed with source, HUI-A1, HUI-A2, and HUI-A3 gates returning zero findings |
 | `mix precommit` | Passed; 1,171 tests, 0 failures, with formatting, unused-dependency, compile, and combined architecture gates clean |
-| Clean-checkout CI | Pending implementation pull request |
+| Clean-checkout CI | Passed on PR #105; `verify` completed in 17m48s and `dialyzer` completed in 1m37s at implementation head `05415b04adfb2a3b29a9f85db7519527d6ad8d57` |
 
 ## Unresolved Risks And Accepted Limits
 
@@ -161,12 +163,12 @@ reopening conditions survive closure verbatim.
 
 ## Gate HUI-A3
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-HUI-A3 remains merge-pending until the implementation pull request passes
-clean-checkout CI, merges, and this receipt records the full merge commit and
-date through the coherent closure transition. Milestone A Phase 4 is not
-authorized before that pinned baseline.
+HUI-A3 is accepted at merged candidate
+`167c6cac0dd148bc919b4969f3c6fb691c0863a1`, merged on 2026-09-03 after
+clean-checkout CI passed. Milestone A Phase 4 is authorized only from this
+pinned baseline.
 
 HUI-A3 reopens regardless of checklist state if an accepted ADR or target
 contract loses architecture authority or falsely gains runtime credit; a

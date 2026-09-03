@@ -99,39 +99,40 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA3Test do
 
     assert HypermediaUIPhaseA3.validate_closure(plan, receipt) == []
 
-    mixed =
-      String.replace(
-        receipt,
-        "Status: **merge-pending**",
-        "Status: **accepted-at-merged-candidate**"
+    mixed = String.replace(plan, "- [x] 3.4.2.3 Subtask", "- [ ] 3.4.2.3 Subtask")
+
+    assert has_error?(HypermediaUIPhaseA3.validate_closure(mixed, receipt), "closure")
+
+    merge_pending_plan =
+      plan
+      |> String.replace("status: completed", "status: proposed")
+      |> String.replace("- [x] 3 Phase", "- [ ] 3 Phase")
+      |> String.replace("- [x] 3.4 Section", "- [ ] 3.4 Section")
+      |> String.replace("- [x] 3.4.2 Task", "- [ ] 3.4.2 Task")
+      |> String.replace("- [x] 3.4.2.3 Subtask", "- [ ] 3.4.2.3 Subtask")
+
+    merge_pending_receipt =
+      receipt
+      |> String.replace("Status: **accepted-at-merged-candidate**", "Status: **merge-pending**")
+      |> then(
+        &Regex.replace(
+          ~r/\| Merged candidate \| `[0-9a-f]{40}` \|/,
+          &1,
+          "| Merged candidate | `merge-pending` |"
+        )
+      )
+      |> then(
+        &Regex.replace(
+          ~r/Merged candidate: `[0-9a-f]{40}`/,
+          &1,
+          "Merged candidate: `merge-pending`"
+        )
+      )
+      |> then(
+        &Regex.replace(~r/Merge date: `\d{4}-\d{2}-\d{2}`/, &1, "Merge date: `merge-pending`")
       )
 
-    assert has_error?(HypermediaUIPhaseA3.validate_closure(plan, mixed), "closure")
-
-    sha = "1234567890abcdef1234567890abcdef12345678"
-
-    accepted_plan =
-      plan
-      |> String.replace("status: proposed", "status: completed")
-      |> String.replace("- [ ] 3 Phase", "- [x] 3 Phase")
-      |> String.replace("- [ ] 3.4 Section", "- [x] 3.4 Section")
-      |> String.replace("- [ ] 3.4.2 Task", "- [x] 3.4.2 Task")
-      |> String.replace("- [ ] 3.4.2.3 Subtask", "- [x] 3.4.2.3 Subtask")
-
-    accepted_receipt = """
-    Status: **accepted-at-merged-candidate**
-
-    | Merged candidate | `#{sha}` |
-
-    Merged candidate: `#{sha}`
-    Merge date: `2026-09-03`
-
-    Gate HUI-A3
-
-    Status: **accepted-at-merged-candidate**
-    """
-
-    assert HypermediaUIPhaseA3.validate_closure(accepted_plan, accepted_receipt) == []
+    assert HypermediaUIPhaseA3.validate_closure(merge_pending_plan, merge_pending_receipt) == []
   end
 
   defp manifests! do
