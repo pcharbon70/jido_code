@@ -107,6 +107,7 @@ claim.
 | Focused HUI-B1 suite | 11 tests, 0 failures |
 | Architecture gate | passed |
 | Architecture/security regression slice | 75 tests, 0 failures |
+| Dialyzer | passed with all 178 registered legacy warnings filtered |
 | Repository precommit | 1,191 tests, 0 failures |
 | Clean-checkout CI | merge-pending; required before implementation merge |
 
@@ -119,7 +120,7 @@ The immutable tracked evidence at this candidate has these SHA-256 identities:
 | `phase_b1_candidate_bom.json` | `dbfb08bfa5a95d41a538dadbcd8f9605918761a565e82ae075854c969a6f7f12` |
 | `phase_b1_supply_chain_ledger.json` | `7e8c4286ebd125f0c1b8a8997abba699c82f0f583b5f518d0b6a7eeba9d9cfe6` |
 | `phase_b1_verification_evidence.json` | `cdcea080e35d61c93533c0967fbc04bae9cd43e7207d864d2adb711b5765a513` |
-| `hypermedia_ui_phase_b1.ex` | `b7641edd9ffa7a67911e1282b168296bbe3c87d7683eb1fa05890a61abec9940` |
+| `hypermedia_ui_phase_b1.ex` | `e09b7684247b22a0441ef5b880cd4c8c6eb0e33b3210674bfae744ce5ca59b4d` |
 | `hypermedia_ui_phase_b1_test.exs` | `9079ba7777d05256f8417580a606a14b69afdd288b78def0776a856ee6dd59f3` |
 | unavailable-artifact fixture | `86f05b4c2b6f64fa8468135d803b179991695a54f5b0eaba02c9ac5b6b0eff06` |
 

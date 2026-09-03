@@ -715,13 +715,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1 do
   end
 
   defp require_match(errors, body, regex, label) do
-    if is_binary(body) and Regex.match?(regex, body),
+    if Regex.match?(regex, body),
       do: errors,
       else: ["#{label} does not match" | errors]
   end
 
   defp require_not_match(errors, body, regex, label) do
-    if is_binary(body) and Regex.match?(regex, body),
+    if Regex.match?(regex, body),
       do: ["#{label} is present" | errors],
       else: errors
   end
