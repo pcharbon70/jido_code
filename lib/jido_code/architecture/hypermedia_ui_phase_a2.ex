@@ -13,6 +13,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA2 do
     scenarios: "phase_a2_policy_scenarios.json"
   }
   @baseline_commit "133b66187828668b61a65b4d2ab5a9033fe56a15"
+  @implementation_commit "e4e213874e19086ab1164b55558edcb9348586e8"
+  @merged_candidate "911b8d7c8a25abf998af832f7ae8e6766e971962"
+  @merged_date "2026-09-03"
 
   @principal_classes ~w[human service agent]
   @identity_records ~w[
@@ -621,6 +624,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA2 do
 
     contract = read(root, "docs/architecture/human-identity-scope-and-authorization-contract.md")
     threat = read(root, "docs/architecture/ui-security-privacy-and-threat-model.md")
+    receipt = read(root, "docs/architecture/hypermedia-ui-milestone-a-phase-02-receipt.md")
 
     plan =
       read(
@@ -645,6 +649,31 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA2 do
       |> require_contains(plan, "- [x] 2.2 Section", "Phase 2 Section 2.2 checkbox")
       |> require_contains(plan, "- [x] 2.3 Section", "Phase 2 Section 2.3 checkbox")
       |> require_contains(plan, "- [x] 2.4.1 Task", "Phase 2 integration task checkbox")
+      |> validate_closure_state(plan, receipt)
+
+    Enum.reduce(@threats, errors, fn threat_id, acc ->
+      require_contains(acc, threat, "`#{threat_id}`", "#{threat_id} threat trace")
+    end)
+  end
+
+  defp validate_closure_state(errors, plan, receipt) do
+    if String.contains?(receipt, "Status: **accepted-at-merged-candidate**") do
+      errors
+      |> require_contains(plan, "status: completed", "Phase 2 completed status")
+      |> require_contains(plan, "- [x] 2 Phase", "Phase 2 closure checkbox")
+      |> require_contains(
+        plan,
+        "- [x] 2.4 Section",
+        "Phase 2 integration section closure checkbox"
+      )
+      |> require_contains(plan, "- [x] 2.4.2 Task", "Phase 2 receipt closure checkbox")
+      |> require_contains(plan, "- [x] 2.4.2.3 Subtask", "Phase 2 merged-candidate checkbox")
+      |> require_contains(receipt, @implementation_commit, "Phase 2 implementation commit")
+      |> require_contains(receipt, @merged_candidate, "Phase 2 merged candidate")
+      |> require_contains(receipt, @merged_date, "Phase 2 merge date")
+    else
+      errors
+      |> require_contains(plan, "status: proposed", "Phase 2 proposed status")
       |> require_contains(plan, "- [ ] 2 Phase", "Phase 2 closure checkbox")
       |> require_contains(
         plan,
@@ -653,10 +682,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA2 do
       )
       |> require_contains(plan, "- [ ] 2.4.2 Task", "Phase 2 receipt closure checkbox")
       |> require_contains(plan, "- [ ] 2.4.2.3 Subtask", "Phase 2 merged-candidate checkbox")
-
-    Enum.reduce(@threats, errors, fn threat_id, acc ->
-      require_contains(acc, threat, "`#{threat_id}`", "#{threat_id} threat trace")
-    end)
+      |> require_contains(receipt, "Status: **merge-pending**", "Phase 2 merge-pending status")
+    end
   end
 
   defp concealed_failure?(context) do
