@@ -59,20 +59,20 @@ Back to plan: [README](./README.md)
       - [x] 2.2.2.3 Subtask - Define concealed-not-found, redacted, denied, unavailable, revoked, and step-up-required outcomes without cross-scope inference.
       - [x] 2.2.2.4 Subtask - Define reauthorization points before response start, query execution, field shaping, each patch, command admission, approval commit, and export retrieval.
 
-  - [ ] 2.3 Section - Define approval separation and live revocation.
+  - [x] 2.3 Section - Define approval separation and live revocation.
 
     This section prevents stale or self-approved high-risk effects and ensures
     open browser connections cannot outlive changed authority.
 
-    - [ ] 2.3.1 Task {#huia-p02-approval-revocation} [repo: jido_code] [after: {#huia-p02-authz-matrix}] - Ratify separation-of-duty and revocation state machines.
+    - [x] 2.3.1 Task {#huia-p02-approval-revocation} [repo: jido_code] [after: {#huia-p02-authz-matrix}] - Ratify separation-of-duty and revocation state machines.
 
       This task defines canonical action-bound approvals and terminal browser
       behavior under account, session, role, delegation, and scope change.
 
-      - [ ] 2.3.1.1 Subtask - Define maker/checker, eligible approver, self-approval prohibition, quorum, canonical action digest, evidence binding, expiry, and stale-input invalidation.
-      - [ ] 2.3.1.2 Subtask - Define concurrent approval/command compare-and-set outcomes and canonical winner/loser receipts.
-      - [ ] 2.3.1.3 Subtask - Define generation/revision events for account, session, role, delegation, project, tenant, graph, and incident revocation.
-      - [ ] 2.3.1.4 Subtask - Define terminal stream close, protected-fragment replacement, reconnect suppression, download invalidation, and audit behavior after revocation.
+      - [x] 2.3.1.1 Subtask - Define maker/checker, eligible approver, self-approval prohibition, quorum, canonical action digest, evidence binding, expiry, and stale-input invalidation.
+      - [x] 2.3.1.2 Subtask - Define concurrent approval/command compare-and-set outcomes and canonical winner/loser receipts.
+      - [x] 2.3.1.3 Subtask - Define generation/revision events for account, session, role, delegation, project, tenant, graph, and incident revocation.
+      - [x] 2.3.1.4 Subtask - Define terminal stream close, protected-fragment replacement, reconnect suppression, download invalidation, and audit behavior after revocation.
 
   - [ ] 2.4 Section - Phase 2 Integration Tests.
 

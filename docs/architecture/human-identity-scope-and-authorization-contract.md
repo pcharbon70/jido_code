@@ -236,6 +236,14 @@ Revocation stops future delivery and best-effort replaces protected fragments
 for connected clients. The server does not claim it can erase bytes already
 delivered to an offline or malicious browser.
 
+The exact revocation dimensions, event fields, delivery states, terminal
+client actions, reconnect suppression, export invalidation, and audit outcomes
+are pinned in
+[Hypermedia UI approval and live revocation authority](./hypermedia-ui-approval-and-live-revocation-authority.md).
+Account, session, role, delegation, project membership, tenant membership,
+graph grant, and incident-policy revisions each invalidate an older protected
+decision independently.
+
 ## Canonical Approval And Separation Of Duty
 
 Approval records contain principal, assurance, action digest, target, scope,
@@ -246,6 +254,21 @@ cannot supply these fields.
 Policy can require two distinct principals for exact actions. The verifier,
 decider, publisher/applicator, security administrator, or incident reopen actor
 MUST satisfy explicit independence rules rather than a UI role label.
+
+The canonical action digest is SHA-256 over an Erlang deterministic term using
+the versioned `hui_action_v1` tuple pinned by the approval/revocation manifest.
+Only the server constructs this tuple. It binds action, target, scope,
+parameters/effect digest, expected revisions and fence, policy revision,
+environment, classification, expiry, and idempotency identity. A change to any
+bound input invalidates every collected approval.
+
+When separation is required, maker and checker are distinct current human
+subjects, every checker is independently eligible and sufficiently assured,
+and only unique current approvals count toward policy quorum. Self-approval is
+prohibited. Approval does not commit an effect: commit reauthorizes and uses a
+compare-and-set over the exact revisions, generations, lifecycle, digest, and
+fence. One conflicting transition wins; losers receive the same safe current
+winner receipt without effect redispatch.
 
 ## Concealment And Field Security
 
