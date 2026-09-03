@@ -24,7 +24,7 @@ runtime removal, or final release evidence.
 | Section 4.1 | `ab4e6dc1f90d804edcb4dd9266414ba8bf0c7e95` - contributor and target implementation guidance |
 | Section 4.2 | `9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71` - architecture guardrails, traceability, fixtures, and tests |
 | Section 4.3 | `29f9fe276797fab918b8d1672f7dea1ed60746ba` - authority dossier and merge-pending receipt |
-| Section 4.4 | `merge-pending` - final acceptance matrix and candidate evidence |
+| Section 4.4 | `af98c32b5ac6a5a8e0a2f38b8620475ae71d1e45` - final acceptance matrix and candidate evidence |
 | Implementation PR head | `merge-pending` |
 | Merged candidate | `merge-pending` |
 
@@ -40,7 +40,7 @@ Merge date: `merge-pending`
 | HUI-A4 governance guardrail manifest | `8ee74ebdcd5ffa0896f4918b4437e064bb22e688ef0b6495bbeea84493eea5d6` |
 | HUI-A4 program traceability manifest | `8378cb971f72b2a05ca35b79736890b0972a10abd31176b5ef334c35011312c7` |
 | HUI-A4 authority dossier manifest | `5435838660be57d8cbaf96ef392127a2ec38a8d4364f9537203918a97e03e70c` |
-| HUI-A4 acceptance matrix | `b51475119950d563de5035188fe4e6315680c50ee24f2c510cf56a77c1ddff91` |
+| HUI-A4 acceptance matrix | `78c46ba8e085124367c14f9370459b622aa74f725fa91ab103e5cdc2722e192a` |
 | Milestone A authority dossier | `c8e744270c28d9952be8ede56d016a3b8157b6da24cd5002e415e59634216c17` |
 | HUI-A4 validator source | `e2fcc6775a1559dec507ded0ae4bace4d885962ba24667eeb9e7972255dde0e9` |
 | HUI-A4 integration test | `81baa1c4363de96521a7b0eb4031bfaa8fe409cbdea97343cef50b84b7a78b83` |
