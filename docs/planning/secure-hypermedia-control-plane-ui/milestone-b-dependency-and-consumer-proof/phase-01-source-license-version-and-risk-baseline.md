@@ -32,19 +32,19 @@ Back to plan: [README](./README.md)
       - [x] 1.1.1.3 Subtask - Inventory components, public APIs, dependencies, generated assets, CSS variables, Datastar attribute handling, namespace collisions, and missing application composites.
       - [x] 1.1.1.4 Subtask - Record upstream CI results, tests, advisories, accessibility evidence/gaps, issue risk, update policy, fork/patch disposition, owner, and expiry.
 
-  - [ ] 1.2 Section - Qualify Dstar and Datastar source/protocol pairing.
+  - [x] 1.2 Section - Qualify Dstar and Datastar source/protocol pairing.
 
     This section freezes both server helper and browser runtime rather than
     inferring compatibility from examples or versionless documentation.
 
-    - [ ] 1.2.1 Task {#huib-p01-datastar} [repo: jido_code] [after: {#huib-p01-shadcn}] - Freeze the Dstar/Datastar compatibility record.
+    - [x] 1.2.1 Task {#huib-p01-datastar} [repo: jido_code] [after: {#huib-p01-shadcn}] - Freeze the Dstar/Datastar compatibility record.
 
       This task records the exact protocol behaviors the later spike must prove.
 
-      - [ ] 1.2.1.1 Subtask - Record Dstar package/source version, commit, lock checksum, archive/tree digest, license, dependencies, supported Elixir/Phoenix constraints, and helper/API inventory.
-      - [ ] 1.2.1.2 Subtask - Record Datastar client version, source commit, bundle filename, minified/unminified digest, license, build flags, CSP mode, import path, and locally served target.
-      - [ ] 1.2.1.3 Subtask - Map server event/action/attribute encodings to exact selected client behavior for requests, signals, fragments, SSE events, retries, morphing, and error handling.
-      - [ ] 1.2.1.4 Subtask - Record protocol gaps, undocumented assumptions, browser support, security advisories, patch/fork needs, update policy, and incompatible combinations.
+      - [x] 1.2.1.1 Subtask - Record Dstar package/source version, commit, lock checksum, archive/tree digest, license, dependencies, supported Elixir/Phoenix constraints, and helper/API inventory.
+      - [x] 1.2.1.2 Subtask - Record Datastar client version, source commit, bundle filename, minified/unminified digest, license, build flags, CSP mode, import path, and locally served target.
+      - [x] 1.2.1.3 Subtask - Map server event/action/attribute encodings to exact selected client behavior for requests, signals, fragments, SSE events, retries, morphing, and error handling.
+      - [x] 1.2.1.4 Subtask - Record protocol gaps, undocumented assumptions, browser support, security advisories, patch/fork needs, update policy, and incompatible combinations.
 
   - [ ] 1.3 Section - Build the dependency and supply-chain decision ledger.
 

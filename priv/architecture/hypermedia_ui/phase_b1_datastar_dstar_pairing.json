@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B1",
+  "recorded_on": "2026-09-03",
+  "status": "accepted_protocol_baseline_adoption_blocked",
+  "dstar": {
+    "package": "dstar",
+    "version": "0.2.0",
+    "repository": "https://github.com/ricotrevisan/dstar",
+    "tag": "v0.2.0",
+    "tag_signature": "unsigned_annotated_tag",
+    "commit": "4bfb9110645f3831cd350f25434493c76a42bfae",
+    "tree": "d0f781f6e97d9bb2cf03331a9202ea375d5f1a98",
+    "committed_at": "2026-08-05T09:59:43+02:00",
+    "hex_release": {
+      "url": "https://hex.pm/packages/dstar/0.2.0",
+      "inserted_at": "2026-08-05T08:08:15.435045Z",
+      "checksum_sha256": "4766c1f3da802aa7e842aa78cbb778c8d764599e18fc67bbe32fbe25ac2c6460",
+      "retired": false,
+      "publisher": "ricotrevisan"
+    },
+    "integrity": {
+      "archive_command": "git archive --format=tar 4bfb9110645f3831cd350f25434493c76a42bfae",
+      "archive_sha256": "8ea84f50f5a9d4877f3cffad7861927d555140cdb779573b22de0d225c12d06e",
+      "tree_entry_count": 59,
+      "license_sha256": "7852a5b0a878f3cf58dc7a6eb003565c619d024be28fbe531acbc50ab585be5f",
+      "mix_exs_sha256": "5e9d93ec4776ccd5d1ca22e80b3a3054fc99d800fee9349fcf63c398d6b6676c",
+      "source_mix_lock_sha256": "7a49ec830fcea0d04aa3f6574794f6ce2e4a238e0d0e4db693f5a3d4f90d160e",
+      "changelog_sha256": "893066d98d53becdddcea3ba76e4beb73773803ddc47dbc72c76793164bc3972"
+    },
+    "license": {
+      "spdx": "MIT",
+      "path": "LICENSE",
+      "conditions": ["retain_copyright_and_permission_notice"]
+    },
+    "constraints": {
+      "elixir": "~> 1.14",
+      "required": [
+        {"name": "plug", "constraint": "~> 1.14"},
+        {"name": "jason", "constraint": "~> 1.4"}
+      ],
+      "optional": [
+        {"name": "phoenix", "constraint": "~> 1.7"},
+        {"name": "phoenix_live_view", "constraint": "~> 1.0"}
+      ]
+    },
+    "api_inventory": [
+      "Dstar",
+      "Dstar.SSE",
+      "Dstar.Signals",
+      "Dstar.Elements",
+      "Dstar.Actions",
+      "Dstar.Scripts",
+      "Dstar.Page",
+      "Dstar.Component",
+      "Dstar.Router",
+      "Dstar.Page.Plug",
+      "Dstar.Page.Helpers",
+      "Dstar.Page.Assigns",
+      "Dstar.Plugs.Dispatch",
+      "Dstar.Plugs.RenameCsrfParam",
+      "Dstar.Test",
+      "Dstar.Utility.StreamRegistry"
+    ],
+    "selected_surface": [
+      "Dstar.SSE framing",
+      "Dstar.Elements formatting and delivery",
+      "Dstar.Signals reading formatting and delivery",
+      "Dstar.Test decoding where useful"
+    ],
+    "prohibited_or_deferred_surface": [
+      "Dstar.Scripts",
+      "Dstar.Page",
+      "Dstar.Component",
+      "Dstar.Router",
+      "Dstar.Page.Plug",
+      "Dstar.Plugs.Dispatch",
+      "dynamic module dispatch",
+      "Dstar.Plugs.RenameCsrfParam default nonlocal csrf signal transport",
+      "Dstar.Utility.StreamRegistry as authority quota revocation or lifetime owner"
+    ],
+    "upstream_evidence": {
+      "repository_archived": false,
+      "repository_disabled": false,
+      "open_issue_count_at_review": 12,
+      "repository_security_advisories_at_review": [],
+      "hex_security_advisories_at_review": [],
+      "exact_commit_checks": [
+        {"name": "Test (Elixir 1.18 / OTP 27)", "conclusion": "success", "url": "https://github.com/ricotrevisan/dstar/actions/runs/30987195294/job/92244609626"},
+        {"name": "Test (Elixir 1.16 / OTP 26)", "conclusion": "success", "url": "https://github.com/ricotrevisan/dstar/actions/runs/30987195294/job/92244609551"}
+      ]
+    }
+  },
+  "datastar": {
+    "repository": "https://github.com/starfederation/datastar",
+    "version": "1.0.3",
+    "tag": "v1.0.3",
+    "annotated_tag_object": "7c8d39a10f6013dc4b9443203bf89b66b2d6f730",
+    "tag_signature": {
+      "status": "verified_by_GitHub",
+      "key_fingerprint": "210FDD28983C35883AC94DA509D799816F1CF332",
+      "verified_at": "2026-08-27T14:15:15Z",
+      "local_verification": "public_key_not_present"
+    },
+    "commit": "73ab00e7c06d8c2bad030fdddafba800fcccbde2",
+    "tree": "54640bca9fee5bc6f2b7b488aba56d19f776cbdd",
+    "committed_at": "2026-08-27T16:10:16+02:00",
+    "release_published_at": "2026-08-27T14:15:59Z",
+    "release_assets": [],
+    "integrity": {
+      "archive_command": "git archive --format=tar 73ab00e7c06d8c2bad030fdddafba800fcccbde2",
+      "archive_sha256": "3cc36052c8036e42bbc456bcd4190a17d6644f3ae0bab7a1b8145d9a775c70cb",
+      "tree_entry_count": 216,
+      "license_sha256": "17da0e216d3c6a819526f5b72a6a44d84d34bcd9beb4191ac6af89c1508ef08f",
+      "sdk_config_sha256": "1d85ca17de97b5ab17ca33152aa4dd1b3d9a1d0642277d8ec869d86b47210180",
+      "sdk_adr_sha256": "efdc90488bcdd1936ef322cab535ff2f9be2a067b1137e0b6f244acd1d81e40d",
+      "csp_source_sha256": "414f21c72ec3c7e98132f6471367cafc92d7d5fd492f59864deb9f172a083a85"
+    },
+    "license": {
+      "spdx": "MIT",
+      "path": "LICENSE.md",
+      "conditions": ["retain_copyright_and_permission_notice"]
+    },
+    "selected_bundle": {
+      "path": "bundles/datastar.js",
+      "sha256": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+      "bytes": 33538,
+      "format": "minified_ES_module_full_standard_attribute_bundle",
+      "source_map_path": "bundles/datastar.js.map",
+      "source_map_sha256": "78460dcfbadbd8ffd4954753fae02337d7afd6537b5975916280aa5532cfa72a",
+      "source_map_bytes": 195190,
+      "source_map_embedded_sources": 35,
+      "unminified_bundle_path": null,
+      "unminified_bundle_sha256": null,
+      "unminified_disposition": "upstream_tag_publishes_no_unminified_bundle; source_identity_is_the_pinned_tree_archive_and_embedded_source_map",
+      "local_import_source_target": "assets/vendor/datastar/datastar.js",
+      "application_import_target": "assets/js/app.js",
+      "served_target": "/assets/app.js",
+      "source_map_delivery": "disabled_in_production_unless_separately_approved"
+    },
+    "build_record": {
+      "typescript_target": "ES2021",
+      "module": "ESNext",
+      "module_resolution": "bundler",
+      "bundle_entry": "library/src/bundles/datastar.ts",
+      "bundle_plugins": [
+        "peek",
+        "setAll",
+        "toggleAll",
+        "fetch",
+        "attr",
+        "bind",
+        "class",
+        "computed",
+        "effect",
+        "indicator",
+        "init",
+        "jsonSignals",
+        "on",
+        "onIntersect",
+        "onInterval",
+        "onSignalPatch",
+        "ref",
+        "show",
+        "signals",
+        "style",
+        "text",
+        "patchElements",
+        "patchSignals"
+      ],
+      "rebuild_status": "not_reproducible_from_release_tree_alone",
+      "rebuild_gap": "Taskfile invokes pnpm in library but the release tree contains no package manifest or package lock",
+      "phase_2_disposition": "vendor_and_verify_exact_selected_bundle_bytes_in_the_existing_locked_application_pipeline"
+    },
+    "csp": {
+      "mode": "opt_in_nonce_mode",
+      "activation": "render a fresh nonempty data-nonce on the html element before the module executes",
+      "behavior": "Datastar removes data-nonce then compiles expressions through nonce-bearing transient script elements",
+      "unsafe_eval_required": false,
+      "unsafe_inline_required": false,
+      "remote_source_required": false,
+      "trusted_types_policy": "datastar",
+      "requirements": [
+        "the Datastar module and transient expression scripts receive the same response-scoped nonce policy",
+        "trusted-types datastar is allowed when Trusted Types is enforced",
+        "expressions remain static reviewed application source",
+        "Dstar.Scripts and text/javascript response execution remain prohibited"
+      ]
+    },
+    "browser_contract": {
+      "upstream_declared_floor": "ES2021 plus DOM and DOM.Iterable",
+      "required_apis": [
+        "AbortController",
+        "CustomEvent",
+        "MutationObserver",
+        "IntersectionObserver",
+        "URLSearchParams",
+        "window.fetch",
+        "ReadableStream"
+      ],
+      "optional_apis": ["document.startViewTransition", "window.trustedTypes"],
+      "exact_release_browser_CI": "no_check_runs_attached_to_release_commit",
+      "support_status": "unqualified_until_HUI_B3_and_HUI_B4_real_browser_matrix"
+    },
+    "upstream_evidence": {
+      "repository_archived": false,
+      "repository_disabled": false,
+      "open_issue_count_at_review": 15,
+      "repository_security_advisories_at_review": [],
+      "exact_commit_check_runs": [],
+      "release_notes": "https://github.com/starfederation/datastar/releases/tag/v1.0.3",
+      "csp_issue": "https://github.com/starfederation/datastar/issues/1142"
+    }
+  },
+  "compatibility_matrix": [
+    {"id": "request_headers", "dstar_or_application": "application emits explicit routes and closed static action expressions", "datastar_1_0_3": "sends Accept text/event-stream,text/html,application/json and Datastar-Request true", "jido_code_disposition": "prove exact Origin Fetch-Metadata content-type and method admission in the consumer spike"},
+    {"id": "json_signal_transport", "dstar_or_application": "Dstar.Signals.read reads GET/DELETE datastar query JSON and other methods from the body", "datastar_1_0_3": "GET/DELETE serialize filtered JSON into datastar query; POST/PUT/PATCH send JSON body", "jido_code_disposition": "GET is read-only; mutations use POST/PUT/PATCH; DELETE is avoided; every signal schema and byte limit is application-owned"},
+    {"id": "form_transport", "dstar_or_application": "ordinary Phoenix forms and controllers remain authoritative", "datastar_1_0_3": "form content uses URL encoding or multipart body on body-capable methods", "jido_code_disposition": "native action/method/CSRF path first, then exact enhanced parity"},
+    {"id": "csrf", "dstar_or_application": "Dstar RenameCsrfParam can copy a nonlocal csrf signal from body or query", "datastar_1_0_3": "nonlocal signals are sent and GET/DELETE place them in the URL", "jido_code_disposition": "default Dstar csrf-signal pattern is prohibited; use native form token or qualified same-origin header/body transport with no credential in URL"},
+    {"id": "element_event", "dstar_or_application": "Dstar.Elements emits datastar-patch-elements with selector mode namespace useViewTransition and elements lines", "datastar_1_0_3": "recognizes datastar-patch-elements and outer inner remove replace prepend append before after modes", "jido_code_disposition": "only stable authorized roots and bounded escaped HTML; Phase 3 proves morph focus and overlay behavior"},
+    {"id": "signal_event", "dstar_or_application": "Dstar.Signals emits datastar-patch-signals with signals and optional onlyIfMissing", "datastar_1_0_3": "merges JSON signal patches and deletes null paths unless onlyIfMissing applies", "jido_code_disposition": "signals are untrusted bounded presentation intent and never authority or durable state"},
+    {"id": "sse_framing", "dstar_or_application": "Dstar.SSE emits safe CR/LF-split data lines and strips line breaks from event id and retry fields", "datastar_1_0_3": "parses text/event-stream, remembers last-event-id and applies Datastar-prefixed events", "jido_code_disposition": "application owns response admission event and patch ceilings heartbeat lifetime reauthorization and terminal closure"},
+    {"id": "non_sse_response", "dstar_or_application": "application may return bounded HTML or JSON", "datastar_1_0_3": "200 text/html dispatches an element patch and 200 application/json dispatches a signal patch", "jido_code_disposition": "only documented bounded response shapes; text/javascript is prohibited"},
+    {"id": "retries", "dstar_or_application": "Dstar documents retryMaxCount as consecutive failure count only", "datastar_1_0_3": "successful HTTP 200 resets the counter; auto/error/always/never modes and exponential backoff are client behavior", "jido_code_disposition": "application hard lifetime revocation reconnect suppression and connection limits are mandatory because retryMaxCount cannot bound successful reconnect cycles"},
+    {"id": "errors", "dstar_or_application": "Dstar raises on invalid modes namespaces verbs and unsafe helper input", "datastar_1_0_3": "dispatches started finished error retrying and retries-failed fetch events and rejects blocked CSP compilation", "jido_code_disposition": "server returns a closed sanitized outcome and native recovery; no source path secret or exception disclosure"},
+    {"id": "csp", "dstar_or_application": "Dstar expressions are generated strings and Dstar.Scripts can emit executable script elements", "datastar_1_0_3": "data-nonce opt-in compiles expressions with nonce-bearing transient scripts instead of Function", "jido_code_disposition": "nonce mode is mandatory; generated expressions must be static reviewed source; Dstar.Scripts remains prohibited"}
+  ],
+  "incompatible_combinations": [
+    {"combination": "Dstar 0.2.0 plus Datastar 1.0.0 through 1.0.2 under no-unsafe-eval CSP", "reason": "those clients compile expressions with Function and have no nonce mode", "status": "rejected"},
+    {"combination": "Dstar 0.2.0 default dynamic dispatch/page router as product handler", "reason": "browser-selected module or event dispatch conflicts with explicit application routes and pre-response authorization", "status": "rejected"},
+    {"combination": "Dstar RenameCsrfParam nonlocal csrf signal with enhanced GET or DELETE", "reason": "the credential enters query strings logs and same-origin referrers", "status": "rejected"},
+    {"combination": "Datastar CDN version tag or mutable develop branch", "reason": "remote and mutable runtime violates local exact-digest delivery", "status": "rejected"},
+    {"combination": "Datastar text/javascript response or Dstar.Scripts", "reason": "executable server response conflicts with static expression and no-script-surface policy", "status": "rejected"}
+  ],
+  "risk_register": [
+    {"id": "HUI-B1-PAIR-R01", "severity": "P0", "owner": "HUI-B2 asset owner", "status": "blocking_adoption", "risk": "Datastar v1.0.3 has no uploaded release asset and its release tree lacks the package manifest and lock needed to reproduce bundles", "mitigation": "vendor the exact signed-tag bundle bytes and verify source archive bundle and application output digests in clean checkouts", "expires_on": "2026-10-03", "reopening_condition": "a rebuilt or downloaded bundle receives the selected digest without byte-for-byte verification"},
+    {"id": "HUI-B1-PAIR-R02", "severity": "P0", "owner": "HUI-B2 security owner", "status": "blocking_adoption", "risk": "nonce CSP mode dynamically creates transient scripts and a Trusted Types policy", "mitigation": "prove enforcing CSP without unsafe-eval unsafe-inline or remote sources and qualify the datastar Trusted Types policy", "expires_on": "HUI-B2", "reopening_condition": "CSP is weakened or nonce and Trusted Types behavior is inferred instead of tested"},
+    {"id": "HUI-B1-PAIR-R03", "severity": "P0", "owner": "HUI-B3 request security owner", "status": "blocking_consumer", "risk": "default nonlocal csrf signals can enter GET/DELETE URLs and all nonlocal signals are transmitted by default", "mitigation": "reject DELETE enhanced actions and default RenameCsrfParam transport; use closed filtered schemas plus qualified header/body CSRF", "expires_on": "HUI-B3", "reopening_condition": "a credential enters signals URLs logs or referrers or an open signal schema is accepted"},
+    {"id": "HUI-B1-PAIR-R04", "severity": "P0", "owner": "HUI-B3 stream owner", "status": "blocking_consumer", "risk": "client retryMaxCount does not bound reconnect cycles that obtain successful HTTP 200 responses", "mitigation": "application-owned admission hard lifetime reauthorization connection ceilings terminal revocation and reconnect suppression", "expires_on": "HUI-B3", "reopening_condition": "Datastar retry count or Dstar StreamRegistry is treated as lifetime quota revocation or authority"},
+    {"id": "HUI-B1-PAIR-R05", "severity": "P1", "owner": "HUI-B3 browser owner", "status": "blocking_release", "risk": "the Datastar release commit has no attached check runs or accepted browser support matrix", "mitigation": "run pinned real-browser native enhanced CSP morph focus disconnect and recovery suites in HUI-B3 and HUI-B4", "expires_on": "HUI-B4", "reopening_condition": "ES2021 source target or upstream release status is presented as supported-browser evidence"},
+    {"id": "HUI-B1-PAIR-R06", "severity": "P1", "owner": "HUI-B supply-chain owner", "status": "open", "risk": "Dstar tag is unsigned and Datastar signer key is not present in the local trust store", "mitigation": "combine exact commits trees archives Hex checksum and GitHub-verified Datastar signature; require fresh review on signer or tag drift", "expires_on": "2026-10-03", "reopening_condition": "tag labels alone are treated as integrity or the GitHub signature result changes"},
+    {"id": "HUI-B1-PAIR-R07", "severity": "P1", "owner": "HUI-B3 protocol owner", "status": "open", "risk": "Dstar 0.2.0 documents Datastar v1.0 while the selected client is patch 1.0.3 and adds optional response behavior not emitted by Dstar", "mitigation": "pin the exact behavior matrix and prove every selected request event morph retry error and CSP behavior in the consumer fixture", "expires_on": "HUI-B3", "reopening_condition": "semver compatibility replaces exact protocol tests or an unrecorded data line is emitted"}
+  ],
+  "update_policy": {
+    "cadence": "monthly_and_on_security_release_or_protocol_event",
+    "expiry": "2026-10-03_or_first_source_tag_bundle_license_signature_dependency_CSP_protocol_CI_browser_or_advisory_change",
+    "pinning": "Dstar exact Hex version checksum source commit tree archive and license plus Datastar exact signed tag commit tree archive bundle and source-map digests",
+    "patch_policy": "no local patch or fork selected; any byte change creates a new candidate identity and repeats HUI-B1 review",
+    "adoption_decision": "blocked_until_HUI_B2_asset_CSP_and_HUI_B3_consumer_protocol_proofs_close"
+  }
+}
