@@ -28,8 +28,14 @@ dependency, or route, answer every applicable check.
    commands accept them?
 4. Are credentials, source bodies, prompts, raw model/tool output, private
    paths, and personal data rejected or classified/redacted before output?
-5. Does browser state contain only presentation preferences and bounded island
-   props/events rather than graph authority or workflow persistence?
+5. Does browser state contain only presentation preferences and bounded
+   signals rather than graph authority, trusted revisions, or workflow
+   persistence?
+6. Does a target product route use explicit controllers/HEEx, closed requests,
+   stable fragment roots, an application-owned coordinator for SSE, and native
+   fallback without product LiveView/LiveVue/SaladUI runtime use?
+7. If `phoenix_live_view` remains, does the exact consumer manifest prove it is
+   qualified compile-time `Phoenix.Component`/HEEx use only?
 
 ## Required Verification
 
@@ -47,5 +53,7 @@ mix precommit
 Update ontology fixtures/checksums, command/query catalogs, capacity limits,
 threat model, runbooks, and migration contract when their boundary changes.
 Any direct RocksDB/TripleStore handle outside Knowledge, raw SPARQL outside its
-private adapters, alternate durable store/queue, unbounded browser graph, or
-compatibility facade is release-blocking.
+private adapters, alternate durable store/queue, unbounded browser graph,
+remote/CDN product asset, browser-derived authority, unallowlisted target
+route/event, product LiveView/LiveVue/SaladUI use past its migration fence, or
+unexplained compatibility consumer is release-blocking.

@@ -61,3 +61,18 @@ reconcile. An absent substrate receipt and absent semantic outcome is unknown;
 callers may then submit or retry the same retained identity. Rejected and
 superseded states require their own persisted, authorized audit receipt and
 are never inferred from a transient error response.
+
+## Hypermedia Subscriber And Receipt Adapter
+
+The target application-owned SSE coordinator is a `ProjectionSubscription`
+consumer, not a second delivery authority. Admission, periodic checks,
+revocation, and every protected patch use the trusted identity/authority
+builder and a fresh reviewed projection. Dstar transports bounded events only.
+Datastar signals, event IDs, connection state, and DOM revisions never alter
+the last server-evaluated graph revision.
+
+After a command transport interruption, an action adapter retains the exact
+validated envelope identity and invokes command-status recovery. It renders
+only `unknown`, `staged`, `committed`, `rejected`, `superseded`, or concealed
+`inaccessible` from the authorized graph result. It never derives success from
+an HTTP status, optimistic patch, client retry counter, or open stream.

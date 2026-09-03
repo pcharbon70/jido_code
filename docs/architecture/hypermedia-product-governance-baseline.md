@@ -47,7 +47,11 @@ module, contract, or accepted receipt exists.
 
 ## Contract Preservation And Supersession
 
-| Existing contract | Preserved authority | Proposed supersession |
+The accepted clause-by-clause owner and migration record is the
+[HUI-A3 runtime contract supersession](./hypermedia-ui-runtime-contract-supersession.md)
+and its machine supersession matrix.
+
+| Existing contract | Preserved authority | HUI-A3 target disposition |
 |---|---|---|
 | Graph-only source of truth | TripleStore remains durable authority | None |
 | Reviewed query catalog | Closed, bounded, authorized reads | Add product lens queries; no raw browser |

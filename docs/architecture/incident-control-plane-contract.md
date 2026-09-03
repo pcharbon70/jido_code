@@ -1,7 +1,8 @@
 # Incident Control Plane Contract
 
-- Status: Proposed under ADR 0009
-- Specification version: `0.1.0`
+- Status: Accepted architecture contract under ADRs 0009 and 0011; controls remain unavailable
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode security, operations, Factory, runtime, and audit maintainers
 - Milestone: G — Security And Release Qualification
 - Decisions:

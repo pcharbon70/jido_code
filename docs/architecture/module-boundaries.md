@@ -16,7 +16,7 @@ flowchart TB
   RUNTIME["JidoCode.Runtime\nephemeral execution"]
   KNOWLEDGE["JidoCode.Knowledge\nsemantic commands and queries"]
   STORE[("TripleStore quad dataset")]
-  WEB["JidoCodeWeb\nLiveView and LiveVue"]
+  WEB["JidoCodeWeb\ncontrollers, HEEx, and hypermedia adapters"]
 
   EXT <--> INTEGRATIONS
   INTEGRATIONS --> FACTORY
@@ -108,10 +108,12 @@ or workspace paths through that facade.
 
 ### `JidoCodeWeb`
 
-Owns routing, authentication/session presentation, LiveView shells, HEEx
-components, LiveVue island mounts, and browser event translation. Web modules
-may call Factory services and approved read projections. They cannot issue raw
-SPARQL, invoke knowledge internals, or send store/domain structs to the browser.
+Owns routing, authentication/session presentation, controller-rendered HEEx,
+closed fragment/action adapters, application-owned SSE coordination, component
+facades, and bounded browser-intent translation. Web modules may call Factory
+services and approved read projections. They cannot issue raw SPARQL, invoke
+knowledge internals, send store/domain structs to the browser, derive authority
+from signals/DOM/URLs, or treat Dstar/Datastar as application state.
 
 ## Dependency Rules
 

@@ -49,3 +49,14 @@ state and schedules a re-query, covering notification or mailbox loss.
 Authority-context changes force another refresh; a revoked or narrowed actor
 becomes inaccessible instead of retaining a cached projection. Process restart
 uses the consumer's last known revision and the same re-query path.
+
+## Hypermedia Delivery Adapter
+
+The target controller and stream coordinator consume only complete authorized
+`ProjectionEnvelope` values. A full page or fragment reauthorizes before query;
+an SSE coordinator reauthorizes at admission, periodically, on revocation, and
+before every protected patch. A `ChangeFeed` or PubSub message remains only a
+refresh hint. It cannot be serialized as product truth or forwarded to the
+browser as an authoritative revision. Unavailable results clear the affected
+fragment rows, and reconnect begins from a current snapshot rather than a
+process cache.

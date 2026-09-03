@@ -1,7 +1,8 @@
 # ShadcnUI Adoption And Component Contract
 
-- Status: Proposed under ADR 0010
-- Specification version: `0.1.0`
+- Status: Accepted architecture contract under ADR 0010; dependency adoption gated
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode web, design-system, supply-chain, security, and
   accessibility maintainers
 - Milestones: B and C

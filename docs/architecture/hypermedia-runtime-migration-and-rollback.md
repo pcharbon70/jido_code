@@ -1,7 +1,8 @@
 # Hypermedia Runtime Migration And Rollback
 
-- Status: Proposed under ADRs 0008 and 0010
-- Specification version: `0.1.0`
+- Status: Accepted architecture contract under ADRs 0008 and 0010; removal gated
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode web, operations, release, security, and documentation
   maintainers
 - Milestone: H — Remove Superseded Product Runtime

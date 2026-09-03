@@ -1,7 +1,8 @@
 # Datastar Request, Signal, Fragment, And Stream Contract
 
-- Status: Proposed under ADR 0008
-- Specification version: `0.1.0`
+- Status: Accepted architecture contract under ADR 0008; implementation gated
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode web, security, projection, and operations maintainers
 - Milestone: D — Datastar Delivery
 - Decision: [ADR 0008](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)

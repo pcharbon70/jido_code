@@ -1,7 +1,8 @@
 # Hypermedia UI Security, Privacy, And Threat Model
 
-- Status: Proposed under ADRs 0008, 0009, and 0011
-- Specification version: `0.2.0`
+- Status: Accepted architecture contract under ADRs 0008, 0009, and 0011; release gated
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode security, identity, product, Knowledge, and operations
   maintainers
 - Milestone: G — Security And Release Qualification

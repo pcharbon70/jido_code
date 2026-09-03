@@ -43,30 +43,30 @@ Back to plan: [README](./README.md)
       - [x] 3.1.2.3 Subtask - Decide the ten lens groups, graph-family mapping, reviewed-query-only rule, visualization selection, bounds, provenance, and accessible alternatives.
       - [x] 3.1.2.4 Subtask - Prohibit raw SPARQL, unrestricted graph browsing, a universal node-link hairball, chat-as-record-of-truth, and process heartbeat as semantic progress.
 
-  - [ ] 3.2 Section - Amend all affected architecture and product contracts.
+  - [x] 3.2 Section - Amend all affected architecture and product contracts.
 
     This section removes contradictory ownership clauses and installs explicit
     page, request, stream, command, receipt, revocation, and projection rules.
 
-    - [ ] 3.2.1 Task {#huia-p03-contracts} [repo: jido_code] [after: {#huia-p03-product-adr}] - Reconcile product, wiki, security, testing, and operations specifications.
+    - [x] 3.2.1 Task {#huia-p03-contracts} [repo: jido_code] [after: {#huia-p03-product-adr}] - Reconcile product, wiki, security, testing, and operations specifications.
 
       This task makes the proposed hypermedia specifications the complete
       replacement for presentation-specific clauses they supersede.
 
-      - [ ] 3.2.1.1 Subtask - Amend product-surface, repository-wiki product, delegated-agent product, security/privacy, projection delivery, command recovery, fleet operations, install/rollback, and contributor fitness contracts.
-      - [ ] 3.2.1.2 Subtask - Freeze explicit full-page/fragment/action/stream routes, HTTP methods, request classes, signal namespaces, projection states, patch roots, error outcomes, and native fallback expectations.
-      - [ ] 3.2.1.3 Subtask - Freeze trusted identity/authority builder, reauthorization points, stream lifetime/revocation, command preview/receipt, export, incident, and audit interfaces.
-      - [ ] 3.2.1.4 Subtask - Preserve accepted wiki enrollment, per-repository isolation, maintainer, token reservation/usage/cost, budget, and deterministic-release semantics in the new product contract.
+      - [x] 3.2.1.1 Subtask - Amend product-surface, repository-wiki product, delegated-agent product, security/privacy, projection delivery, command recovery, fleet operations, install/rollback, and contributor fitness contracts.
+      - [x] 3.2.1.2 Subtask - Freeze explicit full-page/fragment/action/stream routes, HTTP methods, request classes, signal namespaces, projection states, patch roots, error outcomes, and native fallback expectations.
+      - [x] 3.2.1.3 Subtask - Freeze trusted identity/authority builder, reauthorization points, stream lifetime/revocation, command preview/receipt, export, incident, and audit interfaces.
+      - [x] 3.2.1.4 Subtask - Preserve accepted wiki enrollment, per-repository isolation, maintainer, token reservation/usage/cost, budget, and deterministic-release semantics in the new product contract.
 
-    - [ ] 3.2.2 Task {#huia-p03-versioning} [repo: jido_code] [after: {#huia-p03-contracts}] - Assign interface versions, owners, compatibility, and migration fences.
+    - [x] 3.2.2 Task {#huia-p03-versioning} [repo: jido_code] [after: {#huia-p03-contracts}] - Assign interface versions, owners, compatibility, and migration fences.
 
       This task prevents parallel sessions and later milestones from racing
       shared contracts or inventing incompatible protocol meanings.
 
-      - [ ] 3.2.2.1 Subtask - Assign owners and versions for identity/session, product projection, signal/fragment, stream, component facade, command adapter, lens registry, incident, and migration protocols.
-      - [ ] 3.2.2.2 Subtask - Define additive/compatible/breaking change rules, old-reader behavior, feature flags, dual-read/write prohibitions, and deprecation windows.
-      - [ ] 3.2.2.3 Subtask - Define which phase owns every shared file/module/route/schema and how parallel worktrees reconcile without concurrent version assignment.
-      - [ ] 3.2.2.4 Subtask - Bind removal and rollback decisions to an exact consumer manifest and accepted evidence rather than milestone completion labels alone.
+      - [x] 3.2.2.1 Subtask - Assign owners and versions for identity/session, product projection, signal/fragment, stream, component facade, command adapter, lens registry, incident, and migration protocols.
+      - [x] 3.2.2.2 Subtask - Define additive/compatible/breaking change rules, old-reader behavior, feature flags, dual-read/write prohibitions, and deprecation windows.
+      - [x] 3.2.2.3 Subtask - Define which phase owns every shared file/module/route/schema and how parallel worktrees reconcile without concurrent version assignment.
+      - [x] 3.2.2.4 Subtask - Bind removal and rollback decisions to an exact consumer manifest and accepted evidence rather than milestone completion labels alone.
 
   - [ ] 3.3 Section - Freeze validation and release evidence contracts.
 

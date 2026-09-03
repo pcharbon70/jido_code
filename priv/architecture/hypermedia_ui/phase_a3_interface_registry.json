@@ -1,0 +1,291 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A3",
+  "registry_version": "hui.interfaces/1.0.0",
+  "status": "accepted_architecture_contract",
+  "availability": "unavailable_until_owning_milestone_gates",
+  "interfaces": [
+    {
+      "id": "hui.identity_scope.v1",
+      "version": "1.0.0",
+      "owner": "JidoCode_identity_security_and_web",
+      "milestone": "HUI-C",
+      "status": "contract_only",
+      "consumers": ["page", "fragment", "action", "stream", "approval", "incident", "export", "download"]
+    },
+    {
+      "id": "hui.product_projection.v1",
+      "version": "1.0.0",
+      "owner": "JidoCode_Product_and_Knowledge_projection",
+      "milestone": "HUI-C",
+      "status": "contract_only",
+      "consumers": ["page", "fragment", "stream", "lens", "wiki"]
+    },
+    {
+      "id": "hui.signal_fragment.v1",
+      "version": "1.0.0",
+      "owner": "JidoCodeWeb",
+      "milestone": "HUI-D",
+      "status": "contract_only",
+      "consumers": ["datastar_request_adapter", "heex_fragment_renderer"]
+    },
+    {
+      "id": "hui.stream.v1",
+      "version": "1.0.0",
+      "owner": "JidoCodeWeb_delivery_and_operations",
+      "milestone": "HUI-D",
+      "status": "contract_only",
+      "consumers": ["authorized_delivery_coordinator", "projection_subscription", "dstar_transport"]
+    },
+    {
+      "id": "hui.component_facade.v1",
+      "version": "1.0.0",
+      "owner": "JidoCodeWeb.Components.UI",
+      "milestone": "HUI-B",
+      "status": "contract_only_dependency_unqualified",
+      "consumers": ["JidoCode_owned_HEEx_composites"]
+    },
+    {
+      "id": "hui.command_adapter.v1",
+      "version": "1.0.0",
+      "owner": "JidoCode_Product_and_Factory_gateways",
+      "milestone": "HUI-E",
+      "status": "contract_only",
+      "semantic_protocol": "2.11.0",
+      "consumers": ["action_controller", "approval_controller", "receipt_recovery"]
+    },
+    {
+      "id": "hui.lens_registry.v1",
+      "version": "1.0.0",
+      "owner": "JidoCode_Product_Knowledge_and_wiki",
+      "milestone": "HUI-F",
+      "status": "contract_only",
+      "consumers": ["lens_page", "lens_fragment", "export"]
+    },
+    {
+      "id": "hui.incident.v1",
+      "version": "1.0.0",
+      "owner": "JidoCode_security_operations_and_audit",
+      "milestone": "HUI-G",
+      "status": "read_only_until_semantic_controls_exist",
+      "consumers": ["incident_page", "incident_action", "incident_audit"]
+    },
+    {
+      "id": "hui.audit_export.v1",
+      "version": "1.0.0",
+      "owner": "JidoCode_security_Knowledge_and_audit",
+      "milestone": "HUI-G",
+      "status": "contract_only",
+      "consumers": ["audit_page", "export_create", "export_retrieval"]
+    },
+    {
+      "id": "hui.runtime_migration.v1",
+      "version": "1.0.0",
+      "owner": "JidoCode_web_operations_release_and_documentation",
+      "milestone": "HUI-H",
+      "status": "contract_only",
+      "consumers": ["router", "endpoint", "assets", "dependencies", "tests", "runbooks", "rollback"]
+    }
+  ],
+  "projection_states": [
+    "ready",
+    "empty",
+    "stale",
+    "incomplete",
+    "contradicted",
+    "truncated",
+    "unauthorized",
+    "unavailable",
+    "maintenance",
+    "recovery"
+  ],
+  "request_classes": [
+    {"id": "full_page", "methods": ["GET"], "response": "complete_heex_document", "effect": false},
+    {"id": "bounded_read", "methods": ["GET", "POST"], "response": "authorized_heex_fragment", "effect": false},
+    {"id": "stream_connect", "methods": ["POST"], "response": "text_event_stream_with_initial_snapshot", "effect": false},
+    {"id": "semantic_action", "methods": ["POST"], "response": "canonical_receipt_and_refreshed_fragments", "effect": true},
+    {"id": "approval_preview", "methods": ["GET", "POST"], "response": "canonical_heex_transaction", "effect": false},
+    {"id": "export_create", "methods": ["POST"], "response": "bounded_artifact_receipt", "effect": true},
+    {"id": "export_retrieval", "methods": ["GET"], "response": "reauthorized_bounded_artifact", "effect": false}
+  ],
+  "routes": [
+    {"id": "factory_page", "class": "full_page", "method": "GET", "path": "/factory", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "projects_page", "class": "full_page", "method": "GET", "path": "/projects", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "project_page", "class": "full_page", "method": "GET", "path": "/projects/:project_ref", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "project_work_page", "class": "full_page", "method": "GET", "path": "/projects/:project_ref/work", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "project_attempts_page", "class": "full_page", "method": "GET", "path": "/projects/:project_ref/attempts", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "attempt_page", "class": "full_page", "method": "GET", "path": "/projects/:project_ref/attempts/:attempt_ref", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "lens_page", "class": "full_page", "method": "GET", "path": "/projects/:project_ref/knowledge/:lens", "interface": "hui.lens_registry.v1", "status": "contract_only", "native_fallback": "ordinary_navigation_with_accessible_table"},
+    {"id": "wiki_page", "class": "full_page", "method": "GET", "path": "/projects/:project_ref/wiki/*wiki_path", "interface": "hui.lens_registry.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "review_page", "class": "full_page", "method": "GET", "path": "/reviews/:candidate_ref", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "operations_page", "class": "full_page", "method": "GET", "path": "/operations/*path", "interface": "hui.product_projection.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "governance_page", "class": "full_page", "method": "GET", "path": "/governance/*path", "interface": "hui.incident.v1", "status": "contract_only", "native_fallback": "ordinary_navigation"},
+    {"id": "factory_attention_fragment", "class": "bounded_read", "method": "GET", "path": "/_fragments/factory/attention", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-factory-attention"},
+    {"id": "factory_health_fragment", "class": "bounded_read", "method": "GET", "path": "/_fragments/factory/health", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-factory-health"},
+    {"id": "factory_fleet_fragment", "class": "bounded_read", "method": "POST", "path": "/_fragments/factory/fleet", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-factory-fleet"},
+    {"id": "project_summary_fragment", "class": "bounded_read", "method": "GET", "path": "/_fragments/projects/:project_ref/summary", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-project-summary"},
+    {"id": "project_attempts_fragment", "class": "bounded_read", "method": "POST", "path": "/_fragments/projects/:project_ref/attempts", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-project-attempts"},
+    {"id": "attempt_workspace_fragment", "class": "bounded_read", "method": "GET", "path": "/_fragments/projects/:project_ref/attempts/:attempt_ref/workspace", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-attempt-workspace"},
+    {"id": "attempt_conversation_fragment", "class": "bounded_read", "method": "POST", "path": "/_fragments/projects/:project_ref/attempts/:attempt_ref/conversation", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-attempt-conversation"},
+    {"id": "wiki_fragment", "class": "bounded_read", "method": "POST", "path": "/_fragments/projects/:project_ref/wiki/:wiki_ref", "interface": "hui.signal_fragment.v1", "status": "contract_only", "patch_root": "hui-wiki-content"},
+    {"id": "lens_fragment", "class": "bounded_read", "method": "POST", "path": "/_fragments/projects/:project_ref/knowledge/:lens", "interface": "hui.lens_registry.v1", "status": "contract_only", "patch_root": "hui-lens-results"},
+    {"id": "product_stream", "class": "stream_connect", "method": "POST", "path": "/streams/product", "interface": "hui.stream.v1", "status": "contract_only", "patch_root": "allowlisted_projection_roots_only"},
+    {"id": "repository_enrollment_preview", "class": "approval_preview", "method": "POST", "path": "/actions/projects/:project_ref/repository-enrollment/preview", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "server_rendered_validation_preview"},
+    {"id": "repository_enrollment_action", "class": "semantic_action", "method": "POST", "path": "/actions/projects/:project_ref/repository-enrollment", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "wiki_refresh_action", "class": "semantic_action", "method": "POST", "path": "/actions/projects/:project_ref/wiki/refresh", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "attempt_steer_action", "class": "semantic_action", "method": "POST", "path": "/actions/projects/:project_ref/attempts/:attempt_ref/steer", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "attempt_answer_action", "class": "semantic_action", "method": "POST", "path": "/actions/projects/:project_ref/attempts/:attempt_ref/answer", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "attempt_cancel_action", "class": "semantic_action", "method": "POST", "path": "/actions/projects/:project_ref/attempts/:attempt_ref/cancel", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "attempt_handoff_action", "class": "semantic_action", "method": "POST", "path": "/actions/projects/:project_ref/attempts/:attempt_ref/handoff", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "attempt_retry_action", "class": "semantic_action", "method": "POST", "path": "/actions/projects/:project_ref/attempts/:attempt_ref/retry", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "approval_preview", "class": "approval_preview", "method": "POST", "path": "/actions/approvals/preview", "interface": "hui.command_adapter.v1", "status": "contract_only", "native_fallback": "canonical_transaction_page"},
+    {"id": "approval_commit", "class": "semantic_action", "method": "POST", "path": "/actions/approvals/:approval_ref", "interface": "hui.command_adapter.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "incident_freeze_admission_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/freeze-admission", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "incident_revoke_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/revoke", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "incident_quarantine_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/quarantine", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "incident_handoff_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/handoff", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "incident_record_evidence_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/record-evidence", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "incident_enter_recovery_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/enter-recovery", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "incident_close_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/close", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "incident_reopen_action", "class": "semantic_action", "method": "POST", "path": "/actions/incidents/:incident_ref/reopen", "interface": "hui.incident.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "external_versioned_runbook_until_available"},
+    {"id": "export_create", "class": "export_create", "method": "POST", "path": "/actions/exports", "interface": "hui.audit_export.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "ordinary_form_with_receipt_page"},
+    {"id": "export_retrieval", "class": "export_retrieval", "method": "GET", "path": "/exports/:export_ref", "interface": "hui.audit_export.v1", "status": "unavailable_until_semantic_binding", "native_fallback": "ordinary_authenticated_download"}
+  ],
+  "signal_namespaces": [
+    {"id": "local_presentation", "prefix": "_ui", "allowed": ["disclosure", "focus_intent", "tab_id", "theme_preference"], "authority": false},
+    {"id": "factory", "prefix": "factory", "allowed": ["filter", "sort", "cursor", "search"], "authority": false},
+    {"id": "project", "prefix": "project", "allowed": ["filter", "sort", "cursor", "selected_ref"], "authority": false},
+    {"id": "attempt", "prefix": "attempt", "allowed": ["timeline_cursor", "conversation_cursor", "selected_ref", "draft_text"], "authority": false},
+    {"id": "wiki", "prefix": "wiki", "allowed": ["filter", "search", "cursor", "selected_ref"], "authority": false},
+    {"id": "lens", "prefix": "lens", "allowed": ["lens_key", "filter", "sort", "cursor", "selected_ref", "expansion_request"], "authority": false}
+  ],
+  "prohibited_signal_fields": [
+    "actor", "account", "role", "tenant_authority", "project_authority", "graph", "query", "command", "profile", "policy", "fence", "trusted_revision", "csrf", "secret", "permission", "durable_result"
+  ],
+  "patch_roots": [
+    "hui-factory-attention",
+    "hui-factory-health",
+    "hui-factory-fleet",
+    "hui-project-summary",
+    "hui-project-attempts",
+    "hui-attempt-workspace",
+    "hui-attempt-conversation",
+    "hui-command-receipt",
+    "hui-wiki-content",
+    "hui-lens-results",
+    "hui-incident-state"
+  ],
+  "safe_outcomes": [
+    "ready", "empty", "stale", "incomplete", "contradicted", "truncated",
+    "concealed_not_found", "redacted", "denied", "unavailable", "maintenance",
+    "recovery", "step_up_required", "conflict", "unknown_outcome", "upgrade_required"
+  ],
+  "reauthorization_points": [
+    "before_response_start",
+    "before_query_execution",
+    "before_field_shaping",
+    "before_stream_subscription",
+    "before_each_protected_patch",
+    "before_command_construction",
+    "inside_command_gateway",
+    "before_approval_commit",
+    "before_export_creation",
+    "before_each_export_or_download_retrieval"
+  ],
+  "trusted_identity_authority_builder": {
+    "interface": "hui.identity_scope.v1",
+    "trusted_inputs": [
+      "authenticated_principal_and_session",
+      "current_session_and_revocation_generations",
+      "server_resolved_tenant_project_resource_and_environment",
+      "current_graph_grants_and_exact_optional_delegation",
+      "classification_and_assurance",
+      "policy_and_graph_revisions",
+      "incident_posture_and_fence_when_applicable"
+    ],
+    "outputs": ["current_scope", "product_identity", "authority", "safe_reason_vocabulary"],
+    "rejects": ["browser_actor", "browser_role", "browser_scope", "browser_grant", "browser_delegation", "browser_revision", "browser_fence", "cached_permission"]
+  },
+  "stream_contract": {
+    "interface": "hui.stream.v1",
+    "maximum_lifetime_seconds": 900,
+    "maximum_reauthorization_interval_seconds": 60,
+    "heartbeat_interval_seconds": 15,
+    "maximum_idle_seconds": 120,
+    "initial_state": "current_authorized_snapshot",
+    "revocation_sources": ["account", "session", "role", "delegation", "project", "tenant", "graph", "incident"],
+    "before_patch": "reauthorize_and_requery",
+    "terminal_actions": ["best_effort_concealed_replacement", "close_stream", "suppress_privileged_reconnect", "clear_privileged_browser_state", "record_safe_audit_evidence"]
+  },
+  "command_contract": {
+    "interface": "hui.command_adapter.v1",
+    "preview_fields": ["action", "target", "project", "environment", "parameters", "consequence", "candidate", "blast_radius", "reversibility", "policy", "expected_revisions", "fence", "expiry", "action_digest"],
+    "submit_fields": ["csrf", "current_identity", "current_assurance", "idempotency_key", "expected_state", "expected_revisions", "fence", "profile", "bounded_reason"],
+    "receipt_outcomes": ["committed", "idempotent_duplicate", "conflict", "rejected", "stale_or_revoked", "unknown_outcome"],
+    "recovery_states": ["unknown", "staged", "committed", "rejected", "superseded", "inaccessible"],
+    "optimistic_success": false
+  },
+  "export_incident_audit_contract": {
+    "export": "creation_and_every_retrieval_reauthorize_exact_scope_revision_classification_expiry_and_generation",
+    "incident": "read_only_until_each_closed_route_has_semantic_capability_gateway_receipt_recovery_and_audit",
+    "audit": "append_only_classified_receipt_and_security_evidence_separate_from_operational_telemetry",
+    "offline_limit": "cannot_erase_prior_delivered_bytes"
+  },
+  "compatibility": {
+    "additive": "optional_output_ignored_safely_without_boundary_or_default_change",
+    "breaking": "required_field_route_method_meaning_state_authorization_patch_signal_or_default_change",
+    "old_reader": "last_compatible_representation_or_upgrade_required_or_unavailable",
+    "feature_flags": "trusted_server_rollout_selects_one_owner_before_admission",
+    "dual_write": "prohibited",
+    "dual_read": "prohibited_for_browser_authority; shadow_only_for_same_input_read_only_evidence",
+    "deprecation": "all_consumers_named_compatible_and_observed_before_removal",
+    "deprecation_window": "two_consecutive_accepted_release_manifests_plus_closed_rollback_observation_window"
+  },
+  "parallel_ownership": [
+    {"milestone": "HUI-A", "owns": ["architecture_documents", "interface_manifests", "evidence_schema"]},
+    {"milestone": "HUI-B", "owns": ["dependency_pins", "asset_digests", "consumer_spike", "component_facade_qualification"]},
+    {"milestone": "HUI-C", "owns": ["identity_composition", "page_routes", "shell", "read_projections"]},
+    {"milestone": "HUI-D", "owns": ["signal_schemas", "fragment_routes", "stream_route", "delivery_coordinator"]},
+    {"milestone": "HUI-E", "owns": ["attempt_actions", "command_preview", "receipts", "recovery"]},
+    {"milestone": "HUI-F", "owns": ["lens_registry", "lens_routes", "wiki_adapters"]},
+    {"milestone": "HUI-G", "owns": ["incident", "audit_export", "security_accessibility_usability_load_proxy_release_evidence"]},
+    {"milestone": "HUI-H", "owns": ["final_route_socket_runtime_dependency_asset_test_and_document_removal"]}
+  ],
+  "shared_file_ownership": [
+    {"path": "mix.exs", "primary_owner": "HUI-B", "later_owner": "HUI-H", "fence": "dependency_qualification_then_final_removal"},
+    {"path": "mix.lock", "primary_owner": "HUI-B", "later_owner": "HUI-H", "fence": "immutable_pin_then_final_removal"},
+    {"path": "lib/jido_code_web/router.ex", "primary_owner": "HUI-C", "later_owner": "HUI-H", "fence": "page_routes_land_before_fragment_action_and_removal_edits"},
+    {"path": "lib/jido_code_web/endpoint.ex", "primary_owner": "HUI-D", "later_owner": "HUI-H", "fence": "stream_transport_lands_before_socket_removal"},
+    {"path": "lib/jido_code_web/components/layouts.ex", "primary_owner": "HUI-C", "later_owner": "HUI-H", "fence": "target_shell_lands_before_compatibility_copy_removal"},
+    {"path": "lib/jido_code_web/components/ui.ex", "primary_owner": "HUI-B", "later_owner": "HUI-H", "fence": "qualified_facade_lands_before_saladui_removal"},
+    {"path": "assets/js/app.js", "primary_owner": "HUI-D", "later_owner": "HUI-H", "fence": "qualified_datastar_bundle_lands_before_livesocket_livevue_removal"},
+    {"path": "assets/css/app.css", "primary_owner": "HUI-B", "later_owner": "HUI-H", "fence": "qualified_local_styles_land_before_saladui_source_removal"},
+    {"path": "priv/architecture/hypermedia_ui/phase_a3_interface_registry.json", "primary_owner": "HUI-A", "later_owner": "interface_owner_major_change_only", "fence": "consumer_worktrees_rebase_on_merged_registry_version"},
+    {"path": "product_release_manifest", "primary_owner": "HUI-G", "later_owner": "HUI-H", "fence": "release_qualification_lands_before_final_cutover_manifest"}
+  ],
+  "current_consumer_manifest": [
+    {"path": "lib/jido_code_web/router.ex", "kind": "live_routes_and_live_session", "removal_owner": "HUI-H"},
+    {"path": "lib/jido_code_web/endpoint.ex", "kind": "liveview_socket", "removal_owner": "HUI-H"},
+    {"path": "lib/jido_code_web/product_auth.ex", "kind": "liveview_mount_and_event_hook", "removal_owner": "HUI-C-and-H"},
+    {"path": "lib/jido_code_web/live/home_live.ex", "kind": "product_route_owner", "removal_owner": "HUI-H"},
+    {"path": "lib/jido_code_web/live/coding_agent_live.ex", "kind": "product_route_owner", "removal_owner": "HUI-H"},
+    {"path": "lib/jido_code_web/live/managed_coding_attempt_live.ex", "kind": "product_route_owner", "removal_owner": "HUI-H"},
+    {"path": "lib/jido_code_web/components/live_vue_components.ex", "kind": "livevue_mount_facade", "removal_owner": "HUI-H"},
+    {"path": "lib/jido_code_web/components/ui.ex", "kind": "saladui_facade", "removal_owner": "HUI-B-and-H"},
+    {"path": "assets/js/app.js", "kind": "livesocket_livevue_and_saladui_assets", "removal_owner": "HUI-D-and-H"},
+    {"path": "assets/css/app.css", "kind": "saladui_and_current_theme_assets", "removal_owner": "HUI-B-and-H"},
+    {"path": "assets/vue", "kind": "livevue_product_sources", "removal_owner": "HUI-H"},
+    {"path": "test/jido_code_web/live", "kind": "liveview_product_tests", "removal_owner": "HUI-H"},
+    {"path": "mix.exs", "kind": "liveview_livevue_saladui_dashboard_dependencies", "removal_owner": "HUI-H"}
+  ],
+  "removal_gate": {
+    "requires": [
+      "exact_consumer_manifest_empty_for_target",
+      "replacement_evidence_classes_accepted",
+      "rollback_window_closed",
+      "last_qualified_artifact_retained",
+      "clean_checkout_ci_at_merged_candidate"
+    ],
+    "milestone_label_alone_sufficient": false
+  }
+}

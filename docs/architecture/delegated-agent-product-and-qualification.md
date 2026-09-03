@@ -14,6 +14,18 @@ separates a developer-local preview milestone from managed-fleet production so
 local subscription utility is not blocked on fleet credentials, while neither
 mode overclaims its security or operational posture.
 
+## Presentation Runtime And Supersession
+
+The browser workflow is presentation-runtime neutral at its durable boundary.
+For the HUI target, explicit controllers and HEEx render reviewed projections;
+bounded Datastar requests and the application-owned Dstar/SSE coordinator may
+refresh them. Every action still enters the same semantic gateway and every
+result still derives from a receipt plus a fresh authorized projection.
+Signals, DOM, streams, tabs, browser connection state, and server processes
+cannot start a runtime, select an adapter, widen scope, or prove progress.
+Current compatibility routes retain their accepted evidence until their
+Milestone H consumer and rollback gates close.
+
 ## Product Workflow
 
 The supported end-to-end workflow is:

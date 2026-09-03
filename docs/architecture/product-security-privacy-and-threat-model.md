@@ -10,12 +10,14 @@ random nonce, and trusted session generation in the signed Phoenix session.
 Credentials never enter the session, graph, logs, telemetry, flash, or forms
 returned to the browser.
 
-The root product route and development dashboard require the authenticated
-pipeline. `ProductAuth` reconstructs principal and actor IRIs from trusted
-configuration, not browser values. The authenticated `live_session` repeats
-this check on mount and validates expiry plus the trusted generation before
-every semantic event. Changing `JIDO_CODE_SESSION_GENERATION` revokes all
-existing sessions. Logout drops the complete session.
+Every product and development-diagnostic route requires the authenticated
+pipeline. The target trusted identity/authority builder reconstructs principal,
+actor, session, scope, and current generation from server-owned identity and
+graph facts, never browser values. Controllers repeat admission for each page,
+fragment, action, stream, and retrieval. Streams also reauthorize before every
+protected patch and on periodic/revocation boundaries. Changing
+`JIDO_CODE_SESSION_GENERATION` revokes all existing compatibility sessions.
+Logout drops the complete session.
 
 Route admission does not grant resource or command authority. Product query
 code admits a closed query/version/parameter matrix and the knowledge boundary
@@ -52,9 +54,10 @@ required, must itself use the semantic command pipeline.
 | --- | --- | --- | --- |
 | Credential guessing or reflection | constant-shape failure, bounded token, secure digest comparison | authentication failure metrics without values; rotate token and generation | `AuthControllerTest` |
 | Session fixation or copied stale session | renew and clear on login; expiry; signed cookie; generation | revoke generation and force reauthentication | `ProductAuthTest` |
-| CSRF command submission | Phoenix CSRF pipeline on sign-in, sign-out, and LiveView | reject request before event or controller action | controller and LiveView tests |
+| CSRF command submission | Phoenix CSRF on sign-in, sign-out, actions, and stream connect | reject before controller effect or SSE response start | controller, request, and browser tests |
 | Actor or delegation forgery | actor built from trusted config; command gateway ignores browser actor fields | command/audit actor mismatch blocks commit | `CommandGatewayTest` |
-| Route/resource enumeration | closed route values, bounded refs, cohort membership, concealment | safe unavailable state with no stale stream rows | `HomeLiveTest`, `QuerySecurityTest` |
+| Route/resource enumeration | closed route values, bounded refs, cohort membership, concealment | safe unavailable state with no stale fragment rows | route, fragment, and `QuerySecurityTest` suites |
+| Signal, patch, or stream tampering | closed signal schemas, server-derived authority, stable patch roots, pre-start and pre-patch authorization | terminal concealed replacement, stream close, reconnect suppression, audit | request, browser, proxy, and revocation suites |
 | SPARQL injection or catalog bypass | no raw query endpoint; closed names, versions, keys, graph families, states | stable `invalid_input` before adapter invocation | `QuerySecurityTest` |
 | Expensive graph amplification | catalog limits, finite work states, repository cap, empty adapter options | timeout/limit telemetry and truncated projection | projection provider tests |
 | Secret, prompt, source, or path leakage | one classification/redaction policy; no raw errors | bounded redaction counts without values; fail closed | `RedactorTest` |
@@ -87,3 +90,7 @@ escape, unverified backup restore, or secret-value persistence. The exact
 lockfile was checked with `mix hex.audit` on 2026-08-04 and contained no retired
 Hex packages. Git/native dependencies and all licenses remain part of the
 release-candidate operator audit; no dependency pin is advanced implicitly.
+
+The current token-backed compatibility runtime remains subject to its accepted
+single-operator limits. HUI-A3 changes target entry-point ownership only; it
+does not claim named-human identity, Datastar delivery, or release readiness.

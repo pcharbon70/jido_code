@@ -1,7 +1,8 @@
 # Secure Product Shell And Information Architecture
 
-- Status: Proposed under ADRs 0009 and 0011
-- Specification version: `0.1.0`
+- Status: Accepted architecture contract under ADRs 0009 and 0011; implementation gated
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode product, web, security, and accessibility maintainers
 - Milestone: C — Read-Only Hypermedia Shell
 - Decisions:
