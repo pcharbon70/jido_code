@@ -184,33 +184,52 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1Test do
 
     assert HypermediaUIPhaseB1.validate_closure(plan, milestone, receipt) == []
 
-    accepted_plan =
+    merge_pending_plan =
       plan
-      |> String.replace("status: proposed", "status: completed", global: false)
-      |> set_closure_checkboxes(true)
+      |> String.replace("status: completed", "status: proposed", global: false)
+      |> set_closure_checkboxes(false)
 
-    accepted_receipt =
+    merge_pending_receipt =
       receipt
-      |> String.replace("Status: **merge-pending**", "Status: **accepted-at-merged-candidate**")
-      |> String.replace(
-        "| Merged candidate | `merge-pending` |",
-        "| Merged candidate | `#{String.duplicate("a", 40)}` |"
+      |> String.replace("Status: **accepted-at-merged-candidate**", "Status: **merge-pending**")
+      |> then(
+        &Regex.replace(
+          ~r/\| Merged candidate \| `[0-9a-f]{40}` \|/,
+          &1,
+          "| Merged candidate | `merge-pending` |"
+        )
       )
-      |> String.replace(
-        "Merged candidate: `merge-pending`",
-        "Merged candidate: `#{String.duplicate("a", 40)}`"
+      |> then(
+        &Regex.replace(
+          ~r/Merged candidate: `[0-9a-f]{40}`/,
+          &1,
+          "Merged candidate: `merge-pending`"
+        )
       )
-      |> String.replace("Merge date: `merge-pending`", "Merge date: `2026-09-03`")
+      |> then(
+        &Regex.replace(~r/Merge date: `\d{4}-\d{2}-\d{2}`/, &1, "Merge date: `merge-pending`")
+      )
 
-    assert HypermediaUIPhaseB1.validate_closure(accepted_plan, milestone, accepted_receipt) == []
+    assert HypermediaUIPhaseB1.validate_closure(
+             merge_pending_plan,
+             milestone,
+             merge_pending_receipt
+           ) == []
 
     assert has_error?(
-             HypermediaUIPhaseB1.validate_closure(accepted_plan, milestone, receipt),
-             "proposed plan status"
+             HypermediaUIPhaseB1.validate_closure(merge_pending_plan, milestone, receipt),
+             "completed plan status"
            )
 
     assert has_error?(
              HypermediaUIPhaseB1.validate_closure(plan, milestone, ""),
+             "exactly one coherent"
+           )
+
+    mixed_receipt = receipt <> "\nStatus: **merge-pending**\n"
+
+    assert has_error?(
+             HypermediaUIPhaseB1.validate_closure(plan, milestone, mixed_receipt),
              "exactly one coherent"
            )
   end

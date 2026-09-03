@@ -2,18 +2,17 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the HUI-B1 implementation candidate prepared on
-2026-09-03. It accepts an immutable source, license, version, protocol, BOM,
-and risk baseline only. Dependency declarations, locks, application assets,
-routes, runtime behavior, and product consumers are unchanged. ShadcnUI,
-Dstar, and Datastar remain unavailable to product code and receive no release
-credit.
+This receipt accepts the HUI-B1 implementation candidate merged on 2026-09-03
+as the immutable source, license, version, protocol, BOM, and risk baseline.
+Dependency declarations, locks, application assets, routes, runtime behavior,
+and product consumers are unchanged. ShadcnUI, Dstar, and Datastar remain
+unavailable to product code and receive no release credit.
 
-HUI-B2 is not authorized from this branch or receipt. It becomes eligible only
-after the implementation pull request passes clean-checkout CI, merges, and a
-narrow closure pull request pins that full implementation merge SHA and date.
+This closure transition becomes authoritative only when its narrow pull
+request passes clean-checkout CI and merges. After that merge, HUI-B2 is
+authorized only from the pinned implementation candidate below.
 
 ## Candidate Provenance
 
@@ -24,11 +23,12 @@ narrow closure pull request pins that full implementation merge SHA and date.
 | Section 1.2 | `25a427144358aacafb4299df31cfd319de829f64` - Dstar/Datastar source, bundle, CSP, protocol, and risk pairing |
 | Section 1.3 | `814d9bce551dbfa4caa98e46f030b0a72c2f6eaa` - candidate BOM, resolution, alternatives, cache, incident, and output ledger |
 | Section 1.4 | `5afdbd460221e427c8f7091383cb813c598cf24d` - executable integrity matrix and merge-pending receipt |
-| Implementation content head | `5afdbd460221e427c8f7091383cb813c598cf24d` - before this provenance-only pin |
-| Merged candidate | `merge-pending` |
+| Provenance-only pin | `d6c2b60818057c5b1b2138aa11d81c148b18d7f4` |
+| Implementation PR head | `49956c5d0619a48da0ee8054000bd9a4e378739a` - Dialyzer correction and refreshed verifier digest |
+| Merged candidate | `4441ce873bc244e3b60ed48d6812cd0c45513f95` |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `4441ce873bc244e3b60ed48d6812cd0c45513f95`
+Merge date: `2026-09-03`
 
 ## Selected Immutable Inputs
 
@@ -108,8 +108,14 @@ claim.
 | Architecture gate | passed |
 | Architecture/security regression slice | 75 tests, 0 failures |
 | Dialyzer | passed with all 178 registered legacy warnings filtered |
-| Repository precommit | 1,191 tests, 0 failures |
-| Clean-checkout CI | merge-pending; required before implementation merge |
+| Repository precommit | implementation and closure candidates each ran 1,191 tests with 0 failures |
+| Implementation clean-checkout CI | PR #109 Dialyzer and 1,191-test verifier passed at `49956c5d0619a48da0ee8054000bd9a4e378739a` |
+| Closure clean-checkout CI | required before this transition merges |
+
+The implementation verifier's first run encountered one unrelated temporary
+directory teardown race in `GraphTopologyTest`. The exact same candidate's
+fresh-checkout retry completed all 1,191 tests with zero failures; the local
+precommit run also completed all 1,191 tests with zero failures.
 
 The immutable tracked evidence at this candidate has these SHA-256 identities:
 
@@ -119,9 +125,9 @@ The immutable tracked evidence at this candidate has these SHA-256 identities:
 | `phase_b1_datastar_dstar_pairing.json` | `ad37092dfe70109aa5923ad744b67b2ccde78dca4fd4b1fa630ee50f4605298b` |
 | `phase_b1_candidate_bom.json` | `dbfb08bfa5a95d41a538dadbcd8f9605918761a565e82ae075854c969a6f7f12` |
 | `phase_b1_supply_chain_ledger.json` | `7e8c4286ebd125f0c1b8a8997abba699c82f0f583b5f518d0b6a7eeba9d9cfe6` |
-| `phase_b1_verification_evidence.json` | `cdcea080e35d61c93533c0967fbc04bae9cd43e7207d864d2adb711b5765a513` |
+| `phase_b1_verification_evidence.json` | `467c38bc89cfd3e9e23528124d9b3290874c350916d47bfbe5dbca301f2d47bf` |
 | `hypermedia_ui_phase_b1.ex` | `e09b7684247b22a0441ef5b880cd4c8c6eb0e33b3210674bfae744ce5ca59b4d` |
-| `hypermedia_ui_phase_b1_test.exs` | `9079ba7777d05256f8417580a606a14b69afdd288b78def0776a856ee6dd59f3` |
+| `hypermedia_ui_phase_b1_test.exs` | `8fc5a67c119b7c77e113b9d480f3f58f3fa1edf0ee4e24ff6ac736a3e59a5ced` |
 | unavailable-artifact fixture | `86f05b4c2b6f64fa8468135d803b179991695a54f5b0eaba02c9ac5b6b0eff06` |
 
 ## Risk Ownership And Limitations
@@ -147,17 +153,18 @@ as an equivalent candidate with all source and risk evidence.
 | Dstar Hex/source/API/protocol | HUI-B dependency owner | request and stream security owner | consumer and operational behavior unproved |
 | Datastar tag/bundle/CSP/protocol | HUI-B asset owner | CSP and browser owner | no release-commit checks or JidoCode browser proof |
 | Candidate BOM and acquisition policy | HUI-B supply-chain owner | security and release owner | candidate graph not installed; resolved SBOM deferred |
-| Mutation and boundary verification | HUI-B architecture owner | clean-checkout CI | implementation candidate is not merged |
+| Mutation and boundary verification | HUI-B architecture owner | clean-checkout CI | implementation merged; closure publication remains pending |
 
 ## Gate HUI-B1
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-HUI-B1 remains merge-pending until the implementation PR passes all required
-checks and merges, then a closure PR records the exact merge SHA/date, changes
-this status to accepted-at-merged-candidate, completes the Phase 1 plan and
-checkboxes 1, 1.4, 1.4.2, and 1.4.2.3, and passes clean-checkout CI. Only that
-pinned baseline authorizes HUI-B2.
+HUI-B1 is accepted at merged implementation candidate
+`4441ce873bc244e3b60ed48d6812cd0c45513f95`. PR #109 passed Dialyzer and the
+clean-checkout verifier before merging. This closure records the full merge
+SHA/date and completes Phase 1 checkboxes 1, 1.4, 1.4.2, and 1.4.2.3 without
+changing any reopening condition. HUI-B2 is authorized only from that pinned
+baseline after this closure pull request passes clean-checkout CI and merges.
 
 HUI-B1 reopens regardless of checklist state if any selected repository,
 owner, package, version, commit, tag, tree, archive, Hex or npm checksum,

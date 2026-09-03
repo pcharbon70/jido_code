@@ -2,8 +2,12 @@
   "schema_version": 1,
   "phase": "HUI-B1",
   "recorded_on": "2026-09-03",
-  "status": "implementation_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "baseline_commit": "1e4073bb6968924abb2345e49453f980ae7eee92",
+  "implementation_pr": 109,
+  "implementation_head": "49956c5d0619a48da0ee8054000bd9a4e378739a",
+  "merged_candidate": "4441ce873bc244e3b60ed48d6812cd0c45513f95",
+  "merge_date": "2026-09-03",
   "source_verification": [
     {"id": "shadcn_source", "channel": "https://github.com/pcharbon70/shadcn_ui", "identity": "fe40eae63504adc4375aead4f0e741f158a4d86e", "verified": true, "checks": ["commit", "tree", "git_archive_sha256", "license_sha256", "notice_sha256", "compiled_css_sha256", "mix_lock_sha256", "package_lock_sha256"]},
     {"id": "dstar_source", "channel": "https://github.com/ricotrevisan/dstar", "identity": "v0.2.0@4bfb9110645f3831cd350f25434493c76a42bfae", "verified": true, "checks": ["tag", "commit", "tree", "git_archive_sha256", "license_sha256", "mix_exs_sha256", "source_mix_lock_sha256", "exact_commit_CI"]},
@@ -42,6 +46,6 @@
     "application_assets_changed": false,
     "routes_or_runtime_changed": false,
     "release_credit_granted": false,
-    "next_authority": "HUI-B2 only after the HUI-B1 implementation and closure pull requests merge and pin the implementation merge commit"
+    "next_authority": "HUI-B2 is authorized only from merged candidate 4441ce873bc244e3b60ed48d6812cd0c45513f95 after this closure transition merges"
   }
 }
