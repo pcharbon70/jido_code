@@ -1,7 +1,8 @@
 # Hypermedia Product Governance Baseline
 
-- Status: Proposed; non-normative until ADRs 0008–0011 are accepted
-- Specification version: `0.2.0`
+- Status: Accepted for architecture authority; implementation and release gated
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode architecture, product, security, and operations maintainers
 - Milestone: A — Architectural Authority
 - Research: [Secure hypermedia control plane](../research/12-secure-hypermedia-coding-factory-ui.md)
@@ -20,6 +21,12 @@ decisions require explicit supersession, which current capabilities are not
 production-composed, and which gates authorize each later milestone.
 
 It creates no runtime, dependency, route, graph, query, command, role, or grant.
+
+The accepted target is intentionally distinct from current operability. The
+existing LiveView/LiveVue/SaladUI product remains the deployed compatibility
+runtime until later route, consumer, and removal gates close. Dstar, Datastar,
+ShadcnUI, named-human identity, attention projections, and knowledge lenses
+receive no runtime credit from this architecture acceptance.
 
 ## Governing Baseline
 

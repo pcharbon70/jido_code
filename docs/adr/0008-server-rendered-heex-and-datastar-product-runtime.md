@@ -1,7 +1,8 @@
 # ADR 0008: Server-Rendered HEEx And Datastar Product Runtime
 
-- Status: Proposed
+- Status: Accepted for architecture authority; dependency, migration, and release gated
 - Date: 2026-08-31
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode product, web, security, and operations maintainers
 - Decision scope: Browser rendering, interaction transport, live delivery,
   client state, and removal of the current LiveView/LiveVue product runtime
@@ -37,6 +38,12 @@ compile-time component dependency is distinct from using LiveView routes,
 sockets, processes, events, streams, or state ownership.
 
 ## Decision
+
+This decision is binding for target route, rendering, request, signal, stream,
+asset, and process ownership. It does not claim that Dstar, Datastar, or the
+target component facade is installed, qualified, composed, or release-ready.
+The deployed LiveView/LiveVue runtime remains the compatibility implementation
+until the route-by-route gates in Milestones B through H close.
 
 JidoCode will use a server-rendered hypermedia product runtime with these
 boundaries:
@@ -159,9 +166,12 @@ LiveView runtime dependencies is the final milestone and occurs only after the
 rollback window closes and clean-checkout evidence proves no product or
 development route requires them.
 
-## Acceptance Conditions
+## Decision Acceptance And Implementation Gates
 
-This ADR may move to `Accepted` only when:
+HUI-A3 accepts the target ownership decision only after the supersession,
+interface, evidence, and rollback manifests pass architecture validation and
+clean-checkout CI at its merged candidate. Runtime use remains gated.
+Milestones B through H must prove that:
 
 1. the governing specifications are approved with no weaker graph,
    authorization, projection, command, or recovery boundary;

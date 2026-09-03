@@ -18,30 +18,30 @@ Back to plan: [README](./README.md)
   This phase closes HUI-A3 by making controller/HEEx/Datastar ownership
   coherent across accepted documentation while preserving durable authority.
 
-  - [ ] 3.1 Section - Accept the product runtime and component decisions.
+  - [x] 3.1 Section - Accept the product runtime and component decisions.
 
     This section decides the allowed and prohibited runtime constructs,
     dependency exceptions, product component boundary, and rollback posture.
 
-    - [ ] 3.1.1 Task {#huia-p03-runtime-adr} [repo: jido_code] [after: {#huia-p02-phase-receipt}] - Accept or narrow ADRs 0008 and 0010.
+    - [x] 3.1.1 Task {#huia-p03-runtime-adr} [repo: jido_code] [after: {#huia-p02-phase-receipt}] - Accept or narrow ADRs 0008 and 0010.
 
       This task gives ordinary controllers, HEEx, Datastar/Dstar, and ShadcnUI
       precise ownership without granting them application authority.
 
-      - [ ] 3.1.1.1 Subtask - Decide full-page, fragment, request, SSE, native-fallback, browser-state, asset, and server-process ownership.
-      - [ ] 3.1.1.2 Subtask - Prohibit LiveView product routes/processes/events/streams/state, LiveVue islands, remote CDN assets, client-authoritative revisions, and browser-granted authority.
-      - [ ] 3.1.1.3 Subtask - Define the narrowly allowed `phoenix_live_view` package use for Phoenix.Component/HEEx if still required and the evidence needed to remove or retain it.
-      - [ ] 3.1.1.4 Subtask - Decide the ShadcnUI facade, JidoCode-owned composite boundary, Vite posture, LiveDashboard disposition, migration order, and rollback obligations.
+      - [x] 3.1.1.1 Subtask - Decide full-page, fragment, request, SSE, native-fallback, browser-state, asset, and server-process ownership.
+      - [x] 3.1.1.2 Subtask - Prohibit LiveView product routes/processes/events/streams/state, LiveVue islands, remote CDN assets, client-authoritative revisions, and browser-granted authority.
+      - [x] 3.1.1.3 Subtask - Define the narrowly allowed `phoenix_live_view` package use for Phoenix.Component/HEEx if still required and the evidence needed to remove or retain it.
+      - [x] 3.1.1.4 Subtask - Decide the ShadcnUI facade, JidoCode-owned composite boundary, Vite posture, LiveDashboard disposition, migration order, and rollback obligations.
 
-    - [ ] 3.1.2 Task {#huia-p03-product-adr} [repo: jido_code] [after: {#huia-p03-runtime-adr}] - Accept or narrow ADR 0011 and product vocabulary.
+    - [x] 3.1.2 Task {#huia-p03-product-adr} [repo: jido_code] [after: {#huia-p03-runtime-adr}] - Accept or narrow ADR 0011 and product vocabulary.
 
       This task establishes the attention-oriented factory, durable attempt
       workspace, and reviewed knowledge-lens mental model.
 
-      - [ ] 3.1.2.1 Subtask - Decide the factory/repository-backed-project/task/attempt/interaction/evidence navigation hierarchy and durable URL rules.
-      - [ ] 3.1.2.2 Subtask - Decide attention derivation, acknowledgement limits, lifecycle/outcome separation, readiness language, and current capability honesty.
-      - [ ] 3.1.2.3 Subtask - Decide the ten lens groups, graph-family mapping, reviewed-query-only rule, visualization selection, bounds, provenance, and accessible alternatives.
-      - [ ] 3.1.2.4 Subtask - Prohibit raw SPARQL, unrestricted graph browsing, a universal node-link hairball, chat-as-record-of-truth, and process heartbeat as semantic progress.
+      - [x] 3.1.2.1 Subtask - Decide the factory/repository-backed-project/task/attempt/interaction/evidence navigation hierarchy and durable URL rules.
+      - [x] 3.1.2.2 Subtask - Decide attention derivation, acknowledgement limits, lifecycle/outcome separation, readiness language, and current capability honesty.
+      - [x] 3.1.2.3 Subtask - Decide the ten lens groups, graph-family mapping, reviewed-query-only rule, visualization selection, bounds, provenance, and accessible alternatives.
+      - [x] 3.1.2.4 Subtask - Prohibit raw SPARQL, unrestricted graph browsing, a universal node-link hairball, chat-as-record-of-truth, and process heartbeat as semantic progress.
 
   - [ ] 3.2 Section - Amend all affected architecture and product contracts.
 

@@ -1,7 +1,8 @@
 # ADR 0010: ShadcnUI As The Product Component Primitive Layer
 
-- Status: Proposed
+- Status: Accepted for architecture authority; dependency adoption and release gated
 - Date: 2026-08-31
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode product, design-system, web, security, and accessibility
   maintainers
 - Decision scope: Server component dependency, facade, styling, asset,
@@ -30,6 +31,12 @@ identifier, no visible root license, incomplete manual accessibility evidence,
 and an observed GitHub Actions startup failure.
 
 ## Decision
+
+This decision accepts the facade and ownership boundary, not the candidate
+dependency. ShadcnUI remains absent and unavailable until Milestone B resolves
+its immutable identity, license/usage authority, CI, dependency compatibility,
+accessibility, asset, and real-consumer evidence. No product may import or
+advertise it from this architecture-only acceptance.
 
 JidoCode will use a qualified immutable revision of `pcharbon70/shadcn_ui` as a
 semantic presentation **primitive layer** beneath application-owned product
@@ -113,9 +120,12 @@ Rollback selects the prior fingerprinted facade and stylesheet bundle. It does
 not fetch a different upstream branch, widen imports, or preserve product state
 inside a component library.
 
-## Acceptance Conditions
+## Decision Acceptance And Implementation Gates
 
-This ADR may move to `Accepted` only when:
+HUI-A3 accepts the facade and primitive-layer decision after its ownership,
+compatibility, evidence, and rollback contracts pass clean-checkout CI at the
+merged candidate. Dependency adoption remains gated. Milestone B and later
+release gates must prove that:
 
 1. canonical namespace, immutable source, package digest, license/usage
    authority, dependency versions, and green CI evidence are recorded;
