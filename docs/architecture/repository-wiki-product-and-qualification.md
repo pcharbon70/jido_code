@@ -1,7 +1,7 @@
 # Repository Wiki Product And Qualification Specification
 
 - Status: Approved and normative under accepted ADRs 0005, 0006, and 0007
-- Specification version: `0.1.0`
+- Specification version: `0.2.0`
 - Owners: JidoCode product, knowledge, security, and release maintainers
 - Decisions:
   [ADR 0005](../adr/0005-repository-wikis-as-compiled-knowledge-projections.md),
@@ -20,10 +20,12 @@ trust, search, review, refresh, and evaluate one repository wiki. The wiki is a
 knowledge product inside the existing repository workbench, not a raw graph
 browser, generic content management system, or separate authority plane.
 
-The initial product extends `GET /`, owned by `JidoCodeWeb.HomeLive`, with a
-verified `wiki` workbench area for the selected repository. A route or query
-parameter is presentation selection only. It never selects a graph, command,
-query text, actor, tenant, source revision, or visibility rule.
+The target product owns the wiki beneath
+`GET /projects/:project_ref/wiki/...` through explicit controllers, HEEx, and
+reviewed fragments. The deployed `GET /` workbench remains a compatibility
+surface until route cutover. A route or query parameter is presentation
+selection only. It never selects a graph, command, query text, actor, tenant,
+source revision, or visibility rule.
 
 ## User Outcomes
 
@@ -225,7 +227,7 @@ search, agent default context, or public source links.
 When an actor has more than one authorized parallel session, preview selection
 uses an opaque session-scoped reference. Switching repository, session,
 attempt, candidate, fence, or edition clears page/search/review selections and
-LiveView streams before re-query. Counts, slugs, backlinks, notifications,
+rendered fragment rows before re-query. Counts, slugs, backlinks, notifications,
 cache keys, and PubSub hints cannot reveal sibling-session preview existence.
 
 Review surfaces show:
@@ -290,9 +292,10 @@ Initial durable actions are limited to:
 - propose a documentation or drift-remediation task; and
 - operator-only profile transition, invalidation, or rollback selection.
 
-LiveView resolves and reauthorizes every intent against current graph state,
-then submits it through the semantic command gateway. Optimistic browser
-updates cannot claim compilation, closure, review, or activation success.
+The owning controller resolves and reauthorizes every intent against current
+graph state, then submits it through the semantic command gateway. Optimistic
+browser updates cannot claim compilation, closure, review, or activation
+success.
 
 The product never offers arbitrary page editing for generated wiki content.
 Repository-authored documentation changes follow the normal coding workflow.
@@ -343,17 +346,18 @@ Product conformance MUST address:
   destination risk;
 - visibility changes, actor revocation, stale browser references, and shared
   client/cache state; and
-- logging, telemetry, error, LiveView assign, island-prop, and DOM leakage.
+- logging, telemetry, error, server-render assign, signal, patch, and DOM
+  leakage.
 
-Server projections contain only the minimum presentation values. LiveVue
-islands receive JSON-safe labels, opaque identities, counts, freshness,
-completeness, truncation, and finite semantic events. They never receive RDF,
-SPARQL, graph names/handles, credentials, provider sessions, raw source bodies,
-complete dependency graphs, or a writer.
+Server projections contain only the minimum presentation values. HEEx
+fragments and Datastar signals receive JSON-safe labels, opaque identities,
+counts, freshness, completeness, truncation, and finite presentation intent.
+They never receive RDF, SPARQL, graph names/handles, credentials, provider
+sessions, raw source bodies, complete dependency graphs, or a writer.
 
 ## Accessibility And Interface Requirements
 
-The wiki MUST remain usable with server-rendered LiveView behavior and support
+The wiki MUST remain usable through native server-rendered HTML and support
 keyboard navigation, visible focus, semantic headings/landmarks, reduced
 motion, sufficient contrast in light/dark/system modes, and accessible labels
 for freshness, authority, warnings, citation popovers, filters, and external
@@ -361,9 +365,9 @@ links.
 
 Color alone never indicates authored versus generated content, current versus
 preview, completeness, or severity. Loading states retain layout and announce
-progress without claiming semantic completion. Collections use LiveView
-streams and stable unique DOM IDs; empty/count state uses separate assigns or
-the accepted stream pattern.
+progress without claiming semantic completion. Collections are server-bounded,
+paginated, and rendered beneath stable unique DOM and fragment IDs; empty and
+count state come from the same reviewed projection envelope.
 
 ## Qualification Unit
 
@@ -411,9 +415,9 @@ The corpus MUST contain, at minimum:
   content, malformed output, timeout, and provider outage;
 - process/BEAM/node/store loss, partial edition, stale fence, cancellation,
   late result, backup/restore, missing artifact, and rollback; and
-- direct URL, search, backlink, dependency-name, cache, PubSub, LiveView, and
-  island attempts to cross repository, tenant, session, attempt, candidate,
-  and preview authorization boundaries.
+- direct URL, search, backlink, dependency-name, cache, PubSub, signal, stream,
+  and fragment attempts to cross repository, tenant, session, attempt,
+  candidate, and preview authorization boundaries.
 
 Expected page manifests, dependency counts, citations, roots, states, and
 allowed product projections are versioned fixtures. Generated-explanation

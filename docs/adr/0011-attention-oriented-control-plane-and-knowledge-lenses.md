@@ -1,7 +1,8 @@
 # ADR 0011: Attention-Oriented Control Plane And Knowledge Lenses
 
-- Status: Proposed
+- Status: Accepted for architecture authority; projection, interaction, and release gated
 - Date: 2026-08-31
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode product, Factory, Knowledge, security, and accessibility
   maintainers
 - Decision scope: Product mental model, navigation, attempt workspaces,
@@ -34,6 +35,12 @@ single node-link hairball would expose implementation identities, weaken query
 authorization, overload users, and obscure provenance.
 
 ## Decision
+
+This decision is binding product vocabulary and information architecture. It
+does not claim that attention queries, attempt workspaces, conversation
+adapters, lens projections, visualizations, acknowledgements, or operational
+controls are implemented. Those capabilities remain unavailable until their
+Milestones C through G gates close.
 
 JidoCode will implement an **attention-oriented factory control plane** with
 progressive disclosure from factory to repository-backed project, task,
@@ -159,9 +166,12 @@ stay intact. New routes can coexist as read-only projections before commands
 move. Rollback restores the prior route presentation without changing graph
 facts or accepting browser-local state.
 
-## Acceptance Conditions
+## Decision Acceptance And Implementation Gates
 
-This ADR may move to `Accepted` only when:
+HUI-A3 accepts the product vocabulary and mental model only after the route,
+projection, interface, evidence, and supersession contracts pass architecture
+validation and clean-checkout CI at its merged candidate. Product capability
+remains gated. Milestones C through G must prove that:
 
 1. project/repository, task, attempt, interaction-session, candidate, and
    receipt vocabulary and containment are explicit;

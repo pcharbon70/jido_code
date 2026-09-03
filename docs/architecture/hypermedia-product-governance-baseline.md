@@ -1,7 +1,8 @@
 # Hypermedia Product Governance Baseline
 
-- Status: Proposed; non-normative until ADRs 0008–0011 are accepted
-- Specification version: `0.2.0`
+- Status: Accepted for architecture authority; implementation and release gated
+- Specification version: `1.0.0`
+- Accepted: 2026-09-03 through HUI-A3 merged-candidate governance
 - Owners: JidoCode architecture, product, security, and operations maintainers
 - Milestone: A — Architectural Authority
 - Research: [Secure hypermedia control plane](../research/12-secure-hypermedia-coding-factory-ui.md)
@@ -20,6 +21,12 @@ decisions require explicit supersession, which current capabilities are not
 production-composed, and which gates authorize each later milestone.
 
 It creates no runtime, dependency, route, graph, query, command, role, or grant.
+
+The accepted target is intentionally distinct from current operability. The
+existing LiveView/LiveVue/SaladUI product remains the deployed compatibility
+runtime until later route, consumer, and removal gates close. Dstar, Datastar,
+ShadcnUI, named-human identity, attention projections, and knowledge lenses
+receive no runtime credit from this architecture acceptance.
 
 ## Governing Baseline
 
@@ -40,7 +47,11 @@ module, contract, or accepted receipt exists.
 
 ## Contract Preservation And Supersession
 
-| Existing contract | Preserved authority | Proposed supersession |
+The accepted clause-by-clause owner and migration record is the
+[HUI-A3 runtime contract supersession](./hypermedia-ui-runtime-contract-supersession.md)
+and its machine supersession matrix.
+
+| Existing contract | Preserved authority | HUI-A3 target disposition |
 |---|---|---|
 | Graph-only source of truth | TripleStore remains durable authority | None |
 | Reviewed query catalog | Closed, bounded, authorized reads | Add product lens queries; no raw browser |
@@ -98,6 +109,10 @@ the preceding milestone's final phase receipt is pinned.
     new checklist state.
 
 ## Evidence And Drift Control
+
+Evidence classes, immutable qualification identity, real-seam requirements,
+review, retention, and receipt closure follow the accepted
+[HUI validation and release evidence contract](./hypermedia-ui-validation-and-release-evidence-contract.md).
 
 The first implementation section MUST record SHA-256 digests for all proposed
 ADRs, specifications, research, and plan documents. Architecture fitness checks

@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A3",
+  "baseline": {
+    "phase": "HUI-A2",
+    "merged_candidate": "911b8d7c8a25abf998af832f7ae8e6766e971962",
+    "closure_commit": "02e16cbb6cd4c56fb93c19db8c9f4a535e580dcb"
+  },
+  "status": "accepted_architecture_authority",
+  "runtime_status": "current_compatibility_runtime_until_milestone_h",
+  "decisions": [
+    {
+      "id": "ADR-0008",
+      "decision": "controller_heex_datastar_dstar_target_runtime",
+      "availability": "unavailable_until_dependency_and_route_gates"
+    },
+    {
+      "id": "ADR-0010",
+      "decision": "shadcnui_primitive_behind_jido_code_facade",
+      "availability": "unavailable_until_milestone_b_qualification"
+    },
+    {
+      "id": "ADR-0011",
+      "decision": "attention_workspaces_and_reviewed_knowledge_lenses",
+      "availability": "unavailable_until_projection_and_product_gates"
+    }
+  ],
+  "target_ownership": {
+    "full_page": "phoenix_controller_and_heex_template",
+    "fragment": "authenticated_phoenix_controller_and_heex_component",
+    "action": "application_controller_to_semantic_gateway",
+    "stream": "application_owned_authorized_delivery_coordinator_over_dstar_sse",
+    "browser_state": "bounded_untrusted_presentation_intent",
+    "durability": "triple_store_and_governed_external_observations",
+    "asset_build": "vite_app_js_and_app_css_local_bundles",
+    "native_fallback": "meaningful_html_read_or_form_for_essential_operations"
+  },
+  "prohibited_target_runtime": [
+    "liveview_product_routes",
+    "liveview_product_processes",
+    "liveview_product_events",
+    "liveview_product_streams",
+    "liveview_product_state",
+    "livevue_islands",
+    "saladui_product_components",
+    "remote_or_cdn_assets",
+    "client_authoritative_revisions",
+    "browser_granted_authority"
+  ],
+  "narrow_exceptions": [
+    {
+      "id": "phoenix_live_view_package",
+      "scope": "qualified_compile_time_phoenix_component_and_heex_only",
+      "removal_or_retention_evidence": "exact_consumer_manifest_dependency_tree_architecture_scan_and_clean_checkout_ci"
+    },
+    {
+      "id": "live_dashboard",
+      "scope": "current_development_only_compatibility_route",
+      "removal_or_retention_evidence": "remove_replace_or_separately_approve_before_zero_liveview_claim"
+    }
+  ],
+  "component_boundary": {
+    "primitive_owner": "qualified_shadcnui_revision",
+    "facade_owner": "JidoCodeWeb.Components.UI",
+    "composite_owner": "JidoCodeWeb",
+    "application_authority_owner": "JidoCode.Product_and_semantic_gateways",
+    "dependency_adoption_gate": "HUI-B"
+  },
+  "product_vocabulary": {
+    "hierarchy": [
+      "factory",
+      "repository_backed_project",
+      "task",
+      "attempt_workspace",
+      "interaction_session",
+      "evidence",
+      "provenance"
+    ],
+    "project_definition": "presentation_alias_for_one_conceptual_repository",
+    "attempt_workspace": "durable_human_facing_attempt_route",
+    "interaction_session": "distinct_graph_native_identity",
+    "attention_source": "reviewed_projection_of_durable_facts",
+    "acknowledgement": "unavailable_without_semantic_resource_and_command",
+    "progress": "semantic_effect_and_evidence_not_process_heartbeat"
+  },
+  "lens_groups": [
+    "factory_and_capacity",
+    "source",
+    "project_domain",
+    "work_and_execution",
+    "evidence_and_decision",
+    "memory_and_experience",
+    "wiki_guides_and_dependencies",
+    "cross_project_datasets",
+    "security_and_audit",
+    "derived_diagnostics"
+  ],
+  "knowledge_rules": {
+    "query_boundary": "reviewed_bounded_queries_only",
+    "visualization_boundary": "task_specific_bounded_with_synchronized_accessible_alternative",
+    "prohibited": [
+      "raw_sparql",
+      "unrestricted_graph_browsing",
+      "universal_node_link_hairball",
+      "chat_as_record_of_truth",
+      "process_heartbeat_as_semantic_progress"
+    ]
+  },
+  "migration": {
+    "order": "route_by_route_behind_explicit_rollout_policy",
+    "coexistence": "distinct_route_owners_without_shared_mutable_browser_authority",
+    "rollback": "last_qualified_route_owner_and_fingerprinted_asset_manifest",
+    "dependency_removal": "milestone_h_after_consumer_manifest_and_rollback_window"
+  }
+}

@@ -45,6 +45,13 @@ command reasons, logs, or browser storage.
 Never delete a lock file, initialize over a non-empty unknown dataset, or
 force an incompatible schema open.
 
+The hypermedia target additionally requires an immutable product release
+manifest containing route-owner, interface, dependency, browser asset, CSP,
+proxy, signal-schema, fragment-root, and rollback-artifact versions. Until a
+route's cutover gate closes, clean installation must identify the current
+compatibility owner honestly and must not advertise unavailable Datastar,
+Dstar, ShadcnUI, named-human, incident, or lens capability.
+
 ## Upgrade
 
 `JidoCode.ReleaseContract.migration_order/0` is authoritative: application,
@@ -84,3 +91,11 @@ If new authoritative commands have committed, do not silently discard them.
 Fail stop, export evidence, and require an explicit forward migration or an
 operator-approved reconciliation plan. Retention floors reject checkpoints
 that could reactivate erased data.
+
+Product-runtime rollback selects the last qualified route table, handler set,
+dependency lock, fingerprinted `app.js`/`app.css` assets, CSP/proxy config, and
+operations instructions as one compatible unit. It does not roll back graph
+state, receipts, identity/revocation generations, or observed source outcomes.
+Removal of a compatibility route, asset, socket, or dependency requires the
+exact consumer manifest to be empty and the rollback observation window to be
+accepted; a milestone label alone is insufficient.

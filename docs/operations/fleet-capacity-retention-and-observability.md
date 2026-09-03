@@ -4,6 +4,21 @@ This runbook defines the Phase 10 operating envelope. The graph remains the
 only durable coordination and product state. Scheduler process state,
 telemetry, benchmark samples, and UI projections are disposable.
 
+## Hypermedia Delivery Operations
+
+HTTP request, fragment, SSE connection, queue, retry, and patch metrics are
+disposable observations. They must use fixed low-cardinality route/interface/
+outcome labels and never include signals, opaque refs, graph IRIs, principals,
+search text, command reasons, or fragment bodies. Per-principal, tenant, tab,
+and factory limits are enforced by application admission, not inferred from
+Dstar registry membership or process counts. A heartbeat proves transport
+liveness only; semantic progress remains a reviewed graph projection.
+
+Operational readiness must report the current compatibility route owner and
+the target route/interface manifest separately throughout migration. A route
+cutover or rollback changes the immutable release manifest and asset digest;
+it never rewrites graph facts or command receipts.
+
 ## Fleet Coordination
 
 Every scheduler cycle re-queries candidates, active leases, and the fleet
