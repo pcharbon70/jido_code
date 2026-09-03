@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B1",
+  "recorded_on": "2026-09-03",
+  "status": "implementation_candidate_merge_pending",
+  "baseline_commit": "1e4073bb6968924abb2345e49453f980ae7eee92",
+  "source_verification": [
+    {"id": "shadcn_source", "channel": "https://github.com/pcharbon70/shadcn_ui", "identity": "fe40eae63504adc4375aead4f0e741f158a4d86e", "verified": true, "checks": ["commit", "tree", "git_archive_sha256", "license_sha256", "notice_sha256", "compiled_css_sha256", "mix_lock_sha256", "package_lock_sha256"]},
+    {"id": "dstar_source", "channel": "https://github.com/ricotrevisan/dstar", "identity": "v0.2.0@4bfb9110645f3831cd350f25434493c76a42bfae", "verified": true, "checks": ["tag", "commit", "tree", "git_archive_sha256", "license_sha256", "mix_exs_sha256", "source_mix_lock_sha256", "exact_commit_CI"]},
+    {"id": "dstar_hex", "channel": "https://repo.hex.pm/tarballs/dstar-0.2.0.tar", "identity": "dstar-0.2.0", "verified": true, "checks": ["download_available", "tarball_sha256", "release_not_retired", "requirements", "security_advisories"]},
+    {"id": "datastar_source", "channel": "https://github.com/starfederation/datastar", "identity": "v1.0.3@73ab00e7c06d8c2bad030fdddafba800fcccbde2", "verified": true, "checks": ["GitHub_verified_tag_signature", "commit", "tree", "git_archive_sha256", "license_sha256", "SDK_config_sha256", "CSP_source_sha256"]},
+    {"id": "datastar_bundle", "channel": "https://github.com/starfederation/datastar/blob/73ab00e7c06d8c2bad030fdddafba800fcccbde2/bundles/datastar.js", "identity": "bundles/datastar.js", "verified": true, "checks": ["bundle_sha256", "bundle_bytes", "source_map_sha256", "embedded_sources", "no_unminified_release_artifact", "no_uploaded_release_asset"]},
+    {"id": "candidate_hex_graph", "channel": "https://hex.pm/api/packages", "identity": "HUI-B1_candidate_Hex_closure", "verified": true, "checks": ["exact_release_checksums", "requirements", "retirement_state", "baseline_mix_hex_audit"]},
+    {"id": "shadcn_npm_build_graph", "channel": "https://registry.npmjs.org", "identity": "package-lock_sha256:e155db35ac11512f0d10b88131b20e22abd2aa8ae92ba6e077ccd4be6bd74075", "verified": true, "checks": ["lockfile_integrity", "66_components", "npm_audit_zero_findings"]}
+  ],
+  "negative_cases": [
+    {"id": "changed_commit", "expected": "blocked", "diagnostic": "exact candidate commit mismatch"},
+    {"id": "changed_tag", "expected": "blocked", "diagnostic": "exact candidate tag mismatch"},
+    {"id": "checksum_mismatch", "expected": "blocked", "diagnostic": "package or asset checksum mismatch"},
+    {"id": "missing_license_or_usage_grant", "expected": "blocked", "diagnostic": "MIT license and retained conditions required"},
+    {"id": "namespace_drift", "expected": "blocked", "diagnostic": "ShadcnUI namespace mismatch"},
+    {"id": "advisory_present", "expected": "blocked", "diagnostic": "selected source or release advisory snapshot is no longer empty"},
+    {"id": "upstream_CI_failure_claimed_qualified", "expected": "blocked", "diagnostic": "failed ShadcnUI candidate cannot receive qualification or release credit"},
+    {"id": "unavailable_artifact", "expected": "blocked", "diagnostic": "missing manifest or acquisition input fails closed"},
+    {"id": "versionless_protocol_claim", "expected": "blocked", "diagnostic": "every protocol behavior requires the selected Dstar and Datastar identities"},
+    {"id": "product_consumer_added_in_phase_1", "expected": "blocked", "diagnostic": "HUI-B1 is evidence-only and preserves dependency lock and asset entrypoints"}
+  ],
+  "commands": [
+    "jq empty priv/architecture/hypermedia_ui/phase_b1_*.json",
+    "git archive --format=tar <exact-commit> | sha256sum",
+    "curl -fsSL https://repo.hex.pm/tarballs/<package>-<version>.tar | sha256sum",
+    "mix hex.audit",
+    "npm audit --package-lock-only --json",
+    "mix test test/jido_code/architecture/hypermedia_ui_phase_b1_test.exs",
+    "mix architecture.check",
+    "mix precommit"
+  ],
+  "phase_boundary": {
+    "product_consumers_added": false,
+    "dependency_declarations_changed": false,
+    "lockfiles_changed": false,
+    "application_assets_changed": false,
+    "routes_or_runtime_changed": false,
+    "release_credit_granted": false,
+    "next_authority": "HUI-B2 only after the HUI-B1 implementation and closure pull requests merge and pin the implementation merge commit"
+  }
+}

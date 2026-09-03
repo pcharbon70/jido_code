@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B1",
+  "recorded_on": "2026-09-03",
+  "status": "accepted_source_baseline_adoption_blocked",
+  "candidate": {
+    "repository": "https://github.com/pcharbon70/shadcn_ui",
+    "owner": "pcharbon70",
+    "default_branch": "main",
+    "commit": "fe40eae63504adc4375aead4f0e741f158a4d86e",
+    "tree": "75980039b06222dcba51ba642ef06fb596aa8cfa",
+    "committed_at": "2026-09-03T11:12:01-04:00",
+    "commit_subject": "Merge pull request #47 from pcharbon70/codex/version-1-0-0",
+    "immutable_tag": null,
+    "package_app": "shadcn_ui",
+    "package_version": "1.0.0",
+    "module_namespace": "ShadcnUI",
+    "hex_release": null,
+    "publication_status": "unpublished_untagged_source_candidate"
+  },
+  "integrity": {
+    "archive_command": "git archive --format=tar fe40eae63504adc4375aead4f0e741f158a4d86e",
+    "archive_sha256": "a71b35c1102102ee38935d80b1d21e41c68aa3966bca4fb77e8d816383831a1c",
+    "tree_entry_count": 689,
+    "license_sha256": "125c269356102a6f23c6fcf0285d7921e9dd8ac28c19d03fa197388402050405",
+    "third_party_notices_sha256": "32d61e76c847c0eab4510ff19eec28776b84e7401a984aa948e23a353182e8de",
+    "compiled_css_path": "priv/static/shadcn_ui.css",
+    "compiled_css_sha256": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41",
+    "mix_lock_sha256": "ad8e13e7418692f0f768980a7a2d16e3961046953d66c350ba0d3fe5c09ad8bf",
+    "package_lock_sha256": "e155db35ac11512f0d10b88131b20e22abd2aa8ae92ba6e077ccd4be6bd74075"
+  },
+  "license_and_usage": {
+    "spdx": "MIT",
+    "license_path": "LICENSE",
+    "covers": [
+      "source",
+      "compiled_css",
+      "examples",
+      "copied_code",
+      "modifications",
+      "redistribution"
+    ],
+    "icons": "no_icon_package_or_icon_asset_is_distributed",
+    "conditions": [
+      "retain_copyright_and_permission_notice_in_copies_or_substantial_portions",
+      "retain_applicable_third_party_notices"
+    ],
+    "historical_blocker": "commit_78d3dfeb_declared_LicenseRef_LECO_Proprietary_without_a_root_grant_and_is_rejected",
+    "authority_result": "usage_authorized_at_exact_candidate_subject_to_MIT_conditions"
+  },
+  "package_contract": {
+    "elixir": "~> 1.17",
+    "runtime_dependencies": [
+      {"name": "phoenix_html", "constraint": "~> 4.1", "role": "HTML_safe_and_form_infrastructure"},
+      {"name": "phoenix_live_view", "constraint": "~> 1.2", "role": "compile_time_Phoenix.Component_HEEx_attrs_and_slots_only"}
+    ],
+    "development_dependencies": [
+      {"name": "ex_doc", "constraint": "~> 0.40.3"},
+      {"name": "spec_led_ex", "source": "https://github.com/specleddev/specled_ex.git", "ref": "f0d20dba6786a8f1dff0d7365a113b23db696fc1"}
+    ],
+    "javascript_runtime": "none",
+    "routes_sockets_processes_hooks_state_authorization_persistence_commands": "none",
+    "stylesheet_delivery": "consumer_copies_exact_compiled_css_into_local_app_css_build"
+  },
+  "component_inventory": {
+    "public_function_components": 41,
+    "categories": {
+      "foundation": 6,
+      "forms": 15,
+      "disclosure": 1,
+      "navigation": 3,
+      "content": 3,
+      "overlays": 7,
+      "media": 3,
+      "motion": 3
+    },
+    "public_entry": "use ShadcnUI imports every defining component module",
+    "known_name_collisions": ["button/1", "input/1"],
+    "datastar_attributes": "reviewed global attributes may pass through only to the documented element; exact facade rendering remains a Phase 2 and Phase 3 proof",
+    "generated_assets": ["priv/static/shadcn_ui.css"],
+    "css_token_prefix": "--shadcn-ui-",
+    "css_utility_prefix": "sui:",
+    "application_composites_missing": [
+      "FactoryShell",
+      "ProjectContextSwitcher",
+      "AttentionQueue",
+      "ProjectionStatusStrip",
+      "AgentFleetTable",
+      "AgentAttemptWorkspace",
+      "StageRail",
+      "AttemptTimeline",
+      "CodeDiff",
+      "EvidenceMatrix",
+      "ScopedCommandDialog",
+      "CommandReceipt",
+      "GraphLens",
+      "ProvenancePanel",
+      "CostBudgetMeter"
+    ]
+  },
+  "upstream_evidence": {
+    "repository_archived": false,
+    "repository_disabled": false,
+    "open_issue_count_at_review": 0,
+    "repository_security_advisories_at_review": [],
+    "ci_run": "https://github.com/pcharbon70/shadcn_ui/actions/runs/33771257223",
+    "ci_conclusion": "failure",
+    "ci_failed_step": "npm run browser:milestone-e-phase4",
+    "ci_preceding_passes": [
+      "locked_dependency_install",
+      "deterministic_asset_check",
+      "mix_precommit",
+      "docs_and_hex_archive_build",
+      "clean_consumer_precommit",
+      "spec_check",
+      "browser_suites_through_milestone_e_phase3"
+    ],
+    "candidate_qualified": false,
+    "candidate_blockers": [
+      "exact_1_0_0_archive_and_clean_consumer_record_pending",
+      "manual_accessibility_pending",
+      "exact_revision_review_and_CI_not_green",
+      "matching_gallery_identity_pending",
+      "Hex_publication_and_public_tag_pending"
+    ],
+    "automated_browser_history": "historical_locked_Chromium_Firefox_WebKit_evidence_exists_but_does_not_qualify_this_exact_candidate",
+    "manual_accessibility": "six_bounded_scenarios_pending"
+  },
+  "risk_register": [
+    {"id": "HUI-B1-SHADCN-R01", "severity": "P0", "owner": "HUI-B2 dependency owner", "status": "open", "risk": "phoenix_live_view ~> 1.2 does not intersect JidoCode's current ~> 1.1.0 constraint", "mitigation": "solve and qualify the compile-only Phoenix.Component dependency in Phase 2 without a product LiveView consumer", "expires_on": "2026-10-03", "reopening_condition": "a lock change lands before the exact constraint set and no-product-runtime proof pass"},
+    {"id": "HUI-B1-SHADCN-R02", "severity": "P0", "owner": "ShadcnUI upstream and HUI-B supply-chain owner", "status": "blocking_adoption", "risk": "exact candidate CI failed and later browser suites were skipped", "mitigation": "require green exact-revision upstream or independently reproduced equivalent evidence before Phase 4 qualification", "expires_on": "2026-10-03", "reopening_condition": "the candidate receives CI or release credit from the failed run"},
+    {"id": "HUI-B1-SHADCN-R03", "severity": "P1", "owner": "HUI-B accessibility owner", "status": "blocking_release", "risk": "manual keyboard overlay zoom RTL forced-colors touch and screen-reader scenarios remain pending", "mitigation": "retain the explicit gap and execute the product-owned matrix before release qualification", "expires_on": "HUI-G3", "reopening_condition": "automated primitive evidence is presented as manual or product accessibility acceptance"},
+    {"id": "HUI-B1-SHADCN-R04", "severity": "P1", "owner": "HUI-B supply-chain owner", "status": "open", "risk": "version 1.0.0 has no immutable public tag or Hex release", "mitigation": "pin the exact commit and archive digest; do not resolve by mutable branch or version label", "expires_on": "2026-10-03", "reopening_condition": "the untagged version string is treated as immutable provenance"},
+    {"id": "HUI-B1-SHADCN-R05", "severity": "P1", "owner": "JidoCodeWeb.Components.UI owner", "status": "open", "risk": "broad imports collide with JidoCode input and button helpers and expose package APIs directly", "mitigation": "import only reviewed primitives behind the JidoCode facade and test exact forwarded attributes", "expires_on": "HUI-B4", "reopening_condition": "a product module broadly uses ShadcnUI or bypasses the facade"}
+  ],
+  "update_policy": {
+    "cadence": "monthly_and_on_security_or_release_event",
+    "pinning": "exact_commit_and_archive_digest_only",
+    "expiry": "2026-10-03_or_first_upstream_commit_tag_license_dependency_CSS_CI_or_advisory_change",
+    "fork_policy": "no_fork_or_patch_selected; any patch requires a new identity and complete review",
+    "adoption_decision": "blocked_until_Phases_2_through_4_close"
+  }
+}

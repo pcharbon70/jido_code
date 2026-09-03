@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B1",
+  "recorded_on": "2026-09-03",
+  "status": "accepted_decision_ledger_adoption_blocked",
+  "candidate_bom": "priv/architecture/hypermedia_ui/phase_b1_candidate_bom.json",
+  "baseline": {
+    "commit": "1e4073bb6968924abb2345e49453f980ae7eee92",
+    "elixir": "1.19.5",
+    "otp": "28",
+    "node": "24.3.0",
+    "npm": "11.4.2",
+    "mix_exs_sha256": "ac3ee46af4eb10360bead10c6875f286e6d6308920e17624f98ae88247ead3f1",
+    "mix_lock_sha256": "db12394fa532dfcf3468249f30732204c278afde74fb48cc9c630b4e2b409402",
+    "package_json_sha256": "7f591835bbd701538c7352dcbc54b7f6e9f8930b94ded856bb67128023b48da3",
+    "package_lock_sha256": "597085163703c02ba831aec86e335ada9f577021da748fa6225f29f718a9868f",
+    "app_js_sha256": "9b412cc6aed09720186d85fd901a9569ab6fe68a15ee538a6fd746c881c1f283",
+    "app_css_sha256": "9a2d120a389d8c686cfbde58c0dc2d954a22325b404d5258a356b2e8ea92d4e8",
+    "new_dependencies_or_assets_in_HUI_B1": []
+  },
+  "selected_inputs": [
+    {"id": "HUI-B1-SELECT-01", "input": "ShadcnUI source", "identity": "fe40eae63504adc4375aead4f0e741f158a4d86e", "reason": "exact MIT source with component and compiled CSS provenance", "owner": "HUI-B2 component owner", "replacement_trigger": "license namespace dependency CSS CI or accessibility evidence drift"},
+    {"id": "HUI-B1-SELECT-02", "input": "Dstar Hex and source", "identity": "0.2.0 checksum 4766c1f3da802aa7e842aa78cbb778c8d764599e18fc67bbe32fbe25ac2c6460 at 4bfb9110645f3831cd350f25434493c76a42bfae", "reason": "current immutable release includes v1.0 request transport and CR/LF selector CSRF and retry fixes", "owner": "HUI-B2 dependency and HUI-B3 protocol owners", "replacement_trigger": "release retirement advisory protocol or constraint drift"},
+    {"id": "HUI-B1-SELECT-03", "input": "Datastar browser runtime", "identity": "v1.0.3 at 73ab00e7c06d8c2bad030fdddafba800fcccbde2 bundle 5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65", "reason": "first compatible 1.0 patch with opt-in nonce CSP mode and no unsafe-eval requirement", "owner": "HUI-B2 asset and security owners", "replacement_trigger": "signature source bundle CSP protocol browser or advisory drift"},
+    {"id": "HUI-B1-SELECT-04", "input": "Phoenix component resolution", "identity": "Phoenix 1.8.11 Phoenix.HTML 4.3.0 Phoenix LiveView 1.2.9", "reason": "exact ShadcnUI lock resolution intersects Dstar and the existing Phoenix stack; only Phoenix LiveView changes from the baseline", "owner": "HUI-B2 dependency owner", "replacement_trigger": "solver conflict retirement advisory compile failure or product-runtime expansion"}
+  ],
+  "alternatives": [
+    {"id": "HUI-B1-ALT-01", "candidate": "historical ShadcnUI 78d3dfeb", "decision": "rejected", "reason": "proprietary declaration wrong canonical metadata and no root usage grant"},
+    {"id": "HUI-B1-ALT-02", "candidate": "ShadcnUI main branch or version 1.0.0 label", "decision": "rejected", "reason": "mutable branch and untagged version string are not immutable provenance"},
+    {"id": "HUI-B1-ALT-03", "candidate": "React shadcn/ui or continued SaladUI as target", "decision": "rejected", "reason": "does not provide the accepted server-rendered Phoenix function-component source target"},
+    {"id": "HUI-B1-ALT-04", "candidate": "Dstar main branch latest or versionless documentation", "decision": "rejected", "reason": "mutable identity and inferred protocol behavior"},
+    {"id": "HUI-B1-ALT-05", "candidate": "Datastar v1.0.0 v1.0.1 or v1.0.2", "decision": "rejected", "reason": "Function-based expression compilation requires unsafe-eval"},
+    {"id": "HUI-B1-ALT-06", "candidate": "Datastar CDN or direct release-tag browser URL", "decision": "rejected", "reason": "remote runtime availability and mutable delivery bypass local digest and CSP ownership"},
+    {"id": "HUI-B1-ALT-07", "candidate": "rebuild Datastar v1.0.3 from its release tree", "decision": "rejected_for_phase_2", "reason": "release tree omits package manifest and lock; build cannot be reproduced from recorded inputs"},
+    {"id": "HUI-B1-ALT-08", "candidate": "locally patch or fork selected source", "decision": "deferred", "reason": "no patch is currently justified; any byte change requires a new source identity BOM license and qualification cycle"}
+  ],
+  "constraint_decisions": [
+    {"id": "HUI-B1-CONSTRAINT-01", "constraint": "JidoCode phoenix_live_view ~> 1.1.0 versus ShadcnUI ~> 1.2", "resolution": "HUI-B2 must update the direct declaration and lock to exact 1.2.9 then prove all retained and target consumers", "status": "blocking_adoption"},
+    {"id": "HUI-B1-CONSTRAINT-02", "constraint": "Dstar plug ~> 1.14 and jason ~> 1.4", "resolution": "existing Plug 1.20.3 and Jason 1.4.5 satisfy the constraints without override", "status": "resolved_candidate"},
+    {"id": "HUI-B1-CONSTRAINT-03", "constraint": "Dstar optional Phoenix ~> 1.7 and Phoenix LiveView ~> 1.0", "resolution": "candidate Phoenix 1.8.11 and Phoenix LiveView 1.2.9 intersect; application must avoid Dstar Page Router Component and Dispatch product consumers", "status": "resolved_candidate_runtime_proof_pending"},
+    {"id": "HUI-B1-CONSTRAINT-04", "constraint": "Datastar nonce mode with no unsafe-eval unsafe-inline or remote source", "resolution": "select v1.0.3 exact bundle; HUI-B2 must prove enforcing response-scoped nonce and Trusted Types behavior", "status": "blocking_adoption"},
+    {"id": "HUI-B1-CONSTRAINT-05", "constraint": "ShadcnUI upstream Tailwind 4.3.3 CSS build versus application Tailwind 4.3.3 lock", "resolution": "consume exact compiled CSS and retain local Tailwind 4.3.3; do not install upstream npm build graph", "status": "resolved_candidate_determinism_proof_pending"}
+  ],
+  "exceptions_and_controls": {
+    "active_adoption_exceptions": [],
+    "temporary_constraints": [
+      {"id": "HUI-B1-TEMP-01", "owner": "HUI-B2 dependency owner", "expires_on": "2026-10-03", "condition": "Phoenix LiveView 1.2.9 is selected for component compatibility while existing product LiveView consumers remain until HUI-H", "control": "no new LiveView route process event stream hook socket or state consumer; audit supervision routes imports assets and release footprint"},
+      {"id": "HUI-B1-TEMP-02", "owner": "HUI-B2 asset owner", "expires_on": "2026-10-03", "condition": "Datastar official bundle is vendored because the signed release tree cannot rebuild it", "control": "verify signed tag commit archive source-map vendor application build and production asset digests; no local edits or CDN fallback"}
+    ],
+    "release_credit": "none_until_HUI_B2_through_HUI_B4_close"
+  },
+  "offline_and_cache_policy": {
+    "cache_key": "ecosystem_name_version_or_commit_plus_recorded_sha256",
+    "populate": "download only from the recorded HTTPS GitHub Hex or npm publication channel during an explicit online acquisition step",
+    "verify_before_use": "hash every source archive Hex tarball npm tarball compiled CSS Datastar bundle and lock before extraction compilation or import",
+    "offline_build": "after verified cache population run dependency install and asset build with network disabled; fail closed on a missing or mismatched artifact",
+    "fallback": "no branch tag latest alternate registry CDN or rebuild fallback",
+    "cache_poisoning": "quarantine unexpected bytes retain evidence and require a new reviewed candidate rather than rewriting expected digests"
+  },
+  "publication_channel_policy": {
+    "git": "recorded HTTPS repository plus exact commit/tree/archive; require verified tag when available and never trust tag text alone",
+    "hex": "repo.hex.pm tarball plus exact release checksum retirement requirements and mix.lock registry checksum",
+    "npm": "registry.npmjs.org tarball plus package-lock integrity; no lifecycle or optional native package executes before lock and platform review",
+    "assets": "same-origin application bundle only with local fingerprint cache MIME nosniff and CSP controls",
+    "review": "pull-request review and merged-candidate SHA bind local evidence; upstream signatures supplement but do not replace project review"
+  },
+  "update_and_incident_policy": {
+    "cadence": "monthly plus immediate review on release advisory retirement signature license dependency or protocol event",
+    "drift_detection": ["candidate_manifest_exact_fields", "source_archive_and_bundle_hashes", "mix_exs_and_mix_lock", "package_json_and_package_lock", "asset_manifest_and_production_digests", "license_and_notice_hashes", "runtime_consumer_scan"],
+    "emergency": "stop acquisition and release credit quarantine caches restore the last accepted lock and asset manifest assess exposure rotate any affected credential revoke unsafe runtime routes and open a remediation receipt",
+    "replacement": "a replacement changes candidate identity and repeats source license BOM compatibility consumer security browser and rollback review"
+  },
+  "expected_HUI_B2_outputs": [
+    {"path": "mix.exs", "expectation": "exact Dstar 0.2.0 and ShadcnUI fe40eae source declarations plus Phoenix LiveView 1.2-compatible direct constraint; no implicit override"},
+    {"path": "mix.lock", "expectation": "Dstar checksum and ShadcnUI exact commit with Phoenix LiveView 1.2.9 candidate closure or a newly reviewed equivalent resolution"},
+    {"path": "package.json", "expectation": "no Datastar CDN or npm dependency; existing asset compiler only"},
+    {"path": "package-lock.json", "expectation": "unchanged unless an independently reviewed build-tool change is required"},
+    {"path": "assets/vendor/datastar/datastar.js", "expectation": "exact selected 5d6b7794 bundle bytes and retained MIT notice"},
+    {"path": "assets/css/app.css", "expectation": "Tailwind v4 import syntax retained and exact ShadcnUI stylesheet included locally without remote source or @apply"},
+    {"path": "priv/static/.vite/manifest.json", "expectation": "fingerprinted app.js and app.css ownership with no external runtime"},
+    {"path": "priv/static/cache_manifest.json", "expectation": "Phoenix production digest evidence after asset deployment"},
+    {"path": "priv/architecture/hypermedia_ui/phase_b2_resolved_sbom.json", "expectation": "full resolved runtime compile build and optional-platform graph with source checksum license advisory role and consumer"},
+    {"path": "docs/architecture/hypermedia-ui-milestone-b-phase-02-receipt.md", "expectation": "reviewed clean-checkout resolution asset CSP facade and rollback evidence pinned after merge"}
+  ],
+  "reopening_conditions": [
+    "a selected source version commit tag tree archive bundle lock checksum license owner namespace dependency consumer or advisory changes",
+    "a dependency or asset is acquired from a mutable unrecorded remote or unverifiable channel",
+    "an upstream CI browser accessibility CSP or security gap is represented as closed",
+    "an undocumented transitive runtime compile build optional-platform or native dependency appears",
+    "a lock or asset digest is rewritten to match unexpected bytes rather than reopening review",
+    "a risk loses its owner expiry mitigation replacement trigger or blocking status",
+    "a build needs network after the verified cache population step or silently falls back online",
+    "an expected lock manifest SBOM license evidence or production digest is absent from HUI-B2",
+    "the candidate graph creates a LiveView product consumer Dstar dynamic handler Dstar Script remote asset unsafe CSP mode or browser authority"
+  ]
+}

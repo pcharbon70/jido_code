@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "kind": "HUI-B1_candidate_dependency_asset_bill_of_materials",
+  "recorded_on": "2026-09-03",
+  "baseline_commit": "1e4073bb6968924abb2345e49453f980ae7eee92",
+  "status": "immutable_candidate_graph_not_installed",
+  "components": [
+    {
+      "ref": "source:shadcn_ui@fe40eae63504adc4375aead4f0e741f158a4d86e",
+      "name": "shadcn_ui",
+      "version": "1.0.0+fe40eae63504",
+      "ecosystem": "git_source",
+      "source": "https://github.com/pcharbon70/shadcn_ui/tree/fe40eae63504adc4375aead4f0e741f158a4d86e",
+      "sha256": "a71b35c1102102ee38935d80b1d21e41c68aa3966bca4fb77e8d816383831a1c",
+      "license": "MIT",
+      "role": "compile_and_runtime_Phoenix_function_components",
+      "consumer": "future_JidoCodeWeb.Components.UI_facade_only",
+      "disposition": "selected_source_adoption_blocked"
+    },
+    {
+      "ref": "asset:shadcn_ui.css@ed0768e9582e",
+      "name": "shadcn_ui.css",
+      "version": "1.0.0+fe40eae63504",
+      "ecosystem": "compiled_asset",
+      "source": "https://github.com/pcharbon70/shadcn_ui/blob/fe40eae63504adc4375aead4f0e741f158a4d86e/priv/static/shadcn_ui.css",
+      "sha256": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41",
+      "license": "MIT",
+      "role": "local_CSS_build_input",
+      "consumer": "future_assets_css_app.css_import",
+      "disposition": "selected_asset_adoption_blocked"
+    },
+    {
+      "ref": "pkg:hex/dstar@0.2.0",
+      "name": "dstar",
+      "version": "0.2.0",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/dstar-0.2.0.tar",
+      "sha256": "4766c1f3da802aa7e842aa78cbb778c8d764599e18fc67bbe32fbe25ac2c6460",
+      "source_commit": "4bfb9110645f3831cd350f25434493c76a42bfae",
+      "source_archive_sha256": "8ea84f50f5a9d4877f3cffad7861927d555140cdb779573b22de0d225c12d06e",
+      "license": "MIT",
+      "role": "runtime_transport_helper",
+      "consumer": "future_application_owned_controller_and_SSE_boundaries",
+      "disposition": "selected_package_adoption_blocked"
+    },
+    {
+      "ref": "asset:datastar@1.0.3",
+      "name": "datastar.js",
+      "version": "1.0.3",
+      "ecosystem": "git_release_asset",
+      "source": "https://github.com/starfederation/datastar/blob/73ab00e7c06d8c2bad030fdddafba800fcccbde2/bundles/datastar.js",
+      "sha256": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+      "source_commit": "73ab00e7c06d8c2bad030fdddafba800fcccbde2",
+      "source_archive_sha256": "3cc36052c8036e42bbc456bcd4190a17d6644f3ae0bab7a1b8145d9a775c70cb",
+      "license": "MIT",
+      "role": "locally_vendored_browser_runtime_input",
+      "consumer": "future_assets_js_app.js_import",
+      "disposition": "selected_asset_adoption_blocked"
+    },
+    {
+      "ref": "pkg:hex/phoenix_live_view@1.2.9",
+      "name": "phoenix_live_view",
+      "version": "1.2.9",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/phoenix_live_view-1.2.9.tar",
+      "sha256": "2f9528c3d7046edabbb30a91710ca33988f8d8bc20a964a1fc48b32134572afa",
+      "license": "MIT",
+      "role": "candidate_compile_component_infrastructure_and_temporary_existing_compatibility_runtime",
+      "consumer": "ShadcnUI_Phoenix.Component_plus_existing_consumers_until_HUI-H",
+      "disposition": "selected_resolution_replaces_current_1.1.33_in_HUI-B2"
+    },
+    {
+      "ref": "pkg:hex/phoenix@1.8.11",
+      "name": "phoenix",
+      "version": "1.8.11",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/phoenix-1.8.11.tar",
+      "sha256": "44f028f4129e5a29487e868f84903373e3d032da151ad0c789c3849f464e7351",
+      "license": "MIT",
+      "role": "existing_runtime_framework",
+      "consumer": "JidoCode_and_transitive_component_dependencies",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/phoenix_html@4.3.0",
+      "name": "phoenix_html",
+      "version": "4.3.0",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/phoenix_html-4.3.0.tar",
+      "sha256": "3eaa290a78bab0f075f791a46a981bbe769d94bc776869f4f3063a14f30497ad",
+      "license": "MIT",
+      "role": "existing_HTML_form_and_safe_data_infrastructure",
+      "consumer": "JidoCode_ShadcnUI_and_Phoenix_LiveView",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/phoenix_pubsub@2.2.0",
+      "name": "phoenix_pubsub",
+      "version": "2.2.0",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/phoenix_pubsub-2.2.0.tar",
+      "sha256": "adc313a5bf7136039f63cfd9668fde73bba0765e0614cba80c06ac9460ff3e96",
+      "license": "MIT",
+      "role": "existing_Phoenix_transitive_runtime",
+      "consumer": "Phoenix",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/phoenix_template@1.0.4",
+      "name": "phoenix_template",
+      "version": "1.0.4",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/phoenix_template-1.0.4.tar",
+      "sha256": "2c0c81f0e5c6753faf5cca2f229c9709919aba34fab866d3bc05060c9c444206",
+      "license": "MIT",
+      "role": "existing_Phoenix_and_LiveView_transitive_compile_runtime",
+      "consumer": "Phoenix_and_Phoenix_LiveView",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/plug@1.20.3",
+      "name": "plug",
+      "version": "1.20.3",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/plug-1.20.3.tar",
+      "sha256": "be266aee1b8536ef6409d58cf39a3121319f0ec47cfa1b24024485aa0e76ad76",
+      "license": "Apache-2.0",
+      "role": "existing_HTTP_runtime_and_Dstar_required_dependency",
+      "consumer": "JidoCode_Phoenix_Dstar_and_Phoenix_LiveView",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/plug_crypto@2.2.0",
+      "name": "plug_crypto",
+      "version": "2.2.0",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/plug_crypto-2.2.0.tar",
+      "sha256": "83a95744ab1c75876542b6fab135fcc176280e0f301a111c1f757fddcec95d2c",
+      "license": "Apache-2.0",
+      "role": "existing_Plug_and_Phoenix_transitive_runtime",
+      "consumer": "Plug_and_Phoenix",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/telemetry@1.4.2",
+      "name": "telemetry",
+      "version": "1.4.2",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/telemetry-1.4.2.tar",
+      "sha256": "928f6495066506077862c0d1646609eed891a4326bee3126ba54b60af61febb1",
+      "license": "Apache-2.0",
+      "role": "existing_Phoenix_Plug_transitive_runtime",
+      "consumer": "Phoenix_Plug_and_Phoenix_LiveView",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/jason@1.4.5",
+      "name": "jason",
+      "version": "1.4.5",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/jason-1.4.5.tar",
+      "sha256": "b0c823996102bcd0239b3c2444eb00409b72f6a140c1950bc8b457d836b30684",
+      "license": "Apache-2.0",
+      "role": "existing_JSON_runtime_and_Dstar_required_dependency",
+      "consumer": "JidoCode_and_Dstar",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/mime@2.0.7",
+      "name": "mime",
+      "version": "2.0.7",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/mime-2.0.7.tar",
+      "sha256": "6171188e399ee16023ffc5b76ce445eb6d9672e2e241d2df6050f3c771e80ccd",
+      "license": "Apache-2.0",
+      "role": "existing_Plug_transitive_runtime",
+      "consumer": "Plug",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/websock_adapter@0.6.0",
+      "name": "websock_adapter",
+      "version": "0.6.0",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/websock_adapter-0.6.0.tar",
+      "sha256": "50021a85bce8f203b086705d9e0c5415e2c7eb05d319111b0428fe71f9934617",
+      "license": "MIT",
+      "role": "existing_Phoenix_transitive_runtime",
+      "consumer": "Phoenix",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:hex/websock@0.5.3",
+      "name": "websock",
+      "version": "0.5.3",
+      "ecosystem": "hex",
+      "source": "https://repo.hex.pm/tarballs/websock-0.5.3.tar",
+      "sha256": "6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453",
+      "license": "MIT",
+      "role": "existing_websock_adapter_transitive_runtime",
+      "consumer": "websock_adapter",
+      "disposition": "retain_exact_current_resolution_for_HUI-B2_candidate"
+    },
+    {
+      "ref": "pkg:npm/%40tailwindcss/vite@4.3.3",
+      "name": "@tailwindcss/vite",
+      "version": "4.3.3",
+      "ecosystem": "npm",
+      "source": "https://registry.npmjs.org/@tailwindcss/vite/-/vite-4.3.3.tgz",
+      "integrity": "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw==",
+      "license": "MIT",
+      "role": "existing_local_CSS_build_tool",
+      "consumer": "assets_build",
+      "disposition": "retain_from_existing_package_lock"
+    },
+    {
+      "ref": "pkg:npm/tailwindcss@4.3.3",
+      "name": "tailwindcss",
+      "version": "4.3.3",
+      "ecosystem": "npm",
+      "source": "https://registry.npmjs.org/tailwindcss/-/tailwindcss-4.3.3.tgz",
+      "integrity": "sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==",
+      "license": "MIT",
+      "role": "existing_local_CSS_build_tool_and_upstream_ShadcnUI_CSS_compiler",
+      "consumer": "assets_build",
+      "disposition": "retain_from_existing_package_lock"
+    },
+    {
+      "ref": "pkg:npm/vite@7.3.6",
+      "name": "vite",
+      "version": "7.3.6",
+      "ecosystem": "npm",
+      "source": "https://registry.npmjs.org/vite/-/vite-7.3.6.tgz",
+      "integrity": "sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==",
+      "license": "MIT",
+      "role": "existing_local_JS_and_CSS_bundle_tool",
+      "consumer": "assets_build",
+      "disposition": "retain_from_existing_package_lock"
+    }
+  ],
+  "dependency_edges": {
+    "source:shadcn_ui@fe40eae63504adc4375aead4f0e741f158a4d86e": ["pkg:hex/phoenix_html@4.3.0", "pkg:hex/phoenix_live_view@1.2.9", "asset:shadcn_ui.css@ed0768e9582e"],
+    "pkg:hex/dstar@0.2.0": ["pkg:hex/plug@1.20.3", "pkg:hex/jason@1.4.5"],
+    "pkg:hex/phoenix_live_view@1.2.9": ["pkg:hex/phoenix@1.8.11", "pkg:hex/phoenix_html@4.3.0", "pkg:hex/phoenix_template@1.0.4", "pkg:hex/plug@1.20.3", "pkg:hex/telemetry@1.4.2"],
+    "pkg:hex/phoenix@1.8.11": ["pkg:hex/phoenix_pubsub@2.2.0", "pkg:hex/phoenix_template@1.0.4", "pkg:hex/plug@1.20.3", "pkg:hex/plug_crypto@2.2.0", "pkg:hex/telemetry@1.4.2", "pkg:hex/websock_adapter@0.6.0"],
+    "pkg:hex/plug@1.20.3": ["pkg:hex/mime@2.0.7", "pkg:hex/plug_crypto@2.2.0", "pkg:hex/telemetry@1.4.2"],
+    "pkg:hex/websock_adapter@0.6.0": ["pkg:hex/plug@1.20.3", "pkg:hex/websock@0.5.3"],
+    "pkg:npm/%40tailwindcss/vite@4.3.3": ["pkg:npm/tailwindcss@4.3.3"],
+    "pkg:npm/vite@7.3.6": ["asset:datastar@1.0.3"],
+    "pkg:npm/tailwindcss@4.3.3": ["asset:shadcn_ui.css@ed0768e9582e"]
+  },
+  "upstream_build_inputs": {
+    "shadcn_ui": {
+      "mix_lock_sha256": "ad8e13e7418692f0f768980a7a2d16e3961046953d66c350ba0d3fe5c09ad8bf",
+      "package_lock_sha256": "e155db35ac11512f0d10b88131b20e22abd2aa8ae92ba6e077ccd4be6bd74075",
+      "npm_locked_component_count": 66,
+      "direct_npm_build_tools": ["@tailwindcss/cli@4.3.3", "tailwindcss@4.3.3"],
+      "npm_license_set": ["Apache-2.0", "BSD-3-Clause", "ISC", "MIT", "MPL-2.0"],
+      "disposition": "provenance_only; JidoCode consumes exact compiled CSS rather than installing the upstream npm graph"
+    },
+    "datastar": {
+      "release_tree_package_manifest": null,
+      "release_tree_package_lock": null,
+      "disposition": "vendor exact selected bundle; no npm package or nonreproducible upstream rebuild"
+    }
+  },
+  "advisory_snapshot": {
+    "reviewed_on": "2026-09-03",
+    "selected_source_repository_advisories": [],
+    "selected_Hex_release_retirements": [],
+    "baseline_mix_hex_audit": "no_retired_or_security_advisory_packages_found",
+    "shadcn_upstream_package_lock_npm_audit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "scope_warning": "time_bounded_registry_and_repository_observation_not_a_claim_of_future_or_transitive_safety"
+  }
+}
