@@ -148,8 +148,9 @@ accepted as architecture authority through HUI-A2 while their runtime and
 release capabilities remain gated. HUI-A3 accepts ADRs 0008, 0010, and 0011,
 target contract supersession, versioned interfaces, and the evidence schema as
 architecture authority while every dependency and runtime capability remains
-gated. The phase remains merge-pending until its implementation PR passes and
-the merged candidate is pinned.
+gated. HUI-A3 is accepted at merged candidate
+`167c6cac0dd148bc919b4969f3c6fb691c0863a1`; Phase 4 is authorized only from
+that pinned baseline.
 
 - [Secure hypermedia control plane UI research](../research/12-secure-hypermedia-coding-factory-ui.md)
 - [HUI-A1 current-state authority baseline](./hypermedia-ui-current-state-authority-baseline.md)
@@ -166,7 +167,7 @@ the merged candidate is pinned.
 - [HUI-A3 validation and evidence schema](../../priv/architecture/hypermedia_ui/phase_a3_evidence_contract.json)
 - [HUI-A3 runtime contract supersession](./hypermedia-ui-runtime-contract-supersession.md)
 - [HUI-A3 validation and release evidence contract](./hypermedia-ui-validation-and-release-evidence-contract.md)
-- [HUI-A3 merge-pending Phase 3 receipt](./hypermedia-ui-milestone-a-phase-03-receipt.md)
+- [HUI-A3 accepted Phase 3 receipt](./hypermedia-ui-milestone-a-phase-03-receipt.md)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
 - [ADR 0009: Human identity, scoped authorization, and separation of duty](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
 - [ADR 0010: ShadcnUI as the product component primitive layer](../adr/0010-shadcnui-as-product-component-primitive-layer.md)
