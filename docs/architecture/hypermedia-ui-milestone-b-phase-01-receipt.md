@@ -23,8 +23,8 @@ narrow closure pull request pins that full implementation merge SHA and date.
 | Section 1.1 | `bf3b75fc8cb994ef6979b9f5932fc125f025701d` - ShadcnUI source, license, component, CI, accessibility, and risk record |
 | Section 1.2 | `25a427144358aacafb4299df31cfd319de829f64` - Dstar/Datastar source, bundle, CSP, protocol, and risk pairing |
 | Section 1.3 | `814d9bce551dbfa4caa98e46f030b0a72c2f6eaa` - candidate BOM, resolution, alternatives, cache, incident, and output ledger |
-| Section 1.4 | `commit-pending` - executable integrity matrix and merge-pending receipt |
-| Implementation PR head | `commit-pending` |
+| Section 1.4 | `5afdbd460221e427c8f7091383cb813c598cf24d` - executable integrity matrix and merge-pending receipt |
+| Implementation content head | `5afdbd460221e427c8f7091383cb813c598cf24d` - before this provenance-only pin |
 | Merged candidate | `merge-pending` |
 
 Merged candidate: `merge-pending`
