@@ -33,30 +33,30 @@ Back to plan: [README](./README.md)
       - [x] 4.1.1.3 Subtask - Add named identity, exact scope, concealment, reauthorization, step-up, receipt, graph-lens, wiki cost, parallel-session, accessibility, and readiness rules.
       - [x] 4.1.1.4 Subtask - Update testing, dependency, asset, operations, migration, commit-per-section, PR-per-phase, receipt, and clean-checkout closure guidance.
 
-  - [ ] 4.2 Section - Implement architecture and traceability checks.
+  - [x] 4.2 Section - Implement architecture and traceability checks.
 
     This section turns the most important boundaries into deterministic CI
     failures with explicit exceptions rather than review-time memory.
 
-    - [ ] 4.2.1 Task {#huia-p04-fitness} [repo: jido_code] [after: {#huia-p04-guidance}] - Add forbidden-runtime and authority-boundary checks.
+    - [x] 4.2.1 Task {#huia-p04-fitness} [repo: jido_code] [after: {#huia-p04-guidance}] - Add forbidden-runtime and authority-boundary checks.
 
       This task prevents new product code from depending on superseded runtime
       constructs or bypassing trusted projections and gateways.
 
-      - [ ] 4.2.1.1 Subtask - Detect new LiveView/LiveComponent product routes/modules/processes/events/streams, LiveVue/Vue bridges, SaladUI imports, remote assets, inline scripts, and unauthorized dashboard exposure.
-      - [ ] 4.2.1.2 Subtask - Detect raw Knowledge internals/SPARQL, direct TripleStore writes, caller-selected graphs, browser-derived grants/revisions, GET effects, and direct runtime effects outside governed gateways.
-      - [ ] 4.2.1.3 Subtask - Detect routes/fragments/streams/commands/exports without trusted authority construction, exact resource/action checks, redaction/concealment, CSRF/Origin, or receipt behavior.
-      - [ ] 4.2.1.4 Subtask - Require narrowly reviewed exception records with owner, reason, exact path/symbol, expiry, evidence, and reopening condition.
+      - [x] 4.2.1.1 Subtask - Detect new LiveView/LiveComponent product routes/modules/processes/events/streams, LiveVue/Vue bridges, SaladUI imports, remote assets, inline scripts, and unauthorized dashboard exposure.
+      - [x] 4.2.1.2 Subtask - Detect raw Knowledge internals/SPARQL, direct TripleStore writes, caller-selected graphs, browser-derived grants/revisions, GET effects, and direct runtime effects outside governed gateways.
+      - [x] 4.2.1.3 Subtask - Detect routes/fragments/streams/commands/exports without trusted authority construction, exact resource/action checks, redaction/concealment, CSRF/Origin, or receipt behavior.
+      - [x] 4.2.1.4 Subtask - Require narrowly reviewed exception records with owner, reason, exact path/symbol, expiry, evidence, and reopening condition.
 
-    - [ ] 4.2.2 Task {#huia-p04-traceability} [repo: jido_code] [after: {#huia-p04-fitness}] - Add document, plan, gate, and owner traceability checks.
+    - [x] 4.2.2 Task {#huia-p04-traceability} [repo: jido_code] [after: {#huia-p04-fitness}] - Add document, plan, gate, and owner traceability checks.
 
       This task ensures later phases cannot silently drift from their accepted
       milestone plan or claim closure without the required evidence.
 
-      - [ ] 4.2.2.1 Subtask - Verify all eight milestone plan directories, 37 phase files, stable anchors/dependencies, unique receipts, source links, and final integration-test sections.
-      - [ ] 4.2.2.2 Subtask - Verify each requirement/gap maps to an ADR/spec owner, milestone, phase task, test/evidence class, and reopening condition.
-      - [ ] 4.2.2.3 Subtask - Verify proposed/accepted/superseded status consistency and reject phase authorization from merge-pending or unpinned receipts.
-      - [ ] 4.2.2.4 Subtask - Publish architecture-check fixtures for allowed Phoenix.Component use and each prohibited product/runtime/authority construct.
+      - [x] 4.2.2.1 Subtask - Verify all eight milestone plan directories, 37 phase files, stable anchors/dependencies, unique receipts, source links, and final integration-test sections.
+      - [x] 4.2.2.2 Subtask - Verify each requirement/gap maps to an ADR/spec owner, milestone, phase task, test/evidence class, and reopening condition.
+      - [x] 4.2.2.3 Subtask - Verify proposed/accepted/superseded status consistency and reject phase authorization from merge-pending or unpinned receipts.
+      - [x] 4.2.2.4 Subtask - Publish architecture-check fixtures for allowed Phoenix.Component use and each prohibited product/runtime/authority construct.
 
   - [ ] 4.3 Section - Assemble the accepted authority dossier.
 

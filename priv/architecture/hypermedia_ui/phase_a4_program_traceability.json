@@ -1,0 +1,370 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-A4",
+  "recorded_on": "2026-09-03",
+  "status": "accepted_traceability_contract_implementation_gated",
+  "program": "program.jido_code_secure_hypermedia_control_plane_ui",
+  "milestones": [
+    {"directory": "milestone-a-architectural-authority", "phase_count": 4},
+    {"directory": "milestone-b-dependency-and-consumer-proof", "phase_count": 4},
+    {"directory": "milestone-c-read-only-hypermedia-shell", "phase_count": 5},
+    {"directory": "milestone-d-datastar-delivery", "phase_count": 4},
+    {"directory": "milestone-e-governed-agent-control", "phase_count": 6},
+    {"directory": "milestone-f-knowledge-and-wiki-lenses", "phase_count": 5},
+    {"directory": "milestone-g-security-and-release-qualification", "phase_count": 5},
+    {"directory": "milestone-h-remove-superseded-product-runtime", "phase_count": 4}
+  ],
+  "plan_rules": {
+    "phase_file_count": 37,
+    "unique_task_anchors": true,
+    "resolved_dependencies": true,
+    "one_receipt_task_per_phase": true,
+    "final_integration_section_per_phase": true,
+    "internal_links_exist": true,
+    "completed_requires_accepted_pinned_receipt": true,
+    "merge_pending_never_authorizes_dependent_phase": true,
+    "silent_supersession_allowed": false
+  },
+  "parallel_version_policy": {
+    "caller_selected_versions": false,
+    "shared_mutable_browser_authority": false,
+    "conflict_outcome": "explicit_conflict_receipt",
+    "interface_major_change": "owner_review_registry_update_consumer_rebase"
+  },
+  "requirements": [
+    {
+      "id": "HUI-REQ-01",
+      "authority_owner": "ADR-0008",
+      "owner_documents": ["docs/adr/0008-server-rendered-heex-and-datastar-product-runtime.md", "docs/architecture/hypermedia-runtime-migration-and-rollback.md"],
+      "milestone": "HUI-A,HUI-H",
+      "phase_task": "huia-p04-fitness",
+      "test_evidence_class": "architecture_fixture_and_removal_manifest",
+      "reopening_condition": "target presentation ownership becomes ambiguous or a superseded runtime consumer is added"
+    },
+    {
+      "id": "HUI-REQ-02",
+      "authority_owner": "ADR-0009",
+      "owner_documents": ["docs/adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md", "docs/architecture/human-identity-scope-and-authorization-contract.md"],
+      "milestone": "HUI-A,HUI-C,HUI-G",
+      "phase_task": "huia-p02-identity",
+      "test_evidence_class": "identity_policy_security",
+      "reopening_condition": "named-human identity, assurance, delegation, or session binding weakens"
+    },
+    {
+      "id": "HUI-REQ-03",
+      "authority_owner": "HUI authorization matrix",
+      "owner_documents": ["docs/architecture/hypermedia-ui-operation-authorization-matrix.md", "docs/architecture/hypermedia-ui-approval-and-live-revocation-authority.md"],
+      "milestone": "HUI-A,HUI-C,HUI-D,HUI-E,HUI-G",
+      "phase_task": "huia-p02-authz-matrix",
+      "test_evidence_class": "authorization_concealment_revocation",
+      "reopening_condition": "a protected surface omits exact resource/action authorization, concealment, redaction, step-up, or revocation"
+    },
+    {
+      "id": "HUI-REQ-04",
+      "authority_owner": "Knowledge query catalog",
+      "owner_documents": ["docs/architecture/bounded-projections-cache-and-subscriptions.md", "docs/architecture/graph-lens-and-visualization-contract.md"],
+      "milestone": "HUI-C,HUI-F",
+      "phase_task": "huif-p01-catalog",
+      "test_evidence_class": "reviewed_query_projection_bounds",
+      "reopening_condition": "product code accesses raw Knowledge internals, raw SPARQL, unrestricted graphs, or unbounded projections"
+    },
+    {
+      "id": "HUI-REQ-05",
+      "authority_owner": "Semantic command gateway",
+      "owner_documents": ["docs/architecture/semantic-command-contract.md", "docs/architecture/agent-attempt-workspace-and-command-contract.md"],
+      "milestone": "HUI-E,HUI-G",
+      "phase_task": "huie-p04-adapter",
+      "test_evidence_class": "command_preview_receipt_conflict_recovery",
+      "reopening_condition": "a product effect bypasses the governed gateway or reports optimistic success without an immutable receipt"
+    },
+    {
+      "id": "HUI-REQ-06",
+      "authority_owner": "Datastar stream contract",
+      "owner_documents": ["docs/architecture/datastar-request-signal-fragment-and-stream-contract.md", "docs/architecture/change-delivery-and-command-recovery.md"],
+      "milestone": "HUI-B,HUI-D,HUI-G",
+      "phase_task": "huid-p02-coordinator",
+      "test_evidence_class": "real_browser_proxy_stream_revocation",
+      "reopening_condition": "protected delivery starts without authority, skips pre-patch reauthorization, exceeds bounds, or reconnects after revocation"
+    },
+    {
+      "id": "HUI-REQ-07",
+      "authority_owner": "ADR-0010",
+      "owner_documents": ["docs/adr/0010-shadcnui-as-product-component-primitive-layer.md", "docs/architecture/shadcn-ui-adoption-and-component-contract.md"],
+      "milestone": "HUI-B,HUI-H",
+      "phase_task": "huib-p01-shadcn",
+      "test_evidence_class": "source_license_digest_consumer_asset",
+      "reopening_condition": "an unpinned dependency, remote asset, inline script, or component bypass enters the product"
+    },
+    {
+      "id": "HUI-REQ-08",
+      "authority_owner": "UI accessibility contract",
+      "owner_documents": ["docs/architecture/graph-lens-and-visualization-contract.md", "docs/architecture/ui-security-privacy-and-threat-model.md"],
+      "milestone": "HUI-C,HUI-F,HUI-G",
+      "phase_task": "huig-p03-audit",
+      "test_evidence_class": "keyboard_screen_reader_focus_contrast_motion",
+      "reopening_condition": "a product state or visualization lacks equivalent keyboard, semantic, focus, announcement, or alternative access"
+    },
+    {
+      "id": "HUI-REQ-09",
+      "authority_owner": "Repository wiki contracts",
+      "owner_documents": ["docs/architecture/repository-wiki-governance-baseline.md", "docs/architecture/repository-wiki-enrollment-budget-and-accounting.md"],
+      "milestone": "HUI-F,HUI-G",
+      "phase_task": "huif-p04-wiki",
+      "test_evidence_class": "wiki_isolation_enrollment_cost_release",
+      "reopening_condition": "wiki isolation, immutable edition identity, default-off enrollment, cost accounting, budget, or release separation weakens"
+    },
+    {
+      "id": "HUI-REQ-10",
+      "authority_owner": "Parallel ownership contract",
+      "owner_documents": ["docs/architecture/hypermedia-ui-runtime-contract-supersession.md", "docs/architecture/agent-attempt-workspace-and-command-contract.md"],
+      "milestone": "HUI-A,HUI-E,HUI-G",
+      "phase_task": "huie-p05-concurrency",
+      "test_evidence_class": "parallel_session_revision_race",
+      "reopening_condition": "parallel sessions share mutable browser authority or resolve semantic races by last writer wins"
+    },
+    {
+      "id": "HUI-REQ-11",
+      "authority_owner": "HUI evidence contract",
+      "owner_documents": ["docs/architecture/hypermedia-ui-validation-and-release-evidence-contract.md", "docs/architecture/verification-evidence-boundary.md"],
+      "milestone": "HUI-A,HUI-G,HUI-H",
+      "phase_task": "huia-p03-evidence",
+      "test_evidence_class": "qualification_identity_real_seams_and_clean_checkout",
+      "reopening_condition": "evidence loses its exact candidate identity, deterministic inputs, owner, reviewer, limitation, retention, or required real seam"
+    },
+    {
+      "id": "HUI-REQ-12",
+      "authority_owner": "HUI planning governance",
+      "owner_documents": ["docs/architecture/hypermedia-product-governance-baseline.md", "docs/planning/secure-hypermedia-control-plane-ui/README.md"],
+      "milestone": "HUI-A,HUI-B,HUI-C,HUI-D,HUI-E,HUI-F,HUI-G,HUI-H",
+      "phase_task": "huia-p04-traceability",
+      "test_evidence_class": "plan_anchor_dependency_receipt_and_closure",
+      "reopening_condition": "a phase is authorized from a missing, merge-pending, mixed, or unpinned receipt or silently supersedes an accepted owner"
+    }
+  ],
+  "gap_mappings": [
+    {
+      "id": "HUI-GAP-01",
+      "authority_owner": "ADR-0008 and Milestone H",
+      "owner_documents": ["docs/adr/0008-server-rendered-heex-and-datastar-product-runtime.md", "docs/architecture/hypermedia-runtime-migration-and-rollback.md"],
+      "milestone": "HUI-A,HUI-H",
+      "phase_task": "huia-p03-contracts",
+      "test_evidence_class": "supersession_scan_and_exact_consumer_removal",
+      "reopening_condition": "an accepted target document again mandates LiveView or LiveVue, or removal lacks parity evidence"
+    },
+    {
+      "id": "HUI-GAP-02",
+      "authority_owner": "ADR-0009",
+      "owner_documents": ["docs/architecture/human-identity-scope-and-authorization-contract.md"],
+      "milestone": "HUI-A,HUI-C,HUI-G",
+      "phase_task": "huia-p02-identity",
+      "test_evidence_class": "named_identity_mfa_role_and_separation",
+      "reopening_condition": "a shared operator identity, missing assurance, role union, or self-approval becomes authoritative"
+    },
+    {
+      "id": "HUI-GAP-03",
+      "authority_owner": "Trusted authority builder",
+      "owner_documents": ["docs/architecture/human-identity-scope-and-authorization-contract.md"],
+      "milestone": "HUI-A,HUI-C,HUI-G",
+      "phase_task": "huic-p01-authority",
+      "test_evidence_class": "controller_api_identity_authority_parity",
+      "reopening_condition": "the browser path constructs different or weaker authority than API and governed command paths"
+    },
+    {
+      "id": "HUI-GAP-04",
+      "authority_owner": "Factory production composition",
+      "owner_documents": ["docs/architecture/hypermedia-product-governance-baseline.md", "docs/architecture/verification-evidence-boundary.md"],
+      "milestone": "HUI-A,HUI-C,HUI-G",
+      "phase_task": "huic-p05-baseline",
+      "test_evidence_class": "real_adapter_default_composition",
+      "reopening_condition": "a fake, absent, or development-only adapter receives production readiness credit"
+    },
+    {
+      "id": "HUI-GAP-05",
+      "authority_owner": "Datastar and Dstar qualification",
+      "owner_documents": ["docs/architecture/datastar-dstar-dependency-and-consumer-qualification.md"],
+      "milestone": "HUI-B,HUI-D,HUI-G",
+      "phase_task": "huib-p01-datastar",
+      "test_evidence_class": "pinned_dependency_asset_and_real_consumer",
+      "reopening_condition": "Datastar or Dstar is used without exact source, version, digest, license, consumer, browser, proxy, and security evidence"
+    },
+    {
+      "id": "HUI-GAP-06",
+      "authority_owner": "ShadcnUI qualification",
+      "owner_documents": ["docs/architecture/shadcn-ui-adoption-and-component-contract.md"],
+      "milestone": "HUI-B",
+      "phase_task": "huib-p01-shadcn",
+      "test_evidence_class": "namespace_license_release_ci_and_usage",
+      "reopening_condition": "ShadcnUI provenance, license, namespace, supported usage, or CI identity becomes ambiguous"
+    },
+    {
+      "id": "HUI-GAP-07",
+      "authority_owner": "Phoenix component dependency qualification",
+      "owner_documents": ["docs/architecture/datastar-dstar-dependency-and-consumer-qualification.md"],
+      "milestone": "HUI-B",
+      "phase_task": "huib-p02-hex",
+      "test_evidence_class": "clean_dependency_resolution_and_component_consumer",
+      "reopening_condition": "Phoenix.Component/HEEx requires an unqualified runtime conflict or hidden LiveView consumer"
+    },
+    {
+      "id": "HUI-GAP-08",
+      "authority_owner": "ADR-0011 attention control plane",
+      "owner_documents": ["docs/adr/0011-attention-oriented-control-plane-and-knowledge-lenses.md"],
+      "milestone": "HUI-C,HUI-G",
+      "phase_task": "huic-p04-attention",
+      "test_evidence_class": "fleet_attempt_attention_projection",
+      "reopening_condition": "fleet attention, attempt, project, or readiness state is missing, unbounded, or browser-authoritative"
+    },
+    {
+      "id": "HUI-GAP-09",
+      "authority_owner": "Datastar stream coordinator",
+      "owner_documents": ["docs/architecture/datastar-request-signal-fragment-and-stream-contract.md"],
+      "milestone": "HUI-D,HUI-G",
+      "phase_task": "huid-p04-capacity",
+      "test_evidence_class": "revocation_backpressure_reconnect_proxy_load",
+      "reopening_condition": "SSE revocation, backpressure, lifetime, reconnect, or proxy behavior lacks bounded real-seam evidence"
+    },
+    {
+      "id": "HUI-GAP-10",
+      "authority_owner": "Governed command adapter",
+      "owner_documents": ["docs/architecture/agent-attempt-workspace-and-command-contract.md"],
+      "milestone": "HUI-E,HUI-G",
+      "phase_task": "huie-p04-adapter",
+      "test_evidence_class": "closed_command_preview_receipt_and_recovery",
+      "reopening_condition": "a command bypasses exact authority, preview, optimistic revision, receipt, or recovery controls"
+    },
+    {
+      "id": "HUI-GAP-11",
+      "authority_owner": "Bounded interaction session",
+      "owner_documents": ["docs/architecture/agent-attempt-workspace-and-command-contract.md"],
+      "milestone": "HUI-E,HUI-G",
+      "phase_task": "huie-p03-projection",
+      "test_evidence_class": "bounded_conversation_pagination_redaction_and_resume",
+      "reopening_condition": "conversation becomes durable truth, unbounded, cross-scope, unredacted, or detached from interaction-session identity"
+    },
+    {
+      "id": "HUI-GAP-12",
+      "authority_owner": "ADR-0009 approval authority",
+      "owner_documents": ["docs/architecture/hypermedia-ui-approval-and-live-revocation-authority.md"],
+      "milestone": "HUI-E,HUI-G",
+      "phase_task": "huie-p05-review",
+      "test_evidence_class": "step_up_two_human_approval_and_compare_and_set",
+      "reopening_condition": "high-risk action lacks current step-up, unique independent approvers, or atomic compare-and-set commit"
+    },
+    {
+      "id": "HUI-GAP-13",
+      "authority_owner": "Incident control plane",
+      "owner_documents": ["docs/architecture/incident-control-plane-contract.md"],
+      "milestone": "HUI-G",
+      "phase_task": "huig-p02-resources",
+      "test_evidence_class": "incident_resource_action_runbook_and_audit",
+      "reopening_condition": "incident posture, resources, commands, audit, concealment, or runbook evidence is absent or bypassable"
+    },
+    {
+      "id": "HUI-GAP-14",
+      "authority_owner": "Projection and lens catalogs",
+      "owner_documents": ["docs/architecture/bounded-projections-cache-and-subscriptions.md", "docs/architecture/graph-lens-and-visualization-contract.md"],
+      "milestone": "HUI-C,HUI-F",
+      "phase_task": "huic-p04-project",
+      "test_evidence_class": "complete_bounded_product_projection_and_lens",
+      "reopening_condition": "a product domain lacks its accepted projection state, bounds, freshness, or lens owner"
+    },
+    {
+      "id": "HUI-GAP-15",
+      "authority_owner": "ADR-0011 vocabulary",
+      "owner_documents": ["docs/architecture/agent-attempt-workspace-and-command-contract.md", "docs/architecture/hypermedia-ui-vocabulary-and-supersession.md"],
+      "milestone": "HUI-A,HUI-C,HUI-E",
+      "phase_task": "huia-p03-product-adr",
+      "test_evidence_class": "project_session_attempt_identity_conformance",
+      "reopening_condition": "durable project, task, attempt, browser session, tab, and interaction session identities are conflated"
+    },
+    {
+      "id": "HUI-GAP-16",
+      "authority_owner": "Application component facade",
+      "owner_documents": ["docs/architecture/shadcn-ui-adoption-and-component-contract.md", "docs/architecture/graph-lens-and-visualization-contract.md"],
+      "milestone": "HUI-B,HUI-C,HUI-D,HUI-E,HUI-F,HUI-G",
+      "phase_task": "huic-p02-projection-components",
+      "test_evidence_class": "table_timeline_diff_graph_component_and_accessibility",
+      "reopening_condition": "a required composite is absent, bypasses the facade, exceeds bounds, or lacks an accessible alternative"
+    },
+    {
+      "id": "HUI-GAP-17",
+      "authority_owner": "Projection redaction contract",
+      "owner_documents": ["docs/architecture/graph-lens-and-visualization-contract.md", "docs/architecture/ui-security-privacy-and-threat-model.md"],
+      "milestone": "HUI-C,HUI-F",
+      "phase_task": "huif-p03-source",
+      "test_evidence_class": "opaque_reference_and_safe_label_projection",
+      "reopening_condition": "raw conceptual IRIs, hidden identifiers, or unauthorized labels leak into browser output"
+    },
+    {
+      "id": "HUI-GAP-18",
+      "authority_owner": "Cost and capacity projection owners",
+      "owner_documents": ["docs/architecture/agent-attempt-workspace-and-command-contract.md", "docs/architecture/repository-wiki-enrollment-budget-and-accounting.md"],
+      "milestone": "HUI-E,HUI-F,HUI-G",
+      "phase_task": "huie-p05-cost",
+      "test_evidence_class": "authorized_cost_budget_capacity_provider_projection",
+      "reopening_condition": "cost, reservation, usage, budget, capacity, or provider data is incomplete, misattributed, or overexposed"
+    },
+    {
+      "id": "HUI-GAP-19",
+      "authority_owner": "Attempt workspace resume contract",
+      "owner_documents": ["docs/architecture/agent-attempt-workspace-and-command-contract.md"],
+      "milestone": "HUI-E,HUI-G",
+      "phase_task": "huie-p02-resume",
+      "test_evidence_class": "causal_timeline_resume_since_you_left",
+      "reopening_condition": "resume state omits causal evidence, freshness, authorization, or bounded since-you-left semantics"
+    },
+    {
+      "id": "HUI-GAP-20",
+      "authority_owner": "Graph lens accessibility contract",
+      "owner_documents": ["docs/architecture/graph-lens-and-visualization-contract.md"],
+      "milestone": "HUI-F,HUI-G",
+      "phase_task": "huif-p02-semantic-views",
+      "test_evidence_class": "task_specific_graph_selection_and_accessible_alternative",
+      "reopening_condition": "graph visualization is unrestricted, selection is ambiguous, or equivalent table/text access is missing"
+    },
+    {
+      "id": "HUI-GAP-21",
+      "authority_owner": "Target consumer qualification",
+      "owner_documents": ["docs/architecture/datastar-dstar-dependency-and-consumer-qualification.md", "docs/architecture/hypermedia-ui-validation-and-release-evidence-contract.md"],
+      "milestone": "HUI-B,HUI-G",
+      "phase_task": "huib-p03-consumer",
+      "test_evidence_class": "controller_heex_native_datastar_browser_harness",
+      "reopening_condition": "target behavior is claimed from LiveView-only tests or without controller/native/enhanced real-browser evidence"
+    },
+    {
+      "id": "HUI-GAP-22",
+      "authority_owner": "LiveDashboard exception and Milestone H",
+      "owner_documents": ["docs/architecture/hypermedia-runtime-migration-and-rollback.md", "docs/architecture/hypermedia-ui-runtime-contract-supersession.md"],
+      "milestone": "HUI-A,HUI-H",
+      "phase_task": "huih-p02-liveview",
+      "test_evidence_class": "exact_dashboard_remove_replace_or_retention_decision",
+      "reopening_condition": "LiveDashboard scope widens or a zero-LiveView claim retains it without separate approval and evidence"
+    },
+    {
+      "id": "HUI-GAP-23",
+      "authority_owner": "Release accessibility qualification",
+      "owner_documents": ["docs/architecture/hypermedia-ui-validation-and-release-evidence-contract.md"],
+      "milestone": "HUI-G",
+      "phase_task": "huig-p03-audit",
+      "test_evidence_class": "current_agent_wiki_browser_and_assistive_technology",
+      "reopening_condition": "accessibility evidence does not cover the current agent and wiki surfaces at the exact candidate"
+    },
+    {
+      "id": "HUI-GAP-24",
+      "authority_owner": "Migration documentation owner",
+      "owner_documents": ["docs/architecture/hypermedia-runtime-migration-and-rollback.md", "docs/operations/operator-handbook.md"],
+      "milestone": "HUI-H",
+      "phase_task": "huih-p03-docs",
+      "test_evidence_class": "documentation_operations_term_and_runbook_scan",
+      "reopening_condition": "product or operator documentation retains stale runtime ownership, unsupported readiness, or obsolete procedures"
+    }
+  ],
+  "authorization_rule": {
+    "dependent_phase": "huib-p01-shadcn",
+    "required_receipt": "huia-p04-phase-receipt",
+    "accepted_state": "accepted-at-merged-candidate_with_full_sha_and_date",
+    "merge_pending_authorizes": false,
+    "mixed_state_authorizes": false,
+    "checkboxes_without_receipt_authorize": false
+  }
+}
