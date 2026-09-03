@@ -1,11 +1,14 @@
 # JidoCode
 
-JidoCode is a Phoenix LiveView server project.
+JidoCode is a Phoenix server project with a graph-native managed repository
+factory.
 
 The root route (`/`) renders the graph-backed managed repository factory
-workbench. LiveView owns actor-scoped projections, navigation, forms, semantic
-commands, and receipts; bounded LiveVue islands provide focused local
-interaction without becoming a second source of truth.
+workbench. Its currently deployed LiveView/LiveVue surface is a compatibility
+runtime with tracked removal gates. New product work targets explicit Phoenix
+controllers, server-rendered HEEx, native links/forms, and qualified Datastar
+enhancement while preserving server-owned identity, authorization, semantic
+commands, and receipts.
 
 ## Architecture
 
@@ -14,6 +17,8 @@ application-owned durable source of truth. See the
 [architecture index](docs/architecture/README.md),
 [accepted ADRs](docs/adr/README.md), and
 [implementation plan](docs/planning/graph-native-managed-repository-factory/README.md).
+Contributor rules for the target browser stack are in the
+[hypermedia product contribution contract](docs/contributing/hypermedia-product-work.md).
 
 ## Requirements
 

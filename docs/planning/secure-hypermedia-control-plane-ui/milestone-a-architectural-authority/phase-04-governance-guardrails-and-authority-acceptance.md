@@ -18,20 +18,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-A4 and program Gate HUI1 only when future changes fail
   fast on forbidden runtime, authority, query, command, or evidence patterns.
 
-  - [ ] 4.1 Section - Update contributor and implementation guidance.
+  - [x] 4.1 Section - Update contributor and implementation guidance.
 
     This section removes LiveView-specific instructions that would recreate
     migration debt and replaces them with target-stack guardrails.
 
-    - [ ] 4.1.1 Task {#huia-p04-guidance} [repo: jido_code] [after: {#huia-p03-phase-receipt}] - Amend `AGENTS.md` and contributor documentation.
+    - [x] 4.1.1 Task {#huia-p04-guidance} [repo: jido_code] [after: {#huia-p03-phase-receipt}] - Amend `AGENTS.md` and contributor documentation.
 
       This task gives human and agent contributors executable rules for
       controller/HEEx/Datastar product work.
 
-      - [ ] 4.1.1.1 Subtask - Remove or scope LiveView route/process/event/stream instructions away from product work while retaining valid Phoenix.Component/HEEx conventions.
-      - [ ] 4.1.1.2 Subtask - Add controller/template/layout/form, explicit route, CSRF/Origin, CSP, stable DOM, Datastar signal/patch/SSE, native fallback, and no-inline-script rules.
-      - [ ] 4.1.1.3 Subtask - Add named identity, exact scope, concealment, reauthorization, step-up, receipt, graph-lens, wiki cost, parallel-session, accessibility, and readiness rules.
-      - [ ] 4.1.1.4 Subtask - Update testing, dependency, asset, operations, migration, commit-per-section, PR-per-phase, receipt, and clean-checkout closure guidance.
+      - [x] 4.1.1.1 Subtask - Remove or scope LiveView route/process/event/stream instructions away from product work while retaining valid Phoenix.Component/HEEx conventions.
+      - [x] 4.1.1.2 Subtask - Add controller/template/layout/form, explicit route, CSRF/Origin, CSP, stable DOM, Datastar signal/patch/SSE, native fallback, and no-inline-script rules.
+      - [x] 4.1.1.3 Subtask - Add named identity, exact scope, concealment, reauthorization, step-up, receipt, graph-lens, wiki cost, parallel-session, accessibility, and readiness rules.
+      - [x] 4.1.1.4 Subtask - Update testing, dependency, asset, operations, migration, commit-per-section, PR-per-phase, receipt, and clean-checkout closure guidance.
 
   - [ ] 4.2 Section - Implement architecture and traceability checks.
 
