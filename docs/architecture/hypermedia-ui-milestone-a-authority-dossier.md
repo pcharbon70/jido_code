@@ -1,6 +1,6 @@
 # Hypermedia UI Milestone A Authority Dossier
 
-Status: **merge-pending HUI-A4/HUI1 authority dossier; implementation gated**
+Status: **accepted-at-merged-candidate HUI-A4/HUI1 authority dossier; implementation gated by later milestones**
 
 This dossier binds Milestone A's accepted decisions, contracts, contributor
 rules, deterministic checks, current-consumer inventory, authority paths,
@@ -17,9 +17,10 @@ HUI-A1 pinned the current-state inventory and 24 owned gaps. HUI-A2 accepted
 named-human identity, exact scope and graph grants, assurance, delegation,
 separation of duty, approval, and live revocation authority. HUI-A3 accepted
 the controller/HEEx/Datastar target, component facade, product/lens contracts,
-supersession matrix, versioned interfaces, and evidence schema. HUI-A4 starts
+supersession matrix, versioned interfaces, and evidence schema. HUI-A4 started
 only from HUI-A3 closure commit
-`e9da1fe3a9f0a1017f35fcb29136f390e2da954f`.
+`e9da1fe3a9f0a1017f35fcb29136f390e2da954f` and is accepted at merged
+candidate `59ffca10f3ac9f262a81ce46b9f9f0e61550697c`.
 
 The following outcomes are now architecture-authoritative:
 
@@ -136,10 +137,11 @@ Milestone B remains blocked until all of the following have named evidence:
 8. Consumer/license/asset allowlists, full qualification dossier,
    `mix precommit`, clean-checkout CI, and a pinned HUI-B merged candidate.
 
-Milestone B Phase 1 is authorized only after the Phase 4 receipt transitions
-from merge-pending to accepted-at-merged-candidate with the full merge SHA and
-date. Checkboxes, a branch head, an open pull request, or successful local
-tests cannot authorize it.
+Milestone B Phase 1 is authorized only from Phase 4 merged candidate
+`59ffca10f3ac9f262a81ce46b9f9f0e61550697c`, whose receipt is
+accepted-at-merged-candidate with the full merge SHA and date. Checkboxes, a
+branch head, an open pull request, or successful local tests cannot authorize
+it. The eight Milestone B entry blockers above remain binding.
 
 ## Enforceable Evidence
 

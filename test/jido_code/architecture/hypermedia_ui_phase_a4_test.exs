@@ -19,6 +19,15 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
              HypermediaUIPhaseA4.load()
 
     assert guardrails["phase"] == "HUI-A4"
+    assert acceptance["status"] == "accepted_at_merged_candidate"
+    assert dossier["status"] == "accepted_at_merged_candidate"
+
+    assert get_in(acceptance, ["baseline", "merged_candidate"]) ==
+             "59ffca10f3ac9f262a81ce46b9f9f0e61550697c"
+
+    assert get_in(dossier, ["baseline", "merged_candidate"]) ==
+             "59ffca10f3ac9f262a81ce46b9f9f0e61550697c"
+
     assert length(traceability["gap_mappings"]) == 24
     assert length(traceability["requirements"]) == 12
     assert length(dossier["consumer_reconciliation"]) == 13
@@ -232,47 +241,55 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
 
     assert HypermediaUIPhaseA4.validate_closure(plan, milestone, receipt) == []
 
-    merge_pending_receipt = """
-    Status: **merge-pending**
-    | Merged candidate | `merge-pending` |
-    Merged candidate: `merge-pending`
-    Merge date: `merge-pending`
-    """
+    merge_pending_plan =
+      plan
+      |> String.replace("status: completed", "status: proposed")
+      |> set_closure_checkboxes(false)
 
-    assert HypermediaUIPhaseA4.validate_closure(plan, milestone, merge_pending_receipt) == []
+    merge_pending_milestone = String.replace(milestone, "status: completed", "status: proposed")
+
+    merge_pending_receipt =
+      receipt
+      |> String.replace("Status: **accepted-at-merged-candidate**", "Status: **merge-pending**")
+      |> then(
+        &Regex.replace(
+          ~r/\| Merged candidate \| `[0-9a-f]{40}` \|/,
+          &1,
+          "| Merged candidate | `merge-pending` |"
+        )
+      )
+      |> then(
+        &Regex.replace(
+          ~r/Merged candidate: `[0-9a-f]{40}`/,
+          &1,
+          "Merged candidate: `merge-pending`"
+        )
+      )
+      |> then(
+        &Regex.replace(~r/Merge date: `\d{4}-\d{2}-\d{2}`/, &1, "Merge date: `merge-pending`")
+      )
+
+    assert HypermediaUIPhaseA4.validate_closure(
+             merge_pending_plan,
+             merge_pending_milestone,
+             merge_pending_receipt
+           ) == []
 
     assert has_error?(
              HypermediaUIPhaseA4.validate_closure(plan, milestone, ""),
              "exactly one coherent"
            )
 
-    accepted_plan =
-      plan
-      |> String.replace("status: proposed", "status: completed")
-      |> set_closure_checkboxes(true)
-
-    accepted_milestone = String.replace(milestone, "status: proposed", "status: completed")
-    sha = String.duplicate("a", 40)
-
-    accepted_receipt = """
-    Status: **accepted-at-merged-candidate**
-    | Merged candidate | `#{sha}` |
-    Merged candidate: `#{sha}`
-    Merge date: `2026-09-03`
-    """
-
-    assert HypermediaUIPhaseA4.validate_closure(
-             accepted_plan,
-             accepted_milestone,
-             accepted_receipt
-           ) == []
-
     assert has_error?(
-             HypermediaUIPhaseA4.validate_closure(plan, milestone, accepted_receipt),
+             HypermediaUIPhaseA4.validate_closure(
+               merge_pending_plan,
+               merge_pending_milestone,
+               receipt
+             ),
              "completed plan status"
            )
 
-    mixed_receipt = accepted_receipt <> "\nStatus: **merge-pending**\n"
+    mixed_receipt = receipt <> "\nStatus: **merge-pending**\n"
 
     assert has_error?(
              HypermediaUIPhaseA4.validate_closure(plan, milestone, mixed_receipt),

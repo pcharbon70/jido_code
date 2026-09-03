@@ -1,6 +1,6 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_a
-status: proposed
+status: completed
 intent: feature
 milestone: A
 program: program.jido_code_secure_hypermedia_control_plane_ui

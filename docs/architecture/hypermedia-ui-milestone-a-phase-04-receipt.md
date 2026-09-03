@@ -2,12 +2,13 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 This receipt records the HUI-A4/HUI1 implementation candidate prepared on
-2026-09-03. It remains merge-pending until the implementation pull request
-passes clean-checkout CI and merges. Milestone B Phase 1 is not authorized by
-this branch, its checkboxes, local verification, or an open pull request.
+2026-09-03. Pull request #107 passed clean-checkout CI and merged on 2026-09-03
+as `59ffca10f3ac9f262a81ce46b9f9f0e61550697c`. HUI-A4/HUI1 and Milestone A
+are accepted at that exact candidate. Milestone B Phase 1 is authorized only
+from this pinned baseline and remains bound by every recorded entry blocker.
 
 HUI-A4 accepts contributor guidance, architecture guardrails, traceability,
 and the authority dossier only. It does not implement or grant readiness to
@@ -25,11 +26,11 @@ runtime removal, or final release evidence.
 | Section 4.2 | `9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71` - architecture guardrails, traceability, fixtures, and tests |
 | Section 4.3 | `29f9fe276797fab918b8d1672f7dea1ed60746ba` - authority dossier and merge-pending receipt |
 | Section 4.4 | `af98c32b5ac6a5a8e0a2f38b8620475ae71d1e45` - final acceptance matrix and candidate evidence |
-| Implementation PR head | `merge-pending` |
-| Merged candidate | `merge-pending` |
+| Implementation PR head | `0469ba0b0cd7b2fe773e28b72cb8aba06083d74e` - PR #107 clean-checkout candidate |
+| Merged candidate | `59ffca10f3ac9f262a81ce46b9f9f0e61550697c` |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `59ffca10f3ac9f262a81ce46b9f9f0e61550697c`
+Merge date: `2026-09-03`
 
 ## Artifact Identity
 
@@ -39,11 +40,15 @@ Merge date: `merge-pending`
 | Hypermedia product contribution contract | `ccca1097171f286680f05d80eba327c1a380514076e2753ea7016ef35dfe4926` |
 | HUI-A4 governance guardrail manifest | `8ee74ebdcd5ffa0896f4918b4437e064bb22e688ef0b6495bbeea84493eea5d6` |
 | HUI-A4 program traceability manifest | `8378cb971f72b2a05ca35b79736890b0972a10abd31176b5ef334c35011312c7` |
-| HUI-A4 authority dossier manifest | `5435838660be57d8cbaf96ef392127a2ec38a8d4364f9537203918a97e03e70c` |
-| HUI-A4 acceptance matrix | `78c46ba8e085124367c14f9370459b622aa74f725fa91ab103e5cdc2722e192a` |
-| Milestone A authority dossier | `c8e744270c28d9952be8ede56d016a3b8157b6da24cd5002e415e59634216c17` |
+| HUI-A4 authority dossier manifest at implementation candidate | `5435838660be57d8cbaf96ef392127a2ec38a8d4364f9537203918a97e03e70c` |
+| HUI-A4 authority dossier manifest after accepted transition | `f18a720187c38bb77c3823a143a955460fcec506e2b2e7ad35586e2ab1da1ea6` |
+| HUI-A4 acceptance matrix at implementation candidate | `78c46ba8e085124367c14f9370459b622aa74f725fa91ab103e5cdc2722e192a` |
+| HUI-A4 acceptance matrix after accepted transition | `b144e0ab72fffbeb92699e885a4e6469e3f2a4f044645a823500772a563da5f4` |
+| Milestone A authority dossier at implementation candidate | `c8e744270c28d9952be8ede56d016a3b8157b6da24cd5002e415e59634216c17` |
+| Milestone A authority dossier after accepted transition | `9c054f4e824a4e770c7e1007bd357295bc5ee7119de9bf193226eda4798886de` |
 | HUI-A4 validator source | `e2fcc6775a1559dec507ded0ae4bace4d885962ba24667eeb9e7972255dde0e9` |
-| HUI-A4 integration test | `81baa1c4363de96521a7b0eb4031bfaa8fe409cbdea97343cef50b84b7a78b83` |
+| HUI-A4 integration test at implementation candidate | `81baa1c4363de96521a7b0eb4031bfaa8fe409cbdea97343cef50b84b7a78b83` |
+| HUI-A4 closure-state test after accepted transition | `bfd0e030eb283a77b23e00408cefeed13130dfed0c8108c62e7450dc94101272` |
 | Allowed/prohibited fixture tree | `bf5ae8588abbcfa61b0c20ca2e177fa275159817618a1b537eff9a883eb4e186` |
 
 ## Toolchain Identity
@@ -157,8 +162,8 @@ milestone, exact phase task, evidence class, and reopening condition.
   authoritative application state, superseded target runtime ownership, and
   an unrestricted universal graph browser are rejected.
 - Ten residual risks remain open, blocked, contract-only, unqualified,
-  deferred, tooling-limited, or merge-pending with explicit owners,
-  mitigations, expiry/gates, and reopening conditions.
+  deferred, tooling-limited, or mitigated-at-merged-candidate with explicit
+  owners, mitigations, expiry/gates, and reopening conditions.
 - Eight Milestone B blockers require exact dependency/source/license/lock/
   asset identity, reproducible local builds, a real controller/HEEx consumer,
   browser/security/accessibility/failure/native evidence, allowlists, full
@@ -174,7 +179,7 @@ milestone, exact phase task, evidence class, and reopening condition.
 | Plan/gap/receipt traceability | HUI-A planning owner | milestone owners | later receipts do not exist yet |
 | Dependency/asset blockers | HUI-B owner | security/license owner | no selected source or consumer evidence |
 | Dossier and residual risk | HUI-A program owner | HUI-B through HUI-H owners | later milestone evidence remains unavailable |
-| Candidate verification | repository maintainer | clean-checkout CI | merge-pending until PR passes and merges |
+| Candidate verification | repository maintainer | clean-checkout CI | accepted for architecture authority only; later runtime and real-seam evidence remains unavailable |
 
 ## Verification Record
 
@@ -184,7 +189,7 @@ milestone, exact phase task, evidence class, and reopening condition.
 | `mix architecture.check` | Passed with graph-native source and HUI-A1 through HUI-A4 gates returning zero findings |
 | Architecture/security/documentation regression suites | Passed; 72 tests, 0 failures |
 | `mix precommit` | Passed; 1,180 tests, 0 failures, with formatting, unused-dependency, compile, and combined architecture gates clean |
-| Clean-checkout CI | `merge-pending` |
+| Clean-checkout CI | Passed on PR #107; `verify` completed in 17m35s and `dialyzer` completed in 1m39s at implementation head `0469ba0b0cd7b2fe773e28b72cb8aba06083d74e` |
 
 The `mix conformance` task remains unconfigured for this repository layout and
 expects a missing `specs/` tree. It is not a HUI gate. The checked-in HUI
@@ -193,16 +198,16 @@ clean-checkout CI are authoritative.
 
 ## Gate HUI-A4 / HUI1
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-HUI-A4 and program Gate HUI1 remain merge-pending. They transition only when
-the final acceptance matrix, architecture/security/documentation suites,
-`mix precommit`, and clean-checkout CI pass for the exact implementation
-candidate; the implementation pull request merges; a closure pull request pins
-the full merge SHA/date and exact artifact/toolchain/evidence identity; the
-Phase 4 and Milestone A plan statuses become completed; closure checkboxes 4,
-4.4, 4.4.2, and 4.4.2.3 become checked coherently; and every reopening
-condition below remains intact.
+HUI-A4 and program Gate HUI1 are accepted at merged candidate
+`59ffca10f3ac9f262a81ce46b9f9f0e61550697c`, merged on 2026-09-03 after the
+final acceptance matrix, architecture/security/documentation suites,
+`mix precommit`, and clean-checkout CI passed at the exact implementation
+head. The Phase 4 and Milestone A plan statuses are completed; closure
+checkboxes 4, 4.4, 4.4.2, and 4.4.2.3 are checked coherently; and every
+reopening condition below remains intact. Milestone B Phase 1 is authorized
+only from this pinned baseline.
 
 HUI-A4/HUI1 reopens regardless of checklist state if contributor guidance
 again makes product LiveView/LiveComponent/LiveVue/SaladUI normative, omits the

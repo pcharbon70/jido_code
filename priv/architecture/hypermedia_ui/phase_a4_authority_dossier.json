@@ -2,12 +2,14 @@
   "schema_version": 1,
   "phase": "HUI-A4",
   "recorded_on": "2026-09-03",
-  "status": "merge_pending_authority_dossier",
+  "status": "accepted_at_merged_candidate",
   "baseline": {
     "accepted_candidate": "167c6cac0dd148bc919b4969f3c6fb691c0863a1",
     "closure_commit": "e9da1fe3a9f0a1017f35fcb29136f390e2da954f",
     "section_4_1": "ab4e6dc1f90d804edcb4dd9266414ba8bf0c7e95",
-    "section_4_2": "9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71"
+    "section_4_2": "9f0a3af68740a7ea1d2bf6d1d8a6fa518fa06d71",
+    "implementation_pr_head": "0469ba0b0cd7b2fe773e28b72cb8aba06083d74e",
+    "merged_candidate": "59ffca10f3ac9f262a81ce46b9f9f0e61550697c"
   },
   "consumer_reconciliation": [
     {
@@ -240,7 +242,7 @@
     {"id": "HUI-RISK-07", "severity": "P0", "owner": "HUI-G", "status": "unqualified", "mitigation": "run identity/security/accessibility/usability/load/fault/install/upgrade/rollback/real-adapter release matrices", "expiry": "HUI-G5", "reopening_condition": "production readiness is claimed without exact merged-candidate evidence and required real seams"},
     {"id": "HUI-RISK-08", "severity": "P1", "owner": "HUI-H", "status": "deferred_decision", "mitigation": "remove, replace, or separately approve LiveDashboard and prove the final runtime consumer graph", "expiry": "HUI-H2", "reopening_condition": "the dashboard exception widens or a zero-LiveView claim precedes the decision"},
     {"id": "HUI-RISK-09", "severity": "P1", "owner": "HUI-A", "status": "tooling_limit", "mitigation": "maintain deterministic architecture fixtures, exception digests, plan graph validation, and clean-checkout CI", "expiry": "continuous", "reopening_condition": "a guardrail becomes bypassable, stale, non-deterministic, or detached from contributor guidance"},
-    {"id": "HUI-RISK-10", "severity": "P1", "owner": "HUI-A,HUI-B", "status": "merge_pending", "mitigation": "keep Milestone B unauthorized until this receipt pins the clean-checkout merged candidate", "expiry": "HUI1", "reopening_condition": "Milestone B begins from merge-pending, mixed, unmerged, or unpinned HUI-A4 evidence"}
+    {"id": "HUI-RISK-10", "severity": "P1", "owner": "HUI-A,HUI-B", "status": "mitigated_at_merged_candidate", "mitigation": "authorize Milestone B only from accepted receipt candidate 59ffca10f3ac9f262a81ce46b9f9f0e61550697c", "expiry": "HUI1", "reopening_condition": "Milestone B begins from merge-pending, mixed, unmerged, or unpinned HUI-A4 evidence"}
   ],
   "milestone_b_blockers": [
     {"id": "HUI-BLOCK-B01", "owner": "HUI-B1", "required_evidence": "exact Dstar source, release, lock/archive identity, license, API surface, and risk record", "status": "blocking", "reopening_condition": "Dstar is fetched, added, or used before this evidence is reviewed"},

@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_a_phase_04
 parent_plan: plan.jido_code_hypermedia_ui_milestone_a
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -13,7 +13,7 @@ It closes Milestone A without implementing target product behavior.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Enforce and accept the architectural-authority baseline.
+- [x] 4 Phase - Enforce and accept the architectural-authority baseline.
 
   This phase closes HUI-A4 and program Gate HUI1 only when future changes fail
   fast on forbidden runtime, authority, query, command, or evidence patterns.
@@ -73,7 +73,7 @@ Back to plan: [README](./README.md)
       - [x] 4.3.1.3 Subtask - Record accepted/deferred/rejected proposal items, residual risks, exceptions, owners, expiry, and explicit Milestone B blockers.
       - [x] 4.3.1.4 Subtask - Create `hypermedia-ui-milestone-a-phase-04-receipt.md` in merge-pending state with HUI-A4/HUI1 evidence and all reopening conditions.
 
-  - [ ] 4.4 Section - Phase 4 Integration Tests.
+  - [x] 4.4 Section - Phase 4 Integration Tests.
 
     This final section proves the target authority is internally consistent,
     enforceable, reproducible, and safe to use as the dependency baseline.
@@ -88,11 +88,11 @@ Back to plan: [README](./README.md)
       - [x] 4.4.1.3 Subtask - Reproduce the full authority dossier and inventory from a clean checkout and verify no target implementation or unsupported readiness claim leaked into Milestone A.
       - [x] 4.4.1.4 Subtask - Run full architecture/security/documentation suites, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 4.4.2 Task {#huia-p04-phase-receipt} [repo: jido_code] [after: {#huia-p04-integration}] - Publish and pin the Phase 4 receipt and HUI1 closure.
+    - [x] 4.4.2 Task {#huia-p04-phase-receipt} [repo: jido_code] [after: {#huia-p04-integration}] - Publish and pin the Phase 4 receipt and HUI1 closure.
 
       This task records HUI-A4/HUI1 evidence in
       `docs/architecture/hypermedia-ui-milestone-a-phase-04-receipt.md`.
 
       - [x] 4.4.2.1 Subtask - Keep HUI1 merge-pending on an unaccepted decision, contradictory contract, stale contributor rule, bypassable check, incomplete traceability, unowned risk, or unpinned evidence input.
       - [x] 4.4.2.2 Subtask - Record exact document/check/fixture/toolchain digests, full findings, exceptions, reviewers, limitations, and every gate reopening condition.
-      - [ ] 4.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 4 Integration Tests section, receipt task, pinning subtask, and Milestone A completion before authorizing Milestone B Phase 1.
+      - [x] 4.4.2.3 Subtask - Record the full merge SHA/date and pin the merged candidate; check the phase, Phase 4 Integration Tests section, receipt task, pinning subtask, and Milestone A completion before authorizing Milestone B Phase 1.
