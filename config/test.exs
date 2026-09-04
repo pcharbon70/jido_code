@@ -5,6 +5,7 @@ browser_port = String.to_integer(System.get_env("PORT") || "4002")
 config :live_vue, ssr: false
 
 config :jido_code, :knowledge_store, enabled: false
+config :jido_code, :hypermedia_qualification_build, true
 
 config :jido_code, :product_auth,
   credential_digest: :crypto.hash(:sha256, "test-operator-token"),

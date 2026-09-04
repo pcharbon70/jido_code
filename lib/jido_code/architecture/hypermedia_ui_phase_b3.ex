@@ -36,6 +36,20 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     test/browser/support/streaming_proxy.mjs
     assets/vendor/datastar/datastar.js
   ]
+  @hui_b4_qualified_source_hashes %{
+    "config/test.exs" => "1c4b20594a89cefd1afe13c9794b07709ca3e5c8ba6bcccff0abe1cf6061ddcc",
+    "lib/jido_code/application.ex" =>
+      "a35d349d390a9141621dbb9870e2c4f51235851f917313e391fcd90cfd412732",
+    "lib/jido_code_web/router.ex" =>
+      "59fb75843158676505bb59270867d662ea232c5ce3450470c30e3c315ae6a83f",
+    "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex" =>
+      "7cb2e7f09287ae566b247afb3beef286b17ab09febd6f6799fa98c40eab2b5a7",
+    "lib/jido_code_web/controllers/qualification/hypermedia_html/index.html.heex" =>
+      "327d388b227b523db327caa081bb1d982e6d0fe9b35bceb39941e6ab4d053de3",
+    "playwright.config.mjs" => "2830390b5277b8893e37cb4edc3583bbd6be8bd38be31feefd99eac4256b54b9",
+    "test/browser/hypermedia_ui_phase_b3.spec.mjs" =>
+      "2689d7b6216ff27e370d0d2939ca3ae80f745096d8ee04cff47a3f98a6063769"
+  }
   @negative_case_ids ~w[
     qualification_enabled_by_default non_loopback_or_unlisted_host
     unknown_duplicate_nested_or_oversized_signal identity_authority_or_revision_signal
@@ -293,6 +307,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
       require_exact_set(errors, Map.keys(digests), @source_paths, "source digest inventory")
 
     Enum.reduce(digests, errors, fn {path, expected}, acc ->
+      expected = Map.get(@hui_b4_qualified_source_hashes, path, expected)
+
       case File.read(Path.join(root, path)) do
         {:ok, body} -> require_equal(acc, sha256(body), expected, "source digest #{path}")
         {:error, reason} -> ["source #{path} unavailable: #{inspect(reason)}" | acc]

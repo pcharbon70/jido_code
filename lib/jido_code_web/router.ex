@@ -24,8 +24,10 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.ProductAuth, :require_authenticated_operator
   end
 
-  pipeline :hypermedia_qualification do
-    plug JidoCodeWeb.Plugs.HypermediaQualificationAccess
+  if Application.compile_env(:jido_code, :hypermedia_qualification_build, false) do
+    pipeline :hypermedia_qualification do
+      plug JidoCodeWeb.Plugs.HypermediaQualificationAccess
+    end
   end
 
   scope "/", JidoCodeWeb do
@@ -46,17 +48,19 @@ defmodule JidoCodeWeb.Router do
     post "/coding-attempts/:attempt_ref/controls/:control", CodingAttemptController, :control
   end
 
-  scope "/__qualification", JidoCodeWeb.Qualification do
-    pipe_through [:browser, :hypermedia_qualification]
+  if Application.compile_env(:jido_code, :hypermedia_qualification_build, false) do
+    scope "/__qualification", JidoCodeWeb.Qualification do
+      pipe_through [:browser, :hypermedia_qualification]
 
-    get "/hypermedia", HypermediaController, :index
-    get "/hypermedia/results", HypermediaController, :results
-    post "/hypermedia/submissions", HypermediaController, :submit
-    get "/hypermedia/fragments/results", HypermediaController, :fragment_results
-    post "/hypermedia/events/:event", HypermediaController, :event
-    post "/hypermedia/stream", HypermediaController, :stream_fixture
-    get "/hypermedia/maintenance", HypermediaController, :maintenance
-    get "/hypermedia/error", HypermediaController, :error
+      get "/hypermedia", HypermediaController, :index
+      get "/hypermedia/results", HypermediaController, :results
+      post "/hypermedia/submissions", HypermediaController, :submit
+      get "/hypermedia/fragments/results", HypermediaController, :fragment_results
+      post "/hypermedia/events/:event", HypermediaController, :event
+      post "/hypermedia/stream", HypermediaController, :stream_fixture
+      get "/hypermedia/maintenance", HypermediaController, :maintenance
+      get "/hypermedia/error", HypermediaController, :error
+    end
   end
 
   scope "/", JidoCodeWeb do

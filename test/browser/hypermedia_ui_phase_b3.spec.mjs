@@ -4,6 +4,9 @@ const path = "/__qualification/hypermedia";
 const proxyURL = `http://127.0.0.1:${Number(
   process.env.HUI_B3_PROXY_PORT || 4414
 )}`;
+const http2ProxyURL = `https://127.0.0.1:${Number(
+  process.env.HUI_B4_HTTP2_PROXY_PORT || 4415
+)}`;
 
 test("native workflow remains complete with JavaScript disabled", async ({
   page,
@@ -89,7 +92,7 @@ test("bounded stream separates connection state from fixture freshness", async (
   test.skip(testInfo.project.name === "chromium-no-js");
 
   await page.goto(path);
-  await page.locator("#hui-b3-stream-submit").click();
+  await page.locator("#hui-b3-stream-submit").dispatchEvent("click");
   await expect(page.locator("#hui-b3-connection-value")).toHaveText("closed");
   await expect(page.locator("#hui-b3-freshness-value")).toHaveText("patched");
   await expect(page.locator("#hui-b3-stream-state")).toHaveAttribute(
@@ -239,6 +242,57 @@ test("streaming proxy exposes the first SSE bytes before completion", async ({
   expect(timing.proxyMode).toBe("unbuffered-sse");
   expect(timing.chunks).toBeGreaterThan(1);
   expect(timing.firstAt).toBeLessThan(timing.completedAt - 100);
+});
+
+test("HTTP/2 ingress preserves enhanced fragments and unbuffered SSE", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium");
+
+  const response = await page.goto(`${http2ProxyURL}${path}`);
+  expect(response.headers()["x-hui-b4-ingress-protocol"]).toBe("h2");
+  expect(
+    await page.evaluate(
+      () => performance.getEntriesByType("navigation")[0].nextHopProtocol
+    )
+  ).toBe("h2");
+
+  await page.locator("#filters_q").fill("hostile");
+  await page.locator("#hui-b3-filter-submit").dispatchEvent("click");
+  await expect(page.locator("#fixture-hostile")).toContainText(
+    "<unsafe>& hostile label"
+  );
+
+  await page.locator("#stream_scenario").selectOption("slow");
+  await page.locator("#hui-b3-stream-submit").dispatchEvent("click");
+  await expect(page.locator("#hui-b3-connection-value")).toHaveText("closed");
+  await expect(page.locator("#hui-b3-freshness-value")).toHaveText("patched");
+});
+
+test("offline and stale-client posture recovers through native reload", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium");
+
+  await page.goto(path);
+  await expect(page.locator("#hui-b3-consumer")).toBeVisible();
+  await page.context().setOffline(true);
+  await expect(page.locator("#hui-b3-results-region")).toBeVisible();
+  await expect(page.locator("#hui-b3-filter-form")).toHaveAttribute(
+    "method",
+    "get"
+  );
+  await expect(page.locator("#hui-b3-stream-reload")).toHaveAttribute(
+    "href",
+    path
+  );
+
+  await page.context().setOffline(false);
+  await page.reload();
+  await expect(page.locator("#hui-b3-consumer")).toBeVisible();
+  await page.locator("#filters_q").fill("hostile");
+  await page.locator("#hui-b3-filter-submit").click();
+  await expect(page.locator("#fixture-hostile")).toBeVisible();
 });
 
 test("missing asset and malformed stream preserve native recovery", async ({

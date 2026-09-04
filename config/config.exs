@@ -45,9 +45,11 @@ config :jido_code, :product_auth,
   session_ttl_seconds: 28_800,
   session_generation: "1"
 
-# HUI-B3's qualification consumer is absent by default. Runtime configuration
-# may enable it only with an explicit host allowlist; its Plug also restricts
-# callers to the loopback interface.
+# HUI-B3's qualification consumer is compiled only into the test build. Runtime
+# configuration may enable that test-only build with an explicit host allowlist;
+# its Plug also restricts callers to the loopback interface.
+config :jido_code, :hypermedia_qualification_build, false
+
 config :jido_code, :hypermedia_qualification,
   enabled: false,
   allowed_hosts: []

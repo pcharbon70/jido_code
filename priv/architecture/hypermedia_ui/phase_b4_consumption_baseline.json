@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B4",
+  "recorded_on": "2026-09-04",
+  "status": "merge_pending_consumption_baseline",
+  "baseline_commit": "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2",
+  "approved_imports": {
+    "heex_facade": "JidoCodeWeb.Components.UI",
+    "shadcn_ui": ["lib/jido_code_web/components/ui.ex", "assets/css/app.css"],
+    "datastar": ["assets/js/app.js"],
+    "dstar_product_boundary": ["explicit Phoenix controller", "application-owned bounded SSE adapter"],
+    "dstar_functions": ["start/1", "patch_elements/3", "patch_signals/3", "SSE.send_event!/3"]
+  },
+  "approved_primitives": [
+    "button",
+    "field_input",
+    "link",
+    "badge",
+    "table",
+    "disclosure",
+    "dialog",
+    "status"
+  ],
+  "approved_datastar_attributes": [
+    "data-signals:*",
+    "data-bind:*",
+    "data-on:click__prevent",
+    "data-attr:*",
+    "data-indicator:*",
+    "data-text"
+  ],
+  "approved_events": ["get", "post"],
+  "asset_contract": {
+    "datastar_version": "1.0.3",
+    "datastar_bundle_sha256": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+    "shadcn_ui_source_commit": "fe40eae63504adc4375aead4f0e741f158a4d86e",
+    "shadcn_ui_css_sha256": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41",
+    "app_js_sha256": "5f3451073941a412f73af51f3808b9530cbed20e8b83776c05c99ab4a4f65d4d",
+    "app_css_sha256": "3920d1b157fea16475fda56ca07d463e6238c26e8b987485b9460f261c68ef58",
+    "ui_facade_sha256": "c6a537da7828a9357e15c0e72a9ba3196429c7e23a31dd76ac303dc17b5528e5"
+  },
+  "production_boundary": {
+    "qualification_build_default": false,
+    "qualification_build_test": true,
+    "production_route_count": 0,
+    "production_supervision_children": 0,
+    "fixture_source_retained": true,
+    "verification_command": "MIX_ENV=prod mix hui.b4.production_boundary"
+  },
+  "supported_profiles": {
+    "browsers": ["chromium", "firefox", "webkit", "chromium-no-js", "chromium-touch"],
+    "proxies": ["direct HTTP/1.1", "unbuffered HTTP/1.1 reverse proxy", "unbuffered HTTP/2 TLS reverse proxy fixture"],
+    "csp": "enforcing; no unsafe-inline, unsafe-eval, or remote product asset",
+    "accessibility": [
+      "semantic landmarks and names",
+      "visible keyboard focus",
+      "native disclosure semantics",
+      "dialog focus entry, Escape, and return",
+      "table caption, headers, and bounded overflow",
+      "polite or assertive live status",
+      "light and dark themes",
+      "320px reflow",
+      "reduced motion, forced colors, RTL, 200% zoom, and touch"
+    ]
+  },
+  "operational_ceilings": {
+    "max_connections": 4,
+    "max_connections_per_tab": 1,
+    "max_events": 8,
+    "max_bytes": 12288,
+    "max_queue": 0,
+    "max_lifetime_ms": 1200,
+    "retry_max_count": 2,
+    "retry_max_wait_ms": 3000
+  },
+  "known_failure_modes": [
+    "missing_or_stale_client_asset_uses_native_recovery",
+    "malformed_or_unsupported_signal_fails_closed",
+    "missing_csrf_or_cross_origin_write_fails_closed",
+    "duplicate_or_excess_stream_fails_without_queue",
+    "offline_or_interrupted_stream_uses_bounded_retry_then_native_recovery",
+    "terminal_close_suppresses_reconnect",
+    "authority_or_revision_from_browser_is_rejected"
+  ],
+  "milestone_c_composite_gaps": [
+    "FactoryShell",
+    "ProjectContextSwitcher",
+    "AttentionQueue",
+    "ProjectionStatusStrip",
+    "AgentFleetTable",
+    "AgentAttemptWorkspace",
+    "StageRail",
+    "AttemptTimeline",
+    "CodeDiff",
+    "artifact manifest",
+    "EvidenceMatrix",
+    "ScopedCommandDialog",
+    "CommandReceipt",
+    "GraphLens accessible table/outline",
+    "ProvenancePanel",
+    "CostBudgetMeter"
+  ],
+  "rollback": "restore the complete prior Mix/npm locks, local Datastar bundle, ShadcnUI source and stylesheet, facade, asset configuration, and release; there is no HUI data migration",
+  "upgrade": "follow the deterministic HUI-B4 update workflow and renew provenance, license, advisory, consumer, browser, accessibility, release, and rollback evidence as one candidate",
+  "source_digests": {
+    "assets/js/app.js": "5f3451073941a412f73af51f3808b9530cbed20e8b83776c05c99ab4a4f65d4d",
+    "assets/css/app.css": "3920d1b157fea16475fda56ca07d463e6238c26e8b987485b9460f261c68ef58",
+    "config/config.exs": "1594d1d5ea7d4e4ce4a3b0d59d7b5434341d366fb07eb5b1d4589b6ac07e6ec8",
+    "config/test.exs": "1c4b20594a89cefd1afe13c9794b07709ca3e5c8ba6bcccff0abe1cf6061ddcc",
+    "lib/jido_code/application.ex": "a35d349d390a9141621dbb9870e2c4f51235851f917313e391fcd90cfd412732",
+    "lib/jido_code_web/router.ex": "59fb75843158676505bb59270867d662ea232c5ce3450470c30e3c315ae6a83f",
+    "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex": "7cb2e7f09287ae566b247afb3beef286b17ab09febd6f6799fa98c40eab2b5a7",
+    "lib/jido_code_web/controllers/qualification/hypermedia_html/index.html.heex": "327d388b227b523db327caa081bb1d982e6d0fe9b35bceb39941e6ab4d053de3",
+    "lib/mix/tasks/hui.b4.production_boundary.ex": "661beca76f26491eee18ba8811d341336b438b8c7dce99fc8cadc68a3d95f4b0",
+    "lib/jido_code_web/components/ui.ex": "c6a537da7828a9357e15c0e72a9ba3196429c7e23a31dd76ac303dc17b5528e5",
+    "priv/architecture/hypermedia_ui/phase_a4_governance_guardrails.json": "7ba9c927f4e86aa411960cde57c8f5d5acaf23514139b96c5e1e1942a5e5095d"
+  },
+  "forbidden": [
+    "direct ShadcnUI imports outside the facade",
+    "Dstar Scripts, dynamic module or action dispatch",
+    "new product LiveView, LiveVue, Vue, or SaladUI consumers",
+    "inline scripts, unsafe CSP, remote product assets, or browser authority",
+    "qualification routes or coordinator in a production build",
+    "product query, command, durable state, or authorization in the qualification fixture",
+    "unbounded streams, retries, queues, patches, or signal schemas"
+  ],
+  "exceptions": []
+}
