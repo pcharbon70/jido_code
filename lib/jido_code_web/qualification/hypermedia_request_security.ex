@@ -60,9 +60,25 @@ defmodule JidoCodeWeb.Qualification.HypermediaRequestSecurity do
   end
 
   defp compare_origin(conn, origin) do
-    expected =
-      URI.to_string(%URI{scheme: Atom.to_string(conn.scheme), host: conn.host, port: conn.port})
+    expected_scheme = Atom.to_string(conn.scheme)
+    expected_host = conn.host
+    expected_port = conn.port
 
-    if origin == expected, do: :ok, else: {:error, :invalid_origin}
+    case URI.new(origin) do
+      {:ok,
+       %URI{
+         scheme: ^expected_scheme,
+         host: ^expected_host,
+         port: ^expected_port,
+         userinfo: nil,
+         path: nil,
+         query: nil,
+         fragment: nil
+       }} ->
+        :ok
+
+      _invalid_or_cross_origin ->
+        {:error, :invalid_origin}
+    end
   end
 end

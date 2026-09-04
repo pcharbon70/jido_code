@@ -111,7 +111,7 @@
     "lib/jido_code_web/plugs/hypermedia_qualification_access.ex": "0ee179fbaea880771ea6a9f5cb82d3bedbf1f0ae94d808cc7fd6367a96a06afc",
     "lib/jido_code_web/qualification_raw_body_reader.ex": "2ba9d82b8503870356873a977f57d387aa1e8e7aa03c70c5dc554e56ad271cf4",
     "lib/jido_code_web/qualification/hypermedia_fixture.ex": "1d2cc09fd764f5c5a241da2d26d08b6e63a91c259e9d56050d935f8738950666",
-    "lib/jido_code_web/qualification/hypermedia_request_security.ex": "6bec24c94009ba4772e578e77bdd66bd4066ba06c5cb6d47c3f4a9760a3f79cf",
+    "lib/jido_code_web/qualification/hypermedia_request_security.ex": "8b3b06c7a3526df962fcffd2c5a420f012816cb2d7fb2163cb635b962a0a296c",
     "lib/jido_code_web/qualification/hypermedia_signals.ex": "7fca27b350a0f3d2f68e6418d630534afa2448e3159c0d60339c24a7e63c5633",
     "lib/jido_code_web/qualification/hypermedia_stream_coordinator.ex": "cfdc3ebaadd11c630544a61c1979e2ec2be1dd6afe01c48351e01362b469661e",
     "lib/jido_code_web/qualification/hypermedia_stream_fixture.ex": "f24482bfb755829ef4f0301885c63b4aabcb1e4b112a02a7b61ca6f074dd5ae5",
