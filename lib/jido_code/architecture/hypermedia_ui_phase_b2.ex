@@ -114,6 +114,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
       "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65"
   }
   @hui_b3_qualified_source_hashes %{
+    "mix.lock" => "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b",
     "package.json" => "d41b1362235934cf2f37a87351f1610325e27945660b636619b3f49a2fdc51ba",
     "package-lock.json" => "8a4b2384bdaf539731dd7eefa169cacaea38bcf689c2a59108ff6de5456addda"
   }

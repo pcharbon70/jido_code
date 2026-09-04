@@ -48,6 +48,13 @@
     "profiles": ["chromium", "firefox", "webkit", "chromium-no-js", "chromium-touch"],
     "os": "ubuntu-24.04-x64 fallback build"
   },
+  "dependency_security_patch": {
+    "package": "mint",
+    "from": "1.9.3",
+    "to": "1.10.0",
+    "cves": ["CVE-2026-82728", "CVE-2026-82729"],
+    "scope": "compatible transitive lockfile-only update"
+  },
   "proxy_fixture": {
     "implementation": "Node.js core http streaming pass-through",
     "path": "test/browser/support/streaming_proxy.mjs",
@@ -80,8 +87,9 @@
     "unbuffered_proxy_stream": "pass",
     "accessibility_responsive_theme_modes": "pass",
     "browser_matrix": "19 passed, 31 intentional profile skips",
-    "focused_elixir_matrix": "28 tests, 0 failures",
-    "repository_precommit": "1228 tests, 0 failures"
+    "focused_elixir_matrix": "30 tests, 0 failures",
+    "repository_precommit": "1228 tests, 0 failures",
+    "dependency_audit": "pass after Mint 1.10.0 security update"
   },
   "negative_cases": [
     {"id": "qualification_enabled_by_default", "expected": "blocked"},
@@ -105,6 +113,7 @@
     "config/runtime.exs": "72edd9871fe63479e00663d76a7f61ac071a8ab4bedaddc65ff242a3d07fadc3",
     "config/test.exs": "8fa80bb95a8ac25200dae95d4b5a7851721e83a94fa0870115970f5f590a259b",
     "lib/jido_code/application.ex": "d1170554d5335650e4596f1d02b2c6ee2eba18897cd8b54f9add8b03e659758d",
+    "lib/jido_code/architecture/hypermedia_ui_phase_b2.ex": "68115fa34173a381615839e1e9d49b67de2cdd2b622fc1aa0e7d17b32cade900",
     "lib/jido_code_web/endpoint.ex": "32af992a2705d8e2dc05645e193bdb2a50576355e0a09e2c44e3b6a86d3c9709",
     "lib/jido_code_web/router.ex": "36a91e6376f08afec40b0827c4dba452095fcf358e2588470ca096326077830d",
     "lib/jido_code_web/frontend_assets.ex": "7106d4fa047df618dd3204b5e4d9ab839fcfee4810b9614524c739267b047776",
@@ -118,6 +127,7 @@
     "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex": "a7b92c085aa3d16235d75c7b01d9c4f4ff06286aab72728b2e07f36797d5a18c",
     "lib/jido_code_web/controllers/qualification/hypermedia_html.ex": "af3fefa2b04897fe1b1ca9c793e50054d092f2f1c2f390a98c82422014bbb7d4",
     "lib/jido_code_web/controllers/qualification/hypermedia_html/index.html.heex": "422e5a5a3300b84eec69d36c83f133db57d713205be35ae799df2a75740636ad",
+    "mix.lock": "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b",
     "package.json": "d41b1362235934cf2f37a87351f1610325e27945660b636619b3f49a2fdc51ba",
     "package-lock.json": "8a4b2384bdaf539731dd7eefa169cacaea38bcf689c2a59108ff6de5456addda",
     "playwright.config.mjs": "178bea3136ba59c515e4172696332eb5190f154c56938bafe2373c174a74da64",

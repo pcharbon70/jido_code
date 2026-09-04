@@ -14,7 +14,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3Test do
     assert evidence["baseline_commit"] == "21e659819f4ccce7a4ba5fb1a9d858183fb65564"
     assert get_in(evidence, ["browser_toolchain", "version"]) == "1.62.0"
     assert get_in(evidence, ["stream_limits", "max_queue"]) == 0
-    assert map_size(evidence["source_digests"]) == 22
+    assert map_size(evidence["source_digests"]) == 24
   end
 
   test "stream limits, signal schema, toolchain, and evidence drift fail closed" do

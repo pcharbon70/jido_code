@@ -112,12 +112,18 @@ consumer boundary. The CI `verify` job installs the exact browsers, builds the
 production assets, runs the browser/proxy matrix, retains failure traces for
 90 days, and still runs the repository `mix precommit` gate.
 
-The implementation candidate passed warnings-as-errors compilation, 28 focused
+The implementation candidate passed warnings-as-errors compilation, 30 focused
 controller/signal/coordinator/protocol and B2/B3 architecture tests, architecture
 checks, the production asset build, the 19-case applicable real-browser matrix,
 and `mix precommit` with 1,228 tests and zero failures. The clean-checkout job
 identity will be recorded in the implementation PR before merge; any failure
 keeps this receipt merge-pending.
+
+Clean-checkout audit discovered CVE-2026-82728 and CVE-2026-82729 in the
+transitive Mint 1.9.3 HTTP client. The candidate moves only that compatible
+lock entry to Mint 1.10.0, whose upstream release is a non-breaking security
+update for both advisories. The exact lock digest and transition are pinned in
+the machine-readable evidence; `mix hex.audit` reports no advisories afterward.
 
 ## Exceptions And Limitations
 

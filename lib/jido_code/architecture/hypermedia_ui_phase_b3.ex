@@ -14,6 +14,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     config/runtime.exs
     config/test.exs
     lib/jido_code/application.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_b2.ex
     lib/jido_code_web/endpoint.ex
     lib/jido_code_web/router.ex
     lib/jido_code_web/frontend_assets.ex
@@ -27,6 +28,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     lib/jido_code_web/controllers/qualification/hypermedia_controller.ex
     lib/jido_code_web/controllers/qualification/hypermedia_html.ex
     lib/jido_code_web/controllers/qualification/hypermedia_html/index.html.heex
+    mix.lock
     package.json
     package-lock.json
     playwright.config.mjs
@@ -74,6 +76,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     browser = evidence["browser_toolchain"] || %{}
     boundary = evidence["qualification_boundary"] || %{}
     limits = evidence["stream_limits"] || %{}
+    security_patch = evidence["dependency_security_patch"] || %{}
 
     []
     |> require_equal(evidence["schema_version"], 1, "schema_version")
@@ -101,6 +104,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     |> require_equal(limits["max_queue"], 0, "queue ceiling")
     |> require_equal(limits["max_lifetime_ms"], 1_200, "lifetime ceiling")
     |> require_equal(limits["retry_max_count"], 2, "retry count ceiling")
+    |> require_equal(security_patch["package"], "mint", "security patch package")
+    |> require_equal(security_patch["from"], "1.9.3", "security patch origin")
+    |> require_equal(security_patch["to"], "1.10.0", "security patch target")
+    |> require_exact_set(
+      security_patch["cves"] || [],
+      ~w[CVE-2026-82728 CVE-2026-82729],
+      "security patch CVEs"
+    )
     |> require_exact_set(Enum.map(cases, & &1["id"]), @negative_case_ids, "negative cases")
     |> require_equal(
       Enum.all?(cases, &(&1["expected"] in ["blocked", "cleanup", "native_safe_recovery"])),
@@ -241,6 +252,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     config = read(root, "playwright.config.mjs")
     browser_test = read(root, "test/browser/hypermedia_ui_phase_b3.spec.mjs")
     proxy = read(root, "test/browser/support/streaming_proxy.mjs")
+    mix_lock = read(root, "mix.lock")
 
     errors
     |> require_equal(
@@ -263,6 +275,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
       |> require_contains(browser_test, "forcedColors", "forced-colors smoke")
       |> require_contains(browser_test, "reconnect attempts", "reconnect coverage")
       |> require_contains(proxy, "upstreamResponse.pipe(response)", "streaming proxy")
+      |> require_contains(
+        mix_lock,
+        ~s("mint": {:hex, :mint, "1.10.0"),
+        "patched Mint lock"
+      )
       |> require_contains(
         read(root, "config/runtime.exs"),
         "JIDO_CODE_HUI_BROWSER_ASSETS",
