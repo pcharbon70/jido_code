@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B2",
+  "recorded_on": "2026-09-04",
+  "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
+  "status": "exact_dependency_and_asset_graph_resolved",
+  "lock_sha256": "cb1db44c1cc488f7e8a8e9caba7b52ac68977666b28c8e515f24114c43407644",
+  "components": [
+    {"name": "phoenix", "version": "1.8.11", "ecosystem": "hex", "integrity": "44f028f4129e5a29487e868f84903373e3d032da151ad0c789c3849f464e7351", "license": "MIT", "role": "existing runtime framework"},
+    {"name": "phoenix_html", "version": "4.3.0", "ecosystem": "hex", "integrity": "3eaa290a78bab0f075f791a46a981bbe769d94bc776869f4f3063a14f30497ad", "license": "MIT", "role": "HTML safety and forms"},
+    {"name": "phoenix_live_view", "version": "1.2.9", "ecosystem": "hex", "integrity": "2f9528c3d7046edabbb30a91710ca33988f8d8bc20a964a1fc48b32134572afa", "license": "MIT", "role": "Phoenix.Component infrastructure and existing compatibility runtime"},
+    {"name": "phoenix_pubsub", "version": "2.2.0", "ecosystem": "hex", "integrity": "adc313a5bf7136039f63cfd9668fde73bba0765e0614cba80c06ac9460ff3e96", "license": "MIT", "role": "retained Phoenix runtime transitive"},
+    {"name": "phoenix_template", "version": "1.0.4", "ecosystem": "hex", "integrity": "2c0c81f0e5c6753faf5cca2f229c9709919aba34fab866d3bc05060c9c444206", "license": "MIT", "role": "template transitive"},
+    {"name": "plug", "version": "1.20.3", "ecosystem": "hex", "integrity": "be266aee1b8536ef6409d58cf39a3121319f0ec47cfa1b24024485aa0e76ad76", "license": "Apache-2.0", "role": "HTTP runtime and Dstar dependency"},
+    {"name": "plug_crypto", "version": "2.2.0", "ecosystem": "hex", "integrity": "83a95744ab1c75876542b6fab135fcc176280e0f301a111c1f757fddcec95d2c", "license": "Apache-2.0", "role": "Plug and Phoenix transitive"},
+    {"name": "jason", "version": "1.4.5", "ecosystem": "hex", "integrity": "b0c823996102bcd0239b3c2444eb00409b72f6a140c1950bc8b457d836b30684", "license": "Apache-2.0", "role": "JSON runtime and Dstar dependency"},
+    {"name": "telemetry", "version": "1.4.2", "ecosystem": "hex", "integrity": "928f6495066506077862c0d1646609eed891a4326bee3126ba54b60af61febb1", "license": "Apache-2.0", "role": "Phoenix and Plug telemetry transitive"},
+    {"name": "mime", "version": "2.0.7", "ecosystem": "hex", "integrity": "6171188e399ee16023ffc5b76ce445eb6d9672e2e241d2df6050f3c771e80ccd", "license": "Apache-2.0", "role": "Plug MIME transitive"},
+    {"name": "websock_adapter", "version": "0.6.0", "ecosystem": "hex", "integrity": "50021a85bce8f203b086705d9e0c5415e2c7eb05d319111b0428fe71f9934617", "license": "MIT", "role": "Phoenix WebSocket transitive"},
+    {"name": "websock", "version": "0.5.3", "ecosystem": "hex", "integrity": "6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453", "license": "MIT", "role": "WebSocket transitive"},
+    {"name": "spitfire", "version": "0.4.0", "ecosystem": "hex", "integrity": "7e5c6d1523c111b59f332f9dc49edc0377111d0c17167a29830f0e98233f5472", "license": "Apache-2.0", "role": "retained compile transitive"},
+    {"name": "dstar", "version": "0.2.0", "ecosystem": "hex", "integrity": "4766c1f3da802aa7e842aa78cbb778c8d764599e18fc67bbe32fbe25ac2c6460", "license": "MIT", "role": "qualified transport helper; product use deferred"},
+    {"name": "shadcn_ui", "version": "1.0.0+fe40eae63504", "ecosystem": "git", "integrity": "fe40eae63504adc4375aead4f0e741f158a4d86e", "license": "MIT", "role": "facade-only function components"},
+    {"name": "salad_ui", "version": "1.0.0", "ecosystem": "hex", "integrity": "4cc5811d7be5ef3ff84b99d0741ffdc0a75bc6aa05298802a45d5640f307beac", "license": "MIT", "role": "existing compatibility consumer"},
+    {"name": "@tailwindcss/vite", "version": "4.3.3", "ecosystem": "npm", "integrity": "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw==", "license": "MIT", "role": "existing CSS build tool"},
+    {"name": "tailwindcss", "version": "4.3.3", "ecosystem": "npm", "integrity": "sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==", "license": "MIT", "role": "existing CSS build tool"},
+    {"name": "vite", "version": "7.3.6", "ecosystem": "npm", "integrity": "sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==", "license": "MIT", "role": "existing asset bundler"}
+  ],
+  "assets": [
+    {
+      "name": "shadcn_ui.css",
+      "version": "1.0.0+fe40eae63504",
+      "source_path": "deps/shadcn_ui/priv/static/shadcn_ui.css",
+      "sha256": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41",
+      "bytes": 54389,
+      "license": "MIT",
+      "consumer": "assets/css/app.css"
+    },
+    {
+      "name": "datastar.js",
+      "version": "1.0.3",
+      "source_path": "assets/vendor/datastar/datastar.js",
+      "sha256": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+      "bytes": 33538,
+      "license": "MIT",
+      "consumer": "assets/js/app.js"
+    }
+  ],
+  "exceptions": []
+}

@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B2",
+  "recorded_on": "2026-09-04",
+  "status": "integration_candidate_merge_pending",
+  "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
+  "commands": [
+    "mix deps.get --check-locked",
+    "npm ci",
+    "mix compile --warnings-as-errors",
+    "mix test test/jido_code/architecture/hypermedia_ui_phase_b2_test.exs test/jido_code_web/components/ui_qualification_test.exs test/jido_code_web/plugs/content_security_policy_test.exs",
+    "mix architecture.check",
+    "mix hex.audit",
+    "npm audit --omit=dev",
+    "mix assets.deploy",
+    "MIX_ENV=prod mix release --overwrite",
+    "release eval Application.ensure_all_started(:jido_code)",
+    "mix precommit"
+  ],
+  "results": {
+    "exact_dependency_resolution": "pass",
+    "application_compile": "pass",
+    "release_assembly_and_startup": "pass",
+    "facade_render_and_hostile_content": "pass",
+    "theme_and_accessibility_modes": "pass",
+    "csp_nonce_and_static_headers": "pass",
+    "repeat_asset_build": "pass",
+    "source_maps_absent": "pass",
+    "architecture_and_consumer_boundary": "pass",
+    "dependency_and_license_inventory": "pass",
+    "npm_production_advisory_audit": "local_registry_timeout; required clean-checkout CI gate",
+    "repository_precommit": "pass: 1204 tests, 0 failures"
+  },
+  "negative_cases": [
+    {"id": "dependency_pin_drift", "expected": "blocked"},
+    {"id": "lock_checksum_drift", "expected": "blocked"},
+    {"id": "implicit_override", "expected": "blocked"},
+    {"id": "missing_license", "expected": "blocked"},
+    {"id": "shadcn_outside_facade", "expected": "blocked"},
+    {"id": "datastar_product_consumer", "expected": "blocked"},
+    {"id": "dstar_product_consumer", "expected": "blocked"},
+    {"id": "bundle_digest_drift", "expected": "blocked"},
+    {"id": "source_map_present", "expected": "blocked"},
+    {"id": "csp_unsafe_eval", "expected": "blocked"},
+    {"id": "csp_unsafe_inline", "expected": "blocked"},
+    {"id": "missing_or_reused_nonce", "expected": "blocked"},
+    {"id": "nondeterministic_build", "expected": "blocked"},
+    {"id": "mixed_closure_state", "expected": "blocked"}
+  ],
+  "source_digests": {
+    "mix_exs": "d66c00f068f43943ed9bd94b0a2c77db152a224ad3e1d6deefee4745df3ffab9",
+    "mix_lock": "cb1db44c1cc488f7e8a8e9caba7b52ac68977666b28c8e515f24114c43407644",
+    "package_json": "7f591835bbd701538c7352dcbc54b7f6e9f8930b94ded856bb67128023b48da3",
+    "package_lock": "fc388ab416c696007dc3f15fda8ac4a2e897bf63ac78440019eab1f94f9351c7",
+    "datastar_bundle": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+    "shadcn_stylesheet": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41",
+    "app_js": "5f3451073941a412f73af51f3808b9530cbed20e8b83776c05c99ab4a4f65d4d",
+    "app_css": "3920d1b157fea16475fda56ca07d463e6238c26e8b987485b9460f261c68ef58",
+    "theme_js": "b61046bdcc7a7164d419d1658c0dedd13a9b26ae057c736d01e49832e931850a"
+  },
+  "limitations": [
+    "HUI-B2 adds no product Datastar or Dstar consumer; the isolated consumer is HUI-B3",
+    "manual multi-browser and assistive-technology release evidence remains HUI-B4",
+    "existing LiveView, LiveVue, and SaladUI consumers remain compatibility-only until HUI-H",
+    "Node 24.3 reports engine warnings for Phoenix LiveView's nested development-only Babel 8 toolchain, while the root production asset toolchain installs and builds successfully",
+    "stale clients rely on atomic release draining rather than in-place retention in one build directory"
+  ],
+  "exceptions": []
+}

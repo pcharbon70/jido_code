@@ -71,7 +71,7 @@ jobs:
           mix hex.audit
           npm audit --omit=dev
 
-      - name: Build Vite assets
+      - name: Build and digest production assets
         env:
           MIX_ENV: prod
           # Asset compilation loads runtime config but never starts a server.
@@ -79,4 +79,4 @@ jobs:
           # CI-only value satisfying the prod operator-token validation;
           # never a real credential.
           JIDO_CODE_OPERATOR_TOKEN: "ci-only-asset-build-token"
-        run: mix assets.build
+        run: mix assets.deploy

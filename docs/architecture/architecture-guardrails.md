@@ -26,8 +26,9 @@ The checker rejects:
 - direct `TripleStore.update/2` outside the empty-store metadata bootstrap and
   the `Writer`-owned atomic compiler;
 - unclassified filesystem write/copy/rename APIs;
-- browser persistence other than the digest-pinned `phx:theme` implementation
-  in `assets/js/theme.js`;
+- browser persistence other than the current digest-pinned `phx:theme`
+  implementation in `assets/js/theme.js`; an authorized UI phase may advance
+  that digest only with theme-contract evidence and hostile mutation tests;
 - dependency directions prohibited by the accepted plane matrix;
 - raw SPARQL in Factory, Runtime, Integrations, Web, HEEx, JS, TS, or Vue;
 - generic entity/record/CRUD store modules; and

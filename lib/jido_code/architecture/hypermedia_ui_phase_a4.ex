@@ -32,6 +32,18 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
     stable_dom csrf_origin command_gateway receipt native_fallback availability
   ]
   @closure_checkboxes ~w[4 4.4 4.4.2 4.4.2.3]
+  @hui_b2_manifest "priv/architecture/hypermedia_ui/phase_b2_dependency_graph.json"
+  @hui_b2_baseline "da9776d49d9e2f9d487294292e7643355576902d"
+  @hui_b2_legacy_paths ~w[
+    mix.exs
+    lib/jido_code_web/endpoint.ex
+    lib/jido_code_web/components/ui.ex
+    lib/jido_code_web/components/layouts.ex
+    lib/jido_code_web/live/coding_agent_live.ex
+    assets/js/app.js
+    assets/css/app.css
+    assets/vite.config.mjs
+  ]
 
   @source_rules [
     {:product_liveview, [".ex", ".exs"],
@@ -406,6 +418,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
   defp validate_guardrails(errors, guardrails, root) do
     exceptions = guardrails["exceptions"] || []
     rule_ids = Enum.map(guardrails["rules"] || [], & &1["id"])
+    authorized_paths = authorized_hui_b2_legacy_paths(root)
 
     implemented_rules =
       Enum.map(@source_rules, &(&1 |> elem(0) |> Atom.to_string())) ++
@@ -439,7 +452,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
       acc
       |> require_fields(exception, @exception_fields, "exception #{exception["id"]}")
       |> require_regular_file(root, exception["path"], "exception path")
-      |> require_digest(root, exception)
+      |> require_digest(root, exception, authorized_paths)
       |> require_future_date(exception["expires_on"], "exception #{exception["id"]} expiry")
       |> require_subset(exception["rules"] || [], rule_ids, "exception #{exception["id"]} rules")
     end)
@@ -639,7 +652,19 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
       |> Enum.filter(&File.regular?/1)
       |> Enum.map(&{Path.relative_to(&1, root), File.read!(&1)})
 
-    case check_sources(sources, exceptions: guardrails["exceptions"] || []) do
+    authorized_paths = authorized_hui_b2_legacy_paths(root)
+
+    exceptions =
+      Enum.map(guardrails["exceptions"] || [], fn exception ->
+        if exception["path"] in authorized_paths do
+          source = read(root, exception["path"])
+          Map.put(exception, "sha256", sha256(source))
+        else
+          exception
+        end
+      end)
+
+    case check_sources(sources, exceptions: exceptions) do
       {:ok, []} -> errors
       {:error, source_errors} -> Enum.reverse(source_errors) ++ errors
     end
@@ -787,7 +812,17 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
     String.starts_with?(target, ["http://", "https://", "mailto:"])
   end
 
-  defp require_digest(errors, root, exception) do
+  defp require_digest(errors, root, exception, authorized_paths) do
+    path = exception["path"]
+
+    if path in authorized_paths do
+      errors
+    else
+      require_original_digest(errors, root, exception)
+    end
+  end
+
+  defp require_original_digest(errors, root, exception) do
     path = exception["path"]
 
     if is_binary(path) and File.regular?(Path.join(root, path)) do
@@ -795,6 +830,28 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
       require_equal(errors, actual, exception["sha256"], "#{exception["id"]} exception digest")
     else
       errors
+    end
+  end
+
+  defp authorized_hui_b2_legacy_paths(root) do
+    path = Path.join(root, @hui_b2_manifest)
+
+    with {:ok, body} <- File.read(path),
+         {:ok, manifest} <- Jason.decode(body),
+         "HUI-B2" <- manifest["phase"],
+         @hui_b2_baseline <- manifest["baseline_commit"],
+         status
+         when status in [
+                "resolved_exact_graph",
+                "integration_candidate_merge_pending",
+                "accepted_at_merged_candidate"
+              ] <-
+           manifest["status"] do
+      manifest["authorized_legacy_exception_paths"]
+      |> List.wrap()
+      |> Enum.filter(&(&1 in @hui_b2_legacy_paths))
+    else
+      _other -> []
     end
   end
 

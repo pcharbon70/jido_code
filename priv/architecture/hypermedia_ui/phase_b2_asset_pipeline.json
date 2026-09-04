@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B2",
+  "recorded_on": "2026-09-04",
+  "status": "qualified_deterministic_local_pipeline",
+  "datastar": {
+    "version": "1.0.3",
+    "signed_tag": "v1.0.3",
+    "source_commit": "73ab00e7c06d8c2bad030fdddafba800fcccbde2",
+    "source_path": "bundles/datastar.js",
+    "vendored_path": "assets/vendor/datastar/datastar.js",
+    "sha256": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+    "bytes": 33538,
+    "license": "MIT",
+    "license_path": "assets/vendor/datastar/LICENSE.md",
+    "source_license_sha256": "17da0e216d3c6a819526f5b72a6a44d84d34bcd9beb4191ac6af89c1508ef08f",
+    "vendored_license_sha256": "d3744837a0204e16cce7dfbcc77a1b72f302a74d10089a4dd552147582151cb0",
+    "imported_by": "assets/js/app.js",
+    "cdn_or_remote_fallback": false,
+    "source_map_shipped": false
+  },
+  "build": {
+    "vite": "7.3.6",
+    "tailwindcss": "4.3.3",
+    "source_maps": false,
+    "clean_digest_input": true,
+    "normalized_digest_mtime": 63955699200,
+    "repeat_builds": 2,
+    "repeat_builds_equal": true,
+    "uncompressed_tree_sha256": "cf826b5db16b369594b1e21f46e203500fa1b22f545543711c8a19eaf177c3fc",
+    "compressed_tree_sha256": "e6ad9ae8fde22f97e28a111ac8fcfc3d49f51900e93b8d96f8d65e228be8f0a6",
+    "vite_manifest_sha256": "c3cf4c4bfcb85020c8950a327074bdfcf494e6c5829976cdff59dec42c25a75c",
+    "phoenix_manifest_sha256": "44722d5ec867aba8c78692430d0b8ce7a746603d48017416b87ab858e7ce3673",
+    "client_javascript": {"logical_path": "assets/app-Bt6rmj3K.js", "bytes": 330128, "sha256": "14b2465b966f743a7a85b7e2fb1cdf85900f619ad98ee3a9bbecaab402b2d63d", "phoenix_digest": "1d79c9d082aab8e3b903892e857f6ee4"},
+    "client_css": {"logical_path": "assets/app-DPMabVPp.css", "bytes": 178719, "sha256": "27eecaad1dfdc14aa6692d10da03fce2a4a0e65c6715af8ab68b2ce22824d217", "phoenix_digest": "5f6c5b54cdd51aa7891a4430f3b76132"},
+    "gzip_file_count": 6,
+    "map_files": []
+  },
+  "http": {
+    "csp_mode": "response_nonce_and_trusted_types",
+    "root_nonce_attribute": "data-nonce",
+    "trusted_types_policy": "datastar",
+    "required_directives": ["script-src 'self' 'nonce-<response>'", "require-trusted-types-for 'script'", "trusted-types datastar", "object-src 'none'", "frame-ancestors 'none'"],
+    "forbidden_directives": ["unsafe-eval", "unsafe-inline", "remote script source"],
+    "static_headers": ["X-Content-Type-Options: nosniff", "Cross-Origin-Resource-Policy: same-origin"],
+    "versioned_cache_control": "public, max-age=31536000, immutable",
+    "etag_cache_control": "public, max-age=0, must-revalidate",
+    "compression": ["gzip"],
+    "mime_source": "Plug.Static"
+  },
+  "consumer_boundary": {
+    "product_datastar_attributes": false,
+    "dstar_product_modules": false,
+    "dstar_scripts": false,
+    "static_reviewed_fixture_attributes_only": true,
+    "third_party_network_required": false
+  },
+  "stale_client_policy": "immutable URLs remain served by the draining prior release; deployments are atomic releases, never in-place mixed manifests",
+  "rollback": "restore the prior complete release and its matching manifest/assets; never pair a new manifest with old bytes",
+  "exceptions": []
+}

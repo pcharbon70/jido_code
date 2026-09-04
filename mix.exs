@@ -48,10 +48,17 @@ defmodule JidoCode.MixProject do
     [
       {:live_vue, "~> 1.0"},
       {:phoenix_vite, "~> 0.4"},
-      {:phoenix, "~> 1.8.1"},
-      {:phoenix_html, "~> 4.1"},
+      {:phoenix, "== 1.8.11"},
+      {:phoenix_html, "== 4.3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.1.0"},
+      # Phoenix.Component is currently distributed with Phoenix LiveView.
+      # Keep this exact resolution as component infrastructure; HUI-B2 does not
+      # authorize new LiveView product routes, sockets, processes, or state.
+      {:phoenix_live_view, "== 1.2.9"},
+      {:shadcn_ui,
+       git: "https://github.com/pcharbon70/shadcn_ui.git",
+       ref: "fe40eae63504adc4375aead4f0e741f158a4d86e"},
+      {:dstar, "== 0.2.0"},
       # Dialyxir 1.4.7 predates OTP 28's opaque comparison warning formats.
       # Pin the upstream formatter support until it is included in a Hex release.
       {:dialyxir,
@@ -61,7 +68,8 @@ defmodule JidoCode.MixProject do
        runtime: false},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:salad_ui, "~> 1.0.0-beta.3"},
+      # Exact compatibility release required by the qualified LiveView 1.2 graph.
+      {:salad_ui, "== 1.0.0"},
       # RDF 2.1 still declares Decimal 2.x, whose exponent parser is vulnerable
       # to unbounded allocation. Decimal 3 retains the API RDF uses.
       {:decimal, "~> 3.1", override: true},
@@ -113,8 +121,10 @@ defmodule JidoCode.MixProject do
         "phoenix_vite.npm vite build --ssrManifest --emptyOutDir false --ssr js/server.js --outDir ../priv/static"
       ],
       "assets.deploy": [
+        "phx.digest.clean --all --no-compile",
         "assets.build",
-        "phx.digest"
+        "phx.digest",
+        "assets.normalize_digest_manifest"
       ],
       precommit: [
         "compile --warnings-as-errors",
