@@ -17,7 +17,7 @@ full merge commit and date without weakening any reopening condition below.
 | Section 3.1 | `094f6b55342a50c156529872f3c456acc6830a24` - isolated native controller/HEEx consumer |
 | Section 3.2 | `c0d49072a66d008ab49ed01abfa1c811debe1bda` - closed Datastar request and fragment boundary |
 | Section 3.3 | `cfb7e84d10f234462cb77b84ae32ed1825334fe4` - bounded SSE lifecycle and coordinator |
-| Section 3.4 | `merge-pending` - browser/proxy matrix, verifier, and receipt |
+| Section 3.4 | `589662589577dfbef2f6be1b09c7af7f736899ab` - browser/proxy matrix, verifier, and receipt |
 | Implementation PR head | `merge-pending` |
 | Merged candidate | `merge-pending` |
 
