@@ -20,6 +20,36 @@ if System.get_env("PHX_SERVER") do
   config :jido_code, JidoCodeWeb.Endpoint, server: true
 end
 
+case System.get_env("JIDO_CODE_HUI_QUALIFICATION_ENABLED") do
+  nil ->
+    :ok
+
+  "false" ->
+    :ok
+
+  "true" ->
+    hosts =
+      System.get_env("JIDO_CODE_HUI_QUALIFICATION_HOSTS")
+      |> case do
+        nil -> raise "JIDO_CODE_HUI_QUALIFICATION_HOSTS is required when qualification is enabled"
+        value -> value
+      end
+      |> String.split(",", trim: true)
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+
+    if hosts == [] do
+      raise "JIDO_CODE_HUI_QUALIFICATION_HOSTS must contain at least one host"
+    end
+
+    config :jido_code, :hypermedia_qualification,
+      enabled: true,
+      allowed_hosts: hosts
+
+  invalid ->
+    raise "JIDO_CODE_HUI_QUALIFICATION_ENABLED must be true or false, got: #{inspect(invalid)}"
+end
+
 session_ttl_seconds = fn ->
   value = System.get_env("JIDO_CODE_SESSION_TTL_SECONDS") || "28800"
 
