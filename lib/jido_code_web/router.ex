@@ -24,6 +24,10 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.ProductAuth, :require_authenticated_operator
   end
 
+  pipeline :hypermedia_qualification do
+    plug JidoCodeWeb.Plugs.HypermediaQualificationAccess
+  end
+
   scope "/", JidoCodeWeb do
     pipe_through :browser
 
@@ -40,6 +44,19 @@ defmodule JidoCodeWeb.Router do
     get "/coding-attempts/:attempt_ref", CodingAttemptController, :show
     post "/coding-attempts/:attempt_ref/refresh", CodingAttemptController, :refresh
     post "/coding-attempts/:attempt_ref/controls/:control", CodingAttemptController, :control
+  end
+
+  scope "/__qualification", JidoCodeWeb.Qualification do
+    pipe_through [:browser, :hypermedia_qualification]
+
+    get "/hypermedia", HypermediaController, :index
+    get "/hypermedia/results", HypermediaController, :results
+    post "/hypermedia/submissions", HypermediaController, :submit
+    get "/hypermedia/fragments/results", HypermediaController, :fragment_results
+    post "/hypermedia/events/:event", HypermediaController, :event
+    post "/hypermedia/stream", HypermediaController, :stream_fixture
+    get "/hypermedia/maintenance", HypermediaController, :maintenance
+    get "/hypermedia/error", HypermediaController, :error
   end
 
   scope "/", JidoCodeWeb do

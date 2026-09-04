@@ -15,6 +15,10 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
   @plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-02-phoenix-component-and-asset-integration.md"
   @receipt_path "docs/architecture/hypermedia-ui-milestone-b-phase-02-receipt.md"
   @facade_path "lib/jido_code_web/components/ui.ex"
+  @hui_b3_qualification_consumer_paths MapSet.new(~w[
+    lib/jido_code_web/controllers/qualification/hypermedia_controller.ex
+    lib/jido_code_web/qualification/hypermedia_stream_fixture.ex
+  ])
   @authorized_legacy_paths ~w[
     mix.exs
     lib/jido_code_web/endpoint.ex
@@ -109,6 +113,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
     "assets/vendor/datastar/datastar.js" =>
       "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65"
   }
+  @hui_b3_qualified_source_hashes %{
+    "mix.lock" => "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b",
+    "package.json" => "d41b1362235934cf2f37a87351f1610325e27945660b636619b3f49a2fdc51ba",
+    "package-lock.json" => "8a4b2384bdaf539731dd7eefa169cacaea38bcf689c2a59108ff6de5456addda"
+  }
   @required_documents ~w[
     docs/architecture/hypermedia-ui-phoenix-component-resolution.md
     docs/architecture/hypermedia-ui-component-facade-and-theme.md
@@ -194,14 +203,16 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
           "#{path}: ShadcnUI is available only behind #{@facade_path}"
         },
         {
-          Regex.match?(
-            ~r/\bDstar\.(?:Page|Router|Component|Plugs|Scripts|SSE|Utility)/,
-            source
-          ),
+          not MapSet.member?(@hui_b3_qualification_consumer_paths, path) and
+            Regex.match?(
+              ~r/\bDstar\.(?:Page|Router|Component|Plugs|Scripts|SSE|Utility)/,
+              source
+            ),
           "#{path}: Dstar product consumption is not authorized in HUI-B2"
         },
         {
           Enum.all?([
+            not MapSet.member?(@hui_b3_qualification_consumer_paths, path),
             Path.extname(path) in [".ex", ".heex"],
             Regex.match?(~r/data-on:/, source)
           ]),
@@ -486,6 +497,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
   defp validate_sources(errors, root) do
     errors =
       Enum.reduce(@source_hashes, errors, fn {path, expected}, acc ->
+        expected = Map.get(@hui_b3_qualified_source_hashes, path, expected)
+
         case File.read(Path.join(root, path)) do
           {:ok, body} -> require_equal(acc, sha256(body), expected, "pinned source #{path}")
           {:error, reason} -> ["pinned source #{path} unavailable: #{inspect(reason)}" | acc]

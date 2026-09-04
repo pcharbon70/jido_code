@@ -45,6 +45,13 @@ config :jido_code, :product_auth,
   session_ttl_seconds: 28_800,
   session_generation: "1"
 
+# HUI-B3's qualification consumer is absent by default. Runtime configuration
+# may enable it only with an explicit host allowlist; its Plug also restricts
+# callers to the loopback interface.
+config :jido_code, :hypermedia_qualification,
+  enabled: false,
+  allowed_hosts: []
+
 config :phoenix_vite, PhoenixVite.Npm,
   assets: [args: [], cd: Path.expand("..", __DIR__)],
   vite: [

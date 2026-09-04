@@ -55,10 +55,14 @@ defmodule JidoCodeWeb.FrontendAssets do
   @spec status() :: map()
   def status do
     runtime_mode = Application.get_env(:jido_code, :runtime_mode, :prod)
+
+    qualification_asset_mode =
+      Application.get_env(:jido_code, :hypermedia_qualification_asset_mode, :test)
+
     dev_server? = PhoenixVite.Components.has_vite_watcher?(JidoCodeWeb.Endpoint)
 
     cond do
-      runtime_mode == :test ->
+      runtime_mode == :test and qualification_asset_mode != :production ->
         %{mode: :ready, manifest: @test_manifest}
 
       dev_server? ->

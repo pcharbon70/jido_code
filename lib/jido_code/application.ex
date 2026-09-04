@@ -9,19 +9,30 @@ defmodule JidoCode.Application do
   def start(_type, _args) do
     :ok = verify_release_contract!()
 
-    children = [
-      JidoCodeWeb.Telemetry,
-      TwMerge.Cache,
-      {DNSCluster, query: Application.get_env(:jido_code, :dns_cluster_query) || :ignore},
-      JidoCode.Knowledge.Supervisor,
-      {Task.Supervisor, name: JidoCode.Factory.Model.StreamSupervisor},
-      JidoCode.Runtime.Supervisor,
-      {Phoenix.PubSub, name: JidoCode.PubSub},
-      # Start a worker by calling: JidoCode.Worker.start_link(arg)
-      # {JidoCode.Worker, arg},
-      # Start to serve requests, typically the last entry
-      JidoCodeWeb.Endpoint
-    ]
+    qualification_children =
+      if Application.get_env(:jido_code, :hypermedia_qualification, [])[:enabled] do
+        [JidoCodeWeb.Qualification.HypermediaStreamCoordinator]
+      else
+        []
+      end
+
+    children =
+      [
+        JidoCodeWeb.Telemetry,
+        TwMerge.Cache,
+        {DNSCluster, query: Application.get_env(:jido_code, :dns_cluster_query) || :ignore},
+        JidoCode.Knowledge.Supervisor,
+        {Task.Supervisor, name: JidoCode.Factory.Model.StreamSupervisor},
+        JidoCode.Runtime.Supervisor,
+        {Phoenix.PubSub, name: JidoCode.PubSub}
+      ] ++
+        qualification_children ++
+        [
+          # Start a worker by calling: JidoCode.Worker.start_link(arg)
+          # {JidoCode.Worker, arg},
+          # Start to serve requests, typically the last entry
+          JidoCodeWeb.Endpoint
+        ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

@@ -1,0 +1,214 @@
+<Layouts.app flash={@flash}>
+  <section
+    id="hui-b3-consumer"
+    aria-labelledby="hui-b3-title"
+    data-qualification-only
+    class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem]"
+    {@root_signal_attrs}
+  >
+    <div class="min-w-0 space-y-6">
+      <header id="hui-b3-header" class="border-b border-border pb-5">
+        <UI.badge variant="outline">Qualification only</UI.badge>
+        <h1 id="hui-b3-title" class="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+          Datastar/Dstar consumer laboratory
+        </h1>
+        <p class="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+          An isolated fixture for native navigation, secure enhancement, fragments, and bounded
+          streams. It has no product queries, commands, or durable state.
+        </p>
+      </header>
+
+      <nav
+        id="hui-b3-native-navigation"
+        aria-label="Qualification views"
+        class="flex flex-wrap gap-4 text-sm"
+      >
+        <UI.link id="hui-b3-home-link" href={~p"/__qualification/hypermedia"}>Ready view</UI.link>
+        <UI.link id="hui-b3-empty-link" href={~p"/__qualification/hypermedia?state=empty"}>Empty view</UI.link>
+        <UI.link id="hui-b3-loading-link" href={~p"/__qualification/hypermedia?state=loading"}>Loading view</UI.link>
+        <UI.link id="hui-b3-maintenance-link" href={~p"/__qualification/hypermedia/maintenance"}>Maintenance</UI.link>
+      </nav>
+
+      <UI.status :if={@outcome == :success} id="hui-b3-submit-success" kind={:success}>
+        Fixture note accepted: <span id="hui-b3-submitted-note">{@submitted_note}</span>
+      </UI.status>
+      <UI.status
+        :if={@outcome == :failure}
+        id="hui-b3-submit-error"
+        kind={:failure}
+        live={:assertive}
+      >
+        Correct the highlighted field and submit again.
+      </UI.status>
+      <UI.status :if={@outcome == :maintenance} id="hui-b3-maintenance" kind={:attention}>
+        Qualification fixture maintenance is active. Native navigation remains available.
+      </UI.status>
+      <UI.status :if={@outcome == :error} id="hui-b3-safe-error" kind={:failure} live={:assertive}>
+        The fixture could not be rendered. No exception, path, or source detail is exposed.
+      </UI.status>
+
+      <.form
+        for={@filter_form}
+        id="hui-b3-filter-form"
+        action={~p"/__qualification/hypermedia/results"}
+        method="get"
+        class="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end"
+      >
+        <.input
+          field={@filter_form[:q]}
+          type="search"
+          label="Filter fixture labels"
+          maxlength="40"
+          autocomplete="off"
+          {@query_signal_attrs}
+        />
+        <.input
+          field={@filter_form[:state]}
+          type="select"
+          label="Rendered state"
+          options={[
+            {"Ready", "ready"},
+            {"Loading", "loading"},
+            {"Empty", "empty"},
+            {"Error", "error"}
+          ]}
+          {@state_signal_attrs}
+        />
+        <UI.button id="hui-b3-filter-submit" type="submit" {@filter_button_attrs}>
+          Apply filter
+        </UI.button>
+      </.form>
+
+      <.results view={@view} previous_url={@previous_url} next_url={@next_url} />
+
+      <.enhanced_outcome
+        kind={:neutral}
+        message="Enhanced note validation is ready; native submission remains available."
+      />
+
+      <section
+        id="hui-b3-stream-laboratory"
+        aria-labelledby="hui-b3-stream-title"
+        class="grid gap-4 rounded-xl border border-border bg-card p-5"
+      >
+        <div>
+          <h2 id="hui-b3-stream-title" class="text-lg font-semibold">Bounded SSE lifecycle</h2>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Connection state and fixture freshness are independent, non-authoritative signals.
+          </p>
+        </div>
+        <.stream_status
+          connection="idle"
+          freshness="native"
+          message="Use the fixture stream or keep using ordinary page navigation."
+        />
+        <.form
+          for={@stream_form}
+          id="hui-b3-stream-form"
+          action={~p"/__qualification/hypermedia/stream"}
+          method="post"
+          class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+        >
+          <.input
+            field={@stream_form[:scenario]}
+            type="select"
+            label="Stream fault scenario"
+            options={[
+              {"Normal", "normal"},
+              {"Duplicate hint", "duplicate"},
+              {"Reordered hint", "reorder"},
+              {"Dropped hint", "drop"},
+              {"Slow consumer", "slow"},
+              {"Sleep and wake", "sleep_wake"},
+              {"Server restart", "restart"},
+              {"Terminal close", "terminal"}
+            ]}
+            {@scenario_signal_attrs}
+          />
+          <UI.button id="hui-b3-stream-submit" type="submit" {@stream_button_attrs}>
+            Run bounded stream
+          </UI.button>
+        </.form>
+        <UI.link id="hui-b3-stream-reload" href={~p"/__qualification/hypermedia"}>
+          Reload the native page
+        </UI.link>
+      </section>
+
+      <section
+        id="hui-b3-overlays"
+        aria-labelledby="hui-b3-overlays-title"
+        class="grid gap-5 rounded-xl border border-border p-5"
+      >
+        <h2 id="hui-b3-overlays-title" class="text-lg font-semibold">Native overlays</h2>
+        <UI.disclosure id="hui-b3-disclosure">
+          <:item key="protocol" summary="Protocol details" open={@view.disclosure_open?}>
+            <p id="hui-b3-disclosure-copy">
+              Disclosure state is browser-owned presentation intent.
+            </p>
+          </:item>
+        </UI.disclosure>
+        <UI.dialog
+          id="hui-b3-dialog"
+          initial_focus={:close}
+        >
+          <:trigger>Open qualification dialog</:trigger>
+          <:title>Qualification dialog</:title>
+          <:description>A native dialog kept outside the fragment replacement root.</:description>
+          <p id="hui-b3-dialog-copy">Focus and open state must survive sibling result morphs.</p>
+          <:close>Return to the dialog trigger</:close>
+          <:fallback>
+            <span id="hui-b3-dialog-fallback">
+              Dialog content: {if(@view.dialog_open?,
+                do: "deep-link requested",
+                else: "available from the invoker"
+              )}
+            </span>
+          </:fallback>
+        </UI.dialog>
+      </section>
+    </div>
+
+    <aside
+      id="hui-b3-native-form-panel"
+      aria-labelledby="hui-b3-native-form-title"
+      class="h-fit rounded-xl border border-border bg-card p-5 lg:sticky lg:top-6"
+    >
+      <h2 id="hui-b3-native-form-title" class="text-lg font-semibold">Native POST fallback</h2>
+      <p class="mt-2 text-sm leading-6 text-muted-foreground">
+        The note is validated and echoed only in this response. It is never persisted.
+      </p>
+      <.form
+        for={@note_form}
+        id="hui-b3-note-form"
+        action={~p"/__qualification/hypermedia/submissions"}
+        method="post"
+        class="mt-5 grid gap-4"
+      >
+        <.input
+          field={@note_form[:note]}
+          type="text"
+          label="Fixture note"
+          minlength="3"
+          maxlength="80"
+          autocomplete="off"
+          required
+          {@note_signal_attrs}
+        />
+        <UI.button id="hui-b3-note-submit" type="submit" {@note_button_attrs}>
+          Validate note
+        </UI.button>
+      </.form>
+      <div class="mt-6 border-t border-border pt-5">
+        <UI.field_input
+          id="hui-b3-facade-input"
+          name="facade_qualification"
+          value="Facade composition"
+          readonly
+        >
+          <:label>Qualified facade input</:label>
+          <:help>Read-only representative component; not submitted.</:help>
+        </UI.field_input>
+      </div>
+    </aside>
+  </section>
+</Layouts.app>
