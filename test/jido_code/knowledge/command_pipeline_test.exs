@@ -14,6 +14,7 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Knowledge.StoreServer
   alias JidoCode.Knowledge.Writer
+  alias JidoCode.TestSupport.Filesystem
 
   @jf "https://jido.run/ontology/factory#"
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -28,7 +29,7 @@ defmodule JidoCode.Knowledge.CommandPipelineTest do
     on_exit(fn ->
       stop_process(substrate.writer)
       stop_process(substrate.server)
-      File.rm_rf!(root)
+      Filesystem.remove_root!(root)
     end)
 
     %{substrate: substrate}
