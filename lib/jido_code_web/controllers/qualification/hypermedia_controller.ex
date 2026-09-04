@@ -239,6 +239,7 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
   defp rejection_status(_reason), do: :unprocessable_entity
 
   defp page_url(view, page) do
-    ~p"/__qualification/hypermedia/results?#{%{q: view.query, state: view.state, page: page}}"
+    "/__qualification/hypermedia/results?" <>
+      URI.encode_query(%{q: view.query, state: view.state, page: page})
   end
 end

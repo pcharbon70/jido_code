@@ -5,16 +5,17 @@ defmodule JidoCode.Application do
 
   use Application
 
+  @qualification_build Application.compile_env(
+                         :jido_code,
+                         :hypermedia_qualification_build,
+                         false
+                       )
+
   @impl true
   def start(_type, _args) do
     :ok = verify_release_contract!()
 
-    qualification_children =
-      if Application.get_env(:jido_code, :hypermedia_qualification, [])[:enabled] do
-        [JidoCodeWeb.Qualification.HypermediaStreamCoordinator]
-      else
-        []
-      end
+    qualification_children = qualification_children()
 
     children =
       [
@@ -38,6 +39,16 @@ defmodule JidoCode.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: JidoCode.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  @doc false
+  def qualification_children do
+    if @qualification_build and
+         Application.get_env(:jido_code, :hypermedia_qualification, [])[:enabled] do
+      [JidoCodeWeb.Qualification.HypermediaStreamCoordinator]
+    else
+      []
+    end
   end
 
   defp verify_release_contract! do

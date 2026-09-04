@@ -62,9 +62,9 @@
       "symbol": "JidoCodeWeb.Router",
       "rules": ["product_liveview", "unauthorized_dashboard"],
       "expires_on": "2027-03-31",
-      "evidence": "docs/architecture/hypermedia-ui-milestone-a-phase-03-receipt.md#unresolved-risks-and-accepted-limits",
+      "evidence": "docs/architecture/hypermedia-ui-product-consumption-baseline.md#assets-and-configuration",
       "reopening_condition": "the file digest changes without a reviewed migration disposition or the route/dashboard scope widens",
-      "sha256": "36a91e6376f08afec40b0827c4dba452095fcf358e2588470ca096326077830d"
+      "sha256": "59fb75843158676505bb59270867d662ea232c5ce3450470c30e3c315ae6a83f"
     },
     {
       "id": "HUI-A4-EX-002",

@@ -23,10 +23,10 @@
         aria-label="Qualification views"
         class="flex flex-wrap gap-4 text-sm"
       >
-        <UI.link id="hui-b3-home-link" href={~p"/__qualification/hypermedia"}>Ready view</UI.link>
-        <UI.link id="hui-b3-empty-link" href={~p"/__qualification/hypermedia?state=empty"}>Empty view</UI.link>
-        <UI.link id="hui-b3-loading-link" href={~p"/__qualification/hypermedia?state=loading"}>Loading view</UI.link>
-        <UI.link id="hui-b3-maintenance-link" href={~p"/__qualification/hypermedia/maintenance"}>Maintenance</UI.link>
+        <UI.link id="hui-b3-home-link" href="/__qualification/hypermedia">Ready view</UI.link>
+        <UI.link id="hui-b3-empty-link" href="/__qualification/hypermedia?state=empty">Empty view</UI.link>
+        <UI.link id="hui-b3-loading-link" href="/__qualification/hypermedia?state=loading">Loading view</UI.link>
+        <UI.link id="hui-b3-maintenance-link" href="/__qualification/hypermedia/maintenance">Maintenance</UI.link>
       </nav>
 
       <UI.status :if={@outcome == :success} id="hui-b3-submit-success" kind={:success}>
@@ -50,7 +50,7 @@
       <.form
         for={@filter_form}
         id="hui-b3-filter-form"
-        action={~p"/__qualification/hypermedia/results"}
+        action="/__qualification/hypermedia/results"
         method="get"
         class="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end"
       >
@@ -105,7 +105,7 @@
         <.form
           for={@stream_form}
           id="hui-b3-stream-form"
-          action={~p"/__qualification/hypermedia/stream"}
+          action="/__qualification/hypermedia/stream"
           method="post"
           class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
         >
@@ -129,7 +129,7 @@
             Run bounded stream
           </UI.button>
         </.form>
-        <UI.link id="hui-b3-stream-reload" href={~p"/__qualification/hypermedia"}>
+        <UI.link id="hui-b3-stream-reload" href="/__qualification/hypermedia">
           Reload the native page
         </UI.link>
       </section>
@@ -180,7 +180,7 @@
       <.form
         for={@note_form}
         id="hui-b3-note-form"
-        action={~p"/__qualification/hypermedia/submissions"}
+        action="/__qualification/hypermedia/submissions"
         method="post"
         class="mt-5 grid gap-4"
       >

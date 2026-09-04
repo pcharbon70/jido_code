@@ -7,8 +7,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
 
   @manifest_path "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json"
   @qualification_path "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json"
+  @consumption_path "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json"
   @baseline "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2"
   @document_path "docs/architecture/hypermedia-ui-dependency-fitness-and-update-policy.md"
+  @consumption_document "docs/architecture/hypermedia-ui-product-consumption-baseline.md"
+  @receipt_path "docs/architecture/hypermedia-ui-milestone-b-phase-04-receipt.md"
+  @plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-04-dependency-consumer-and-architecture-qualification.md"
   @manifest_digests %{
     "priv/architecture/hypermedia_ui/phase_b1_candidate_bom.json" =>
       "dbfb08bfa5a95d41a538dadbcd8f9605918761a565e82ae075854c969a6f7f12",
@@ -92,6 +96,63 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
       "47dbe13e8f870b222b9f8f610a9e5ef9b6c00bb7277916e0a09d5fcfe66afb28"
   }
   @qualification_document "docs/architecture/hypermedia-ui-release-qualification-evidence.md"
+  @approved_attributes [
+    "data-signals:*",
+    "data-bind:*",
+    "data-on:click__prevent",
+    "data-attr:*",
+    "data-indicator:*",
+    "data-text"
+  ]
+  @dstar_functions ["start/1", "patch_elements/3", "patch_signals/3", "SSE.send_event!/3"]
+  @browsers ~w[chromium firefox webkit chromium-no-js chromium-touch]
+  @composite_gaps [
+    "FactoryShell",
+    "ProjectContextSwitcher",
+    "AttentionQueue",
+    "ProjectionStatusStrip",
+    "AgentFleetTable",
+    "AgentAttemptWorkspace",
+    "StageRail",
+    "AttemptTimeline",
+    "CodeDiff",
+    "artifact manifest",
+    "EvidenceMatrix",
+    "ScopedCommandDialog",
+    "CommandReceipt",
+    "GraphLens accessible table/outline",
+    "ProvenancePanel",
+    "CostBudgetMeter"
+  ]
+  @failure_modes ~w[
+    missing_or_stale_client_asset_uses_native_recovery
+    malformed_or_unsupported_signal_fails_closed
+    missing_csrf_or_cross_origin_write_fails_closed
+    duplicate_or_excess_stream_fails_without_queue
+    offline_or_interrupted_stream_uses_bounded_retry_then_native_recovery
+    terminal_close_suppresses_reconnect
+    authority_or_revision_from_browser_is_rejected
+  ]
+  @production_source_digests %{
+    "assets/js/app.js" => "5f3451073941a412f73af51f3808b9530cbed20e8b83776c05c99ab4a4f65d4d",
+    "assets/css/app.css" => "3920d1b157fea16475fda56ca07d463e6238c26e8b987485b9460f261c68ef58",
+    "config/config.exs" => "1594d1d5ea7d4e4ce4a3b0d59d7b5434341d366fb07eb5b1d4589b6ac07e6ec8",
+    "config/test.exs" => "1c4b20594a89cefd1afe13c9794b07709ca3e5c8ba6bcccff0abe1cf6061ddcc",
+    "lib/jido_code/application.ex" =>
+      "a35d349d390a9141621dbb9870e2c4f51235851f917313e391fcd90cfd412732",
+    "lib/jido_code_web/router.ex" =>
+      "59fb75843158676505bb59270867d662ea232c5ce3450470c30e3c315ae6a83f",
+    "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex" =>
+      "7cb2e7f09287ae566b247afb3beef286b17ab09febd6f6799fa98c40eab2b5a7",
+    "lib/jido_code_web/controllers/qualification/hypermedia_html/index.html.heex" =>
+      "327d388b227b523db327caa081bb1d982e6d0fe9b35bceb39941e6ab4d053de3",
+    "lib/mix/tasks/hui.b4.production_boundary.ex" =>
+      "661beca76f26491eee18ba8811d341336b438b8c7dce99fc8cadc68a3d95f4b0",
+    "lib/jido_code_web/components/ui.ex" =>
+      "c6a537da7828a9357e15c0e72a9ba3196429c7e23a31dd76ac303dc17b5528e5",
+    "priv/architecture/hypermedia_ui/phase_a4_governance_guardrails.json" =>
+      "7ba9c927f4e86aa411960cde57c8f5d5acaf23514139b96c5e1e1942a5e5095d"
+  }
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
   def check(root \\ File.cwd!()) do
@@ -100,12 +161,31 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
       |> Enum.flat_map(fn module -> module.check(root) |> errors() end)
 
     with {:ok, policy} <- load(root),
-         {:ok, qualification} <- load_qualification(root) do
+         {:ok, qualification} <- load_qualification(root),
+         {:ok, consumption} <- load_consumption(root) do
       case predecessor_errors ++
-             validate(policy, root) ++ validate_qualification(qualification, root) do
+             validate(policy, root) ++
+             validate_qualification(qualification, root) ++
+             validate_consumption(consumption, root) do
         [] -> {:ok, []}
         errors -> {:error, errors}
       end
+    end
+  end
+
+  @spec load_consumption(Path.t()) :: {:ok, map()} | {:error, [String.t()]}
+  def load_consumption(root \\ File.cwd!()) do
+    path = Path.join(root, @consumption_path)
+
+    with {:ok, body} <- File.read(path),
+         {:ok, baseline} <- Jason.decode(body) do
+      {:ok, baseline}
+    else
+      {:error, %Jason.DecodeError{} = reason} ->
+        {:error, ["#{path}: invalid JSON: #{Exception.message(reason)}"]}
+
+      {:error, reason} ->
+        {:error, ["#{path}: unavailable baseline: #{inspect(reason)}"]}
     end
   end
 
@@ -262,6 +342,130 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   def validate_qualification(_evidence, _root),
     do: ["HUI-B4 qualification evidence must be a map"]
 
+  @spec validate_consumption(map(), Path.t()) :: [String.t()]
+  def validate_consumption(baseline, root) when is_map(baseline) do
+    imports = baseline["approved_imports"] || %{}
+    assets = baseline["asset_contract"] || %{}
+    production = baseline["production_boundary"] || %{}
+    profiles = baseline["supported_profiles"] || %{}
+    ceilings = baseline["operational_ceilings"] || %{}
+
+    []
+    |> require_equal(baseline["schema_version"], 1, "consumption schema_version")
+    |> require_equal(baseline["phase"], "HUI-B4", "consumption phase")
+    |> require_member(
+      baseline["status"],
+      ["merge_pending_consumption_baseline", "accepted_at_merged_candidate"],
+      "consumption status"
+    )
+    |> require_equal(baseline["baseline_commit"], @baseline, "consumption baseline")
+    |> require_equal(imports["heex_facade"], "JidoCodeWeb.Components.UI", "HEEx facade")
+    |> require_exact_set(
+      imports["shadcn_ui"] || [],
+      [
+        "lib/jido_code_web/components/ui.ex",
+        "assets/css/app.css"
+      ],
+      "ShadcnUI import boundary"
+    )
+    |> require_equal(imports["datastar"], ["assets/js/app.js"], "Datastar import boundary")
+    |> require_exact_set(
+      imports["dstar_product_boundary"] || [],
+      ["explicit Phoenix controller", "application-owned bounded SSE adapter"],
+      "Dstar product boundary"
+    )
+    |> require_exact_set(imports["dstar_functions"] || [], @dstar_functions, "Dstar functions")
+    |> require_exact_set(
+      baseline["approved_primitives"] || [],
+      @primitives,
+      "approved primitives"
+    )
+    |> require_exact_set(
+      baseline["approved_datastar_attributes"] || [],
+      @approved_attributes,
+      "Datastar attributes"
+    )
+    |> require_exact_set(baseline["approved_events"] || [], ~w[get post], "approved events")
+    |> require_equal(assets["datastar_version"], "1.0.3", "Datastar version")
+    |> require_equal(
+      assets["datastar_bundle_sha256"],
+      @candidate_inputs["assets/vendor/datastar/datastar.js"],
+      "Datastar asset"
+    )
+    |> require_equal(
+      assets["shadcn_ui_source_commit"],
+      @source_pins["shadcn_ui"],
+      "ShadcnUI source"
+    )
+    |> require_equal(
+      assets["shadcn_ui_css_sha256"],
+      @candidate_inputs["deps/shadcn_ui/priv/static/shadcn_ui.css"],
+      "ShadcnUI CSS"
+    )
+    |> require_equal(
+      assets["app_js_sha256"],
+      @production_source_digests["assets/js/app.js"],
+      "application JS"
+    )
+    |> require_equal(
+      assets["app_css_sha256"],
+      @production_source_digests["assets/css/app.css"],
+      "application CSS"
+    )
+    |> require_equal(
+      assets["ui_facade_sha256"],
+      @production_source_digests["lib/jido_code_web/components/ui.ex"],
+      "UI facade"
+    )
+    |> require_equal(production["qualification_build_default"], false, "production build default")
+    |> require_equal(production["qualification_build_test"], true, "test build setting")
+    |> require_equal(production["production_route_count"], 0, "production route count")
+    |> require_equal(
+      production["production_supervision_children"],
+      0,
+      "production supervision children"
+    )
+    |> require_equal(production["fixture_source_retained"], true, "fixture retention")
+    |> require_equal(
+      production["verification_command"],
+      "MIX_ENV=prod mix hui.b4.production_boundary",
+      "production verification command"
+    )
+    |> require_exact_set(profiles["browsers"] || [], @browsers, "supported browsers")
+    |> require_contains(profiles["csp"], "no unsafe-inline", "CSP unsafe-inline boundary")
+    |> require_contains(profiles["csp"], "unsafe-eval", "CSP unsafe-eval boundary")
+    |> require_equal(ceilings["max_connections"], 4, "connection ceiling")
+    |> require_equal(ceilings["max_connections_per_tab"], 1, "per-tab ceiling")
+    |> require_equal(ceilings["max_events"], 8, "event ceiling")
+    |> require_equal(ceilings["max_bytes"], 12_288, "byte ceiling")
+    |> require_equal(ceilings["max_queue"], 0, "queue ceiling")
+    |> require_equal(ceilings["max_lifetime_ms"], 1_200, "lifetime ceiling")
+    |> require_equal(ceilings["retry_max_count"], 2, "retry count")
+    |> require_equal(ceilings["retry_max_wait_ms"], 3_000, "retry wait")
+    |> require_exact_set(baseline["known_failure_modes"] || [], @failure_modes, "failure modes")
+    |> require_exact_set(
+      baseline["milestone_c_composite_gaps"] || [],
+      @composite_gaps,
+      "Milestone C composite gaps"
+    )
+    |> require_contains(baseline["rollback"], "complete prior Mix/npm locks", "rollback")
+    |> require_contains(baseline["upgrade"], "deterministic HUI-B4", "upgrade")
+    |> require_equal(
+      baseline["source_digests"],
+      @production_source_digests,
+      "production source pins"
+    )
+    |> require_equal(baseline["exceptions"], [], "consumption exceptions")
+    |> validate_digests(root, @production_source_digests)
+    |> validate_production_boundary_sources(root)
+    |> validate_consumption_document(root)
+    |> validate_closure_files(baseline, root)
+    |> Enum.reverse()
+  end
+
+  def validate_consumption(_baseline, _root),
+    do: ["HUI-B4 consumption baseline must be a map"]
+
   @spec check_candidate_sources([{String.t(), String.t()}]) :: [String.t()]
   def check_candidate_sources(sources) when is_list(sources) do
     Enum.flat_map(sources, fn {path, source} ->
@@ -334,6 +538,95 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     |> require_contains(body, "does not authorize a product route", "product boundary")
   end
 
+  defp validate_production_boundary_sources(errors, root) do
+    config = read(root, "config/config.exs")
+    test_config = read(root, "config/test.exs")
+    application = read(root, "lib/jido_code/application.ex")
+    router = read(root, "lib/jido_code_web/router.ex")
+    task = read(root, "lib/mix/tasks/hui.b4.production_boundary.ex")
+
+    errors
+    |> require_contains(
+      config,
+      "config :jido_code, :hypermedia_qualification_build, false",
+      "production build default"
+    )
+    |> require_contains(
+      test_config,
+      "config :jido_code, :hypermedia_qualification_build, true",
+      "test build fixture"
+    )
+    |> require_contains(
+      application,
+      "Application.compile_env(\n                         :jido_code,\n                         :hypermedia_qualification_build,\n                         false",
+      "compile-time supervision boundary"
+    )
+    |> require_contains(
+      router,
+      "if Application.compile_env(:jido_code, :hypermedia_qualification_build, false) do",
+      "compile-time route boundary"
+    )
+    |> require_contains(task, "qualification_routes", "production route assertion")
+    |> require_contains(task, "qualification_children", "production supervision assertion")
+  end
+
+  defp validate_consumption_document(errors, root) do
+    body = read(root, @consumption_document)
+
+    errors
+    |> require_contains(body, "Authorized Consumption", "consumption authorization")
+    |> require_contains(body, "Milestone C-Owned Composite Gaps", "composite ownership")
+    |> require_contains(body, "zero `__qualification` routes", "production route exclusion")
+    |> require_contains(body, "Rollback, Upgrade, And Reopening", "operations and reopening")
+    |> require_contains(body, "HUI2 reopens", "HUI2 reopening")
+  end
+
+  defp validate_closure_files(errors, baseline, root) do
+    receipt = read(root, @receipt_path)
+    plan = read(root, @plan_path)
+
+    expected_status =
+      if String.contains?(receipt, "Status: **accepted-at-merged-candidate**"),
+        do: "accepted_at_merged_candidate",
+        else: "merge_pending_consumption_baseline"
+
+    errors
+    |> require_equal(baseline["status"], expected_status, "HUI-B4 receipt lifecycle")
+    |> then(&(Enum.reverse(validate_closure(plan, receipt)) ++ &1))
+  end
+
+  @spec validate_closure(String.t(), String.t()) :: [String.t()]
+  def validate_closure(plan, receipt) do
+    accepted? = String.contains?(receipt, "Status: **accepted-at-merged-candidate**")
+    pending? = String.contains?(receipt, "Status: **merge-pending**")
+
+    cond do
+      accepted? and not pending? ->
+        []
+        |> require_contains(plan, "status: completed", "completed plan status")
+        |> require_checkbox(plan, "4", "Phase", true)
+        |> require_checkbox(plan, "4.4", "Section", true)
+        |> require_checkbox(plan, "4.4.2", "Task", true)
+        |> require_checkbox(plan, "4.4.2.3", "Subtask", true)
+        |> require_match(receipt, ~r/Merged candidate: `[0-9a-f]{40}`/, "merged candidate")
+        |> require_match(receipt, ~r/Merge date: `\d{4}-\d{2}-\d{2}`/, "merge date")
+
+      pending? and not accepted? ->
+        []
+        |> require_contains(plan, "status: proposed", "proposed plan status")
+        |> require_checkbox(plan, "4", "Phase", false)
+        |> require_checkbox(plan, "4.3", "Section", true)
+        |> require_checkbox(plan, "4.4", "Section", false)
+        |> require_checkbox(plan, "4.4.2", "Task", false)
+        |> require_checkbox(plan, "4.4.2.3", "Subtask", false)
+        |> require_contains(receipt, "Merged candidate: `merge-pending`", "pending candidate")
+        |> require_contains(receipt, "Merge date: `merge-pending`", "pending merge date")
+
+      true ->
+        ["HUI-B4 closure must have exactly one coherent receipt state"]
+    end
+  end
+
   defp validate_residual_risks(errors, risks) do
     required = ~w[id severity risk control owner expires_on update_trigger]
 
@@ -357,10 +650,23 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     end)
   end
 
+  defp require_checkbox(errors, plan, id, label, checked?) do
+    require_contains(
+      errors,
+      plan,
+      "- [#{if(checked?, do: "x", else: " ")}] #{id} #{label}",
+      "#{id} closure checkbox"
+    )
+  end
+
   defp require_equal(errors, actual, expected, _label) when actual == expected, do: errors
 
   defp require_equal(errors, actual, expected, label),
     do: ["#{label}: expected #{inspect(expected)}, got #{inspect(actual)}" | errors]
+
+  defp require_member(errors, value, values, label) do
+    if value in values, do: errors, else: ["#{label}: unexpected #{inspect(value)}" | errors]
+  end
 
   defp require_exact_set(errors, actual, expected, label) do
     if MapSet.new(actual) == MapSet.new(expected),
@@ -370,6 +676,10 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
 
   defp require_contains(errors, body, fragment, label) do
     if String.contains?(body, fragment), do: errors, else: ["missing #{label}" | errors]
+  end
+
+  defp require_match(errors, body, pattern, label) do
+    if Regex.match?(pattern, body), do: errors, else: ["missing #{label}" | errors]
   end
 
   defp errors({:ok, []}), do: []

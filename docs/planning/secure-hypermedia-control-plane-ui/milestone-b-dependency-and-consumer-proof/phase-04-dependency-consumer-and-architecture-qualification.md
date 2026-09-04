@@ -46,20 +46,20 @@ Back to plan: [README](./README.md)
       - [x] 4.2.1.3 Subtask - Complete manual accessibility review for adopted primitives and representative compositions, including overlay/focus behavior during patches.
       - [x] 4.2.1.4 Subtask - Record patches/forks, upstream reports, residual risks, compensating controls, owners, expiry, and version-update triggers.
 
-  - [ ] 4.3 Section - Publish the product-consumption baseline.
+  - [x] 4.3 Section - Publish the product-consumption baseline.
 
     This section defines exactly what Milestone C may import, copy, configure,
     and rely on and what remains prohibited.
 
-    - [ ] 4.3.1 Task {#huib-p04-baseline} [repo: jido_code] [after: {#huib-p04-qualification}] - Assemble and approve the HUI2 consumption dossier.
+    - [x] 4.3.1 Task {#huib-p04-baseline} [repo: jido_code] [after: {#huib-p04-qualification}] - Assemble and approve the HUI2 consumption dossier.
 
       This task binds source, locks, assets, facade APIs, theme tokens, protocol
       behavior, browser profiles, and exceptions to one candidate.
 
-      - [ ] 4.3.1.1 Subtask - Publish the exact approved imports/components/attributes/events/assets/configuration and the application composite gaps Milestone C owns.
-      - [ ] 4.3.1.2 Subtask - Publish supported browser/proxy/CSP/accessibility profiles, operational ceilings, known failure modes, rollback, and upgrade procedure.
-      - [ ] 4.3.1.3 Subtask - Remove or disable the qualification consumer from production routing while retaining deterministic test fixtures and evidence.
-      - [ ] 4.3.1.4 Subtask - Create `hypermedia-ui-milestone-b-phase-04-receipt.md` in merge-pending state with HUI-B4/HUI2 evidence and reopening conditions.
+      - [x] 4.3.1.1 Subtask - Publish the exact approved imports/components/attributes/events/assets/configuration and the application composite gaps Milestone C owns.
+      - [x] 4.3.1.2 Subtask - Publish supported browser/proxy/CSP/accessibility profiles, operational ceilings, known failure modes, rollback, and upgrade procedure.
+      - [x] 4.3.1.3 Subtask - Remove or disable the qualification consumer from production routing while retaining deterministic test fixtures and evidence.
+      - [x] 4.3.1.4 Subtask - Create `hypermedia-ui-milestone-b-phase-04-receipt.md` in merge-pending state with HUI-B4/HUI2 evidence and reopening conditions.
 
   - [ ] 4.4 Section - Phase 4 Integration Tests.
 

@@ -46,6 +46,51 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4Test do
     end)
   end
 
+  test "product consumption baseline pins the facade, protocol, profiles, and production exclusion" do
+    assert {:ok, baseline} = HypermediaUIPhaseB4.load_consumption()
+    assert HypermediaUIPhaseB4.validate_consumption(baseline, File.cwd!()) == []
+
+    assert get_in(baseline, ["approved_imports", "heex_facade"]) ==
+             "JidoCodeWeb.Components.UI"
+
+    assert get_in(baseline, ["production_boundary", "production_route_count"]) == 0
+    assert length(baseline["milestone_c_composite_gaps"]) == 16
+    assert baseline["exceptions"] == []
+  end
+
+  test "product import, asset, ceiling, failure, composite, and route drift fails closed" do
+    assert {:ok, baseline} = HypermediaUIPhaseB4.load_consumption()
+
+    mutations = [
+      {put_in(baseline, ["approved_imports", "heex_facade"], "ShadcnUI"), "HEEx facade"},
+      {put_in(baseline, ["asset_contract", "app_js_sha256"], String.duplicate("0", 64)),
+       "application JS"},
+      {put_in(baseline, ["operational_ceilings", "max_queue"], 1), "queue ceiling"},
+      {update_in(baseline, ["known_failure_modes"], &tl/1), "failure modes"},
+      {update_in(baseline, ["milestone_c_composite_gaps"], &tl/1), "Milestone C composite gaps"},
+      {put_in(baseline, ["production_boundary", "production_route_count"], 1),
+       "production route count"}
+    ]
+
+    Enum.each(mutations, fn {mutated, expected} ->
+      assert Enum.any?(
+               HypermediaUIPhaseB4.validate_consumption(mutated, File.cwd!()),
+               &String.contains?(&1, expected)
+             )
+    end)
+  end
+
+  test "merge-pending receipt keeps the final closure boxes open" do
+    plan =
+      File.read!(
+        "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-04-dependency-consumer-and-architecture-qualification.md"
+      )
+
+    receipt = File.read!("docs/architecture/hypermedia-ui-milestone-b-phase-04-receipt.md")
+
+    assert HypermediaUIPhaseB4.validate_closure(plan, receipt) == []
+  end
+
   test "version, digest, license, consumer, and update-evidence drift fails closed" do
     assert {:ok, policy} = HypermediaUIPhaseB4.load()
 
