@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_b_phase_04
 parent_plan: plan.jido_code_hypermedia_ui_milestone_b
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -12,7 +12,7 @@ HUI2 at a reproducible clean merged candidate without shipping product routes.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Qualify and govern the exact dependency/consumer combination.
+- [x] 4 Phase - Qualify and govern the exact dependency/consumer combination.
 
   This phase closes HUI-B4 and HUI2 by ensuring future drift fails before it
   can enter Milestone C product work.
@@ -61,7 +61,7 @@ Back to plan: [README](./README.md)
       - [x] 4.3.1.3 Subtask - Remove or disable the qualification consumer from production routing while retaining deterministic test fixtures and evidence.
       - [x] 4.3.1.4 Subtask - Create `hypermedia-ui-milestone-b-phase-04-receipt.md` in merge-pending state with HUI-B4/HUI2 evidence and reopening conditions.
 
-  - [ ] 4.4 Section - Phase 4 Integration Tests.
+  - [x] 4.4 Section - Phase 4 Integration Tests.
 
     This final section proves a clean product branch can consume the approved
     stack and that any drift or forbidden runtime pattern is rejected.
@@ -76,11 +76,11 @@ Back to plan: [README](./README.md)
       - [x] 4.4.1.3 Subtask - Verify production routing/supervision contains no qualification route or LiveView product runtime and rollback restores the prior dependency/asset set.
       - [x] 4.4.1.4 Subtask - Run all Milestone B suites, architecture/security/a11y checks, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 4.4.2 Task {#huib-p04-phase-receipt} [repo: jido_code] [after: {#huib-p04-integration}] - Publish and pin the Phase 4 receipt and HUI2 closure.
+    - [x] 4.4.2 Task {#huib-p04-phase-receipt} [repo: jido_code] [after: {#huib-p04-integration}] - Publish and pin the Phase 4 receipt and HUI2 closure.
 
       This task records HUI-B4/HUI2 evidence in
       `docs/architecture/hypermedia-ui-milestone-b-phase-04-receipt.md`.
 
       - [x] 4.4.2.1 Subtask - Keep HUI2 merge-pending on unreproducible inputs, unresolved license/advisory, failing consumer/browser/a11y case, unbounded protocol behavior, forbidden consumer, or ineffective drift check.
       - [x] 4.4.2.2 Subtask - Record exact artifact/config/browser/proxy digests, evidence, exceptions, owners, expiry, and every reopening condition.
-      - [ ] 4.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 4 Integration Tests section, receipt task, pinning subtask, and Milestone B completion before authorizing Milestone C Phase 1.
+      - [x] 4.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 4 Integration Tests section, receipt task, pinning subtask, and Milestone B completion before authorizing Milestone C Phase 1.

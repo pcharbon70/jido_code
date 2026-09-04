@@ -189,6 +189,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1Test do
       |> String.replace("status: completed", "status: proposed", global: false)
       |> set_closure_checkboxes(false)
 
+    merge_pending_milestone =
+      String.replace(milestone, "status: completed", "status: proposed", global: false)
+
     merge_pending_receipt =
       receipt
       |> String.replace("Status: **accepted-at-merged-candidate**", "Status: **merge-pending**")
@@ -212,12 +215,16 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1Test do
 
     assert HypermediaUIPhaseB1.validate_closure(
              merge_pending_plan,
-             milestone,
+             merge_pending_milestone,
              merge_pending_receipt
            ) == []
 
     assert has_error?(
-             HypermediaUIPhaseB1.validate_closure(merge_pending_plan, milestone, receipt),
+             HypermediaUIPhaseB1.validate_closure(
+               merge_pending_plan,
+               merge_pending_milestone,
+               receipt
+             ),
              "completed plan status"
            )
 

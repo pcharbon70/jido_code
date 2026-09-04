@@ -81,7 +81,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4Test do
     end)
   end
 
-  test "merge-pending receipt keeps the final closure boxes open" do
+  test "accepted receipt pins the merged candidate and closes the final boxes" do
     plan =
       File.read!(
         "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-04-dependency-consumer-and-architecture-qualification.md"
@@ -96,7 +96,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4Test do
     assert {:ok, evidence} = HypermediaUIPhaseB4.load_integration()
     assert HypermediaUIPhaseB4.validate_integration(evidence, File.cwd!()) == []
 
-    assert evidence["clean_checkout_ci"] == "merge_pending"
+    assert evidence["clean_checkout_ci"] == "pass"
+    assert evidence["implementation_pr"] == 115
+    assert evidence["merged_candidate"] == "63d2689321121775a46bf531d004ac4de44b81f2"
     assert length(evidence["reproduction"]) == 12
     assert length(evidence["mutation_cases"]) == 21
     assert get_in(evidence, ["production_boundary", "qualification_routes"]) == 0
@@ -207,7 +209,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4Test do
       "receipt_lifecycle" =>
         HypermediaUIPhaseB4.validate_closure(
           plan,
-          String.replace(receipt, "Status: **merge-pending**", "Status: **unknown**")
+          String.replace(
+            receipt,
+            "Status: **accepted-at-merged-candidate**",
+            "Status: **unknown**"
+          )
         )
     }
 

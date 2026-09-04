@@ -145,7 +145,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1 do
       accepted? and not merge_pending? ->
         []
         |> require_contains(plan, "status: completed", "HUI-B1 completed plan status")
-        |> require_contains(milestone, "status: proposed", "Milestone B remains proposed")
+        |> require_contains(milestone, "status: completed", "Milestone B completed status")
         |> validate_closure_checkboxes(plan, true)
         |> require_match(
           receipt,
