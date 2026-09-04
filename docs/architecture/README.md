@@ -189,6 +189,7 @@ binding.
 - [HUI-B2 component/theme manifest](../../priv/architecture/hypermedia_ui/phase_b2_component_theme_contract.json)
 - [HUI-B2 Datastar asset pipeline](./hypermedia-ui-datastar-asset-pipeline.md)
 - [HUI-B2 asset pipeline manifest](../../priv/architecture/hypermedia_ui/phase_b2_asset_pipeline.json)
+- [HUI-B2 component and asset receipt](./hypermedia-ui-milestone-b-phase-02-receipt.md)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
 - [ADR 0009: Human identity, scoped authorization, and separation of duty](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
 - [ADR 0010: ShadcnUI as the product component primitive layer](../adr/0010-shadcnui-as-product-component-primitive-layer.md)

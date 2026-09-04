@@ -109,8 +109,7 @@ defmodule JidoCodeWeb.CodingAgentLive do
           <header class="grid gap-5 border-b border-frame-border pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div class="max-w-3xl">
               <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                <span class="size-2 rounded-full bg-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]">
-                </span>
+                <span class="size-2 rounded-full bg-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]"></span>
                 Governed coding runtime
               </div>
               <h1
@@ -239,8 +238,7 @@ defmodule JidoCodeWeb.CodingAgentLive do
                       "bg-status-success shadow-[0_0_0_4px_hsl(var(--status-success)/0.12)]",
                     offering.readiness != :ready &&
                       "bg-status-attention shadow-[0_0_0_4px_hsl(var(--status-attention)/0.12)]"
-                  ]}>
-                  </span>
+                  ]}></span>
                 </div>
 
                 <dl class="grid grid-cols-2 gap-x-5 gap-y-3 border-y border-border py-4 text-xs sm:grid-cols-3">

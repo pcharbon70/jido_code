@@ -3,7 +3,7 @@
   "phase": "HUI-B2",
   "recorded_on": "2026-09-04",
   "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
-  "status": "resolved_exact_graph",
+  "status": "integration_candidate_merge_pending",
   "direct_constraints": {
     "phoenix": "== 1.8.11",
     "phoenix_html": "== 4.3.0",
@@ -43,6 +43,11 @@
       "component": "phoenix_pubsub and spitfire",
       "decision": "retain the HUI-B1 2.2.0 and 0.4.0 lock entries",
       "reason": "all constraints admit the existing versions; unrelated solver upgrades receive no implicit approval"
+    },
+    {
+      "component": "Phoenix LiveView HTML formatter",
+      "decision": "accept only its two empty-span normalizations in the existing coding-agent compatibility LiveView",
+      "reason": "mix format under the exact LiveView 1.2.9 formatter collapses two empty span bodies; HUI-B2 pins the resulting file digest and authorizes no semantic, route, event, stream, or authority change"
     }
   ],
   "application_loading": {
@@ -58,6 +63,7 @@
     "lib/jido_code_web/components/ui.ex",
     "lib/jido_code_web/endpoint.ex",
     "lib/jido_code_web/components/layouts.ex",
+    "lib/jido_code_web/live/coding_agent_live.ex",
     "assets/js/app.js",
     "assets/css/app.css",
     "assets/vite.config.mjs"

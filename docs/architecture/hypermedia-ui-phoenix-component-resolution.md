@@ -31,6 +31,11 @@ added. The authoritative edge list and exact decisions are recorded in
 `phase_b2_dependency_graph.json`; the resolved dependency inventory is in
 `phase_b2_resolved_sbom.json`.
 
+The LiveView 1.2.9 formatter normalizes the bodies of two empty decorative
+spans in the existing coding-agent compatibility LiveView. HUI-B2 authorizes
+and pins only that resulting file digest. The change is markup-equivalent and
+adds no route, event, stream, state owner, or authority behavior.
+
 ## Compile, Runtime, And Release Evidence
 
 `mix deps.get` is stable with the checked-in lock, and

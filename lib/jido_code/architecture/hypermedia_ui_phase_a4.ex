@@ -39,6 +39,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
     lib/jido_code_web/endpoint.ex
     lib/jido_code_web/components/ui.ex
     lib/jido_code_web/components/layouts.ex
+    lib/jido_code_web/live/coding_agent_live.ex
     assets/js/app.js
     assets/css/app.css
     assets/vite.config.mjs

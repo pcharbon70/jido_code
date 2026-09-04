@@ -77,21 +77,21 @@ Back to plan: [README](./README.md)
     This final section proves the exact dependency and asset combination can be
     reproduced without introducing prohibited product runtime consumers.
 
-    - [ ] 2.4.1 Task {#huib-p02-integration} [repo: jido_code] [after: {#huib-p02-assets}] - Execute the HUI-B2 compile, facade, theme, and asset matrix.
+    - [x] 2.4.1 Task {#huib-p02-integration} [repo: jido_code] [after: {#huib-p02-assets}] - Execute the HUI-B2 compile, facade, theme, and asset matrix.
 
       This task covers clean install/build/release plus hostile drift and stale
       client conditions.
 
-      - [ ] 2.4.1.1 Subtask - Run clean dependency resolution, compile, release, SBOM/license scan, supervision/router audit, and rollback against the pinned locks.
-      - [ ] 2.4.1.2 Subtask - Render representative facade components/forms/slots/global Datastar attributes under all themes, accessibility modes, no-JS, and hostile content.
-      - [ ] 2.4.1.3 Subtask - Build and serve production assets under CSP, fingerprint/cache/compression, digest mismatch, missing asset, stale manifest, and rollback cases.
-      - [ ] 2.4.1.4 Subtask - Run architecture/dependency/browser smoke tests, `mix precommit`, and clean-checkout CI.
+      - [x] 2.4.1.1 Subtask - Run clean dependency resolution, compile, release, SBOM/license scan, supervision/router audit, and rollback against the pinned locks.
+      - [x] 2.4.1.2 Subtask - Render representative facade components/forms/slots/global Datastar attributes under all themes, accessibility modes, no-JS, and hostile content.
+      - [x] 2.4.1.3 Subtask - Build and serve production assets under CSP, fingerprint/cache/compression, digest mismatch, missing asset, stale manifest, and rollback cases.
+      - [x] 2.4.1.4 Subtask - Run architecture/dependency/browser smoke tests, `mix precommit`, and clean-checkout CI.
 
     - [ ] 2.4.2 Task {#huib-p02-phase-receipt} [repo: jido_code] [after: {#huib-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records HUI-B2 evidence in
       `docs/architecture/hypermedia-ui-milestone-b-phase-02-receipt.md`.
 
-      - [ ] 2.4.2.1 Subtask - Keep HUI-B2 merge-pending on unresolved constraints, unpinned locks/assets, broad imports, CSP weakening, remote runtime, inaccessible primitives, nondeterministic build, or LiveView product consumption.
-      - [ ] 2.4.2.2 Subtask - Record exact locks/assets/config/build outputs, tests, exceptions, limitations, and all reopening conditions.
+      - [x] 2.4.2.1 Subtask - Keep HUI-B2 merge-pending on unresolved constraints, unpinned locks/assets, broad imports, CSP weakening, remote runtime, inaccessible primitives, nondeterministic build, or LiveView product consumption.
+      - [x] 2.4.2.2 Subtask - Record exact locks/assets/config/build outputs, tests, exceptions, limitations, and all reopening conditions.
       - [ ] 2.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.
