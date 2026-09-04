@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B2",
+  "recorded_on": "2026-09-04",
+  "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
+  "status": "resolved_exact_graph",
+  "direct_constraints": {
+    "phoenix": "== 1.8.11",
+    "phoenix_html": "== 4.3.0",
+    "phoenix_live_view": "== 1.2.9",
+    "shadcn_ui": "git:fe40eae63504adc4375aead4f0e741f158a4d86e",
+    "dstar": "== 0.2.0",
+    "salad_ui": "== 1.0.0"
+  },
+  "retained_transitive_resolutions": {
+    "phoenix_pubsub": "2.2.0",
+    "phoenix_template": "1.0.4",
+    "plug": "1.20.3",
+    "plug_crypto": "2.2.0",
+    "jason": "1.4.5",
+    "spitfire": "0.4.0"
+  },
+  "edges": [
+    ["jido_code", "phoenix_live_view", "Phoenix.Component infrastructure and existing compatibility runtime"],
+    ["jido_code", "shadcn_ui", "facade-only Phoenix function components"],
+    ["jido_code", "dstar", "qualified transport helper; no product consumer in HUI-B2"],
+    ["jido_code", "salad_ui", "existing compatibility consumers pending HUI-H removal"],
+    ["shadcn_ui", "phoenix_live_view", "~> 1.2"],
+    ["shadcn_ui", "phoenix_html", "~> 4.1"],
+    ["dstar", "phoenix_live_view", "optional ~> 1.0"],
+    ["dstar", "phoenix", "optional ~> 1.7"],
+    ["dstar", "plug", "~> 1.14"],
+    ["dstar", "jason", "~> 1.4"],
+    ["salad_ui", "phoenix_live_view", "~> 1.2"]
+  ],
+  "solver_decisions": [
+    {
+      "component": "salad_ui",
+      "decision": "upgrade 1.0.0-beta.3 to exact 1.0.0",
+      "reason": "the beta.3 breadcrumb HEEx is rejected by the LiveView 1.2.9 tokenizer; the stable release declares LiveView ~> 1.2 and compiles without a fork"
+    },
+    {
+      "component": "phoenix_pubsub and spitfire",
+      "decision": "retain the HUI-B1 2.2.0 and 0.4.0 lock entries",
+      "reason": "all constraints admit the existing versions; unrelated solver upgrades receive no implicit approval"
+    }
+  ],
+  "application_loading": {
+    "release_includes": ["phoenix_live_view", "shadcn_ui", "dstar", "salad_ui"],
+    "shadcn_ui_registered_processes": [],
+    "dstar_registered_processes": [],
+    "dstar_stream_registry_started_by_jido_code": false,
+    "new_liveview_product_consumers": false,
+    "new_routes_sockets_events_streams_or_state_owners": false
+  },
+  "authorized_legacy_exception_paths": ["mix.exs"],
+  "rollback": {
+    "method": "revert the Section 2.1 commit and restore the accepted HUI-B1 lock",
+    "data_migration_required": false,
+    "asset_cache_change": false
+  },
+  "exceptions": []
+}

@@ -129,7 +129,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1 do
     |> validate_bom(bom, shadcn, pairing)
     |> validate_ledger(ledger)
     |> validate_evidence(evidence)
-    |> validate_phase_boundary(root)
+    |> validate_phase_boundary(root, evidence)
     |> validate_documents_and_closure(root)
     |> Enum.reverse()
   end
@@ -545,6 +545,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1 do
       errors
       |> require_equal(evidence["schema_version"], 1, "verification evidence schema_version")
       |> require_equal(evidence["phase"], "HUI-B1", "verification evidence phase")
+      |> require_equal(
+        evidence["status"],
+        "accepted_at_merged_candidate",
+        "verification evidence status"
+      )
       |> require_equal(evidence["baseline_commit"], @baseline, "verification evidence baseline")
       |> require_equal(length(sources), 7, "source verification count")
       |> require_all_equal(
@@ -569,7 +574,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1 do
     )
   end
 
-  defp validate_phase_boundary(errors, root) do
+  defp validate_phase_boundary(errors, _root, %{"status" => "accepted_at_merged_candidate"}),
+    do: errors
+
+  defp validate_phase_boundary(errors, root, %{
+         "status" => "implementation_candidate_merge_pending"
+       }) do
     errors =
       Enum.reduce(@baseline_files, errors, fn {path, expected}, acc ->
         case File.read(Path.join(root, path)) do
@@ -596,6 +606,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB1 do
     )
     |> require_not_match(source, ~r/shadcn_ui\.css/, "HUI-B1 ShadcnUI asset consumer")
   end
+
+  defp validate_phase_boundary(errors, _root, _evidence),
+    do: ["HUI-B1 phase-boundary state is unsupported" | errors]
 
   defp validate_documents_and_closure(errors, root) do
     documents = [

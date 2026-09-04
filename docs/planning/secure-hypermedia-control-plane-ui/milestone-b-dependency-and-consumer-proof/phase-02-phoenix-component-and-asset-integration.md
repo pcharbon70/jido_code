@@ -17,20 +17,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-B2 with one clean dependency graph, local asset path,
   narrow facade, and CSP-compatible deterministic build.
 
-  - [ ] 2.1 Section - Resolve Phoenix.Component and Hex dependency constraints.
+  - [x] 2.1 Section - Resolve Phoenix.Component and Hex dependency constraints.
 
     This section proves the chosen ShadcnUI/Dstar combination compiles with the
     application without adding LiveView routes, processes, or state ownership.
 
-    - [ ] 2.1.1 Task {#huib-p02-hex} [repo: jido_code] [after: {#huib-p01-phase-receipt}] - Resolve and pin the qualified Hex graph.
+    - [x] 2.1.1 Task {#huib-p02-hex} [repo: jido_code] [after: {#huib-p01-phase-receipt}] - Resolve and pin the qualified Hex graph.
 
       This task explicitly handles the `phoenix_live_view` constraint as a
       component-library dependency rather than hiding it as product runtime.
 
-      - [ ] 2.1.1.1 Subtask - Select the qualified Phoenix/Phoenix.HTML/Phoenix.LiveView/ShadcnUI/Dstar constraint set from the HUI-B1 ledger and document each resolution.
-      - [ ] 2.1.1.2 Subtask - Update dependency declarations and lock checksums deterministically; reject implicit overrides, unreviewed forks, or broad floating constraints.
-      - [ ] 2.1.1.3 Subtask - Prove compilation and release startup include no LiveView product socket, route, process, event, stream, or state consumer created by the dependency change.
-      - [ ] 2.1.1.4 Subtask - Record compile-only/runtime application loading, release footprint, transitive modules, upgrade/rollback, and exception posture.
+      - [x] 2.1.1.1 Subtask - Select the qualified Phoenix/Phoenix.HTML/Phoenix.LiveView/ShadcnUI/Dstar constraint set from the HUI-B1 ledger and document each resolution.
+      - [x] 2.1.1.2 Subtask - Update dependency declarations and lock checksums deterministically; reject implicit overrides, unreviewed forks, or broad floating constraints.
+      - [x] 2.1.1.3 Subtask - Prove compilation and release startup include no LiveView product socket, route, process, event, stream, or state consumer created by the dependency change.
+      - [x] 2.1.1.4 Subtask - Record compile-only/runtime application loading, release footprint, transitive modules, upgrade/rollback, and exception posture.
 
   - [ ] 2.2 Section - Establish the component facade and theme contract.
 
