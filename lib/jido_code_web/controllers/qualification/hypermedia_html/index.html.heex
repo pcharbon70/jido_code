@@ -4,6 +4,7 @@
     aria-labelledby="hui-b3-title"
     data-qualification-only
     class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem]"
+    {@root_signal_attrs}
   >
     <div class="min-w-0 space-y-6">
       <header id="hui-b3-header" class="border-b border-border pb-5">
@@ -59,6 +60,7 @@
           label="Filter fixture labels"
           maxlength="40"
           autocomplete="off"
+          {@query_signal_attrs}
         />
         <.input
           field={@filter_form[:state]}
@@ -70,91 +72,19 @@
             {"Empty", "empty"},
             {"Error", "error"}
           ]}
+          {@state_signal_attrs}
         />
-        <UI.button id="hui-b3-filter-submit" type="submit">Apply filter</UI.button>
+        <UI.button id="hui-b3-filter-submit" type="submit" {@filter_button_attrs}>
+          Apply filter
+        </UI.button>
       </.form>
 
-      <section
-        id="hui-b3-results-region"
-        aria-labelledby="hui-b3-results-title"
-        class="space-y-4"
-        tabindex="-1"
-      >
-        <div class="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Bounded fixture
-            </p>
-            <h2 id="hui-b3-results-title" class="mt-1 text-lg font-semibold">Results</h2>
-          </div>
-          <UI.badge id="hui-b3-result-count" variant="secondary">{@view.total} total</UI.badge>
-        </div>
+      <.results view={@view} previous_url={@previous_url} next_url={@next_url} />
 
-        <div
-          :if={@view.state == "loading"}
-          id="hui-b3-loading-state"
-          role="status"
-          aria-live="polite"
-          class="rounded-xl border border-border p-6"
-        >
-          <p class="font-medium">Loading the bounded fixture…</p>
-          <p class="mt-1 text-sm text-muted-foreground">The native page remains navigable.</p>
-        </div>
-
-        <UI.status
-          :if={@view.state == "error"}
-          id="hui-b3-results-error"
-          kind={:failure}
-          live={:assertive}
-        >
-          Fixture results are unavailable. Adjust the filter or use the ready view.
-        </UI.status>
-
-        <div
-          :if={@view.state == "empty" or (@view.items == [] and @view.state == "ready")}
-          id="hui-b3-empty-state"
-          class="rounded-xl border border-dashed border-border p-8 text-center"
-        >
-          <p class="font-medium">No fixture rows match.</p>
-          <p class="mt-1 text-sm text-muted-foreground">
-            Clear the filter to restore the bounded list.
-          </p>
-        </div>
-
-        <UI.table
-          :if={@view.state == "ready" and @view.items != []}
-          id="hui-b3-results-table"
-          caption="Qualification fixture results"
-          class="rounded-xl border border-border"
-        >
-          <:head>
-            <tr>
-              <th class="px-4 py-3">Label</th><th class="px-4 py-3">State</th><th class="px-4 py-3">
-                Detail
-              </th>
-            </tr>
-          </:head>
-          <tr :for={item <- @view.items} id={item.id}>
-            <td class="px-4 py-3 font-medium">{item.label}</td>
-            <td class="px-4 py-3">{item.state}</td>
-            <td class="px-4 py-3 text-muted-foreground">{item.detail}</td>
-          </tr>
-        </UI.table>
-
-        <nav
-          id="hui-b3-pagination"
-          aria-label="Fixture pagination"
-          class="flex items-center justify-between text-sm"
-        >
-          <UI.link id="hui-b3-previous-page" href={@previous_url} aria-disabled={@view.page == 1}>Previous</UI.link>
-          <span id="hui-b3-page-position">Page {@view.page} of {@view.page_count}</span>
-          <UI.link
-            id="hui-b3-next-page"
-            href={@next_url}
-            aria-disabled={@view.page == @view.page_count}
-          >Next</UI.link>
-        </nav>
-      </section>
+      <.enhanced_outcome
+        kind={:neutral}
+        message="Enhanced note validation is ready; native submission remains available."
+      />
 
       <section
         id="hui-b3-overlays"
@@ -214,8 +144,11 @@
           maxlength="80"
           autocomplete="off"
           required
+          {@note_signal_attrs}
         />
-        <UI.button id="hui-b3-note-submit" type="submit">Validate note</UI.button>
+        <UI.button id="hui-b3-note-submit" type="submit" {@note_button_attrs}>
+          Validate note
+        </UI.button>
       </.form>
       <div class="mt-6 border-t border-border pt-5">
         <UI.field_input

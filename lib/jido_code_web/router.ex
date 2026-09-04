@@ -52,6 +52,8 @@ defmodule JidoCodeWeb.Router do
     get "/hypermedia", HypermediaController, :index
     get "/hypermedia/results", HypermediaController, :results
     post "/hypermedia/submissions", HypermediaController, :submit
+    get "/hypermedia/fragments/results", HypermediaController, :fragment_results
+    post "/hypermedia/events/:event", HypermediaController, :event
     get "/hypermedia/maintenance", HypermediaController, :maintenance
     get "/hypermedia/error", HypermediaController, :error
   end

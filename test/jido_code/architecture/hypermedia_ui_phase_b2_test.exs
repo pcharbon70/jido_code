@@ -119,6 +119,28 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2Test do
     assert has_error?(errors, "remote product asset import")
   end
 
+  test "product source boundary admits only the exact HUI-B3 qualification consumer" do
+    qualified_source =
+      "Dstar.SSE.send_event(conn, \"datastar-patch-elements\", [])\n" <>
+        "data-on:click"
+
+    refute has_error?(
+             HypermediaUIPhaseB2.check_product_sources([
+               {"lib/jido_code_web/controllers/qualification/hypermedia_controller.ex",
+                qualified_source}
+             ]),
+             "product consumption"
+           )
+
+    assert has_error?(
+             HypermediaUIPhaseB2.check_product_sources([
+               {"lib/jido_code_web/controllers/qualification/another_controller.ex",
+                qualified_source}
+             ]),
+             "Datastar product expressions"
+           )
+  end
+
   test "negative evidence registry is exact and all cases remain blocking" do
     assert {:ok, %{evidence: evidence}} = HypermediaUIPhaseB2.load()
 

@@ -64,7 +64,7 @@
       "expires_on": "2027-03-31",
       "evidence": "docs/architecture/hypermedia-ui-milestone-a-phase-03-receipt.md#unresolved-risks-and-accepted-limits",
       "reopening_condition": "the file digest changes without a reviewed migration disposition or the route/dashboard scope widens",
-      "sha256": "91e5e2347bc1fe21aa62d7cc4c3f807b3edc16310f04fa448f042054077bc94d"
+      "sha256": "32791bf31b6afcada4dad9cf2baddde033a9c3e783040f1f3b1ed92bc0778209"
     },
     {
       "id": "HUI-A4-EX-002",

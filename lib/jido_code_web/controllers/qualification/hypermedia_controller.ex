@@ -6,10 +6,54 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
   use JidoCodeWeb, :controller
 
   alias JidoCodeWeb.Qualification.HypermediaFixture
+  alias JidoCodeWeb.Qualification.HypermediaHTML
+  alias JidoCodeWeb.Qualification.HypermediaRequestSecurity
+  alias JidoCodeWeb.Qualification.HypermediaSignals
 
   def index(conn, params), do: render_consumer(conn, params)
 
   def results(conn, params), do: render_consumer(conn, params)
+
+  def fragment_results(conn, _params) do
+    with {:ok, conn} <- HypermediaRequestSecurity.admit(conn, :get),
+         {:ok, signals} <- HypermediaSignals.read_get(conn, ~w(q state page)) do
+      view = HypermediaFixture.view(signals)
+
+      conn
+      |> Dstar.start()
+      |> Dstar.patch_elements(results_html(view),
+        selector: "#hui-b3-results-region",
+        mode: :outer,
+        event_id: "hui-b3-results-#{view.page}"
+      )
+      |> Dstar.patch_signals(%{
+        _fixture_freshness: "fresh",
+        _fixture_page: view.page,
+        _pending: false
+      })
+    else
+      {:error, reason} -> HypermediaRequestSecurity.reject(conn, rejection_status(reason), reason)
+    end
+  end
+
+  def event(conn, %{"event" => "validate-note"}) do
+    with {:ok, conn} <- HypermediaRequestSecurity.admit(conn, :post),
+         {:ok, signals} <- HypermediaSignals.read_body(conn, ~w(note)) do
+      case HypermediaFixture.validate_note(signals) do
+        {:ok, note} ->
+          enhanced_outcome(conn, :success, "Fixture note accepted: #{note}")
+
+        {:error, _note, _errors} ->
+          enhanced_outcome(conn, :failure, "Fixture note must contain 3 through 80 characters.")
+      end
+    else
+      {:error, reason} -> HypermediaRequestSecurity.reject(conn, rejection_status(reason), reason)
+    end
+  end
+
+  def event(conn, %{"event" => _unsupported}) do
+    HypermediaRequestSecurity.reject(conn, :not_found, :unsupported_event)
+  end
 
   def submit(conn, %{"qualification" => params}) when is_map(params) do
     case HypermediaFixture.validate_note(params) do
@@ -72,9 +116,57 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
       outcome: Keyword.get(options, :outcome),
       submitted_note: Keyword.get(options, :submitted_note),
       previous_url: page_url(view, max(view.page - 1, 1)),
-      next_url: page_url(view, min(view.page + 1, view.page_count))
+      next_url: page_url(view, min(view.page + 1, view.page_count)),
+      root_signal_attrs: %{"data-signals:_pending" => "false"},
+      filter_button_attrs: %{
+        "data-attr:disabled" => "$_pending",
+        "data-indicator:_pending" => "",
+        "data-on:click__prevent" =>
+          "@get('/__qualification/hypermedia/fragments/results', {filterSignals: {include: /^(q|state|page)$/}, requestCancellation: 'auto'})"
+      },
+      note_button_attrs: %{
+        "data-attr:disabled" => "$_pending",
+        "data-indicator:_pending" => "",
+        "data-on:click__prevent" =>
+          "@post('/__qualification/hypermedia/events/validate-note', {headers: {'x-csrf-token': document.querySelector('meta[name=csrf-token]').content}, filterSignals: {include: /^note$/}, requestCancellation: 'auto'})"
+      },
+      query_signal_attrs: %{"data-bind:q" => ""},
+      state_signal_attrs: %{"data-bind:state" => ""},
+      note_signal_attrs: %{"data-bind:note" => ""}
     )
   end
+
+  defp results_html(view) do
+    HypermediaHTML.results(%{
+      view: view,
+      previous_url: page_url(view, max(view.page - 1, 1)),
+      next_url: page_url(view, min(view.page + 1, view.page_count))
+    })
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+  end
+
+  defp enhanced_outcome(conn, kind, message) do
+    html =
+      HypermediaHTML.enhanced_outcome(%{kind: kind, message: message})
+      |> Phoenix.HTML.Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    conn
+    |> Dstar.start()
+    |> Dstar.patch_elements(html,
+      selector: "#hui-b3-enhanced-outcome",
+      mode: :outer,
+      event_id: "hui-b3-note-outcome"
+    )
+    |> Dstar.patch_signals(%{_pending: false})
+  end
+
+  defp rejection_status(reason)
+       when reason in [:invalid_origin, :cross_site_request, :enhanced_request_required],
+       do: :forbidden
+
+  defp rejection_status(_reason), do: :unprocessable_entity
 
   defp page_url(view, page) do
     ~p"/__qualification/hypermedia/results?#{%{q: view.query, state: view.state, page: page}}"
