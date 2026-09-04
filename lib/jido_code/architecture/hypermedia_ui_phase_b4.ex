@@ -6,6 +6,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   alias JidoCode.Architecture.HypermediaUIPhaseB3
 
   @manifest_path "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json"
+  @qualification_path "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json"
   @baseline "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2"
   @document_path "docs/architecture/hypermedia-ui-dependency-fitness-and-update-policy.md"
   @manifest_digests %{
@@ -63,6 +64,34 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     dependency_and_consumer_diff browser_protocol_matrix manual_accessibility_review
     release_and_rollback_drill
   ]
+  @evidence_classes ~w[
+    unit integration browser accessibility security_privacy usability load_capacity
+    fault_injection real_adapter install upgrade rollback observation
+  ]
+  @browser_profiles ~w[chromium firefox webkit chromium-no-js chromium-touch]
+  @primitives ~w[button field_input link badge table disclosure dialog status]
+  @accessibility_checks ~w[
+    landmarks_names_labels visible_keyboard_focus native_disclosure_semantics
+    dialog_modal_tree_initial_focus_escape_and_return
+    table_caption_headers_and_bounded_overflow status_live_region
+    light_and_dark_visual_contrast 320px_reflow
+    patch_focus_selection_and_overlay_continuity
+    reduced_motion_forced_colors_rtl_zoom_touch
+  ]
+  @qualification_source_digests %{
+    "playwright.config.mjs" => "2830390b5277b8893e37cb4edc3583bbd6be8bd38be31feefd99eac4256b54b9",
+    "test/browser/hypermedia_ui_phase_b3.spec.mjs" =>
+      "2689d7b6216ff27e370d0d2939ca3ae80f745096d8ee04cff47a3f98a6063769",
+    "test/browser/support/streaming_proxy.mjs" =>
+      "a50f24a27aafdcc48a0e26d8e7436003caf1c0081a57341bb0f3f839e9a3be12",
+    "test/browser/support/http2_streaming_proxy.mjs" =>
+      "78e56e333b5b82c360240dcb1c4d29e11f1842bc2a34ff231a3c5ad41d01038e",
+    "test/browser/support/hui-b4-local.crt" =>
+      "f0458f35e0e0538bcae12bf5031d2d011fa7398390bd128e6238abb89dc02967",
+    "test/browser/support/hui-b4-local.key" =>
+      "47dbe13e8f870b222b9f8f610a9e5ef9b6c00bb7277916e0a09d5fcfe66afb28"
+  }
+  @qualification_document "docs/architecture/hypermedia-ui-release-qualification-evidence.md"
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
   def check(root \\ File.cwd!()) do
@@ -70,11 +99,29 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
       [HypermediaUIPhaseB1, HypermediaUIPhaseB2, HypermediaUIPhaseB3]
       |> Enum.flat_map(fn module -> module.check(root) |> errors() end)
 
-    with {:ok, policy} <- load(root) do
-      case predecessor_errors ++ validate(policy, root) do
+    with {:ok, policy} <- load(root),
+         {:ok, qualification} <- load_qualification(root) do
+      case predecessor_errors ++
+             validate(policy, root) ++ validate_qualification(qualification, root) do
         [] -> {:ok, []}
         errors -> {:error, errors}
       end
+    end
+  end
+
+  @spec load_qualification(Path.t()) :: {:ok, map()} | {:error, [String.t()]}
+  def load_qualification(root \\ File.cwd!()) do
+    path = Path.join(root, @qualification_path)
+
+    with {:ok, body} <- File.read(path),
+         {:ok, evidence} <- Jason.decode(body) do
+      {:ok, evidence}
+    else
+      {:error, %Jason.DecodeError{} = reason} ->
+        {:error, ["#{path}: invalid JSON: #{Exception.message(reason)}"]}
+
+      {:error, reason} ->
+        {:error, ["#{path}: unavailable evidence: #{inspect(reason)}"]}
     end
   end
 
@@ -123,6 +170,98 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
 
   def validate(_policy, _root), do: ["HUI-B4 fitness policy must be a map"]
 
+  @spec validate_qualification(map(), Path.t()) :: [String.t()]
+  def validate_qualification(evidence, root) when is_map(evidence) do
+    classes = evidence["evidence_classes"] || []
+    upstream = evidence["upstream"] || %{}
+    application = evidence["application"] || %{}
+    browser = evidence["browser"] || %{}
+    accessibility = evidence["manual_accessibility"] || %{}
+    build = evidence["reproducible_build"] || %{}
+    release = evidence["release"] || %{}
+    risks = evidence["residual_risks"] || []
+
+    []
+    |> require_equal(evidence["schema_version"], 1, "qualification schema_version")
+    |> require_equal(evidence["phase"], "HUI-B4", "qualification phase")
+    |> require_equal(
+      evidence["status"],
+      "qualification_evidence_complete",
+      "qualification status"
+    )
+    |> require_equal(evidence["baseline_commit"], @baseline, "qualification baseline")
+    |> require_exact_set(Enum.map(classes, & &1["id"]), @evidence_classes, "evidence classes")
+    |> require_equal(
+      Enum.all?(classes, &String.starts_with?(&1["status"], "pass")),
+      true,
+      "evidence class outcomes"
+    )
+    |> require_equal(
+      get_in(upstream, ["shadcn_ui", "result"]),
+      "420 tests, 0 failures",
+      "ShadcnUI upstream suite"
+    )
+    |> require_contains(
+      get_in(upstream, ["dstar", "result"]),
+      "no tests to run",
+      "Dstar upstream limitation"
+    )
+    |> require_equal(application["strict_compile"], "pass", "strict compile")
+    |> require_contains(application["static_analysis"], "0 unignored errors", "Dialyzer result")
+    |> require_equal(application["hex_advisories"], "0", "Hex advisory result")
+    |> require_equal(application["npm_production_advisories"], "0", "npm advisory result")
+    |> require_exact_set(browser["profiles"] || [], @browser_profiles, "browser profiles")
+    |> require_equal(browser["applicable_passed"], 21, "browser passed count")
+    |> require_equal(browser["profile_skips"], 39, "browser skip count")
+    |> require_equal(browser["production_assets"], true, "production browser assets")
+    |> require_equal(browser["csp_enforcing"], true, "browser CSP")
+    |> require_equal(
+      browser["http2_tls_reverse_proxy_unbuffered_sse"],
+      "pass",
+      "HTTP/2 proxy"
+    )
+    |> require_exact_set(accessibility["primitives"] || [], @primitives, "reviewed primitives")
+    |> require_exact_set(
+      Enum.map(accessibility["checks"] || [], & &1["id"]),
+      @accessibility_checks,
+      "accessibility checks"
+    )
+    |> require_equal(
+      Enum.all?(accessibility["checks"] || [], &String.starts_with?(&1["status"], "pass")),
+      true,
+      "accessibility outcomes"
+    )
+    |> require_contains(
+      accessibility["named_screen_reader_speech_output"],
+      "not_claimed",
+      "screen-reader residual risk"
+    )
+    |> require_equal(build["runs"], 2, "reproducible build runs")
+    |> require_equal(build["equal"], true, "reproducible build equality")
+    |> require_equal(
+      build["static_tree_sha256"],
+      "2f360d1cd037f8c86ef38bf484da68e4c29d2d59b24672d85ca997d4110f6347",
+      "static tree digest"
+    )
+    |> require_equal(release["assembly"], "pass", "release assembly")
+    |> require_equal(release["clean_store_startup_runs"], 2, "release startup runs")
+    |> require_equal(release["graceful_stop"], "pass", "release stop")
+    |> require_equal(release["qualification_route_release_credit"], false, "route release credit")
+    |> require_equal(evidence["source_digests"], @qualification_source_digests, "source digests")
+    |> require_equal(evidence["patches_or_forks"], [], "patch and fork record")
+    |> require_equal(evidence["upstream_reports"], [], "upstream report record")
+    |> require_equal(length(risks), 5, "residual risk count")
+    |> validate_residual_risks(risks)
+    |> require_equal(evidence["exceptions"], [], "qualification exceptions")
+    |> validate_digests(root, @qualification_source_digests)
+    |> validate_browser_sources(root)
+    |> validate_qualification_document(root)
+    |> Enum.reverse()
+  end
+
+  def validate_qualification(_evidence, _root),
+    do: ["HUI-B4 qualification evidence must be a map"]
+
   @spec check_candidate_sources([{String.t(), String.t()}]) :: [String.t()]
   def check_candidate_sources(sources) when is_list(sources) do
     Enum.flat_map(sources, fn {path, source} ->
@@ -169,6 +308,44 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     |> require_contains(body, "release-startup", "release renewal")
     |> require_contains(body, "rollback", "rollback renewal")
     |> require_contains(body, "reopens HUI2", "drift reopening")
+  end
+
+  defp validate_browser_sources(errors, root) do
+    config = read(root, "playwright.config.mjs")
+    browser_test = read(root, "test/browser/hypermedia_ui_phase_b3.spec.mjs")
+    http2_proxy = read(root, "test/browser/support/http2_streaming_proxy.mjs")
+
+    errors
+    |> require_contains(config, "http2_streaming_proxy.mjs", "HTTP/2 proxy server")
+    |> require_contains(config, "ignoreHTTPSErrors: true", "loopback TLS policy")
+    |> require_contains(browser_test, "nextHopProtocol", "HTTP/2 negotiation assertion")
+    |> require_contains(browser_test, "setOffline(true)", "offline browser case")
+    |> require_contains(http2_proxy, "http2.createSecureServer", "HTTP/2 TLS edge")
+    |> require_contains(http2_proxy, "x-accel-buffering", "proxy buffering control")
+  end
+
+  defp validate_qualification_document(errors, root) do
+    body = read(root, @qualification_document)
+
+    errors
+    |> require_contains(body, "Manual Accessibility Review", "manual accessibility record")
+    |> require_contains(body, "HTTP/2", "HTTP/2 evidence")
+    |> require_contains(body, "Residual Risks", "residual-risk record")
+    |> require_contains(body, "does not authorize a product route", "product boundary")
+  end
+
+  defp validate_residual_risks(errors, risks) do
+    required = ~w[id severity risk control owner expires_on update_trigger]
+
+    Enum.reduce(risks, errors, fn risk, acc ->
+      missing = Enum.reject(required, &(is_binary(risk[&1]) and String.trim(risk[&1]) != ""))
+
+      if missing == [],
+        do: acc,
+        else: [
+          "residual risk #{inspect(risk["id"])} is missing #{Enum.join(missing, ", ")}" | acc
+        ]
+    end)
   end
 
   defp validate_digests(errors, root, expected) do

@@ -2,8 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 const appPort = Number(process.env.HUI_B3_APP_PORT || 4413);
 const proxyPort = Number(process.env.HUI_B3_PROXY_PORT || 4414);
+const http2ProxyPort = Number(process.env.HUI_B4_HTTP2_PROXY_PORT || 4415);
 const appURL = `http://127.0.0.1:${appPort}`;
 const proxyURL = `http://127.0.0.1:${proxyPort}`;
+const http2ProxyURL = `https://127.0.0.1:${http2ProxyPort}`;
 
 export default defineConfig({
   testDir: "./test/browser",
@@ -29,6 +31,15 @@ export default defineConfig({
     },
     {
       command:
+        `HUI_B4_HTTP2_PROXY_PORT=${http2ProxyPort} HUI_B3_UPSTREAM_PORT=${appPort} ` +
+        "node test/browser/support/http2_streaming_proxy.mjs",
+      url: `${http2ProxyURL}/__proxy_health`,
+      timeout: 30_000,
+      reuseExistingServer: false,
+      ignoreHTTPSErrors: true,
+    },
+    {
+      command:
         `HUI_B3_PROXY_PORT=${proxyPort} HUI_B3_UPSTREAM_PORT=${appPort} ` +
         "node test/browser/support/streaming_proxy.mjs",
       url: `${proxyURL}/__proxy_health`,
@@ -38,6 +49,7 @@ export default defineConfig({
   ],
   use: {
     baseURL: appURL,
+    ignoreHTTPSErrors: true,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

@@ -16,6 +16,36 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4Test do
     assert policy["exceptions"] == []
   end
 
+  test "qualification evidence covers all release classes and residual risks" do
+    assert {:ok, evidence} = HypermediaUIPhaseB4.load_qualification()
+    assert HypermediaUIPhaseB4.validate_qualification(evidence, File.cwd!()) == []
+
+    assert get_in(evidence, ["browser", "applicable_passed"]) == 21
+    assert get_in(evidence, ["reproducible_build", "equal"]) == true
+    assert length(evidence["evidence_classes"]) == 13
+    assert length(evidence["residual_risks"]) == 5
+  end
+
+  test "qualification browser, accessibility, release, and risk drift fails closed" do
+    assert {:ok, evidence} = HypermediaUIPhaseB4.load_qualification()
+
+    mutations = [
+      {put_in(evidence, ["browser", "applicable_passed"], 20), "browser passed count"},
+      {put_in(evidence, ["reproducible_build", "equal"], false), "build equality"},
+      {put_in(evidence, ["release", "qualification_route_release_credit"], true),
+       "route release credit"},
+      {update_in(evidence, ["evidence_classes"], &tl/1), "evidence classes"},
+      {update_in(evidence, ["residual_risks"], &tl/1), "residual risk count"}
+    ]
+
+    Enum.each(mutations, fn {mutated, expected} ->
+      assert Enum.any?(
+               HypermediaUIPhaseB4.validate_qualification(mutated, File.cwd!()),
+               &String.contains?(&1, expected)
+             )
+    end)
+  end
+
   test "version, digest, license, consumer, and update-evidence drift fails closed" do
     assert {:ok, policy} = HypermediaUIPhaseB4.load()
 

@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B4",
+  "recorded_on": "2026-09-04",
+  "status": "qualification_evidence_complete",
+  "baseline_commit": "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2",
+  "evidence_classes": [
+    {"id": "unit", "status": "pass", "evidence": "ShadcnUI 420 tests; Dstar has no upstream tests; JidoCode focused suites"},
+    {"id": "integration", "status": "pass", "evidence": "49 downstream component, protocol, security, and architecture tests"},
+    {"id": "browser", "status": "pass", "evidence": "21 applicable Playwright cases across five profiles"},
+    {"id": "accessibility", "status": "pass_with_recorded_residual_risk", "evidence": "hands-on AX, keyboard, focus, overlay, light/dark, and 320px review plus automated modes"},
+    {"id": "security_privacy", "status": "pass", "evidence": "closed signals, CSRF/Origin, CSP, hostile content, dependency advisories"},
+    {"id": "usability", "status": "pass", "evidence": "native fallback, reload, back/forward, loading, empty, error, and maintenance outcomes"},
+    {"id": "load_capacity", "status": "pass_for_fixture_ceiling", "evidence": "four global streams, one per tab, zero queue, bounded events and bytes"},
+    {"id": "fault_injection", "status": "pass", "evidence": "duplicate, reorder, drop, slow, offline, stale asset, malformed stream, sleep/wake, restart hint, and terminal cases"},
+    {"id": "real_adapter", "status": "pass", "evidence": "real Phoenix/Bandit, Dstar, Datastar bundle, browsers, HTTP/1.1 and HTTP/2 proxy seams"},
+    {"id": "install", "status": "pass", "evidence": "locked Mix/npm acquisition and clean production asset build"},
+    {"id": "upgrade", "status": "pass_for_pinned_candidate", "evidence": "B1-to-B3 lock, source, asset, and Mint security transition retained"},
+    {"id": "rollback", "status": "pass_for_hui_artifacts", "evidence": "restore whole prior lock/asset release; no data migration"},
+    {"id": "observation", "status": "pass", "evidence": "bounded stream cleanup telemetry and retained CI failure traces"}
+  ],
+  "upstream": {
+    "shadcn_ui": {
+      "source_commit": "fe40eae63504adc4375aead4f0e741f158a4d86e",
+      "result": "420 tests, 0 failures",
+      "observation": "one upstream test-only static typing warning at select_test.exs:296"
+    },
+    "dstar": {
+      "version": "0.2.0",
+      "source_commit": "4bfb9110645f3831cd350f25434493c76a42bfae",
+      "result": "source compiles; upstream reports no tests to run",
+      "compensating_evidence": "JidoCode downstream protocol/controller/stream and real-browser suites"
+    },
+    "datastar": {
+      "version": "1.0.3",
+      "source_commit": "73ab00e7c06d8c2bad030fdddafba800fcccbde2",
+      "result": "exact signed-tag bundle qualified downstream",
+      "bundle_sha256": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65"
+    }
+  },
+  "application": {
+    "strict_compile": "pass",
+    "static_analysis": "Dialyzer pass: 178 accepted ignores, 0 unignored errors, 0 unnecessary ignores",
+    "focused_tests": "49 tests, 0 failures",
+    "hex_advisories": "0",
+    "npm_production_advisories": "0",
+    "license_scan": "pass: exact MIT and Apache-2.0 HUI component records",
+    "sbom": "pass: phase_b2_resolved_sbom.json exact component and asset closure"
+  },
+  "browser": {
+    "playwright": "1.62.0",
+    "node": "24.3.0",
+    "profiles": ["chromium", "firefox", "webkit", "chromium-no-js", "chromium-touch"],
+    "applicable_passed": 21,
+    "profile_skips": 39,
+    "production_assets": true,
+    "csp_enforcing": true,
+    "offline_and_stale_recovery": "pass",
+    "http1_reverse_proxy_unbuffered_sse": "pass",
+    "http2_tls_reverse_proxy_unbuffered_sse": "pass",
+    "http2_test_certificate_sha256": "f0458f35e0e0538bcae12bf5031d2d011fa7398390bd128e6238abb89dc02967",
+    "http2_test_certificate_scope": "loopback fixture only; not a production trust or termination claim"
+  },
+  "manual_accessibility": {
+    "reviewed_on": "2026-09-04",
+    "reviewer": "HUI-B4 implementation-session accessibility review",
+    "method": "hands-on Chromium accessibility tree, keyboard, focus, dialog/disclosure, visual theme, and reflow inspection",
+    "viewports": ["1280x720", "320x720"],
+    "themes": ["light", "dark"],
+    "primitives": ["button", "field_input", "link", "badge", "table", "disclosure", "dialog", "status"],
+    "checks": [
+      {"id": "landmarks_names_labels", "status": "pass"},
+      {"id": "visible_keyboard_focus", "status": "pass"},
+      {"id": "native_disclosure_semantics", "status": "pass"},
+      {"id": "dialog_modal_tree_initial_focus_escape_and_return", "status": "pass"},
+      {"id": "table_caption_headers_and_bounded_overflow", "status": "pass"},
+      {"id": "status_live_region", "status": "pass"},
+      {"id": "light_and_dark_visual_contrast", "status": "pass"},
+      {"id": "320px_reflow", "status": "pass"},
+      {"id": "patch_focus_selection_and_overlay_continuity", "status": "pass"},
+      {"id": "reduced_motion_forced_colors_rtl_zoom_touch", "status": "pass_automated"}
+    ],
+    "named_screen_reader_speech_output": "not_claimed; explicit residual risk HUI-B4-R03"
+  },
+  "reproducible_build": {
+    "runs": 2,
+    "equal": true,
+    "static_tree_sha256": "2f360d1cd037f8c86ef38bf484da68e4c29d2d59b24672d85ca997d4110f6347",
+    "vite_manifest_sha256": "3c5754f51d835b5922887d95035a21666e6a6f7ae773d6a548f6cd5ec31a24a3",
+    "phoenix_manifest_sha256": "743bf66f78ba646c2ac84ffee43ea1c75ee84ea58a6c304761b02e1acf7e29b0",
+    "client_js_sha256": "14b2465b966f743a7a85b7e2fb1cdf85900f619ad98ee3a9bbecaab402b2d63d",
+    "client_css_sha256": "bcc43d106133aa07f1a799c08a980a1335a46b1b6d9116d692676c6a895b584e"
+  },
+  "release": {
+    "assembly": "pass",
+    "clean_store_startup_runs": 2,
+    "graceful_stop": "pass",
+    "persistent_product_store_restart_credit": false,
+    "qualification_route_release_credit": false
+  },
+  "source_digests": {
+    "playwright.config.mjs": "2830390b5277b8893e37cb4edc3583bbd6be8bd38be31feefd99eac4256b54b9",
+    "test/browser/hypermedia_ui_phase_b3.spec.mjs": "2689d7b6216ff27e370d0d2939ca3ae80f745096d8ee04cff47a3f98a6063769",
+    "test/browser/support/streaming_proxy.mjs": "a50f24a27aafdcc48a0e26d8e7436003caf1c0081a57341bb0f3f839e9a3be12",
+    "test/browser/support/http2_streaming_proxy.mjs": "78e56e333b5b82c360240dcb1c4d29e11f1842bc2a34ff231a3c5ad41d01038e",
+    "test/browser/support/hui-b4-local.crt": "f0458f35e0e0538bcae12bf5031d2d011fa7398390bd128e6238abb89dc02967",
+    "test/browser/support/hui-b4-local.key": "47dbe13e8f870b222b9f8f610a9e5ef9b6c00bb7277916e0a09d5fcfe66afb28"
+  },
+  "commands": [
+    "mix compile --warnings-as-errors",
+    "mix test HUI-B1..B4 component CSP controller protocol qualification suites",
+    "mix dialyzer",
+    "mix hex.audit",
+    "npm audit --omit=dev",
+    "MIX_ENV=prod mix assets.deploy (twice)",
+    "MIX_ENV=prod mix release --overwrite",
+    "release eval Application.ensure_all_started(:jido_code) with graceful stop (twice on clean isolated stores)",
+    "npx playwright test",
+    "hands-on accessibility review"
+  ],
+  "patches_or_forks": [],
+  "upstream_reports": [],
+  "residual_risks": [
+    {
+      "id": "HUI-B4-R01",
+      "severity": "P1",
+      "risk": "Dstar 0.2.0 publishes no executable upstream tests",
+      "control": "pin source and Hex checksum; exercise every selected helper through downstream unit, integration, hostile-input, SSE, and browser tests",
+      "owner": "web protocol and security maintainers",
+      "expires_on": "2026-10-03",
+      "update_trigger": "Dstar release, source, protocol, or test-suite change"
+    },
+    {
+      "id": "HUI-B4-R02",
+      "severity": "P2",
+      "risk": "ShadcnUI upstream tests pass with one test-only static typing warning",
+      "control": "application strict compile is warning-free; selected facade render and hostile-data tests pass",
+      "owner": "component facade maintainer",
+      "expires_on": "2026-10-03",
+      "update_trigger": "ShadcnUI source, compiler, or warning change"
+    },
+    {
+      "id": "HUI-B4-R03",
+      "severity": "P1",
+      "risk": "manual review used the browser accessibility tree and keyboard/visual inspection, not named screen-reader speech output on every production OS",
+      "control": "qualification route is absent from production; automated Chromium/Firefox/WebKit semantics and mode coverage plus route-specific manual AT review before Milestone C release",
+      "owner": "accessibility maintainer",
+      "expires_on": "Milestone C Phase 1 release review",
+      "update_trigger": "first product composition or supported browser/OS change"
+    },
+    {
+      "id": "HUI-B4-R04",
+      "severity": "P2",
+      "risk": "HTTP/2 uses a loopback self-signed termination fixture and proves protocol/stream behavior, not production certificate trust, proxy capacity, or operations",
+      "control": "no qualification route ships in production; deployment-specific TLS/proxy/load evidence is required with the first product route",
+      "owner": "release and operations maintainers",
+      "expires_on": "Milestone C Phase 1 release review",
+      "update_trigger": "first product route deployment or proxy topology change"
+    },
+    {
+      "id": "HUI-B4-R05",
+      "severity": "P2",
+      "risk": "Ubuntu 24.04 uses Playwright fallback browser builds and LiveView's nested development-only Babel graph reports Node 24.3 engine warnings",
+      "control": "exact browser revisions and root production Vite build are pinned and pass; no nested Babel tool enters the production build",
+      "owner": "browser and asset maintainers",
+      "expires_on": "2026-10-03",
+      "update_trigger": "Playwright, Node, LiveView, browser revision, or production asset graph change"
+    }
+  ],
+  "exceptions": []
+}

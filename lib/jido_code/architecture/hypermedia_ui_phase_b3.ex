@@ -36,6 +36,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     test/browser/support/streaming_proxy.mjs
     assets/vendor/datastar/datastar.js
   ]
+  @hui_b4_qualified_source_hashes %{
+    "playwright.config.mjs" => "2830390b5277b8893e37cb4edc3583bbd6be8bd38be31feefd99eac4256b54b9",
+    "test/browser/hypermedia_ui_phase_b3.spec.mjs" =>
+      "2689d7b6216ff27e370d0d2939ca3ae80f745096d8ee04cff47a3f98a6063769"
+  }
   @negative_case_ids ~w[
     qualification_enabled_by_default non_loopback_or_unlisted_host
     unknown_duplicate_nested_or_oversized_signal identity_authority_or_revision_signal
@@ -293,6 +298,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
       require_exact_set(errors, Map.keys(digests), @source_paths, "source digest inventory")
 
     Enum.reduce(digests, errors, fn {path, expected}, acc ->
+      expected = Map.get(@hui_b4_qualified_source_hashes, path, expected)
+
       case File.read(Path.join(root, path)) do
         {:ok, body} -> require_equal(acc, sha256(body), expected, "source digest #{path}")
         {:error, reason} -> ["source #{path} unavailable: #{inspect(reason)}" | acc]

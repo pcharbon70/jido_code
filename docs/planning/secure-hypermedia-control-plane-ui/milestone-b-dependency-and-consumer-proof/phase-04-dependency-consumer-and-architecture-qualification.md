@@ -31,20 +31,20 @@ Back to plan: [README](./README.md)
       - [x] 4.1.1.3 Subtask - Reject LiveView product routes/processes/events/streams, LiveVue/Vue, SaladUI additions, Dstar Scripts, inline/eval CSP weakening, and client-authoritative state patterns.
       - [x] 4.1.1.4 Subtask - Add deterministic update workflow requiring renewed provenance, license, advisory, consumer, browser, accessibility, and rollback evidence.
 
-  - [ ] 4.2 Section - Complete upstream and application qualification evidence.
+  - [x] 4.2 Section - Complete upstream and application qualification evidence.
 
     This section closes known ShadcnUI and Datastar/Dstar risks with current,
     reproducible evidence and explicit residual-risk ownership.
 
-    - [ ] 4.2.1 Task {#huib-p04-qualification} [repo: jido_code] [after: {#huib-p04-fitness}] - Run component, protocol, browser, accessibility, and security qualification.
+    - [x] 4.2.1 Task {#huib-p04-qualification} [repo: jido_code] [after: {#huib-p04-fitness}] - Run component, protocol, browser, accessibility, and security qualification.
 
       This task promotes only the exact evidence-backed combination for product
       consumption.
 
-      - [ ] 4.2.1.1 Subtask - Run upstream/downstream unit and integration suites, compile warnings, static analysis, dependency/advisory/license scans, reproducible builds, and release startup.
-      - [ ] 4.2.1.2 Subtask - Run the full native/enhanced consumer protocol matrix under production CSP/assets, supported browsers, HTTP/2/reverse proxy, offline/stale client, and restart conditions.
-      - [ ] 4.2.1.3 Subtask - Complete manual accessibility review for adopted primitives and representative compositions, including overlay/focus behavior during patches.
-      - [ ] 4.2.1.4 Subtask - Record patches/forks, upstream reports, residual risks, compensating controls, owners, expiry, and version-update triggers.
+      - [x] 4.2.1.1 Subtask - Run upstream/downstream unit and integration suites, compile warnings, static analysis, dependency/advisory/license scans, reproducible builds, and release startup.
+      - [x] 4.2.1.2 Subtask - Run the full native/enhanced consumer protocol matrix under production CSP/assets, supported browsers, HTTP/2/reverse proxy, offline/stale client, and restart conditions.
+      - [x] 4.2.1.3 Subtask - Complete manual accessibility review for adopted primitives and representative compositions, including overlay/focus behavior during patches.
+      - [x] 4.2.1.4 Subtask - Record patches/forks, upstream reports, residual risks, compensating controls, owners, expiry, and version-update triggers.
 
   - [ ] 4.3 Section - Publish the product-consumption baseline.
 
