@@ -2,8 +2,14 @@
   "schema_version": 1,
   "phase": "HUI-B4",
   "recorded_on": "2026-09-04",
-  "status": "merge_pending_consumption_baseline",
+  "status": "accepted_at_merged_candidate",
   "baseline_commit": "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2",
+  "accepted_candidate": {
+    "implementation_pr": 115,
+    "implementation_pr_head": "67292e3e82b695731bd80da9eab1891aa143697a",
+    "merged_candidate": "63d2689321121775a46bf531d004ac4de44b81f2",
+    "merge_date": "2026-09-04"
+  },
   "approved_imports": {
     "heex_facade": "JidoCodeWeb.Components.UI",
     "shadcn_ui": ["lib/jido_code_web/components/ui.ex", "assets/css/app.css"],

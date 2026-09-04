@@ -154,7 +154,9 @@ that pinned baseline. HUI-A4 installs contributor, source, exception,
 traceability, dossier, and closure guardrails and is accepted at merged
 candidate `59ffca10f3ac9f262a81ce46b9f9f0e61550697c`; Milestone B Phase 1 is
 authorized only from that pinned baseline and its entry blockers remain
-binding.
+binding. HUI-B4/HUI2 and Milestone B are accepted at merged candidate
+`63d2689321121775a46bf531d004ac4de44b81f2`; Milestone C Phase 1 is authorized
+only from that exact dependency, consumer, and evidence baseline.
 
 - [Secure hypermedia control plane UI research](../research/12-secure-hypermedia-coding-factory-ui.md)
 - [HUI-A1 current-state authority baseline](./hypermedia-ui-current-state-authority-baseline.md)

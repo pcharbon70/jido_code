@@ -2,7 +2,7 @@
   "schema_version": 1,
   "phase": "HUI-B4",
   "recorded_on": "2026-09-04",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "baseline_commit": "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2",
   "section_commits": {
     "4.1": "ab2d29065259d4e9a2f720abeffc3672f235f3e3",
@@ -13,6 +13,11 @@
     "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json": "41669e19b59e89d317a2e89afda755e8eb80cae8393a41f0c814605134f84282",
     "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json": "546339e6a20ea6ddf5a36b1aed01d8fd410f4457e30da925a323548c7ef6e2d1",
     "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json": "2600f2127e2dc730fff4f93642302a9e86b591d19dfd7542db69b16c71d288bd"
+  },
+  "accepted_manifest_digests": {
+    "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json": "41669e19b59e89d317a2e89afda755e8eb80cae8393a41f0c814605134f84282",
+    "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json": "546339e6a20ea6ddf5a36b1aed01d8fd410f4457e30da925a323548c7ef6e2d1",
+    "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json": "68948117ff1a6b2008d95fc8ac13b272a98e97dc00a5408c760b8c1eb8fe4ce6"
   },
   "reproduction": [
     {"id": "locked_mix_acquisition", "result": "pass", "evidence": "mix deps.get resolved the unchanged exact lock"},
@@ -80,6 +85,14 @@
     "git diff --exit-code baseline -- dependency and asset restoration set",
     "mix precommit"
   ],
-  "clean_checkout_ci": "merge_pending",
+  "implementation_pr": 115,
+  "implementation_pr_head": "67292e3e82b695731bd80da9eab1891aa143697a",
+  "merged_candidate": "63d2689321121775a46bf531d004ac4de44b81f2",
+  "merge_date": "2026-09-04",
+  "clean_checkout_ci": "pass",
+  "clean_checkout_jobs": {
+    "verify": {"id": 101115796930, "duration": "18m33s", "result": "pass"},
+    "dialyzer": {"id": 101115797017, "duration": "1m28s", "result": "pass"}
+  },
   "exceptions": []
 }

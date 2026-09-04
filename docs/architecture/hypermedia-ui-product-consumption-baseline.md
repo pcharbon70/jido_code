@@ -1,6 +1,7 @@
 # Hypermedia UI Product Consumption Baseline
 
-- Status: Merge-pending HUI-B4 product-consumption baseline
+- Status: Accepted HUI-B4 product-consumption baseline at merged candidate
+  `63d2689321121775a46bf531d004ac4de44b81f2`
 - Recorded: 2026-09-04
 - Baseline: `e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2`
 - Machine record: `priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json`

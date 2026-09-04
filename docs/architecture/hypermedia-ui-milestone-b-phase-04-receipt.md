@@ -2,12 +2,13 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the HUI-B4 implementation candidate. It does not accept
-HUI-B4 or close HUI2 before the implementation pull request passes
-clean-checkout CI and merges. Milestone C remains unauthorized until a closure
-pull request pins the full merged-candidate SHA and date.
+This receipt accepts the HUI-B4 implementation at the merged candidate below.
+Implementation PR #115 passed clean-checkout CI and merged on 2026-09-04.
+HUI-B4, HUI2, and Milestone B are accepted at that exact candidate. Milestone
+C Phase 1 is authorized only from this pinned baseline while every reopening
+condition below remains in force.
 
 ## Candidate Provenance
 
@@ -17,12 +18,12 @@ pull request pins the full merged-candidate SHA and date.
 | Section 4.1 | `ab2d29065259d4e9a2f720abeffc3672f235f3e3` - dependency fitness policy and drift enforcement |
 | Section 4.2 | `0ea83345a3be68993e640c7bfb6a5ab01ef30844` - release qualification and browser/accessibility evidence |
 | Section 4.3 | `96badb46f1d2f19a8443363980cc88615d8e78e5` - product-consumption baseline and production exclusion |
-| Section 4.4 | `commit-pending` - integration matrix, mutation proof, and receipt preparation |
-| Implementation PR head | `merge-pending` |
-| Merged candidate | `merge-pending` |
+| Section 4.4 | `67292e3e82b695731bd80da9eab1891aa143697a` - integration matrix, mutation proof, and receipt preparation |
+| Implementation PR head | `67292e3e82b695731bd80da9eab1891aa143697a` - PR #115 clean-checkout candidate |
+| Merged candidate | `63d2689321121775a46bf531d004ac4de44b81f2` - PR #115 |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `63d2689321121775a46bf531d004ac4de44b81f2`
+Merge date: `2026-09-04`
 
 ## Dependency And Consumer Fitness
 
@@ -96,14 +97,15 @@ not production compilation warnings; the strict production build is clean.
 Dialyzer passed with 178 accepted ignores, zero unignored errors, and zero
 unnecessary ignores.
 
-The executable mutation matrix covers Hex, source, and npm versions; manifest,
+At the exact implementation head, clean-checkout `verify` job 101115796930
+passed in 18m33s and `dialyzer` job 101115797017 passed in 1m28s. The
+executable mutation matrix covers Hex, source, and npm versions; manifest,
 source, and asset digests; licenses; ShadcnUI import boundaries; the Datastar
 asset; Dstar Scripts; inline/eval CSP; remote assets; browser authority; new
 LiveView, LiveVue/Vue, or SaladUI consumers; production qualification routes
 or supervision; operational ceilings; Datastar attributes/events; browser
 profiles; residual risks; and receipt lifecycle. Every mutation must be
-rejected with its named diagnostic. Clean-checkout CI remains merge-pending
-and HUI2 remains open until the exact PR candidate passes and merges.
+rejected with its named diagnostic.
 
 ## Exceptions And Residual Risks
 
@@ -117,8 +119,9 @@ development-only nested Babel engine warnings.
 
 ## Gate HUI-B4 / HUI2 Reopening Conditions
 
-HUI-B4 and HUI2 remain merge-pending. Once accepted at the exact merged
-candidate, the gate reopens if any HUI-B1, HUI-B2, or HUI-B3 gate reopens; if
+HUI-B4 and HUI2 are accepted at merged candidate
+`63d2689321121775a46bf531d004ac4de44b81f2`. The gate reopens if any HUI-B1,
+HUI-B2, or HUI-B3 gate reopens; if
 any source, source commit, version, lock, checksum, license, usage authority,
 advisory, dependency edge, SBOM entry, direct/transitive application, import,
 consumer, facade API, primitive, attribute, event, signal schema, asset,

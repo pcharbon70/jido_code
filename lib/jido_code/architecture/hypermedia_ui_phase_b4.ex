@@ -14,6 +14,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   @consumption_document "docs/architecture/hypermedia-ui-product-consumption-baseline.md"
   @receipt_path "docs/architecture/hypermedia-ui-milestone-b-phase-04-receipt.md"
   @plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-04-dependency-consumer-and-architecture-qualification.md"
+  @milestone_plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/README.md"
+  @implementation_pr_head "67292e3e82b695731bd80da9eab1891aa143697a"
+  @merged_candidate "63d2689321121775a46bf531d004ac4de44b81f2"
   @manifest_digests %{
     "priv/architecture/hypermedia_ui/phase_b1_candidate_bom.json" =>
       "dbfb08bfa5a95d41a538dadbcd8f9605918761a565e82ae075854c969a6f7f12",
@@ -166,6 +169,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
       "546339e6a20ea6ddf5a36b1aed01d8fd410f4457e30da925a323548c7ef6e2d1",
     "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json" =>
       "2600f2127e2dc730fff4f93642302a9e86b591d19dfd7542db69b16c71d288bd"
+  }
+  @accepted_manifest_digests %{
+    "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json" =>
+      "41669e19b59e89d317a2e89afda755e8eb80cae8393a41f0c814605134f84282",
+    "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json" =>
+      "546339e6a20ea6ddf5a36b1aed01d8fd410f4457e30da925a323548c7ef6e2d1",
+    "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json" =>
+      "68948117ff1a6b2008d95fc8ac13b272a98e97dc00a5408c760b8c1eb8fe4ce6"
   }
   @reproduction_ids ~w[
     locked_mix_acquisition locked_npm_acquisition predecessor_and_architecture
@@ -408,6 +419,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
       "consumption status"
     )
     |> require_equal(baseline["baseline_commit"], @baseline, "consumption baseline")
+    |> validate_consumption_provenance(baseline)
     |> require_equal(imports["heex_facade"], "JidoCodeWeb.Components.UI", "HEEx facade")
     |> require_exact_set(
       imports["shadcn_ui"] || [],
@@ -515,6 +527,25 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   def validate_consumption(_baseline, _root),
     do: ["HUI-B4 consumption baseline must be a map"]
 
+  defp validate_consumption_provenance(
+         errors,
+         %{"status" => "accepted_at_merged_candidate"} = baseline
+       ) do
+    candidate = baseline["accepted_candidate"] || %{}
+
+    errors
+    |> require_equal(candidate["implementation_pr"], 115, "consumption implementation PR")
+    |> require_equal(
+      candidate["implementation_pr_head"],
+      @implementation_pr_head,
+      "consumption implementation head"
+    )
+    |> require_equal(candidate["merged_candidate"], @merged_candidate, "consumption candidate")
+    |> require_equal(candidate["merge_date"], "2026-09-04", "consumption merge date")
+  end
+
+  defp validate_consumption_provenance(errors, _baseline), do: errors
+
   @spec validate_integration(map(), Path.t()) :: [String.t()]
   def validate_integration(evidence, root) when is_map(evidence) do
     reproductions = evidence["reproduction"] || []
@@ -535,7 +566,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     |> require_equal(
       evidence["manifest_digests"],
       @integration_manifest_digests,
-      "integration manifest pins"
+      "implementation manifest pins"
+    )
+    |> require_equal(
+      evidence["accepted_manifest_digests"],
+      @accepted_manifest_digests,
+      "accepted manifest pins"
     )
     |> require_exact_set(Enum.map(reproductions, & &1["id"]), @reproduction_ids, "reproductions")
     |> require_equal(
@@ -582,7 +618,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     |> require_member("npx playwright test", evidence["commands"] || [], "browser command")
     |> require_member("mix precommit", evidence["commands"] || [], "precommit command")
     |> require_equal(evidence["exceptions"], [], "integration exceptions")
-    |> validate_digests(root, @integration_manifest_digests)
+    |> validate_digests(root, @accepted_manifest_digests)
     |> validate_integration_closure(evidence, root)
     |> Enum.reverse()
   end
@@ -698,6 +734,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     body = read(root, @consumption_document)
 
     errors
+    |> require_contains(body, "Accepted HUI-B4 product-consumption baseline", "accepted baseline")
     |> require_contains(body, "Authorized Consumption", "consumption authorization")
     |> require_contains(body, "Milestone C-Owned Composite Gaps", "composite ownership")
     |> require_contains(body, "zero `__qualification` routes", "production route exclusion")
@@ -708,14 +745,18 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   defp validate_closure_files(errors, baseline, root) do
     receipt = read(root, @receipt_path)
     plan = read(root, @plan_path)
+    milestone_plan = read(root, @milestone_plan_path)
 
-    expected_status =
-      if String.contains?(receipt, "Status: **accepted-at-merged-candidate**"),
-        do: "accepted_at_merged_candidate",
-        else: "merge_pending_consumption_baseline"
+    {expected_status, milestone_status} =
+      if String.contains?(receipt, "Status: **accepted-at-merged-candidate**") do
+        {"accepted_at_merged_candidate", "status: completed"}
+      else
+        {"merge_pending_consumption_baseline", "status: proposed"}
+      end
 
     errors
     |> require_equal(baseline["status"], expected_status, "HUI-B4 receipt lifecycle")
+    |> require_contains(milestone_plan, milestone_status, "Milestone B lifecycle")
     |> then(&(Enum.reverse(validate_closure(plan, receipt)) ++ &1))
   end
 
@@ -732,6 +773,32 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     errors
     |> require_equal(evidence["status"], expected_status, "integration receipt lifecycle")
     |> require_equal(evidence["clean_checkout_ci"], expected_ci, "clean-checkout CI lifecycle")
+    |> validate_accepted_provenance(evidence, expected_status)
+  end
+
+  defp validate_accepted_provenance(errors, _evidence, "integration_candidate_merge_pending"),
+    do: errors
+
+  defp validate_accepted_provenance(errors, evidence, "accepted_at_merged_candidate") do
+    jobs = evidence["clean_checkout_jobs"] || %{}
+
+    errors
+    |> require_equal(evidence["implementation_pr"], 115, "implementation PR")
+    |> require_equal(
+      evidence["implementation_pr_head"],
+      @implementation_pr_head,
+      "implementation PR head"
+    )
+    |> require_equal(evidence["merged_candidate"], @merged_candidate, "merged candidate")
+    |> require_equal(evidence["merge_date"], "2026-09-04", "merge date")
+    |> require_equal(
+      jobs,
+      %{
+        "verify" => %{"id" => 101_115_796_930, "duration" => "18m33s", "result" => "pass"},
+        "dialyzer" => %{"id" => 101_115_797_017, "duration" => "1m28s", "result" => "pass"}
+      },
+      "clean-checkout jobs"
+    )
   end
 
   @spec validate_closure(String.t(), String.t()) :: [String.t()]
