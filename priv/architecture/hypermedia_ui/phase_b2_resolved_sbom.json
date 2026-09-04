@@ -3,7 +3,7 @@
   "phase": "HUI-B2",
   "recorded_on": "2026-09-04",
   "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
-  "status": "dependency_graph_resolved_assets_pending",
+  "status": "component_theme_resolved_datastar_pending",
   "lock_sha256": "cb1db44c1cc488f7e8a8e9caba7b52ac68977666b28c8e515f24114c43407644",
   "components": [
     {"name": "phoenix", "version": "1.8.11", "ecosystem": "hex", "integrity": "44f028f4129e5a29487e868f84903373e3d032da151ad0c789c3849f464e7351", "license": "MIT", "role": "existing runtime framework"},
@@ -21,6 +21,16 @@
     {"name": "tailwindcss", "version": "4.3.3", "ecosystem": "npm", "integrity": "sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==", "license": "MIT", "role": "existing CSS build tool"},
     {"name": "vite", "version": "7.3.6", "ecosystem": "npm", "integrity": "sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==", "license": "MIT", "role": "existing asset bundler"}
   ],
-  "assets": [],
+  "assets": [
+    {
+      "name": "shadcn_ui.css",
+      "version": "1.0.0+fe40eae63504",
+      "source_path": "deps/shadcn_ui/priv/static/shadcn_ui.css",
+      "sha256": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41",
+      "bytes": 54389,
+      "license": "MIT",
+      "consumer": "assets/css/app.css"
+    }
+  ],
   "exceptions": []
 }

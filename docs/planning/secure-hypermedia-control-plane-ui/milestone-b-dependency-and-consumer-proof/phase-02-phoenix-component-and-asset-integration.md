@@ -32,30 +32,30 @@ Back to plan: [README](./README.md)
       - [x] 2.1.1.3 Subtask - Prove compilation and release startup include no LiveView product socket, route, process, event, stream, or state consumer created by the dependency change.
       - [x] 2.1.1.4 Subtask - Record compile-only/runtime application loading, release footprint, transitive modules, upgrade/rollback, and exception posture.
 
-  - [ ] 2.2 Section - Establish the component facade and theme contract.
+  - [x] 2.2 Section - Establish the component facade and theme contract.
 
     This section contains upstream primitives behind JidoCode-owned APIs and
     resolves naming, form, accessibility, and token collisions centrally.
 
-    - [ ] 2.2.1 Task {#huib-p02-facade} [repo: jido_code] [after: {#huib-p02-hex}] - Build the minimal qualification-only component facade.
+    - [x] 2.2.1 Task {#huib-p02-facade} [repo: jido_code] [after: {#huib-p02-hex}] - Build the minimal qualification-only component facade.
 
       This task proves primitive consumption without implementing product
       composites reserved for Milestone C.
 
-      - [ ] 2.2.1.1 Subtask - Introduce narrow wrappers/import aliases for representative button, input/form, link, badge, table shell, disclosure, dialog, and status primitives.
-      - [ ] 2.2.1.2 Subtask - Preserve `Phoenix.Component.to_form/2`, `<.form>`, project `<.input>`, slots, global attributes, HEEx escaping, unique DOM IDs, and no inline script behavior.
-      - [ ] 2.2.1.3 Subtask - Resolve function/attribute/class collisions and prove product modules need not broadly `use ShadcnUI` or know upstream namespaces.
-      - [ ] 2.2.1.4 Subtask - Define wrapper versioning, upstream-diff review, deprecation, component test, accessibility evidence, and escape-hatch policy.
+      - [x] 2.2.1.1 Subtask - Introduce narrow wrappers/import aliases for representative button, input/form, link, badge, table shell, disclosure, dialog, and status primitives.
+      - [x] 2.2.1.2 Subtask - Preserve `Phoenix.Component.to_form/2`, `<.form>`, project `<.input>`, slots, global attributes, HEEx escaping, unique DOM IDs, and no inline script behavior.
+      - [x] 2.2.1.3 Subtask - Resolve function/attribute/class collisions and prove product modules need not broadly `use ShadcnUI` or know upstream namespaces.
+      - [x] 2.2.1.4 Subtask - Define wrapper versioning, upstream-diff review, deprecation, component test, accessibility evidence, and escape-hatch policy.
 
-    - [ ] 2.2.2 Task {#huib-p02-theme} [repo: jido_code] [after: {#huib-p02-facade}] - Integrate controlled CSS variables and theme resolution.
+    - [x] 2.2.2 Task {#huib-p02-theme} [repo: jido_code] [after: {#huib-p02-facade}] - Integrate controlled CSS variables and theme resolution.
 
       This task maps ShadcnUI tokens into the existing asset contract without
       remote styles or runtime-generated unsafe CSS.
 
-      - [ ] 2.2.2.1 Subtask - Map surface/color/focus/radius/motion variables and resolved light/dark theme attributes while keeping application typography/spacing ownership.
-      - [ ] 2.2.2.2 Subtask - Verify contrast, focus visibility, reduced motion, forced colors, RTL, zoom/reflow, print, and no-JS rendering for representative primitives.
-      - [ ] 2.2.2.3 Subtask - Preserve Tailwind v4 source/import conventions, avoid `@apply`, and keep all CSS in controlled local bundles.
-      - [ ] 2.2.2.4 Subtask - Record theme migration, cache invalidation, stale asset behavior, rollback, and visual-regression fixtures.
+      - [x] 2.2.2.1 Subtask - Map surface/color/focus/radius/motion variables and resolved light/dark theme attributes while keeping application typography/spacing ownership.
+      - [x] 2.2.2.2 Subtask - Verify contrast, focus visibility, reduced motion, forced colors, RTL, zoom/reflow, print, and no-JS rendering for representative primitives.
+      - [x] 2.2.2.3 Subtask - Preserve Tailwind v4 source/import conventions, avoid `@apply`, and keep all CSS in controlled local bundles.
+      - [x] 2.2.2.4 Subtask - Record theme migration, cache invalidation, stale asset behavior, rollback, and visual-regression fixtures.
 
   - [ ] 2.3 Section - Build the pinned Datastar asset pipeline.
 

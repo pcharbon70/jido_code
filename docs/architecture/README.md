@@ -185,6 +185,8 @@ binding.
 - [HUI-B2 Phoenix component dependency resolution](./hypermedia-ui-phoenix-component-resolution.md)
 - [HUI-B2 resolved dependency graph](../../priv/architecture/hypermedia_ui/phase_b2_dependency_graph.json)
 - [HUI-B2 resolved SBOM](../../priv/architecture/hypermedia_ui/phase_b2_resolved_sbom.json)
+- [HUI-B2 component facade and theme contract](./hypermedia-ui-component-facade-and-theme.md)
+- [HUI-B2 component/theme manifest](../../priv/architecture/hypermedia_ui/phase_b2_component_theme_contract.json)
 - [ADR 0008: Server-rendered HEEx and Datastar product runtime](../adr/0008-server-rendered-heex-and-datastar-product-runtime.md)
 - [ADR 0009: Human identity, scoped authorization, and separation of duty](../adr/0009-human-identity-scoped-authorization-and-separation-of-duty.md)
 - [ADR 0010: ShadcnUI as the product component primitive layer](../adr/0010-shadcnui-as-product-component-primitive-layer.md)

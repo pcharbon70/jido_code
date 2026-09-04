@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B2",
+  "recorded_on": "2026-09-04",
+  "status": "qualified_facade_and_theme",
+  "facade": {
+    "module": "JidoCodeWeb.Components.UI",
+    "upstream_namespace": "ShadcnUI",
+    "public_primitives": ["button", "field_input", "link", "badge", "table", "disclosure", "dialog", "status"],
+    "native_contracts": ["Phoenix.Component.to_form/2", "Phoenix.Component.form/1", "JidoCodeWeb.CoreComponents.input/1"],
+    "global_attribute_policy": "closed component attrs plus reviewed global data attributes forwarded to the intended native element",
+    "authority_from_component_attrs": false,
+    "broad_upstream_imports_allowed": false,
+    "compatibility_delegates": "existing SaladUI-only names remain until HUI-H"
+  },
+  "stylesheet": {
+    "source_commit": "fe40eae63504adc4375aead4f0e741f158a4d86e",
+    "source_path": "priv/static/shadcn_ui.css",
+    "locked_input_path": "deps/shadcn_ui/priv/static/shadcn_ui.css",
+    "sha256": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41",
+    "bytes": 54389,
+    "imported_by": "assets/css/app.css into the local application bundle",
+    "remote_fallback": false
+  },
+  "theme": {
+    "theme_js_sha256": "b61046bdcc7a7164d419d1658c0dedd13a9b26ae057c736d01e49832e931850a",
+    "resolved_attributes": ["data-theme", "data-shadcn-theme"],
+    "allowed_values": ["light", "dark"],
+    "application_owns": ["typography", "spacing", "surface semantics"],
+    "mapped_groups": ["surface", "color", "focus", "radius", "motion"],
+    "qualified_modes": ["light", "dark", "system", "reduced-motion", "forced-colors", "rtl", "print", "no-js"]
+  },
+  "versioning": {
+    "wrapper_policy": "backward-compatible attrs and slots within a milestone; removals require deprecation and consumer migration evidence",
+    "upstream_diff_review": "compare exact Git revision, public component metadata, rendered fixture, and compiled stylesheet digest",
+    "escape_hatch": "application-owned primitive only; no direct product import and no authority-bearing attrs",
+    "rollback": "revert Section 2.2 and invalidate the changed application asset digest"
+  },
+  "visual_fixture": "test/support/hypermedia_ui_phase_b2_fixture.ex",
+  "exceptions": []
+}

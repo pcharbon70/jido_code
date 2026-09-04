@@ -3,6 +3,7 @@
 
 @import "tailwindcss" source(none);
 @import "tw-animate-css";
+@import "../../deps/shadcn_ui/priv/static/shadcn_ui.css";
 @source "../css";
 @source "../js";
 @source "../vue";
@@ -135,6 +136,38 @@
   --status-stale: oklch(0.68 0.05 247);
 }
 
+:root,
+[data-shadcn-theme="light"],
+[data-shadcn-theme="dark"] {
+  --shadcn-ui-background: var(--background);
+  --shadcn-ui-foreground: var(--foreground);
+  --shadcn-ui-card: var(--card);
+  --shadcn-ui-card-foreground: var(--card-foreground);
+  --shadcn-ui-popover: var(--popover);
+  --shadcn-ui-popover-foreground: var(--popover-foreground);
+  --shadcn-ui-primary: var(--primary);
+  --shadcn-ui-primary-foreground: var(--primary-foreground);
+  --shadcn-ui-secondary: var(--secondary);
+  --shadcn-ui-secondary-foreground: var(--secondary-foreground);
+  --shadcn-ui-muted: var(--muted);
+  --shadcn-ui-muted-foreground: var(--muted-foreground);
+  --shadcn-ui-accent: var(--accent);
+  --shadcn-ui-accent-foreground: var(--accent-foreground);
+  --shadcn-ui-destructive: var(--destructive);
+  --shadcn-ui-destructive-foreground: var(--destructive-foreground);
+  --shadcn-ui-border: var(--shadcn-border);
+  --shadcn-ui-input: var(--input);
+  --shadcn-ui-ring: var(--ring);
+  --shadcn-ui-radius-sm: calc(var(--radius) - 4px);
+  --shadcn-ui-radius-md: calc(var(--radius) - 2px);
+  --shadcn-ui-radius-lg: var(--radius);
+  --shadcn-ui-radius-xl: calc(var(--radius) + 4px);
+  --shadcn-ui-motion-fast: 100ms;
+  --shadcn-ui-motion-normal: 150ms;
+  --shadcn-ui-motion-slow: 240ms;
+  --shadcn-ui-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -203,6 +236,62 @@ body {
   background: var(--navigation-current);
   color: var(--frame-text);
   box-shadow: inset 0 -2px 0 var(--primary);
+}
+
+[data-status-kind="success"] {
+  border-color: var(--status-healthy);
+}
+
+[data-status-kind="attention"] {
+  border-color: var(--status-attention);
+}
+
+[data-status-kind="failure"] {
+  border-color: var(--status-failure);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-shadcn-ui],
+  [data-ui-status],
+  [data-ui-table] {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  [data-shadcn-ui]:focus-visible,
+  [data-ui-link]:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  [data-ui-status],
+  [data-ui-table] {
+    border-color: CanvasText;
+  }
+}
+
+@media print {
+  [data-shadcn-ui-dialog-invoker],
+  [data-shadcn-ui-dialog-close] {
+    display: none !important;
+  }
+
+  [data-shadcn-ui],
+  [data-ui-status],
+  [data-ui-table] {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+}
+
+[dir="rtl"] [data-ui-table] table,
+[dir="rtl"] [data-ui-status] {
+  text-align: start;
 }
 
 /* Add variants based on LiveView classes */

@@ -53,7 +53,12 @@
     "new_liveview_product_consumers": false,
     "new_routes_sockets_events_streams_or_state_owners": false
   },
-  "authorized_legacy_exception_paths": ["mix.exs"],
+  "authorized_legacy_exception_paths": [
+    "mix.exs",
+    "lib/jido_code_web/components/ui.ex",
+    "lib/jido_code_web/components/layouts.ex",
+    "assets/css/app.css"
+  ],
   "rollback": {
     "method": "revert the Section 2.1 commit and restore the accepted HUI-B1 lock",
     "data_migration_required": false,
