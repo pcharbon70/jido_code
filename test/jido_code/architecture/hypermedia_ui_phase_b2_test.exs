@@ -107,7 +107,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2Test do
       {"assets/js/bad.js", "import runtime from \"https://cdn.example/runtime.js\""}
     ]
 
-    assert {:error, errors} = HypermediaUIPhaseB2.check_product_sources(sources)
+    errors = HypermediaUIPhaseB2.check_product_sources(sources)
     assert has_error?(errors, "ShadcnUI is available only behind")
     assert has_error?(errors, "Datastar product expressions")
     assert has_error?(errors, "Dstar product consumption")

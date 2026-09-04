@@ -181,34 +181,42 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
 
   def validate(_incomplete, _root), do: ["HUI-B2 manifest set is incomplete"]
 
-  @spec check_product_sources([{String.t(), String.t()}]) :: {:ok, []} | {:error, [String.t()]}
+  @spec check_product_sources([{String.t(), String.t()}]) :: [String.t()]
   def check_product_sources(sources) do
-    errors =
-      sources
-      |> Enum.flat_map(fn {path, source} ->
-        []
-        |> maybe_error(
-          path != @facade_path and
-            Regex.match?(~r/(?:use|import|alias)\s+ShadcnUI|ShadcnUI\./, source),
+    sources
+    |> Enum.flat_map(fn {path, source} ->
+      [
+        {
+          Enum.all?([
+            path != @facade_path,
+            Regex.match?(~r/(?:use|import|alias)\s+ShadcnUI|ShadcnUI\./, source)
+          ]),
           "#{path}: ShadcnUI is available only behind #{@facade_path}"
-        )
-        |> maybe_error(
-          Regex.match?(~r/\bDstar\.(?:Page|Router|Component|Plugs|Scripts|SSE|Utility)/, source),
+        },
+        {
+          Regex.match?(
+            ~r/\bDstar\.(?:Page|Router|Component|Plugs|Scripts|SSE|Utility)/,
+            source
+          ),
           "#{path}: Dstar product consumption is not authorized in HUI-B2"
-        )
-        |> maybe_error(
-          Path.extname(path) in [".ex", ".heex"] and Regex.match?(~r/data-on:/, source),
+        },
+        {
+          Enum.all?([
+            Path.extname(path) in [".ex", ".heex"],
+            Regex.match?(~r/data-on:/, source)
+          ]),
           "#{path}: Datastar product expressions are not authorized in HUI-B2"
-        )
-        |> maybe_error(
+        },
+        {
           Regex.match?(~r/(?:import|from)\s+["']https?:\/\//, source),
           "#{path}: remote product asset import is prohibited"
-        )
-      end)
-      |> Enum.uniq()
-      |> Enum.sort()
-
-    if errors == [], do: {:ok, []}, else: {:error, errors}
+        }
+      ]
+      |> Enum.filter(&elem(&1, 0))
+      |> Enum.map(&elem(&1, 1))
+    end)
+    |> Enum.uniq()
+    |> Enum.sort()
   end
 
   @spec validate_closure(String.t(), String.t()) :: [String.t()]
@@ -561,10 +569,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
       |> Enum.filter(&File.regular?/1)
       |> Enum.map(&{Path.relative_to(&1, root), File.read!(&1)})
 
-    case check_product_sources(sources) do
-      {:ok, []} -> errors
-      {:error, source_errors} -> Enum.reverse(source_errors) ++ errors
-    end
+    source_errors = check_product_sources(sources)
+    Enum.reverse(source_errors) ++ errors
   end
 
   defp validate_documents(errors, root) do
@@ -624,19 +630,16 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
   end
 
   defp require_not_contains(errors, body, forbidden, label) do
-    if is_binary(body) and String.contains?(body, forbidden),
+    if String.contains?(body, forbidden),
       do: ["#{label} is present" | errors],
       else: errors
   end
 
   defp require_match(errors, body, pattern, label) do
-    if is_binary(body) and Regex.match?(pattern, body),
+    if Regex.match?(pattern, body),
       do: errors,
       else: ["#{label} does not match" | errors]
   end
-
-  defp maybe_error(errors, true, message), do: [message | errors]
-  defp maybe_error(errors, false, _message), do: errors
 
   defp read(root, path) do
     case File.read(Path.join(root, path)) do
