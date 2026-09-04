@@ -2,8 +2,12 @@
   "schema_version": 1,
   "phase": "HUI-B2",
   "recorded_on": "2026-09-04",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
+  "implementation_pr": 111,
+  "implementation_pr_head": "28414c020e789743da63d7bc6f7ce9213ef2afc9",
+  "merged_candidate": "c45df6647b3aebed9731595027dd2928dd2c5ca2",
+  "merge_date": "2026-09-04",
   "commands": [
     "mix deps.get --check-locked",
     "npm ci",
@@ -28,7 +32,7 @@
     "source_maps_absent": "pass",
     "architecture_and_consumer_boundary": "pass",
     "dependency_and_license_inventory": "pass",
-    "npm_production_advisory_audit": "local_registry_timeout; required clean-checkout CI gate",
+    "npm_production_advisory_audit": "pass: GitHub Actions verify job 100998787834",
     "repository_precommit": "pass: 1204 tests, 0 failures"
   },
   "negative_cases": [

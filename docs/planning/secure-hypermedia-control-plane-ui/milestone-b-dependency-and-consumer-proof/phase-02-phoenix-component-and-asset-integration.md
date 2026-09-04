@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_b_phase_02
 parent_plan: plan.jido_code_hypermedia_ui_milestone_b
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -12,7 +12,7 @@ component, CSS, theme, and browser-asset integration without product runtime use
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Integrate the pinned component and asset inputs at compile/build boundaries.
+- [x] 2 Phase - Integrate the pinned component and asset inputs at compile/build boundaries.
 
   This phase closes HUI-B2 with one clean dependency graph, local asset path,
   narrow facade, and CSP-compatible deterministic build.
@@ -72,7 +72,7 @@ Back to plan: [README](./README.md)
       - [x] 2.3.1.3 Subtask - Configure HTTP CSP nonce/hash mode, static Datastar expressions, no Dstar Scripts, no unsafe inline/eval allowance, and no third-party network dependency.
       - [x] 2.3.1.4 Subtask - Add deterministic build and drift checks comparing source, bundle, manifest, production release, and HUI-B1 digest records.
 
-  - [ ] 2.4 Section - Phase 2 Integration Tests.
+  - [x] 2.4 Section - Phase 2 Integration Tests.
 
     This final section proves the exact dependency and asset combination can be
     reproduced without introducing prohibited product runtime consumers.
@@ -87,11 +87,11 @@ Back to plan: [README](./README.md)
       - [x] 2.4.1.3 Subtask - Build and serve production assets under CSP, fingerprint/cache/compression, digest mismatch, missing asset, stale manifest, and rollback cases.
       - [x] 2.4.1.4 Subtask - Run architecture/dependency/browser smoke tests, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 2.4.2 Task {#huib-p02-phase-receipt} [repo: jido_code] [after: {#huib-p02-integration}] - Publish and pin the Phase 2 receipt.
+    - [x] 2.4.2 Task {#huib-p02-phase-receipt} [repo: jido_code] [after: {#huib-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records HUI-B2 evidence in
       `docs/architecture/hypermedia-ui-milestone-b-phase-02-receipt.md`.
 
       - [x] 2.4.2.1 Subtask - Keep HUI-B2 merge-pending on unresolved constraints, unpinned locks/assets, broad imports, CSP weakening, remote runtime, inaccessible primitives, nondeterministic build, or LiveView product consumption.
       - [x] 2.4.2.2 Subtask - Record exact locks/assets/config/build outputs, tests, exceptions, limitations, and all reopening conditions.
-      - [ ] 2.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.
+      - [x] 2.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.
