@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the verified HUI-B2 implementation candidate. It remains
-merge-pending until the implementation pull request passes clean-checkout CI
-and merges. HUI-B3 is not authorized until a closure pull request pins that
-full merge commit and date without weakening any reopening condition.
+This receipt accepts the verified HUI-B2 implementation at the merged
+candidate below. Implementation PR #111 passed clean-checkout CI and merged on
+2026-09-04. HUI-B3 is authorized only from this pinned baseline while every
+reopening condition below remains in force.
 
 ## Candidate Provenance
 
@@ -18,11 +18,12 @@ full merge commit and date without weakening any reopening condition.
 | Section 2.2 | `245fd7d16263393b867c1c32f04365a13b74df06` - facade and theme contract |
 | Section 2.3 | `e5330518b9886e401b887ab994a3dc7cc8a33add` - deterministic Datastar asset pipeline |
 | Section 2.4 | `e962ad037041c9a7adf678ac293022fb6a0a1893` - integration verifier and receipt |
-| Implementation PR head | `head-pending` |
-| Merged candidate | `merge-pending` |
+| Static-analysis repair | `28414c020e789743da63d7bc6f7ce9213ef2afc9` - exact clean-checkout PR head |
+| Implementation PR head | `28414c020e789743da63d7bc6f7ce9213ef2afc9` - PR #111 |
+| Merged candidate | `c45df6647b3aebed9731595027dd2928dd2c5ca2` - PR #111 |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `c45df6647b3aebed9731595027dd2928dd2c5ca2`
+Merge date: `2026-09-04`
 
 ## Accepted Candidate Inputs
 
@@ -103,9 +104,10 @@ The phase candidate runs exact dependency resolution, npm installation,
 warnings-as-errors compilation, the focused render/security/architecture
 suite, repeated production asset deployment, production release
 assembly/startup, `mix architecture.check`, and `mix precommit`. The local Hex
-advisory audit passed; the npm production-only advisory endpoint timed out
-after three minutes despite a successful registry ping, so its successful
-clean-checkout CI run remains an explicit merge gate.
+advisory audit passed. The npm production-only advisory endpoint timed out
+locally after three minutes despite a successful registry ping, then passed in
+the clean-checkout CI `verify` job. That job passed in 20m05s and the separate
+clean-checkout `dialyzer` job passed in 1m36s at the exact implementation head.
 The final local `mix precommit` run completed all 1,204 tests with zero
 failures.
 
@@ -119,7 +121,8 @@ accessibility release qualification assigned to HUI-B4.
 
 ## Gate HUI-B2 Reopening Conditions
 
-HUI-B2 is merge-pending. After acceptance, the gate reopens if any selected
+HUI-B2 is accepted at merged candidate
+`c45df6647b3aebed9731595027dd2928dd2c5ca2`. The gate reopens if any selected
 version, commit, checksum, license, dependency edge, lock, runtime application,
 release footprint, or exception posture drifts; if a fork, floating constraint,
 implicit override, or unrelated solver upgrade appears; if compilation or

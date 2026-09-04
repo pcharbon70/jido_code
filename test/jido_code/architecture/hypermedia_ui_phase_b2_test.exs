@@ -10,7 +10,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2Test do
     assert {:ok, []} = HypermediaUIPhaseB2.check()
     assert {:ok, manifests} = HypermediaUIPhaseB2.load()
 
-    assert manifests.graph["status"] == "integration_candidate_merge_pending"
+    assert manifests.graph["status"] == "accepted_at_merged_candidate"
+    assert manifests.evidence["status"] == "accepted_at_merged_candidate"
+
+    assert manifests.evidence["merged_candidate"] ==
+             "c45df6647b3aebed9731595027dd2928dd2c5ca2"
+
     assert length(manifests.sbom["components"]) == 19
     assert length(manifests.theme["facade"]["public_primitives"]) == 8
     assert manifests.assets["build"]["repeat_builds_equal"]
@@ -134,25 +139,30 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2Test do
 
     assert HypermediaUIPhaseB2.validate_closure(plan, receipt) == []
 
-    accepted_plan =
+    merge_pending_plan =
       plan
-      |> String.replace("status: proposed", "status: completed", global: false)
-      |> set_closure_checkboxes(true)
+      |> String.replace("status: completed", "status: proposed", global: false)
+      |> set_closure_checkboxes(false)
 
-    accepted_receipt =
+    merge_pending_receipt =
       receipt
-      |> String.replace("Status: **merge-pending**", "Status: **accepted-at-merged-candidate**")
-      |> String.replace(
-        "Merged candidate: `merge-pending`",
-        "Merged candidate: `#{String.duplicate("a", 40)}`"
+      |> String.replace("Status: **accepted-at-merged-candidate**", "Status: **merge-pending**")
+      |> then(
+        &Regex.replace(
+          ~r/Merged candidate: `[0-9a-f]{40}`/,
+          &1,
+          "Merged candidate: `merge-pending`"
+        )
       )
-      |> String.replace("Merge date: `merge-pending`", "Merge date: `2026-09-04`")
+      |> then(
+        &Regex.replace(~r/Merge date: `\d{4}-\d{2}-\d{2}`/, &1, "Merge date: `merge-pending`")
+      )
 
-    assert HypermediaUIPhaseB2.validate_closure(accepted_plan, accepted_receipt) == []
+    assert HypermediaUIPhaseB2.validate_closure(merge_pending_plan, merge_pending_receipt) == []
 
     assert has_error?(
-             HypermediaUIPhaseB2.validate_closure(accepted_plan, receipt),
-             "proposed plan status"
+             HypermediaUIPhaseB2.validate_closure(merge_pending_plan, receipt),
+             "completed plan status"
            )
 
     assert has_error?(
@@ -160,7 +170,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2Test do
              "exactly one coherent"
            )
 
-    mixed_receipt = receipt <> "\nStatus: **accepted-at-merged-candidate**\n"
+    mixed_receipt = receipt <> "\nStatus: **merge-pending**\n"
 
     assert has_error?(
              HypermediaUIPhaseB2.validate_closure(plan, mixed_receipt),

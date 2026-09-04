@@ -3,7 +3,7 @@
   "phase": "HUI-B2",
   "recorded_on": "2026-09-04",
   "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "direct_constraints": {
     "phoenix": "== 1.8.11",
     "phoenix_html": "== 4.3.0",
