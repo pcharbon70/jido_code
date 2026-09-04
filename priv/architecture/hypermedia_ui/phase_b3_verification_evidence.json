@@ -2,7 +2,7 @@
   "schema_version": 1,
   "phase": "HUI-B3",
   "recorded_on": "2026-09-04",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "baseline_commit": "21e659819f4ccce7a4ba5fb1a9d858183fb65564",
   "section_commits": {
     "3.1": "094f6b55342a50c156529872f3c456acc6830a24",
@@ -10,10 +10,10 @@
     "3.3": "cfb7e84d10f234462cb77b84ae32ed1825334fe4",
     "3.4": "589662589577dfbef2f6be1b09c7af7f736899ab"
   },
-  "implementation_pr": "merge-pending",
-  "implementation_pr_head": "merge-pending",
-  "merged_candidate": "merge-pending",
-  "merge_date": "merge-pending",
+  "implementation_pr": 113,
+  "implementation_pr_head": "29e662f1afa5e8671e69632468d2a34ece1adcdb",
+  "merged_candidate": "e055ce51d880aa167c033a2e1f59ba4d7f8d1e81",
+  "merge_date": "2026-09-04",
   "qualification_boundary": {
     "enabled_by_default": false,
     "required_runtime_flag": "JIDO_CODE_HUI_QUALIFICATION_ENABLED=true",
@@ -88,8 +88,9 @@
     "accessibility_responsive_theme_modes": "pass",
     "browser_matrix": "19 passed, 31 intentional profile skips",
     "focused_elixir_matrix": "30 tests, 0 failures",
-    "repository_precommit": "1228 tests, 0 failures",
-    "dependency_audit": "pass after Mint 1.10.0 security update"
+    "repository_precommit": "pass: 1228 tests, 0 failures; GitHub Actions verify job 101074431980",
+    "dependency_audit": "pass after Mint 1.10.0 security update; GitHub Actions verify job 101074431980",
+    "clean_checkout_dialyzer": "pass: GitHub Actions job 101074432284"
   },
   "negative_cases": [
     {"id": "qualification_enabled_by_default", "expected": "blocked"},

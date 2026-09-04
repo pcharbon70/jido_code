@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_b_phase_03
 parent_plan: plan.jido_code_hypermedia_ui_milestone_b
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -12,7 +12,7 @@ server/browser/component combination through real HTTP and browser behavior.
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Prove the selected hypermedia stack in a clean bounded consumer.
+- [x] 3 Phase - Prove the selected hypermedia stack in a clean bounded consumer.
 
   This phase closes HUI-B3 with executable evidence for native HTML, Datastar
   requests and patches, Dstar SSE, reconnect, CSP, CSRF, focus, and overlays.
@@ -62,7 +62,7 @@ Back to plan: [README](./README.md)
       - [x] 3.3.1.3 Subtask - Exercise several tabs, missing/duplicate tab IDs as untrusted correlation data, connection ceilings, slow consumers, backpressure, and zombie cleanup.
       - [x] 3.3.1.4 Subtask - Verify connection state is separate from fixture freshness/truth and the page remains safely usable through native reload after enhancement failure.
 
-  - [ ] 3.4 Section - Phase 3 Integration Tests.
+  - [x] 3.4 Section - Phase 3 Integration Tests.
 
     This final section proves the clean consumer works across supported browser,
     CSP, proxy, accessibility, native, and enhanced profiles.
@@ -77,11 +77,11 @@ Back to plan: [README](./README.md)
       - [x] 3.4.1.3 Subtask - Run keyboard, screen-reader smoke, focus/overlay, reduced-motion, forced-colors, RTL, touch, theme, and hostile-content checks.
       - [x] 3.4.1.4 Subtask - Run exact protocol fixture tests, architecture checks, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 3.4.2 Task {#huib-p03-phase-receipt} [repo: jido_code] [after: {#huib-p03-integration}] - Publish and pin the Phase 3 receipt.
+    - [x] 3.4.2 Task {#huib-p03-phase-receipt} [repo: jido_code] [after: {#huib-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records HUI-B3 evidence in
       `docs/architecture/hypermedia-ui-milestone-b-phase-03-receipt.md`.
 
       - [x] 3.4.2.1 Subtask - Keep HUI-B3 merge-pending on native failure, client/server protocol mismatch, CSRF/CSP bypass, unsafe morph, lost focus/overlay state, unbounded stream, reconnect leak, or unsupported browser behavior.
       - [x] 3.4.2.2 Subtask - Record exact consumer/config/asset/browser/proxy fixtures, results, failures, limitations, and all reopening conditions.
-      - [ ] 3.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.
+      - [x] 3.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.
