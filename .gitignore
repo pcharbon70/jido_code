@@ -42,3 +42,5 @@ jido_code-*.tar
 npm-debug.log
 /assets/node_modules/
 /node_modules/
+/playwright-report/
+/test-results/

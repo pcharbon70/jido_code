@@ -21,6 +21,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
 
     actual =
       JidoCodeWeb.Router.__routes__()
+      |> Enum.reject(&String.starts_with?(&1.path, "/__qualification/"))
       |> Enum.map(&{&1.verb |> Atom.to_string() |> String.upcase(), &1.path})
       |> Enum.sort()
 

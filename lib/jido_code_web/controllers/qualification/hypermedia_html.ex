@@ -125,9 +125,16 @@ defmodule JidoCodeWeb.Qualification.HypermediaHTML do
       live={:polite}
       data-connection-state={@connection}
       data-fixture-freshness={@freshness}
+      data-attr:data-connection-state="$_connectionState"
+      data-attr:data-fixture-freshness="$_fixtureFreshness"
     >
-      <span id="hui-b3-connection-value">Connection: {@connection}.</span>
-      <span id="hui-b3-freshness-value">Fixture freshness: {@freshness}.</span>
+      <span id="hui-b3-connection-value" data-text="$_connectionState">
+        {@connection}
+      </span>
+      <span id="hui-b3-freshness-value" data-text="$_fixtureFreshness">
+        {@freshness}
+      </span>
+      <span id="hui-b3-fixture-hint" data-text="$_fixtureHint">none</span>
       <span id="hui-b3-stream-message">{@message}</span>
     </UI.status>
     """

@@ -4,13 +4,8 @@ defmodule JidoCodeWeb.Qualification.HypermediaStreamCoordinatorTest do
   alias JidoCodeWeb.Qualification.HypermediaStreamCoordinator, as: Coordinator
 
   setup do
+    start_supervised!(Coordinator)
     assert :ok = Coordinator.reset()
-
-    on_exit(fn ->
-      wait_until(fn -> Coordinator.snapshot().active == 0 end)
-      Coordinator.reset()
-    end)
-
     :ok
   end
 

@@ -66,6 +66,26 @@ jobs:
       - name: Verify application
         run: mix precommit
 
+      - name: Install HUI-B3 browser runtimes
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Build production assets for HUI-B3
+        run: MIX_ENV=test mix assets.build
+
+      - name: Run HUI-B3 browser and proxy matrix
+        run: npx playwright test
+
+      - name: Retain HUI-B3 failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hui-b3-browser-failure-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
       - name: Audit dependencies
         run: |
           mix hex.audit

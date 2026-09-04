@@ -50,6 +50,20 @@ case System.get_env("JIDO_CODE_HUI_QUALIFICATION_ENABLED") do
     raise "JIDO_CODE_HUI_QUALIFICATION_ENABLED must be true or false, got: #{inspect(invalid)}"
 end
 
+case System.get_env("JIDO_CODE_HUI_BROWSER_ASSETS") do
+  nil ->
+    :ok
+
+  "test" ->
+    :ok
+
+  "production" ->
+    config :jido_code, :hypermedia_qualification_asset_mode, :production
+
+  invalid ->
+    raise "JIDO_CODE_HUI_BROWSER_ASSETS must be test or production, got: #{inspect(invalid)}"
+end
+
 session_ttl_seconds = fn ->
   value = System.get_env("JIDO_CODE_SESSION_TTL_SECONDS") || "28800"
 

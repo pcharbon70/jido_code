@@ -4,6 +4,7 @@ defmodule JidoCodeWeb.Qualification.HypermediaStreamTest do
   alias JidoCodeWeb.Qualification.HypermediaStreamCoordinator, as: Coordinator
 
   setup do
+    start_supervised!(Coordinator)
     prior = Application.get_env(:jido_code, :hypermedia_qualification)
 
     Application.put_env(:jido_code, :hypermedia_qualification,
@@ -15,7 +16,6 @@ defmodule JidoCodeWeb.Qualification.HypermediaStreamTest do
 
     on_exit(fn ->
       Application.put_env(:jido_code, :hypermedia_qualification, prior)
-      Coordinator.reset()
     end)
   end
 

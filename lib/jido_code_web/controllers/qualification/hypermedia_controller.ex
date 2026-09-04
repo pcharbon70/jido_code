@@ -14,6 +14,9 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
 
   def index(conn, params), do: render_consumer(conn, params)
 
+  def results(conn, %{"filters" => filters}) when is_map(filters),
+    do: render_consumer(conn, filters)
+
   def results(conn, params), do: render_consumer(conn, params)
 
   def fragment_results(conn, _params) do
@@ -160,6 +163,7 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
         "data-signals:_stream-pending" => "false",
         "data-signals:_connection-state" => "'idle'",
         "data-signals:_fixture-freshness" => "'native'",
+        "data-signals:_fixture-hint" => "'none'",
         "data-signals:_terminal" => "false",
         "data-signals:scenario" => "'normal'",
         "data-signals:tab-id" => "'#{tab_id}'"
@@ -180,7 +184,7 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
         "data-attr:disabled" => "$_streamPending",
         "data-indicator:_stream-pending" => "",
         "data-on:click__prevent" =>
-          "@post('/__qualification/hypermedia/stream', {headers: {'x-csrf-token': document.querySelector('meta[name=csrf-token]').content}, filterSignals: {include: /^(tabId|scenario)$/}, requestCancellation: 'auto', retry: 'auto', retryInterval: #{HypermediaStreamFixture.retry_ms()}})"
+          "@post('/__qualification/hypermedia/stream', {headers: {'x-csrf-token': document.querySelector('meta[name=csrf-token]').content}, filterSignals: {include: /^(tabId|scenario)$/}, requestCancellation: 'auto', retry: 'auto', retryInterval: #{HypermediaStreamFixture.retry_ms()}, retryMaxWait: 3000, retryMaxCount: 2})"
       },
       query_signal_attrs: %{"data-bind:q" => ""},
       state_signal_attrs: %{"data-bind:state" => ""},
