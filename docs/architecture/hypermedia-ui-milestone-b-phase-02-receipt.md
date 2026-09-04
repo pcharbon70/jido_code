@@ -17,7 +17,7 @@ full merge commit and date without weakening any reopening condition.
 | Section 2.1 | `f6c36dd0b7937a4b2869ee278a784885f5b54a73` - exact component dependency graph |
 | Section 2.2 | `245fd7d16263393b867c1c32f04365a13b74df06` - facade and theme contract |
 | Section 2.3 | `e5330518b9886e401b887ab994a3dc7cc8a33add` - deterministic Datastar asset pipeline |
-| Section 2.4 | `commit-pending` - integration verifier and receipt |
+| Section 2.4 | `e962ad037041c9a7adf678ac293022fb6a0a1893` - integration verifier and receipt |
 | Implementation PR head | `head-pending` |
 | Merged candidate | `merge-pending` |
 
