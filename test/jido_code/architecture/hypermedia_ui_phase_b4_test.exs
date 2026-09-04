@@ -2,6 +2,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4Test do
   use ExUnit.Case, async: true
 
   alias JidoCode.Architecture.HypermediaUIPhaseB4
+  alias JidoCode.Architecture.HypermediaUIPhaseA4
 
   test "accepted manifests, locks, assets, licenses, consumers, and update policy pass" do
     assert {:ok, []} = HypermediaUIPhaseB4.check()
@@ -89,6 +90,137 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4Test do
     receipt = File.read!("docs/architecture/hypermedia-ui-milestone-b-phase-04-receipt.md")
 
     assert HypermediaUIPhaseB4.validate_closure(plan, receipt) == []
+  end
+
+  test "integration evidence pins reproduction, mutation, production, and rollback results" do
+    assert {:ok, evidence} = HypermediaUIPhaseB4.load_integration()
+    assert HypermediaUIPhaseB4.validate_integration(evidence, File.cwd!()) == []
+
+    assert evidence["clean_checkout_ci"] == "merge_pending"
+    assert length(evidence["reproduction"]) == 12
+    assert length(evidence["mutation_cases"]) == 21
+    assert get_in(evidence, ["production_boundary", "qualification_routes"]) == 0
+    assert get_in(evidence, ["rollback", "dependency_and_asset_diff"]) == "empty"
+  end
+
+  test "every recorded mutation class is rejected with its actionable diagnostic" do
+    assert {:ok, policy} = HypermediaUIPhaseB4.load()
+    assert {:ok, qualification} = HypermediaUIPhaseB4.load_qualification()
+    assert {:ok, consumption} = HypermediaUIPhaseB4.load_consumption()
+    assert {:ok, integration} = HypermediaUIPhaseB4.load_integration()
+
+    plan =
+      File.read!(
+        "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-04-dependency-consumer-and-architecture-qualification.md"
+      )
+
+    receipt = File.read!("docs/architecture/hypermedia-ui-milestone-b-phase-04-receipt.md")
+
+    source_errors = fn path, source ->
+      HypermediaUIPhaseB4.check_candidate_sources([{path, source}])
+    end
+
+    a4_errors = fn path, source ->
+      {:error, errors} = HypermediaUIPhaseA4.check_sources([{path, source}])
+      errors
+    end
+
+    diagnostics = %{
+      "hex_version" =>
+        HypermediaUIPhaseB4.validate(
+          put_in(policy, ["approved_stack", "hex", "dstar"], "0.2.1"),
+          File.cwd!()
+        ),
+      "source_version" =>
+        HypermediaUIPhaseB4.validate(
+          put_in(policy, ["approved_stack", "source", "datastar"], "main"),
+          File.cwd!()
+        ),
+      "npm_version" =>
+        HypermediaUIPhaseB4.validate(
+          put_in(policy, ["approved_stack", "npm", "vite"], "latest"),
+          File.cwd!()
+        ),
+      "manifest_or_source_digest" =>
+        HypermediaUIPhaseB4.validate(
+          put_in(policy, ["candidate_inputs", "mix.lock"], String.duplicate("0", 64)),
+          File.cwd!()
+        ),
+      "license" =>
+        HypermediaUIPhaseB4.validate(
+          update_in(policy, ["approved_stack", "licenses"], &tl/1),
+          File.cwd!()
+        ),
+      "shadcn_import" =>
+        HypermediaUIPhaseB4.validate_consumption(
+          update_in(consumption, ["approved_imports", "shadcn_ui"], &tl/1),
+          File.cwd!()
+        ),
+      "datastar_asset" =>
+        HypermediaUIPhaseB4.validate_consumption(
+          put_in(
+            consumption,
+            ["asset_contract", "datastar_bundle_sha256"],
+            String.duplicate("0", 64)
+          ),
+          File.cwd!()
+        ),
+      "dstar_scripts" => source_errors.("fixture.ex", "Dstar.Scripts.execute(conn, action)"),
+      "inline_or_eval_csp" => source_errors.("fixture.ex", "script-src 'unsafe-eval'"),
+      "remote_product_asset" =>
+        source_errors.("fixture.heex", "<script src=\"https://cdn.invalid/app.js\">"),
+      "browser_authority" =>
+        source_errors.("fixture.js", "sessionStorage.getItem('policy_revision_authority')"),
+      "new_liveview_runtime" => a4_errors.("fixture.ex", "live \"/new\", NewLive"),
+      "new_livevue_runtime" => a4_errors.("fixture.ex", "use LiveVue"),
+      "new_saladui_consumer" => a4_errors.("fixture.ex", "alias SaladUI.Button"),
+      "production_qualification_route" =>
+        HypermediaUIPhaseB4.validate_consumption(
+          put_in(consumption, ["production_boundary", "production_route_count"], 1),
+          File.cwd!()
+        ),
+      "production_qualification_supervision" =>
+        HypermediaUIPhaseB4.validate_consumption(
+          put_in(consumption, ["production_boundary", "production_supervision_children"], 1),
+          File.cwd!()
+        ),
+      "operational_ceiling" =>
+        HypermediaUIPhaseB4.validate_consumption(
+          put_in(consumption, ["operational_ceilings", "max_queue"], 1),
+          File.cwd!()
+        ),
+      "attribute_or_event" =>
+        HypermediaUIPhaseB4.validate_consumption(
+          update_in(consumption, ["approved_datastar_attributes"], &tl/1),
+          File.cwd!()
+        ),
+      "browser_profile" =>
+        HypermediaUIPhaseB4.validate_consumption(
+          update_in(consumption, ["supported_profiles", "browsers"], &tl/1),
+          File.cwd!()
+        ),
+      "residual_risk" =>
+        HypermediaUIPhaseB4.validate_qualification(
+          update_in(qualification, ["residual_risks"], &tl/1),
+          File.cwd!()
+        ),
+      "receipt_lifecycle" =>
+        HypermediaUIPhaseB4.validate_closure(
+          plan,
+          String.replace(receipt, "Status: **merge-pending**", "Status: **unknown**")
+        )
+    }
+
+    assert Map.keys(diagnostics) |> Enum.sort() ==
+             integration["mutation_cases"] |> Enum.map(& &1["id"]) |> Enum.sort()
+
+    Enum.each(integration["mutation_cases"], fn mutation ->
+      assert Enum.any?(
+               Map.fetch!(diagnostics, mutation["id"]),
+               &String.contains?(&1, mutation["diagnostic"])
+             ),
+             "#{mutation["id"]} did not produce #{mutation["diagnostic"]}"
+    end)
   end
 
   test "version, digest, license, consumer, and update-evidence drift fails closed" do

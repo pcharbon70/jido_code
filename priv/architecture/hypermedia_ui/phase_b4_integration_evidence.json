@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B4",
+  "recorded_on": "2026-09-04",
+  "status": "integration_candidate_merge_pending",
+  "baseline_commit": "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2",
+  "section_commits": {
+    "4.1": "ab2d29065259d4e9a2f720abeffc3672f235f3e3",
+    "4.2": "0ea83345a3be68993e640c7bfb6a5ab01ef30844",
+    "4.3": "96badb46f1d2f19a8443363980cc88615d8e78e5"
+  },
+  "manifest_digests": {
+    "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json": "41669e19b59e89d317a2e89afda755e8eb80cae8393a41f0c814605134f84282",
+    "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json": "546339e6a20ea6ddf5a36b1aed01d8fd410f4457e30da925a323548c7ef6e2d1",
+    "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json": "2600f2127e2dc730fff4f93642302a9e86b591d19dfd7542db69b16c71d288bd"
+  },
+  "reproduction": [
+    {"id": "locked_mix_acquisition", "result": "pass", "evidence": "mix deps.get resolved the unchanged exact lock"},
+    {"id": "locked_npm_acquisition", "result": "pass_with_recorded_warning", "evidence": "npm ci installed the exact package-lock; the existing development-only Babel engine warning remains HUI-B4-R05"},
+    {"id": "predecessor_and_architecture", "result": "pass", "evidence": "HUI-A and HUI-B1 through HUI-B4 executable checks"},
+    {"id": "strict_production_compile", "result": "pass", "evidence": "MIX_ENV=prod mix compile --warnings-as-errors"},
+    {"id": "static_analysis", "result": "pass", "evidence": "Dialyzer: 178 accepted ignores, 0 unignored errors, 0 unnecessary ignores"},
+    {"id": "production_assets", "result": "pass", "evidence": "deterministic static tree 2f360d1cd037f8c86ef38bf484da68e4c29d2d59b24672d85ca997d4110f6347"},
+    {"id": "sbom_license_advisory", "result": "pass", "evidence": "pinned SBOM/license records, zero Hex advisories, zero npm production vulnerabilities"},
+    {"id": "release_startup", "result": "pass", "evidence": "assembled release started against a new isolated store and exited cleanly"},
+    {"id": "browser_proxy_accessibility", "result": "pass_with_recorded_risk", "evidence": "21 applicable Playwright cases, 39 profile skips, retained manual review, R03 named screen-reader risk"},
+    {"id": "production_fixture_exclusion", "result": "pass", "evidence": "zero qualification routes and zero supervision children in prod"},
+    {"id": "rollback_identity", "result": "pass", "evidence": "dependency locks, local assets, facade, and asset configuration are byte-identical to the accepted HUI-B3 closure baseline"},
+    {"id": "full_precommit", "result": "pass", "evidence": "local candidate mix precommit: 1,238 tests, 0 failures"}
+  ],
+  "mutation_cases": [
+    {"id": "hex_version", "expected": "rejected", "diagnostic": "Hex pins"},
+    {"id": "source_version", "expected": "rejected", "diagnostic": "source pins"},
+    {"id": "npm_version", "expected": "rejected", "diagnostic": "npm pins"},
+    {"id": "manifest_or_source_digest", "expected": "rejected", "diagnostic": "candidate pins"},
+    {"id": "license", "expected": "rejected", "diagnostic": "license allowlist"},
+    {"id": "shadcn_import", "expected": "rejected", "diagnostic": "ShadcnUI import boundary"},
+    {"id": "datastar_asset", "expected": "rejected", "diagnostic": "Datastar asset"},
+    {"id": "dstar_scripts", "expected": "rejected", "diagnostic": "Dstar Scripts"},
+    {"id": "inline_or_eval_csp", "expected": "rejected", "diagnostic": "unsafe CSP"},
+    {"id": "remote_product_asset", "expected": "rejected", "diagnostic": "remote or CDN"},
+    {"id": "browser_authority", "expected": "rejected", "diagnostic": "browser state"},
+    {"id": "new_liveview_runtime", "expected": "rejected", "diagnostic": "product_liveview"},
+    {"id": "new_livevue_runtime", "expected": "rejected", "diagnostic": "livevue_bridge"},
+    {"id": "new_saladui_consumer", "expected": "rejected", "diagnostic": "saladui_import"},
+    {"id": "production_qualification_route", "expected": "rejected", "diagnostic": "production route count"},
+    {"id": "production_qualification_supervision", "expected": "rejected", "diagnostic": "production supervision children"},
+    {"id": "operational_ceiling", "expected": "rejected", "diagnostic": "queue ceiling"},
+    {"id": "attribute_or_event", "expected": "rejected", "diagnostic": "Datastar attributes"},
+    {"id": "browser_profile", "expected": "rejected", "diagnostic": "supported browsers"},
+    {"id": "residual_risk", "expected": "rejected", "diagnostic": "residual risk count"},
+    {"id": "receipt_lifecycle", "expected": "rejected", "diagnostic": "closure"}
+  ],
+  "production_boundary": {
+    "compile_build": "prod",
+    "qualification_routes": 0,
+    "qualification_supervision_children": 0,
+    "runtime_enable_attempt": "remains_absent",
+    "liveview_product_additions": 0
+  },
+  "rollback": {
+    "baseline": "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2",
+    "dependency_and_asset_diff": "empty",
+    "restoration_set": ["mix.exs", "mix.lock", "package.json", "package-lock.json", "assets/vendor/datastar/datastar.js", "deps/shadcn_ui/priv/static/shadcn_ui.css", "lib/jido_code_web/components/ui.ex", "assets/js/app.js", "assets/css/app.css"],
+    "data_migration": false
+  },
+  "commands": [
+    "mix deps.get",
+    "npm ci",
+    "mix architecture.check",
+    "MIX_ENV=prod mix compile --warnings-as-errors",
+    "mix dialyzer --no-compile --format dialyxir --list-unused-filters",
+    "MIX_ENV=prod mix hui.b4.production_boundary",
+    "mix hex.audit",
+    "npm audit --omit=dev",
+    "MIX_ENV=prod mix assets.deploy",
+    "MIX_ENV=prod mix release --overwrite",
+    "release eval Application.ensure_all_started(:jido_code) against a fresh isolated store",
+    "npx playwright test",
+    "git diff --exit-code baseline -- dependency and asset restoration set",
+    "mix precommit"
+  ],
+  "clean_checkout_ci": "merge_pending",
+  "exceptions": []
+}

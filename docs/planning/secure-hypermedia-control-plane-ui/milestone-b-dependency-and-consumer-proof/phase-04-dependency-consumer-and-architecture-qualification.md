@@ -66,21 +66,21 @@ Back to plan: [README](./README.md)
     This final section proves a clean product branch can consume the approved
     stack and that any drift or forbidden runtime pattern is rejected.
 
-    - [ ] 4.4.1 Task {#huib-p04-integration} [repo: jido_code] [after: {#huib-p04-baseline}] - Execute the HUI-B4/HUI2 release qualification matrix.
+    - [x] 4.4.1 Task {#huib-p04-integration} [repo: jido_code] [after: {#huib-p04-baseline}] - Execute the HUI-B4/HUI2 release qualification matrix.
 
       This task repeats the evidence from clean checkout and tests all drift
       guardrails before Milestone C is authorized.
 
-      - [ ] 4.4.1.1 Subtask - Reproduce dependency fetch/verify, asset build, facade compile, release startup, SBOM/license/advisory reports, and consumer browser evidence from pinned inputs.
-      - [ ] 4.4.1.2 Subtask - Mutate each protected version/digest/license/import/CSP/runtime/consumer assumption and prove CI rejects it with actionable diagnostics.
-      - [ ] 4.4.1.3 Subtask - Verify production routing/supervision contains no qualification route or LiveView product runtime and rollback restores the prior dependency/asset set.
-      - [ ] 4.4.1.4 Subtask - Run all Milestone B suites, architecture/security/a11y checks, `mix precommit`, and clean-checkout CI.
+      - [x] 4.4.1.1 Subtask - Reproduce dependency fetch/verify, asset build, facade compile, release startup, SBOM/license/advisory reports, and consumer browser evidence from pinned inputs.
+      - [x] 4.4.1.2 Subtask - Mutate each protected version/digest/license/import/CSP/runtime/consumer assumption and prove CI rejects it with actionable diagnostics.
+      - [x] 4.4.1.3 Subtask - Verify production routing/supervision contains no qualification route or LiveView product runtime and rollback restores the prior dependency/asset set.
+      - [x] 4.4.1.4 Subtask - Run all Milestone B suites, architecture/security/a11y checks, `mix precommit`, and clean-checkout CI.
 
     - [ ] 4.4.2 Task {#huib-p04-phase-receipt} [repo: jido_code] [after: {#huib-p04-integration}] - Publish and pin the Phase 4 receipt and HUI2 closure.
 
       This task records HUI-B4/HUI2 evidence in
       `docs/architecture/hypermedia-ui-milestone-b-phase-04-receipt.md`.
 
-      - [ ] 4.4.2.1 Subtask - Keep HUI2 merge-pending on unreproducible inputs, unresolved license/advisory, failing consumer/browser/a11y case, unbounded protocol behavior, forbidden consumer, or ineffective drift check.
-      - [ ] 4.4.2.2 Subtask - Record exact artifact/config/browser/proxy digests, evidence, exceptions, owners, expiry, and every reopening condition.
+      - [x] 4.4.2.1 Subtask - Keep HUI2 merge-pending on unreproducible inputs, unresolved license/advisory, failing consumer/browser/a11y case, unbounded protocol behavior, forbidden consumer, or ineffective drift check.
+      - [x] 4.4.2.2 Subtask - Record exact artifact/config/browser/proxy digests, evidence, exceptions, owners, expiry, and every reopening condition.
       - [ ] 4.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 4 Integration Tests section, receipt task, pinning subtask, and Milestone B completion before authorizing Milestone C Phase 1.

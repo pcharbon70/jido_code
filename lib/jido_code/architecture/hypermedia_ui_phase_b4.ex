@@ -8,6 +8,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   @manifest_path "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json"
   @qualification_path "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json"
   @consumption_path "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json"
+  @integration_path "priv/architecture/hypermedia_ui/phase_b4_integration_evidence.json"
   @baseline "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2"
   @document_path "docs/architecture/hypermedia-ui-dependency-fitness-and-update-policy.md"
   @consumption_document "docs/architecture/hypermedia-ui-product-consumption-baseline.md"
@@ -153,6 +154,36 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     "priv/architecture/hypermedia_ui/phase_a4_governance_guardrails.json" =>
       "7ba9c927f4e86aa411960cde57c8f5d5acaf23514139b96c5e1e1942a5e5095d"
   }
+  @section_commits %{
+    "4.1" => "ab2d29065259d4e9a2f720abeffc3672f235f3e3",
+    "4.2" => "0ea83345a3be68993e640c7bfb6a5ab01ef30844",
+    "4.3" => "96badb46f1d2f19a8443363980cc88615d8e78e5"
+  }
+  @integration_manifest_digests %{
+    "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json" =>
+      "41669e19b59e89d317a2e89afda755e8eb80cae8393a41f0c814605134f84282",
+    "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json" =>
+      "546339e6a20ea6ddf5a36b1aed01d8fd410f4457e30da925a323548c7ef6e2d1",
+    "priv/architecture/hypermedia_ui/phase_b4_consumption_baseline.json" =>
+      "2600f2127e2dc730fff4f93642302a9e86b591d19dfd7542db69b16c71d288bd"
+  }
+  @reproduction_ids ~w[
+    locked_mix_acquisition locked_npm_acquisition predecessor_and_architecture
+    strict_production_compile static_analysis production_assets sbom_license_advisory release_startup
+    browser_proxy_accessibility production_fixture_exclusion rollback_identity full_precommit
+  ]
+  @mutation_ids ~w[
+    hex_version source_version npm_version manifest_or_source_digest license shadcn_import
+    datastar_asset dstar_scripts inline_or_eval_csp remote_product_asset browser_authority
+    new_liveview_runtime new_livevue_runtime new_saladui_consumer production_qualification_route
+    production_qualification_supervision operational_ceiling attribute_or_event browser_profile
+    residual_risk receipt_lifecycle
+  ]
+  @rollback_paths ~w[
+    mix.exs mix.lock package.json package-lock.json assets/vendor/datastar/datastar.js
+    deps/shadcn_ui/priv/static/shadcn_ui.css lib/jido_code_web/components/ui.ex
+    assets/js/app.js assets/css/app.css
+  ]
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
   def check(root \\ File.cwd!()) do
@@ -162,14 +193,32 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
 
     with {:ok, policy} <- load(root),
          {:ok, qualification} <- load_qualification(root),
-         {:ok, consumption} <- load_consumption(root) do
+         {:ok, consumption} <- load_consumption(root),
+         {:ok, integration} <- load_integration(root) do
       case predecessor_errors ++
              validate(policy, root) ++
              validate_qualification(qualification, root) ++
-             validate_consumption(consumption, root) do
+             validate_consumption(consumption, root) ++
+             validate_integration(integration, root) do
         [] -> {:ok, []}
         errors -> {:error, errors}
       end
+    end
+  end
+
+  @spec load_integration(Path.t()) :: {:ok, map()} | {:error, [String.t()]}
+  def load_integration(root \\ File.cwd!()) do
+    path = Path.join(root, @integration_path)
+
+    with {:ok, body} <- File.read(path),
+         {:ok, evidence} <- Jason.decode(body) do
+      {:ok, evidence}
+    else
+      {:error, %Jason.DecodeError{} = reason} ->
+        {:error, ["#{path}: invalid JSON: #{Exception.message(reason)}"]}
+
+      {:error, reason} ->
+        {:error, ["#{path}: unavailable integration evidence: #{inspect(reason)}"]}
     end
   end
 
@@ -466,6 +515,81 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   def validate_consumption(_baseline, _root),
     do: ["HUI-B4 consumption baseline must be a map"]
 
+  @spec validate_integration(map(), Path.t()) :: [String.t()]
+  def validate_integration(evidence, root) when is_map(evidence) do
+    reproductions = evidence["reproduction"] || []
+    mutations = evidence["mutation_cases"] || []
+    production = evidence["production_boundary"] || %{}
+    rollback = evidence["rollback"] || %{}
+
+    []
+    |> require_equal(evidence["schema_version"], 1, "integration schema_version")
+    |> require_equal(evidence["phase"], "HUI-B4", "integration phase")
+    |> require_member(
+      evidence["status"],
+      ["integration_candidate_merge_pending", "accepted_at_merged_candidate"],
+      "integration status"
+    )
+    |> require_equal(evidence["baseline_commit"], @baseline, "integration baseline")
+    |> require_equal(evidence["section_commits"], @section_commits, "section provenance")
+    |> require_equal(
+      evidence["manifest_digests"],
+      @integration_manifest_digests,
+      "integration manifest pins"
+    )
+    |> require_exact_set(Enum.map(reproductions, & &1["id"]), @reproduction_ids, "reproductions")
+    |> require_equal(
+      Enum.all?(reproductions, &String.starts_with?(&1["result"], "pass")),
+      true,
+      "reproduction outcomes"
+    )
+    |> require_equal(
+      Enum.all?(reproductions, &nonempty_evidence?/1),
+      true,
+      "reproduction evidence"
+    )
+    |> require_exact_set(Enum.map(mutations, & &1["id"]), @mutation_ids, "mutation cases")
+    |> require_equal(
+      Enum.all?(mutations, &(&1["expected"] == "rejected")),
+      true,
+      "mutation outcomes"
+    )
+    |> require_equal(Enum.all?(mutations, &nonempty_diagnostic?/1), true, "mutation diagnostics")
+    |> require_equal(production["compile_build"], "prod", "production compile build")
+    |> require_equal(production["qualification_routes"], 0, "production qualification routes")
+    |> require_equal(
+      production["qualification_supervision_children"],
+      0,
+      "production qualification supervision"
+    )
+    |> require_equal(
+      production["runtime_enable_attempt"],
+      "remains_absent",
+      "runtime enable attempt"
+    )
+    |> require_equal(production["liveview_product_additions"], 0, "LiveView product additions")
+    |> require_equal(rollback["baseline"], @baseline, "rollback baseline")
+    |> require_equal(rollback["dependency_and_asset_diff"], "empty", "rollback identity")
+    |> require_exact_set(rollback["restoration_set"] || [], @rollback_paths, "rollback set")
+    |> require_equal(rollback["data_migration"], false, "rollback data migration")
+    |> require_member("mix deps.get", evidence["commands"] || [], "Mix acquisition command")
+    |> require_member("npm ci", evidence["commands"] || [], "npm acquisition command")
+    |> require_member(
+      "mix dialyzer --no-compile --format dialyxir --list-unused-filters",
+      evidence["commands"] || [],
+      "Dialyzer command"
+    )
+    |> require_member("npx playwright test", evidence["commands"] || [], "browser command")
+    |> require_member("mix precommit", evidence["commands"] || [], "precommit command")
+    |> require_equal(evidence["exceptions"], [], "integration exceptions")
+    |> validate_digests(root, @integration_manifest_digests)
+    |> validate_integration_closure(evidence, root)
+    |> Enum.reverse()
+  end
+
+  def validate_integration(_evidence, _root),
+    do: ["HUI-B4 integration evidence must be a map"]
+
   @spec check_candidate_sources([{String.t(), String.t()}]) :: [String.t()]
   def check_candidate_sources(sources) when is_list(sources) do
     Enum.flat_map(sources, fn {path, source} ->
@@ -595,6 +719,21 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
     |> then(&(Enum.reverse(validate_closure(plan, receipt)) ++ &1))
   end
 
+  defp validate_integration_closure(errors, evidence, root) do
+    receipt = read(root, @receipt_path)
+
+    {expected_status, expected_ci} =
+      if String.contains?(receipt, "Status: **accepted-at-merged-candidate**") do
+        {"accepted_at_merged_candidate", "pass"}
+      else
+        {"integration_candidate_merge_pending", "merge_pending"}
+      end
+
+    errors
+    |> require_equal(evidence["status"], expected_status, "integration receipt lifecycle")
+    |> require_equal(evidence["clean_checkout_ci"], expected_ci, "clean-checkout CI lifecycle")
+  end
+
   @spec validate_closure(String.t(), String.t()) :: [String.t()]
   def validate_closure(plan, receipt) do
     accepted? = String.contains?(receipt, "Status: **accepted-at-merged-candidate**")
@@ -619,6 +758,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
         |> require_checkbox(plan, "4.4", "Section", false)
         |> require_checkbox(plan, "4.4.2", "Task", false)
         |> require_checkbox(plan, "4.4.2.3", "Subtask", false)
+        |> require_contains(plan, "- [x] 4.4.1 Task", "integration task")
+        |> require_contains(plan, "- [x] 4.4.2.1 Subtask", "pending rule")
+        |> require_contains(plan, "- [x] 4.4.2.2 Subtask", "evidence task")
         |> require_contains(receipt, "Merged candidate: `merge-pending`", "pending candidate")
         |> require_contains(receipt, "Merge date: `merge-pending`", "pending merge date")
 
@@ -640,6 +782,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
         ]
     end)
   end
+
+  defp nonempty_evidence?(record),
+    do: is_binary(record["evidence"]) and String.trim(record["evidence"]) != ""
+
+  defp nonempty_diagnostic?(record),
+    do: is_binary(record["diagnostic"]) and String.trim(record["diagnostic"]) != ""
 
   defp validate_digests(errors, root, expected) do
     Enum.reduce(expected, errors, fn {path, digest}, acc ->

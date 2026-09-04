@@ -16,7 +16,7 @@ pull request pins the full merged-candidate SHA and date.
 | Accepted HUI-B3 closure baseline | `e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2` - closure PR #114 |
 | Section 4.1 | `ab2d29065259d4e9a2f720abeffc3672f235f3e3` - dependency fitness policy and drift enforcement |
 | Section 4.2 | `0ea83345a3be68993e640c7bfb6a5ab01ef30844` - release qualification and browser/accessibility evidence |
-| Section 4.3 | `commit-pending` - product-consumption baseline and production exclusion |
+| Section 4.3 | `96badb46f1d2f19a8443363980cc88615d8e78e5` - product-consumption baseline and production exclusion |
 | Section 4.4 | `commit-pending` - integration matrix, mutation proof, and receipt preparation |
 | Implementation PR head | `merge-pending` |
 | Merged candidate | `merge-pending` |
@@ -78,6 +78,32 @@ The HUI-B3 fixture source remains deterministic, but its pipeline, routes, and
 coordinator are compiled only in the test build. Production configuration has
 the build flag false, zero `__qualification` routes, and zero qualification
 supervision children even if runtime configuration tries to enable it.
+
+## Integration Verification
+
+The local integration candidate reproduced the unchanged Mix and npm locks,
+all predecessor and architecture checks, strict production compilation,
+production asset deployment, SBOM/license/advisory results, production release
+assembly and clean-store startup, the real-browser/proxy matrix, production
+fixture exclusion, and rollback identity. The static tree remained exactly
+`2f360d1cd037f8c86ef38bf484da68e4c29d2d59b24672d85ca997d4110f6347`;
+Hex and npm production audits reported zero advisories. The browser result
+remained 21 applicable passes and 39 profile skips.
+
+The repository `mix precommit` gate passed with 1,238 tests and zero failures.
+Existing test-only fixture and static-typing warnings remain visible and are
+not production compilation warnings; the strict production build is clean.
+Dialyzer passed with 178 accepted ignores, zero unignored errors, and zero
+unnecessary ignores.
+
+The executable mutation matrix covers Hex, source, and npm versions; manifest,
+source, and asset digests; licenses; ShadcnUI import boundaries; the Datastar
+asset; Dstar Scripts; inline/eval CSP; remote assets; browser authority; new
+LiveView, LiveVue/Vue, or SaladUI consumers; production qualification routes
+or supervision; operational ceilings; Datastar attributes/events; browser
+profiles; residual risks; and receipt lifecycle. Every mutation must be
+rejected with its named diagnostic. Clean-checkout CI remains merge-pending
+and HUI2 remains open until the exact PR candidate passes and merges.
 
 ## Exceptions And Residual Risks
 
