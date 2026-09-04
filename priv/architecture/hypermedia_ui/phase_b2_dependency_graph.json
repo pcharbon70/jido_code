@@ -56,8 +56,11 @@
   "authorized_legacy_exception_paths": [
     "mix.exs",
     "lib/jido_code_web/components/ui.ex",
+    "lib/jido_code_web/endpoint.ex",
     "lib/jido_code_web/components/layouts.ex",
-    "assets/css/app.css"
+    "assets/js/app.js",
+    "assets/css/app.css",
+    "assets/vite.config.mjs"
   ],
   "rollback": {
     "method": "revert the Section 2.1 commit and restore the accepted HUI-B1 lock",

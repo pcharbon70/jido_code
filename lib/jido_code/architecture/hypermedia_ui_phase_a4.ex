@@ -41,6 +41,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
     lib/jido_code_web/components/layouts.ex
     assets/js/app.js
     assets/css/app.css
+    assets/vite.config.mjs
   ]
 
   @source_rules [

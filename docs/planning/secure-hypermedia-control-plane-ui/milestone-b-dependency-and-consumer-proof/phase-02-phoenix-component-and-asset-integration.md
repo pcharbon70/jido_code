@@ -57,20 +57,20 @@ Back to plan: [README](./README.md)
       - [x] 2.2.2.3 Subtask - Preserve Tailwind v4 source/import conventions, avoid `@apply`, and keep all CSS in controlled local bundles.
       - [x] 2.2.2.4 Subtask - Record theme migration, cache invalidation, stale asset behavior, rollback, and visual-regression fixtures.
 
-  - [ ] 2.3 Section - Build the pinned Datastar asset pipeline.
+  - [x] 2.3 Section - Build the pinned Datastar asset pipeline.
 
     This section produces one locally served browser runtime with exact
     integrity, CSP, caching, and reproducible-build behavior.
 
-    - [ ] 2.3.1 Task {#huib-p02-assets} [repo: jido_code] [after: {#huib-p02-theme}] - Integrate and verify the selected Datastar bundle.
+    - [x] 2.3.1 Task {#huib-p02-assets} [repo: jido_code] [after: {#huib-p02-theme}] - Integrate and verify the selected Datastar bundle.
 
       This task does not yet enable product enhancement; it proves the asset
       can be built, served, and constrained safely.
 
-      - [ ] 2.3.1.1 Subtask - Vendor or build the exact selected Datastar source through the approved app.js pipeline with source/digest/license metadata and no CDN fallback.
-      - [ ] 2.3.1.2 Subtask - Configure production fingerprinting, manifest lookup, cache headers, compression, MIME/nosniff, source-map policy, and stale-client compatibility.
-      - [ ] 2.3.1.3 Subtask - Configure HTTP CSP nonce/hash mode, static Datastar expressions, no Dstar Scripts, no unsafe inline/eval allowance, and no third-party network dependency.
-      - [ ] 2.3.1.4 Subtask - Add deterministic build and drift checks comparing source, bundle, manifest, production release, and HUI-B1 digest records.
+      - [x] 2.3.1.1 Subtask - Vendor or build the exact selected Datastar source through the approved app.js pipeline with source/digest/license metadata and no CDN fallback.
+      - [x] 2.3.1.2 Subtask - Configure production fingerprinting, manifest lookup, cache headers, compression, MIME/nosniff, source-map policy, and stale-client compatibility.
+      - [x] 2.3.1.3 Subtask - Configure HTTP CSP nonce/hash mode, static Datastar expressions, no Dstar Scripts, no unsafe inline/eval allowance, and no third-party network dependency.
+      - [x] 2.3.1.4 Subtask - Add deterministic build and drift checks comparing source, bundle, manifest, production release, and HUI-B1 digest records.
 
   - [ ] 2.4 Section - Phase 2 Integration Tests.
 

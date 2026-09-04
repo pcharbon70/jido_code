@@ -15,6 +15,8 @@ defmodule JidoCodeWeb.Endpoint do
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
 
+  plug JidoCodeWeb.Plugs.ContentSecurityPolicy
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # When code reloading is disabled (e.g., in production),
@@ -24,6 +26,12 @@ defmodule JidoCodeWeb.Endpoint do
     at: "/",
     from: :jido_code,
     gzip: not code_reloading?,
+    cache_control_for_etags: "public, max-age=0, must-revalidate",
+    cache_control_for_vsn_requests: "public, max-age=31536000, immutable",
+    headers: %{
+      "cross-origin-resource-policy" => "same-origin",
+      "x-content-type-options" => "nosniff"
+    },
     only: JidoCodeWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the

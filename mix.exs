@@ -121,8 +121,10 @@ defmodule JidoCode.MixProject do
         "phoenix_vite.npm vite build --ssrManifest --emptyOutDir false --ssr js/server.js --outDir ../priv/static"
       ],
       "assets.deploy": [
+        "phx.digest.clean --all --no-compile",
         "assets.build",
-        "phx.digest"
+        "phx.digest",
+        "assets.normalize_digest_manifest"
       ],
       precommit: [
         "compile --warnings-as-errors",

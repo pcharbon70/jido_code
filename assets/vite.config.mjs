@@ -27,6 +27,7 @@ export default defineConfig({
   ssr: {noExternal: process.env.NODE_ENV === "production" ? true : undefined},
   build: {
     manifest: false,
+    sourcemap: false,
     ssrManifest: false,
     rollupOptions: {
       input: ["js/app.js", "css/app.css"],

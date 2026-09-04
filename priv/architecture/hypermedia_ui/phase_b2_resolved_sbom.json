@@ -3,7 +3,7 @@
   "phase": "HUI-B2",
   "recorded_on": "2026-09-04",
   "baseline_commit": "da9776d49d9e2f9d487294292e7643355576902d",
-  "status": "component_theme_resolved_datastar_pending",
+  "status": "exact_dependency_and_asset_graph_resolved",
   "lock_sha256": "cb1db44c1cc488f7e8a8e9caba7b52ac68977666b28c8e515f24114c43407644",
   "components": [
     {"name": "phoenix", "version": "1.8.11", "ecosystem": "hex", "integrity": "44f028f4129e5a29487e868f84903373e3d032da151ad0c789c3849f464e7351", "license": "MIT", "role": "existing runtime framework"},
@@ -30,6 +30,15 @@
       "bytes": 54389,
       "license": "MIT",
       "consumer": "assets/css/app.css"
+    },
+    {
+      "name": "datastar.js",
+      "version": "1.0.3",
+      "source_path": "assets/vendor/datastar/datastar.js",
+      "sha256": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+      "bytes": 33538,
+      "license": "MIT",
+      "consumer": "assets/js/app.js"
     }
   ],
   "exceptions": []
