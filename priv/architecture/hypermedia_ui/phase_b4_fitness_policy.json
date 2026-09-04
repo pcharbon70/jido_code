@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-B4",
+  "recorded_on": "2026-09-04",
+  "status": "fitness_policy_installed",
+  "baseline_commit": "e14ee7fa268eb6bd5a4d7bb7e519cce748d7b5e2",
+  "predecessor_candidates": {
+    "HUI-B1": "4441ce873bc244e3b60ed48d6812cd0c45513f95",
+    "HUI-B2": "c45df6647b3aebed9731595027dd2928dd2c5ca2",
+    "HUI-B3": "e055ce51d880aa167c033a2e1f59ba4d7f8d1e81"
+  },
+  "input_manifest_digests": {
+    "priv/architecture/hypermedia_ui/phase_b1_candidate_bom.json": "dbfb08bfa5a95d41a538dadbcd8f9605918761a565e82ae075854c969a6f7f12",
+    "priv/architecture/hypermedia_ui/phase_b1_supply_chain_ledger.json": "7e8c4286ebd125f0c1b8a8997abba699c82f0f583b5f518d0b6a7eeba9d9cfe6",
+    "priv/architecture/hypermedia_ui/phase_b2_dependency_graph.json": "e35613aa0d39af166aa4156e284a0eeab6a68c720b8d186198b5ed0472fe622a",
+    "priv/architecture/hypermedia_ui/phase_b2_resolved_sbom.json": "7a0b9e4ed1b4e187d464dae39de8e593978d9fa81a8b396619d848e14c697f68",
+    "priv/architecture/hypermedia_ui/phase_b2_asset_pipeline.json": "de73f1008e64693583201b02b3fae50fd2c563d2fe38d61941a4a4b49806007a",
+    "priv/architecture/hypermedia_ui/phase_b2_component_theme_contract.json": "381aa3d8c2b36113c97abf3df192a1614c04e9b40dd7720ae3a8636f884b46d4",
+    "priv/architecture/hypermedia_ui/phase_b3_verification_evidence.json": "9acba10084866ab7d800c02b9fded59406b0370bffdad83dc973416f2a656344"
+  },
+  "candidate_inputs": {
+    "mix.exs": "d66c00f068f43943ed9bd94b0a2c77db152a224ad3e1d6deefee4745df3ffab9",
+    "mix.lock": "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b",
+    "package.json": "d41b1362235934cf2f37a87351f1610325e27945660b636619b3f49a2fdc51ba",
+    "package-lock.json": "8a4b2384bdaf539731dd7eefa169cacaea38bcf689c2a59108ff6de5456addda",
+    "assets/vendor/datastar/datastar.js": "5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65",
+    "deps/shadcn_ui/priv/static/shadcn_ui.css": "ed0768e9582e980f3fd1b3ca0076afc573fc269514f527aef9dc942d1f8e9f41"
+  },
+  "approved_stack": {
+    "hex": {
+      "dstar": "0.2.0",
+      "phoenix": "1.8.11",
+      "phoenix_html": "4.3.0",
+      "phoenix_live_view": "1.2.9",
+      "salad_ui": "1.0.0"
+    },
+    "source": {
+      "shadcn_ui": "fe40eae63504adc4375aead4f0e741f158a4d86e",
+      "datastar": "73ab00e7c06d8c2bad030fdddafba800fcccbde2"
+    },
+    "npm": {
+      "@playwright/test": "1.62.0",
+      "@tailwindcss/vite": "4.3.3",
+      "tailwindcss": "4.3.3",
+      "vite": "7.3.6"
+    },
+    "licenses": ["Apache-2.0", "MIT"]
+  },
+  "approved_consumers": {
+    "shadcn_ui": ["lib/jido_code_web/components/ui.ex", "assets/css/app.css"],
+    "datastar": ["assets/js/app.js", "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex", "lib/jido_code_web/qualification/hypermedia_stream_fixture.ex"],
+    "dstar": ["lib/jido_code_web/controllers/qualification/hypermedia_controller.ex", "lib/jido_code_web/qualification/hypermedia_stream_fixture.ex"],
+    "qualification_prefix": "lib/jido_code_web/qualification",
+    "product_consumers": []
+  },
+  "forbidden_capabilities": [
+    "mutable_hui_source",
+    "remote_or_cdn_product_asset",
+    "unreviewed_hui_override_or_fork",
+    "unexpected_hui_transitive_application",
+    "shadcn_import_outside_facade",
+    "new_liveview_product_runtime",
+    "new_livevue_or_vue_consumer",
+    "new_saladui_consumer",
+    "dstar_scripts",
+    "inline_or_eval_csp_weakening",
+    "browser_authority",
+    "unapproved_network_or_build_step"
+  ],
+  "update_evidence": [
+    "immutable_provenance",
+    "license_and_usage_authority",
+    "advisory_scan",
+    "dependency_and_consumer_diff",
+    "browser_protocol_matrix",
+    "manual_accessibility_review",
+    "release_and_rollback_drill"
+  ],
+  "update_trigger": "any source, version, checksum, license, advisory, dependency edge, consumer, asset, CSP, browser, protocol, or build change",
+  "exceptions": []
+}

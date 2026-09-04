@@ -17,19 +17,19 @@ Back to plan: [README](./README.md)
   This phase closes HUI-B4 and HUI2 by ensuring future drift fails before it
   can enter Milestone C product work.
 
-  - [ ] 4.1 Section - Install dependency, asset, and runtime fitness checks.
+  - [x] 4.1 Section - Install dependency, asset, and runtime fitness checks.
 
     This section verifies immutable provenance and rejects forbidden consumers
     on every relevant change.
 
-    - [ ] 4.1.1 Task {#huib-p04-fitness} [repo: jido_code] [after: {#huib-p03-phase-receipt}] - Enforce dependency and asset allowlists with consumer audits.
+    - [x] 4.1.1 Task {#huib-p04-fitness} [repo: jido_code] [after: {#huib-p03-phase-receipt}] - Enforce dependency and asset allowlists with consumer audits.
 
       This task makes the HUI-B1/B2 manifests executable CI inputs.
 
-      - [ ] 4.1.1.1 Subtask - Verify exact Hex/npm/source versions, checksums, licenses, source commits, browser bundle digests, asset manifests, SBOM entries, and approved consumers.
-      - [ ] 4.1.1.2 Subtask - Reject mutable URLs/tags, CDN imports, unreviewed dependency overrides/forks, unexpected transitive applications, broad ShadcnUI imports, and unapproved network/build steps.
-      - [ ] 4.1.1.3 Subtask - Reject LiveView product routes/processes/events/streams, LiveVue/Vue, SaladUI additions, Dstar Scripts, inline/eval CSP weakening, and client-authoritative state patterns.
-      - [ ] 4.1.1.4 Subtask - Add deterministic update workflow requiring renewed provenance, license, advisory, consumer, browser, accessibility, and rollback evidence.
+      - [x] 4.1.1.1 Subtask - Verify exact Hex/npm/source versions, checksums, licenses, source commits, browser bundle digests, asset manifests, SBOM entries, and approved consumers.
+      - [x] 4.1.1.2 Subtask - Reject mutable URLs/tags, CDN imports, unreviewed dependency overrides/forks, unexpected transitive applications, broad ShadcnUI imports, and unapproved network/build steps.
+      - [x] 4.1.1.3 Subtask - Reject LiveView product routes/processes/events/streams, LiveVue/Vue, SaladUI additions, Dstar Scripts, inline/eval CSP weakening, and client-authoritative state patterns.
+      - [x] 4.1.1.4 Subtask - Add deterministic update workflow requiring renewed provenance, license, advisory, consumer, browser, accessibility, and rollback evidence.
 
   - [ ] 4.2 Section - Complete upstream and application qualification evidence.
 
