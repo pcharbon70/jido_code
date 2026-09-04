@@ -87,6 +87,54 @@
       />
 
       <section
+        id="hui-b3-stream-laboratory"
+        aria-labelledby="hui-b3-stream-title"
+        class="grid gap-4 rounded-xl border border-border bg-card p-5"
+      >
+        <div>
+          <h2 id="hui-b3-stream-title" class="text-lg font-semibold">Bounded SSE lifecycle</h2>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Connection state and fixture freshness are independent, non-authoritative signals.
+          </p>
+        </div>
+        <.stream_status
+          connection="idle"
+          freshness="native"
+          message="Use the fixture stream or keep using ordinary page navigation."
+        />
+        <.form
+          for={@stream_form}
+          id="hui-b3-stream-form"
+          action={~p"/__qualification/hypermedia/stream"}
+          method="post"
+          class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+        >
+          <.input
+            field={@stream_form[:scenario]}
+            type="select"
+            label="Stream fault scenario"
+            options={[
+              {"Normal", "normal"},
+              {"Duplicate hint", "duplicate"},
+              {"Reordered hint", "reorder"},
+              {"Dropped hint", "drop"},
+              {"Slow consumer", "slow"},
+              {"Sleep and wake", "sleep_wake"},
+              {"Server restart", "restart"},
+              {"Terminal close", "terminal"}
+            ]}
+            {@scenario_signal_attrs}
+          />
+          <UI.button id="hui-b3-stream-submit" type="submit" {@stream_button_attrs}>
+            Run bounded stream
+          </UI.button>
+        </.form>
+        <UI.link id="hui-b3-stream-reload" href={~p"/__qualification/hypermedia"}>
+          Reload the native page
+        </UI.link>
+      </section>
+
+      <section
         id="hui-b3-overlays"
         aria-labelledby="hui-b3-overlays-title"
         class="grid gap-5 rounded-xl border border-border p-5"

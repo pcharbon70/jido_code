@@ -112,4 +112,24 @@ defmodule JidoCodeWeb.Qualification.HypermediaHTML do
     </UI.status>
     """
   end
+
+  attr :connection, :string, required: true
+  attr :freshness, :string, required: true
+  attr :message, :string, required: true
+
+  def stream_status(assigns) do
+    ~H"""
+    <UI.status
+      id="hui-b3-stream-state"
+      kind={if(@connection == "connected", do: :success, else: :neutral)}
+      live={:polite}
+      data-connection-state={@connection}
+      data-fixture-freshness={@freshness}
+    >
+      <span id="hui-b3-connection-value">Connection: {@connection}.</span>
+      <span id="hui-b3-freshness-value">Fixture freshness: {@freshness}.</span>
+      <span id="hui-b3-stream-message">{@message}</span>
+    </UI.status>
+    """
+  end
 end

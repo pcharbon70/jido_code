@@ -11,9 +11,11 @@ defmodule JidoCodeWeb.Qualification.HypermediaSignals do
   alias JidoCodeWeb.QualificationRawBodyReader
 
   @max_bytes 512
-  @max_keys 4
+  @max_keys 6
   @allowed_states ~w(ready loading empty error)
-  @known_keys ~w(note page q state)
+  @allowed_scenarios ~w(normal duplicate reorder drop slow sleep_wake restart terminal)
+  @known_keys ~w(note page q state tabId scenario)
+  @tab_id_pattern ~r/\A[a-zA-Z0-9_-]{8,48}\z/
 
   @type reason ::
           :duplicate_key
@@ -88,6 +90,11 @@ defmodule JidoCodeWeb.Qualification.HypermediaSignals do
   defp valid_pair?({"q", value}), do: is_binary(value) and String.length(value) <= 40
   defp valid_pair?({"note", value}), do: is_binary(value) and String.length(value) <= 80
   defp valid_pair?({"state", value}), do: value in @allowed_states
+  defp valid_pair?({"scenario", value}), do: value in @allowed_scenarios
+
+  defp valid_pair?({"tabId", value}),
+    do: is_binary(value) and Regex.match?(@tab_id_pattern, value)
+
   defp valid_pair?({"page", value}) when is_integer(value), do: value in 1..20
 
   defp valid_pair?({"page", value}) when is_binary(value) do

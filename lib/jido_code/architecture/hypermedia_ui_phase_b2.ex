@@ -15,7 +15,10 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
   @plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-02-phoenix-component-and-asset-integration.md"
   @receipt_path "docs/architecture/hypermedia-ui-milestone-b-phase-02-receipt.md"
   @facade_path "lib/jido_code_web/components/ui.ex"
-  @hui_b3_qualification_consumer_path "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex"
+  @hui_b3_qualification_consumer_paths MapSet.new(~w[
+    lib/jido_code_web/controllers/qualification/hypermedia_controller.ex
+    lib/jido_code_web/qualification/hypermedia_stream_fixture.ex
+  ])
   @authorized_legacy_paths ~w[
     mix.exs
     lib/jido_code_web/endpoint.ex
@@ -195,7 +198,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
           "#{path}: ShadcnUI is available only behind #{@facade_path}"
         },
         {
-          path != @hui_b3_qualification_consumer_path and
+          not MapSet.member?(@hui_b3_qualification_consumer_paths, path) and
             Regex.match?(
               ~r/\bDstar\.(?:Page|Router|Component|Plugs|Scripts|SSE|Utility)/,
               source
@@ -204,7 +207,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
         },
         {
           Enum.all?([
-            path != @hui_b3_qualification_consumer_path,
+            not MapSet.member?(@hui_b3_qualification_consumer_paths, path),
             Path.extname(path) in [".ex", ".heex"],
             Regex.match?(~r/data-on:/, source)
           ]),

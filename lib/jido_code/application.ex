@@ -17,6 +17,7 @@ defmodule JidoCode.Application do
       {Task.Supervisor, name: JidoCode.Factory.Model.StreamSupervisor},
       JidoCode.Runtime.Supervisor,
       {Phoenix.PubSub, name: JidoCode.PubSub},
+      JidoCodeWeb.Qualification.HypermediaStreamCoordinator,
       # Start a worker by calling: JidoCode.Worker.start_link(arg)
       # {JidoCode.Worker, arg},
       # Start to serve requests, typically the last entry

@@ -6,6 +6,11 @@ defmodule JidoCodeWeb.Qualification.HypermediaSignalsTest do
   test "accepts and normalizes the exact harmless schema" do
     assert HypermediaSignals.decode(~s({"q":"alpha","state":"ready","page":2}), ~w(q state page)) ==
              {:ok, %{"q" => "alpha", "state" => "ready", "page" => "2"}}
+
+    assert HypermediaSignals.decode(
+             ~s({"tabId":"tab_signal_001","scenario":"restart"}),
+             ~w(tabId scenario)
+           ) == {:ok, %{"tabId" => "tab_signal_001", "scenario" => "restart"}}
   end
 
   test "rejects unknown, duplicate, nested, malformed, and oversized input" do

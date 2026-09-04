@@ -124,13 +124,17 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2Test do
       "Dstar.SSE.send_event(conn, \"datastar-patch-elements\", [])\n" <>
         "data-on:click"
 
-    refute has_error?(
-             HypermediaUIPhaseB2.check_product_sources([
-               {"lib/jido_code_web/controllers/qualification/hypermedia_controller.ex",
-                qualified_source}
-             ]),
-             "product consumption"
-           )
+    qualified_paths = [
+      "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex",
+      "lib/jido_code_web/qualification/hypermedia_stream_fixture.ex"
+    ]
+
+    Enum.each(qualified_paths, fn path ->
+      refute has_error?(
+               HypermediaUIPhaseB2.check_product_sources([{path, qualified_source}]),
+               "product consumption"
+             )
+    end)
 
     assert has_error?(
              HypermediaUIPhaseB2.check_product_sources([

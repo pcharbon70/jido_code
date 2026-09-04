@@ -9,6 +9,8 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
   alias JidoCodeWeb.Qualification.HypermediaHTML
   alias JidoCodeWeb.Qualification.HypermediaRequestSecurity
   alias JidoCodeWeb.Qualification.HypermediaSignals
+  alias JidoCodeWeb.Qualification.HypermediaStreamCoordinator
+  alias JidoCodeWeb.Qualification.HypermediaStreamFixture
 
   def index(conn, params), do: render_consumer(conn, params)
 
@@ -53,6 +55,37 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
 
   def event(conn, %{"event" => _unsupported}) do
     HypermediaRequestSecurity.reject(conn, :not_found, :unsupported_event)
+  end
+
+  def stream_fixture(conn, _params) do
+    with {:ok, conn} <- HypermediaRequestSecurity.admit(conn, :post),
+         {:ok, signals} <- HypermediaSignals.read_body(conn, ~w(tabId scenario)),
+         scenario = Map.get(signals, "scenario", "normal"),
+         {:ok, token, correlation} <-
+           HypermediaStreamCoordinator.acquire(Map.get(signals, "tabId")) do
+      try do
+        conn = Dstar.start(conn)
+
+        case HypermediaStreamFixture.run(
+               conn,
+               token,
+               scenario,
+               correlation,
+               stream_status_html("connected", "snapshot", "Bounded fixture stream admitted.")
+             ) do
+          {:ok, conn} ->
+            :ok = HypermediaStreamCoordinator.release(token, :completed)
+            conn
+
+          {:error, _reason, conn} ->
+            conn
+        end
+      after
+        HypermediaStreamCoordinator.release(token, :cancelled)
+      end
+    else
+      {:error, reason} -> HypermediaRequestSecurity.reject(conn, rejection_status(reason), reason)
+    end
   end
 
   def submit(conn, %{"qualification" => params}) when is_map(params) do
@@ -106,6 +139,10 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
         action: if(Keyword.has_key?(options, :note_errors), do: :validate, else: nil)
       )
 
+    stream_form = Phoenix.Component.to_form(%{"scenario" => "normal"}, as: :stream)
+
+    tab_id = Base.url_encode64(:crypto.strong_rand_bytes(18), padding: false)
+
     conn
     |> put_status(Keyword.get(options, :status, :ok))
     |> render(:index,
@@ -113,11 +150,20 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
       view: view,
       filter_form: filter_form,
       note_form: note_form,
+      stream_form: stream_form,
       outcome: Keyword.get(options, :outcome),
       submitted_note: Keyword.get(options, :submitted_note),
       previous_url: page_url(view, max(view.page - 1, 1)),
       next_url: page_url(view, min(view.page + 1, view.page_count)),
-      root_signal_attrs: %{"data-signals:_pending" => "false"},
+      root_signal_attrs: %{
+        "data-signals:_pending" => "false",
+        "data-signals:_stream-pending" => "false",
+        "data-signals:_connection-state" => "'idle'",
+        "data-signals:_fixture-freshness" => "'native'",
+        "data-signals:_terminal" => "false",
+        "data-signals:scenario" => "'normal'",
+        "data-signals:tab-id" => "'#{tab_id}'"
+      },
       filter_button_attrs: %{
         "data-attr:disabled" => "$_pending",
         "data-indicator:_pending" => "",
@@ -130,9 +176,16 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
         "data-on:click__prevent" =>
           "@post('/__qualification/hypermedia/events/validate-note', {headers: {'x-csrf-token': document.querySelector('meta[name=csrf-token]').content}, filterSignals: {include: /^note$/}, requestCancellation: 'auto'})"
       },
+      stream_button_attrs: %{
+        "data-attr:disabled" => "$_streamPending",
+        "data-indicator:_stream-pending" => "",
+        "data-on:click__prevent" =>
+          "@post('/__qualification/hypermedia/stream', {headers: {'x-csrf-token': document.querySelector('meta[name=csrf-token]').content}, filterSignals: {include: /^(tabId|scenario)$/}, requestCancellation: 'auto', retry: 'auto', retryInterval: #{HypermediaStreamFixture.retry_ms()}})"
+      },
       query_signal_attrs: %{"data-bind:q" => ""},
       state_signal_attrs: %{"data-bind:state" => ""},
-      note_signal_attrs: %{"data-bind:note" => ""}
+      note_signal_attrs: %{"data-bind:note" => ""},
+      scenario_signal_attrs: %{"data-bind:scenario" => ""}
     )
   end
 
@@ -161,6 +214,19 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
     )
     |> Dstar.patch_signals(%{_pending: false})
   end
+
+  defp stream_status_html(connection, freshness, message) do
+    HypermediaHTML.stream_status(%{
+      connection: connection,
+      freshness: freshness,
+      message: message
+    })
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+  end
+
+  defp rejection_status(reason) when reason in [:connection_ceiling, :duplicate_tab],
+    do: :too_many_requests
 
   defp rejection_status(reason)
        when reason in [:invalid_origin, :cross_site_request, :enhanced_request_required],
