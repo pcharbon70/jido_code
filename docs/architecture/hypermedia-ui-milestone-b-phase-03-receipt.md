@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the verified HUI-B3 implementation candidate. It remains
-merge-pending until the implementation pull request passes clean-checkout CI
-and merges. HUI-B4 is not authorized until a closure pull request pins that
-full merge commit and date without weakening any reopening condition below.
+This receipt accepts the verified HUI-B3 implementation at the merged
+candidate below. Implementation PR #113 passed clean-checkout CI and merged on
+2026-09-04. HUI-B4 is authorized only from this pinned baseline while every
+reopening condition below remains in force.
 
 ## Candidate Provenance
 
@@ -18,11 +18,13 @@ full merge commit and date without weakening any reopening condition below.
 | Section 3.2 | `c0d49072a66d008ab49ed01abfa1c811debe1bda` - closed Datastar request and fragment boundary |
 | Section 3.3 | `cfb7e84d10f234462cb77b84ae32ed1825334fe4` - bounded SSE lifecycle and coordinator |
 | Section 3.4 | `589662589577dfbef2f6be1b09c7af7f736899ab` - browser/proxy matrix, verifier, and receipt |
-| Implementation PR head | `merge-pending` |
-| Merged candidate | `merge-pending` |
+| Origin/Dialyzer repair | `7f645420b410e0869478402727a1c7ddb715212b` - exact parsed origin tuple |
+| Audit-driven Mint repair | `29e662f1afa5e8671e69632468d2a34ece1adcdb` - exact clean-checkout PR head |
+| Implementation PR head | `29e662f1afa5e8671e69632468d2a34ece1adcdb` - PR #113 |
+| Merged candidate | `e055ce51d880aa167c033a2e1f59ba4d7f8d1e81` - PR #113 |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `e055ce51d880aa167c033a2e1f59ba4d7f8d1e81`
+Merge date: `2026-09-04`
 
 ## Isolated Consumer Boundary
 
@@ -115,9 +117,9 @@ production assets, runs the browser/proxy matrix, retains failure traces for
 The implementation candidate passed warnings-as-errors compilation, 30 focused
 controller/signal/coordinator/protocol and B2/B3 architecture tests, architecture
 checks, the production asset build, the 19-case applicable real-browser matrix,
-and `mix precommit` with 1,228 tests and zero failures. The clean-checkout job
-identity will be recorded in the implementation PR before merge; any failure
-keeps this receipt merge-pending.
+and `mix precommit` with 1,228 tests and zero failures. At the exact PR head,
+clean-checkout CI `verify` job 101074431980 passed in 20m20s and `dialyzer` job
+101074432284 passed in 4m41s. Both job identities are recorded in PR #113.
 
 Clean-checkout audit discovered CVE-2026-82728 and CVE-2026-82729 in the
 transitive Mint 1.9.3 HTTP client. The candidate moves only that compatible
@@ -143,7 +145,8 @@ There are no HUI-B3 exceptions.
 
 ## Gate HUI-B3 Reopening Conditions
 
-HUI-B3 remains merge-pending. Once accepted, the gate reopens if the B2
+HUI-B3 is accepted at merged candidate
+`e055ce51d880aa167c033a2e1f59ba4d7f8d1e81`. The gate reopens if the B2
 baseline or any predecessor gate reopens; if the qualification route becomes
 default-enabled, non-loopback, broadly hosted, product-linked, discoverable,
 or available without both explicit controls; if the consumer gains a product

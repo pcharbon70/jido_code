@@ -10,7 +10,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3Test do
     assert {:ok, []} = HypermediaUIPhaseB3.check()
     assert {:ok, evidence} = HypermediaUIPhaseB3.load()
 
-    assert evidence["status"] == "integration_candidate_merge_pending"
+    assert evidence["status"] == "accepted_at_merged_candidate"
+
+    assert evidence["implementation_pr_head"] ==
+             "29e662f1afa5e8671e69632468d2a34ece1adcdb"
+
+    assert evidence["merged_candidate"] == "e055ce51d880aa167c033a2e1f59ba4d7f8d1e81"
     assert evidence["baseline_commit"] == "21e659819f4ccce7a4ba5fb1a9d858183fb65564"
     assert get_in(evidence, ["browser_toolchain", "version"]) == "1.62.0"
     assert get_in(evidence, ["stream_limits", "max_queue"]) == 0
@@ -77,26 +82,26 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3Test do
 
     assert HypermediaUIPhaseB3.validate_closure(plan, receipt) == []
 
-    accepted_plan =
+    pending_plan =
       plan
-      |> String.replace("status: proposed", "status: completed", global: false)
-      |> set_closure_checkboxes(true)
+      |> String.replace("status: completed", "status: proposed", global: false)
+      |> set_closure_checkboxes(false)
 
-    accepted_receipt =
+    pending_receipt =
       receipt
-      |> String.replace("Status: **merge-pending**", "Status: **accepted-at-merged-candidate**",
+      |> String.replace("Status: **accepted-at-merged-candidate**", "Status: **merge-pending**",
         global: false
       )
       |> String.replace(
-        "Merged candidate: `merge-pending`",
-        "Merged candidate: `1234567890abcdef1234567890abcdef12345678`"
+        "Merged candidate: `e055ce51d880aa167c033a2e1f59ba4d7f8d1e81`",
+        "Merged candidate: `merge-pending`"
       )
-      |> String.replace("Merge date: `merge-pending`", "Merge date: `2026-09-04`")
+      |> String.replace("Merge date: `2026-09-04`", "Merge date: `merge-pending`")
 
-    assert HypermediaUIPhaseB3.validate_closure(accepted_plan, accepted_receipt) == []
+    assert HypermediaUIPhaseB3.validate_closure(pending_plan, pending_receipt) == []
 
     assert has_error?(
-             HypermediaUIPhaseB3.validate_closure(accepted_plan, receipt),
+             HypermediaUIPhaseB3.validate_closure(plan, pending_receipt),
              "status: proposed"
            )
 
