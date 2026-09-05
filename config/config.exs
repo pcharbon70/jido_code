@@ -59,7 +59,8 @@ config :jido_code, :human_identity,
   idle_lifetime_seconds: 1_800,
   idle_warning_seconds: 300,
   maximum_authentication_age_seconds: 43_200,
-  bootstrap: nil
+  bootstrap: nil,
+  authority_adapter: JidoCode.Identity.Authority.Unconfigured
 
 config :jido_code, :secure_session_cookie, true
 

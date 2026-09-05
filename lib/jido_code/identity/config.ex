@@ -15,7 +15,8 @@ defmodule JidoCode.Identity.Config do
     :idle_lifetime_seconds,
     :idle_warning_seconds,
     :maximum_authentication_age_seconds,
-    :bootstrap
+    :bootstrap,
+    :authority_adapter
   ]
   defstruct @enforce_keys
 
@@ -33,7 +34,8 @@ defmodule JidoCode.Identity.Config do
           idle_lifetime_seconds: pos_integer(),
           idle_warning_seconds: pos_integer(),
           maximum_authentication_age_seconds: pos_integer(),
-          bootstrap: map() | nil
+          bootstrap: map() | nil,
+          authority_adapter: module()
         }
 
   @spec load(keyword()) :: {:ok, t()} | {:error, atom()}
@@ -59,7 +61,9 @@ defmodule JidoCode.Identity.Config do
       idle_warning_seconds: Keyword.get(values, :idle_warning_seconds, 300),
       maximum_authentication_age_seconds:
         Keyword.get(values, :maximum_authentication_age_seconds, 43_200),
-      bootstrap: Keyword.get(values, :bootstrap)
+      bootstrap: Keyword.get(values, :bootstrap),
+      authority_adapter:
+        Keyword.get(values, :authority_adapter, JidoCode.Identity.Authority.Unconfigured)
     }
 
     validate(config)
@@ -74,13 +78,14 @@ defmodule JidoCode.Identity.Config do
          true <- config.pbkdf2_iterations in 1_000..2_000_000,
          true <- config.max_failed_attempts in 1..20,
          true <- config.lockout_seconds in 1..86_400,
-         true <- is_atom(config.recovery_adapter),
+         true <- valid_adapter?(config.recovery_adapter, :verify, 2),
          true <- config.hard_lifetime_seconds in 300..43_200,
          true <- config.idle_lifetime_seconds in 60..1_800,
          true <- config.idle_warning_seconds in 30..300,
          true <- config.idle_warning_seconds < config.idle_lifetime_seconds,
          true <- config.maximum_authentication_age_seconds in 300..43_200,
-         true <- is_nil(config.bootstrap) or is_map(config.bootstrap) do
+         true <- is_nil(config.bootstrap) or is_map(config.bootstrap),
+         true <- valid_adapter?(config.authority_adapter, :resolve, 5) do
       {:ok, config}
     else
       _invalid -> {:error, :invalid_identity_config}
@@ -96,4 +101,10 @@ defmodule JidoCode.Identity.Config do
 
   defp valid_integrity_key?(%__MODULE__{integrity_key: key}),
     do: is_binary(key) and byte_size(key) >= 32
+
+  defp valid_adapter?(module, function, arity) when is_atom(module) do
+    Code.ensure_loaded?(module) and function_exported?(module, function, arity)
+  end
+
+  defp valid_adapter?(_module, _function, _arity), do: false
 end

@@ -16,7 +16,12 @@ defmodule JidoCode.Identity.Store do
   alias JidoCode.Identity.Config
   alias JidoCode.Identity.Credential
   alias JidoCode.Identity.HumanAccount
+  alias JidoCode.Identity.HumanDelegation
+  alias JidoCode.Identity.Membership
   alias JidoCode.Identity.RecoveryEvent
+  alias JidoCode.Identity.Resource
+  alias JidoCode.Identity.RevocationEvent
+  alias JidoCode.Identity.Revocations
 
   @snapshot_version 1
   @architecture_file_role :identity_authority
@@ -42,6 +47,12 @@ defmodule JidoCode.Identity.Store do
           {:ok, HumanAccount.t()} | {:error, atom()}
   def bootstrap(server \\ __MODULE__, attributes, credential, options \\ []) do
     GenServer.call(server, {:bootstrap, attributes, credential, options}, 30_000)
+  end
+
+  @spec enroll_account(server(), map(), map(), String.t(), keyword()) ::
+          {:ok, HumanAccount.t()} | {:error, atom()}
+  def enroll_account(server \\ __MODULE__, context, attributes, credential, options \\ []) do
+    GenServer.call(server, {:enroll_account, context, attributes, credential, options}, 30_000)
   end
 
   @spec authenticate(server(), String.t(), String.t(), keyword()) ::
@@ -129,6 +140,59 @@ defmodule JidoCode.Identity.Store do
     GenServer.call(server, {:revoke_session, context, session_ref, options})
   end
 
+  @spec put_membership(server(), map(), map(), keyword()) ::
+          {:ok, Membership.t()} | {:error, atom()}
+  def put_membership(server \\ __MODULE__, context, attributes, options \\ []) do
+    GenServer.call(server, {:put_membership, context, attributes, options})
+  end
+
+  @spec revoke_membership(server(), map(), String.t(), keyword()) ::
+          {:ok, Membership.t()} | {:error, atom()}
+  def revoke_membership(server \\ __MODULE__, context, membership_ref, options \\ []) do
+    GenServer.call(server, {:revoke_membership, context, membership_ref, options})
+  end
+
+  @spec put_delegation(server(), map(), map(), keyword()) ::
+          {:ok, HumanDelegation.t()} | {:error, atom()}
+  def put_delegation(server \\ __MODULE__, context, attributes, options \\ []) do
+    GenServer.call(server, {:put_delegation, context, attributes, options})
+  end
+
+  @spec revoke_delegation(server(), map(), String.t(), keyword()) ::
+          {:ok, HumanDelegation.t()} | {:error, atom()}
+  def revoke_delegation(server \\ __MODULE__, context, delegation_ref, options \\ []) do
+    GenServer.call(server, {:revoke_delegation, context, delegation_ref, options})
+  end
+
+  @spec register_resource(server(), map(), map(), keyword()) ::
+          {:ok, Resource.t()} | {:error, atom()}
+  def register_resource(server \\ __MODULE__, context, attributes, options \\ []) do
+    GenServer.call(server, {:register_resource, context, attributes, options})
+  end
+
+  @spec resolve_resource(server(), :factory | String.t()) ::
+          {:ok, Resource.t()} | {:error, :not_found}
+  def resolve_resource(server \\ __MODULE__, resource_ref) do
+    GenServer.call(server, {:resolve_resource, resource_ref})
+  end
+
+  @spec authorization_snapshot(server(), String.t(), keyword()) ::
+          {:ok, map()} | {:error, atom()}
+  def authorization_snapshot(server \\ __MODULE__, subject_ref, options \\ []) do
+    GenServer.call(server, {:authorization_snapshot, subject_ref, options})
+  end
+
+  @spec record_authorization(server(), map(), keyword()) :: :ok | {:error, atom()}
+  def record_authorization(server \\ __MODULE__, attributes, options \\ []) do
+    GenServer.call(server, {:record_authorization, attributes, options})
+  end
+
+  @spec publish_generation(server(), map(), keyword()) ::
+          {:ok, RevocationEvent.t()} | {:error, atom()}
+  def publish_generation(server \\ __MODULE__, attributes, options \\ []) do
+    GenServer.call(server, {:publish_generation, attributes, options})
+  end
+
   @impl true
   def init(options) do
     with {:ok, config} <- Config.load(Keyword.get(options, :config, [])),
@@ -170,6 +234,228 @@ defmodule JidoCode.Identity.Store do
     evidence = Map.get(state.data.events, kind, []) |> Enum.reverse()
     {:reply, evidence, state}
   end
+
+  def handle_call({:resolve_resource, resource_ref}, _from, state) do
+    resolved_ref =
+      if resource_ref == :factory, do: state.data.default_resource_ref, else: resource_ref
+
+    {:reply, fetch(state.data.resources, resolved_ref), state}
+  end
+
+  def handle_call({:authorization_snapshot, subject_ref, options}, _from, state) do
+    now = now(options)
+
+    with :ok <- available(state),
+         {:ok, account} <- fetch(state.data.accounts, subject_ref),
+         :ok <- active_account(account) do
+      memberships =
+        state.data.memberships
+        |> Map.values()
+        |> Enum.filter(&current_membership?(&1, subject_ref, now))
+        |> Enum.sort_by(& &1.membership_ref)
+
+      delegations =
+        state.data.delegations
+        |> Map.values()
+        |> Enum.filter(&current_delegation?(&1, subject_ref, state.config.policy_revision, now))
+        |> Enum.sort_by(& &1.delegation_ref)
+
+      snapshot = %{
+        account: account,
+        memberships: memberships,
+        delegations: delegations,
+        generations: state.data.generations,
+        authority_adapter: state.config.authority_adapter,
+        policy_revision: state.config.policy_revision
+      }
+
+      {:reply, {:ok, snapshot}, state}
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:put_membership, context, attributes, options}, _from, state) do
+    with :ok <- available(state),
+         :ok <- identity_admin_context(context),
+         {:ok, membership} <- build_membership(state.data, attributes, now(options)),
+         {:ok, _account} <- fetch(state.data.accounts, membership.subject_ref),
+         prior = Map.get(state.data.memberships, membership.membership_ref),
+         :ok <- immutable_membership_binding?(prior, membership) do
+      next_membership = advance_membership(membership, prior)
+      {next_data, events} = put_membership_transition(state, prior, next_membership, now(options))
+      commit(state, next_data, {:ok, next_membership}, events)
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:revoke_membership, context, membership_ref, options}, _from, state) do
+    with :ok <- available(state),
+         :ok <- identity_admin_context(context),
+         {:ok, membership} <- fetch(state.data.memberships, membership_ref),
+         true <- membership.status == :active do
+      now = now(options)
+      next_membership = %{membership | status: :revoked, revision: membership.revision + 1}
+      {next_data, events} = put_membership_transition(state, membership, next_membership, now)
+      commit(state, next_data, {:ok, next_membership}, events)
+    else
+      false -> {:reply, {:error, :membership_inactive}, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:put_delegation, context, attributes, options}, _from, state) do
+    trusted_attributes =
+      if is_map(attributes),
+        do: Map.put(attributes, :policy_revision, state.config.policy_revision),
+        else: attributes
+
+    with :ok <- available(state),
+         :ok <- identity_admin_context(context),
+         {:ok, delegation} <- build_delegation(state.data, trusted_attributes, now(options)),
+         :ok <- delegation_attenuated?(state.data, delegation),
+         prior = Map.get(state.data.delegations, delegation.delegation_ref),
+         :ok <- immutable_delegation_binding?(prior, delegation) do
+      revision = if prior, do: prior.delegation_revision + 1, else: 1
+      next_delegation = %{delegation | delegation_revision: revision}
+      prior_generation = state.data.generations.delegation
+      next_generations = Map.put(state.data.generations, :delegation, prior_generation + 1)
+
+      next_data =
+        state.data
+        |> put_in([:delegations, delegation.delegation_ref], next_delegation)
+        |> Map.put(:generations, next_generations)
+
+      event =
+        revocation_event(
+          :delegation,
+          delegation.delegate_subject_ref,
+          nil,
+          prior_generation,
+          prior_generation + 1,
+          state.config.policy_revision,
+          now(options)
+        )
+
+      commit(state, next_data, {:ok, next_delegation}, [event])
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:revoke_delegation, context, delegation_ref, options}, _from, state) do
+    with :ok <- available(state),
+         :ok <- identity_admin_context(context),
+         {:ok, delegation} <- fetch(state.data.delegations, delegation_ref),
+         true <- delegation.status == :active do
+      now = now(options)
+      prior_generation = state.data.generations.delegation
+
+      next_delegation = %{
+        delegation
+        | status: :revoked,
+          delegation_revision: delegation.delegation_revision + 1,
+          revocation_generation: delegation.revocation_generation + 1
+      }
+
+      next_data =
+        state.data
+        |> put_in([:delegations, delegation_ref], next_delegation)
+        |> put_in([:generations, :delegation], prior_generation + 1)
+
+      event =
+        revocation_event(
+          :delegation,
+          delegation.delegate_subject_ref,
+          nil,
+          prior_generation,
+          prior_generation + 1,
+          state.config.policy_revision,
+          now
+        )
+
+      commit(state, next_data, {:ok, next_delegation}, [event])
+    else
+      false -> {:reply, {:error, :delegation_inactive}, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:register_resource, context, attributes, options}, _from, state) do
+    with :ok <- available(state),
+         :ok <- identity_admin_context(context),
+         {:ok, resource} <- build_resource(state.data, attributes),
+         :ok <- resource_parent_valid?(state.data, resource),
+         prior = Map.get(state.data.resources, resource.resource_ref),
+         :ok <- immutable_resource_binding?(prior, resource) do
+      revision = if prior, do: prior.registry_revision + 1, else: 1
+      next_resource = %{resource | registry_revision: revision}
+      dimension = if resource.project_ref, do: :project, else: :tenant
+      prior_generation = Map.fetch!(state.data.generations, dimension)
+
+      next_data =
+        state.data
+        |> put_in([:resources, resource.resource_ref], next_resource)
+        |> put_in([:generations, dimension], prior_generation + 1)
+
+      event =
+        revocation_event(
+          dimension,
+          nil,
+          resource.resource_ref,
+          prior_generation,
+          prior_generation + 1,
+          state.config.policy_revision,
+          now(options)
+        )
+
+      commit(state, next_data, {:ok, next_resource}, [event])
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:record_authorization, attributes, options}, _from, state) do
+    with :ok <- available(state),
+         {:ok, audit} <-
+           authorization_audit(attributes, state.config.policy_revision, now(options)) do
+      next_data = append_audit(state.data, audit)
+      commit(state, next_data, :ok)
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:publish_generation, attributes, options}, _from, state)
+      when is_map(attributes) do
+    with :ok <- available(state),
+         :ok <- identity_admin_context(attributes[:context]),
+         dimension when dimension in [:graph, :incident] <- attributes[:dimension],
+         current <- Map.fetch!(state.data.generations, dimension),
+         expected when expected == current <- attributes[:prior_generation],
+         next when next == current + 1 <- attributes[:next_generation] do
+      event =
+        revocation_event(
+          dimension,
+          attributes[:subject_ref],
+          attributes[:resource_ref],
+          current,
+          next,
+          state.config.policy_revision,
+          now(options)
+        )
+
+      next_data = put_in(state.data, [:generations, dimension], next)
+      commit(state, next_data, {:ok, event}, [event])
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+      _invalid -> {:reply, {:error, :invalid_generation_transition}, state}
+    end
+  end
+
+  def handle_call({:publish_generation, _attributes, _options}, _from, state),
+    do: {:reply, {:error, :invalid_generation_transition}, state}
 
   def handle_call({:issue_session, authentication, options}, _from, state) do
     with :ok <- available(state),
@@ -277,7 +563,19 @@ defmodule JidoCode.Identity.Store do
         )
 
       emit_session_telemetry(:revoked, next_session, :revoked)
-      commit(state, next_data, :ok)
+
+      event =
+        revocation_event(
+          :session,
+          session.subject_ref,
+          session_ref,
+          session.session_generation,
+          session.session_generation + 1,
+          session.policy_revision,
+          now
+        )
+
+      commit(state, next_data, :ok, [event])
     else
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
@@ -288,6 +586,7 @@ defmodule JidoCode.Identity.Store do
          :ok <- local_bootstrap(options),
          :ok <- bootstrap_available(state.data),
          {:ok, normalized} <- validate_account_attributes(attributes),
+         :ok <- validate_bootstrap_authority(attributes),
          {:ok, verifier} <- Credential.build(credential, state.config.pbkdf2_iterations) do
       now = now(options)
       subject_ref = reference("human")
@@ -327,6 +626,7 @@ defmodule JidoCode.Identity.Store do
         |> put_in([:authenticators, authenticator_ref], authenticator)
         |> put_in([:verifiers, authenticator_ref], verifier)
         |> Map.put(:bootstrap_consumed, true)
+        |> add_bootstrap_authority(account, attributes, now)
         |> append_audit(
           audit_event(
             subject_ref,
@@ -341,6 +641,66 @@ defmodule JidoCode.Identity.Store do
 
       commit(state, next_data, {:ok, account})
     else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:enroll_account, context, attributes, credential, options}, _from, state) do
+    with :ok <- available(state),
+         :ok <- identity_admin_context(context),
+         {:ok, normalized} <- validate_account_attributes(attributes),
+         false <- Map.has_key?(state.data.login_index, normalized.login),
+         {:ok, verifier} <- Credential.build(credential, state.config.pbkdf2_iterations) do
+      now = now(options)
+      subject_ref = reference("human")
+      authenticator_ref = reference("authenticator")
+
+      account = %HumanAccount{
+        subject_ref: subject_ref,
+        display_name: normalized.display_name,
+        login: normalized.login,
+        status: :active,
+        account_generation: 1,
+        policy_revision: state.config.policy_revision,
+        recovery_state: recovery_state(state.config),
+        authenticator_refs: [authenticator_ref],
+        inserted_at: now,
+        updated_at: now
+      }
+
+      authenticator = %Authenticator{
+        authenticator_ref: authenticator_ref,
+        subject_ref: subject_ref,
+        kind: :local_password,
+        phishing_resistant: false,
+        enrolled_at: now,
+        verified_at: now,
+        revoked_at: nil,
+        status: :active,
+        revision: 1
+      }
+
+      next_data =
+        state.data
+        |> put_in([:accounts, subject_ref], account)
+        |> put_in([:login_index, normalized.login], subject_ref)
+        |> put_in([:authenticators, authenticator_ref], authenticator)
+        |> put_in([:verifiers, authenticator_ref], verifier)
+        |> append_audit(
+          audit_event(
+            context.actor_ref,
+            "identity.account.enroll",
+            subject_ref,
+            :committed,
+            state.config.policy_revision,
+            reference("identity_receipt"),
+            now
+          )
+        )
+
+      commit(state, next_data, {:ok, account})
+    else
+      true -> {:reply, {:error, :login_already_enrolled}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
   end
@@ -397,7 +757,8 @@ defmodule JidoCode.Identity.Store do
           )
         )
 
-      commit(state, next_data, {:ok, next_account})
+      event = account_revocation_event(account, next_account, now)
+      commit(state, next_data, {:ok, next_account}, [event])
     else
       false -> {:reply, {:error, :authentication_failed}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
@@ -429,7 +790,8 @@ defmodule JidoCode.Identity.Store do
           )
         )
 
-      commit(state, next_data, {:ok, next_account})
+      event = account_revocation_event(account, next_account, now)
+      commit(state, next_data, {:ok, next_account}, [event])
     else
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
@@ -459,7 +821,8 @@ defmodule JidoCode.Identity.Store do
           )
         )
 
-      commit(state, next_data, {:ok, next_account})
+      event = account_revocation_event(account, next_account, now)
+      commit(state, next_data, {:ok, next_account}, [event])
     else
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
@@ -520,7 +883,8 @@ defmodule JidoCode.Identity.Store do
           )
         )
 
-      commit(state, next_data, {:ok, next_account})
+      event = account_revocation_event(account, next_account, now)
+      commit(state, next_data, {:ok, next_account}, [event])
     else
       {:error, :unavailable} -> {:reply, {:error, :recovery_unavailable}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
@@ -602,10 +966,14 @@ defmodule JidoCode.Identity.Store do
     commit(state, next_data, reply)
   end
 
-  defp commit(state, next_data, reply) do
+  defp commit(state, next_data, reply, revocations \\ []) do
     case persist(state.config, next_data) do
-      :ok -> {:reply, reply, %{state | data: next_data}}
-      {:error, _reason} -> {:reply, {:error, :identity_store_unavailable}, state}
+      :ok ->
+        Enum.each(revocations, &Revocations.publish/1)
+        {:reply, reply, %{state | data: next_data}}
+
+      {:error, _reason} ->
+        {:reply, {:error, :identity_store_unavailable}, state}
     end
   end
 
@@ -633,6 +1001,27 @@ defmodule JidoCode.Identity.Store do
   end
 
   defp validate_account_attributes(_attributes), do: {:error, :invalid_account}
+
+  defp validate_bootstrap_authority(attributes) when is_map(attributes) do
+    tenant_ref = Map.get(attributes, :tenant_ref, "tenant_default")
+    roles = Map.get(attributes, :roles, [:factory_administrator])
+    route_groups = Map.get(attributes, :route_groups, [:administration])
+
+    with true <- valid_ref?(tenant_ref),
+         true <- exact_atoms?(roles, JidoCode.Identity.RoutePolicy.roles()),
+         true <- exact_atoms?(route_groups, JidoCode.Identity.RoutePolicy.areas()),
+         true <- valid_optional_ref?(attributes[:factory_resource_ref]),
+         true <- valid_optional_ref?(attributes[:membership_ref]) do
+      :ok
+    else
+      _invalid -> {:error, :invalid_bootstrap_authority}
+    end
+  end
+
+  defp validate_bootstrap_authority(_attributes), do: {:error, :invalid_bootstrap_authority}
+
+  defp valid_optional_ref?(nil), do: true
+  defp valid_optional_ref?(value), do: valid_ref?(value)
 
   defp normalize_login(login) when is_binary(login) do
     normalized = login |> String.trim() |> String.downcase()
@@ -671,6 +1060,402 @@ defmodule JidoCode.Identity.Store do
       {%Authenticator{} = authenticator, verifier} -> {:ok, authenticator, verifier}
       nil -> {:error, :authenticator_unavailable}
     end
+  end
+
+  defp build_membership(data, attributes, now) when is_map(attributes) do
+    membership_ref = Map.get(attributes, :membership_ref, reference("membership"))
+    subject_ref = attributes[:subject_ref]
+    tenant_ref = attributes[:tenant_ref]
+    project_ref = attributes[:project_ref]
+    roles = attributes[:roles]
+    route_groups = attributes[:route_groups]
+    clearance = Map.get(attributes, :clearance, :internal)
+    valid_from = Map.get(attributes, :valid_from, now)
+    valid_to = Map.get(attributes, :valid_to, ~U[9999-12-31 23:59:59Z])
+
+    with true <- valid_ref?(membership_ref),
+         true <- valid_ref?(subject_ref),
+         true <- valid_ref?(tenant_ref),
+         true <- is_nil(project_ref) or valid_ref?(project_ref),
+         true <- exact_atoms?(roles, JidoCode.Identity.RoutePolicy.roles()),
+         true <- exact_atoms?(route_groups, JidoCode.Identity.RoutePolicy.areas()),
+         true <- clearance in [:public, :internal, :confidential, :secret_reference],
+         true <- match?(%DateTime{}, valid_from) and match?(%DateTime{}, valid_to),
+         true <- DateTime.compare(valid_from, valid_to) == :lt,
+         true <- membership_scope_known?(data, tenant_ref, project_ref) do
+      {:ok,
+       %Membership{
+         membership_ref: membership_ref,
+         subject_ref: subject_ref,
+         tenant_ref: tenant_ref,
+         project_ref: project_ref,
+         roles: Enum.uniq(roles),
+         route_groups: Enum.uniq(route_groups),
+         clearance: clearance,
+         valid_from: valid_from,
+         valid_to: valid_to,
+         revision: 1,
+         status: :active
+       }}
+    else
+      _invalid -> {:error, :invalid_membership}
+    end
+  end
+
+  defp build_membership(_data, _attributes, _now), do: {:error, :invalid_membership}
+
+  defp advance_membership(membership, nil), do: membership
+
+  defp advance_membership(membership, prior) do
+    %{membership | revision: prior.revision + 1}
+  end
+
+  defp put_membership_transition(state, prior, membership, now) do
+    dimensions =
+      [:role, :tenant] ++
+        if membership.project_ref || (prior && prior.project_ref), do: [:project], else: []
+
+    {generations, events} =
+      Enum.reduce(dimensions, {state.data.generations, []}, fn dimension, {generations, events} ->
+        prior_generation = Map.fetch!(generations, dimension)
+        next_generation = prior_generation + 1
+
+        event =
+          revocation_event(
+            dimension,
+            membership.subject_ref,
+            membership.project_ref || membership.tenant_ref,
+            prior_generation,
+            next_generation,
+            state.config.policy_revision,
+            now
+          )
+
+        {Map.put(generations, dimension, next_generation), [event | events]}
+      end)
+
+    data =
+      state.data
+      |> put_in([:memberships, membership.membership_ref], membership)
+      |> Map.put(:generations, generations)
+
+    {data, Enum.reverse(events)}
+  end
+
+  defp build_delegation(data, attributes, now) when is_map(attributes) do
+    delegation_ref = Map.get(attributes, :delegation_ref, reference("human_delegation"))
+    issuer = attributes[:issuer_subject_ref]
+    delegate = attributes[:delegate_subject_ref]
+    resource_refs = attributes[:resource_refs]
+    actions = attributes[:actions]
+    graph_families = attributes[:graph_families]
+    environment = attributes[:environment]
+    valid_from = Map.get(attributes, :valid_from, now)
+    valid_to = attributes[:valid_to]
+    parent_ref = attributes[:attenuation_parent_ref]
+    minimum_assurance = Map.get(attributes, :minimum_assurance, :baseline)
+    maximum_classification = Map.get(attributes, :maximum_classification, :internal)
+    obligations = Map.get(attributes, :obligations, [])
+
+    with true <- valid_ref?(delegation_ref),
+         true <- valid_ref?(issuer) and valid_ref?(delegate) and issuer != delegate,
+         {:ok, _issuer} <- fetch(data.accounts, issuer),
+         {:ok, _delegate} <- fetch(data.accounts, delegate),
+         true <- bounded_refs?(resource_refs, data.resources),
+         true <- exact_atoms?(actions, JidoCode.Identity.RoutePolicy.actions()),
+         true <- is_list(graph_families) and graph_families != [] and length(graph_families) <= 32,
+         true <- Enum.all?(graph_families, &is_atom/1),
+         true <- environment in [:development, :test, :production],
+         true <- match?(%DateTime{}, valid_from) and match?(%DateTime{}, valid_to),
+         true <- DateTime.compare(valid_from, valid_to) == :lt,
+         true <- is_nil(parent_ref) or valid_ref?(parent_ref),
+         true <- minimum_assurance in @allowed_assurance,
+         true <- maximum_classification in [:public, :internal, :confidential, :secret_reference],
+         true <- is_list(obligations) and Enum.all?(obligations, &is_atom/1) do
+      {:ok,
+       %HumanDelegation{
+         delegation_ref: delegation_ref,
+         issuer_subject_ref: issuer,
+         delegate_subject_ref: delegate,
+         resource_refs: Enum.uniq(resource_refs),
+         actions: Enum.uniq(actions),
+         graph_families: Enum.uniq(graph_families),
+         environment: environment,
+         valid_from: valid_from,
+         valid_to: valid_to,
+         policy_revision: attributes[:policy_revision] || "invalid",
+         delegation_revision: 1,
+         attenuation_parent_ref: parent_ref,
+         revocation_generation: 1,
+         minimum_assurance: minimum_assurance,
+         maximum_classification: maximum_classification,
+         obligations: Enum.uniq(obligations),
+         status: :active
+       }}
+    else
+      _invalid -> {:error, :invalid_delegation}
+    end
+  end
+
+  defp build_delegation(_data, _attributes, _now), do: {:error, :invalid_delegation}
+
+  defp delegation_attenuated?(_data, %HumanDelegation{attenuation_parent_ref: nil}), do: :ok
+
+  defp delegation_attenuated?(data, delegation) do
+    with {:ok, parent} <- fetch(data.delegations, delegation.attenuation_parent_ref),
+         true <- parent.status == :active,
+         true <- delegation.issuer_subject_ref == parent.delegate_subject_ref,
+         true <- subset?(delegation.resource_refs, parent.resource_refs),
+         true <- subset?(delegation.actions, parent.actions),
+         true <- subset?(delegation.graph_families, parent.graph_families),
+         true <- delegation.environment == parent.environment,
+         true <- DateTime.compare(delegation.valid_from, parent.valid_from) in [:eq, :gt],
+         true <- DateTime.compare(delegation.valid_to, parent.valid_to) in [:eq, :lt],
+         true <-
+           assurance_rank(delegation.minimum_assurance) >=
+             assurance_rank(parent.minimum_assurance),
+         true <-
+           classification_rank(delegation.maximum_classification) <=
+             classification_rank(parent.maximum_classification),
+         true <- subset?(parent.obligations, delegation.obligations) do
+      :ok
+    else
+      _widened -> {:error, :delegation_widened}
+    end
+  end
+
+  defp build_resource(data, attributes) when is_map(attributes) do
+    resource_ref = Map.get(attributes, :resource_ref, reference("resource"))
+    kind = attributes[:kind]
+    iri = attributes[:iri]
+    tenant_ref = attributes[:tenant_ref]
+    project_ref = attributes[:project_ref]
+    parent_ref = attributes[:parent_ref]
+    graph_scope_iri = attributes[:graph_scope_iri]
+    classification = Map.get(attributes, :classification, :internal)
+    environment = Map.get(attributes, :environment, :production)
+    lifecycle = Map.get(attributes, :lifecycle, :active)
+
+    with true <- valid_ref?(resource_ref),
+         true <-
+           kind in [
+             :factory,
+             :project,
+             :attempt,
+             :interaction_session,
+             :candidate,
+             :wiki_preview,
+             :graph
+           ],
+         true <- valid_iri?(iri) and valid_iri?(graph_scope_iri),
+         true <- valid_ref?(tenant_ref),
+         true <- is_nil(project_ref) or valid_ref?(project_ref),
+         true <- is_nil(parent_ref) or Map.has_key?(data.resources, parent_ref),
+         true <-
+           classification in [
+             :public,
+             :internal,
+             :confidential,
+             :secret_reference,
+             :audit,
+             :personal
+           ],
+         true <- environment in [:development, :test, :production],
+         true <- lifecycle in [:active, :read_only, :archived] do
+      {:ok,
+       %Resource{
+         resource_ref: resource_ref,
+         kind: kind,
+         iri: iri,
+         tenant_ref: tenant_ref,
+         project_ref: project_ref,
+         parent_ref: parent_ref,
+         graph_scope_iri: graph_scope_iri,
+         classification: classification,
+         environment: environment,
+         lifecycle: lifecycle,
+         registry_revision: 1
+       }}
+    else
+      _invalid -> {:error, :invalid_resource}
+    end
+  end
+
+  defp build_resource(_data, _attributes), do: {:error, :invalid_resource}
+
+  defp resource_parent_valid?(_data, %Resource{kind: :factory, parent_ref: nil, project_ref: nil}),
+       do: :ok
+
+  defp resource_parent_valid?(data, %Resource{parent_ref: parent_ref} = resource)
+       when is_binary(parent_ref) do
+    case Map.get(data.resources, parent_ref) do
+      %Resource{} = parent ->
+        if parent.tenant_ref == resource.tenant_ref and
+             (is_nil(parent.project_ref) or parent.project_ref == resource.project_ref),
+           do: :ok,
+           else: {:error, :resource_scope_mismatch}
+
+      _missing ->
+        {:error, :resource_parent_missing}
+    end
+  end
+
+  defp resource_parent_valid?(_data, _resource), do: {:error, :resource_parent_missing}
+
+  defp authorization_audit(attributes, policy_revision, now) when is_map(attributes) do
+    with actor_ref when is_binary(actor_ref) <- attributes[:actor_ref],
+         operation when is_atom(operation) <- attributes[:operation],
+         outcome
+         when outcome in [
+                :allowed,
+                :concealed_not_found,
+                :redacted,
+                :denied,
+                :unavailable,
+                :revoked,
+                :step_up_required
+              ] <-
+           attributes[:outcome],
+         correlation_ref when is_binary(correlation_ref) <- attributes[:correlation_ref] do
+      object_ref =
+        if outcome == :concealed_not_found,
+          do: "concealed_resource",
+          else: attributes[:resource_ref] || "unknown_resource"
+
+      {:ok,
+       audit_event(
+         actor_ref,
+         "identity.authorization.#{operation}",
+         object_ref,
+         outcome,
+         policy_revision,
+         correlation_ref,
+         now
+       )}
+    else
+      _invalid -> {:error, :invalid_authorization_audit}
+    end
+  end
+
+  defp authorization_audit(_attributes, _policy_revision, _now),
+    do: {:error, :invalid_authorization_audit}
+
+  defp current_membership?(membership, subject_ref, now) do
+    membership.subject_ref == subject_ref and membership.status == :active and
+      DateTime.compare(membership.valid_from, now) in [:lt, :eq] and
+      DateTime.compare(now, membership.valid_to) == :lt
+  end
+
+  defp current_delegation?(delegation, subject_ref, policy_revision, now) do
+    delegation.delegate_subject_ref == subject_ref and delegation.status == :active and
+      delegation.policy_revision == policy_revision and
+      DateTime.compare(delegation.valid_from, now) in [:lt, :eq] and
+      DateTime.compare(now, delegation.valid_to) == :lt
+  end
+
+  defp immutable_membership_binding?(nil, _membership), do: :ok
+
+  defp immutable_membership_binding?(prior, membership) do
+    if {prior.subject_ref, prior.tenant_ref, prior.project_ref} ==
+         {membership.subject_ref, membership.tenant_ref, membership.project_ref},
+       do: :ok,
+       else: {:error, :membership_binding_immutable}
+  end
+
+  defp immutable_delegation_binding?(nil, _delegation), do: :ok
+
+  defp immutable_delegation_binding?(prior, delegation) do
+    if {prior.issuer_subject_ref, prior.delegate_subject_ref} ==
+         {delegation.issuer_subject_ref, delegation.delegate_subject_ref},
+       do: :ok,
+       else: {:error, :delegation_binding_immutable}
+  end
+
+  defp immutable_resource_binding?(nil, _resource), do: :ok
+
+  defp immutable_resource_binding?(prior, resource) do
+    if {prior.kind, prior.tenant_ref, prior.project_ref, prior.parent_ref} ==
+         {resource.kind, resource.tenant_ref, resource.project_ref, resource.parent_ref},
+       do: :ok,
+       else: {:error, :resource_binding_immutable}
+  end
+
+  defp membership_scope_known?(data, tenant_ref, nil) do
+    Enum.any?(data.resources, fn {_ref, resource} ->
+      resource.tenant_ref == tenant_ref and resource.kind == :factory
+    end)
+  end
+
+  defp membership_scope_known?(data, tenant_ref, project_ref) do
+    Enum.any?(data.resources, fn {_ref, resource} ->
+      resource.tenant_ref == tenant_ref and resource.project_ref == project_ref
+    end)
+  end
+
+  defp bounded_refs?(refs, resources) do
+    is_list(refs) and refs != [] and length(refs) <= 100 and
+      Enum.all?(refs, &Map.has_key?(resources, &1))
+  end
+
+  defp exact_atoms?(values, allowed) do
+    is_list(values) and values != [] and length(values) <= length(allowed) and
+      Enum.all?(values, &(&1 in allowed))
+  end
+
+  defp valid_ref?(value),
+    do:
+      is_binary(value) and byte_size(value) in 3..256 and
+        Regex.match?(~r/^[A-Za-z0-9][A-Za-z0-9_.:@+-]*$/, value)
+
+  defp valid_iri?(value) when is_binary(value) do
+    uri = URI.parse(value)
+    uri.scheme in ["http", "https", "urn"] and is_nil(uri.userinfo) and is_nil(uri.fragment)
+  end
+
+  defp valid_iri?(_value), do: false
+
+  defp subset?(left, right), do: MapSet.subset?(MapSet.new(left), MapSet.new(right))
+
+  defp assurance_rank(:baseline), do: 1
+  defp assurance_rank(:phishing_resistant), do: 2
+  defp assurance_rank(:action_bound_step_up), do: 3
+
+  defp classification_rank(:public), do: 1
+  defp classification_rank(:internal), do: 2
+  defp classification_rank(:confidential), do: 3
+  defp classification_rank(:secret_reference), do: 4
+
+  defp revocation_event(
+         dimension,
+         subject_ref,
+         resource_ref,
+         prior_generation,
+         next_generation,
+         policy_revision,
+         now
+       ) do
+    %RevocationEvent{
+      event_ref: reference("revocation_event"),
+      dimension: dimension,
+      subject_ref: subject_ref,
+      resource_ref: resource_ref,
+      prior_generation: prior_generation,
+      next_generation: next_generation,
+      policy_revision: policy_revision,
+      occurred_at: now
+    }
+  end
+
+  defp account_revocation_event(account, next_account, now) do
+    revocation_event(
+      :account,
+      account.subject_ref,
+      nil,
+      account.account_generation,
+      next_account.account_generation,
+      next_account.policy_revision,
+      now
+    )
   end
 
   defp authenticated_account(data, authentication) when is_map(authentication) do
@@ -924,6 +1709,18 @@ defmodule JidoCode.Identity.Store do
       authenticators: %{},
       verifiers: %{},
       sessions: %{},
+      memberships: %{},
+      delegations: %{},
+      resources: %{},
+      default_resource_ref: nil,
+      generations: %{
+        role: 1,
+        delegation: 1,
+        project: 1,
+        tenant: 1,
+        graph: 1,
+        incident: 1
+      },
       failures: %{},
       events: %{authentication: [], recovery: [], audit: []},
       bootstrap_consumed: false
@@ -959,8 +1756,9 @@ defmodule JidoCode.Identity.Store do
 
   defp valid_data_shape?(data) do
     is_map(data.accounts) and is_map(data.login_index) and is_map(data.authenticators) and
-      is_map(data.verifiers) and is_map(data.sessions) and is_map(data.failures) and
-      is_boolean(data.bootstrap_consumed)
+      is_map(data.verifiers) and is_map(data.sessions) and is_map(data.memberships) and
+      is_map(data.delegations) and is_map(data.resources) and is_map(data.generations) and
+      is_map(data.failures) and is_boolean(data.bootstrap_consumed)
   rescue
     _error -> false
   end
@@ -995,12 +1793,15 @@ defmodule JidoCode.Identity.Store do
     bootstrap = config.bootstrap
 
     with {:ok, normalized} <- validate_account_attributes(bootstrap),
+         :ok <- validate_bootstrap_authority(bootstrap),
          credential when is_binary(credential) <- bootstrap[:credential],
-         {:ok, verifier} <- Credential.build(credential, config.pbkdf2_iterations) do
-      now = Map.get(bootstrap, :now, DateTime.utc_now())
-      subject_ref = Map.get(bootstrap, :subject_ref, reference("human"))
-      authenticator_ref = Map.get(bootstrap, :authenticator_ref, reference("authenticator"))
-
+         {:ok, verifier} <- Credential.build(credential, config.pbkdf2_iterations),
+         now = Map.get(bootstrap, :now, DateTime.utc_now()),
+         true <- match?(%DateTime{}, now),
+         subject_ref = Map.get(bootstrap, :subject_ref, reference("human")),
+         true <- valid_ref?(subject_ref),
+         authenticator_ref = Map.get(bootstrap, :authenticator_ref, reference("authenticator")),
+         true <- valid_ref?(authenticator_ref) do
       account = %HumanAccount{
         subject_ref: subject_ref,
         display_name: normalized.display_name,
@@ -1033,6 +1834,7 @@ defmodule JidoCode.Identity.Store do
         |> put_in([:authenticators, authenticator_ref], authenticator)
         |> put_in([:verifiers, authenticator_ref], verifier)
         |> Map.put(:bootstrap_consumed, true)
+        |> add_bootstrap_authority(account, bootstrap, now)
 
       with :ok <- persist(config, seeded), do: {:ok, seeded}
     else
@@ -1041,4 +1843,53 @@ defmodule JidoCode.Identity.Store do
   end
 
   defp seed_bootstrap(_config, data), do: {:ok, data}
+
+  defp add_bootstrap_authority(data, account, attributes, now) do
+    surface = Application.fetch_env!(:jido_code, :product_surface)
+    resource_ref = Map.get(attributes, :factory_resource_ref, reference("resource_factory"))
+    tenant_ref = Map.get(attributes, :tenant_ref, "tenant_default")
+    roles = Map.get(attributes, :roles, [:factory_administrator])
+    route_groups = Map.get(attributes, :route_groups, [:administration])
+
+    resource = %Resource{
+      resource_ref: resource_ref,
+      kind: :factory,
+      iri: Keyword.fetch!(surface, :factory_iri),
+      tenant_ref: tenant_ref,
+      project_ref: nil,
+      parent_ref: nil,
+      graph_scope_iri: Keyword.fetch!(surface, :factory_scope_iri),
+      classification: :internal,
+      environment: runtime_environment(),
+      lifecycle: :active,
+      registry_revision: 1
+    }
+
+    membership = %Membership{
+      membership_ref: Map.get(attributes, :membership_ref, reference("membership")),
+      subject_ref: account.subject_ref,
+      tenant_ref: tenant_ref,
+      project_ref: nil,
+      roles: Enum.uniq(roles),
+      route_groups: Enum.uniq(route_groups),
+      clearance: :internal,
+      valid_from: now,
+      valid_to: ~U[9999-12-31 23:59:59Z],
+      revision: 1,
+      status: :active
+    }
+
+    data
+    |> put_in([:resources, resource_ref], resource)
+    |> put_in([:memberships, membership.membership_ref], membership)
+    |> Map.put(:default_resource_ref, resource_ref)
+  end
+
+  defp runtime_environment do
+    case Application.get_env(:jido_code, :runtime_mode, :production) do
+      value when value in [:dev, :development] -> :development
+      :test -> :test
+      _other -> :production
+    end
+  end
 end

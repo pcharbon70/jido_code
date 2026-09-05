@@ -13,6 +13,7 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
     lib/jido_code_web/router.ex
     lib/jido_code_web/product_auth.ex
     lib/jido_code_web/plugs/require_same_origin.ex
+    lib/jido_code_web/plugs/require_product_area.ex
     lib/jido_code_web/controllers/auth_controller.ex
     lib/jido_code_web/controllers/auth_html/new.html.heex
   ])

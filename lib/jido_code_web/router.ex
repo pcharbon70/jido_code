@@ -28,6 +28,12 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.Plugs.RequireSameOrigin
   end
 
+  for area <- JidoCode.Identity.RoutePolicy.areas() do
+    pipeline String.to_atom("authorize_#{area}") do
+      plug JidoCodeWeb.Plugs.RequireProductArea, area
+    end
+  end
+
   if Application.compile_env(:jido_code, :hypermedia_qualification_build, false) do
     pipeline :hypermedia_qualification do
       plug JidoCodeWeb.Plugs.HypermediaQualificationAccess

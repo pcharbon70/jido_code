@@ -30,8 +30,29 @@ config :jido_code, :human_identity,
     authenticator_ref: "authenticator_test_password",
     display_name: "Test Operator",
     login: "operator@example.test",
-    credential: "test-named-human-credential"
-  }
+    credential: "test-named-human-credential",
+    roles: [
+      :observer,
+      :project_developer,
+      :project_maintainer,
+      :independent_verifier,
+      :factory_operator,
+      :security_auditor,
+      :factory_administrator,
+      :knowledge_steward,
+      :cost_observer
+    ],
+    route_groups: [
+      :developer,
+      :reviewer,
+      :operations,
+      :security,
+      :cost,
+      :knowledge,
+      :administration
+    ]
+  },
+  authority_adapter: JidoCode.TestSupport.StaticHumanAuthorityAdapter
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

@@ -14,6 +14,7 @@ defmodule JidoCodeWeb.ProductAuth do
   import Plug.Conn
 
   alias JidoCode.Identity
+  alias JidoCode.Identity.AuthorityBuilder
   alias JidoCode.Identity.Sessions
   alias JidoCode.Product
   alias Phoenix.LiveView
@@ -108,29 +109,41 @@ defmodule JidoCodeWeb.ProductAuth do
 
   def fetch_current_scope(conn, _options) do
     case current_human(get_session(conn, @session_ref_key)) do
-      {:ok, scope, identity, authority} ->
+      {:ok, scope, identity, authority, authorization} ->
         conn
         |> assign(:current_scope, scope)
         |> assign(:product_identity, identity)
         |> assign(:authority, authority)
+        |> assign(:authorization, authorization)
+        |> assign(:authorization_outcome, :allowed)
 
-      {:error, _reason} ->
+      {:error, reason} ->
         conn
         |> assign(:current_scope, nil)
         |> assign(:product_identity, nil)
         |> assign(:authority, nil)
+        |> assign(:authorization, nil)
+        |> assign(:authorization_outcome, reason)
     end
   end
 
   def require_authenticated_human(conn, _options) do
-    if conn.assigns[:current_scope] do
-      conn
-    else
-      return_to = request_path_with_query(conn)
+    case {conn.assigns[:current_scope], conn.assigns[:authorization_outcome]} do
+      {%{}, :allowed} ->
+        conn
 
-      conn
-      |> redirect(to: ~p"/sign-in?#{%{return_to: return_to}}")
-      |> halt()
+      {nil, :concealed_not_found} ->
+        conn |> send_resp(:not_found, "Not found.") |> halt()
+
+      {nil, outcome} when outcome in [:unavailable, :denied, :step_up_required] ->
+        conn |> send_resp(:service_unavailable, "The product authority is unavailable.") |> halt()
+
+      _unauthenticated_or_revoked ->
+        return_to = request_path_with_query(conn)
+
+        conn
+        |> redirect(to: ~p"/sign-in?#{%{return_to: return_to}}")
+        |> halt()
     end
   end
 
@@ -195,12 +208,13 @@ defmodule JidoCodeWeb.ProductAuth do
 
   def on_mount(:require_authenticated, _params, session, %Socket{} = socket) do
     with session_ref when is_binary(session_ref) <- session[@session_ref_key],
-         {:ok, scope, identity, authority} <- current_human(session_ref) do
+         {:ok, scope, identity, authority, authorization} <- current_human(session_ref) do
       {:cont,
        socket
        |> Phoenix.Component.assign(:current_scope, scope)
        |> Phoenix.Component.assign(:product_identity, identity)
        |> Phoenix.Component.assign(:authority, authority)
+       |> Phoenix.Component.assign(:authorization, authorization)
        |> LiveView.attach_hook(
          :product_session_authority,
          :handle_event,
@@ -214,12 +228,13 @@ defmodule JidoCodeWeb.ProductAuth do
   @spec current_scope_valid?(map()) :: boolean()
   def current_scope_valid?(scope) when is_map(scope) do
     with session_ref when is_binary(session_ref) <- scope[:session_ref],
-         {:ok, %{session: session, account: account}} <-
-           Sessions.validate(session_ref, touch: false) do
-      session.subject_ref == scope[:subject_ref] and
-        account.subject_ref == scope[:subject_ref] and
-        session.session_generation == scope[:session_generation] and
-        session.account_generation == scope[:account_generation]
+         {:ok, request} <-
+           AuthorityBuilder.request(:compatibility_product, :developer, :page, :factory),
+         {:ok, authorization} <- AuthorityBuilder.build(session_ref, request, touch: false) do
+      authorization.decision == :allowed and
+        authorization.current_scope.subject_ref == scope[:subject_ref] and
+        authorization.current_scope.account_generation == scope[:account_generation] and
+        authorization.current_scope.revocation_generations == scope[:revocation_generations]
     else
       _invalid -> false
     end
@@ -260,29 +275,21 @@ defmodule JidoCodeWeb.ProductAuth do
   def safe_return_path(_path), do: "/"
 
   defp current_human(session_ref) when is_binary(session_ref) do
-    with {:ok, %{session: session, account: account}} <- Sessions.validate(session_ref),
-         identity <- human_product_identity(account),
-         {:ok, authority} <- Product.authority(identity) do
-      scope = %{
-        iri: identity.factory_scope_iri,
-        actor_iri: identity.actor_iri,
-        principal_iri: identity.principal_iri,
-        subject_ref: account.subject_ref,
-        display_name: account.display_name,
-        authenticated_at: DateTime.to_unix(session.last_authenticated_at),
-        expires_at: DateTime.to_unix(session.hard_expires_at),
-        idle_expires_at: DateTime.to_unix(session.idle_expires_at),
-        assurance: session.assurance,
-        session_ref: session.session_ref,
-        session_generation: session.session_generation,
-        account_generation: session.account_generation,
-        policy_revision: session.policy_revision,
-        nonce: session.nonce,
-        identity: identity,
-        principal_class: :human
-      }
+    with {:ok, request} <-
+           AuthorityBuilder.request(:compatibility_product, :developer, :page, :factory),
+         {:ok, authorization} <- AuthorityBuilder.build(session_ref, request),
+         :allowed <- authorization.decision do
+      {:ok, authorization.current_scope, authorization.product_identity,
+       authorization.authority_context, authorization}
+    else
+      {:ok, authorization} ->
+        {:error, authorization.decision}
 
-      {:ok, scope, identity, authority}
+      {:error, reason} ->
+        {:error, reason}
+
+      reason when reason in [:concealed_not_found, :unavailable, :denied, :step_up_required] ->
+        {:error, reason}
     end
   rescue
     _error -> {:error, :invalid_session}

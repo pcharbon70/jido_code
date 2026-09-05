@@ -16,6 +16,24 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
     credentials_tokens_and_protected_content_are_absent_from_events_and_telemetry
     predecessor_dependency_asset_and_facade_pins_remain_unchanged
   ]
+  @decisions ~w[
+    allowed concealed_not_found redacted denied unavailable revoked step_up_required
+  ]
+  @reauthorization_points ~w[
+    before_response_start before_query_execution before_field_shaping
+    before_stream_subscription before_each_protected_patch before_command_construction
+    inside_command_gateway before_approval_commit before_export_creation
+    before_each_export_or_download_retrieval
+  ]
+  @resource_kinds ~w[
+    factory project attempt interaction_session candidate wiki_preview graph
+  ]
+  @route_groups ~w[
+    developer reviewer operations security cost knowledge administration
+  ]
+  @revocation_dimensions ~w[
+    account session role delegation project tenant graph incident
+  ]
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
   def check(root \\ File.cwd!()) do
@@ -49,6 +67,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
     sources = evidence["source_digests"] || %{}
     identity = evidence["identity_authority"] || %{}
     session = identity["session_profile"] || %{}
+    authority = evidence["authority_construction"] || %{}
 
     []
     |> require_equal(evidence["schema_version"], 1, "schema version")
@@ -104,6 +123,40 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
       ~w[logout logout_all account_disable credential_rotation recovery],
       "revocation events"
     )
+    |> require_equal(
+      authority["builder"],
+      "JidoCode.Identity.AuthorityBuilder",
+      "authority builder"
+    )
+    |> require_equal(authority["request_schema"], "closed_server_owned", "request schema")
+    |> require_equal(
+      authority["production_adapter"],
+      "explicitly_unconfigured",
+      "production adapter posture"
+    )
+    |> require_equal(authority["role_grant_behavior"], "never", "role grant behavior")
+    |> require_equal(
+      authority["project_membership_scope"],
+      "exact_project_only",
+      "project membership scope"
+    )
+    |> require_exact_set(authority["decisions"] || [], @decisions, "authority decisions")
+    |> require_exact_set(
+      authority["reauthorization_points"] || [],
+      @reauthorization_points,
+      "reauthorization points"
+    )
+    |> require_exact_set(
+      authority["resource_kinds"] || [],
+      @resource_kinds,
+      "resource kinds"
+    )
+    |> require_exact_set(authority["route_groups"] || [], @route_groups, "route groups")
+    |> require_exact_set(
+      authority["revocation_dimensions"] || [],
+      @revocation_dimensions,
+      "revocation dimensions"
+    )
     |> validate_source_paths(sources, root)
     |> Enum.reverse()
   end
@@ -117,7 +170,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
       cond do
         not HypermediaUISuccessorEvidence.mutable_path?(path) and
           not String.starts_with?(path, "lib/jido_code/identity") and
-            path != "lib/mix/tasks/identity.bootstrap.ex" ->
+          path != "lib/mix/tasks/identity.bootstrap.ex" and
+            path != "test/support/static_human_authority_adapter.ex" ->
           ["unauthorized HUI-C1 source path #{path}" | acc]
 
         not Regex.match?(~r/^[a-f0-9]{64}$/, expected) ->
