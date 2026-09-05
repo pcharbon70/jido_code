@@ -282,13 +282,18 @@ defmodule JidoCodeWeb.ProductAuth do
       {:ok, authorization.current_scope, authorization.product_identity,
        authorization.authority_context, authorization}
     else
-      {:ok, authorization} ->
-        {:error, authorization.decision}
-
       {:error, reason} ->
         {:error, reason}
 
-      reason when reason in [:concealed_not_found, :unavailable, :denied, :step_up_required] ->
+      reason
+      when reason in [
+             :concealed_not_found,
+             :redacted,
+             :unavailable,
+             :revoked,
+             :denied,
+             :step_up_required
+           ] ->
         {:error, reason}
     end
   rescue

@@ -29,7 +29,7 @@ defmodule JidoCode.Identity.AuthorityRequest do
 
   @spec new(map()) :: {:ok, t()} | {:error, :invalid_authority_request}
   def new(attributes) when is_map(attributes) do
-    with true <- MapSet.new(Map.keys(attributes)) == MapSet.new(@enforce_keys),
+    with true <- Enum.sort(Map.keys(attributes)) == Enum.sort(@enforce_keys),
          operation when is_atom(operation) <- attributes[:operation],
          true <- operation in RoutePolicy.operations(),
          area when is_atom(area) <- attributes[:area],

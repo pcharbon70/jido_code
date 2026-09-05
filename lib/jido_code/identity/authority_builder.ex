@@ -23,6 +23,8 @@ defmodule JidoCode.Identity.AuthorityBuilder do
     :step_up_required
   ]
 
+  @grant_keys [:delegation_ref, :grant_ref, :graph_revisions, :obligations]
+
   @spec request(atom(), atom(), atom(), :factory | String.t(), keyword()) ::
           {:ok, AuthorityRequest.t()} | {:error, :invalid_authority_request}
   def request(operation, area, action, resource_ref \\ :factory, options \\ []) do
@@ -174,7 +176,7 @@ defmodule JidoCode.Identity.AuthorityBuilder do
 
   defp allowed_result(snapshot, session, identity, context, resource, request, roles, grant) do
     with true <- is_map(grant),
-         true <- MapSet.subset?(MapSet.new(Map.keys(grant)), grant_keys()),
+         true <- valid_grant_keys?(grant),
          grant_ref when is_binary(grant_ref) <- grant[:grant_ref],
          true <- valid_iri?(grant_ref),
          :ok <- valid_obligations?(grant[:obligations] || []),
@@ -425,8 +427,9 @@ defmodule JidoCode.Identity.AuthorityBuilder do
 
   defp valid_graph_revisions?(_revisions), do: {:error, :invalid_graph_revisions}
 
-  defp grant_keys do
-    MapSet.new([:grant_ref, :delegation_ref, :obligations, :graph_revisions])
+  defp valid_grant_keys?(grant) do
+    keys = Map.keys(grant)
+    length(keys) <= length(@grant_keys) and Enum.all?(keys, &(&1 in @grant_keys))
   end
 
   defp clearance_rank(:public), do: 1
