@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the local HUI-C1 implementation candidate. It does not
-accept HUI-C1 or authorize Milestone C Phase 2 until the implementation pull
-request passes clean-checkout CI, merges, and a closure pull request pins the
-full merged candidate and merge date.
+This receipt accepts the HUI-C1 implementation at the merged candidate below.
+Implementation PR #117 passed clean-checkout CI and merged on 2026-09-05.
+Milestone C Phase 2 is authorized only from this pinned baseline while every
+reopening condition below remains in force.
 
 ## Candidate Provenance
 
@@ -18,64 +18,52 @@ full merged candidate and merge date.
 | Section 1.1 | `d169129c53f15745f0ebac87f625df3cc0fe130a` - named account and authenticator foundations |
 | Section 1.2 | `2d08df156932fae479c485bae9a8d6bb79139555` - browser session lifecycle and security |
 | Section 1.3 | `1a04872b1295ef4985bb51bae5cb45530e92a397` - trusted scope, authority, membership, and revocation construction |
-| Section 1.4 | merge-pending - integration matrix, full verification, and receipt preparation |
-| Implementation PR head | merge-pending |
-| Merged candidate | merge-pending |
+| Section 1.4 | `5a95c5a655e5f11951a172501ce8b537d08d312c` - integration matrix, full verification, and receipt preparation |
+| Implementation PR head | `0cfc67ea0537fdf5833f9fbd483cc653a7e4b06d` - PR #117 clean-checkout candidate |
+| Merged candidate | `4a6fa78443463a8c8cd8ed039119cef8ba6e3b1b` - PR #117 |
 
-Merged candidate: merge-pending
-Merge date: merge-pending
+Merged candidate: `4a6fa78443463a8c8cd8ed039119cef8ba6e3b1b`
+Merge date: `2026-09-05`
 
 ## Identity And Authenticator Evidence
 
-`JidoCode.Identity.Store` is the exclusive named-human account,
-authenticator, session, membership, delegation, resource-registry, revocation,
-and audit authority for this phase. Durable snapshots use an HMAC-SHA-256
-integrity envelope, atomic replacement, and owner-only file permissions.
-Local credentials use PBKDF2-HMAC-SHA-256 with per-credential salts and
-bounded failure lockout. Credential verifier material is separated from public
-account/authenticator records.
+`JidoCode.Identity.Store` exclusively owns named-human accounts,
+authenticators, sessions, memberships, delegations, resources, revocations,
+and audit for this phase. Its atomically replaced, owner-only snapshots use an
+HMAC-SHA-256 envelope; local credentials use salted PBKDF2-HMAC-SHA-256 with
+bounded lockout and private verifier material.
 
-One-time local bootstrap, governed named-account enrollment, sign-in,
-credential rotation, independent recovery adapter integration, account
-disablement, current-session logout, and logout-all have safe outcomes and
-immutable audit evidence. Browser use of the legacy shared operator is
-prohibited; that operator remains compatibility-API-only. Phishing-resistant
-authentication, action-bound step-up, and recovery remain explicitly
-unavailable when their production adapters are not composed.
+Bootstrap is one-time and local. Enrollment, sign-in, rotation, independent
+recovery, disablement, logout, and logout-all produce immutable audit evidence.
+The legacy shared operator is API-only. Uncomposed phishing-resistant,
+action-bound step-up, and recovery adapters remain explicitly unavailable.
 
 ## Browser Session Evidence
 
-The browser cookie contains only the framework's encrypted/signed opaque
-session reference and CSRF state. Production configuration pins Secure,
-HTTP-only, host-only, path `/`, and SameSite=Lax behavior. Every protected
-request validates server-held session and account state, hard and idle expiry,
-authentication age, policy revision, and session/account generations.
+The encrypted/signed browser cookie holds only an opaque session reference and
+CSRF state, with Secure, HTTP-only, host-only, path `/`, and SameSite=Lax
+configuration. Each protected request checks server-held account/session state,
+hard/idle expiry, authentication age, policy revision, and generations.
 
-Successful authentication renews and clears the anonymous session, rotates
-the CSRF/session material, and refuses caller-elevated assurance. Credential
-rotation, recovery, logout-all, disablement, administrative revocation, and
-current-session logout invalidate future use. Browser writes require CSRF plus
-same-origin/Fetch Metadata admission. Return paths accept only bounded local
-paths. Session telemetry and audit omit cookies, credentials, verifier
-material, nonce values, protected content, and reusable tokens.
+Authentication renews the session and refuses caller-elevated assurance.
+Rotation, recovery, logout-all, disablement, administrative revocation, and
+logout revoke future use. Writes require CSRF and same-origin/Fetch Metadata;
+return paths are bounded and local. Telemetry and audit omit secrets, cookies,
+nonces, protected content, and reusable tokens.
 
 ## Scope And Authority Evidence
 
-`JidoCode.Identity.AuthorityBuilder` is the single named-human constructor used
-by the controller and retained compatibility UI boundary. It accepts a
-validated server session reference and a closed route-owned request. Browser
-actor, principal, role, tenant, project, graph, grant, delegation, assurance,
-classification, environment, revision, and generation fields are rejected or
-have no input path.
+`JidoCode.Identity.AuthorityBuilder` is the sole named-human constructor for
+controllers and the retained compatibility boundary. It accepts a verified
+server session plus a closed route-owned request; browser identity, scope,
+grant, delegation, assurance, classification, revision, and generation values
+have no authority path.
 
-The constructor resolves current memberships, exact optional delegation,
-opaque resource containment, route group, clearance, lifecycle, assurance,
-policy revision, and all independent revocation generations before asking the
-configured adapter for one exact current grant. A final atomic generation,
-session, account, and resource-revision confirmation closes the local
-revocation race before the decision is returned and audited. Adapter crashes,
-malformed output, ambiguous current evidence, audit persistence failure, and
-unconfigured graph authority fail closed.
+It resolves current membership, exact optional delegation, resource
+containment, route group, clearance, lifecycle, assurance, policy, and every
+revocation generation before requesting one exact adapter grant. A final atomic
+session/account/generation/resource-revision check closes the revocation race.
+Malformed, ambiguous, crashing, unavailable, or unpersistable evidence denies.
 
 Role labels are explanation only. Factory scope requires exact tenant-level
 membership; project and child scopes require the exact project membership.
@@ -83,21 +71,18 @@ Project, attempt, interaction-session, candidate, wiki-preview, and graph
 references remain distinct immutable registry records. Unknown, tampered,
 cross-tenant, and cross-project references remain concealed.
 
-The decision vocabulary is `allowed`, `concealed_not_found`, `redacted`,
-`denied`, `unavailable`, `revoked`, and `step_up_required`. Reauthorization
-hooks rebuild current state before response, query, field shaping, stream
-subscription, protected patches, command construction and gateway admission,
-approval commit, export creation, and every download retrieval.
+Decisions are `allowed`, `concealed_not_found`, `redacted`, `denied`,
+`unavailable`, `revoked`, or `step_up_required`. Required response, query,
+field, stream, patch, command/gateway, approval, export, and download boundaries
+rebuild current authority.
 
 ## Membership, Delegation, And Revocation Evidence
 
-The seven independent route groups are developer, reviewer, operations,
-security, cost, knowledge, and administration. Membership and delegation reads
-are bounded, validity-aware, policy-aware, and deterministic. Membership,
-delegation, and resource identities cannot be rebound through an existing
-opaque reference. Delegation attenuation cannot widen subject binding,
-resources, actions, graph families, environment, validity, assurance,
-classification, or obligations; multiple exact delegation matches deny.
+Developer, reviewer, operations, security, cost, knowledge, and administration
+are independent route groups. Bounded current membership and delegation reads
+cannot rebind opaque identities. Delegation cannot widen subject, resource,
+action, graph family, environment, validity, assurance, classification, or
+obligations; ambiguous exact matches deny.
 
 Account, session, role, delegation, project, tenant, graph, and incident
 dimensions publish privacy-safe monotonic invalidation events. Membership,
@@ -108,26 +93,20 @@ server state.
 
 ## Integration Verification
 
-The focused local matrix passes 51 tests with zero failures across
-account, authenticator, session, authority, resource isolation, controller,
-CSRF/Origin, return-path, and retained compatibility UI behavior. It covers
-all role explanations and route groups, exact grants, redaction, concealed
-resources, unavailable and malformed adapters, assurance escalation refusal,
-membership/delegation expiry and revocation, immutable reference binding,
-all resource kinds, several named humans and tabs, concurrent revocation,
-stale generations, and every reauthorization checkpoint.
-
-The executable HUI-C1 evidence pins the accepted HUI-B4 predecessor, unchanged
-dependency/component/asset evidence, production identity/session posture,
-closed authority vocabulary, route/resource/revocation matrices, section
-commits, and exact source digests. Architecture checking rejects predecessor
-drift, browser authority, source drift, reordered phase completion, weakened
-invariants, and false receipt lifecycle claims.
+The focused 51-test matrix passes account, authenticator, session, authority,
+isolation, controller, CSRF/Origin, redirect, compatibility, exact-grant,
+redaction, concealment, adapter-failure, assurance, expiry/revocation,
+immutable-binding, multi-user/tab, race, stale-generation, and reauthorization
+cases. Executable evidence pins HUI-B4, dependency/component/asset evidence,
+production posture, vocabularies, matrices, section commits, and source digests;
+architecture checks reject drift, browser authority, reordered completion,
+weakened invariants, and false lifecycle claims.
 
 Strict production compilation passed with warnings as errors. The repository
 `mix precommit` gate passed 1,270 tests with zero failures. Its existing
 test-only warnings remain visible and are not production compile warnings.
-Clean-checkout CI remains merge-pending and must pass before acceptance.
+PR #117 clean-checkout CI passed: Dialyzer job `101294558289` in 1m51s and
+verification job `101294558445` in 18m35s.
 
 ## Configuration, Exceptions, And Limitations
 
@@ -147,7 +126,8 @@ unavailable until their later gates close.
 
 ## Gate HUI-C1 Reopening Conditions
 
-HUI-C1 remains merge-pending and reopens if HUI-B4 reopens; if shared-operator
+HUI-C1 is accepted at the merged candidate above and reopens if HUI-B4 reopens;
+if shared-operator
 browser authority returns; if a human, service, agent, recovery actor, or
 compatibility operator is conflated; if any browser parameter, header, signal,
 DOM value, cookie value, URL, navigation item, disabled control, role, or

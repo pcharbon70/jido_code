@@ -12,7 +12,7 @@ construction path before any new multi-user product projection is exposed.
 
 Back to plan: [README](./README.md)
 
-- [ ] 1 Phase - Implement secure human sessions, scope construction, and revocation.
+- [x] 1 Phase - Implement secure human sessions, scope construction, and revocation.
 
   This phase closes HUI-C1 by making controller and future SSE authorization
   consistent with accepted graph capabilities, delegation, and assurance.
@@ -72,7 +72,7 @@ Back to plan: [README](./README.md)
       - [x] 1.3.2.3 Subtask - Publish session/role/delegation/project/tenant/graph revocation notifications for request caches and future stream coordinators.
       - [x] 1.3.2.4 Subtask - Preserve concealed-not-found behavior and prevent navigation, disabled controls, URLs, cookie values, or roles alone from granting access.
 
-  - [ ] 1.4 Section - Phase 1 Integration Tests.
+  - [x] 1.4 Section - Phase 1 Integration Tests.
 
     This final section proves named identity and authority behave correctly
     across real sessions, scopes, revocation, and hostile browser inputs.
@@ -87,11 +87,11 @@ Back to plan: [README](./README.md)
       - [x] 1.4.1.3 Subtask - Exercise copied/tampered refs, cross-tenant/project/attempt/interaction/preview/graph probes, several users/tabs, stale session generations, and concurrent revocation.
       - [x] 1.4.1.4 Subtask - Run identity/security/privacy/architecture suites, `mix precommit`, and clean-checkout CI with the production adapter or explicit unconfigured posture.
 
-    - [ ] 1.4.2 Task {#huic-p01-phase-receipt} [repo: jido_code] [after: {#huic-p01-integration}] - Publish and pin the Phase 1 receipt.
+    - [x] 1.4.2 Task {#huic-p01-phase-receipt} [repo: jido_code] [after: {#huic-p01-integration}] - Publish and pin the Phase 1 receipt.
 
       This task records HUI-C1 evidence in
       `docs/architecture/hypermedia-ui-milestone-c-phase-01-receipt.md`.
 
       - [x] 1.4.2.1 Subtask - Keep HUI-C1 merge-pending on shared identity, fixation/revocation failure, inconsistent authority construction, implicit role grant, cross-scope disclosure, or unavailable authenticator presented as ready.
       - [x] 1.4.2.2 Subtask - Record identity/session/policy versions, adapter/config fixtures, security evidence, exceptions, limitations, and every reopening condition.
-      - [ ] 1.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 1 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 2.
+      - [x] 1.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 1 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 2.

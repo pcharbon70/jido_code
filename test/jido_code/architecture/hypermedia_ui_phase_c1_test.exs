@@ -23,11 +23,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1Test do
   test "rejects an accepted lifecycle without merged candidate provenance" do
     assert {:ok, evidence} = HypermediaUIPhaseC1.load()
 
-    false_acceptance =
-      evidence
-      |> Map.put("status", "accepted_at_merged_candidate")
-      |> Map.put("receipt_status", "accepted_at_merged_candidate")
-      |> Map.put("clean_checkout_ci", "pass")
+    false_acceptance = Map.put(evidence, "merged_candidate", nil)
 
     assert Enum.any?(
              HypermediaUIPhaseC1.validate(false_acceptance, File.cwd!()),
