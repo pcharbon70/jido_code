@@ -17,30 +17,30 @@ Back to plan: [README](./README.md)
   This phase closes HUI-C2 with stable APIs and DOM contracts that later pages
   and Datastar fragments can share without importing upstream details.
 
-  - [ ] 2.1 Section - Complete the primitive facade and semantic tokens.
+  - [x] 2.1 Section - Complete the primitive facade and semantic tokens.
 
     This section promotes the qualification wrappers into maintained product
     APIs with coherent styling, forms, focus, and accessibility behavior.
 
-    - [ ] 2.1.1 Task {#huic-p02-primitives} [repo: jido_code] [after: {#huic-p01-phase-receipt}] - Implement the supported primitive facade catalog.
+    - [x] 2.1.1 Task {#huic-p02-primitives} [repo: jido_code] [after: {#huic-p01-phase-receipt}] - Implement the supported primitive facade catalog.
 
       This task provides only semantically justified wrappers and resolves all
       upstream/project naming and form-contract collisions.
 
-      - [ ] 2.1.1.1 Subtask - Implement supported link/button/input/form/select/checkbox/radio/badge/table/disclosure/dialog/menu/tooltip/toast/skeleton primitives behind `JidoCodeWeb.Components.UI`.
-      - [ ] 2.1.1.2 Subtask - Preserve `to_form/2`, project `<.input>`, label/help/error association, unique IDs, native submit, global Datastar attributes, slots, and escaped content.
-      - [ ] 2.1.1.3 Subtask - Define variant/size/state APIs, forbidden ad hoc styling, upstream API isolation, deprecation, and component documentation/examples.
-      - [ ] 2.1.1.4 Subtask - Add unit/render/accessibility tests and a dependency-diff checklist for each adopted primitive.
+      - [x] 2.1.1.1 Subtask - Implement supported link/button/input/form/select/checkbox/radio/badge/table/disclosure/dialog/menu/tooltip/toast/skeleton primitives behind `JidoCodeWeb.Components.UI`.
+      - [x] 2.1.1.2 Subtask - Preserve `to_form/2`, project `<.input>`, label/help/error association, unique IDs, native submit, global Datastar attributes, slots, and escaped content.
+      - [x] 2.1.1.3 Subtask - Define variant/size/state APIs, forbidden ad hoc styling, upstream API isolation, deprecation, and component documentation/examples.
+      - [x] 2.1.1.4 Subtask - Add unit/render/accessibility tests and a dependency-diff checklist for each adopted primitive.
 
-    - [ ] 2.1.2 Task {#huic-p02-tokens} [repo: jido_code] [after: {#huic-p02-primitives}] - Implement application theme, density, motion, and responsive tokens.
+    - [x] 2.1.2 Task {#huic-p02-tokens} [repo: jido_code] [after: {#huic-p02-primitives}] - Implement application theme, density, motion, and responsive tokens.
 
       This task gives factory composites consistent visual meaning without
       encoding semantic state by color alone.
 
-      - [ ] 2.1.2.1 Subtask - Define application typography, spacing, layout, density, elevation, border, focus, status, chart, and code/diff tokens over qualified ShadcnUI variables.
-      - [ ] 2.1.2.2 Subtask - Resolve system/light/dark preference server-first with no flash, safe persistence, CSP compatibility, and synchronized theme attributes.
-      - [ ] 2.1.2.3 Subtask - Define reduced-motion, forced-colors/high-contrast, RTL, zoom/reflow, touch target, print, and narrow-screen behavior.
-      - [ ] 2.1.2.4 Subtask - Add deterministic visual/accessibility fixtures and reject raw status colors, inaccessible contrast, or remote font/icon dependencies.
+      - [x] 2.1.2.1 Subtask - Define application typography, spacing, layout, density, elevation, border, focus, status, chart, and code/diff tokens over qualified ShadcnUI variables.
+      - [x] 2.1.2.2 Subtask - Resolve system/light/dark preference server-first with no flash, safe persistence, CSP compatibility, and synchronized theme attributes.
+      - [x] 2.1.2.3 Subtask - Define reduced-motion, forced-colors/high-contrast, RTL, zoom/reflow, touch target, print, and narrow-screen behavior.
+      - [x] 2.1.2.4 Subtask - Add deterministic visual/accessibility fixtures and reject raw status colors, inaccessible contrast, or remote font/icon dependencies.
 
   - [ ] 2.2 Section - Build factory shell and navigation composites.
 

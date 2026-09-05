@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html
   lang="en"
-  data-appearance="system"
-  data-theme="light"
-  data-shadcn-theme="light"
+  data-appearance={JidoCodeWeb.Layouts.theme_attributes(@conn).appearance}
+  data-theme={JidoCodeWeb.Layouts.theme_attributes(@conn).theme}
+  data-shadcn-theme={JidoCodeWeb.Layouts.theme_attributes(@conn).shadcn_theme}
   data-nonce={@conn.assigns.csp_nonce}
 >
   <head>

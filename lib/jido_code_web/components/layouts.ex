@@ -5,11 +5,39 @@ defmodule JidoCodeWeb.Layouts do
   """
   use JidoCodeWeb, :html
 
+  @appearance_cookie "jido_appearance"
+  @resolved_theme_cookie "jido_resolved_theme"
+  @appearances ~w(system light dark)
+  @resolved_themes ~w(light dark)
+
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers
   # and other static content.
   embed_templates "layouts/*"
+
+  @doc "Returns presentation-only theme attributes from closed, non-authority cookies."
+  @spec theme_attributes(Plug.Conn.t()) :: map()
+  def theme_attributes(%Plug.Conn{} = conn) do
+    cookies = request_cookies(conn)
+    appearance = closed_value(cookies[@appearance_cookie], @appearances, "system")
+    resolved = closed_value(cookies[@resolved_theme_cookie], @resolved_themes, nil)
+    theme = if(appearance == "system", do: resolved, else: appearance)
+
+    %{
+      appearance: appearance,
+      theme: theme,
+      shadcn_theme: theme
+    }
+  end
+
+  defp request_cookies(%Plug.Conn{req_cookies: %Plug.Conn.Unfetched{}} = conn),
+    do: Plug.Conn.fetch_cookies(conn).req_cookies
+
+  defp request_cookies(%Plug.Conn{req_cookies: cookies}) when is_map(cookies), do: cookies
+
+  defp closed_value(value, allowed, fallback),
+    do: if(value in allowed, do: value, else: fallback)
 
   @doc """
   Renders your app layout.
@@ -56,7 +84,7 @@ defmodule JidoCodeWeb.Layouts do
 
           <span class="hidden h-4 w-px bg-frame-border sm:block" />
           <span class="hidden truncate text-xs text-frame-text-muted sm:block">
-            Phoenix LiveView · LiveVue islands
+            Secure hypermedia control plane
           </span>
         </div>
 
@@ -152,7 +180,7 @@ defmodule JidoCodeWeb.Layouts do
         id="application-theme-system"
         type="button"
         class={theme_control_class()}
-        phx-click={JS.dispatch("phx:set-theme")}
+        data-theme-choice
         data-phx-theme="system"
         aria-pressed="false"
         aria-label="Use system theme"
@@ -164,7 +192,7 @@ defmodule JidoCodeWeb.Layouts do
         id="application-theme-light"
         type="button"
         class={theme_control_class()}
-        phx-click={JS.dispatch("phx:set-theme")}
+        data-theme-choice
         data-phx-theme="light"
         aria-pressed="false"
         aria-label="Use light theme"
@@ -176,7 +204,7 @@ defmodule JidoCodeWeb.Layouts do
         id="application-theme-dark"
         type="button"
         class={theme_control_class()}
-        phx-click={JS.dispatch("phx:set-theme")}
+        data-theme-choice
         data-phx-theme="dark"
         aria-pressed="false"
         aria-label="Use dark theme"

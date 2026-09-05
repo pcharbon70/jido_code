@@ -1,4 +1,6 @@
 export const THEME_STORAGE_KEY = "phx:theme"
+export const THEME_COOKIE = "jido_appearance"
+export const RESOLVED_THEME_COOKIE = "jido_resolved_theme"
 export const THEMES = ["system", "light", "dark"]
 
 export const normalizeTheme = theme => THEMES.includes(theme) ? theme : "system"
@@ -27,6 +29,15 @@ const writeStorage = (storage, theme) => {
   }
 }
 
+const writeCookie = (name, value) => {
+  if (typeof document === "undefined") return
+  const secure = globalThis.location?.protocol === "https:" ? "; Secure" : ""
+  document.cookie = `${name}=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`
+}
+
+const resolvedTheme = (theme, prefersDark) =>
+  theme === "system" ? (prefersDark ? "dark" : "light") : theme
+
 export const syncThemeControls = (theme, documentRoot = browserRoot()) => {
   const ownerDocument = documentRoot?.ownerDocument
   if (!ownerDocument) return
@@ -45,12 +56,14 @@ export const applyTheme = (requestedTheme, options = {}) => {
 
   if (!root) return theme
 
+  const resolved = resolvedTheme(theme, prefersDark)
   root.setAttribute("data-appearance", theme)
-  if (theme === "system") root.removeAttribute("data-theme")
-  else root.setAttribute("data-theme", theme)
-  root.setAttribute("data-shadcn-theme", theme === "system" ? (prefersDark ? "dark" : "light") : theme)
+  root.setAttribute("data-theme", resolved)
+  root.setAttribute("data-shadcn-theme", resolved)
 
   if (persist) writeStorage(storage, theme)
+  writeCookie(THEME_COOKIE, theme)
+  writeCookie(RESOLVED_THEME_COOKIE, resolved)
   syncThemeControls(theme, root)
   return theme
 }
@@ -58,7 +71,10 @@ export const applyTheme = (requestedTheme, options = {}) => {
 export const initializeTheme = (options = {}) => {
   const root = options.root ?? browserRoot()
   const storage = options.storage ?? browserStorage()
-  return applyTheme(readStorage(storage), {root, storage, persist: false})
+  const serverTheme = normalizeTheme(root?.getAttribute("data-appearance"))
+  const storedTheme = readStorage(storage)
+  const requestedTheme = serverTheme === "system" && storedTheme ? storedTheme : serverTheme
+  return applyTheme(requestedTheme, {root, storage, persist: true})
 }
 
 export const bindThemeEvents = () => {
@@ -77,8 +93,8 @@ export const bindThemeEvents = () => {
     if (event.key === THEME_STORAGE_KEY) applyTheme(event.newValue, {persist: false})
   })
 
-  window.addEventListener("phx:set-theme", event => {
-    const control = event.target?.closest?.("[data-phx-theme]")
+  window.addEventListener("click", event => {
+    const control = event.target?.closest?.("[data-theme-choice]")
     if (control) applyTheme(control.dataset.phxTheme)
   })
 
