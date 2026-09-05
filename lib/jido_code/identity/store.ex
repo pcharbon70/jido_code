@@ -12,6 +12,7 @@ defmodule JidoCode.Identity.Store do
   alias JidoCode.Identity.AuditEvent
   alias JidoCode.Identity.AuthenticationEvent
   alias JidoCode.Identity.Authenticator
+  alias JidoCode.Identity.BrowserSession
   alias JidoCode.Identity.Config
   alias JidoCode.Identity.Credential
   alias JidoCode.Identity.HumanAccount
@@ -112,10 +113,27 @@ defmodule JidoCode.Identity.Store do
   @spec capabilities(server()) :: map()
   def capabilities(server \\ __MODULE__), do: GenServer.call(server, :capabilities)
 
+  @spec issue_session(server(), map(), keyword()) ::
+          {:ok, BrowserSession.t()} | {:error, atom()}
+  def issue_session(server \\ __MODULE__, authentication, options \\ []) do
+    GenServer.call(server, {:issue_session, authentication, options})
+  end
+
+  @spec validate_session(server(), String.t(), keyword()) :: {:ok, map()} | {:error, atom()}
+  def validate_session(server \\ __MODULE__, session_ref, options \\ []) do
+    GenServer.call(server, {:validate_session, session_ref, options})
+  end
+
+  @spec revoke_session(server(), map(), String.t(), keyword()) :: :ok | {:error, atom()}
+  def revoke_session(server \\ __MODULE__, context, session_ref, options \\ []) do
+    GenServer.call(server, {:revoke_session, context, session_ref, options})
+  end
+
   @impl true
   def init(options) do
     with {:ok, config} <- Config.load(Keyword.get(options, :config, [])),
-         {:ok, data} <- load_snapshot(config) do
+         {:ok, data} <- load_snapshot(config),
+         {:ok, data} <- seed_bootstrap(config, data) do
       {:ok, %__MODULE__{config: config, data: data}}
     else
       {:error, reason} -> {:stop, reason}
@@ -151,6 +169,118 @@ defmodule JidoCode.Identity.Store do
   def handle_call({:evidence, kind}, _from, state) do
     evidence = Map.get(state.data.events, kind, []) |> Enum.reverse()
     {:reply, evidence, state}
+  end
+
+  def handle_call({:issue_session, authentication, options}, _from, state) do
+    with :ok <- available(state),
+         {:ok, account} <- authenticated_account(state.data, authentication),
+         {:ok, authenticated_at} <- fetch_datetime(authentication, :authenticated_at),
+         {:ok, assurance} <- fetch_assurance(authentication),
+         :ok <- current_authentication_age(authenticated_at, now(options), state.config) do
+      issued_at = now(options)
+      hard_expires_at = DateTime.add(issued_at, state.config.hard_lifetime_seconds, :second)
+
+      session = %BrowserSession{
+        session_ref: reference("session"),
+        subject_ref: account.subject_ref,
+        issued_at: issued_at,
+        last_seen_at: issued_at,
+        last_authenticated_at: authenticated_at,
+        assurance: assurance,
+        nonce: reference("nonce"),
+        session_generation: 1,
+        account_generation: account.account_generation,
+        policy_revision: account.policy_revision,
+        hard_expires_at: hard_expires_at,
+        idle_expires_at:
+          earliest(
+            DateTime.add(issued_at, state.config.idle_lifetime_seconds, :second),
+            hard_expires_at
+          ),
+        status: :active,
+        revoked_at: nil
+      }
+
+      next_data =
+        state.data
+        |> revoke_prior_session(
+          authentication,
+          Keyword.get(options, :replace_session_ref),
+          issued_at
+        )
+        |> put_in([:sessions, session.session_ref], session)
+        |> append_audit(
+          audit_event(
+            account.subject_ref,
+            "identity.session.issue",
+            session.session_ref,
+            :committed,
+            account.policy_revision,
+            reference("identity_receipt"),
+            issued_at
+          )
+        )
+
+      emit_session_telemetry(:issued, session, :allowed)
+      commit(state, next_data, {:ok, session})
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:validate_session, session_ref, options}, _from, state) do
+    now = now(options)
+
+    with :ok <- available(state),
+         {:ok, session} <- fetch(state.data.sessions, session_ref),
+         {:ok, account} <- fetch(state.data.accounts, session.subject_ref),
+         :ok <- current_session(session, account, now, state.config) do
+      touched = touch_session(session, now, state.config)
+      next_data = put_in(state.data, [:sessions, session_ref], touched)
+      emit_session_telemetry(:validated, touched, :allowed)
+      commit(state, next_data, {:ok, %{session: touched, account: account}})
+    else
+      {:error, reason} ->
+        {next_data, safe_reason} = expire_or_revoke_session(state.data, session_ref, now, reason)
+
+        case persist(state.config, next_data) do
+          :ok ->
+            emit_session_telemetry(:validation_failed, session_ref, safe_reason)
+            {:reply, {:error, safe_reason}, %{state | data: next_data}}
+
+          {:error, _persist_reason} ->
+            {:reply, {:error, :session_unavailable}, state}
+        end
+    end
+  end
+
+  def handle_call({:revoke_session, context, session_ref, options}, _from, state) do
+    with :ok <- available(state),
+         {:ok, session} <- fetch(state.data.sessions, session_ref),
+         :ok <- session_revoke_context(context, session) do
+      now = now(options)
+      next_session = revoke(session, now)
+
+      next_data =
+        state.data
+        |> put_in([:sessions, session_ref], next_session)
+        |> append_audit(
+          audit_event(
+            context.actor_ref,
+            "identity.session.revoke",
+            session_ref,
+            :committed,
+            session.policy_revision,
+            reference("identity_receipt"),
+            now
+          )
+        )
+
+      emit_session_telemetry(:revoked, next_session, :revoked)
+      commit(state, next_data, :ok)
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
   end
 
   def handle_call({:bootstrap, attributes, credential, options}, _from, state) do
@@ -254,6 +384,7 @@ defmodule JidoCode.Identity.Store do
         |> put_in([:accounts, subject_ref], next_account)
         |> put_in([:authenticators, authenticator.authenticator_ref], next_authenticator)
         |> put_in([:verifiers, authenticator.authenticator_ref], next_verifier)
+        |> revoke_subject_sessions(subject_ref, now)
         |> append_audit(
           audit_event(
             subject_ref,
@@ -285,6 +416,7 @@ defmodule JidoCode.Identity.Store do
       next_data =
         state.data
         |> put_in([:accounts, subject_ref], next_account)
+        |> revoke_subject_sessions(subject_ref, now)
         |> append_audit(
           audit_event(
             context.actor_ref,
@@ -314,6 +446,7 @@ defmodule JidoCode.Identity.Store do
       next_data =
         state.data
         |> put_in([:accounts, subject_ref], next_account)
+        |> revoke_subject_sessions(subject_ref, now)
         |> append_audit(
           audit_event(
             context.actor_ref,
@@ -373,6 +506,7 @@ defmodule JidoCode.Identity.Store do
         |> put_in([:accounts, subject_ref], next_account)
         |> put_in([:authenticators, authenticator.authenticator_ref], next_authenticator)
         |> put_in([:verifiers, authenticator.authenticator_ref], next_verifier)
+        |> revoke_subject_sessions(subject_ref, now)
         |> append_event(:recovery, recovery_event)
         |> append_audit(
           audit_event(
@@ -539,6 +673,155 @@ defmodule JidoCode.Identity.Store do
     end
   end
 
+  defp authenticated_account(data, authentication) when is_map(authentication) do
+    with subject_ref when is_binary(subject_ref) <- authentication[:subject_ref],
+         {:ok, account} <- fetch(data.accounts, subject_ref),
+         :ok <- active_account(account),
+         true <- authentication[:account_generation] == account.account_generation,
+         true <- authentication[:policy_revision] == account.policy_revision do
+      {:ok, account}
+    else
+      _invalid -> {:error, :authentication_stale}
+    end
+  end
+
+  defp authenticated_account(_data, _authentication), do: {:error, :authentication_stale}
+
+  defp fetch_datetime(map, key) do
+    case map[key] do
+      %DateTime{} = value -> {:ok, value}
+      _invalid -> {:error, :authentication_stale}
+    end
+  end
+
+  defp fetch_assurance(authentication) do
+    case authentication[:assurance] do
+      assurance when assurance in @allowed_assurance -> {:ok, assurance}
+      _invalid -> {:error, :authentication_stale}
+    end
+  end
+
+  defp current_authentication_age(authenticated_at, now, config) do
+    age = DateTime.diff(now, authenticated_at, :second)
+
+    if age in 0..config.maximum_authentication_age_seconds,
+      do: :ok,
+      else: {:error, :authentication_stale}
+  end
+
+  defp current_session(session, account, now, config) do
+    cond do
+      session.status != :active ->
+        {:error, :revoked}
+
+      account.status != :active ->
+        {:error, :revoked}
+
+      session.account_generation != account.account_generation ->
+        {:error, :revoked}
+
+      session.policy_revision != account.policy_revision ->
+        {:error, :revoked}
+
+      DateTime.compare(now, session.issued_at) == :lt ->
+        {:error, :invalid_session}
+
+      DateTime.compare(now, session.hard_expires_at) != :lt ->
+        {:error, :expired}
+
+      DateTime.compare(now, session.idle_expires_at) != :lt ->
+        {:error, :expired}
+
+      DateTime.diff(now, session.last_authenticated_at, :second) >
+          config.maximum_authentication_age_seconds ->
+        {:error, :expired}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp touch_session(session, now, config) do
+    idle_expires_at =
+      now
+      |> DateTime.add(config.idle_lifetime_seconds, :second)
+      |> earliest(session.hard_expires_at)
+
+    %{session | last_seen_at: now, idle_expires_at: idle_expires_at}
+  end
+
+  defp expire_or_revoke_session(data, session_ref, now, reason) do
+    safe_reason = if reason == :expired, do: :expired, else: :revoked
+
+    case Map.get(data.sessions, session_ref) do
+      %BrowserSession{} = session ->
+        status = if safe_reason == :expired, do: :expired, else: :revoked
+        next = %{session | status: status, revoked_at: now}
+        {put_in(data, [:sessions, session_ref], next), safe_reason}
+
+      _missing ->
+        {data, :invalid_session}
+    end
+  end
+
+  defp revoke_prior_session(data, authentication, session_ref, now) when is_binary(session_ref) do
+    case Map.get(data.sessions, session_ref) do
+      %BrowserSession{subject_ref: subject_ref} = session
+      when subject_ref == authentication.subject_ref ->
+        put_in(data, [:sessions, session_ref], revoke(session, now))
+
+      _unknown_or_cross_subject ->
+        data
+    end
+  end
+
+  defp revoke_prior_session(data, _authentication, _session_ref, _now), do: data
+
+  defp revoke_subject_sessions(data, subject_ref, now) do
+    sessions =
+      Map.new(data.sessions, fn {session_ref, session} ->
+        if session.subject_ref == subject_ref,
+          do: {session_ref, revoke(session, now)},
+          else: {session_ref, session}
+      end)
+
+    %{data | sessions: sessions}
+  end
+
+  defp revoke(%BrowserSession{} = session, now),
+    do: %{session | status: :revoked, revoked_at: now}
+
+  defp session_revoke_context(%{actor_ref: actor_ref}, %{subject_ref: actor_ref}), do: :ok
+
+  defp session_revoke_context(context, session),
+    do: identity_admin_context_for(context, session.subject_ref)
+
+  defp earliest(left, right) do
+    if DateTime.compare(left, right) == :gt, do: right, else: left
+  end
+
+  defp emit_session_telemetry(event, %BrowserSession{} = session, outcome) do
+    :telemetry.execute(
+      [:jido_code, :identity, :session, event],
+      %{count: 1},
+      %{
+        subject_ref: session.subject_ref,
+        session_ref: session.session_ref,
+        outcome: outcome,
+        assurance: session.assurance,
+        policy_revision: session.policy_revision
+      }
+    )
+  end
+
+  defp emit_session_telemetry(event, _unknown_ref, outcome) do
+    :telemetry.execute(
+      [:jido_code, :identity, :session, event],
+      %{count: 1},
+      %{outcome: outcome}
+    )
+  end
+
   defp self_service_context(%{subject_ref: subject_ref}, subject_ref), do: :ok
   defp self_service_context(_context, _subject_ref), do: {:error, :identity_mismatch}
 
@@ -640,6 +923,7 @@ defmodule JidoCode.Identity.Store do
       login_index: %{},
       authenticators: %{},
       verifiers: %{},
+      sessions: %{},
       failures: %{},
       events: %{authentication: [], recovery: [], audit: []},
       bootstrap_consumed: false
@@ -675,7 +959,7 @@ defmodule JidoCode.Identity.Store do
 
   defp valid_data_shape?(data) do
     is_map(data.accounts) and is_map(data.login_index) and is_map(data.authenticators) and
-      is_map(data.verifiers) and is_map(data.failures) and is_map(data.events) and
+      is_map(data.verifiers) and is_map(data.sessions) and is_map(data.failures) and
       is_boolean(data.bootstrap_consumed)
   rescue
     _error -> false
@@ -704,4 +988,57 @@ defmodule JidoCode.Identity.Store do
       {:error, _reason} = error -> error
     end
   end
+
+  defp seed_bootstrap(%Config{bootstrap: nil}, data), do: {:ok, data}
+
+  defp seed_bootstrap(%Config{} = config, %{bootstrap_consumed: false} = data) do
+    bootstrap = config.bootstrap
+
+    with {:ok, normalized} <- validate_account_attributes(bootstrap),
+         credential when is_binary(credential) <- bootstrap[:credential],
+         {:ok, verifier} <- Credential.build(credential, config.pbkdf2_iterations) do
+      now = Map.get(bootstrap, :now, DateTime.utc_now())
+      subject_ref = Map.get(bootstrap, :subject_ref, reference("human"))
+      authenticator_ref = Map.get(bootstrap, :authenticator_ref, reference("authenticator"))
+
+      account = %HumanAccount{
+        subject_ref: subject_ref,
+        display_name: normalized.display_name,
+        login: normalized.login,
+        status: :active,
+        account_generation: 1,
+        policy_revision: config.policy_revision,
+        recovery_state: recovery_state(config),
+        authenticator_refs: [authenticator_ref],
+        inserted_at: now,
+        updated_at: now
+      }
+
+      authenticator = %Authenticator{
+        authenticator_ref: authenticator_ref,
+        subject_ref: subject_ref,
+        kind: :local_password,
+        phishing_resistant: false,
+        enrolled_at: now,
+        verified_at: now,
+        revoked_at: nil,
+        status: :active,
+        revision: 1
+      }
+
+      seeded =
+        data
+        |> put_in([:accounts, subject_ref], account)
+        |> put_in([:login_index, normalized.login], subject_ref)
+        |> put_in([:authenticators, authenticator_ref], authenticator)
+        |> put_in([:verifiers, authenticator_ref], verifier)
+        |> Map.put(:bootstrap_consumed, true)
+
+      with :ok <- persist(config, seeded), do: {:ok, seeded}
+    else
+      _invalid -> {:error, :invalid_identity_bootstrap_config}
+    end
+  end
+
+  defp seed_bootstrap(_config, data), do: {:ok, data}
 end

@@ -1,6 +1,8 @@
 defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
   @moduledoc false
 
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
+
   alias JidoCodeWeb.Plugs.ContentSecurityPolicy
 
   @manifest_directory "priv/architecture/hypermedia_ui"
@@ -497,7 +499,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
   defp validate_sources(errors, root) do
     errors =
       Enum.reduce(@source_hashes, errors, fn {path, expected}, acc ->
-        expected = Map.get(@hui_b3_qualified_source_hashes, path, expected)
+        expected =
+          HypermediaUISuccessorEvidence.digest(root, path) ||
+            Map.get(@hui_b3_qualified_source_hashes, path, expected)
 
         case File.read(Path.join(root, path)) do
           {:ok, body} -> require_equal(acc, sha256(body), expected, "pinned source #{path}")

@@ -38,7 +38,7 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLiveTest do
     conn =
       conn
       |> init_test_session(%{})
-      |> JidoCodeWeb.ProductAuth.establish_session()
+      |> JidoCodeWeb.ConnCase.sign_in_named_human()
 
     %{conn: conn, attempt: attempt}
   end
@@ -120,7 +120,9 @@ defmodule JidoCodeWeb.ManagedCodingAttemptLiveTest do
 
   test "requires the existing authenticated live session", context do
     public = build_conn() |> init_test_session(%{})
-    assert {:error, {:redirect, %{to: "/sign-in"}}} = live(public, path(context.attempt))
+
+    assert {:error, {:redirect, %{to: return_to}}} = live(public, path(context.attempt))
+    assert return_to =~ "/sign-in?return_to=%2Fmanaged-coding%2F"
   end
 
   defp graph do

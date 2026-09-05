@@ -10,7 +10,12 @@ defmodule JidoCode.Identity.Config do
     :pbkdf2_iterations,
     :max_failed_attempts,
     :lockout_seconds,
-    :recovery_adapter
+    :recovery_adapter,
+    :hard_lifetime_seconds,
+    :idle_lifetime_seconds,
+    :idle_warning_seconds,
+    :maximum_authentication_age_seconds,
+    :bootstrap
   ]
   defstruct @enforce_keys
 
@@ -23,7 +28,12 @@ defmodule JidoCode.Identity.Config do
           pbkdf2_iterations: pos_integer(),
           max_failed_attempts: pos_integer(),
           lockout_seconds: pos_integer(),
-          recovery_adapter: module()
+          recovery_adapter: module(),
+          hard_lifetime_seconds: pos_integer(),
+          idle_lifetime_seconds: pos_integer(),
+          idle_warning_seconds: pos_integer(),
+          maximum_authentication_age_seconds: pos_integer(),
+          bootstrap: map() | nil
         }
 
   @spec load(keyword()) :: {:ok, t()} | {:error, atom()}
@@ -43,7 +53,13 @@ defmodule JidoCode.Identity.Config do
       max_failed_attempts: Keyword.get(values, :max_failed_attempts, 5),
       lockout_seconds: Keyword.get(values, :lockout_seconds, 300),
       recovery_adapter:
-        Keyword.get(values, :recovery_adapter, JidoCode.Identity.Recovery.Unconfigured)
+        Keyword.get(values, :recovery_adapter, JidoCode.Identity.Recovery.Unconfigured),
+      hard_lifetime_seconds: Keyword.get(values, :hard_lifetime_seconds, 43_200),
+      idle_lifetime_seconds: Keyword.get(values, :idle_lifetime_seconds, 1_800),
+      idle_warning_seconds: Keyword.get(values, :idle_warning_seconds, 300),
+      maximum_authentication_age_seconds:
+        Keyword.get(values, :maximum_authentication_age_seconds, 43_200),
+      bootstrap: Keyword.get(values, :bootstrap)
     }
 
     validate(config)
@@ -58,7 +74,13 @@ defmodule JidoCode.Identity.Config do
          true <- config.pbkdf2_iterations in 1_000..2_000_000,
          true <- config.max_failed_attempts in 1..20,
          true <- config.lockout_seconds in 1..86_400,
-         true <- is_atom(config.recovery_adapter) do
+         true <- is_atom(config.recovery_adapter),
+         true <- config.hard_lifetime_seconds in 300..43_200,
+         true <- config.idle_lifetime_seconds in 60..1_800,
+         true <- config.idle_warning_seconds in 30..300,
+         true <- config.idle_warning_seconds < config.idle_lifetime_seconds,
+         true <- config.maximum_authentication_age_seconds in 300..43_200,
+         true <- is_nil(config.bootstrap) or is_map(config.bootstrap) do
       {:ok, config}
     else
       _invalid -> {:error, :invalid_identity_config}

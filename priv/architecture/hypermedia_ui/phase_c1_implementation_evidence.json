@@ -4,7 +4,7 @@
   "status": "implementation_in_progress",
   "baseline_commit": "797e308bc16b609eb6273d07ae96ee47a4cc3512",
   "predecessor_candidate": "63d2689321121775a46bf531d004ac4de44b81f2",
-  "completed_sections": ["1.1"],
+  "completed_sections": ["1.1", "1.2"],
   "identity_authority": {
     "store_owner": "JidoCode.Identity.Store",
     "file_role": "identity_authority",
@@ -12,7 +12,20 @@
     "credential_verifier": "PBKDF2-HMAC-SHA-256",
     "browser_operator_compatibility": "prohibited",
     "phishing_resistant": "unavailable_until_configured",
-    "recovery": "unavailable_until_configured"
+    "recovery": "unavailable_until_configured",
+    "session_profile": {
+      "cookie_payload": "encrypted_opaque_session_reference_and_csrf_only",
+      "hard_lifetime_seconds": 43200,
+      "idle_lifetime_seconds": 1800,
+      "idle_warning_seconds": 300,
+      "same_site": "Lax",
+      "secure": true,
+      "http_only": true,
+      "host_only": true,
+      "origin_required_for_browser_writes": true,
+      "rotation_events": ["login", "recovery", "credential_rotation", "step_up"],
+      "revocation_events": ["logout", "logout_all", "account_disable", "credential_rotation", "recovery"]
+    }
   },
   "invariants": [
     "named_human_subjects_are_distinct_from_operator_service_and_agent_principals",
@@ -24,20 +37,31 @@
     "predecessor_dependency_asset_and_facade_pins_remain_unchanged"
   ],
   "source_digests": {
-    "config/config.exs": "07ee76fd586a52e080c2250d5f30422aebc077a5a81bc14925f6f94d4276f01b",
+    "config/config.exs": "be94005943c1641b2b1b35b4c7a38f71f2a9203cd95de80dd09a4e12bf252765",
     "config/runtime.exs": "cd2d34b3e5d4daa7cb55c24c7cf898f912d8747d831ad57faee9a35d3dcd3788",
+    "config/test.exs": "5e62b675c57e14e42da75a3c47d1995c7745cc2466926fc21440030551e270c6",
     "lib/jido_code/application.ex": "b97e6051ccd9d5506bf32518e24c6bfde7ba92b7d1937dd89fab392266a49323",
+    "lib/jido_code/architecture/hypermedia_ui_phase_a4.ex": "2de24d57c9d3211fd30fb8fc622d7ae4767a20988b39e253a5eefd1f17a445f5",
+    "lib/jido_code/architecture/hypermedia_ui_phase_b2.ex": "7215e02cb9530c162348074e57b2c7e38b64ac262641962afa41bb48ec43ba24",
     "lib/jido_code/identity.ex": "1f6637f18351ac72334978c317f47da76c1d44d1f29e768b575263fa2cca28d5",
     "lib/jido_code/identity/audit_event.ex": "8ec32fd4c1f50bae18c187f1dcb501b4c11c95009e9798dd6d6d00a772845a5e",
     "lib/jido_code/identity/authentication_event.ex": "47c7bd16af77911a672e85fb6f2fc5bb93779811819d0fc95da0730ea7320850",
     "lib/jido_code/identity/authenticator.ex": "955c17eb934fdcc4d66331d106021fe76613713211ea563956b8f78ba5e2b8ca",
-    "lib/jido_code/identity/config.ex": "93cf01e8bbcf841506a9fc32a9accc600840edb470cb0c0555a5dfda292ab598",
+    "lib/jido_code/identity/browser_session.ex": "65eecfbb8dc3b129a05fdad6f8791d822a15dc257705aa7390fac255547fdb70",
+    "lib/jido_code/identity/config.ex": "0601b97c28dd2c0ba72e0a63bc1200220afb998fad3b9c64690f608b57d460fc",
     "lib/jido_code/identity/credential.ex": "370126849a5f43519e56f57eff57625d8323bbb229128bbaf2f949aed8f36a62",
     "lib/jido_code/identity/human_account.ex": "5902fa7dc31c13cdcbc438d456e7ad3a69376d44b908f1d1bb8be77d43ebee03",
     "lib/jido_code/identity/recovery_adapter.ex": "5a77af5f49fa219a885ef1caa2497e060354207b11c596e0823a90c5a7c7a82b",
     "lib/jido_code/identity/recovery/unconfigured.ex": "ab1f43b013b1fc5140e27364d66fddd89556ba5efcf484b73d625f3ca83138df",
     "lib/jido_code/identity/recovery_event.ex": "c794d2cd63349e8283b35f897156d38e04c87a5012aa9c806054ae9c78f25516",
-    "lib/jido_code/identity/store.ex": "542453d4f097a16ab148937bff2dbdc4daba36c276647d6751ca6af72fb03f5d",
-    "lib/mix/tasks/identity.bootstrap.ex": "f8a56f792053028aacd3984ef8d87fb35cf2c89f836730464d5aea1055e518c6"
+    "lib/jido_code/identity/sessions.ex": "dc7b8c3a3e67d7cc8c18c0e3d14b294393a6e5fe5049878b74e497187f567e62",
+    "lib/jido_code/identity/store.ex": "a328628df886d3fa847eac7f29d0f01f46c34df85c14f7fb7ddb7a4d359ff382",
+    "lib/mix/tasks/identity.bootstrap.ex": "f8a56f792053028aacd3984ef8d87fb35cf2c89f836730464d5aea1055e518c6",
+    "lib/jido_code_web/controllers/auth_controller.ex": "bb05188fa20fd7fcea9f17f551f78032d10f1d2f9fe9d3108fdf884a41efb42f",
+    "lib/jido_code_web/controllers/auth_html/new.html.heex": "27feb31937610385188fa9f315651aa29f38f208d3ed09c7b9d513cc6d28e4bf",
+    "lib/jido_code_web/endpoint.ex": "97837a642c0db730f35e1bf15aa28ffe530ac7bcb217538b690a73b52e1e2ed0",
+    "lib/jido_code_web/plugs/require_same_origin.ex": "69dd0b78efeeb258a5ae860652ce746322e669a9dea03eb74d718696c2bb5b9b",
+    "lib/jido_code_web/product_auth.ex": "f9a43c6bed2dad4f610860144128eac53fc7c3e8f81ca12610e48eafe00ab875",
+    "lib/jido_code_web/router.ex": "2138ab704cea91d4aaad41275b5d4723220fe4f93114149c50ee6d34059c0a22"
   }
 }

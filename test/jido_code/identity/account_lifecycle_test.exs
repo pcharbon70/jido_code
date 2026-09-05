@@ -254,7 +254,8 @@ defmodule JidoCode.Identity.AccountLifecycleTest do
         pbkdf2_iterations: 1_000,
         max_failed_attempts: 5,
         lockout_seconds: 300,
-        recovery_adapter: JidoCode.Identity.Recovery.Unconfigured
+        recovery_adapter: JidoCode.Identity.Recovery.Unconfigured,
+        bootstrap: nil
       ],
       overrides
     )

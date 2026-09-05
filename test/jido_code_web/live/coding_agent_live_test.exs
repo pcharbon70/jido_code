@@ -38,14 +38,16 @@ defmodule JidoCodeWeb.CodingAgentLiveTest do
     conn =
       conn
       |> init_test_session(%{})
-      |> JidoCodeWeb.ProductAuth.establish_session()
+      |> JidoCodeWeb.ConnCase.sign_in_named_human()
 
     %{conn: conn}
   end
 
   test "requires the authenticated product live session" do
     public = build_conn() |> init_test_session(%{})
-    assert {:error, {:redirect, %{to: "/sign-in"}}} = live(public, ~p"/coding-agents")
+
+    assert {:error, {:redirect, %{to: "/sign-in?return_to=%2Fcoding-agents"}}} =
+             live(public, ~p"/coding-agents")
   end
 
   test "discovers scope-filtered agent offerings with stable browser controls", %{conn: conn} do

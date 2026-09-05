@@ -1,6 +1,8 @@
 defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
   @moduledoc false
 
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
+
   @manifest_directory "priv/architecture/hypermedia_ui"
   @manifest_files %{
     acceptance: "phase_a4_acceptance_matrix.json",
@@ -418,7 +420,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
   defp validate_guardrails(errors, guardrails, root) do
     exceptions = guardrails["exceptions"] || []
     rule_ids = Enum.map(guardrails["rules"] || [], & &1["id"])
-    authorized_paths = authorized_hui_b2_legacy_paths(root)
+    authorized_paths = authorized_exception_paths(root)
 
     implemented_rules =
       Enum.map(@source_rules, &(&1 |> elem(0) |> Atom.to_string())) ++
@@ -652,7 +654,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
       |> Enum.filter(&File.regular?/1)
       |> Enum.map(&{Path.relative_to(&1, root), File.read!(&1)})
 
-    authorized_paths = authorized_hui_b2_legacy_paths(root)
+    authorized_paths = authorized_exception_paths(root)
 
     exceptions =
       Enum.map(guardrails["exceptions"] || [], fn exception ->
@@ -853,6 +855,18 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4 do
     else
       _other -> []
     end
+  end
+
+  defp authorized_exception_paths(root) do
+    successor_paths =
+      ~w[
+        lib/jido_code_web/endpoint.ex
+        lib/jido_code_web/product_auth.ex
+        lib/jido_code_web/router.ex
+      ]
+      |> Enum.filter(&is_binary(HypermediaUISuccessorEvidence.digest(root, &1)))
+
+    Enum.uniq(authorized_hui_b2_legacy_paths(root) ++ successor_paths)
   end
 
   defp require_future_date(errors, value, label) do

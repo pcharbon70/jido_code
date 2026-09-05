@@ -1,14 +1,18 @@
 defmodule JidoCodeWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :jido_code
 
-  # The session will be stored in the cookie and signed,
-  # this means its contents can be read but not tampered with.
-  # Set :encryption_salt if you would also like to encrypt it.
+  # Browser cookies contain only bounded opaque references and CSRF material.
+  # They are encrypted as well as signed; named-human authority remains in the
+  # server-owned identity store.
   @session_options [
     store: :cookie,
     key: "_jido_code_key",
     signing_salt: "4TNl0szD",
-    same_site: "Lax"
+    encryption_salt: "68VsYSBzkJcR3uQk",
+    same_site: "Lax",
+    path: "/",
+    http_only: true,
+    secure: Application.compile_env(:jido_code, :secure_session_cookie, true)
   ]
 
   socket "/live", Phoenix.LiveView.Socket,

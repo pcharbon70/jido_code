@@ -7,7 +7,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1Test do
   test "pins the authorized HUI-C1 baseline, invariants, and current sources" do
     assert {:ok, []} = HypermediaUIPhaseC1.check()
     assert {:ok, evidence} = HypermediaUIPhaseC1.load()
-    assert evidence["completed_sections"] == ["1.1"]
+    assert evidence["completed_sections"] == ["1.1", "1.2"]
   end
 
   test "rejects reordered sections and source drift" do

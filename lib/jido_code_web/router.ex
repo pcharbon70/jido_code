@@ -19,9 +19,13 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.ProductAuth, :require_authenticated_api
   end
 
-  pipeline :require_authenticated_operator do
+  pipeline :require_authenticated_human do
     plug JidoCodeWeb.ProductAuth, :fetch_current_scope
-    plug JidoCodeWeb.ProductAuth, :require_authenticated_operator
+    plug JidoCodeWeb.ProductAuth, :require_authenticated_human
+  end
+
+  pipeline :require_same_origin do
+    plug JidoCodeWeb.Plugs.RequireSameOrigin
   end
 
   if Application.compile_env(:jido_code, :hypermedia_qualification_build, false) do
@@ -34,8 +38,19 @@ defmodule JidoCodeWeb.Router do
     pipe_through :browser
 
     get "/sign-in", AuthController, :new
+  end
+
+  scope "/", JidoCodeWeb do
+    pipe_through [:browser, :require_same_origin]
+
     post "/sign-in", AuthController, :create
     delete "/sign-out", AuthController, :delete
+  end
+
+  scope "/", JidoCodeWeb do
+    pipe_through [:browser, :require_authenticated_human, :require_same_origin]
+
+    delete "/sessions", AuthController, :delete_all
   end
 
   scope "/api/v1", JidoCodeWeb.Api.V1 do
@@ -64,7 +79,7 @@ defmodule JidoCodeWeb.Router do
   end
 
   scope "/", JidoCodeWeb do
-    pipe_through [:browser, :require_authenticated_operator]
+    pipe_through [:browser, :require_authenticated_human]
 
     live_session :authenticated,
       on_mount: [{JidoCodeWeb.ProductAuth, :require_authenticated}] do
@@ -89,7 +104,7 @@ defmodule JidoCodeWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through [:browser, :require_authenticated_operator]
+      pipe_through [:browser, :require_authenticated_human]
 
       live_dashboard "/dashboard", metrics: JidoCodeWeb.Telemetry
     end

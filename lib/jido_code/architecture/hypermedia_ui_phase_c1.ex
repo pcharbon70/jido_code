@@ -48,6 +48,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
     completed = evidence["completed_sections"] || []
     sources = evidence["source_digests"] || %{}
     identity = evidence["identity_authority"] || %{}
+    session = identity["session_profile"] || %{}
 
     []
     |> require_equal(evidence["schema_version"], 1, "schema version")
@@ -80,6 +81,29 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
       "phishing-resistant posture"
     )
     |> require_equal(identity["recovery"], "unavailable_until_configured", "recovery posture")
+    |> require_equal(
+      session["cookie_payload"],
+      "encrypted_opaque_session_reference_and_csrf_only",
+      "cookie payload"
+    )
+    |> require_equal(session["hard_lifetime_seconds"], 43_200, "hard lifetime")
+    |> require_equal(session["idle_lifetime_seconds"], 1_800, "idle lifetime")
+    |> require_equal(session["idle_warning_seconds"], 300, "idle warning")
+    |> require_equal(session["same_site"], "Lax", "same-site policy")
+    |> require_equal(session["secure"], true, "secure cookie")
+    |> require_equal(session["http_only"], true, "HTTP-only cookie")
+    |> require_equal(session["host_only"], true, "host-only cookie")
+    |> require_equal(session["origin_required_for_browser_writes"], true, "Origin policy")
+    |> require_exact_set(
+      session["rotation_events"] || [],
+      ~w[login recovery credential_rotation step_up],
+      "rotation events"
+    )
+    |> require_exact_set(
+      session["revocation_events"] || [],
+      ~w[logout logout_all account_disable credential_rotation recovery],
+      "revocation events"
+    )
     |> validate_source_paths(sources, root)
     |> Enum.reverse()
   end

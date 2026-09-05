@@ -7,9 +7,12 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
     config/runtime.exs
     config/test.exs
     lib/jido_code/application.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_a4.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_b2.ex
     lib/jido_code_web/endpoint.ex
     lib/jido_code_web/router.ex
     lib/jido_code_web/product_auth.ex
+    lib/jido_code_web/plugs/require_same_origin.ex
     lib/jido_code_web/controllers/auth_controller.ex
     lib/jido_code_web/controllers/auth_html/new.html.heex
   ])
