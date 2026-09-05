@@ -6,6 +6,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC3 do
   @receipt_path "docs/architecture/hypermedia-ui-milestone-c-phase-03-receipt.md"
   @baseline "7c77e2270cf754b6a04d5f95e12ca070083902ae"
   @predecessor "da7ab6a4478bb278aa31a7636fa92135843249ff"
+  @implementation_head "306405e0e01d76a856b4c33639bd3b79744e02c2"
+  @merged_candidate "fa5203a9aefe08d741b2898a01299c7d960c80d9"
+  @merge_date "2026-09-05"
+  @clean_checkout_jobs %{
+    "verify" => %{"id" => 101_385_012_698, "duration" => "20m10s", "result" => "pass"},
+    "dialyzer" => %{"id" => 101_382_702_919, "duration" => "2m30s", "result" => "pass"}
+  }
   @sections ~w[3.1 3.2 3.3 3.4]
   @profiles ~w[chromium firefox webkit chromium-no-js chromium-touch]
   @route_paths [
@@ -254,9 +261,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC3 do
     |> equal(evidence["receipt_status"], "merge_pending", "receipt status")
     |> equal(evidence["clean_checkout_ci"], "pending", "clean-checkout CI")
     |> equal(evidence["implementation_pr"], nil, "implementation PR")
+    |> equal(evidence["implementation_pr_head"], nil, "implementation PR head")
     |> equal(evidence["merged_candidate"], nil, "merged candidate")
+    |> equal(evidence["merge_date"], nil, "merge date")
+    |> equal(evidence["clean_checkout_jobs"], nil, "clean-checkout jobs")
     |> require_match(receipt, ~r/Status: \*\*merge-pending\*\*/, "pending receipt")
     |> require_match(receipt, ~r/Merged candidate: `merge-pending`/, "pending candidate")
+    |> require_contains(plan, "status: proposed", "pending plan status")
     |> require_match(plan, ~r/- \[ \] 3 Phase/, "pending phase checkbox")
     |> require_match(plan, ~r/- \[ \] 3\.4 Section/, "pending integration checkbox")
   end
@@ -268,15 +279,26 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC3 do
     errors
     |> equal(evidence["receipt_status"], "accepted_at_merged_candidate", "receipt status")
     |> equal(evidence["clean_checkout_ci"], "pass", "clean-checkout CI")
-    |> full_sha(evidence["merged_candidate"], "merged candidate")
+    |> equal(evidence["implementation_pr"], 121, "implementation PR")
+    |> equal(evidence["implementation_pr_head"], @implementation_head, "implementation PR head")
+    |> equal(evidence["merged_candidate"], @merged_candidate, "merged candidate")
+    |> equal(evidence["merge_date"], @merge_date, "merge date")
+    |> equal(evidence["clean_checkout_jobs"], @clean_checkout_jobs, "clean-checkout jobs")
     |> require_match(
       receipt,
       ~r/Status: \*\*accepted-at-merged-candidate\*\*/,
       "accepted receipt"
     )
     |> require_contains(receipt, evidence["merged_candidate"], "receipt candidate")
+    |> forbid(
+      String.contains?(receipt, "merge-pending"),
+      "accepted receipt remains merge-pending"
+    )
+    |> require_contains(plan, "status: completed", "completed plan status")
     |> require_match(plan, ~r/- \[x\] 3 Phase/, "accepted phase checkbox")
     |> require_match(plan, ~r/- \[x\] 3\.4 Section/, "accepted integration checkbox")
+    |> require_match(plan, ~r/- \[x\] 3\.4\.2 Task/, "accepted receipt task checkbox")
+    |> require_match(plan, ~r/- \[x\] 3\.4\.2\.3 Subtask/, "accepted pin checkbox")
   end
 
   defp lifecycle(errors, _evidence, _root), do: ["unsupported receipt lifecycle" | errors]
@@ -354,12 +376,6 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC3 do
 
   defp positive(errors, value, label),
     do: ["#{label}: expected positive integer, got #{inspect(value)}" | errors]
-
-  defp full_sha(errors, value, _label) when is_binary(value) and byte_size(value) == 40,
-    do: errors
-
-  defp full_sha(errors, value, label),
-    do: ["#{label}: expected full SHA, got #{inspect(value)}" | errors]
 
   defp all_pass(errors, results) do
     if Enum.all?(results, fn {_key, value} -> value == "pass" end),
