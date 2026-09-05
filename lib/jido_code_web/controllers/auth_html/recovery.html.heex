@@ -1,0 +1,54 @@
+<Layouts.app flash={@flash} frame={:content}>
+  <main id="human-recovery" class="grid min-h-screen place-items-center bg-frame-canvas p-4">
+    <section
+      aria-labelledby="human-recovery-title"
+      class="w-full max-w-lg border-y border-border bg-background py-8"
+    >
+      <p class="text-xs font-medium uppercase text-muted-foreground">Account access</p>
+      <h1 id="human-recovery-title" tabindex="-1" class="mt-1 text-2xl font-semibold">
+        Account recovery
+      </h1>
+      <p class="mt-4 text-sm leading-6 text-muted-foreground">
+        Recovery never confirms whether an account exists. It requires an independently verified provider.
+      </p>
+
+      <div
+        :if={@capabilities.recovery == :unavailable}
+        id="human-recovery-unavailable"
+        role="status"
+        class="mt-5 border-l-2 border-status-attention bg-muted px-3 py-3 text-sm"
+      >
+        Self-service recovery is not configured. Contact the service operator through an independently verified channel.
+      </div>
+
+      <div
+        :if={@notice}
+        id="human-recovery-notice"
+        role="status"
+        class="mt-5 border-l-2 border-status-success bg-muted px-3 py-3 text-sm"
+      >
+        {@notice}
+      </div>
+
+      <.form
+        for={@form}
+        id="human-recovery-form"
+        action={~p"/recovery"}
+        class="mt-6 grid gap-4"
+      >
+        <.input
+          field={@form[:login]}
+          type="text"
+          label="Account"
+          autocomplete="username"
+          required
+        />
+        <UI.button id="human-recovery-submit" type="submit" variant={:secondary}>
+          Request recovery guidance
+        </UI.button>
+      </.form>
+
+      <.link id="human-recovery-sign-in" href={~p"/sign-in"}>Return to sign in</.link>
+    </section>
+  </main>
+</Layouts.app>

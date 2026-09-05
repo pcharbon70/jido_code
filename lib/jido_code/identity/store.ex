@@ -140,6 +140,27 @@ defmodule JidoCode.Identity.Store do
     GenServer.call(server, {:revoke_session, context, session_ref, options})
   end
 
+  @doc "Lists bounded same-account session summaries through one current session."
+  @spec managed_sessions(server(), String.t(), keyword()) :: {:ok, [map()]} | {:error, atom()}
+  def managed_sessions(server \\ __MODULE__, current_session_ref, options \\ []) do
+    GenServer.call(server, {:managed_sessions, current_session_ref, options})
+  end
+
+  @doc "Revokes a same-account session by its non-bearer management reference."
+  @spec revoke_managed_session(server(), String.t(), String.t(), keyword()) ::
+          {:ok, :current | :other} | {:error, atom()}
+  def revoke_managed_session(
+        server \\ __MODULE__,
+        current_session_ref,
+        management_ref,
+        options \\ []
+      ) do
+    GenServer.call(
+      server,
+      {:revoke_managed_session, current_session_ref, management_ref, options}
+    )
+  end
+
   @spec put_membership(server(), map(), map(), keyword()) ::
           {:ok, Membership.t()} | {:error, atom()}
   def put_membership(server \\ __MODULE__, context, attributes, options \\ []) do
@@ -601,6 +622,82 @@ defmodule JidoCode.Identity.Store do
 
       commit(state, next_data, :ok, [event])
     else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:managed_sessions, current_session_ref, options}, _from, state) do
+    now = now(options)
+
+    with :ok <- available(state),
+         {:ok, current} <- fetch(state.data.sessions, current_session_ref),
+         {:ok, account} <- fetch(state.data.accounts, current.subject_ref),
+         :ok <- current_session(current, account, now, state.config) do
+      sessions =
+        state.data.sessions
+        |> Map.values()
+        |> Enum.filter(fn session ->
+          session.subject_ref == current.subject_ref and
+            current_session(session, account, now, state.config) == :ok
+        end)
+        |> Enum.sort_by(&DateTime.to_unix(&1.last_seen_at), :desc)
+        |> Enum.take(20)
+        |> Enum.map(&managed_session_summary(&1, current_session_ref))
+
+      {:reply, {:ok, sessions}, state}
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call(
+        {:revoke_managed_session, current_session_ref, management_ref, options},
+        _from,
+        state
+      ) do
+    now = now(options)
+
+    with :ok <- available(state),
+         true <- is_binary(management_ref) and byte_size(management_ref) in 1..64,
+         {:ok, current} <- fetch(state.data.sessions, current_session_ref),
+         {:ok, account} <- fetch(state.data.accounts, current.subject_ref),
+         :ok <- current_session(current, account, now, state.config),
+         {:ok, target} <- managed_session_target(state.data.sessions, current, management_ref),
+         :ok <- current_session(target, account, now, state.config) do
+      next_session = revoke(target, now)
+
+      next_data =
+        state.data
+        |> put_in([:sessions, target.session_ref], next_session)
+        |> append_audit(
+          audit_event(
+            current.subject_ref,
+            "identity.session.revoke",
+            target.session_ref,
+            :committed,
+            target.policy_revision,
+            reference("identity_receipt"),
+            now
+          )
+        )
+
+      emit_session_telemetry(:revoked, next_session, :revoked)
+
+      event =
+        revocation_event(
+          :session,
+          target.subject_ref,
+          target.session_ref,
+          target.session_generation,
+          target.session_generation + 1,
+          target.policy_revision,
+          now
+        )
+
+      outcome = if(target.session_ref == current_session_ref, do: :current, else: :other)
+      commit(state, next_data, {:ok, outcome}, [event])
+    else
+      false -> {:reply, {:error, :invalid_session_management_ref}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
   end
@@ -1947,4 +2044,41 @@ defmodule JidoCode.Identity.Store do
       _other -> :production
     end
   end
+
+  defp managed_session_summary(session, current_session_ref) do
+    %{
+      management_ref: session_management_ref(session.session_ref),
+      current: session.session_ref == current_session_ref,
+      issued_at: session.issued_at,
+      last_seen_at: session.last_seen_at,
+      hard_expires_at: session.hard_expires_at,
+      idle_expires_at: session.idle_expires_at,
+      assurance: session.assurance
+    }
+  end
+
+  defp managed_session_target(sessions, current, management_ref) do
+    sessions
+    |> Map.values()
+    |> Enum.find(fn session ->
+      session.subject_ref == current.subject_ref and
+        secure_equal?(session_management_ref(session.session_ref), management_ref)
+    end)
+    |> case do
+      %BrowserSession{} = session -> {:ok, session}
+      nil -> {:error, :not_found}
+    end
+  end
+
+  defp session_management_ref(session_ref) do
+    :sha256
+    |> :crypto.hash("jido-code-session-management\0" <> session_ref)
+    |> Base.url_encode64(padding: false)
+  end
+
+  defp secure_equal?(left, right)
+       when is_binary(left) and is_binary(right) and byte_size(left) == byte_size(right),
+       do: Plug.Crypto.secure_compare(left, right)
+
+  defp secure_equal?(_left, _right), do: false
 end

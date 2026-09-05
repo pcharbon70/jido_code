@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :phoenix, :filter_parameters, ["credential", "password", "token", "secret"]
+
 config :jido_code,
   runtime_mode: config_env(),
   generators: [timestamp_type: :utc_datetime],

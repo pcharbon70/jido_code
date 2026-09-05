@@ -3,5 +3,8 @@ defmodule JidoCodeWeb.AccountHTML do
 
   import JidoCodeWeb.Components.ProductPage
 
+  def humanize(:unavailable), do: "Unavailable"
+  def humanize(:configured), do: "Configured"
+
   embed_templates "account_html/*"
 end

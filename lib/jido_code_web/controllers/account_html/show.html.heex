@@ -4,4 +4,38 @@
   current_scope={@current_scope}
   page={@page}
   view_model={@view_model}
-/>
+>
+  <section
+    id="account-summary"
+    aria-labelledby="account-summary-title"
+    class="rounded-lg border border-border bg-card p-6"
+  >
+    <h2 id="account-summary-title" class="text-lg font-semibold">Current account</h2>
+    <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm text-muted-foreground">Name</dt>
+        <dd id="account-display-name" class="font-medium">{@account.display_name}</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-muted-foreground">Assurance</dt>
+        <dd id="account-assurance" class="font-medium">{@view_model.principal.session_label}</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-muted-foreground">Step-up</dt>
+        <dd id="account-step-up-posture" class="font-medium">
+          {humanize(@capabilities.step_up)}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm text-muted-foreground">Recovery</dt>
+        <dd id="account-recovery-posture" class="font-medium">
+          {humanize(@capabilities.recovery)}
+        </dd>
+      </div>
+    </dl>
+    <div class="mt-6 flex flex-wrap gap-4">
+      <.link id="account-sessions-link" href={~p"/account/sessions"}>Manage sessions</.link>
+      <.link id="account-step-up-link" href={~p"/step-up"}>Verify assurance</.link>
+    </div>
+  </section>
+</.placeholder>

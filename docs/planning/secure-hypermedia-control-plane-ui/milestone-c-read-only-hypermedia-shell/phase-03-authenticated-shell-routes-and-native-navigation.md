@@ -47,20 +47,20 @@ Back to plan: [README](./README.md)
       - [x] 3.2.1.3 Subtask - Implement project switching and native filter/search/pagination forms as GET-safe bounded intent with scope reset and no authority fields.
       - [x] 3.2.1.4 Subtask - Preserve focus, page title, current-location semantics, error summaries, flash ownership, back/forward, reload, and bookmark behavior.
 
-  - [ ] 3.3 Section - Implement native authentication and session workflows.
+  - [x] 3.3 Section - Implement native authentication and session workflows.
 
     This section makes essential account/session behavior usable without
     JavaScript and consistent with step-up and revocation rules.
 
-    - [ ] 3.3.1 Task {#huic-p03-session-ui} [repo: jido_code] [after: {#huic-p03-layout}] - Implement sign-in, sign-out, step-up, recovery, and session-management pages.
+    - [x] 3.3.1 Task {#huic-p03-session-ui} [repo: jido_code] [after: {#huic-p03-layout}] - Implement sign-in, sign-out, step-up, recovery, and session-management pages.
 
       This task exposes only the configured identity capability and avoids
       leaking account existence or security state.
 
-      - [ ] 3.3.1.1 Subtask - Implement native forms with `to_form/2`, CSRF, rate/attempt bounds, safe return targets, generic errors, password-manager/autocomplete semantics, and no secrets in logs/URLs.
-      - [ ] 3.3.1.2 Subtask - Implement current session/assurance display, session list/revocation where accepted, logout-current/all, account disabled, expired session, and step-up-required flows.
-      - [ ] 3.3.1.3 Subtask - Implement configured/unconfigured identity-provider and recovery posture with operator guidance that reveals no protected implementation detail.
-      - [ ] 3.3.1.4 Subtask - Verify post-auth/session rotation, focus/error announcements, back-button/cache behavior, and concurrent logout/revocation.
+      - [x] 3.3.1.1 Subtask - Implement native forms with `to_form/2`, CSRF, rate/attempt bounds, safe return targets, generic errors, password-manager/autocomplete semantics, and no secrets in logs/URLs.
+      - [x] 3.3.1.2 Subtask - Implement current session/assurance display, session list/revocation where accepted, logout-current/all, account disabled, expired session, and step-up-required flows.
+      - [x] 3.3.1.3 Subtask - Implement configured/unconfigured identity-provider and recovery posture with operator guidance that reveals no protected implementation detail.
+      - [x] 3.3.1.4 Subtask - Verify post-auth/session rotation, focus/error announcements, back-button/cache behavior, and concurrent logout/revocation.
 
   - [ ] 3.4 Section - Phase 3 Integration Tests.
 

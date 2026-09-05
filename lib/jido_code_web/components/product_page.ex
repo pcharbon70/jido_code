@@ -12,6 +12,7 @@ defmodule JidoCodeWeb.Components.ProductPage do
   attr :current_scope, :map, default: nil
   attr :page, :map, required: true
   attr :view_model, :map, required: true
+  slot :inner_block
 
   def placeholder(assigns) do
     ~H"""
@@ -102,7 +103,12 @@ defmodule JidoCodeWeb.Components.ProductPage do
             reset={%{label: "Clear filters", href: @conn.request_path}}
           />
 
+          <div :if={@inner_block != []} id="product-owned-content">
+            {render_slot(@inner_block)}
+          </div>
+
           <App.empty_state
+            :if={@inner_block == []}
             id="product-projection-unavailable"
             state={:unavailable}
             title="Projection not configured"

@@ -7,10 +7,8 @@ defmodule JidoCodeWeb.ProductController do
   alias JidoCodeWeb.ProductPageViewModel
 
   def serve(conn, params, spec, template) do
-    case ProductRequest.authorize(conn, spec, params) do
-      {:ok, conn, page} ->
-        view_model = ProductPageViewModel.build(conn, page)
-
+    case prepare(conn, params, spec) do
+      {:ok, conn, page, view_model} ->
         render(conn, template,
           page: page,
           view_model: view_model,
@@ -21,6 +19,13 @@ defmodule JidoCodeWeb.ProductController do
 
       {:error, conn} ->
         conn
+    end
+  end
+
+  def prepare(conn, params, spec) do
+    case ProductRequest.authorize(conn, spec, params) do
+      {:ok, conn, page} -> {:ok, conn, page, ProductPageViewModel.build(conn, page)}
+      {:error, conn} -> {:error, conn}
     end
   end
 end

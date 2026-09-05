@@ -49,19 +49,23 @@ defmodule JidoCodeWeb.Router do
     pipe_through :browser
 
     get "/sign-in", AuthController, :new
+    get "/recovery", AuthController, :recovery_new
   end
 
   scope "/", JidoCodeWeb do
     pipe_through [:browser, :require_same_origin]
 
     post "/sign-in", AuthController, :create
+    post "/recovery", AuthController, :recovery_create
     delete "/sign-out", AuthController, :delete
   end
 
   scope "/", JidoCodeWeb do
-    pipe_through [:browser, :require_authenticated_human, :require_same_origin]
+    pipe_through [:browser, :require_authenticated_session, :require_same_origin]
 
     delete "/sessions", AuthController, :delete_all
+    post "/step-up", AuthController, :step_up_create
+    delete "/account/sessions/:management_ref", AccountController, :revoke
   end
 
   scope "/api/v1", JidoCodeWeb.Api.V1 do
@@ -113,6 +117,7 @@ defmodule JidoCodeWeb.Router do
     get "/governance", GovernanceController, :index
     get "/account", AccountController, :show
     get "/account/sessions", AccountController, :sessions
+    get "/step-up", AuthController, :step_up_new
   end
 
   scope "/", JidoCodeWeb do

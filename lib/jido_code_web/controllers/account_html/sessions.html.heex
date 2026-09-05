@@ -4,4 +4,67 @@
   current_scope={@current_scope}
   page={@page}
   view_model={@view_model}
-/>
+>
+  <section id="session-management" aria-labelledby="session-management-title" class="grid gap-5">
+    <div>
+      <h2 id="session-management-title" class="text-lg font-semibold">Active browser sessions</h2>
+      <p id="session-management-summary" role="status" class="mt-1 text-sm text-muted-foreground">
+        {length(@sessions)} active session(s). Management references cannot authenticate a browser.
+      </p>
+    </div>
+
+    <ul id="session-list" class="grid gap-4">
+      <li
+        :for={{session, index} <- Enum.with_index(@sessions, 1)}
+        id={"session-item-#{index}"}
+        data-current-session={session.current && "true"}
+        class="rounded-lg border border-border bg-card p-5"
+      >
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h3 class="font-semibold">
+              {if(session.current, do: "This browser", else: "Other browser")}
+            </h3>
+            <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+              <div>
+                <dt class="text-muted-foreground">Assurance</dt><dd>{session.assurance}</dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">Issued</dt><dd>{session.issued_at}</dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">Last checked</dt><dd>{session.last_seen_at}</dd>
+              </div>
+              <div>
+                <dt class="text-muted-foreground">Hard expiry</dt><dd>
+                  {session.hard_expires_at}
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <.form
+            for={session.form}
+            id={"session-revoke-form-#{index}"}
+            action={~p"/account/sessions/#{session.management_ref}"}
+            method="delete"
+          >
+            <UI.button id={"session-revoke-submit-#{index}"} type="submit" variant={:outline}>
+              {if(session.current, do: "End this session", else: "End session")}
+            </UI.button>
+          </.form>
+        </div>
+      </li>
+    </ul>
+
+    <.form
+      for={@logout_all_form}
+      id="session-logout-all-form"
+      action={~p"/sessions"}
+      method="delete"
+    >
+      <UI.button id="session-logout-all-submit" type="submit" variant={:destructive}>
+        End all sessions
+      </UI.button>
+    </.form>
+  </section>
+</.placeholder>
