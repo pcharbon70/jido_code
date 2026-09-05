@@ -17,20 +17,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-C3 with useful navigation and error handling before
   live fragments or commands are added.
 
-  - [ ] 3.1 Section - Implement explicit authenticated route groups.
+  - [x] 3.1 Section - Implement explicit authenticated route groups.
 
     This section gives every page an owned controller/action/template,
     authority decision, canonical URL, and safe unavailable behavior.
 
-    - [ ] 3.1.1 Task {#huic-p03-routes} [repo: jido_code] [after: {#huic-p02-phase-receipt}] - Implement factory, project, attempt, and restricted-area routes.
+    - [x] 3.1.1 Task {#huic-p03-routes} [repo: jido_code] [after: {#huic-p02-phase-receipt}] - Implement factory, project, attempt, and restricted-area routes.
 
       This task builds ordinary Phoenix route/controller boundaries without
       LiveView routing or catch-all action dispatch.
 
-      - [ ] 3.1.1.1 Subtask - Add authenticated routes for home/attention, fleet, project overview/attempts/wiki/dependencies, attempt workspace, reviews, costs, knowledge lenses, operations, security/incidents, governance, and account/session pages.
-      - [ ] 3.1.1.2 Subtask - Use opaque bounded resource refs and trusted resolution; preserve conceptual repository/project alias and distinct attempt/interaction/candidate/preview identities.
-      - [ ] 3.1.1.3 Subtask - Apply exact route/action authorization, assurance, concealment, no-store/referrer policy, safe errors, and restricted-area separation on every handler.
-      - [ ] 3.1.1.4 Subtask - Add canonical URL, redirect, trailing-slash/query normalization, deep-link, pagination/filter, not-found, forbidden/concealed, maintenance, and unconfigured behavior.
+      - [x] 3.1.1.1 Subtask - Add authenticated routes for home/attention, fleet, project overview/attempts/wiki/dependencies, attempt workspace, reviews, costs, knowledge lenses, operations, security/incidents, governance, and account/session pages.
+      - [x] 3.1.1.2 Subtask - Use opaque bounded resource refs and trusted resolution; preserve conceptual repository/project alias and distinct attempt/interaction/candidate/preview identities.
+      - [x] 3.1.1.3 Subtask - Apply exact route/action authorization, assurance, concealment, no-store/referrer policy, safe errors, and restricted-area separation on every handler.
+      - [x] 3.1.1.4 Subtask - Add canonical URL, redirect, trailing-slash/query normalization, deep-link, pagination/filter, not-found, forbidden/concealed, maintenance, and unconfigured behavior.
 
   - [ ] 3.2 Section - Compose full-page layouts and scope-aware navigation.
 

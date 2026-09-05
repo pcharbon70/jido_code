@@ -24,6 +24,11 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.ProductAuth, :require_authenticated_human
   end
 
+  pipeline :require_authenticated_session do
+    plug JidoCodeWeb.ProductAuth, :fetch_authenticated_session
+    plug JidoCodeWeb.ProductAuth, :require_authenticated_session
+  end
+
   pipeline :require_same_origin do
     plug JidoCodeWeb.Plugs.RequireSameOrigin
   end
@@ -85,11 +90,36 @@ defmodule JidoCodeWeb.Router do
   end
 
   scope "/", JidoCodeWeb do
+    pipe_through [:browser, :require_authenticated_session]
+
+    get "/", FactoryController, :root
+    get "/factory", FactoryController, :attention
+    get "/factory/fleet", FactoryController, :fleet
+
+    get "/projects", ProjectController, :index
+    get "/projects/switch", ProjectController, :switch
+    get "/projects/:project_ref", ProjectController, :overview
+    get "/projects/:project_ref/attempts", ProjectController, :attempts
+    get "/projects/:project_ref/wiki", ProjectController, :wiki
+    get "/projects/:project_ref/dependencies", ProjectController, :dependencies
+    get "/projects/:project_ref/attempts/:attempt_ref", AttemptController, :show
+    get "/projects/:project_ref/knowledge/:lens", KnowledgeController, :show
+
+    get "/reviews/:candidate_ref", ReviewController, :show
+    get "/operations", OperationsController, :index
+    get "/operations/costs", OperationsController, :costs
+    get "/security", SecurityController, :index
+    get "/security/incidents", SecurityController, :incidents
+    get "/governance", GovernanceController, :index
+    get "/account", AccountController, :show
+    get "/account/sessions", AccountController, :sessions
+  end
+
+  scope "/", JidoCodeWeb do
     pipe_through [:browser, :require_authenticated_human]
 
     live_session :authenticated,
       on_mount: [{JidoCodeWeb.ProductAuth, :require_authenticated}] do
-      live "/", HomeLive
       live "/coding-agents", CodingAgentLive
       live "/managed-coding/:attempt_ref", ManagedCodingAttemptLive, :show
     end

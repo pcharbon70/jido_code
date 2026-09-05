@@ -28,6 +28,8 @@ defmodule JidoCodeWeb.ProductAuth do
       when action in [
              :fetch_current_scope,
              :require_authenticated_human,
+             :fetch_authenticated_session,
+             :require_authenticated_session,
              :fetch_api_scope,
              :require_authenticated_api
            ],
@@ -35,6 +37,8 @@ defmodule JidoCodeWeb.ProductAuth do
 
   def call(conn, :fetch_current_scope), do: fetch_current_scope(conn, [])
   def call(conn, :require_authenticated_human), do: require_authenticated_human(conn, [])
+  def call(conn, :fetch_authenticated_session), do: fetch_authenticated_session(conn, [])
+  def call(conn, :require_authenticated_session), do: require_authenticated_session(conn, [])
   def call(conn, :fetch_api_scope), do: fetch_api_scope(conn, [])
   def call(conn, :require_authenticated_api), do: require_authenticated_api(conn, [])
 
@@ -124,6 +128,52 @@ defmodule JidoCodeWeb.ProductAuth do
         |> assign(:authority, nil)
         |> assign(:authorization, nil)
         |> assign(:authorization_outcome, reason)
+    end
+  end
+
+  @doc "Resolves only the current named-human session for route admission."
+  @spec fetch_authenticated_session(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
+  def fetch_authenticated_session(conn, _options) do
+    case get_session(conn, @session_ref_key) do
+      session_ref when is_binary(session_ref) ->
+        case Sessions.validate(session_ref) do
+          {:ok, %{session: session, account: account}} ->
+            assign(conn, :authenticated_human, %{
+              account: account,
+              identity: named_product_identity(account),
+              session: session,
+              session_ref: session_ref
+            })
+
+          {:error, reason} ->
+            conn
+            |> assign(:authenticated_human, nil)
+            |> assign(:authentication_outcome, reason)
+        end
+
+      _missing ->
+        conn
+        |> assign(:authenticated_human, nil)
+        |> assign(:authentication_outcome, :invalid_session)
+    end
+  rescue
+    _error ->
+      conn
+      |> assign(:authenticated_human, nil)
+      |> assign(:authentication_outcome, :unavailable)
+  end
+
+  @doc "Requires the server-resolved named-human session without selecting a product grant."
+  @spec require_authenticated_session(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
+  def require_authenticated_session(conn, _options) do
+    if conn.assigns[:authenticated_human] do
+      conn
+    else
+      return_to = request_path_with_query(conn)
+
+      conn
+      |> redirect(to: ~p"/sign-in?#{%{return_to: return_to}}")
+      |> halt()
     end
   end
 
