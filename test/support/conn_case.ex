@@ -34,4 +34,28 @@ defmodule JidoCodeWeb.ConnCase do
   setup _tags do
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  def sign_in_named_human(conn) do
+    {:ok, authentication} =
+      JidoCode.Identity.authenticate(
+        "operator@example.test",
+        "test-named-human-credential"
+      )
+
+    {:ok, conn} =
+      conn
+      |> Plug.Conn.fetch_session()
+      |> JidoCodeWeb.ProductAuth.establish_session(authentication)
+
+    conn
+  end
+
+  def with_same_origin(conn) do
+    default_port? =
+      (conn.scheme == :http and conn.port == 80) or
+        (conn.scheme == :https and conn.port == 443)
+
+    port = if default_port?, do: "", else: ":#{conn.port}"
+    Plug.Conn.put_req_header(conn, "origin", "#{conn.scheme}://#{conn.host}#{port}")
+  end
 end

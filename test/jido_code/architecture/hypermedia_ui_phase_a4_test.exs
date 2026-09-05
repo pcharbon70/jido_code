@@ -2,6 +2,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
   use ExUnit.Case, async: true
 
   alias JidoCode.Architecture.HypermediaUIPhaseA4
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
 
   @fixture_root "test/fixtures/architecture/hypermedia_ui"
   @plan_root "docs/planning/secure-hypermedia-control-plane-ui"
@@ -137,18 +138,20 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
       Enum.find(guardrails["exceptions"], &(&1["path"] == "lib/jido_code_web/router.ex"))
 
     source = File.read!(exception["path"])
+    successor_digest = HypermediaUISuccessorEvidence.digest(File.cwd!(), exception["path"])
+    current_exception = Map.put(exception, "sha256", successor_digest)
 
     assert {:ok, []} =
              HypermediaUIPhaseA4.check_sources(
                [{exception["path"], source}],
-               exceptions: [exception],
+               exceptions: [current_exception],
                today: ~D[2026-09-03]
              )
 
     assert {:error, changed_errors} =
              HypermediaUIPhaseA4.check_sources(
                [{exception["path"], source <> "\n"}],
-               exceptions: [exception],
+               exceptions: [current_exception],
                today: ~D[2026-09-03]
              )
 
@@ -157,7 +160,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA4Test do
     assert {:error, expired_errors} =
              HypermediaUIPhaseA4.check_sources(
                [{exception["path"], source}],
-               exceptions: [exception],
+               exceptions: [current_exception],
                today: ~D[2027-04-01]
              )
 

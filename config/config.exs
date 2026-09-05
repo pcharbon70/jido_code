@@ -45,6 +45,25 @@ config :jido_code, :product_auth,
   session_ttl_seconds: 28_800,
   session_generation: "1"
 
+config :jido_code, :human_identity,
+  enabled: false,
+  persistence: false,
+  path: nil,
+  integrity_key: nil,
+  policy_revision: "hui.identity.v1",
+  pbkdf2_iterations: 210_000,
+  max_failed_attempts: 5,
+  lockout_seconds: 300,
+  recovery_adapter: JidoCode.Identity.Recovery.Unconfigured,
+  hard_lifetime_seconds: 43_200,
+  idle_lifetime_seconds: 1_800,
+  idle_warning_seconds: 300,
+  maximum_authentication_age_seconds: 43_200,
+  bootstrap: nil,
+  authority_adapter: JidoCode.Identity.Authority.Unconfigured
+
+config :jido_code, :secure_session_cookie, true
+
 # HUI-B3's qualification consumer is compiled only into the test build. Runtime
 # configuration may enable that test-only build with an explicit host allowlist;
 # its Plug also restricts callers to the loopback interface.

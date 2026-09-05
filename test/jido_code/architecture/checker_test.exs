@@ -127,7 +127,9 @@ defmodule JidoCode.Architecture.CheckerTest do
       {"lib/jido_code/knowledge/backend/checkpoint.ex",
        "defmodule JidoCode.Knowledge.Backend.Checkpoint do\n  @architecture_file_role :graph_backup\n  def save(db, path), do: :rocksdb.checkpoint(db, path)\nend"},
       {"lib/jido_code/runtime/sandbox.ex",
-       "defmodule JidoCode.Runtime.Sandbox do\n  @architecture_file_role :temporary\n  def save(path, body), do: File.write!(path, body)\nend"}
+       "defmodule JidoCode.Runtime.Sandbox do\n  @architecture_file_role :temporary\n  def save(path, body), do: File.write!(path, body)\nend"},
+      {"lib/jido_code/identity/store.ex",
+       "defmodule JidoCode.Identity.Store do\n  @architecture_file_role :identity_authority\n  def save(path, body), do: File.write!(path, body)\nend"}
     ]
 
     assert {:ok, []} = Checker.check_sources(sources)

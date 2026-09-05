@@ -23,10 +23,14 @@ defmodule JidoCodeWeb.Phase10ProductAcceptanceTest do
 
     substrate = Phase04Fixture.start!(context)
 
+    {:ok, account} = JidoCode.Identity.account("human_test_operator")
+    named_identity = JidoCodeWeb.ProductAuth.named_product_identity(account)
+
     assert {:ok, bootstrap} =
              Install.bootstrap(@operator_token,
                store_server: substrate.store_server,
-               writer: substrate.writer
+               writer: substrate.writer,
+               identity: named_identity
              )
 
     Application.put_env(:jido_code, :product_projection_provider, Phase10ProductAdapter)
@@ -42,19 +46,19 @@ defmodule JidoCodeWeb.Phase10ProductAcceptanceTest do
     conn =
       context.conn
       |> init_test_session(%{})
-      |> JidoCodeWeb.ProductAuth.establish_session()
+      |> JidoCodeWeb.ConnCase.sign_in_named_human()
 
-    {:ok, conn: conn, bootstrap: bootstrap}
+    {:ok, conn: conn, bootstrap: bootstrap, named_identity: named_identity}
   end
 
   test "commits enrollment from LiveView and reconstructs the surface from graph", %{
     conn: conn,
-    bootstrap: bootstrap
+    bootstrap: bootstrap,
+    named_identity: identity
   } do
     substrate = Application.fetch_env!(:jido_code, :phase_10_product_substrate)
     abrupt_restart_substrate!(substrate)
 
-    identity = JidoCodeWeb.ProductAuth.product_identity()
     {:ok, authority} = JidoCode.Product.authority(identity)
 
     assert {:ok, initial_projection} = Phase10ProductAdapter.load(authority, identity, [])
@@ -159,8 +163,9 @@ defmodule JidoCodeWeb.Phase10ProductAcceptanceTest do
     refute has_element?(concealed, "#repositories > button")
   end
 
-  test "reopens the exact product commit and rebuilds its projection from graph" do
-    identity = JidoCodeWeb.ProductAuth.product_identity()
+  test "reopens the exact product commit and rebuilds its projection from graph", %{
+    named_identity: identity
+  } do
     {:ok, authority} = JidoCode.Product.authority(identity)
 
     assert {:ok, %{outcome: :committed}} =

@@ -48,11 +48,15 @@ namespace:
 | `build_artifact` | `JidoCode.Runtime`, `JidoCode.Integrations` | Reproducible build output |
 | `external_worktree` | `JidoCode.Runtime`, `JidoCode.Integrations` | Disposable Git/provider working material |
 | `graph_backup` | `JidoCode.Knowledge` | Owner-coordinated checkpoint of the authoritative graph |
+| `identity_authority` | `JidoCode.Identity` | Integrity-protected named-human account, authenticator-verifier, generation, and immutable security evidence authority |
 
 The module must consume or persist the custom attribute so Elixir does not
 report it as unused. The marker does not authorize arbitrary state: reviewers
 and tests must still prove the file is reconstructable or is a graph
-checkpoint. Adding a role requires changing the checker and this contract.
+checkpoint. The identity authority role is limited to the HUI-C1 named-human
+store: it cannot hold graph grants, product content, command authority, or a
+browser-derived authorization decision. Adding a role requires changing the
+checker and this contract.
 
 ## Public Knowledge Dependencies
 

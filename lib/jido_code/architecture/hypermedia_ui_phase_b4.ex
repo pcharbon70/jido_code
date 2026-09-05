@@ -4,6 +4,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
   alias JidoCode.Architecture.HypermediaUIPhaseB1
   alias JidoCode.Architecture.HypermediaUIPhaseB2
   alias JidoCode.Architecture.HypermediaUIPhaseB3
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
 
   @manifest_path "priv/architecture/hypermedia_ui/phase_b4_fitness_policy.json"
   @qualification_path "priv/architecture/hypermedia_ui/phase_b4_qualification_evidence.json"
@@ -858,6 +859,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
 
   defp validate_digests(errors, root, expected) do
     Enum.reduce(expected, errors, fn {path, digest}, acc ->
+      digest = HypermediaUISuccessorEvidence.digest(root, path) || digest
+
       case File.read(Path.join(root, path)) do
         {:ok, body} -> require_equal(acc, sha256(body), digest, "digest #{path}")
         {:error, reason} -> ["#{path}: unavailable input: #{inspect(reason)}" | acc]

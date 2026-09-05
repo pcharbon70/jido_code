@@ -81,7 +81,7 @@ defmodule JidoCode.Product.DelegatedAgentPhase05IntegrationTest do
     browser_conn =
       conn
       |> init_test_session(%{})
-      |> JidoCodeWeb.ProductAuth.establish_session()
+      |> JidoCodeWeb.ConnCase.sign_in_named_human()
 
     %{attempt: attempt, browser_conn: browser_conn}
   end

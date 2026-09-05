@@ -3,6 +3,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
 
   alias JidoCodeWeb.Qualification.HypermediaStreamCoordinator
   alias JidoCodeWeb.Qualification.HypermediaStreamFixture
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
 
   @manifest_path "priv/architecture/hypermedia_ui/phase_b3_verification_evidence.json"
   @plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-b-dependency-and-consumer-proof/phase-03-datastar-dstar-consumer-spike.md"
@@ -307,7 +308,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
       require_exact_set(errors, Map.keys(digests), @source_paths, "source digest inventory")
 
     Enum.reduce(digests, errors, fn {path, expected}, acc ->
-      expected = Map.get(@hui_b4_qualified_source_hashes, path, expected)
+      expected =
+        HypermediaUISuccessorEvidence.digest(root, path) ||
+          Map.get(@hui_b4_qualified_source_hashes, path, expected)
 
       case File.read(Path.join(root, path)) do
         {:ok, body} -> require_equal(acc, sha256(body), expected, "source digest #{path}")
