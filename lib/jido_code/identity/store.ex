@@ -176,6 +176,13 @@ defmodule JidoCode.Identity.Store do
     GenServer.call(server, {:resolve_resource, resource_ref})
   end
 
+  @doc "Returns a bounded registry candidate set; callers must authorize every item before use."
+  @spec registered_resources(server(), atom(), pos_integer()) ::
+          {:ok, [Resource.t()]} | {:error, :invalid_resource_query}
+  def registered_resources(server \\ __MODULE__, kind, limit) do
+    GenServer.call(server, {:registered_resources, kind, limit})
+  end
+
   @spec authorization_snapshot(server(), String.t(), keyword()) ::
           {:ok, map()} | {:error, atom()}
   def authorization_snapshot(server \\ __MODULE__, subject_ref, options \\ []) do
@@ -241,6 +248,21 @@ defmodule JidoCode.Identity.Store do
 
     {:reply, fetch(state.data.resources, resolved_ref), state}
   end
+
+  def handle_call({:registered_resources, kind, limit}, _from, state)
+      when kind in [:project] and is_integer(limit) and limit in 1..50 do
+    resources =
+      state.data.resources
+      |> Map.values()
+      |> Enum.filter(&(&1.kind == kind))
+      |> Enum.sort_by(& &1.resource_ref)
+      |> Enum.take(limit)
+
+    {:reply, {:ok, resources}, state}
+  end
+
+  def handle_call({:registered_resources, _kind, _limit}, _from, state),
+    do: {:reply, {:error, :invalid_resource_query}, state}
 
   def handle_call({:authorization_snapshot, subject_ref, options}, _from, state) do
     now = now(options)

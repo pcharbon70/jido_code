@@ -32,20 +32,20 @@ Back to plan: [README](./README.md)
       - [x] 3.1.1.3 Subtask - Apply exact route/action authorization, assurance, concealment, no-store/referrer policy, safe errors, and restricted-area separation on every handler.
       - [x] 3.1.1.4 Subtask - Add canonical URL, redirect, trailing-slash/query normalization, deep-link, pagination/filter, not-found, forbidden/concealed, maintenance, and unconfigured behavior.
 
-  - [ ] 3.2 Section - Compose full-page layouts and scope-aware navigation.
+  - [x] 3.2 Section - Compose full-page layouts and scope-aware navigation.
 
     This section renders the component shell with current authorized context,
     breadcrumbs, status, and meaningful native interactions.
 
-    - [ ] 3.2.1 Task {#huic-p03-layout} [repo: jido_code] [after: {#huic-p03-routes}] - Implement controller layout/view-model composition.
+    - [x] 3.2.1 Task {#huic-p03-layout} [repo: jido_code] [after: {#huic-p03-routes}] - Implement controller layout/view-model composition.
 
       This task keeps templates presentation-only and derives all navigation
       and context from server-owned view models.
 
-      - [ ] 3.2.1.1 Subtask - Build page view models containing current principal summary, assurance, route, authorized navigation, project/attempt context, readiness, freshness, notices, and support metadata.
-      - [ ] 3.2.1.2 Subtask - Render shell, skip/landmark structure, page headers, breadcrumbs, responsive navigation, account/session controls, and reserved-area cues through application components.
-      - [ ] 3.2.1.3 Subtask - Implement project switching and native filter/search/pagination forms as GET-safe bounded intent with scope reset and no authority fields.
-      - [ ] 3.2.1.4 Subtask - Preserve focus, page title, current-location semantics, error summaries, flash ownership, back/forward, reload, and bookmark behavior.
+      - [x] 3.2.1.1 Subtask - Build page view models containing current principal summary, assurance, route, authorized navigation, project/attempt context, readiness, freshness, notices, and support metadata.
+      - [x] 3.2.1.2 Subtask - Render shell, skip/landmark structure, page headers, breadcrumbs, responsive navigation, account/session controls, and reserved-area cues through application components.
+      - [x] 3.2.1.3 Subtask - Implement project switching and native filter/search/pagination forms as GET-safe bounded intent with scope reset and no authority fields.
+      - [x] 3.2.1.4 Subtask - Preserve focus, page title, current-location semantics, error summaries, flash ownership, back/forward, reload, and bookmark behavior.
 
   - [ ] 3.3 Section - Implement native authentication and session workflows.
 

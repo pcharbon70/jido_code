@@ -34,7 +34,7 @@ defmodule JidoCodeWeb.ProductRequest do
     conn = secure(conn)
 
     with {:ok, route_params} <- normalize_route_params(spec, params),
-         {:ok, query} <- normalize_query(Map.get(spec, :query, []), params),
+         {:ok, query, query_errors} <- normalize_query(Map.get(spec, :query, []), params),
          {:ok, authorization} <- authorize_resource(conn, spec, route_params),
          :ok <- verify_resource(spec.resource, route_params, authorization) do
       page = %{
@@ -44,6 +44,8 @@ defmodule JidoCodeWeb.ProductRequest do
         area: Map.fetch!(spec, :area),
         route_params: route_params,
         query: query,
+        query_fields: Map.get(spec, :query, []),
+        query_errors: query_errors,
         authorization: authorization,
         canonical_url: canonical_url(conn.request_path, query)
       }
@@ -104,20 +106,40 @@ defmodule JidoCodeWeb.ProductRequest do
   defp normalize_query(allowed, params) do
     allowed = MapSet.new(allowed)
 
-    params
-    |> Map.take(["q", "state", "page"])
-    |> Enum.reduce_while({:ok, %{}}, fn {key, value}, {:ok, acc} ->
-      if MapSet.member?(allowed, key) do
-        case normalize_query_value(key, value) do
-          {:ok, nil} -> {:cont, {:ok, acc}}
-          {:ok, normalized} -> {:cont, {:ok, Map.put(acc, key, normalized)}}
-          {:error, reason} -> {:halt, {:error, reason}}
+    {query, errors} =
+      params
+      |> Map.take(["q", "state", "page"])
+      |> Enum.reduce({%{}, []}, fn {key, value}, {acc, errors} ->
+        if MapSet.member?(allowed, key) do
+          case normalize_query_value(key, value) do
+            {:ok, nil} -> {acc, errors}
+            {:ok, normalized} -> {Map.put(acc, key, normalized), errors}
+            {:error, :invalid_route_parameter} -> {acc, [query_error(key) | errors]}
+          end
+        else
+          {acc, errors}
         end
-      else
-        {:cont, {:ok, acc}}
-      end
-    end)
+      end)
+
+    {:ok, query, Enum.reverse(errors)}
   end
+
+  defp query_error("q"),
+    do: %{
+      key: "query",
+      label: "Search must be at most 128 bytes.",
+      target_id: "product-filter-search-query"
+    }
+
+  defp query_error("state"),
+    do: %{
+      key: "state",
+      label: "Choose one of the available states.",
+      target_id: "product-filter-search-filter-state"
+    }
+
+  defp query_error("page"),
+    do: %{key: "page", label: "Page must be between 1 and 100.", target_id: "product-pagination"}
 
   defp normalize_query_value("q", value)
        when is_binary(value) and byte_size(value) <= @maximum_query_bytes do
@@ -234,8 +256,11 @@ defmodule JidoCodeWeb.ProductRequest do
 
   defp assign_authorization(conn, _session_authorization), do: conn
 
-  defp canonical_url(path, query) when map_size(query) == 0, do: path
-  defp canonical_url(path, query), do: path <> "?" <> URI.encode_query(query)
+  defp canonical_url(path, query) when map_size(query) == 0,
+    do: JidoCodeWeb.Endpoint.url() <> path
+
+  defp canonical_url(path, query),
+    do: JidoCodeWeb.Endpoint.url() <> path <> "?" <> URI.encode_query(query)
 
   defp secure(conn) do
     conn

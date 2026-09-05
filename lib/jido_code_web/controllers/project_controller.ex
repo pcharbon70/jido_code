@@ -78,8 +78,9 @@ defmodule JidoCodeWeb.ProjectController do
 
   def switch(conn, params) do
     spec = spec(@project, :project_switch, "Project switch", "Open an authorized project.")
+    project_ref = get_in(params, ["project_switch", "project_ref"])
 
-    case ProductRequest.authorize(conn, spec, params) do
+    case ProductRequest.authorize(conn, spec, Map.put(params, "project_ref", project_ref)) do
       {:ok, conn, %{route_params: %{resource_ref: project_ref}}} ->
         redirect(conn, to: ~p"/projects/#{project_ref}")
 
