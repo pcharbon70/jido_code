@@ -13,6 +13,7 @@
     <.live_title default="JidoCode" suffix=" · Phoenix Framework">
       {assigns[:page_title]}
     </.live_title>
+    <link :if={assigns[:canonical_url]} rel="canonical" href={assigns[:canonical_url]} />
     <link rel="icon" type="image/svg+xml" href={~p"/images/logo.svg"} />
     <PhoenixVite.Components.assets
       names={JidoCodeWeb.FrontendAssets.asset_names()}

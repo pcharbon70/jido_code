@@ -20,4 +20,17 @@ defmodule JidoCode.Identity.Sessions do
     {server, call_options} = Keyword.pop(options, :server, Store)
     Store.revoke_session(server, context, session_ref, call_options)
   end
+
+  @spec managed(String.t(), keyword()) :: {:ok, [map()]} | {:error, atom()}
+  def managed(current_session_ref, options \\ []) do
+    {server, call_options} = Keyword.pop(options, :server, Store)
+    Store.managed_sessions(server, current_session_ref, call_options)
+  end
+
+  @spec revoke_managed(String.t(), String.t(), keyword()) ::
+          {:ok, :current | :other} | {:error, atom()}
+  def revoke_managed(current_session_ref, management_ref, options \\ []) do
+    {server, call_options} = Keyword.pop(options, :server, Store)
+    Store.revoke_managed_session(server, current_session_ref, management_ref, call_options)
+  end
 end

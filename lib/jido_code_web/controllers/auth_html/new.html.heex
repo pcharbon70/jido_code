@@ -1,4 +1,4 @@
-<Layouts.app flash={@flash}>
+<Layouts.app flash={@flash} frame={:content}>
   <main id="human-sign-in" class="grid min-h-full place-items-center bg-frame-canvas p-4">
     <section
       aria-labelledby="human-sign-in-title"
@@ -16,6 +16,24 @@
         Authenticate to enter the repository factory control plane.
       </p>
 
+      <p
+        :if={@notice}
+        id="human-sign-in-notice"
+        role="status"
+        class="mt-4 border-l-2 border-status-attention bg-muted px-3 py-2 text-sm"
+      >
+        {@notice}
+      </p>
+
+      <p
+        :if={!@capabilities.enabled}
+        id="human-sign-in-unconfigured"
+        role="status"
+        class="mt-4 border-l-2 border-status-attention bg-muted px-3 py-2 text-sm"
+      >
+        Named-human authentication is not configured. Contact the service operator.
+      </p>
+
       <div
         :if={@error}
         id="human-sign-in-error"
@@ -25,7 +43,13 @@
         {@error}
       </div>
 
-      <.form for={@form} id="human-sign-in-form" action={~p"/sign-in"} class="mt-6 grid gap-4">
+      <.form
+        :if={@capabilities.enabled}
+        for={@form}
+        id="human-sign-in-form"
+        action={~p"/sign-in"}
+        class="mt-6 grid gap-4"
+      >
         <.input
           field={@form[:login]}
           type="text"
@@ -45,6 +69,10 @@
           <.icon name="hero-arrow-right-end-on-rectangle" class="size-4" /> Sign in
         </UI.button>
       </.form>
+
+      <p class="mt-6 text-sm">
+        <.link id="human-recovery-link" href={~p"/recovery"}>Account recovery</.link>
+      </p>
     </section>
   </main>
 </Layouts.app>

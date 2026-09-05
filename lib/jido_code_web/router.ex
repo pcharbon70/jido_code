@@ -24,6 +24,11 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.ProductAuth, :require_authenticated_human
   end
 
+  pipeline :require_authenticated_session do
+    plug JidoCodeWeb.ProductAuth, :fetch_authenticated_session
+    plug JidoCodeWeb.ProductAuth, :require_authenticated_session
+  end
+
   pipeline :require_same_origin do
     plug JidoCodeWeb.Plugs.RequireSameOrigin
   end
@@ -44,19 +49,23 @@ defmodule JidoCodeWeb.Router do
     pipe_through :browser
 
     get "/sign-in", AuthController, :new
+    get "/recovery", AuthController, :recovery_new
   end
 
   scope "/", JidoCodeWeb do
     pipe_through [:browser, :require_same_origin]
 
     post "/sign-in", AuthController, :create
+    post "/recovery", AuthController, :recovery_create
     delete "/sign-out", AuthController, :delete
   end
 
   scope "/", JidoCodeWeb do
-    pipe_through [:browser, :require_authenticated_human, :require_same_origin]
+    pipe_through [:browser, :require_authenticated_session, :require_same_origin]
 
     delete "/sessions", AuthController, :delete_all
+    post "/step-up", AuthController, :step_up_create
+    delete "/account/sessions/:management_ref", AccountController, :revoke
   end
 
   scope "/api/v1", JidoCodeWeb.Api.V1 do
@@ -82,6 +91,32 @@ defmodule JidoCodeWeb.Router do
       get "/hypermedia/maintenance", HypermediaController, :maintenance
       get "/hypermedia/error", HypermediaController, :error
     end
+  end
+
+  scope "/", JidoCodeWeb do
+    pipe_through [:browser, :require_authenticated_session]
+
+    get "/factory", FactoryController, :attention
+    get "/factory/fleet", FactoryController, :fleet
+
+    get "/projects", ProjectController, :index
+    get "/projects/switch", ProjectController, :switch
+    get "/projects/:project_ref", ProjectController, :overview
+    get "/projects/:project_ref/attempts", ProjectController, :attempts
+    get "/projects/:project_ref/wiki", ProjectController, :wiki
+    get "/projects/:project_ref/dependencies", ProjectController, :dependencies
+    get "/projects/:project_ref/attempts/:attempt_ref", AttemptController, :show
+    get "/projects/:project_ref/knowledge/:lens", KnowledgeController, :show
+
+    get "/reviews/:candidate_ref", ReviewController, :show
+    get "/operations", OperationsController, :index
+    get "/operations/costs", OperationsController, :costs
+    get "/security", SecurityController, :index
+    get "/security/incidents", SecurityController, :incidents
+    get "/governance", GovernanceController, :index
+    get "/account", AccountController, :show
+    get "/account/sessions", AccountController, :sessions
+    get "/step-up", AuthController, :step_up_new
   end
 
   scope "/", JidoCodeWeb do

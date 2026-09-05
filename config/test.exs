@@ -50,6 +50,20 @@ config :jido_code, :human_identity,
       :cost,
       :knowledge,
       :administration
+    ],
+    projects: [
+      %{
+        resource_ref: "project_browser_alpha",
+        project_ref: "browser_alpha",
+        attempt_ref: "attempt_browser_alpha",
+        candidate_ref: "candidate_browser_alpha"
+      },
+      %{
+        resource_ref: "project_browser_beta",
+        project_ref: "browser_beta",
+        attempt_ref: "attempt_browser_beta",
+        candidate_ref: "candidate_browser_beta"
+      }
     ]
   },
   authority_adapter: JidoCode.TestSupport.StaticHumanAuthorityAdapter

@@ -1,0 +1,57 @@
+<Layouts.app flash={@flash} frame={:content}>
+  <main id="human-step-up" class="grid min-h-screen place-items-center bg-frame-canvas p-4">
+    <section
+      aria-labelledby="human-step-up-title"
+      class="w-full max-w-lg border-y border-border bg-background py-8"
+    >
+      <p class="text-xs font-medium uppercase text-muted-foreground">Account assurance</p>
+      <h1 id="human-step-up-title" tabindex="-1" class="mt-1 text-2xl font-semibold">
+        Verify assurance
+      </h1>
+      <p class="mt-4 text-sm leading-6 text-muted-foreground">
+        Signed in as {@current_human.account.display_name}. Current assurance: {humanize_assurance(
+          @current_human.session.assurance
+        )}.
+      </p>
+
+      <div
+        :if={@capabilities.step_up == :unavailable}
+        id="human-step-up-unavailable"
+        role="status"
+        class="mt-5 border-l-2 border-status-attention bg-muted px-3 py-3 text-sm"
+      >
+        Phishing-resistant step-up is not configured. Contact the service operator; this page will not simulate elevated assurance.
+      </div>
+
+      <div
+        :if={@error}
+        id="human-step-up-error"
+        role="alert"
+        tabindex="-1"
+        class="mt-5 border-l-2 border-status-failure bg-muted px-3 py-3 text-sm"
+      >
+        {@error}
+      </div>
+
+      <.form
+        :if={@capabilities.step_up != :unavailable}
+        for={@form}
+        id="human-step-up-form"
+        action={~p"/step-up"}
+        class="mt-6 grid gap-4"
+      >
+        <.input
+          field={@form[:credential]}
+          type="password"
+          label="Credential"
+          autocomplete="current-password"
+          required
+        />
+        <input type="hidden" name={@form[:return_to].name} value={@form[:return_to].value} />
+        <UI.button id="human-step-up-submit" type="submit">Verify assurance</UI.button>
+      </.form>
+
+      <.link id="human-step-up-cancel" href={@form[:return_to].value}>Return without step-up</.link>
+    </section>
+  </main>
+</Layouts.app>

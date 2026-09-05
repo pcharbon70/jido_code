@@ -140,6 +140,27 @@ defmodule JidoCode.Identity.Store do
     GenServer.call(server, {:revoke_session, context, session_ref, options})
   end
 
+  @doc "Lists bounded same-account session summaries through one current session."
+  @spec managed_sessions(server(), String.t(), keyword()) :: {:ok, [map()]} | {:error, atom()}
+  def managed_sessions(server \\ __MODULE__, current_session_ref, options \\ []) do
+    GenServer.call(server, {:managed_sessions, current_session_ref, options})
+  end
+
+  @doc "Revokes a same-account session by its non-bearer management reference."
+  @spec revoke_managed_session(server(), String.t(), String.t(), keyword()) ::
+          {:ok, :current | :other} | {:error, atom()}
+  def revoke_managed_session(
+        server \\ __MODULE__,
+        current_session_ref,
+        management_ref,
+        options \\ []
+      ) do
+    GenServer.call(
+      server,
+      {:revoke_managed_session, current_session_ref, management_ref, options}
+    )
+  end
+
   @spec put_membership(server(), map(), map(), keyword()) ::
           {:ok, Membership.t()} | {:error, atom()}
   def put_membership(server \\ __MODULE__, context, attributes, options \\ []) do
@@ -174,6 +195,13 @@ defmodule JidoCode.Identity.Store do
           {:ok, Resource.t()} | {:error, :not_found}
   def resolve_resource(server \\ __MODULE__, resource_ref) do
     GenServer.call(server, {:resolve_resource, resource_ref})
+  end
+
+  @doc "Returns a bounded registry candidate set; callers must authorize every item before use."
+  @spec registered_resources(server(), atom(), pos_integer()) ::
+          {:ok, [Resource.t()]} | {:error, :invalid_resource_query}
+  def registered_resources(server \\ __MODULE__, kind, limit) do
+    GenServer.call(server, {:registered_resources, kind, limit})
   end
 
   @spec authorization_snapshot(server(), String.t(), keyword()) ::
@@ -241,6 +269,21 @@ defmodule JidoCode.Identity.Store do
 
     {:reply, fetch(state.data.resources, resolved_ref), state}
   end
+
+  def handle_call({:registered_resources, kind, limit}, _from, state)
+      when kind in [:project] and is_integer(limit) and limit in 1..50 do
+    resources =
+      state.data.resources
+      |> Map.values()
+      |> Enum.filter(&(&1.kind == kind))
+      |> Enum.sort_by(& &1.resource_ref)
+      |> Enum.take(limit)
+
+    {:reply, {:ok, resources}, state}
+  end
+
+  def handle_call({:registered_resources, _kind, _limit}, _from, state),
+    do: {:reply, {:error, :invalid_resource_query}, state}
 
   def handle_call({:authorization_snapshot, subject_ref, options}, _from, state) do
     now = now(options)
@@ -579,6 +622,85 @@ defmodule JidoCode.Identity.Store do
 
       commit(state, next_data, :ok, [event])
     else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:managed_sessions, current_session_ref, options}, _from, state) do
+    now = now(options)
+
+    with :ok <- available(state),
+         {:ok, current} <- fetch(state.data.sessions, current_session_ref),
+         {:ok, account} <- fetch(state.data.accounts, current.subject_ref),
+         :ok <- current_session(current, account, now, state.config) do
+      other_sessions =
+        state.data.sessions
+        |> Map.values()
+        |> Enum.filter(fn session ->
+          session.subject_ref == current.subject_ref and
+            session.session_ref != current_session_ref and
+            current_session(session, account, now, state.config) == :ok
+        end)
+        |> Enum.sort_by(&DateTime.to_unix(&1.last_seen_at), :desc)
+        |> Enum.take(19)
+        |> Enum.map(&managed_session_summary(&1, current_session_ref))
+
+      sessions = [managed_session_summary(current, current_session_ref) | other_sessions]
+
+      {:reply, {:ok, sessions}, state}
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call(
+        {:revoke_managed_session, current_session_ref, management_ref, options},
+        _from,
+        state
+      ) do
+    now = now(options)
+
+    with :ok <- available(state),
+         true <- is_binary(management_ref) and byte_size(management_ref) in 1..64,
+         {:ok, current} <- fetch(state.data.sessions, current_session_ref),
+         {:ok, account} <- fetch(state.data.accounts, current.subject_ref),
+         :ok <- current_session(current, account, now, state.config),
+         {:ok, target} <- managed_session_target(state.data.sessions, current, management_ref),
+         :ok <- current_session(target, account, now, state.config) do
+      next_session = revoke(target, now)
+
+      next_data =
+        state.data
+        |> put_in([:sessions, target.session_ref], next_session)
+        |> append_audit(
+          audit_event(
+            current.subject_ref,
+            "identity.session.revoke",
+            target.session_ref,
+            :committed,
+            target.policy_revision,
+            reference("identity_receipt"),
+            now
+          )
+        )
+
+      emit_session_telemetry(:revoked, next_session, :revoked)
+
+      event =
+        revocation_event(
+          :session,
+          target.subject_ref,
+          target.session_ref,
+          target.session_generation,
+          target.session_generation + 1,
+          target.policy_revision,
+          now
+        )
+
+      outcome = if(target.session_ref == current_session_ref, do: :current, else: :other)
+      commit(state, next_data, {:ok, outcome}, [event])
+    else
+      false -> {:reply, {:error, :invalid_session_management_ref}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
   end
@@ -1012,6 +1134,7 @@ defmodule JidoCode.Identity.Store do
     with true <- valid_ref?(tenant_ref),
          true <- exact_atoms?(roles, JidoCode.Identity.RoutePolicy.roles()),
          true <- exact_atoms?(route_groups, JidoCode.Identity.RoutePolicy.areas()),
+         true <- valid_bootstrap_projects?(attributes[:projects]),
          true <- valid_optional_ref?(attributes[:factory_resource_ref]),
          true <- valid_optional_ref?(attributes[:membership_ref]) do
       :ok
@@ -1024,6 +1147,19 @@ defmodule JidoCode.Identity.Store do
 
   defp valid_optional_ref?(nil), do: true
   defp valid_optional_ref?(value), do: valid_ref?(value)
+
+  defp valid_bootstrap_projects?(nil), do: true
+
+  defp valid_bootstrap_projects?(projects) when is_list(projects) and length(projects) <= 10 do
+    Enum.all?(projects, fn project ->
+      is_map(project) and
+        Enum.sort(Map.keys(project)) ==
+          Enum.sort([:resource_ref, :project_ref, :attempt_ref, :candidate_ref]) and
+        Enum.all?(Map.values(project), &valid_ref?/1)
+    end)
+  end
+
+  defp valid_bootstrap_projects?(_projects), do: false
 
   defp normalize_login(login) when is_binary(login) do
     normalized = login |> String.trim() |> String.downcase()
@@ -1868,6 +2004,7 @@ defmodule JidoCode.Identity.Store do
         |> put_in([:verifiers, authenticator_ref], verifier)
         |> Map.put(:bootstrap_consumed, true)
         |> add_bootstrap_authority(account, bootstrap, now)
+        |> add_bootstrap_projects(account, bootstrap, now)
 
       with :ok <- persist(config, seeded), do: {:ok, seeded}
     else
@@ -1918,6 +2055,76 @@ defmodule JidoCode.Identity.Store do
     |> Map.put(:default_resource_ref, resource_ref)
   end
 
+  defp add_bootstrap_projects(data, account, attributes, now) do
+    factory = Map.fetch!(data.resources, data.default_resource_ref)
+    roles = Map.get(attributes, :roles, [:project_developer])
+    route_groups = Map.get(attributes, :route_groups, [:developer])
+
+    Enum.reduce(Map.get(attributes, :projects, []), data, fn project, acc ->
+      project_resource = %Resource{
+        resource_ref: project.resource_ref,
+        kind: :project,
+        iri: "https://jido.run/id/project/#{project.project_ref}",
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        parent_ref: factory.resource_ref,
+        graph_scope_iri: "https://jido.run/graph/project/#{project.project_ref}",
+        classification: :internal,
+        environment: runtime_environment(),
+        lifecycle: :active,
+        registry_revision: 1
+      }
+
+      attempt_resource = %Resource{
+        resource_ref: project.attempt_ref,
+        kind: :attempt,
+        iri: "https://jido.run/id/attempt/#{project.attempt_ref}",
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        parent_ref: project.resource_ref,
+        graph_scope_iri: "https://jido.run/graph/attempt/#{project.attempt_ref}",
+        classification: :internal,
+        environment: runtime_environment(),
+        lifecycle: :active,
+        registry_revision: 1
+      }
+
+      candidate_resource = %Resource{
+        resource_ref: project.candidate_ref,
+        kind: :candidate,
+        iri: "https://jido.run/id/candidate/#{project.candidate_ref}",
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        parent_ref: project.attempt_ref,
+        graph_scope_iri: "https://jido.run/graph/candidate/#{project.candidate_ref}",
+        classification: :internal,
+        environment: runtime_environment(),
+        lifecycle: :active,
+        registry_revision: 1
+      }
+
+      membership = %Membership{
+        membership_ref: "membership_#{project.project_ref}",
+        subject_ref: account.subject_ref,
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        roles: Enum.uniq(roles),
+        route_groups: Enum.uniq(route_groups),
+        clearance: :internal,
+        valid_from: now,
+        valid_to: ~U[9999-12-31 23:59:59Z],
+        revision: 1,
+        status: :active
+      }
+
+      acc
+      |> put_in([:resources, project_resource.resource_ref], project_resource)
+      |> put_in([:resources, attempt_resource.resource_ref], attempt_resource)
+      |> put_in([:resources, candidate_resource.resource_ref], candidate_resource)
+      |> put_in([:memberships, membership.membership_ref], membership)
+    end)
+  end
+
   defp runtime_environment do
     case Application.get_env(:jido_code, :runtime_mode, :production) do
       value when value in [:dev, :development] -> :development
@@ -1925,4 +2132,41 @@ defmodule JidoCode.Identity.Store do
       _other -> :production
     end
   end
+
+  defp managed_session_summary(session, current_session_ref) do
+    %{
+      management_ref: session_management_ref(session.session_ref),
+      current: session.session_ref == current_session_ref,
+      issued_at: session.issued_at,
+      last_seen_at: session.last_seen_at,
+      hard_expires_at: session.hard_expires_at,
+      idle_expires_at: session.idle_expires_at,
+      assurance: session.assurance
+    }
+  end
+
+  defp managed_session_target(sessions, current, management_ref) do
+    sessions
+    |> Map.values()
+    |> Enum.find(fn session ->
+      session.subject_ref == current.subject_ref and
+        secure_equal?(session_management_ref(session.session_ref), management_ref)
+    end)
+    |> case do
+      %BrowserSession{} = session -> {:ok, session}
+      nil -> {:error, :not_found}
+    end
+  end
+
+  defp session_management_ref(session_ref) do
+    :sha256
+    |> :crypto.hash("jido-code-session-management\0" <> session_ref)
+    |> Base.url_encode64(padding: false)
+  end
+
+  defp secure_equal?(left, right)
+       when is_binary(left) and is_binary(right) and byte_size(left) == byte_size(right),
+       do: Plug.Crypto.secure_compare(left, right)
+
+  defp secure_equal?(_left, _right), do: false
 end

@@ -1,6 +1,8 @@
 defmodule JidoCode.Architecture.HypermediaUIPhaseC2 do
   @moduledoc false
 
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
+
   @manifest_path "priv/architecture/hypermedia_ui/phase_c2_implementation_evidence.json"
   @plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-02-shadcnui-facade-theme-and-app-components.md"
   @receipt_path "docs/architecture/hypermedia-ui-milestone-c-phase-02-receipt.md"
@@ -442,8 +444,16 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC2 do
           true ->
             case File.read(Path.join(root, path)) do
               {:ok, body} ->
-                {require_equal(acc, sha256(body), expected, "source digest #{path}"),
-                 [{path, body} | bodies]}
+                current = sha256(body)
+                successor = HypermediaUISuccessorEvidence.digest(root, path)
+                canonical = canonical_source_digest(root, path)
+
+                acc =
+                  if current == expected or (expected == canonical and successor == current),
+                    do: acc,
+                    else: require_equal(acc, current, expected, "source digest #{path}")
+
+                {acc, [{path, body} | bodies]}
 
               {:error, reason} ->
                 {["#{path}: unavailable source: #{inspect(reason)}" | acc], bodies}
@@ -601,4 +611,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC2 do
   defp full_sha?(value), do: is_binary(value) and Regex.match?(~r/^[a-f0-9]{40}$/, value)
   defp full_digest?(value), do: is_binary(value) and Regex.match?(~r/^[a-f0-9]{64}$/, value)
   defp sha256(body), do: :crypto.hash(:sha256, body) |> Base.encode16(case: :lower)
+
+  defp canonical_source_digest(root, path) do
+    with {:ok, body} <- File.read(Path.join(root, @manifest_path)),
+         {:ok, evidence} <- Jason.decode(body),
+         digest when is_binary(digest) <- get_in(evidence, ["source_digests", path]) do
+      digest
+    else
+      _unavailable -> nil
+    end
+  end
 end
