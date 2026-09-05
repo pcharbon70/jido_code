@@ -57,20 +57,20 @@ Back to plan: [README](./README.md)
       - [x] 2.2.1.3 Subtask - Implement page header, action area, filter/search shell, pagination, empty state, error summary, maintenance/degraded banners, and footer/support metadata.
       - [x] 2.2.1.4 Subtask - Define stable DOM IDs/roots, focus targets, native behavior, and future fragment boundaries without adding Datastar delivery yet.
 
-  - [ ] 2.3 Section - Build projection and factory-domain composites.
+  - [x] 2.3 Section - Build projection and factory-domain composites.
 
     This section creates the missing application components ShadcnUI does not
     supply for operational factory truth.
 
-    - [ ] 2.3.1 Task {#huic-p02-projection-components} [repo: jido_code] [after: {#huic-p02-shell-components}] - Implement projection state, trust, attention, and collection components.
+    - [x] 2.3.1 Task {#huic-p02-projection-components} [repo: jido_code] [after: {#huic-p02-shell-components}] - Implement projection state, trust, attention, and collection components.
 
       This task makes truth, provenance, readiness, truncation, and action need
       understandable before any domain page is composed.
 
-      - [ ] 2.3.1.1 Subtask - Implement all ten projection states with revision/freshness/source/as-of, partial/truncated, contradiction, concealed, unavailable, unconfigured, and safe retry semantics.
-      - [ ] 2.3.1.2 Subtask - Implement trust header, attention card/list, health summary, fleet/project table, attempt summary, lifecycle/outcome rails, budget meter, receipt/evidence link, and readiness badge.
-      - [ ] 2.3.1.3 Subtask - Implement bounded table/card switching, column priorities, accessible sorting labels, pagination summaries, no-result states, and narrow-screen alternatives.
-      - [ ] 2.3.1.4 Subtask - Add hostile-content, long-label, missing-field, stale/error, high-count, keyboard, screen-reader, and visual regression fixtures.
+      - [x] 2.3.1.1 Subtask - Implement all ten projection states with revision/freshness/source/as-of, partial/truncated, contradiction, concealed, unavailable, unconfigured, and safe retry semantics.
+      - [x] 2.3.1.2 Subtask - Implement trust header, attention card/list, health summary, fleet/project table, attempt summary, lifecycle/outcome rails, budget meter, receipt/evidence link, and readiness badge.
+      - [x] 2.3.1.3 Subtask - Implement bounded table/card switching, column priorities, accessible sorting labels, pagination summaries, no-result states, and narrow-screen alternatives.
+      - [x] 2.3.1.4 Subtask - Add hostile-content, long-label, missing-field, stale/error, high-count, keyboard, screen-reader, and visual regression fixtures.
 
   - [ ] 2.4 Section - Phase 2 Integration Tests.
 
