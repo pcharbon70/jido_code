@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_c_phase_02
 parent_plan: plan.jido_code_hypermedia_ui_milestone_c
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -12,7 +12,7 @@ design system for factory pages, projection states, provenance, and navigation.
 
 Back to plan: [README](./README.md)
 
-- [ ] 2 Phase - Build the accessible application component and theme layer.
+- [x] 2 Phase - Build the accessible application component and theme layer.
 
   This phase closes HUI-C2 with stable APIs and DOM contracts that later pages
   and Datastar fragments can share without importing upstream details.
@@ -72,7 +72,7 @@ Back to plan: [README](./README.md)
       - [x] 2.3.1.3 Subtask - Implement bounded table/card switching, column priorities, accessible sorting labels, pagination summaries, no-result states, and narrow-screen alternatives.
       - [x] 2.3.1.4 Subtask - Add hostile-content, long-label, missing-field, stale/error, high-count, keyboard, screen-reader, and visual regression fixtures.
 
-  - [ ] 2.4 Section - Phase 2 Integration Tests.
+  - [x] 2.4 Section - Phase 2 Integration Tests.
 
     This final section proves the component layer is coherent, accessible,
     native-first, stable for future patches, and isolated from application authority.
@@ -87,11 +87,11 @@ Back to plan: [README](./README.md)
       - [x] 2.4.1.3 Subtask - Verify stable unique DOM roots/focus targets, no broad upstream imports, no inline/remote assets, no authority logic, and no accidental LiveView product dependency.
       - [x] 2.4.1.4 Subtask - Run component/a11y/visual/architecture/dependency tests, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 2.4.2 Task {#huic-p02-phase-receipt} [repo: jido_code] [after: {#huic-p02-integration}] - Publish and pin the Phase 2 receipt.
+    - [x] 2.4.2 Task {#huic-p02-phase-receipt} [repo: jido_code] [after: {#huic-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records HUI-C2 evidence in
       `docs/architecture/hypermedia-ui-milestone-c-phase-02-receipt.md`.
 
       - [x] 2.4.2.1 Subtask - Keep HUI-C2 merge-pending on unstable DOM/APIs, inaccessible composition, color-only meaning, broken native forms/navigation, upstream leakage, authority in components, or unqualified asset use.
       - [x] 2.4.2.2 Subtask - Record component/catalog/token/asset digests, browser/a11y evidence, exceptions, limitations, and all reopening conditions.
-      - [ ] 2.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.
+      - [x] 2.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.

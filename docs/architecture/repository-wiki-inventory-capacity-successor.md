@@ -1,6 +1,6 @@
 # Repository Wiki Inventory Capacity Successor
 
-- Status: HUI-C2 requalification in progress
+- Status: accepted at HUI-C2 merged candidate `da7ab6a4478bb278aa31a7636fa92135843249ff`
 - Recorded: 2026-09-05
 - Owner: JidoCode knowledge and security maintainers
 - Trigger: HUI-C2 source and normative documentation exceed the accepted RW5
@@ -141,21 +141,21 @@ is the reason for that deliberate omission.
 
 ## Candidate Evidence
 
-Values that depend on the final source fence remain pending until the closure
-pull request can replay the immutable merged implementation candidate. Static
-profile, runtime, signed-corpus, release-catalog, accounting, and focused-test
-evidence is exact at the implementation candidate:
+The closure replay pins the immutable merged implementation candidate
+`da7ab6a4478bb278aa31a7636fa92135843249ff`. Static profile, runtime,
+signed-corpus, report, release-catalog, accounting, and focused-test evidence
+is exact at that source fence:
 
 | Evidence | Candidate result |
 | --- | --- |
 | Inventory profile and limits | `wiki-source-inventory/1.1.0`; profile digest `f61b2fc8cef3ec250007ecb47c4f419ac4e2e8d88488a2838c1f2cf565964f84`; 2,000 files; 16,777,216 total bytes; 262,144 bytes/file; 512 bytes/path; 4,000 visited paths; 4 live helpers |
 | Trusted helper host prerequisite and observed runtime tuple | Linux Mint 22.1 / Ubuntu 24.04 base; CPython 3.12.3; GNU `timeout` 9.4; util-linux `prlimit` 2.39.3; mutable-host limitation retained |
-| Admitted self-hosted file count and bytes | `merge-pending` — closure replay against the immutable merged source fence |
-| Inventory/source identity and digest | `merge-pending` — closure replay against the immutable merged source fence |
+| Admitted self-hosted file count and bytes | 1,067 files; 8,642,765 bytes; 786 projected module names; within every accepted limit |
+| Inventory/source identity and digest | commit `da7ab6a4478bb278aa31a7636fa92135843249ff`; source revision `e33f921db0286600b0ee0d0f66ba7b223cf92fe5a59394af5cfe2ff88aa11dff`; snapshot `https://jido.run/id/repository-snapshot/16754f0fa799e58a8db75c503814fea3`; fence `rw5-pilot:da7ab6a4478bb278aa31a7636fa92135843249ff`; inventory digest `0f0adbce7fa61aedb1be2986812e01b7ae67337d742dcd7882a32d7d8789366a` |
 | Signed corpus revision and digest | `repository-wiki-qualification-corpus/1.1.0`; `78cb7bb49b3d611c2f8d40da3fb5f70d70c562f6b7b83829b1e16efa999e19e9` |
-| Security and quality report verification | structural, signature, source-fence, resource, security, and quality mutation suites pass; exact self-hosted report digests remain `merge-pending` |
-| Pilot revision, report digest, and admission | `jido-code-repository-wiki-pilot/1.1.0`; exact merged-source replay remains `merge-pending` |
-| Release catalog digest and publication verification | `9c2eb44d2bc2f41e6203ab0aa46d04a51ecd4e04281fc2743d4716d4d89fda19`; default-off, zero-model catalog verification passes |
+| Security and quality report verification | both admitted and signature-verified; security digest `ea4cfc45360dbadcb809f4c8d01218be35e0851aeb6fca9a0edeab2e9e3280c0`; quality digest `95dc7f66e86fb4ea4e28390c367d361cef9a5208187784611f3eaafec9eb6fc2` |
+| Pilot revision, report digest, and admission | `jido-code-repository-wiki-pilot/1.1.0`; report digest `37173b364534ce8ba996d37b79e417d92c54aabd9ddc57d39af26b2e86d6861e`; payload digest `ab1158969f91eadef4e50ed481b4494c9ab1316c184b6594ea2f13d8a74a82e3`; verified and admitted |
+| Release catalog digest and publication verification | catalog `9c2eb44d2bc2f41e6203ab0aa46d04a51ecd4e04281fc2743d4716d4d89fda19`; accepted decision `c09d64316eb307c6bd38e0220b146203fdb695423ad31cb2e840bef103707cd3`; default-off, zero-model publication verification passes |
 | Model calls, tokens, and cost | exactly 0 calls, 0 input tokens, 0 output tokens, and zero cost |
 | Focused repository-wiki test commands/counts | inventory-helper/capacity successor: 17 tests, 0 failures; complete repository-wiki suite: 165 tests, 0 failures in 40.0 seconds |
 

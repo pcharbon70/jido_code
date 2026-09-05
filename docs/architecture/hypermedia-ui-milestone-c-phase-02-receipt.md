@@ -2,14 +2,14 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the HUI-C2 implementation candidate while its exact
-component, theme, composition, accessibility, and clean-checkout evidence is
-assembled. It grants no acceptance or release credit. Milestone C Phase 3 is
-not authorized until the implementation pull request passes clean-checkout CI,
-merges, and a narrowly scoped closure pull request pins the full merged
-candidate and date.
+This receipt accepts HUI-C2 only at merged implementation candidate
+`da7ab6a4478bb278aa31a7636fa92135843249ff`. Implementation pull request #119
+passed the required clean-checkout verify and Dialyzer jobs and merged on
+2026-09-05. This narrowly scoped closure transition pins that immutable
+candidate and authorizes Milestone C Phase 3 subject to every reopening
+condition below.
 
 All HUI-B2/HUI-B4 and HUI-C1 reopening conditions remain cumulative and binding.
 Nothing in this receipt weakens, replaces, or silently reinterprets them.
@@ -24,18 +24,18 @@ Nothing in this receipt weakens, replaces, or silently reinterprets them.
 | Section 2.1 | `956f372796e6f5afee7a7f6c3838d1f8e694dc9e` - primitive facade, semantic tokens, themes, and accessibility modes |
 | Section 2.2 | `b221e76df601dc1c9dae8eea837e060204e48a2c` - factory shell and navigation composites |
 | Section 2.3 | `1f39ed57b7414e6ab944a2110efa993e48d5a5a5` - projection-state and factory-domain composites |
-| Section 2.4 | `merge-pending` - integration matrix, executable evidence, and receipt preparation |
-| Implementation PR head | `merge-pending` |
-| Merged candidate | `merge-pending` |
+| Section 2.4 | `3569921642900e1651ed3efd9a6a2e6514d8efb4` - integration matrix, executable evidence, and receipt preparation |
+| Implementation PR head | `3569921642900e1651ed3efd9a6a2e6514d8efb4` - implementation PR #119 |
+| Merged candidate | `da7ab6a4478bb278aa31a7636fa92135843249ff` - merge commit for implementation PR #119 |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `da7ab6a4478bb278aa31a7636fa92135843249ff`
+Merge date: `2026-09-05`
 
 ## Section Gates
 
 ### Gate HUI-C2.1 - Primitive Facade And Semantic Theme
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Section 2.1 closes only when every supported primitive is available through
 the application-owned `JidoCodeWeb.Components.UI` facade; form, label, help,
@@ -53,7 +53,7 @@ behavior must be independently verified.
 
 ### Gate HUI-C2.2 - Factory Shell And Navigation Composites
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Section 2.2 closes only when stateless HEEx components implement the skip link,
 masthead, primary and utility navigation, project switcher, breadcrumbs,
@@ -71,7 +71,7 @@ Dstar, SSE, or product LiveView delivery.
 
 ### Gate HUI-C2.3 - Projection And Factory-Domain Composites
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Section 2.3 closes only when the projection status/trust API preserves the ten
 canonical states and exposes safe revision, freshness, source, as-of,
@@ -90,7 +90,7 @@ of the gate.
 
 ### Gate HUI-C2.4 - Integrated Component Candidate
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Section 2.4 closes only when representative full compositions cover the shell,
 forms, navigation, every projection state, fleet tables, attempt summaries,
@@ -260,10 +260,12 @@ thresholds derive from the live profile, and the signed corpus and pilot
 advance together to their `1.1.0` revisions.
 
 The complete repository-wiki suite passes 165 tests locally with zero
-failures. Exact self-hosted file count, total bytes, source identity, signed
-digests, and deterministic zero-model-call/token/cost results remain
-merge-pending until replay against the merged implementation candidate can be
-recorded without self-referential provenance.
+failures. Replay against merged implementation candidate
+`da7ab6a4478bb278aa31a7636fa92135843249ff` admits 1,067 files and 8,642,765
+bytes under inventory digest
+`0f0adbce7fa61aedb1be2986812e01b7ae67337d742dcd7882a32d7d8789366a`.
+The exact signed tuple and deterministic zero-model-call/token/cost evidence is
+pinned in the capacity-successor record.
 
 If the candidate exceeds an accepted inventory ceiling, changes the signed
 pilot/release tuple, or cannot reproduce the accepted invariants, HUI-C2 stays
@@ -297,17 +299,17 @@ and verifier. The manifest deliberately does not digest itself.
 | `mix hex.audit` | passed with no known retired or vulnerable Hex dependencies |
 | `npm audit --omit=dev` | passed with 0 vulnerabilities |
 | `mix precommit` | passed; 1,337 tests, 0 failures in 687.5 seconds after clean compile, architecture, dependency, and format gates |
-| Clean-checkout implementation CI | merge-pending; exact job identities, durations, and outcomes are pinned only by the closure pull request |
+| Clean-checkout implementation CI | passed — verify job `101360624510` in 20m0s and Dialyzer job `101360624559` in 1m53s on implementation head `3569921642900e1651ed3efd9a6a2e6514d8efb4` |
+| Closure transition validation | `mix precommit` passed; 1,337 tests, 0 failures in 641.9 seconds before the closure commit |
 
 The focused and browser matrices cover the supported primitive catalog, native
 forms/navigation, every canonical projection state, shell and collection
 compositions, overlays, errors, hostile/long/bounded content, keyboard and
 semantic name/order/status behavior, responsive modes, preference modes,
 visual regression, stable roots/focus targets, production-fixture exclusion,
-and authority/import/asset boundaries. Exact Section 2.4 commit provenance,
-the implementation PR head, clean-checkout jobs, full merged candidate SHA,
-and merge date remain merge-pending because they cannot be truthfully pinned
-before the implementation commit and merge exist.
+and authority/import/asset boundaries. Section 2.4 provenance, the
+implementation PR head, both clean-checkout jobs, the full merged candidate
+SHA, and merge date are pinned exactly above.
 
 ## Exceptions And Limitations
 
