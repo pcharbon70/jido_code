@@ -74,7 +74,7 @@ defmodule JidoCodeWeb.ProductRoutePhaseC3Test do
       assert has_selector?(document, "[data-product-route]")
       assert has_selector?(document, "#product-main")
       assert get_resp_header(response, "cache-control") == ["no-store, private"]
-      assert get_resp_header(response, "referrer-policy") == ["no-referrer"]
+      assert get_resp_header(response, "referrer-policy") == ["origin"]
     end
   end
 

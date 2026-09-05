@@ -14,7 +14,7 @@ defmodule JidoCodeWeb.SessionWorkflowPhaseC3Test do
     assert has?(document, "input[type='password'][autocomplete='current-password']")
     assert has?(document, "#human-recovery-link[href='/recovery']")
     assert get_resp_header(response, "cache-control") == ["no-store, private"]
-    assert get_resp_header(response, "referrer-policy") == ["no-referrer"]
+    assert get_resp_header(response, "referrer-policy") == ["origin"]
   end
 
   test "states unavailable step-up without soliciting or simulating elevated assurance", %{

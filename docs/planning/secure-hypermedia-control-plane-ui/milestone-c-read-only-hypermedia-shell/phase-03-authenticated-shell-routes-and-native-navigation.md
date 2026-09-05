@@ -67,21 +67,21 @@ Back to plan: [README](./README.md)
     This final section proves route ownership, native navigation, scope
     isolation, session flows, and responsive shell behavior end to end.
 
-    - [ ] 3.4.1 Task {#huic-p03-integration} [repo: jido_code] [after: {#huic-p03-session-ui}] - Execute the HUI-C3 route, navigation, and native-browser matrix.
+    - [x] 3.4.1 Task {#huic-p03-integration} [repo: jido_code] [after: {#huic-p03-session-ui}] - Execute the HUI-C3 route, navigation, and native-browser matrix.
 
       This task uses ordinary HTTP/browser behavior with JavaScript disabled as
       the mandatory baseline.
 
-      - [ ] 3.4.1.1 Subtask - Exercise every route group, canonical/deep link, redirect, project switch, search/filter/page, reload, back/forward, error, maintenance, and unconfigured path.
-      - [ ] 3.4.1.2 Subtask - Exercise anonymous/authenticated/step-up/expired/revoked sessions, role areas, concealed resources, copied refs, cross-project/tenant probes, and several tabs/users.
-      - [ ] 3.4.1.3 Subtask - Exercise keyboard, screen-reader landmark/title/focus/error behavior, zoom/reflow, touch, RTL, themes, and narrow layouts with no JavaScript.
-      - [ ] 3.4.1.4 Subtask - Run controller/template/router/security/accessibility/architecture suites, `mix precommit`, and clean-checkout CI.
+      - [x] 3.4.1.1 Subtask - Exercise every route group, canonical/deep link, redirect, project switch, search/filter/page, reload, back/forward, error, maintenance, and unconfigured path.
+      - [x] 3.4.1.2 Subtask - Exercise anonymous/authenticated/step-up/expired/revoked sessions, role areas, concealed resources, copied refs, cross-project/tenant probes, and several tabs/users.
+      - [x] 3.4.1.3 Subtask - Exercise keyboard, screen-reader landmark/title/focus/error behavior, zoom/reflow, touch, RTL, themes, and narrow layouts with no JavaScript.
+      - [x] 3.4.1.4 Subtask - Run controller/template/router/security/accessibility/architecture suites, `mix precommit`, and clean-checkout CI.
 
     - [ ] 3.4.2 Task {#huic-p03-phase-receipt} [repo: jido_code] [after: {#huic-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records HUI-C3 evidence in
       `docs/architecture/hypermedia-ui-milestone-c-phase-03-receipt.md`.
 
-      - [ ] 3.4.2.1 Subtask - Keep HUI-C3 merge-pending on unowned/catch-all route, authorization mismatch, broken native workflow, unsafe redirect/cache/referrer, identity leak, inaccessible navigation, or cross-scope state.
-      - [ ] 3.4.2.2 Subtask - Record exact route/view-model/browser/config evidence, exceptions, limitations, and every reopening condition.
+      - [x] 3.4.2.1 Subtask - Keep HUI-C3 merge-pending on unowned/catch-all route, authorization mismatch, broken native workflow, unsafe redirect/cache/referrer, identity leak, inaccessible navigation, or cross-scope state.
+      - [x] 3.4.2.2 Subtask - Record exact route/view-model/browser/config evidence, exceptions, limitations, and every reopening condition.
       - [ ] 3.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.

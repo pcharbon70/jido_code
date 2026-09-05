@@ -222,8 +222,17 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
 
         true ->
           case File.read(Path.join(root, path)) do
-            {:ok, body} -> require_equal(acc, sha256(body), expected, "source digest #{path}")
-            {:error, reason} -> ["#{path}: unavailable source: #{inspect(reason)}" | acc]
+            {:ok, body} ->
+              current = sha256(body)
+              successor = HypermediaUISuccessorEvidence.digest(root, path)
+              canonical = canonical_source_digest(root, path)
+
+              if current == expected or (expected == canonical and successor == current),
+                do: acc,
+                else: require_equal(acc, current, expected, "source digest #{path}")
+
+            {:error, reason} ->
+              ["#{path}: unavailable source: #{inspect(reason)}" | acc]
           end
       end
     end)
@@ -276,4 +285,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
   defp full_sha?(value), do: is_binary(value) and Regex.match?(~r/^[a-f0-9]{40}$/, value)
 
   defp sha256(body), do: :crypto.hash(:sha256, body) |> Base.encode16(case: :lower)
+
+  defp canonical_source_digest(root, path) do
+    with {:ok, body} <- File.read(Path.join(root, @manifest_path)),
+         {:ok, evidence} <- Jason.decode(body),
+         digest when is_binary(digest) <- get_in(evidence, ["source_digests", path]) do
+      digest
+    else
+      _unavailable -> nil
+    end
+  end
 end

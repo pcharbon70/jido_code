@@ -207,11 +207,9 @@ defmodule JidoCodeWeb.ProductRequest do
          true <- authorization.current_scope.resource_kind == elem(spec.resource, 2) do
       {:ok, authorization}
     else
-      {:ok, %AuthorizationResult{decision: decision}} -> {:error, decision}
       false -> {:error, :concealed_not_found}
       decision when is_atom(decision) -> {:error, decision}
       {:error, reason} -> {:error, reason}
-      _invalid -> {:error, :unavailable}
     end
   end
 
@@ -265,7 +263,7 @@ defmodule JidoCodeWeb.ProductRequest do
   defp secure(conn) do
     conn
     |> put_resp_header("cache-control", "no-store, private")
-    |> put_resp_header("referrer-policy", "no-referrer")
+    |> put_resp_header("referrer-policy", "origin")
     |> put_resp_header("x-robots-tag", "noindex, nofollow")
   end
 

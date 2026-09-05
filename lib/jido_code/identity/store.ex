@@ -633,16 +633,19 @@ defmodule JidoCode.Identity.Store do
          {:ok, current} <- fetch(state.data.sessions, current_session_ref),
          {:ok, account} <- fetch(state.data.accounts, current.subject_ref),
          :ok <- current_session(current, account, now, state.config) do
-      sessions =
+      other_sessions =
         state.data.sessions
         |> Map.values()
         |> Enum.filter(fn session ->
           session.subject_ref == current.subject_ref and
+            session.session_ref != current_session_ref and
             current_session(session, account, now, state.config) == :ok
         end)
         |> Enum.sort_by(&DateTime.to_unix(&1.last_seen_at), :desc)
-        |> Enum.take(20)
+        |> Enum.take(19)
         |> Enum.map(&managed_session_summary(&1, current_session_ref))
+
+      sessions = [managed_session_summary(current, current_session_ref) | other_sessions]
 
       {:reply, {:ok, sessions}, state}
     else
@@ -1131,6 +1134,7 @@ defmodule JidoCode.Identity.Store do
     with true <- valid_ref?(tenant_ref),
          true <- exact_atoms?(roles, JidoCode.Identity.RoutePolicy.roles()),
          true <- exact_atoms?(route_groups, JidoCode.Identity.RoutePolicy.areas()),
+         true <- valid_bootstrap_projects?(attributes[:projects]),
          true <- valid_optional_ref?(attributes[:factory_resource_ref]),
          true <- valid_optional_ref?(attributes[:membership_ref]) do
       :ok
@@ -1143,6 +1147,19 @@ defmodule JidoCode.Identity.Store do
 
   defp valid_optional_ref?(nil), do: true
   defp valid_optional_ref?(value), do: valid_ref?(value)
+
+  defp valid_bootstrap_projects?(nil), do: true
+
+  defp valid_bootstrap_projects?(projects) when is_list(projects) and length(projects) <= 10 do
+    Enum.all?(projects, fn project ->
+      is_map(project) and
+        Enum.sort(Map.keys(project)) ==
+          Enum.sort([:resource_ref, :project_ref, :attempt_ref, :candidate_ref]) and
+        Enum.all?(Map.values(project), &valid_ref?/1)
+    end)
+  end
+
+  defp valid_bootstrap_projects?(_projects), do: false
 
   defp normalize_login(login) when is_binary(login) do
     normalized = login |> String.trim() |> String.downcase()
@@ -1987,6 +2004,7 @@ defmodule JidoCode.Identity.Store do
         |> put_in([:verifiers, authenticator_ref], verifier)
         |> Map.put(:bootstrap_consumed, true)
         |> add_bootstrap_authority(account, bootstrap, now)
+        |> add_bootstrap_projects(account, bootstrap, now)
 
       with :ok <- persist(config, seeded), do: {:ok, seeded}
     else
@@ -2035,6 +2053,76 @@ defmodule JidoCode.Identity.Store do
     |> put_in([:resources, resource_ref], resource)
     |> put_in([:memberships, membership.membership_ref], membership)
     |> Map.put(:default_resource_ref, resource_ref)
+  end
+
+  defp add_bootstrap_projects(data, account, attributes, now) do
+    factory = Map.fetch!(data.resources, data.default_resource_ref)
+    roles = Map.get(attributes, :roles, [:project_developer])
+    route_groups = Map.get(attributes, :route_groups, [:developer])
+
+    Enum.reduce(Map.get(attributes, :projects, []), data, fn project, acc ->
+      project_resource = %Resource{
+        resource_ref: project.resource_ref,
+        kind: :project,
+        iri: "https://jido.run/id/project/#{project.project_ref}",
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        parent_ref: factory.resource_ref,
+        graph_scope_iri: "https://jido.run/graph/project/#{project.project_ref}",
+        classification: :internal,
+        environment: runtime_environment(),
+        lifecycle: :active,
+        registry_revision: 1
+      }
+
+      attempt_resource = %Resource{
+        resource_ref: project.attempt_ref,
+        kind: :attempt,
+        iri: "https://jido.run/id/attempt/#{project.attempt_ref}",
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        parent_ref: project.resource_ref,
+        graph_scope_iri: "https://jido.run/graph/attempt/#{project.attempt_ref}",
+        classification: :internal,
+        environment: runtime_environment(),
+        lifecycle: :active,
+        registry_revision: 1
+      }
+
+      candidate_resource = %Resource{
+        resource_ref: project.candidate_ref,
+        kind: :candidate,
+        iri: "https://jido.run/id/candidate/#{project.candidate_ref}",
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        parent_ref: project.attempt_ref,
+        graph_scope_iri: "https://jido.run/graph/candidate/#{project.candidate_ref}",
+        classification: :internal,
+        environment: runtime_environment(),
+        lifecycle: :active,
+        registry_revision: 1
+      }
+
+      membership = %Membership{
+        membership_ref: "membership_#{project.project_ref}",
+        subject_ref: account.subject_ref,
+        tenant_ref: factory.tenant_ref,
+        project_ref: project.project_ref,
+        roles: Enum.uniq(roles),
+        route_groups: Enum.uniq(route_groups),
+        clearance: :internal,
+        valid_from: now,
+        valid_to: ~U[9999-12-31 23:59:59Z],
+        revision: 1,
+        status: :active
+      }
+
+      acc
+      |> put_in([:resources, project_resource.resource_ref], project_resource)
+      |> put_in([:resources, attempt_resource.resource_ref], attempt_resource)
+      |> put_in([:resources, candidate_resource.resource_ref], candidate_resource)
+      |> put_in([:memberships, membership.membership_ref], membership)
+    end)
   end
 
   defp runtime_environment do

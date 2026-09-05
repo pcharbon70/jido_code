@@ -1,6 +1,24 @@
 defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @moduledoc false
 
+  @phase_c3_manifest "priv/architecture/hypermedia_ui/phase_c3_implementation_evidence.json"
+  @phase_c3_mutable_paths ~w[
+    config/config.exs
+    config/test.exs
+    lib/jido_code/architecture/hypermedia_ui_phase_c1.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_c2.ex
+    lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex
+    lib/jido_code/identity/sessions.ex
+    lib/jido_code/identity/store.ex
+    lib/jido_code_web/components/layouts/root.html.heex
+    lib/jido_code_web/controllers/auth_controller.ex
+    lib/jido_code_web/controllers/auth_html/new.html.heex
+    lib/jido_code_web/endpoint.ex
+    lib/jido_code_web/product_auth.ex
+    lib/jido_code_web/router.ex
+    lib/mix/tasks/architecture.check.ex
+  ]
+
   @phase_c2_manifest "priv/architecture/hypermedia_ui/phase_c2_implementation_evidence.json"
   @phase_c2_mutable_paths ~w[
     assets/css/app.css
@@ -32,12 +50,18 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @spec digest(Path.t(), String.t()) :: String.t() | nil
   def digest(root, path) do
-    phase_digest(root, path, @phase_c2_manifest, @phase_c2_mutable_paths, "HUI-C2") ||
+    phase_digest(root, path, @phase_c3_manifest, @phase_c3_mutable_paths, "HUI-C3") ||
+      phase_digest(root, path, @phase_c2_manifest, @phase_c2_mutable_paths, "HUI-C2") ||
       phase_digest(root, path, @phase_c1_manifest, @phase_c1_mutable_paths, "HUI-C1")
   end
 
   @spec mutable_path?(String.t()) :: boolean()
-  def mutable_path?(path), do: phase_c2_mutable_path?(path) or phase_c1_mutable_path?(path)
+  def mutable_path?(path),
+    do:
+      phase_c3_mutable_path?(path) or phase_c2_mutable_path?(path) or phase_c1_mutable_path?(path)
+
+  @spec phase_c3_mutable_path?(String.t()) :: boolean()
+  def phase_c3_mutable_path?(path), do: path in @phase_c3_mutable_paths
 
   @spec phase_c1_mutable_path?(String.t()) :: boolean()
   def phase_c1_mutable_path?(path), do: path in @phase_c1_mutable_paths

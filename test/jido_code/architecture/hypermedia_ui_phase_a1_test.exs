@@ -3,6 +3,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
 
   alias JidoCode.Architecture.HypermediaUIPhaseA1
   alias JidoCode.Architecture.HypermediaUIPhaseC1
+  alias JidoCode.Architecture.HypermediaUIPhaseC3
   alias JidoCode.Knowledge.CommandRegistry
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.QueryCatalog
@@ -14,9 +15,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
   test "the route inventory matches generated product routes" do
     manifests = manifests!()
     successor = successor!()
+    c3_successor = c3_successor!()
 
     expected =
-      (manifests.runtime["routes"] ++ successor["runtime_successor"]["routes"])
+      (manifests.runtime["routes"] ++
+         successor["runtime_successor"]["routes"] ++
+         c3_successor["runtime_successor"]["routes"])
       |> Enum.reject(&(&1["id"] == "development_dashboard"))
       |> Enum.map(&{&1["method"], &1["path"]})
       |> Enum.sort()
@@ -120,6 +124,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
 
   defp successor! do
     assert {:ok, evidence} = HypermediaUIPhaseC1.load()
+    evidence
+  end
+
+  defp c3_successor! do
+    assert {:ok, evidence} = HypermediaUIPhaseC3.load()
     evidence
   end
 

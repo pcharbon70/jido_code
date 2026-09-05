@@ -193,7 +193,7 @@ defmodule JidoCodeWeb.AuthController do
   defp secure_response(conn, _options) do
     conn
     |> put_resp_header("cache-control", "no-store, private")
-    |> put_resp_header("referrer-policy", "no-referrer")
+    |> put_resp_header("referrer-policy", "origin")
     |> put_resp_header("x-robots-tag", "noindex, nofollow")
   end
 end
