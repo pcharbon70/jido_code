@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "phase": "HUI-C2",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "recorded_on": "2026-09-05",
   "baseline_commit": "73326538cefcc6b136cc96c621062f44f2346c24",
   "predecessor_candidate": "4a6fa78443463a8c8cd8ed039119cef8ba6e3b1b",
@@ -11,13 +11,24 @@
     "2.2": "b221e76df601dc1c9dae8eea837e060204e48a2c",
     "2.3": "1f39ed57b7414e6ab944a2110efa993e48d5a5a5"
   },
-  "receipt_status": "merge_pending",
-  "clean_checkout_ci": "pending",
-  "implementation_pr": null,
-  "implementation_pr_head": null,
-  "merged_candidate": null,
-  "merge_date": null,
-  "clean_checkout_jobs": null,
+  "receipt_status": "accepted_at_merged_candidate",
+  "clean_checkout_ci": "pass",
+  "implementation_pr": 119,
+  "implementation_pr_head": "3569921642900e1651ed3efd9a6a2e6514d8efb4",
+  "merged_candidate": "da7ab6a4478bb278aa31a7636fa92135843249ff",
+  "merge_date": "2026-09-05",
+  "clean_checkout_jobs": {
+    "verify": {
+      "id": 101360624510,
+      "duration": "20m0s",
+      "result": "pass"
+    },
+    "dialyzer": {
+      "id": 101360624559,
+      "duration": "1m53s",
+      "result": "pass"
+    }
+  },
   "facade": {
     "module": "JidoCodeWeb.Components.UI",
     "supported_primitives": [
@@ -140,9 +151,9 @@
     "assets/js/app.js": "a3ae3db7f03420397afc3664f22de42c1de1d33387c1c6827f32bf3c41cec6a7",
     "assets/js/theme.js": "fdf41dae3f3a26f0198d495382d6bbfb932d57d82e458011eccf37f6d1d018e1",
     "docs/architecture/hypermedia-ui-component-facade-and-theme.md": "3ea3995aa8ea4b092f52c382e33a838e66b11e35f0361f9328020c17e7beb78c",
-    "docs/architecture/hypermedia-ui-milestone-c-phase-02-receipt.md": "b072fc6168173f202e3c32b2a22559fc500afc5a26ec68be83e012036c6641af",
-    "docs/architecture/repository-wiki-inventory-capacity-successor.md": "e0356d137fb894e0ab6658261aedcd856b926c8d504bacb23a55aeaa8e53f8c4",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-02-shadcnui-facade-theme-and-app-components.md": "472518182db7207abb58c68af0ac0a89f79d31a419054ba0b9769acfb7b61f4b",
+    "docs/architecture/hypermedia-ui-milestone-c-phase-02-receipt.md": "01e7e80af636489a7dc26b17045aa718396644fd6083f767834f6898cb6feb62",
+    "docs/architecture/repository-wiki-inventory-capacity-successor.md": "887002b2dfaab23af0fb9e43999333681a963c45a3d3b21a52ee28ba23ad3c3f",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-02-shadcnui-facade-theme-and-app-components.md": "f854ce65a5476e79eb4f1fbbaec7ca3d5ef2859c86d5a60f9fc2cc25b6db7ed7",
     "lib/jido_code/architecture/checker.ex": "d464688f095379c1e348dc9b68e2b3ffce89053cf1c73184cafa3931c54bf369",
     "lib/jido_code/architecture/hypermedia_ui_phase_c1.ex": "96e05e9134c282a3f5f23e0e3544e28062f112ad397661bb8475fbc88060fe4d",
     "lib/jido_code/architecture/hypermedia_ui_phase_c2.ex": "d001fae51f3638572466aab357307dcd6330b47d695e45c6c617dd780046bf6d",
