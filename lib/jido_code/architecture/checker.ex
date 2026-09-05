@@ -41,7 +41,8 @@ defmodule JidoCode.Architecture.Checker do
     temporary: [:integrations, :runtime],
     build_artifact: [:integrations, :runtime],
     external_worktree: [:integrations, :runtime],
-    graph_backup: [:knowledge]
+    graph_backup: [:knowledge],
+    identity_authority: [:identity]
   }
 
   @spec check(Path.t(), keyword()) :: {:ok, []} | {:error, [Violation.t()]}
@@ -670,6 +671,7 @@ defmodule JidoCode.Architecture.Checker do
   defp plane_for_jido_code(module) do
     cond do
       module_prefix?(module, "JidoCode.Knowledge") -> :knowledge
+      module_prefix?(module, "JidoCode.Identity") -> :identity
       module_prefix?(module, "JidoCode.Factory") -> :factory
       module_prefix?(module, "JidoCode.Integrations") -> :integrations
       module_prefix?(module, "JidoCode.Runtime") -> :runtime

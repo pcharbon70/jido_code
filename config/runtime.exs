@@ -73,6 +73,45 @@ session_ttl_seconds = fn ->
   end
 end
 
+case System.get_env("JIDO_CODE_HUMAN_IDENTITY_ENABLED") do
+  nil ->
+    :ok
+
+  "false" ->
+    :ok
+
+  "true" ->
+    store_path =
+      System.get_env("JIDO_CODE_HUMAN_IDENTITY_STORE_PATH") ||
+        raise "JIDO_CODE_HUMAN_IDENTITY_STORE_PATH is required when named identity is enabled"
+
+    if Path.type(store_path) != :absolute do
+      raise "JIDO_CODE_HUMAN_IDENTITY_STORE_PATH must be an absolute path"
+    end
+
+    integrity_key =
+      System.get_env("JIDO_CODE_HUMAN_IDENTITY_INTEGRITY_KEY") ||
+        raise "JIDO_CODE_HUMAN_IDENTITY_INTEGRITY_KEY is required when named identity is enabled"
+
+    integrity_key =
+      case Base.decode64(integrity_key) do
+        {:ok, value} when byte_size(value) >= 32 ->
+          value
+
+        _invalid ->
+          raise "JIDO_CODE_HUMAN_IDENTITY_INTEGRITY_KEY must be base64 for at least 32 bytes"
+      end
+
+    config :jido_code, :human_identity,
+      enabled: true,
+      persistence: true,
+      path: store_path,
+      integrity_key: integrity_key
+
+  invalid ->
+    raise "JIDO_CODE_HUMAN_IDENTITY_ENABLED must be true or false, got: #{inspect(invalid)}"
+end
+
 if operator_token = System.get_env("JIDO_CODE_OPERATOR_TOKEN") do
   if byte_size(operator_token) < 24 or byte_size(operator_token) > 512 do
     raise "JIDO_CODE_OPERATOR_TOKEN must contain from 24 through 512 bytes"
