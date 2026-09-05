@@ -211,7 +211,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
   defp validate_source_paths(errors, sources, root) when map_size(sources) > 0 do
     Enum.reduce(sources, errors, fn {path, expected}, acc ->
       cond do
-        not HypermediaUISuccessorEvidence.mutable_path?(path) and
+        not HypermediaUISuccessorEvidence.phase_c1_mutable_path?(path) and
           not String.starts_with?(path, "lib/jido_code/identity") and
           path != "lib/mix/tasks/identity.bootstrap.ex" and
             not MapSet.member?(@test_authority_sources, path) ->

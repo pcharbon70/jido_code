@@ -62,6 +62,13 @@ defmodule JidoCodeWeb.Components.UIQualificationTest do
     assert app_css =~ "@media print"
     refute app_css =~ "@apply"
     assert theme =~ ~s(root.setAttribute("data-shadcn-theme")
-    assert root_layout =~ ~s(data-shadcn-theme="light")
+
+    assert root_layout =~
+             ~s|data-appearance={JidoCodeWeb.Layouts.theme_attributes(@conn).appearance}|
+
+    assert root_layout =~ ~s|data-theme={JidoCodeWeb.Layouts.theme_attributes(@conn).theme}|
+
+    assert root_layout =~
+             ~s|data-shadcn-theme={JidoCodeWeb.Layouts.theme_attributes(@conn).shadcn_theme}|
   end
 end

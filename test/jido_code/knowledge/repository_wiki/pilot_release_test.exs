@@ -8,6 +8,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
   alias JidoCode.Knowledge.RepositoryWiki.QualityEvaluation
   alias JidoCode.Knowledge.RepositoryWiki.SecurityEvaluation
   alias JidoCode.Knowledge.RepositoryWiki.SignedEvidence
+  alias JidoCode.Knowledge.RepositoryWiki.SourceInventory
   alias JidoCode.RepositoryWikiRelease
 
   @secret "rw5-pilot-release-signing-key-for-tests"
@@ -33,6 +34,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
        %{pilot: pilot} do
     assert :ok = Pilot.verify(pilot, &verify/2)
     assert Pilot.admitted?(pilot)
+    assert pilot.payload.revision == "jido-code-repository-wiki-pilot/1.1.0"
 
     compilation = pilot.payload.compilation
     assert compilation.repository.name == "jido_code"
@@ -43,7 +45,12 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
     assert compilation.overview.generation_mode == :deterministic_only
     assert compilation.inventory.file_count > 100
     assert compilation.inventory.module_count > 100
+    assert compilation.inventory.source_profile == "wiki-source-inventory/1.1.0"
+    assert compilation.inventory.total_bytes <= 16_777_216
     assert Enum.all?(compilation.inventory.known_gaps, & &1.visible?)
+
+    assert [%{code: :test_tree_outside_pilot_inventory_scope, visible?: true}] =
+             compilation.inventory.known_gaps
 
     assert compilation.dependencies.complete?
     assert compilation.dependencies.missing_declared_lock_entries == []
@@ -105,6 +112,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
     assert release.synthesis.production_adapters == []
     assert release.synthesis.prompts == []
     assert Contract.digest?(release.digest)
+    assert release.component_profiles.inventory.revision == "wiki-source-inventory/1.1.0"
+    assert release.supported_repository_envelope.source_inventory.total_bytes == 16_777_216
 
     assert Enum.sort(Map.keys(release.component_digests)) ==
              Enum.sort(~w[compiler parser sandbox metadata lint renderer]a)
@@ -135,6 +144,50 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
 
     assert {:error, %Error{kind: :unauthorized}} = Pilot.verify(forged, &verify/2)
     refute Pilot.admitted?(forged)
+  end
+
+  test "rejects validly signed pilots with stale or over-capacity inventory evidence", %{
+    pilot: pilot
+  } do
+    stale_profile =
+      put_in(
+        pilot.payload,
+        [:compilation, :inventory, :source_profile],
+        "wiki-source-inventory/1.0.0"
+      )
+
+    over_capacity =
+      put_in(pilot.payload, [:compilation, :inventory, :total_bytes], 16_777_217)
+
+    underreported =
+      put_in(pilot.payload, [:compilation, :inventory, :total_bytes], 1)
+
+    cross_source_manifest =
+      pilot.payload.compilation.inventory.manifest
+      |> Map.put(:source_fence, "rw5-pilot:" <> String.duplicate("f", 40))
+      |> Map.delete(:digest)
+      |> then(&Map.put(&1, :digest, Contract.digest(&1)))
+
+    assert :ok = SourceInventory.validate(cross_source_manifest)
+
+    cross_source = refresh_inventory_derivations(pilot.payload, cross_source_manifest)
+
+    for forged_payload <- [stale_profile, over_capacity, underreported, cross_source] do
+      forged_payload = %{
+        forged_payload
+        | pilot_digest:
+            Contract.digest(
+              {forged_payload.compilation, forged_payload.review, forged_payload.race,
+               forged_payload.lifecycle}
+            )
+      }
+
+      assert {:ok, forged} =
+               SignedEvidence.sign(:jido_code_wiki_pilot_report, forged_payload, &sign/1)
+
+      assert {:error, %Error{kind: :unauthorized}} = Pilot.verify(forged, &verify/2)
+      refute Pilot.admitted?(forged)
+    end
   end
 
   test "admits and verifies the exact signed corpus, reports, and pilot tuple", fixture do
@@ -215,6 +268,47 @@ defmodule JidoCode.Knowledge.RepositoryWiki.PilotReleaseTest do
         evidence_digest: digest({:security, id})
       }
     end)
+  end
+
+  defp refresh_inventory_derivations(payload, manifest) do
+    compilation =
+      payload.compilation
+      |> put_in([:inventory, :manifest], manifest)
+      |> put_in([:inventory, :digest], manifest.digest)
+
+    edition_root =
+      Contract.digest(%{
+        source_revision: compilation.source.revision,
+        inventory: compilation.inventory.digest,
+        project: compilation.project.digest,
+        lock: compilation.dependencies.lock_digest,
+        guides: compilation.guides.manifest_digest,
+        render: compilation.guides.render_digest,
+        documents: compilation.accepted_documents.digest
+      })
+
+    compilation = %{
+      compilation
+      | edition_root: edition_root,
+        compilation_digest: Contract.digest({edition_root, :closed, :linted})
+    }
+
+    previews =
+      Enum.map(payload.race.previews, fn preview ->
+        %{
+          preview
+          | preview_root: Contract.digest({edition_root, preview.session_iri, :preview})
+        }
+      end)
+
+    race = %{
+      payload.race
+      | previews: previews,
+        evidence_digest:
+          Contract.digest({previews, payload.race.candidates, payload.race.outcomes})
+    }
+
+    %{payload | compilation: compilation, race: race}
   end
 
   defp quality_evidence do

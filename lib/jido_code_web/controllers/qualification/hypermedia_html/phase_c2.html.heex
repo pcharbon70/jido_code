@@ -1,0 +1,468 @@
+<Layouts.app flash={@flash} frame={:content}>
+  <div id="hui-c2-qualification" data-qualification-only data-hui-phase="C2">
+    <JidoCodeWeb.Components.Application.shell id="hui-c2-shell" main_id="hui-c2-main">
+      <:masthead>
+        <JidoCodeWeb.Components.Application.masthead id="hui-c2-masthead" brand={@brand}>
+          <:primary_navigation>
+            <JidoCodeWeb.Components.Application.primary_navigation
+              id="hui-c2-primary-navigation"
+              items={@primary_navigation}
+            />
+          </:primary_navigation>
+
+          <:project_switcher>
+            <JidoCodeWeb.Components.Application.project_switcher
+              id="hui-c2-project-switcher"
+              form={@project_form}
+              field={@project_form[:view]}
+              action="/__qualification/hypermedia"
+              projects={@project_options}
+              label="Qualification composition"
+              help="Ordinary navigation selects a closed fixture view."
+              submit_label="Open"
+            />
+          </:project_switcher>
+
+          <:utility_navigation>
+            <div class="flex items-center gap-2">
+              <JidoCodeWeb.Components.Application.utility_navigation
+                id="hui-c2-utility-navigation"
+                items={@utility_navigation}
+                class="hidden lg:block"
+              />
+              <Layouts.theme_toggle appearance={@appearance} />
+            </div>
+          </:utility_navigation>
+
+          <:account_menu>
+            <JidoCodeWeb.Components.Application.account_session_menu
+              id="hui-c2-account-menu"
+              account={@account}
+              actions={@account_actions}
+            />
+          </:account_menu>
+
+          <:responsive_navigation>
+            <JidoCodeWeb.Components.Application.responsive_navigation
+              id="hui-c2-responsive-navigation"
+              summary="Menu"
+              items={@compact_navigation}
+            />
+          </:responsive_navigation>
+        </JidoCodeWeb.Components.Application.masthead>
+      </:masthead>
+
+      <:context>
+        <div id="hui-c2-context-stack" class="grid gap-4">
+          <JidoCodeWeb.Components.Application.breadcrumbs
+            id="hui-c2-breadcrumbs"
+            items={@breadcrumbs}
+          />
+          <JidoCodeWeb.Components.Application.context_explanation
+            id="hui-c2-current-context"
+            context={@context}
+          />
+          <JidoCodeWeb.Components.Application.attempt_context
+            id="hui-c2-attempt-context"
+            attempt={@attempt_context}
+          />
+        </div>
+      </:context>
+
+      <JidoCodeWeb.Components.Application.service_banner
+        id="hui-c2-maintenance-banner"
+        kind={:maintenance}
+        title="Planned qualification maintenance"
+        message="The fixture remains read-only and ordinary navigation stays available."
+      />
+
+      <JidoCodeWeb.Components.Application.service_banner
+        id="hui-c2-degraded-banner"
+        kind={:degraded}
+        title="Evidence candidate"
+        message="Clean-checkout evidence is not yet pinned."
+        support={%{label: "Review the state matrix", href: "#hui-c2-state-matrix"}}
+      />
+
+      <JidoCodeWeb.Components.Application.page_header
+        id="hui-c2-page-header"
+        eyebrow="Milestone C · Phase 2"
+        title="Application component qualification"
+        summary={@long_content}
+        actions={@page_actions}
+      />
+
+      <section
+        id="hui-c2-native-forms"
+        aria-labelledby="hui-c2-native-forms-title"
+        class="grid gap-5"
+      >
+        <h2 id="hui-c2-native-forms-title" class="text-2xl font-semibold">
+          Native forms and navigation
+        </h2>
+        <JidoCodeWeb.Components.Application.filter_search
+          id="hui-c2-filter-search"
+          form={@filter_form}
+          query_field={@filter_form[:q]}
+          action="/__qualification/hypermedia"
+          search_label="Search the fixture"
+          placeholder="Presentation text"
+          submit_label="Apply native filters"
+          filters={@filters}
+          reset={%{label: "Reset fixture", href: "/__qualification/hypermedia?view=c2"}}
+        />
+
+        <div
+          id="hui-c2-native-result"
+          role="status"
+          data-query={@native_selection.query}
+          data-selected-state={@native_selection.state}
+          data-page={@native_selection.page}
+          data-sort={@native_selection.sort_column}
+          data-direction={@native_selection.direction}
+          class="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm"
+        >
+          <p id="hui-c2-native-result-summary" class="break-words">
+            Server-rendered selection: query “{@native_selection.query}”; state {@native_selection.state};
+            page {@native_selection.page}; sort {@native_selection.sort_column} {@native_selection.direction}.
+          </p>
+        </div>
+
+        <JidoCodeWeb.Components.Projection.projection_status
+          id="hui-c2-native-projection"
+          state={@native_selection.state_atom}
+          retry_href="/__qualification/hypermedia?view=c2"
+        />
+
+        <JidoCodeWeb.Components.Application.error_summary
+          id="hui-c2-error-summary"
+          title="Review two fixture fields"
+          errors={@errors}
+        />
+
+        <JidoCodeWeb.Components.Application.pagination
+          id="hui-c2-application-pagination"
+          summary={@application_page_summary}
+          previous={@application_previous}
+          pages={@pages}
+          next={@application_next}
+        />
+
+        <JidoCodeWeb.Components.Application.empty_state
+          id="hui-c2-empty-state"
+          state={:no_results}
+          title="No additional fixture rows"
+          message="This explicit empty state preserves a useful native destination."
+          action={
+            %{label: "Return to the composition", href: "/__qualification/hypermedia?view=c2"}
+          }
+        />
+      </section>
+
+      <section
+        id="hui-c2-state-matrix"
+        aria-labelledby="hui-c2-state-matrix-title"
+        class="grid gap-5"
+      >
+        <div>
+          <p class="text-sm font-medium text-muted-foreground">Exact truth vocabulary</p>
+          <h2 id="hui-c2-state-matrix-title" class="text-2xl font-semibold">
+            Ten projection states
+          </h2>
+        </div>
+        <div class="grid gap-3 lg:grid-cols-2">
+          <JidoCodeWeb.Components.Projection.projection_status
+            :for={state <- @states}
+            id={"hui-c2-state-#{state}"}
+            state={state}
+            retry_href="/__qualification/hypermedia?view=c2"
+          />
+        </div>
+      </section>
+
+      <section
+        id="hui-c2-protected-clearing"
+        aria-labelledby="hui-c2-protected-clearing-title"
+        class="grid gap-5"
+      >
+        <h2 id="hui-c2-protected-clearing-title" class="text-2xl font-semibold">
+          Protected collection clearing
+        </h2>
+        <JidoCodeWeb.Components.Projection.fleet_project_table
+          :for={state <- @protected_states}
+          id={"hui-c2-protected-#{state}"}
+          state={state}
+          rows={@protected_rows}
+          retry_href="/__qualification/hypermedia?view=c2"
+        />
+      </section>
+
+      <section
+        id="hui-c2-projection-composition"
+        aria-labelledby="hui-c2-projection-composition-title"
+        class="grid gap-8"
+      >
+        <h2 id="hui-c2-projection-composition-title" class="text-2xl font-semibold">
+          Projection and factory composites
+        </h2>
+
+        <JidoCodeWeb.Components.Projection.trust_header
+          id="hui-c2-trust"
+          state={:stale}
+          title="Projection trust and provenance"
+          revision="fixture-c2-1"
+          freshness="12 minutes old"
+          source={@hostile_content}
+          as_of="Deterministic fixture render"
+          completeness="Bounded, stale presentation evidence"
+        />
+
+        <JidoCodeWeb.Components.Projection.attention_list
+          id="hui-c2-attention"
+          state={:truncated}
+          title="Bounded attention list"
+          items={@attention_items}
+          retry_href="/__qualification/hypermedia?view=c2"
+        />
+
+        <JidoCodeWeb.Components.Projection.health_summary
+          id="hui-c2-health"
+          state={:truncated}
+          title="Bounded health summary"
+          items={@health_items}
+          retry_href="/__qualification/hypermedia?view=c2"
+        />
+
+        <JidoCodeWeb.Components.Projection.fleet_project_table
+          id="hui-c2-fleet"
+          state={:incomplete}
+          title="Fleet and project alternatives"
+          caption="Static fleet qualification rows"
+          rows={@fleet_rows}
+          sort_column={@native_selection.sort_column}
+          sort_direction={@native_selection.direction}
+          sort_hrefs={@fleet_sort_hrefs}
+          page={@native_selection.page}
+          page_count={3}
+          previous_href={@fleet_previous_href}
+          next_href={@fleet_next_href}
+          page_summary={@fleet_page_summary}
+          retry_href="/__qualification/hypermedia?view=c2"
+        />
+
+        <JidoCodeWeb.Components.Projection.attempt_summary
+          id="hui-c2-attempt-summary"
+          state={:ready}
+          attempt={@attempt}
+        />
+
+        <div class="flex flex-wrap items-center gap-4">
+          <JidoCodeWeb.Components.Projection.readiness_badge
+            id="hui-c2-readiness-badge"
+            state={:contradicted}
+            label="Sources disagree"
+          />
+          <JidoCodeWeb.Components.Projection.evidence_link
+            id="hui-c2-evidence-link"
+            state={:ready}
+            kind={:receipt}
+            href="/__qualification/hypermedia?view=c2#hui-c2-trust"
+            label="Review fixture receipt"
+          />
+        </div>
+      </section>
+
+      <section
+        id="hui-c2-primitive-catalog"
+        aria-labelledby="hui-c2-primitive-catalog-title"
+        class="grid gap-6 rounded-xl border border-border bg-card p-5"
+      >
+        <div>
+          <UI.badge id="hui-c2-catalog-badge" variant={:outline}>
+            Seventeen facade primitives
+          </UI.badge>
+          <h2 id="hui-c2-primitive-catalog-title" class="mt-2 text-2xl font-semibold">
+            Primitive composition
+          </h2>
+        </div>
+
+        <UI.form
+          for={@primitive_form}
+          id="hui-c2-primitive-form"
+          action="/__qualification/hypermedia"
+          method="get"
+          class="grid gap-4 lg:grid-cols-2"
+        >
+          <UI.input
+            field={@primitive_form[:catalog_label]}
+            id="hui-c2-core-input"
+            type="text"
+            label="Project input"
+            maxlength="180"
+          />
+          <UI.field_input
+            field={@primitive_form[:qualified_label]}
+            id="hui-c2-field-input"
+            maxlength={180}
+          >
+            <:label>Qualified field input</:label>
+            <:help>Help remains visible and associated.</:help>
+          </UI.field_input>
+          <UI.select
+            field={@primitive_form[:density]}
+            id="hui-c2-catalog-select"
+            options={[
+              %{key: "comfortable", value: "comfortable", label: "Comfortable"},
+              %{key: "compact", value: "compact", label: "Compact"}
+            ]}
+          >
+            <:label>Display density</:label>
+            <:help>Native select semantics remain available.</:help>
+          </UI.select>
+          <UI.select
+            field={@primitive_form[:view]}
+            id="hui-c2-catalog-view"
+            options={[%{key: "c2", value: "c2", label: "HUI-C2"}]}
+          >
+            <:label>Qualification view</:label>
+          </UI.select>
+          <UI.checkbox
+            field={@primitive_form[:include_archived]}
+            id="hui-c2-catalog-checkbox"
+          >
+            <:label>Include archived fixture rows</:label>
+            <:help>This control changes no durable state.</:help>
+          </UI.checkbox>
+          <UI.radio_group
+            field={@primitive_form[:mode]}
+            id="hui-c2-catalog-radio"
+            options={[
+              %{key: "summary", value: "summary", label: "Summary"},
+              %{key: "details", value: "details", label: "Details"}
+            ]}
+            layout={:inline}
+          >
+            <:legend>Presentation mode</:legend>
+            <:help>Arrow and Tab behavior remains native.</:help>
+          </UI.radio_group>
+          <div class="flex items-end">
+            <UI.button id="hui-c2-primitive-submit" type="submit">Submit native GET form</UI.button>
+          </div>
+        </UI.form>
+
+        <UI.link id="hui-c2-catalog-link" href="/__qualification/hypermedia?view=c2">
+          Ordinary facade link
+        </UI.link>
+
+        <UI.table id="hui-c2-catalog-table" caption="Primitive catalog sample table">
+          <:head>
+            <tr>
+              <th scope="col" class="px-3 py-2">Primitive</th><th scope="col" class="px-3 py-2">
+                Baseline
+              </th>
+            </tr>
+          </:head>
+          <tr>
+            <th scope="row" class="px-3 py-2">Table</th><td class="px-3 py-2">
+              Native semantics
+            </td>
+          </tr>
+        </UI.table>
+
+        <div id="hui-c2-overlays" class="grid gap-5">
+          <UI.disclosure id="hui-c2-disclosure">
+            <:item key="details" summary="Open native disclosure" open={true}>
+              <p id="hui-c2-disclosure-content">Disclosure content is server-rendered.</p>
+            </:item>
+          </UI.disclosure>
+
+          <UI.dialog id="hui-c2-dialog" initial_focus={:close}>
+            <:trigger>Open qualification dialog</:trigger>
+            <:title>Native qualification dialog</:title>
+            <:description>Dialog content is supplemental presentation.</:description>
+            <p id="hui-c2-dialog-copy">No application state is changed.</p>
+            <:close>Return to the dialog trigger</:close>
+            <:fallback>
+              <details
+                id="hui-c2-dialog-fallback"
+                data-enhancement-fallback="dialog"
+                class="mt-2 rounded-md border border-border px-3 py-2"
+              >
+                <summary id="hui-c2-dialog-fallback-summary" class="cursor-pointer font-medium">
+                  Read dialog content inline
+                </summary>
+                <p id="hui-c2-dialog-fallback-copy" class="mt-2 text-sm text-muted-foreground">
+                  Dialog content remains available without scripting. No application state is changed.
+                </p>
+              </details>
+            </:fallback>
+          </UI.dialog>
+
+          <UI.menu id="hui-c2-menu" accessible_label="Qualification actions">
+            <:trigger>Open qualification actions</:trigger>
+            <:action
+              key="top"
+              label="Back to composition"
+              kind={:link}
+              destination="/__qualification/hypermedia?view=c2"
+            />
+            <:action
+              key="states"
+              label="Inspect projection states"
+              kind={:link}
+              destination="#hui-c2-state-matrix"
+            />
+            <:fallback>
+              <details
+                id="hui-c2-menu-fallback"
+                data-enhancement-fallback="popover"
+                class="mt-2 rounded-md border border-border px-3 py-2"
+              >
+                <summary id="hui-c2-menu-fallback-summary" class="cursor-pointer font-medium">
+                  Direct qualification links
+                </summary>
+                <UI.link id="hui-c2-menu-fallback-link" href="#hui-c2-state-matrix">
+                  Inspect projection states
+                </UI.link>
+              </details>
+            </:fallback>
+          </UI.menu>
+
+          <UI.tooltip id="hui-c2-tooltip" text="Supplemental fixture description">
+            <:trigger label="Read supplemental description" kind={:button} type="button" />
+          </UI.tooltip>
+        </div>
+
+        <UI.toast id="hui-c2-toast" kind={:attention} title="Transient fixture feedback">
+          This visible message is not a durable acknowledgement.
+          <:actions>
+            <UI.link id="hui-c2-toast-action" href="#hui-c2-state-matrix">Review states</UI.link>
+          </:actions>
+        </UI.toast>
+
+        <UI.status id="hui-c2-status" kind={:success}>
+          Component composition rendered with visible, non-color status text.
+        </UI.status>
+
+        <div
+          id="hui-c2-loading-sample"
+          role="status"
+          aria-label="Loading fixture preview"
+          class="grid gap-2"
+        >
+          <span>Loading fixture preview</span>
+          <UI.skeleton id="hui-c2-skeleton" shape={:text} aria-hidden="true" />
+        </div>
+      </section>
+
+      <:footer>
+        <JidoCodeWeb.Components.Application.footer
+          id="hui-c2-footer"
+          product_label="JidoCode HUI-C2 qualification"
+          metadata={@footer_metadata}
+          support_links={@footer_links}
+        />
+      </:footer>
+    </JidoCodeWeb.Components.Application.shell>
+  </div>
+</Layouts.app>

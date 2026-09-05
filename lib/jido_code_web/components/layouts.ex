@@ -5,11 +5,40 @@ defmodule JidoCodeWeb.Layouts do
   """
   use JidoCodeWeb, :html
 
+  @appearance_cookie "jido_appearance"
+  @resolved_theme_cookie "jido_resolved_theme"
+  @appearances ~w(system light dark)
+  @resolved_themes ~w(light dark)
+  @appearance_labels %{"system" => "System", "light" => "Light", "dark" => "Dark"}
+
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers
   # and other static content.
   embed_templates "layouts/*"
+
+  @doc "Returns presentation-only theme attributes from closed, non-authority cookies."
+  @spec theme_attributes(Plug.Conn.t()) :: map()
+  def theme_attributes(%Plug.Conn{} = conn) do
+    cookies = request_cookies(conn)
+    appearance = closed_value(cookies[@appearance_cookie], @appearances, "system")
+    resolved = closed_value(cookies[@resolved_theme_cookie], @resolved_themes, nil)
+    theme = if(appearance == "system", do: resolved, else: appearance)
+
+    %{
+      appearance: appearance,
+      theme: theme,
+      shadcn_theme: theme
+    }
+  end
+
+  defp request_cookies(%Plug.Conn{req_cookies: %Plug.Conn.Unfetched{}} = conn),
+    do: Plug.Conn.fetch_cookies(conn).req_cookies
+
+  defp request_cookies(%Plug.Conn{req_cookies: cookies}) when is_map(cookies), do: cookies
+
+  defp closed_value(value, allowed, fallback),
+    do: if(value in allowed, do: value, else: fallback)
 
   @doc """
   Renders your app layout.
@@ -31,9 +60,21 @@ defmodule JidoCodeWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :frame, :atom,
+    values: [:application, :content],
+    default: :application,
+    doc: "closed outer frame; content lets an application-owned shell provide landmarks"
+
   slot :inner_block, required: true
 
   def app(assigns) do
+    case closed_frame!(assigns.frame) do
+      :application -> application_frame(assigns)
+      :content -> content_frame(assigns)
+    end
+  end
+
+  defp application_frame(assigns) do
     ~H"""
     <div
       id="application-shell"
@@ -56,7 +97,7 @@ defmodule JidoCodeWeb.Layouts do
 
           <span class="hidden h-4 w-px bg-frame-border sm:block" />
           <span class="hidden truncate text-xs text-frame-text-muted sm:block">
-            Phoenix LiveView · LiveVue islands
+            Secure hypermedia control plane
           </span>
         </div>
 
@@ -91,6 +132,21 @@ defmodule JidoCodeWeb.Layouts do
       <.flash_group flash={@flash} />
     </div>
     """
+  end
+
+  defp content_frame(assigns) do
+    ~H"""
+    <div id="application-content-frame" data-layout-frame="content">
+      {render_slot(@inner_block)}
+      <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
+  defp closed_frame!(frame) when frame in [:application, :content], do: frame
+
+  defp closed_frame!(frame) do
+    raise ArgumentError, "unsupported layout frame: #{inspect(frame)}"
   end
 
   @doc """
@@ -140,49 +196,69 @@ defmodule JidoCodeWeb.Layouts do
   Provides System, Light, and Dark appearance controls backed by semantic tokens.
   The application bundle initializes and persists selection.
   """
+  attr :appearance, :string, default: nil
+
   def theme_toggle(assigns) do
+    appearance = closed_value(assigns.appearance, @appearances, "system")
+
+    assigns =
+      assigns
+      |> assign(:appearance, appearance)
+      |> assign(:appearance_label, Map.fetch!(@appearance_labels, appearance))
+
     ~H"""
     <div
       id="application-theme-toggle"
       role="group"
       aria-label="Appearance"
-      class="flex h-9 items-center rounded-md border border-frame-border bg-frame-chrome-elevated"
+      aria-describedby="application-theme-current"
+      class="flex items-center"
     >
-      <button
-        id="application-theme-system"
-        type="button"
-        class={theme_control_class()}
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="system"
-        aria-pressed="false"
-        aria-label="Use system theme"
+      <span id="application-theme-current" data-theme-current class="sr-only">
+        Current appearance: {@appearance_label}. Controls require scripting.
+      </span>
+      <div
+        id="application-theme-controls"
+        data-theme-controls
+        hidden
+        class="min-h-[var(--touch-target)] items-center rounded-md border border-frame-border bg-frame-chrome-elevated lg:h-9 lg:min-h-0"
       >
-        <.icon name="hero-computer-desktop-micro" class="size-4" />
-      </button>
+        <button
+          id="application-theme-system"
+          type="button"
+          class={theme_control_class()}
+          data-theme-choice
+          data-phx-theme="system"
+          aria-pressed={if(@appearance == "system", do: "true", else: "false")}
+          aria-label="Use system theme"
+        >
+          <.icon name="hero-computer-desktop-micro" class="size-4" />
+        </button>
 
-      <button
-        id="application-theme-light"
-        type="button"
-        class={theme_control_class()}
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="light"
-        aria-pressed="false"
-        aria-label="Use light theme"
-      >
-        <.icon name="hero-sun-micro" class="size-4" />
-      </button>
+        <button
+          id="application-theme-light"
+          type="button"
+          class={theme_control_class()}
+          data-theme-choice
+          data-phx-theme="light"
+          aria-pressed={if(@appearance == "light", do: "true", else: "false")}
+          aria-label="Use light theme"
+        >
+          <.icon name="hero-sun-micro" class="size-4" />
+        </button>
 
-      <button
-        id="application-theme-dark"
-        type="button"
-        class={theme_control_class()}
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="dark"
-        aria-pressed="false"
-        aria-label="Use dark theme"
-      >
-        <.icon name="hero-moon-micro" class="size-4" />
-      </button>
+        <button
+          id="application-theme-dark"
+          type="button"
+          class={theme_control_class()}
+          data-theme-choice
+          data-phx-theme="dark"
+          aria-pressed={if(@appearance == "dark", do: "true", else: "false")}
+          aria-label="Use dark theme"
+        >
+          <.icon name="hero-moon-micro" class="size-4" />
+        </button>
+      </div>
     </div>
     """
   end

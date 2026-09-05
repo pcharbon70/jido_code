@@ -7,6 +7,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Compiler do
   alias JidoCode.Knowledge.RepositoryWiki.FullCompiler
   alias JidoCode.Knowledge.RepositoryWiki.Protocol
   alias JidoCode.Knowledge.RepositoryWiki.SemanticContract
+  alias JidoCode.Knowledge.RepositoryWiki.SourceInventory
   alias JidoCode.Knowledge.ResourceIdentity
 
   @rdf_type "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -24,8 +25,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Compiler do
 
   @spec compile(map(), map()) :: {:ok, map()} | {:error, Error.t()}
   def compile(inventory, attributes) when is_map(inventory) and is_map(attributes) do
-    with true <- inventory[:profile] == "wiki-source-inventory/1.0.0",
-         true <- Contract.digest?(inventory[:digest]),
+    with :ok <- validate_inventory(inventory),
          true <- inventory[:model_calls] == 0 and inventory[:model_tokens] == 0,
          true <- inventory[:repository_iri] == attributes[:repository_iri],
          :ok <- Contract.resource(attributes[:tenant_iri]),
@@ -94,6 +94,13 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Compiler do
   end
 
   def compile(_inventory, _attributes), do: invalid(:repository_wiki_compile)
+
+  defp validate_inventory(inventory) do
+    case SourceInventory.validate(inventory) do
+      :ok -> :ok
+      _invalid -> invalid(:repository_wiki_compile)
+    end
+  end
 
   @spec compile_full(map(), map(), [map()], [map()], map()) ::
           {:ok, map()} | {:error, Error.t()}

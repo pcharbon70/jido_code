@@ -20,7 +20,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
   alias JidoCode.Knowledge.RepositoryWiki.SourceInventory
   alias JidoCode.Knowledge.ResourceIdentity
 
-  @revision "jido-code-repository-wiki-pilot/1.0.0"
+  @revision "jido-code-repository-wiki-pilot/1.1.0"
   @repository_external "github.com/pcharbon70/jido_code"
   @source_commit ~r/^[a-f0-9]{40,64}$/
   @required_project_fields ~w[app version elixir application.mod application.extra_applications deps]
@@ -103,9 +103,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
       repository_iri: identities.repository_iri,
       source_snapshot_iri: identities.source_snapshot_iri,
       source_fence: identities.source_fence,
-      # The accepted inventory ceiling cannot contain this repository's entire
-      # test tree in addition to source and normative documentation. The pilot
-      # records that deliberate exclusion as a visible known gap below.
+      # Preserve the signed pilot's lib-and-normative-document scope. The test
+      # tree remains Git/CI-authoritative and is recorded as a visible gap.
       test_roots: [],
       guide_roots: [],
       limits: SourceInventory.profile().limits
@@ -225,6 +224,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
         generation_mode: :deterministic_only
       },
       inventory: %{
+        manifest: inventory,
         digest: inventory.digest,
         file_count: inventory.file_count,
         total_bytes: inventory.total_bytes,
@@ -232,14 +232,7 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
         source_profile: inventory.profile,
         registered_roots: inventory.registrations,
         observed_gaps: inventory.gaps,
-        known_gaps: [
-          %{
-            code: :test_tree_excluded_by_inventory_ceiling,
-            visible?: true,
-            reason:
-              "The signed source inventory ceiling covers lib and docs; tests remain source-authoritative."
-          }
-        ]
+        known_gaps: inventory_known_gaps()
       },
       project: %{
         digest: project.digest,
@@ -496,8 +489,11 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
       valid_project?(compilation[:project]) and
       valid_dependencies?(compilation[:dependencies]) and valid_guides?(compilation[:guides]) and
       valid_documents?(compilation[:accepted_documents]) and
-      compilation[:inventory][:file_count] > 0 and
-      Enum.all?(compilation[:inventory][:known_gaps], &(&1[:visible?] == true)) and
+      valid_inventory?(
+        compilation[:inventory],
+        compilation[:repository],
+        compilation[:source]
+      ) and
       compilation[:overview][:app] == "jido_code" and
       compilation[:overview][:generation_mode] == :deterministic_only and
       compilation[:overview][:compiler] == Protocol.compiler_profile() and
@@ -579,6 +575,46 @@ defmodule JidoCode.Knowledge.RepositoryWiki.Pilot do
         is_binary(document[:path]) and document[:kind] in @document_classes and
           Contract.digest?(document[:digest])
       end)
+  end
+
+  defp valid_inventory?(inventory, repository, source)
+       when is_map(inventory) and is_map(repository) and is_map(source) do
+    profile = SourceInventory.profile()
+    manifest = inventory[:manifest]
+
+    expected_registrations = %{
+      root_files: Enum.sort(profile.root_files),
+      documentation_roots: Enum.sort(profile.documentation_roots),
+      source_roots: Enum.sort(profile.source_roots),
+      test_roots: [],
+      guide_roots: []
+    }
+
+    SourceInventory.validate(manifest) == :ok and
+      manifest[:repository_iri] == repository[:repository_iri] and
+      manifest[:source_snapshot_iri] == source[:snapshot_iri] and
+      manifest[:source_fence] == source[:fence] and inventory[:digest] == manifest[:digest] and
+      inventory[:source_profile] == manifest[:profile] and
+      inventory[:source_profile] == profile.revision and
+      inventory[:file_count] == manifest[:file_count] and inventory[:file_count] > 0 and
+      inventory[:total_bytes] == manifest[:total_bytes] and
+      inventory[:module_count] == length(manifest[:module_names]) and
+      inventory[:registered_roots] == manifest[:registrations] and
+      inventory[:registered_roots] == expected_registrations and
+      inventory[:observed_gaps] == manifest[:gaps] and
+      inventory[:known_gaps] == inventory_known_gaps()
+  end
+
+  defp valid_inventory?(_inventory, _repository, _source), do: false
+
+  defp inventory_known_gaps do
+    [
+      %{
+        code: :test_tree_outside_pilot_inventory_scope,
+        visible?: true,
+        reason: "The signed pilot inventories lib and docs; tests remain Git/CI-authoritative."
+      }
+    ]
   end
 
   defp edition_root(compilation) do

@@ -36,7 +36,7 @@ defmodule JidoCode.Architecture.Checker do
     "JidoCode.Knowledge.Ontology.Release"
   ]
   @theme_path "assets/js/theme.js"
-  @theme_sha256 "b61046bdcc7a7164d419d1658c0dedd13a9b26ae057c736d01e49832e931850a"
+  @theme_sha256 "fdf41dae3f3a26f0198d495382d6bbfb932d57d82e458011eccf37f6d1d018e1"
   @file_roles %{
     temporary: [:integrations, :runtime],
     build_artifact: [:integrations, :runtime],

@@ -17,9 +17,9 @@ defmodule JidoCode.Knowledge.RepositoryWiki.QualificationCorpus do
   alias JidoCode.Knowledge.RepositoryWiki.SignedEvidence
   alias JidoCode.Knowledge.RepositoryWiki.SourceInventory
 
-  @revision "repository-wiki-qualification-corpus/1.0.0"
+  @revision "repository-wiki-qualification-corpus/1.1.0"
   @member_kinds ~w[corpus expected_outputs component_profiles clock evaluator release_thresholds]a
-  @clock ~U[2026-08-28 16:00:00.000000Z]
+  @clock ~U[2026-09-05 16:00:00.000000Z]
 
   @repository_fixtures [
     {:simple, :accepted},
@@ -262,6 +262,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.QualificationCorpus do
   end
 
   defp release_thresholds do
+    inventory_limits = SourceInventory.profile().limits
+
     %{
       maximum_findings: %{critical: 0, high: 0},
       maximum_residual_severity: :medium,
@@ -272,8 +274,8 @@ defmodule JidoCode.Knowledge.RepositoryWiki.QualificationCorpus do
       require_all_usefulness_tasks: true,
       require_all_isolation_scenarios: true,
       resources: %{
-        inventory_files: 2_000,
-        inventory_bytes: 8_388_608,
+        inventory_files: inventory_limits.files,
+        inventory_bytes: inventory_limits.total_bytes,
         parsing_ast_nodes: 100_000,
         graph_statements: 250_000,
         rendered_bytes: 16_777_216,

@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-C2",
+  "status": "integration_candidate_merge_pending",
+  "recorded_on": "2026-09-05",
+  "baseline_commit": "73326538cefcc6b136cc96c621062f44f2346c24",
+  "predecessor_candidate": "4a6fa78443463a8c8cd8ed039119cef8ba6e3b1b",
+  "completed_sections": ["2.1", "2.2", "2.3", "2.4"],
+  "section_commits": {
+    "2.1": "956f372796e6f5afee7a7f6c3838d1f8e694dc9e",
+    "2.2": "b221e76df601dc1c9dae8eea837e060204e48a2c",
+    "2.3": "1f39ed57b7414e6ab944a2110efa993e48d5a5a5"
+  },
+  "receipt_status": "merge_pending",
+  "clean_checkout_ci": "pending",
+  "implementation_pr": null,
+  "implementation_pr_head": null,
+  "merged_candidate": null,
+  "merge_date": null,
+  "clean_checkout_jobs": null,
+  "facade": {
+    "module": "JidoCodeWeb.Components.UI",
+    "supported_primitives": [
+      "badge",
+      "button",
+      "checkbox",
+      "dialog",
+      "disclosure",
+      "field_input",
+      "form",
+      "input",
+      "link",
+      "menu",
+      "radio_group",
+      "select",
+      "skeleton",
+      "status",
+      "table",
+      "toast",
+      "tooltip"
+    ],
+    "shadcn_import_owner": "JidoCodeWeb.Components.UI",
+    "closed_variants": true,
+    "phoenix_form_contract": true,
+    "project_input_contract": true,
+    "escaped_content": true
+  },
+  "projection": {
+    "states": [
+      "ready",
+      "empty",
+      "stale",
+      "incomplete",
+      "contradicted",
+      "truncated",
+      "unauthorized",
+      "unavailable",
+      "maintenance",
+      "recovery"
+    ],
+    "unavailable_clears_rows": true,
+    "unauthorized_is_concealed": true,
+    "stale_rows_require_explicit_state": true,
+    "bounded_collections": true
+  },
+  "dom_contract": {
+    "stable_unique_root_ids": true,
+    "stable_focus_targets": true,
+    "deterministic_relationship_ids": true
+  },
+  "native_contract": {
+    "ordinary_links": true,
+    "native_forms": true,
+    "native_submit": true,
+    "javascript_disabled": "supported"
+  },
+  "authority_boundary": {
+    "component_authority": false,
+    "browser_authority": false,
+    "navigation_visibility_grants": false,
+    "server_authorized_inputs": true
+  },
+  "asset_boundary": {
+    "inline_scripts": false,
+    "inline_event_handlers": false,
+    "remote_assets": false,
+    "remote_fonts": false,
+    "remote_icons": false,
+    "application_bundles": ["assets/js/app.js", "assets/css/app.css"]
+  },
+  "invariants": [
+    "stable_unique_dom_roots_and_focus_targets",
+    "native_forms_and_navigation_work_without_javascript",
+    "components_never_construct_or_grant_authority",
+    "shadcn_ui_imports_are_confined_to_the_ui_facade",
+    "inline_scripts_event_handlers_and_remote_assets_are_prohibited",
+    "projection_states_preserve_truth_bounds_and_concealment",
+    "unavailable_and_unauthorized_projections_clear_rows",
+    "semantic_status_never_relies_on_color_alone"
+  ],
+  "integration": {
+    "focused_tests": 69,
+    "precommit_tests": 1337,
+    "browser_profiles": [
+      "chromium",
+      "firefox",
+      "webkit",
+      "chromium-no-js",
+      "chromium-touch"
+    ],
+    "results": {
+      "facade_render_and_hostile_content": "pass",
+      "native_forms_and_navigation": "pass",
+      "accessibility_semantics": "pass",
+      "browser_matrix": "pass",
+      "visual_regression": "pass",
+      "architecture_boundary": "pass",
+      "dependency_and_asset_diff": "pass",
+      "strict_production_compile": "pass",
+      "repository_precommit": "pass"
+    }
+  },
+  "limitations": [
+    {
+      "id": "named-screen-reader-release-evidence",
+      "detail": "Automated semantic and accessibility-tree checks do not claim named screen-reader speech-output evidence; that release evidence remains assigned to HUI-C5."
+    },
+    {
+      "id": "trusted-mutable-inventory-helper-host",
+      "detail": "The repository inventory helper requires a trusted mutable Linux/CPython 3.12 host; executable paths, permissions, helper scripts, protocols, and limits are pinned, but host libraries and package contents are not content-addressed and require requalification on drift."
+    },
+    {
+      "id": "traversal-not-whole-scan-deadline",
+      "detail": "The 60000 ms inventory deadline reserves bounded helper traversal windows; final sorting, digesting, and manifest validation are finite by count and byte ceilings but are not claimed under that wall deadline."
+    }
+  ],
+  "exceptions": [],
+  "source_digests": {
+    "assets/css/app.css": "f02a64849ebab8a50e2de85dfd6f63005da04c65f100776b59ae40db8e021b61",
+    "assets/js/app.js": "a3ae3db7f03420397afc3664f22de42c1de1d33387c1c6827f32bf3c41cec6a7",
+    "assets/js/theme.js": "fdf41dae3f3a26f0198d495382d6bbfb932d57d82e458011eccf37f6d1d018e1",
+    "docs/architecture/hypermedia-ui-component-facade-and-theme.md": "3ea3995aa8ea4b092f52c382e33a838e66b11e35f0361f9328020c17e7beb78c",
+    "docs/architecture/hypermedia-ui-milestone-c-phase-02-receipt.md": "b072fc6168173f202e3c32b2a22559fc500afc5a26ec68be83e012036c6641af",
+    "docs/architecture/repository-wiki-inventory-capacity-successor.md": "e0356d137fb894e0ab6658261aedcd856b926c8d504bacb23a55aeaa8e53f8c4",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-02-shadcnui-facade-theme-and-app-components.md": "472518182db7207abb58c68af0ac0a89f79d31a419054ba0b9769acfb7b61f4b",
+    "lib/jido_code/architecture/checker.ex": "d464688f095379c1e348dc9b68e2b3ffce89053cf1c73184cafa3931c54bf369",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c1.ex": "96e05e9134c282a3f5f23e0e3544e28062f112ad397661bb8475fbc88060fe4d",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c2.ex": "d001fae51f3638572466aab357307dcd6330b47d695e45c6c617dd780046bf6d",
+    "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "48d2ad6bc2ea3d386e0c66c999972dfdde587d175f67141e2eae7b9df0b4eda5",
+    "lib/jido_code/knowledge/repository_wiki/compiler.ex": "b913f41a606a7ae154298ec0f6e0ba9872da670109db08e3ef8be69223a9f4b6",
+    "lib/jido_code/knowledge/repository_wiki/pilot.ex": "c441eb1ca027dc3efe872b01cad4bdac59a6c59a2135ae53bcb97eca7a9596d1",
+    "lib/jido_code/knowledge/repository_wiki/qualification_corpus.ex": "06ab96ca24d907e0a8907f1949f5c1b87c37191a7a8a1775874c814b5ce7005a",
+    "lib/jido_code/knowledge/repository_wiki/source_inventory.ex": "c35e50f7e36af1e6f25e0f9f817a692822e2b5de192ad812411d8e4a13709a6f",
+    "lib/jido_code/knowledge/repository_wiki/source_inventory_helper_boundary.ex": "b6f1288b51851e04a19127aeffcebf620a8445b4a996c83adf9da39279dd0e95",
+    "lib/jido_code/knowledge/repository_wiki/source_inventory_protocol.ex": "bffd058e67e19ecb867c8eaf9150346058b93a6c922b01461c554f0152b19524",
+    "lib/jido_code_web/components/application.ex": "28cc57cf195216b025940fecb47dd4fdaf80d44aa0b6c1ea3214976b912ee5a7",
+    "lib/jido_code_web/components/layouts.ex": "d15646505f51606bbafb537c07d19ba492e1a73317a65a33861e3377a3f046a9",
+    "lib/jido_code_web/components/layouts/root.html.heex": "55d9a8bc426c871d578c78130f80fa118afea414886629af18f39c8800ef44ae",
+    "lib/jido_code_web/components/projection.ex": "fd1c1be1f4219a3910ff03f576abca6a33c5701a27b7404eaba0ae5e5d9b1578",
+    "lib/jido_code_web/components/ui.ex": "d4b7f67b87c82a7c0a39b4bf694ba4e736d40054d5c68eae8a021d888d0dc9f1",
+    "lib/jido_code_web/controllers/qualification/hypermedia_controller.ex": "ab787cd94d0f59d603eb6bf08a1e51b03f5b477d210eef41e64a680e75dd7725",
+    "lib/jido_code_web/controllers/qualification/hypermedia_html/phase_c2.html.heex": "ffc3da57e2653edbc92ebecf06b9cfbe82801b9f45b5b7146116935050341f14",
+    "lib/jido_code_web/qualification/hypermedia_phase_c2_fixture.ex": "122cf843a1eb36614bc3ced61bf88cec570b9e1943750c65b690650c35d81244",
+    "lib/mix/tasks/architecture.check.ex": "f103eac2b46df0422b0d32263dbd19407311cdd2ec57a8f76b19826c7b01e3d3",
+    "test/browser/hypermedia_ui_phase_c2.spec.mjs": "13b374b4c77930316c5738c02e329fbfb23c6aa81153d7df1793f43d9702e54e",
+    "test/browser/hypermedia_ui_phase_c2.spec.mjs-snapshots/hui-c2-desktop-dark-chromium-linux.png": "36a04c99262dab0b20f4999f5c1f780ae6f2b18f9a2e0de68b8c1f220275090f",
+    "test/browser/hypermedia_ui_phase_c2.spec.mjs-snapshots/hui-c2-desktop-light-chromium-linux.png": "69e0499caa4277b8772a8e86012b2a9d52c8dd145abf6bbe2d44e0b0dedeebca",
+    "test/browser/hypermedia_ui_phase_c2.spec.mjs-snapshots/hui-c2-touch-dark-chromium-touch-linux.png": "829fdaafb4b396e5be4ec153a311ceb2bf93f19bb5454201a694598182998e74",
+    "test/browser/hypermedia_ui_phase_c2.spec.mjs-snapshots/hui-c2-touch-light-chromium-touch-linux.png": "767cb04d4ca08ba8b5d5e8d1b1c2b4a3f3fb40e9687098fd158502dd53d75a21",
+    "test/jido_code/architecture/hypermedia_ui_phase_c2_test.exs": "1517763598ca4d55328884b4a3ff2debc67ac060318515096d6035d5e9db2be1",
+    "test/jido_code/knowledge/repository_wiki/pilot_release_test.exs": "740de6677227a8d89db8aa2726669dba6482a39dffebdc67c018e44151a9cacd",
+    "test/jido_code/knowledge/repository_wiki/qualification_corpus_test.exs": "af21218d9a2d06d667c4cd586eb6eaa9ed9bb26caf24014dd26b3f1c445fd52f",
+    "test/jido_code/knowledge/repository_wiki/source_inventory_boundary_test.exs": "7f2f6c223fbaf3cbdcbae5c11c391d1fae0f0c44a758623262573698087fd8b8",
+    "test/jido_code/knowledge/repository_wiki/source_inventory_capacity_successor_test.exs": "c34f4d21aebe269584061303bbb944a88201ad1bdea210c2ceed3542cda33ec6",
+    "test/jido_code_web/components/application_phase_c2_test.exs": "df7b22eb24f009a154bcbb571a89eba6c39ad36d20cc3d58ace250e56adb8529",
+    "test/jido_code_web/components/projection_phase_c2_test.exs": "adac92fdcf890c967afce207db730fab90ab80eac54f63eb541305ab0954f169",
+    "test/jido_code_web/components/ui_phase_c2_test.exs": "13a08f408a817c53d011885d66f95298c8c4ae39094c5f958725a97e6070537b",
+    "test/jido_code_web/components/ui_qualification_test.exs": "e3ef3cca0405753cf5338b8948440cee38de0b8b1dd81981da408961a42622a1",
+    "test/jido_code_web/controllers/qualification/hypermedia_phase_c2_test.exs": "75ee2ef86fac057ef5fd76cf51a95f62f7c09464eb45484394b96514cd1d8098",
+    "test/jido_code_web/plugs/content_security_policy_test.exs": "f52dc5a41c5f00b9f37664208d50641485e6835c21f6bbe296cf3553cf49dabe",
+    "test/support/hypermedia_ui_phase_c2_primitives_fixture.ex": "fc86cc696c23fa4597b8eba0bb0da7650a0e54851afb3b848295a3ce63180ed0",
+    "test/support/hypermedia_ui_phase_c2_projection_fixture.ex": "74bb982a8b1910ddd617d3d64f9744f590bf71de655936e745e42b582d8990b8",
+    "test/support/hypermedia_ui_phase_c2_shell_fixture.ex": "b7f52622b3aaf0bd6b03db50d394b53e04c9c7da12a6fc5cbf7eb9057e3c5c3d"
+  }
+}
