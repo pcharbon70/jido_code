@@ -42,20 +42,20 @@ Back to plan: [README](./README.md)
       - [x] 2.1.2.3 Subtask - Define reduced-motion, forced-colors/high-contrast, RTL, zoom/reflow, touch target, print, and narrow-screen behavior.
       - [x] 2.1.2.4 Subtask - Add deterministic visual/accessibility fixtures and reject raw status colors, inaccessible contrast, or remote font/icon dependencies.
 
-  - [ ] 2.2 Section - Build factory shell and navigation composites.
+  - [x] 2.2 Section - Build factory shell and navigation composites.
 
     This section owns the global/project/attempt hierarchy, scope explanation,
     responsive navigation, and reserved-area presentation.
 
-    - [ ] 2.2.1 Task {#huic-p02-shell-components} [repo: jido_code] [after: {#huic-p02-tokens}] - Implement application shell, navigation, and context components.
+    - [x] 2.2.1 Task {#huic-p02-shell-components} [repo: jido_code] [after: {#huic-p02-tokens}] - Implement application shell, navigation, and context components.
 
       This task produces stateless HEEx components that render current server-
       authorized navigation without treating visibility as authority.
 
-      - [ ] 2.2.1.1 Subtask - Implement skip link, masthead, primary navigation, project switcher, breadcrumbs, attempt context, utility navigation, account/session menu, and responsive disclosure.
-      - [ ] 2.2.1.2 Subtask - Implement current route/scope/role/assurance/readiness explanations and concealed omission for inaccessible destinations.
-      - [ ] 2.2.1.3 Subtask - Implement page header, action area, filter/search shell, pagination, empty state, error summary, maintenance/degraded banners, and footer/support metadata.
-      - [ ] 2.2.1.4 Subtask - Define stable DOM IDs/roots, focus targets, native behavior, and future fragment boundaries without adding Datastar delivery yet.
+      - [x] 2.2.1.1 Subtask - Implement skip link, masthead, primary navigation, project switcher, breadcrumbs, attempt context, utility navigation, account/session menu, and responsive disclosure.
+      - [x] 2.2.1.2 Subtask - Implement current route/scope/role/assurance/readiness explanations and concealed omission for inaccessible destinations.
+      - [x] 2.2.1.3 Subtask - Implement page header, action area, filter/search shell, pagination, empty state, error summary, maintenance/degraded banners, and footer/support metadata.
+      - [x] 2.2.1.4 Subtask - Define stable DOM IDs/roots, focus targets, native behavior, and future fragment boundaries without adding Datastar delivery yet.
 
   - [ ] 2.3 Section - Build projection and factory-domain composites.
 

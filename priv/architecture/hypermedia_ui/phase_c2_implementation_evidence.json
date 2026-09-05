@@ -5,8 +5,10 @@
   "recorded_on": "2026-09-05",
   "baseline_commit": "73326538cefcc6b136cc96c621062f44f2346c24",
   "predecessor_candidate": "4a6fa78443463a8c8cd8ed039119cef8ba6e3b1b",
-  "completed_sections": ["2.1"],
-  "section_commits": {},
+  "completed_sections": ["2.1", "2.2"],
+  "section_commits": {
+    "2.1": "956f372796e6f5afee7a7f6c3838d1f8e694dc9e"
+  },
   "receipt_status": "merge_pending",
   "clean_checkout_ci": "not_run",
   "implementation_pr": null,
@@ -106,18 +108,21 @@
     "assets/css/app.css": "496fe056ba7435765ab4428740eb7eb2094634099fcc9280aff34fd100670773",
     "assets/js/theme.js": "f414c5b87a4f90b3c06c9471484a1351d7748f28fb69ffd9c8e9b06a4580bbb5",
     "docs/architecture/hypermedia-ui-component-facade-and-theme.md": "3ea3995aa8ea4b092f52c382e33a838e66b11e35f0361f9328020c17e7beb78c",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-02-shadcnui-facade-theme-and-app-components.md": "e81f32745874ba7694a3370e8b6e6558b6e03e1ee9140be12846d8a2469f11e4",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-02-shadcnui-facade-theme-and-app-components.md": "31504de67a5d77f4be8b20ebf76d09d6f8a8dad75c334f64a42e639b28b4161e",
     "lib/jido_code/architecture/checker.ex": "47b5a6adcb7e425ce6cc9a8339dbfa10b20f7b8de0d2d087f8024fca75227dad",
     "lib/jido_code/architecture/hypermedia_ui_phase_c1.ex": "96e05e9134c282a3f5f23e0e3544e28062f112ad397661bb8475fbc88060fe4d",
     "lib/jido_code/architecture/hypermedia_ui_phase_c2.ex": "cb87689488cd1e9d58f019ffe9cbd8a3528b0a2dbf6ec931cb36eaef06664fc9",
     "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "4125421438daa0a1379b9a0be3de581dd109c28f83923b8d9246095c79287418",
+    "lib/jido_code_web/components/application.ex": "d0a14307fb2534f6dbd33fbfd8f0ff85f358932bc2feb2873045ffa9092aa37b",
     "lib/jido_code_web/components/layouts.ex": "a8871382fc47e0a3fb071b2923ee5993d73c5db1c57c086bbdb61e763a6f7cf8",
     "lib/jido_code_web/components/layouts/root.html.heex": "55d9a8bc426c871d578c78130f80fa118afea414886629af18f39c8800ef44ae",
     "lib/jido_code_web/components/ui.ex": "d4b7f67b87c82a7c0a39b4bf694ba4e736d40054d5c68eae8a021d888d0dc9f1",
     "lib/mix/tasks/architecture.check.ex": "f103eac2b46df0422b0d32263dbd19407311cdd2ec57a8f76b19826c7b01e3d3",
     "test/jido_code/architecture/hypermedia_ui_phase_c2_test.exs": "967899b1fab71cf1fe61df2e6b0ae8a92da4073d8445aeeb4ee4e49919018fdb",
+    "test/jido_code_web/components/application_phase_c2_test.exs": "d4e7cb688b1e4fe4469087abbb656dbe5b8f1b440d95f5ca0ffd46f115112b63",
     "test/jido_code_web/components/ui_phase_c2_test.exs": "ea222a86131c206209f1e66afc50d9f6c310f52d6989f4e0e4e1d380c1ed41f9",
     "test/jido_code_web/components/ui_qualification_test.exs": "e3ef3cca0405753cf5338b8948440cee38de0b8b1dd81981da408961a42622a1",
-    "test/support/hypermedia_ui_phase_c2_primitives_fixture.ex": "fc86cc696c23fa4597b8eba0bb0da7650a0e54851afb3b848295a3ce63180ed0"
+    "test/support/hypermedia_ui_phase_c2_primitives_fixture.ex": "fc86cc696c23fa4597b8eba0bb0da7650a0e54851afb3b848295a3ce63180ed0",
+    "test/support/hypermedia_ui_phase_c2_shell_fixture.ex": "b7f52622b3aaf0bd6b03db50d394b53e04c9c7da12a6fc5cbf7eb9057e3c5c3d"
   }
 }
