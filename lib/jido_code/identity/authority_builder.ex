@@ -68,6 +68,7 @@ defmodule JidoCode.Identity.AuthorityBuilder do
              now
            ) do
         :ok -> {:ok, result}
+        {:error, :authorization_stale} -> {:ok, revoked_result(result, request)}
         {:error, _reason} -> {:ok, unavailable_result(result, request)}
       end
     else
@@ -212,7 +213,7 @@ defmodule JidoCode.Identity.AuthorityBuilder do
           resource,
           request,
           roles,
-          :denied
+          :unavailable
         )
     end
   end
@@ -249,6 +250,19 @@ defmodule JidoCode.Identity.AuthorityBuilder do
     }
   end
 
+  defp revoked_result(result, request) do
+    %{
+      result
+      | decision: :revoked,
+        safe_reason: :authority_revoked,
+        exact_grant_ref: nil,
+        delegation_ref: nil,
+        obligations: [],
+        graph_revisions: %{},
+        audit_correlation_ref: request.correlation_ref
+    }
+  end
+
   defp current_scope(snapshot, session, identity, resource) do
     %{
       iri: resource.graph_scope_iri,
@@ -260,6 +274,7 @@ defmodule JidoCode.Identity.AuthorityBuilder do
       project_ref: resource.project_ref,
       resource_ref: resource.resource_ref,
       resource_kind: resource.kind,
+      resource_revision: resource.registry_revision,
       classification: resource.classification,
       environment: resource.environment,
       authenticated_at: DateTime.to_unix(session.last_authenticated_at),
@@ -366,7 +381,13 @@ defmodule JidoCode.Identity.AuthorityBuilder do
         operation: request.operation,
         outcome: result.decision,
         resource_ref: resource_ref,
-        correlation_ref: request.correlation_ref
+        correlation_ref: request.correlation_ref,
+        session_ref: result.current_scope.session_ref,
+        session_generation: result.current_scope.session_generation,
+        account_generation: result.current_scope.account_generation,
+        policy_revision: result.current_scope.policy_revision,
+        revocation_generations: result.current_scope.revocation_generations,
+        resource_revision: result.current_scope.resource_revision
       },
       now: now
     )

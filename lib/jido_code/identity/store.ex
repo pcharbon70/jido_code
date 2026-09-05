@@ -418,6 +418,7 @@ defmodule JidoCode.Identity.Store do
 
   def handle_call({:record_authorization, attributes, options}, _from, state) do
     with :ok <- available(state),
+         :ok <- current_authorization_expectation(state, attributes, now(options)),
          {:ok, audit} <-
            authorization_audit(attributes, state.config.policy_revision, now(options)) do
       next_data = append_audit(state.data, audit)
@@ -462,6 +463,7 @@ defmodule JidoCode.Identity.Store do
          {:ok, account} <- authenticated_account(state.data, authentication),
          {:ok, authenticated_at} <- fetch_datetime(authentication, :authenticated_at),
          {:ok, assurance} <- fetch_assurance(authentication),
+         :ok <- authentication_assurance(state.data, account, authentication, assurance),
          :ok <- current_authentication_age(authenticated_at, now(options), state.config) do
       issued_at = now(options)
       hard_expires_at = DateTime.add(issued_at, state.config.hard_lifetime_seconds, :second)
@@ -1340,6 +1342,27 @@ defmodule JidoCode.Identity.Store do
   defp authorization_audit(_attributes, _policy_revision, _now),
     do: {:error, :invalid_authorization_audit}
 
+  defp current_authorization_expectation(state, attributes, now) when is_map(attributes) do
+    with session_ref when is_binary(session_ref) <- attributes[:session_ref],
+         {:ok, session} <- fetch(state.data.sessions, session_ref),
+         {:ok, account} <- fetch(state.data.accounts, session.subject_ref),
+         :ok <- current_session(session, account, now, state.config),
+         true <- attributes[:actor_ref] == account.subject_ref,
+         true <- attributes[:session_generation] == session.session_generation,
+         true <- attributes[:account_generation] == account.account_generation,
+         true <- attributes[:policy_revision] == state.config.policy_revision,
+         true <- attributes[:revocation_generations] == state.data.generations,
+         {:ok, resource} <- fetch(state.data.resources, attributes[:resource_ref]),
+         true <- attributes[:resource_revision] == resource.registry_revision do
+      :ok
+    else
+      _stale -> {:error, :authorization_stale}
+    end
+  end
+
+  defp current_authorization_expectation(_state, _attributes, _now),
+    do: {:error, :authorization_stale}
+
   defp current_membership?(membership, subject_ref, now) do
     membership.subject_ref == subject_ref and membership.status == :active and
       DateTime.compare(membership.valid_from, now) in [:lt, :eq] and
@@ -1482,6 +1505,16 @@ defmodule JidoCode.Identity.Store do
   defp fetch_assurance(authentication) do
     case authentication[:assurance] do
       assurance when assurance in @allowed_assurance -> {:ok, assurance}
+      _invalid -> {:error, :authentication_stale}
+    end
+  end
+
+  defp authentication_assurance(data, account, authentication, assurance) do
+    with {:ok, authenticator, _verifier} <- active_authenticator(data, account),
+         true <- authentication[:authenticator_ref] == authenticator.authenticator_ref,
+         :ok <- assurance_available(authenticator, assurance) do
+      :ok
+    else
       _invalid -> {:error, :authentication_stale}
     end
   end

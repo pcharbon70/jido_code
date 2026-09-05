@@ -15,12 +15,9 @@ tenant, project, role, grant, delegation, assurance, classification,
 environment, policy revision, graph revision, incident posture, and generation
 values have no browser input path.
 
-For each protected request, the constructor validates the current named-human
-session and account, reads current memberships and delegations, resolves one
-server-owned resource record, applies route-area admission, checks clearance,
-resource lifecycle, and assurance, and then asks the configured graph-authority
-adapter for one exact operation grant. A role label is emitted only as an
-explanation. It is neither a grant nor a union rule.
+Each protected request validates current session, account, membership,
+delegation, resource, route, clearance, lifecycle, and assurance state before
+asking the graph adapter for one exact grant. Roles remain explanation only.
 
 The production adapter is deliberately
 `JidoCode.Identity.Authority.Unconfigured` in this phase. It returns
@@ -29,34 +26,12 @@ The production adapter is deliberately
 access therefore cannot claim production graph authority until a later gate
 composes and proves the production adapter.
 
-## Returned Values
-
-An allowed decision returns transient values only:
-
-- a named-human product identity whose actor and principal are the immutable
-  human subject IRI;
-- an exact resource scope with tenant, optional project, resource kind,
-  classification, environment, session/account generations, policy revision,
-  and all revocation generations;
-- the existing `JidoCode.Knowledge.AuthorityContext`;
-- one adapter-supplied exact grant reference, an optional exact human
-  delegation reference, bounded obligations, and bounded graph revisions; and
-- an audit correlation reference plus explicit concealment and redaction
-  posture.
-
-None of these values is stored in the cookie or persisted as a cached
-authorization result. Adapter exceptions, malformed responses, non-unique
-memberships or delegations, missing evidence, and audit persistence failure
-fail closed.
-
 ## Resource Registry
 
-`JidoCode.Identity.Resource` binds an opaque immutable reference to one kind,
-tenant, optional project, parent, graph scope, classification, environment,
-lifecycle, and registry revision. The closed kinds are factory, project,
-attempt, interaction session, candidate, wiki preview, and graph. Child
-resources must remain inside the parent's tenant and project containment.
-Reusing a resource reference cannot change its kind or containment binding.
+`JidoCode.Identity.Resource` immutably binds kind, tenant, optional project,
+parent, graph scope, classification, environment, lifecycle, and revision.
+Factory, project, attempt, interaction session, candidate, wiki preview, and
+graph children stay inside parent containment.
 
 Factory authorization requires a tenant-level membership. Project and child
 authorization requires an exact project membership; tenant membership is not
@@ -71,13 +46,10 @@ revision, and status. The seven route groups are developer, reviewer,
 operations, security, cost, knowledge, and administration. Their route plugs
 repeat current authority construction before admission.
 
-Human delegations bind immutable issuer and delegate subjects to exact
-resources, actions, graph families, environment, validity, policy revision,
-assurance, classification, obligations, revision, and revocation generation.
-An attenuated child must preserve the parent binding and can only narrow
-resources, actions, graph families, validity, classification, and environment;
-it may strengthen assurance or add obligations. Current reads omit expired,
-revoked, and policy-stale delegations. Multiple exact matches deny.
+Human delegations bind immutable parties and exact resources, actions, graph
+families, environment, validity, policy, assurance, classification,
+obligations, revision, and revocation generation. Attenuation only narrows;
+expired, revoked, stale, or multiple matches deny.
 
 Account enrollment and all membership, delegation, registry, and external
 generation mutations are reachable only through
@@ -101,27 +73,11 @@ rebuilds authority from current server state.
 ## Revocation
 
 Account, session, role, delegation, project, tenant, graph, and incident
-dimensions use monotonic generation transitions. Changes publish privacy-safe
-`RevocationEvent` messages on the application-owned PubSub topic. Generation
-events contain only bounded subject/resource references, the dimension,
-previous and next counters, policy revision, and time. Sessions and cached
-scope comparisons cannot treat a notification as authority; they reauthorize
-against current state.
-
-Membership changes advance role and tenant generations plus project generation
-when applicable. Delegation changes advance delegation generation. Registry
-changes advance tenant or project generation. Account and session lifecycle
-events retain their independent generations. External graph and incident
-owners must publish exact compare-and-increment transitions; stale transitions
-are rejected.
+changes publish privacy-safe monotonic `RevocationEvent` generations. External
+graph and incident owners use exact compare-and-increment transitions. Cached
+scope and notification data are never authority; consumers reauthorize.
 
 ## Limitations And Reopening Conditions
-
-This foundation does not authorize a new product page, stream, field,
-semantic command, approval, export, or download. It does not implement a
-production identity provider, phishing-resistant authenticator, step-up
-ceremony, recovery provider, graph-grant adapter, incident evaluator, or SSE
-coordinator. Each remains explicitly unavailable until its later receipt.
 
 HUI-C1 reopens if a browser value supplies authority, a role or route group is
 treated as an exact grant, a tenant membership crosses into a project, a

@@ -10,8 +10,11 @@ defmodule JidoCode.TestSupport.StaticHumanAuthorityAdapter do
           membership.project_ref == resource.project_ref
       end)
 
-    case matching do
-      [membership] ->
+    case {matching, request.action} do
+      {[_membership], :field} ->
+        {:error, :redacted}
+
+      {[membership], _action} ->
         with {:ok, delegation_ref} <-
                exact_delegation(delegations, identity.subject_ref, resource, request) do
           {:ok,
@@ -24,10 +27,10 @@ defmodule JidoCode.TestSupport.StaticHumanAuthorityAdapter do
            }}
         end
 
-      [] ->
+      {[], _action} ->
         {:error, :concealed_not_found}
 
-      _ambiguous ->
+      {_ambiguous, _action} ->
         {:error, :denied}
     end
   end

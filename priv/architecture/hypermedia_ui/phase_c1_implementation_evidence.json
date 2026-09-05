@@ -1,10 +1,22 @@
 {
   "schema_version": 1,
   "phase": "HUI-C1",
-  "status": "implementation_in_progress",
+  "status": "integration_candidate_merge_pending",
+  "recorded_on": "2026-09-05",
   "baseline_commit": "797e308bc16b609eb6273d07ae96ee47a4cc3512",
   "predecessor_candidate": "63d2689321121775a46bf531d004ac4de44b81f2",
-  "completed_sections": ["1.1", "1.2", "1.3"],
+  "completed_sections": ["1.1", "1.2", "1.3", "1.4"],
+  "section_commits": {
+    "1.1": "d169129c53f15745f0ebac87f625df3cc0fe130a",
+    "1.2": "2d08df156932fae479c485bae9a8d6bb79139555",
+    "1.3": "1a04872b1295ef4985bb51bae5cb45530e92a397"
+  },
+  "receipt_status": "merge_pending",
+  "clean_checkout_ci": "pending",
+  "implementation_pr": null,
+  "implementation_pr_head": null,
+  "merged_candidate": null,
+  "merge_date": null,
   "identity_authority": {
     "store_owner": "JidoCode.Identity.Store",
     "file_role": "identity_authority",
@@ -40,6 +52,27 @@
     "route_groups": ["developer", "reviewer", "operations", "security", "cost", "knowledge", "administration"],
     "revocation_dimensions": ["account", "session", "role", "delegation", "project", "tenant", "graph", "incident"]
   },
+  "integration": {
+    "focused_tests": 51,
+    "focused_result": "pass",
+    "architecture_check": "pass",
+    "strict_production_compile": "pass",
+    "precommit_result": "pass",
+    "precommit_tests": 1270,
+    "production_adapter_posture": "explicitly_unconfigured",
+    "exceptions": []
+  },
+  "runtime_successor": {
+    "application_child_ids": ["JidoCode.Identity.Store"],
+    "routes": [
+      {
+        "method": "DELETE",
+        "path": "/sessions",
+        "owner": "JidoCodeWeb.AuthController.delete_all/2",
+        "pipelines": ["browser", "require_authenticated_human", "require_same_origin"]
+      }
+    ]
+  },
   "invariants": [
     "named_human_subjects_are_distinct_from_operator_service_and_agent_principals",
     "browser_fields_never_supply_identity_scope_grants_assurance_or_revisions",
@@ -63,7 +96,7 @@
     "lib/jido_code/identity/authenticator.ex": "955c17eb934fdcc4d66331d106021fe76613713211ea563956b8f78ba5e2b8ca",
     "lib/jido_code/identity/authority/unconfigured.ex": "cef4920123974485611e8166fe790f3695b38c5be879b12c78b1264728985e97",
     "lib/jido_code/identity/authority_adapter.ex": "ebecc667edf1df241e2c612dea6bdd862501f3a8e5aa5cde6f4ae54a97e2af56",
-    "lib/jido_code/identity/authority_builder.ex": "1f4ec09aeecc7748c63262f5ff8270a9070eb0b4163f19341fe09a877b57eaf9",
+    "lib/jido_code/identity/authority_builder.ex": "872ef2c30373124efedbd265945a1e45dfd23ea93229919309dadb7304825164",
     "lib/jido_code/identity/authority_request.ex": "adbe3058d094873370b9eb60184327c2e14ce8f3c5a43f3c14a171e94647af26",
     "lib/jido_code/identity/authorization_result.ex": "3c8a2d8820ca43577fec69cf0bb8f8852cb1893df55710b152d63731c1507f7f",
     "lib/jido_code/identity/browser_session.ex": "65eecfbb8dc3b129a05fdad6f8791d822a15dc257705aa7390fac255547fdb70",
@@ -80,7 +113,7 @@
     "lib/jido_code/identity/revocations.ex": "2e7372d051dd25e13ede007f5254edf58011a89870acd13701a956f7f2a16040",
     "lib/jido_code/identity/route_policy.ex": "c9b9c3dd03b50d427fff577eff04f5fe67a71dbe45e81c00587fe51c06b37976",
     "lib/jido_code/identity/sessions.ex": "dc7b8c3a3e67d7cc8c18c0e3d14b294393a6e5fe5049878b74e497187f567e62",
-    "lib/jido_code/identity/store.ex": "b31f17920da950e7d5ee29eb0377c47232ad49ad4f24d1af0fc980f3b7bac4fd",
+    "lib/jido_code/identity/store.ex": "79e5e5f5e4134a302fddbe25c3ae90cd480f9b09f52dd7e91ea2dacef8a5485a",
     "lib/mix/tasks/identity.bootstrap.ex": "f8a56f792053028aacd3984ef8d87fb35cf2c89f836730464d5aea1055e518c6",
     "lib/jido_code_web/controllers/auth_controller.ex": "bb05188fa20fd7fcea9f17f551f78032d10f1d2f9fe9d3108fdf884a41efb42f",
     "lib/jido_code_web/controllers/auth_html/new.html.heex": "27feb31937610385188fa9f315651aa29f38f208d3ed09c7b9d513cc6d28e4bf",
@@ -89,6 +122,10 @@
     "lib/jido_code_web/plugs/require_same_origin.ex": "69dd0b78efeeb258a5ae860652ce746322e669a9dea03eb74d718696c2bb5b9b",
     "lib/jido_code_web/product_auth.ex": "44a1e6e60f0e9b78e1d65c1ce933bcb026bff687db1456af69723a1f670cdbac",
     "lib/jido_code_web/router.ex": "59b2bc97b200fbac55bc98ee90e431e5f15a3fc220aa61fd35b16820012132a9",
-    "test/support/static_human_authority_adapter.ex": "dff13bf3569a92d2e0d0bb7d1c262ad48afd6fd9ba9e206b7ea3ab9ba7523da2"
+    "test/jido_code/identity/phase_01_identity_authority_integration_test.exs": "65d9f80ee2eeae60b67023671525535df4c90b1bca3a65c24b6ebcf08f23fc20",
+    "test/support/crashing_human_authority_adapter.ex": "0103ac04cd2ae25b6648ab156eb36cdea758d72216d1dcd52531472e106cb277",
+    "test/support/delegation_required_human_authority_adapter.ex": "2ec5c367ca9c356e5ebc06b2d88f3ea3413e7f929895235d1bdd38bdcb566648",
+    "test/support/malformed_human_authority_adapter.ex": "c83bb5fbabc1275f135bd73068569acb8c9238ad9dfe05398aa3d87ccaa157e5",
+    "test/support/static_human_authority_adapter.ex": "a37229d077103e99a25fc925670342bdf3e59ba7cd4bcf2109ceeddd4de4f161"
   }
 }

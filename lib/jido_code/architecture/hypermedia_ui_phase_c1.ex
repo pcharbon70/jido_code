@@ -34,6 +34,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
   @revocation_dimensions ~w[
     account session role delegation project tenant graph incident
   ]
+  @test_authority_sources MapSet.new(~w[
+    test/support/static_human_authority_adapter.ex
+    test/support/delegation_required_human_authority_adapter.ex
+    test/support/malformed_human_authority_adapter.ex
+    test/support/crashing_human_authority_adapter.ex
+    test/jido_code/identity/phase_01_identity_authority_integration_test.exs
+  ])
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
   def check(root \\ File.cwd!()) do
@@ -68,6 +75,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
     identity = evidence["identity_authority"] || %{}
     session = identity["session_profile"] || %{}
     authority = evidence["authority_construction"] || %{}
+    integration = evidence["integration"] || %{}
+    runtime = evidence["runtime_successor"] || %{}
 
     []
     |> require_equal(evidence["schema_version"], 1, "schema version")
@@ -84,6 +93,17 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
     |> require_equal(evidence["baseline_commit"], @baseline, "authorized baseline")
     |> require_equal(evidence["predecessor_candidate"], @predecessor, "HUI-B4 candidate")
     |> require_equal(ordered_prefix?(completed), true, "completed section order")
+    |> require_equal(evidence["recorded_on"], "2026-09-05", "recorded date")
+    |> require_equal(
+      evidence["section_commits"] || %{},
+      %{
+        "1.1" => "d169129c53f15745f0ebac87f625df3cc0fe130a",
+        "1.2" => "2d08df156932fae479c485bae9a8d6bb79139555",
+        "1.3" => "1a04872b1295ef4985bb51bae5cb45530e92a397"
+      },
+      "section commits"
+    )
+    |> require_equal(lifecycle_valid?(evidence, completed), true, "receipt lifecycle")
     |> require_exact_set(evidence["invariants"] || [], @invariants, "phase invariants")
     |> require_equal(identity["store_owner"], "JidoCode.Identity.Store", "identity owner")
     |> require_equal(identity["file_role"], "identity_authority", "identity file role")
@@ -157,6 +177,29 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
       @revocation_dimensions,
       "revocation dimensions"
     )
+    |> require_equal(integration["focused_tests"], 51, "focused test count")
+    |> require_equal(integration["focused_result"], "pass", "focused test result")
+    |> require_equal(integration["architecture_check"], "pass", "architecture result")
+    |> require_equal(integration["strict_production_compile"], "pass", "production compile")
+    |> require_equal(integration["precommit_result"], "pass", "precommit result")
+    |> require_positive(integration["precommit_tests"], "precommit test count")
+    |> require_equal(
+      runtime["application_child_ids"],
+      ["JidoCode.Identity.Store"],
+      "runtime successor children"
+    )
+    |> require_equal(
+      runtime["routes"],
+      [
+        %{
+          "method" => "DELETE",
+          "path" => "/sessions",
+          "owner" => "JidoCodeWeb.AuthController.delete_all/2",
+          "pipelines" => ["browser", "require_authenticated_human", "require_same_origin"]
+        }
+      ],
+      "runtime successor routes"
+    )
     |> validate_source_paths(sources, root)
     |> Enum.reverse()
   end
@@ -171,7 +214,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
         not HypermediaUISuccessorEvidence.mutable_path?(path) and
           not String.starts_with?(path, "lib/jido_code/identity") and
           path != "lib/mix/tasks/identity.bootstrap.ex" and
-            path != "test/support/static_human_authority_adapter.ex" ->
+            not MapSet.member?(@test_authority_sources, path) ->
           ["unauthorized HUI-C1 source path #{path}" | acc]
 
         not Regex.match?(~r/^[a-f0-9]{64}$/, expected) ->
@@ -202,6 +245,35 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC1 do
       do: errors,
       else: ["#{label} is not exact" | errors]
   end
+
+  defp require_positive(errors, value, _label) when is_integer(value) and value > 0, do: errors
+
+  defp require_positive(errors, value, label),
+    do: ["#{label}: expected a positive integer, got #{inspect(value)}" | errors]
+
+  defp lifecycle_valid?(%{"status" => "implementation_in_progress"}, completed),
+    do: ordered_prefix?(completed)
+
+  defp lifecycle_valid?(
+         %{"status" => "integration_candidate_merge_pending"} = evidence,
+         completed
+       ) do
+    completed == @sections and evidence["receipt_status"] == "merge_pending" and
+      evidence["clean_checkout_ci"] == "pending" and is_nil(evidence["implementation_pr"]) and
+      is_nil(evidence["implementation_pr_head"]) and is_nil(evidence["merged_candidate"]) and
+      is_nil(evidence["merge_date"])
+  end
+
+  defp lifecycle_valid?(%{"status" => "accepted_at_merged_candidate"} = evidence, completed) do
+    completed == @sections and evidence["receipt_status"] == "accepted_at_merged_candidate" and
+      evidence["clean_checkout_ci"] == "pass" and is_integer(evidence["implementation_pr"]) and
+      full_sha?(evidence["implementation_pr_head"]) and full_sha?(evidence["merged_candidate"]) and
+      Regex.match?(~r/^\d{4}-\d{2}-\d{2}$/, evidence["merge_date"] || "")
+  end
+
+  defp lifecycle_valid?(_evidence, _completed), do: false
+
+  defp full_sha?(value), do: is_binary(value) and Regex.match?(~r/^[a-f0-9]{40}$/, value)
 
   defp sha256(body), do: :crypto.hash(:sha256, body) |> Base.encode16(case: :lower)
 end

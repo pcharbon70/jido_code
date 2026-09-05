@@ -2,6 +2,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
   use ExUnit.Case, async: false
 
   alias JidoCode.Architecture.HypermediaUIPhaseA1
+  alias JidoCode.Architecture.HypermediaUIPhaseC1
   alias JidoCode.Knowledge.CommandRegistry
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.QueryCatalog
@@ -12,9 +13,10 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
 
   test "the route inventory matches generated product routes" do
     manifests = manifests!()
+    successor = successor!()
 
     expected =
-      manifests.runtime["routes"]
+      (manifests.runtime["routes"] ++ successor["runtime_successor"]["routes"])
       |> Enum.reject(&(&1["id"] == "development_dashboard"))
       |> Enum.map(&{&1["method"], &1["path"]})
       |> Enum.sort()
@@ -30,8 +32,15 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
 
   test "the supervision inventory matches live OTP child ids" do
     supervision = manifests!().runtime["supervision"]
+    successor = successor!()
 
-    assert child_ids(JidoCode.Supervisor) == Enum.sort(supervision["application_child_ids"])
+    expected_children =
+      Enum.sort(
+        supervision["application_child_ids"] ++
+          successor["runtime_successor"]["application_child_ids"]
+      )
+
+    assert child_ids(JidoCode.Supervisor) == expected_children
 
     assert child_ids(JidoCode.Knowledge.Supervisor) ==
              Enum.sort(supervision["knowledge_children"])
@@ -107,6 +116,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
   defp manifests! do
     assert {:ok, manifests} = HypermediaUIPhaseA1.load()
     manifests
+  end
+
+  defp successor! do
+    assert {:ok, evidence} = HypermediaUIPhaseC1.load()
+    evidence
   end
 
   defp child_ids(supervisor) do
