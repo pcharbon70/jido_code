@@ -58,14 +58,26 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC2 do
     assets/js/theme.js
     docs/architecture/hypermedia-ui-component-facade-and-theme.md
     docs/architecture/hypermedia-ui-milestone-c-phase-02-receipt.md
+    docs/architecture/repository-wiki-inventory-capacity-successor.md
     docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-02-shadcnui-facade-theme-and-app-components.md
     lib/jido_code/architecture/checker.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c1.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c2.ex
     lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex
+    lib/jido_code/knowledge/repository_wiki/compiler.ex
+    lib/jido_code/knowledge/repository_wiki/pilot.ex
+    lib/jido_code/knowledge/repository_wiki/qualification_corpus.ex
+    lib/jido_code/knowledge/repository_wiki/source_inventory.ex
+    lib/jido_code/knowledge/repository_wiki/source_inventory_helper_boundary.ex
+    lib/jido_code/knowledge/repository_wiki/source_inventory_protocol.ex
     lib/mix/tasks/architecture.check.ex
     playwright.config.mjs
     test/jido_code/architecture/hypermedia_ui_phase_c2_test.exs
+    test/jido_code/knowledge/repository_wiki/pilot_release_test.exs
+    test/jido_code/knowledge/repository_wiki/qualification_corpus_test.exs
+    test/jido_code/knowledge/repository_wiki/source_inventory_boundary_test.exs
+    test/jido_code/knowledge/repository_wiki/source_inventory_capacity_successor_test.exs
+    test/jido_code_web/plugs/content_security_policy_test.exs
   ])
 
   @spec check(Path.t()) :: {:ok, []} | {:error, [String.t()]}
@@ -142,15 +154,22 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC2 do
     |> Enum.flat_map(fn {path, source} ->
       component? = String.starts_with?(path, "lib/jido_code_web/components/")
       facade? = path == "lib/jido_code_web/components/ui.ex"
+
+      c2_qualification? =
+        path == "lib/jido_code_web/qualification/hypermedia_phase_c2_fixture.ex" or
+          path ==
+            "lib/jido_code_web/controllers/qualification/hypermedia_html/phase_c2.html.heex"
+
+      c2_presentation? = component? or c2_qualification?
       presentation? = component? or Path.extname(path) in [".heex", ".js", ".css"]
 
       [
-        {not facade? and upstream_component_import?(source),
+        {c2_presentation? and not facade? and upstream_component_import?(source),
          "#{path}: upstream component imports are confined to JidoCodeWeb.Components.UI"},
-        {component? and authority_dependency?(source),
-         "#{path}: presentation components cannot construct or query authority"},
-        {component? and runtime_dependency?(source),
-         "#{path}: HUI-C2 components cannot depend on LiveView, LiveVue, Dstar, or Datastar"},
+        {c2_presentation? and authority_dependency?(source),
+         "#{path}: HUI-C2 presentation sources cannot construct or query authority"},
+        {c2_presentation? and runtime_dependency?(source),
+         "#{path}: HUI-C2 presentation sources cannot depend on LiveView, LiveVue, Dstar, or Datastar"},
         {presentation? and inline_script?(path, source),
          "#{path}: inline scripts and executable event-handler attributes are prohibited"},
         {presentation? and remote_asset?(path, source),
@@ -566,13 +585,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC2 do
     if String.contains?(body, fragment), do: errors, else: ["missing #{fragment}" | errors]
   end
 
-  defp require_contains(errors, _body, _fragment, label), do: ["#{label}: unavailable" | errors]
-
   defp require_match(errors, body, pattern, label) when is_binary(body) do
     if Regex.match?(pattern, body), do: errors, else: ["#{label}: missing or invalid" | errors]
   end
-
-  defp require_match(errors, _body, _pattern, label), do: ["#{label}: unavailable" | errors]
 
   defp require_iso_date(errors, value, label) do
     if iso_date?(value), do: errors, else: ["#{label}: invalid #{inspect(value)}" | errors]

@@ -2,18 +2,19 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @moduledoc false
 
   @phase_c2_manifest "priv/architecture/hypermedia_ui/phase_c2_implementation_evidence.json"
-  @phase_c2_mutable_paths MapSet.new(~w[
+  @phase_c2_mutable_paths ~w[
     assets/css/app.css
+    assets/js/app.js
     assets/js/theme.js
     lib/jido_code_web/components/layouts.ex
     lib/jido_code_web/components/layouts/root.html.heex
     lib/jido_code_web/components/ui.ex
     lib/jido_code_web/controllers/qualification/hypermedia_controller.ex
     lib/jido_code_web/controllers/qualification/hypermedia_html/index.html.heex
-  ])
+  ]
 
   @phase_c1_manifest "priv/architecture/hypermedia_ui/phase_c1_implementation_evidence.json"
-  @phase_c1_mutable_paths MapSet.new(~w[
+  @phase_c1_mutable_paths ~w[
     config/config.exs
     config/runtime.exs
     config/test.exs
@@ -27,7 +28,7 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
     lib/jido_code_web/plugs/require_product_area.ex
     lib/jido_code_web/controllers/auth_controller.ex
     lib/jido_code_web/controllers/auth_html/new.html.heex
-  ])
+  ]
 
   @spec digest(Path.t(), String.t()) :: String.t() | nil
   def digest(root, path) do
@@ -39,13 +40,13 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   def mutable_path?(path), do: phase_c2_mutable_path?(path) or phase_c1_mutable_path?(path)
 
   @spec phase_c1_mutable_path?(String.t()) :: boolean()
-  def phase_c1_mutable_path?(path), do: MapSet.member?(@phase_c1_mutable_paths, path)
+  def phase_c1_mutable_path?(path), do: path in @phase_c1_mutable_paths
 
   @spec phase_c2_mutable_path?(String.t()) :: boolean()
-  def phase_c2_mutable_path?(path), do: MapSet.member?(@phase_c2_mutable_paths, path)
+  def phase_c2_mutable_path?(path), do: path in @phase_c2_mutable_paths
 
   defp phase_digest(root, path, manifest_path, mutable_paths, expected_phase) do
-    with true <- MapSet.member?(mutable_paths, path),
+    with true <- path in mutable_paths,
          {:ok, body} <- File.read(Path.join(root, manifest_path)),
          {:ok, evidence} <- Jason.decode(body),
          ^expected_phase <- evidence["phase"],

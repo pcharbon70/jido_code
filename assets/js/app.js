@@ -38,6 +38,42 @@ import {bindThemeEvents, initializeTheme} from "./theme"
 initializeTheme()
 bindThemeEvents()
 
+const printFallbackState = new Map()
+
+const hideEnhancementFallbacks = (root = document) => {
+  root.querySelectorAll("[data-enhancement-fallback]").forEach(fallback => {
+    fallback.hidden = true
+  })
+}
+
+const showEnhancementPrintFallbacks = () => {
+  document.querySelectorAll("[data-enhancement-fallback]").forEach(fallback => {
+    if (!printFallbackState.has(fallback)) {
+      printFallbackState.set(fallback, {
+        hidden: fallback.hidden,
+        open: fallback instanceof HTMLDetailsElement ? fallback.open : null,
+      })
+    }
+
+    fallback.hidden = false
+    if (fallback instanceof HTMLDetailsElement) fallback.open = true
+  })
+}
+
+const restoreEnhancementFallbacks = () => {
+  printFallbackState.forEach((state, fallback) => {
+    if (!fallback.isConnected) return
+    fallback.hidden = state.hidden
+    if (fallback instanceof HTMLDetailsElement) fallback.open = state.open
+  })
+  printFallbackState.clear()
+}
+
+hideEnhancementFallbacks()
+window.addEventListener("phx:page-loading-stop", () => hideEnhancementFallbacks())
+window.addEventListener("beforeprint", showEnhancementPrintFallbacks)
+window.addEventListener("afterprint", restoreEnhancementFallbacks)
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const SaladUIHook = createSaladUIHook(SaladUI.SaladUIHook)
 const liveSocket = new LiveSocket("/live", Socket, {

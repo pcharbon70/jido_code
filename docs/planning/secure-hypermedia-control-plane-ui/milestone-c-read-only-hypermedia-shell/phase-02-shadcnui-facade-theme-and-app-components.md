@@ -77,21 +77,21 @@ Back to plan: [README](./README.md)
     This final section proves the component layer is coherent, accessible,
     native-first, stable for future patches, and isolated from application authority.
 
-    - [ ] 2.4.1 Task {#huic-p02-integration} [repo: jido_code] [after: {#huic-p02-projection-components}] - Execute the HUI-C2 component and design-system matrix.
+    - [x] 2.4.1 Task {#huic-p02-integration} [repo: jido_code] [after: {#huic-p02-projection-components}] - Execute the HUI-C2 component and design-system matrix.
 
       This task validates representative full compositions rather than only
       isolated primitive snapshots.
 
-      - [ ] 2.4.1.1 Subtask - Render shell, forms, navigation, projection states, fleet tables, attempt summaries, overlays, errors, and long/hostile content under all supported themes and layouts.
-      - [ ] 2.4.1.2 Subtask - Exercise keyboard, screen-reader names/order/status, zoom/reflow, touch, RTL, reduced motion, forced colors, print, and JavaScript-disabled behavior.
-      - [ ] 2.4.1.3 Subtask - Verify stable unique DOM roots/focus targets, no broad upstream imports, no inline/remote assets, no authority logic, and no accidental LiveView product dependency.
-      - [ ] 2.4.1.4 Subtask - Run component/a11y/visual/architecture/dependency tests, `mix precommit`, and clean-checkout CI.
+      - [x] 2.4.1.1 Subtask - Render shell, forms, navigation, projection states, fleet tables, attempt summaries, overlays, errors, and long/hostile content under all supported themes and layouts.
+      - [x] 2.4.1.2 Subtask - Exercise keyboard, screen-reader names/order/status, zoom/reflow, touch, RTL, reduced motion, forced colors, print, and JavaScript-disabled behavior.
+      - [x] 2.4.1.3 Subtask - Verify stable unique DOM roots/focus targets, no broad upstream imports, no inline/remote assets, no authority logic, and no accidental LiveView product dependency.
+      - [x] 2.4.1.4 Subtask - Run component/a11y/visual/architecture/dependency tests, `mix precommit`, and clean-checkout CI.
 
     - [ ] 2.4.2 Task {#huic-p02-phase-receipt} [repo: jido_code] [after: {#huic-p02-integration}] - Publish and pin the Phase 2 receipt.
 
       This task records HUI-C2 evidence in
       `docs/architecture/hypermedia-ui-milestone-c-phase-02-receipt.md`.
 
-      - [ ] 2.4.2.1 Subtask - Keep HUI-C2 merge-pending on unstable DOM/APIs, inaccessible composition, color-only meaning, broken native forms/navigation, upstream leakage, authority in components, or unqualified asset use.
-      - [ ] 2.4.2.2 Subtask - Record component/catalog/token/asset digests, browser/a11y evidence, exceptions, limitations, and all reopening conditions.
+      - [x] 2.4.2.1 Subtask - Keep HUI-C2 merge-pending on unstable DOM/APIs, inaccessible composition, color-only meaning, broken native forms/navigation, upstream leakage, authority in components, or unqualified asset use.
+      - [x] 2.4.2.2 Subtask - Record component/catalog/token/asset digests, browser/a11y evidence, exceptions, limitations, and all reopening conditions.
       - [ ] 2.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.

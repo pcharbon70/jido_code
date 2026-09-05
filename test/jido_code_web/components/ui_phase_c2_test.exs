@@ -209,6 +209,8 @@ defmodule JidoCodeWeb.Components.UIPhaseC2Test do
       assert css =~ token
     end
 
+    assert css =~ ~s(--font-sans: "Liberation Sans", Arial, sans-serif;)
+
     for mode <- [
           "@media (prefers-reduced-motion: reduce)",
           "@media (forced-colors: active)",
@@ -241,19 +243,25 @@ defmodule JidoCodeWeb.Components.UIPhaseC2Test do
 
   test "theme controls expose explicit accessible names and pressed state" do
     document =
-      render_component(&Layouts.theme_toggle/1, %{})
+      render_component(&Layouts.theme_toggle/1, %{appearance: "dark"})
       |> LazyHTML.from_fragment()
 
-    assert_present(document, "#application-theme-toggle[role='group'][aria-label='Appearance']")
+    assert_present(
+      document,
+      "#application-theme-toggle[role='group'][aria-label='Appearance'][aria-describedby='application-theme-current']"
+    )
 
-    for {id, value, label} <- [
-          {"application-theme-system", "system", "Use system theme"},
-          {"application-theme-light", "light", "Use light theme"},
-          {"application-theme-dark", "dark", "Use dark theme"}
+    assert_present(document, "#application-theme-controls[data-theme-controls][hidden]")
+    assert_text(document, "#application-theme-current", "Current appearance: Dark")
+
+    for {id, value, label, pressed} <- [
+          {"application-theme-system", "system", "Use system theme", "false"},
+          {"application-theme-light", "light", "Use light theme", "false"},
+          {"application-theme-dark", "dark", "Use dark theme", "true"}
         ] do
       assert_present(
         document,
-        "##{id}[type='button'][data-theme-choice][data-phx-theme='#{value}'][aria-label='#{label}'][aria-pressed='false']"
+        "##{id}[type='button'][data-theme-choice][data-phx-theme='#{value}'][aria-label='#{label}'][aria-pressed='#{pressed}']"
       )
     end
   end
@@ -268,6 +276,10 @@ defmodule JidoCodeWeb.Components.UIPhaseC2Test do
   defp assert_present(document, selector) do
     assert document |> LazyHTML.query(selector) |> LazyHTML.to_html() != "",
            "expected selector to be present: #{selector}"
+  end
+
+  defp assert_text(document, selector, expected) do
+    assert document |> LazyHTML.query(selector) |> LazyHTML.text() =~ expected
   end
 
   defp refute_present(document, selector) do

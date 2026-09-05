@@ -2,6 +2,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC2Test do
   use ExUnit.Case, async: true
 
   alias JidoCode.Architecture.HypermediaUIPhaseC2
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
 
   @source_path "lib/jido_code_web/components/hui_c2_probe.ex"
   @source """
@@ -153,6 +154,16 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC2Test do
         ] do
       assert has_error?(errors, diagnostic)
     end
+  end
+
+  test "successor evidence owns only the reviewed C2 application asset changes" do
+    for path <- ["assets/js/app.js", "assets/js/theme.js", "assets/css/app.css"] do
+      assert HypermediaUISuccessorEvidence.phase_c2_mutable_path?(path)
+    end
+
+    refute HypermediaUISuccessorEvidence.phase_c2_mutable_path?(
+             "assets/vendor/datastar/datastar.js"
+           )
   end
 
   defp candidate_evidence(root) do

@@ -10,7 +10,7 @@ defmodule JidoCodeWeb.Plugs.ContentSecurityPolicyTest do
     document = conn |> html_response(200) |> LazyHTML.from_document()
 
     assert document
-           |> LazyHTML.query("html[data-nonce='#{nonce}'][data-shadcn-theme='light']")
+           |> LazyHTML.query("html[data-nonce='#{nonce}'][data-appearance='system']")
            |> LazyHTML.to_html() != ""
 
     assert policy =~ "require-trusted-types-for 'script'"

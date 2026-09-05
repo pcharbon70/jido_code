@@ -6,12 +6,14 @@ defmodule JidoCode.Knowledge.RepositoryWiki.QualificationCorpusTest do
   alias JidoCode.Knowledge.RepositoryWiki.QualificationCorpus
   alias JidoCode.Knowledge.RepositoryWiki.QualityEvaluation
   alias JidoCode.Knowledge.RepositoryWiki.SecurityEvaluation
+  alias JidoCode.Knowledge.RepositoryWiki.SourceInventory
 
   @secret "rw5-qualification-signing-key-for-tests"
 
   test "signs every immutable corpus member and rejects substitution" do
     corpus = signed_corpus()
 
+    assert corpus.revision == "repository-wiki-qualification-corpus/1.1.0"
     assert :ok = QualificationCorpus.verify(corpus, &verify/2)
     assert Contract.digest?(QualificationCorpus.digest(corpus))
 
@@ -53,10 +55,34 @@ defmodule JidoCode.Knowledge.RepositoryWiki.QualificationCorpusTest do
     assert map_size(expected.usage) == length(fixtures.accounting)
     assert Enum.all?(expected.graph, fn {_id, digest} -> Contract.digest?(digest) end)
 
+    profiles = QualificationCorpus.member(corpus, :component_profiles)
+    thresholds = QualificationCorpus.member(corpus, :release_thresholds)
+    clock = QualificationCorpus.member(corpus, :clock)
+    assert clock.evaluated_at == ~U[2026-09-05 16:00:00.000000Z]
+    assert profiles.inventory.profile == SourceInventory.profile()
+    assert profiles.inventory.digest == Contract.digest(SourceInventory.profile())
+    assert thresholds.resources.inventory_files == 2_000
+    assert thresholds.resources.inventory_bytes == 16_777_216
+
     substituted = put_in(corpus.artifacts.clock.payload.mode, :wall_clock)
 
     assert {:error, %Error{kind: :unauthorized}} =
              QualificationCorpus.verify(substituted, &verify/2)
+
+    stale_profile =
+      put_in(
+        corpus.artifacts.component_profiles.payload.inventory.profile.revision,
+        "wiki-source-inventory/1.0.0"
+      )
+
+    assert {:error, %Error{kind: :unauthorized}} =
+             QualificationCorpus.verify(stale_profile, &verify/2)
+
+    wider_threshold =
+      put_in(corpus.artifacts.release_thresholds.payload.resources.inventory_bytes, 16_777_217)
+
+    assert {:error, %Error{kind: :unauthorized}} =
+             QualificationCorpus.verify(wider_threshold, &verify/2)
   end
 
   test "security evaluation admits complete contained evidence with no high findings" do

@@ -60,7 +60,7 @@
   --diff-added: oklch(0.94 0.04 154);
   --diff-removed: oklch(0.95 0.04 28);
   --diff-changed: oklch(0.95 0.045 84);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Liberation Sans", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --text-caption: 0.75rem;
   --text-body: 0.875rem;
@@ -330,7 +330,24 @@ body {
 
 @media (pointer: coarse) {
   :where(a, button, input, select, summary) {
-    min-block-size: var(--touch-target);
+    min-block-size: var(--touch-target) !important;
+  }
+
+  :where(a, button, input:not([type="checkbox"]):not([type="radio"]), select, summary) {
+    min-inline-size: var(--touch-target) !important;
+  }
+
+  :where([data-ui-link]) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :where(
+    [data-shadcn-ui-checkbox-field] label[for],
+    [data-shadcn-ui-radio-options] label[for]
+  ) {
+    min-block-size: var(--touch-target) !important;
+    align-items: center !important;
   }
 }
 
@@ -354,8 +371,18 @@ body {
 
 @media print {
   [data-shadcn-ui-dialog-invoker],
-  [data-shadcn-ui-dialog-close] {
+  [data-shadcn-ui-dialog-close],
+  [data-shadcn-ui-popover] > button[popovertarget],
+  [data-shadcn-ui-overlay-surface] {
     display: none !important;
+  }
+
+  [data-enhancement-fallback] {
+    display: block !important;
+  }
+
+  details[data-enhancement-fallback] > :not(summary) {
+    display: block !important;
   }
 
   [data-shadcn-ui],

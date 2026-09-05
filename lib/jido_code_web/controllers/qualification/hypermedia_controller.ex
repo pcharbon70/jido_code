@@ -1,18 +1,26 @@
 defmodule JidoCodeWeb.Qualification.HypermediaController do
   @moduledoc """
-  Explicit controller boundary for the HUI-B3 non-product consumer.
+  Explicit controller boundary for compile-gated hypermedia qualification views.
   """
 
   use JidoCodeWeb, :controller
 
   alias JidoCodeWeb.Qualification.HypermediaFixture
   alias JidoCodeWeb.Qualification.HypermediaHTML
+  alias JidoCodeWeb.Qualification.HypermediaPhaseC2Fixture
   alias JidoCodeWeb.Qualification.HypermediaRequestSecurity
   alias JidoCodeWeb.Qualification.HypermediaSignals
   alias JidoCodeWeb.Qualification.HypermediaStreamCoordinator
   alias JidoCodeWeb.Qualification.HypermediaStreamFixture
 
-  def index(conn, params), do: render_consumer(conn, params)
+  @phase_c2_view "c2"
+
+  def index(conn, params) do
+    case Map.get(params, "view") do
+      @phase_c2_view -> render_phase_c2(conn, params)
+      _other -> render_consumer(conn, params)
+    end
+  end
 
   def results(conn, %{"filters" => filters}) when is_map(filters),
     do: render_consumer(conn, filters)
@@ -191,6 +199,15 @@ defmodule JidoCodeWeb.Qualification.HypermediaController do
       note_signal_attrs: %{"data-bind:note" => ""},
       scenario_signal_attrs: %{"data-bind:scenario" => ""}
     )
+  end
+
+  defp render_phase_c2(conn, params) do
+    assigns =
+      HypermediaPhaseC2Fixture.composition(params)
+      |> Map.put(:appearance, JidoCodeWeb.Layouts.theme_attributes(conn).appearance)
+      |> Map.put(:page_title, "HUI-C2 component qualification")
+
+    render(conn, :phase_c2, assigns)
   end
 
   defp results_html(view) do

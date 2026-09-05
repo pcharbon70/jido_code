@@ -135,7 +135,7 @@ defmodule JidoCodeWeb.Components.Application do
       data-application-masthead
       class={["border-b border-border bg-card text-card-foreground", @class]}
     >
-      <div class="mx-auto flex w-full max-w-[var(--layout-content)] items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div class="mx-auto grid w-full max-w-[var(--layout-content)] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 px-4 py-3 sm:px-6 lg:flex lg:gap-4 lg:px-8">
         <UI.link
           id={"#{@id}-brand"}
           href={@brand.href}
@@ -157,14 +157,18 @@ defmodule JidoCodeWeb.Components.Application do
           {render_slot(@primary_navigation)}
         </div>
 
-        <div :if={@project_switcher != []} id={"#{@id}-project-region"} class="min-w-0">
+        <div
+          :if={@project_switcher != []}
+          id={"#{@id}-project-region"}
+          class="col-span-2 row-start-2 min-w-0 lg:col-auto lg:row-auto"
+        >
           {render_slot(@project_switcher)}
         </div>
 
         <div
           :if={@utility_navigation != []}
           id={"#{@id}-utility-region"}
-          class="hidden lg:block"
+          class="col-span-2 row-start-3 flex min-w-0 justify-end lg:col-auto lg:row-auto lg:block"
         >
           {render_slot(@utility_navigation)}
         </div>
@@ -176,7 +180,7 @@ defmodule JidoCodeWeb.Components.Application do
         <div
           :if={@responsive_navigation != []}
           id={"#{@id}-responsive-region"}
-          class="ml-auto lg:hidden"
+          class="col-start-2 row-start-1 lg:hidden"
         >
           {render_slot(@responsive_navigation)}
         </div>
@@ -289,14 +293,14 @@ defmodule JidoCodeWeb.Components.Application do
         action={@action}
         method="get"
         aria-label="Project switcher"
-        class="flex min-w-0 items-end gap-2"
+        class="flex w-full min-w-0 items-end gap-2 lg:w-auto"
       >
         <UI.select
           field={@field}
           id={"#{@id}-select"}
           options={@projects}
           size={:small}
-          field_class="min-w-40"
+          field_class="min-w-0 flex-1 lg:min-w-40 lg:flex-none"
         >
           <:label>{@label}</:label>
           <:help>{@help}</:help>
@@ -428,15 +432,28 @@ defmodule JidoCodeWeb.Components.Application do
           current={if(action.current, do: :page, else: :none)}
         />
         <:fallback>
-          <nav id={"#{@id}-fallback"} aria-label="Account and session fallback">
-            <ul>
-              <li :for={action <- @actions}>
-                <UI.link id={"#{@id}-fallback-#{action.key}"} href={action.href}>
-                  {action.label}
-                </UI.link>
-              </li>
-            </ul>
-          </nav>
+          <details
+            id={"#{@id}-fallback-disclosure"}
+            data-enhancement-fallback="popover"
+            class="mt-2 rounded-md border border-border px-3 py-2"
+          >
+            <summary id={"#{@id}-fallback-summary"} class="cursor-pointer text-sm font-medium">
+              Direct account links
+            </summary>
+            <nav
+              id={"#{@id}-fallback"}
+              aria-label="Account and session fallback"
+              class="mt-2"
+            >
+              <ul class="grid gap-2">
+                <li :for={action <- @actions}>
+                  <UI.link id={"#{@id}-fallback-#{action.key}"} href={action.href}>
+                    {action.label}
+                  </UI.link>
+                </li>
+              </ul>
+            </nav>
+          </details>
         </:fallback>
       </UI.menu>
     </section>

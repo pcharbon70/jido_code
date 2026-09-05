@@ -1686,8 +1686,6 @@ defmodule JidoCodeWeb.Components.Projection do
     end
   end
 
-  defp field(_map, _key), do: nil
-
   defp map_text(map, key, fallback, limit),
     do: map |> field(key) |> bounded_text(fallback, limit)
 

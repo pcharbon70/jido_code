@@ -45,6 +45,16 @@ export const syncThemeControls = (theme, documentRoot = browserRoot()) => {
   ownerDocument.querySelectorAll("[data-phx-theme]").forEach(control => {
     control.setAttribute("aria-pressed", control.dataset.phxTheme === theme ? "true" : "false")
   })
+
+  const label = theme.charAt(0).toUpperCase() + theme.slice(1)
+  ownerDocument.querySelectorAll("[data-theme-current]").forEach(status => {
+    status.textContent = `Current appearance: ${label}.`
+  })
+
+  ownerDocument.querySelectorAll("[data-theme-controls]").forEach(container => {
+    container.classList.add("flex")
+    container.hidden = false
+  })
 }
 
 export const applyTheme = (requestedTheme, options = {}) => {

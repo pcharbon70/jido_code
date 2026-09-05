@@ -184,6 +184,11 @@ defmodule JidoCodeWeb.Components.ApplicationPhaseC2Test do
 
     assert_present(
       document,
+      "#hui-c2-account-menu-fallback-disclosure[data-enhancement-fallback='popover'] > summary#hui-c2-account-menu-fallback-summary"
+    )
+
+    assert_present(
+      document,
       "#hui-c2-account-menu-fallback[aria-label='Account and session fallback']"
     )
 
