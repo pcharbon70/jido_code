@@ -6,6 +6,7 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
     assets/js/app.js
     assets/js/read_projection.js
     lib/jido_code/application.ex
+    lib/jido_code/identity/store.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c3.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c4.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c5.ex

@@ -566,10 +566,15 @@ defmodule JidoCode.Identity.Store do
          {:ok, session} <- fetch(state.data.sessions, session_ref),
          {:ok, account} <- fetch(state.data.accounts, session.subject_ref),
          :ok <- current_session(session, account, now, state.config) do
-      touched = touch_session(session, now, state.config)
-      next_data = put_in(state.data, [:sessions, session_ref], touched)
-      emit_session_telemetry(:validated, touched, :allowed)
-      commit(state, next_data, {:ok, %{session: touched, account: account}})
+      if Keyword.get(options, :touch, true) do
+        touched = touch_session(session, now, state.config)
+        next_data = put_in(state.data, [:sessions, session_ref], touched)
+        emit_session_telemetry(:validated, touched, :allowed)
+        commit(state, next_data, {:ok, %{session: touched, account: account}})
+      else
+        emit_session_telemetry(:validated, session, :allowed)
+        {:reply, {:ok, %{session: session, account: account}}, state}
+      end
     else
       {:error, reason} ->
         {next_data, safe_reason} = expire_or_revoke_session(state.data, session_ref, now, reason)

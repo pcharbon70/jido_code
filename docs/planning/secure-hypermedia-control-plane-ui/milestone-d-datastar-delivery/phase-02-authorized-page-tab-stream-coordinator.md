@@ -47,20 +47,20 @@ Back to plan: [README](./README.md)
       - [x] 2.2.1.3 Subtask - Coalesce safe hints, drop superseded nonterminal work, terminate overflow/slow clients safely, and prevent protected payload replay after queue or scope change.
       - [x] 2.2.1.4 Subtask - Handle client disconnect, process/node failure, deploy drain, timeout, exception, cancellation, and supervisor restart with deterministic cleanup.
 
-  - [ ] 2.3 Section - Integrate hard expiry and live revocation.
+  - [x] 2.3 Section - Integrate hard expiry and live revocation.
 
     This section ensures a connection is never a continuing grant and protected
     delivery stops when any relevant authority generation changes.
 
-    - [ ] 2.3.1 Task {#huid-p02-revocation} [repo: jido_code] [after: {#huid-p02-coordinator}] - Implement generation subscriptions and repeated reauthorization.
+    - [x] 2.3.1 Task {#huid-p02-revocation} [repo: jido_code] [after: {#huid-p02-coordinator}] - Implement generation subscriptions and repeated reauthorization.
 
       This task rechecks authority at admission, periodically, before protected
       query/patch, and on explicit revocation events.
 
-      - [ ] 2.3.1.1 Subtask - Subscribe to account/session/role/delegation/project/tenant/graph/incident generation changes using trusted server state.
-      - [ ] 2.3.1.2 Subtask - Enforce hard session/connection expiry independent of traffic and reauthorize route/resource/projection before every protected refresh or patch.
-      - [ ] 2.3.1.3 Subtask - On revocation, cancel queued work, emit only an authorized concealed/session-expired replacement where safe, terminate, audit, and suppress reconnect.
-      - [ ] 2.3.1.4 Subtask - Prevent stale `Last-Event-ID`, tab ID, retry timer, cached fragment, or open socket from restoring authorization.
+      - [x] 2.3.1.1 Subtask - Subscribe to account/session/role/delegation/project/tenant/graph/incident generation changes using trusted server state.
+      - [x] 2.3.1.2 Subtask - Enforce hard session/connection expiry independent of traffic and reauthorize route/resource/projection before every protected refresh or patch.
+      - [x] 2.3.1.3 Subtask - On revocation, cancel queued work, emit only an authorized concealed/session-expired replacement where safe, terminate, audit, and suppress reconnect.
+      - [x] 2.3.1.4 Subtask - Prevent stale `Last-Event-ID`, tab ID, retry timer, cached fragment, or open socket from restoring authorization.
 
   - [ ] 2.4 Section - Phase 2 Integration Tests.
 

@@ -1,7 +1,7 @@
 # HUI-D2 — Authorized Page/Tab Stream Coordinator Receipt
 
-Status: **merge-pending**. Sections 2.1–2.2 admission and supervised lifecycle are
-implemented. Live revocation, browser delivery and integration acceptance remain pending.
+Status: **merge-pending**. Sections 2.1–2.3 admission, supervised lifecycle and
+revocation are implemented. Real HTTP and integration acceptance remain pending.
 
 ## Candidate Provenance
 
@@ -24,6 +24,15 @@ Section 2.2: coordinator/watchdog supervision, hard count/rate/byte/event/credit
 limits, independent session/connection/idle deadlines, blocked-owner termination,
 drain, crash/restart cleanup and private telemetry have focused executable tests.
 This is not yet the real HTTP/proxy/browser integration acceptance of section 2.4.
+
+Section 2.3: all eight generation hints and lost-hint fresh checks, hard expiry,
+attributable authorization audit, whole-shell terminal clearing, independent
+client deadline, bounded fresh retries, stale buffered-frame rejection, cross-tab
+logout, focus and native fallback have focused server/browser coverage. The
+identity store now honors its existing `touch: false` contract; background checks
+cannot extend idle expiry and default foreground touching remains unchanged.
+The identity/reauthorization suite passes 28 tests. Initial browser qualification
+passes 9 applicable checks with 21 profile skips and no failures or CSP violations.
 
 The executable source inventory and section evidence are in
 `priv/architecture/hypermedia_ui/phase_d2_implementation_evidence.json`.

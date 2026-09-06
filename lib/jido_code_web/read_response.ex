@@ -11,6 +11,16 @@ defmodule JidoCodeWeb.ReadResponse do
 
   def render(conn, template, assigns) do
     conn =
+      if conn.private[:stream_context],
+        do:
+          assign(
+            conn,
+            :stream_cursor,
+            JidoCodeWeb.StreamContext.cursor(conn.private.stream_context)
+          ),
+        else: conn
+
+    conn =
       assign(
         conn,
         :read_receipt,

@@ -22,6 +22,10 @@ defmodule JidoCodeWeb.StreamController do
           conn =
             conn
             |> put_format("html")
+            |> assign(
+              :request_id,
+              "stream-" <> Base.url_encode64(:crypto.strong_rand_bytes(16), padding: false)
+            )
             |> put_private(:stream_intent, intent)
             |> put_private(
               :read_raw_body,

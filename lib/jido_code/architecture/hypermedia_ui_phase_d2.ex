@@ -28,10 +28,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     real_http_browser_proxy_failure_and_clean_checkout_tests_precede_merge_acceptance
   ]
   @required_sources ~w[
+    assets/js/app.js
+    assets/js/read_projection.js
+    assets/js/stream_connection.js
     docs/architecture/hypermedia-ui-milestone-d-phase-02-receipt.md
     docs/architecture/hypermedia-ui-stream-coordinator-implementation.md
     docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-02-authorized-page-tab-stream-coordinator.md
     lib/jido_code/application.ex
+    lib/jido_code/identity/store.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c3.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c4.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c5.ex
@@ -40,11 +44,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex
     lib/jido_code/product/stream_coordinator.ex
     lib/jido_code/product/stream_owner_guard.ex
+    lib/jido_code_web/components/product_page.ex
     lib/jido_code_web/controllers/stream_controller.ex
+    lib/jido_code_web/controllers/stream_html.ex
     lib/jido_code_web/plugs/read_body.ex
     lib/jido_code_web/product_controller.ex
     lib/jido_code_web/product_request.ex
     lib/jido_code_web/read_response.ex
+    lib/jido_code_web/read_enhancement.ex
     lib/jido_code_web/read_signals.ex
     lib/jido_code_web/router.ex
     lib/jido_code_web/stream_admission.ex
@@ -57,8 +64,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     test/jido_code/architecture/hypermedia_ui_phase_d2_test.exs
     test/jido_code/product/stream_coordinator_test.exs
     test/jido_code/product/stream_lifecycle_test.exs
+    test/jido_code/product/stream_revocation_test.exs
+    test/jido_code/identity/session_lifecycle_test.exs
     test/jido_code_web/controllers/stream_controller_test.exs
     test/jido_code_web/stream_intent_test.exs
+    test/jido_code_web/stream_reauthorization_test.exs
+    test/browser/hypermedia_ui_phase_d2.spec.mjs
     test/support/deny_stream_authority_adapter.ex
   ]
 
@@ -119,6 +130,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     )
     |> sources(evidence["source_digests"], root)
     |> lifecycle(evidence, root)
+    |> boundaries(root)
   end
 
   defp sources(errors, sources, root) when is_map(sources) do
@@ -147,6 +159,33 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
   end
 
   defp sources(errors, _, _), do: ["missing source digests" | errors]
+
+  defp boundaries(errors, root) do
+    adapter = File.read!(Path.join(root, "assets/js/stream_connection.js"))
+    delivery = File.read!(Path.join(root, "lib/jido_code_web/stream_delivery.ex"))
+
+    errors
+    |> equal(
+      Regex.match?(
+        ~r/localStorage|sessionStorage|eval\(|new Function|innerHTML\s*=|https?:\/\//,
+        adapter
+      ),
+      false,
+      "local stream adapter boundary"
+    )
+    |> equal(
+      Regex.match?(
+        ~r/Dstar\.(Scripts|SSE|start)|TripleStore|CommandGateway|String\.to_atom/,
+        delivery
+      ),
+      false,
+      "shared transport boundary"
+    )
+    |> contains(root, "assets/js/stream_connection.js", "retryMaxCount: 0")
+    |> contains(root, "assets/js/stream_connection.js", "retry <= 2")
+    |> contains(root, "assets/js/stream_connection.js", "event.stopImmediatePropagation()")
+    |> contains(root, "lib/jido_code_web/read_enhancement.ex", "@openStream(evt)")
+  end
 
   defp predecessor_digests(root) do
     {:ok, predecessor} = JidoCode.Architecture.HypermediaUIPhaseD1.load(root)

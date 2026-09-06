@@ -1,7 +1,7 @@
 # Product Stream Coordinator Implementation
 
 Owner: JidoCode web, security and operations maintainers. Gate: HUI-D2.
-Status: sections 2.1–2.2 candidate; revocation/browser qualification is pending.
+Status: sections 2.1–2.3 candidate; real HTTP/integration qualification is pending.
 
 ## Admission and Identity
 
@@ -93,13 +93,55 @@ one current snapshot followed by heartbeat/control events, not domain changes.
 
 Deploy drain terminally closes all owners and rejects admission until restart.
 Disconnect, exceptions and cancellation use controller `after` cleanup; independent
-watchdogs cover blocked or crashed cleanup. Test-owned options may only reduce
-fixed positive ceilings. They cannot widen production limits or enter from HTTP.
+watchdogs cover blocked or crashed cleanup. Isolated tests can lower positive
+numeric limits to accelerate timers and exercise exhaustion; lowering an interval
+is a faster test clock, not a stronger production rate limit. The application
+child supplies no overrides, and HTTP cannot supply any limit configuration.
 
-## Pending Sections
+## Revocation and Browser Lifecycle
 
-Section 2.3 adds generation subscriptions and browser terminal behavior. Section
-2.4 qualifies real HTTP, browser/proxy and failure matrices. Until those pass, no
-product UI control advertises a continuous connection. The client retry ceiling
-is two retries with 1/2-second backoff, implemented in section 2.3; it never
-restores server authority or extends an existing lease.
+The coordinator subscribes to all eight identity revocation dimensions. Six
+scope generations are store-global; account and session generations belong to
+their respective records. Hints conservatively wake bounded owners, coalesce
+behind one control credit, and never contain a protected replacement. Lost or
+reordered hints cannot bypass periodic and final fresh authority/fingerprint
+checks. Each stream has a server-generated audit correlation, independent of
+browser tab/request values. Authorization decisions use the existing immutable
+identity audit boundary.
+
+Integration exposed an existing identity-store defect: session validation ignored
+`touch: false`. The narrow repair now returns the unchanged valid session for
+background checks. Default foreground validation still touches idle expiry, and
+expired/revoked validation still fails closed. Regression tests pin the original
+idle deadline through repeated background checks and verify all eight changed
+generation fingerprints even with no revocation hint.
+
+Revocation/expiry replaces the entire `#product-shell` with fixed unprotected HEEx,
+not merely its data rows. The generic alert and ordinary reload link contain no
+identity, query, resource or authority data. Encoded terminal frames are 912–913
+bytes, within the reserved 1,024 bytes. A connected browser aborts transport,
+focuses the safe alert and suppresses automatic reconnect.
+
+The ordinary “Refresh and connect” anchor works without JavaScript. Its reviewed
+local action starts a fresh POST snapshot with Datastar's retries disabled. The
+application permits at most two transient retries after 1/2-second backoff and
+enforces an independent 30-second deadline, including sleep/wake checks. Each
+attempt has a new nonce. Random tab correlation and cursors remain in page memory;
+reload creates a new correlation and browser storage is never used. Cursors require
+fresh server authorization. Terminal admission outcomes do not retry.
+
+Each attempt has a distinct detached event origin. A capture-phase listener drops
+already-buffered patches from replaced/aborted origins before the SDK applies
+them. Finite read intent cancels the connection and requires deliberate manual
+reconnection. Offline, pagehide, deadline and bfcache restoration clear protected
+content and do not revive a socket. Focus restoration applies only to surviving
+controls. Status distinguishes access checks from data freshness: D2 sends an
+initial snapshot and heartbeats; domain-change subscriptions belong to D3.
+
+## Pending Qualification
+
+Section 2.4 qualifies real HTTP under production supervision, browser/proxy,
+accessibility and failure matrices. Focused browser coverage currently passes
+in the five configured profiles (9 applicable checks, 21 deliberate skips),
+including cross-tab logout, bounded retry, sleep/wake, stale frames and native
+fallback. This is not yet complete phase acceptance.

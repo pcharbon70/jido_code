@@ -2,6 +2,7 @@ defmodule JidoCode.Product.StreamCoordinator do
   @moduledoc "One supervised owner of bounded page/tab lifecycle; no protected payload queue."
   use GenServer
   alias JidoCode.Product.StreamOwnerGuard
+  alias JidoCode.Identity.{RevocationEvent, Revocations}
 
   @states ~w[admitted connected idle retrying revoked expired closing closed]a
   @limits %{
@@ -64,6 +65,8 @@ defmodule JidoCode.Product.StreamCoordinator do
 
   @impl true
   def init(options) do
+    :ok = Revocations.subscribe()
+
     limits =
       Enum.reduce(Keyword.get(options, :limits, %{}), @limits, fn {key, value}, acc ->
         if is_integer(value) and value > 0 and value <= Map.fetch!(@limits, key),
@@ -133,6 +136,7 @@ defmodule JidoCode.Product.StreamCoordinator do
               next_check: now,
               next_heartbeat: now,
               check_pending: false,
+              hint_pending: false,
               events: 0,
               bytes: 0,
               last_event: nil
@@ -273,7 +277,8 @@ defmodule JidoCode.Product.StreamCoordinator do
       entry
       | check_pending: false,
         busy_until: nil,
-        next_check: now() + state.limits.reauthorize_ms
+        next_check: if(entry.hint_pending, do: now(), else: now() + state.limits.reauthorize_ms),
+        hint_pending: false
     }
 
     {:reply, :ok, put_entry(state, lease, entry)}
@@ -286,6 +291,32 @@ defmodule JidoCode.Product.StreamCoordinator do
     do: {:reply, {:error, :invalid_transition}, close(state, lease, :invalid_transition)}
 
   @impl true
+  def handle_info({:identity_revoked, %RevocationEvent{dimension: dimension}}, state)
+      when dimension in [
+             :account,
+             :session,
+             :role,
+             :delegation,
+             :project,
+             :tenant,
+             :graph,
+             :incident
+           ] do
+    # Generations in AuthorityBuilder are global invalidation fences. Fanout is
+    # conservatively bounded by the factory cap; an event is never a grant.
+    state =
+      Enum.reduce(state.leases, state, fn {lease, entry}, acc ->
+        if entry.state == :closing do
+          acc
+        else
+          entry = %{entry | hint_pending: true, next_check: now()}
+          request_check(%{acc | leases: Map.put(acc.leases, lease, entry)}, lease, now())
+        end
+      end)
+
+    {:noreply, state}
+  end
+
   def handle_info(:tick, state) do
     now = now()
 

@@ -21,6 +21,7 @@ import "phoenix_html"
 // Exact HUI-B1 bundle; HUI-B2 loads it under CSP but adds no product consumer.
 import "../vendor/datastar/datastar.js"
 import "./read_projection.js"
+import "./stream_connection.js"
 // Establish Phoenix Socket and LiveView configuration.
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"

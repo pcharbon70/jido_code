@@ -16,7 +16,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2Test do
           {"invariants", []},
           {"runtime_successor", %{}}
         ] do
-      refute Phase.validate(Map.put(evidence, key, value), File.cwd!()) == []
+      mutated = Map.put(evidence, key, value)
+
+      mutated =
+        if key == "status",
+          do: Map.put(mutated, "merged_candidate", String.duplicate("0", 40)),
+          else: mutated
+
+      refute Phase.validate(mutated, File.cwd!()) == []
     end
   end
 end

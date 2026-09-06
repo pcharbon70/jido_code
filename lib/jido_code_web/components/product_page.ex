@@ -102,6 +102,30 @@ defmodule JidoCodeWeb.Components.ProductPage do
               Refresh this view
             </UI.link>
 
+            <div
+              :if={ReadEnhancement.supported?(@page.key)}
+              id="product-stream-controls"
+              class="flex flex-wrap items-center gap-x-4 gap-y-2"
+              {ReadEnhancement.stream_attributes(@page)}
+            >
+              <UI.link
+                id="product-stream-connect"
+                href={@page.canonical_url}
+                aria-describedby="product-stream-status"
+                class="rounded text-sm font-medium underline underline-offset-4 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4"
+              >
+                Refresh and connect
+              </UI.link>
+              <p
+                id="product-stream-status"
+                role="status"
+                aria-live="polite"
+                class="text-xs text-muted-foreground"
+              >
+                Not connected. Connection state is separate from data freshness.
+              </p>
+            </div>
+
             <.read_content conn={@conn} page={@page} view_model={@view_model}>
               <%= if @inner_block == [] do %>
                 <App.empty_state
@@ -155,6 +179,7 @@ defmodule JidoCodeWeb.Components.ProductPage do
       data-read-surface={@page.key}
       data-read-url={ReadEnhancement.native_url(@page)}
       data-read-receipt={@conn.assigns[:read_receipt]}
+      data-stream-cursor={@conn.assigns[:stream_cursor]}
     >
       <p id="product-read-status" role="status" aria-live="polite" aria-atomic="true" class="sr-only">
         {if @conn.assigns[:enhanced_read],

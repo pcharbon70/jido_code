@@ -218,6 +218,8 @@ defmodule JidoCodeWeb.StreamControllerTest do
   defp elements(body),
     do:
       body
+      |> String.split("\n\n")
+      |> Enum.find(&String.contains?(&1, "event: datastar-patch-elements"))
       |> String.split("\n")
       |> Enum.filter(&String.starts_with?(&1, "data: elements "))
       |> Enum.map_join("\n", &String.replace_prefix(&1, "data: elements ", ""))

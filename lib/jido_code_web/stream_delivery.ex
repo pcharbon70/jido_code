@@ -2,17 +2,15 @@ defmodule JidoCodeWeb.StreamDelivery do
   @moduledoc "One shared bounded HTTP delivery loop; page controllers never own stream processes."
   import Plug.Conn
   alias JidoCode.Product.StreamCoordinator
-  alias JidoCodeWeb.{ProductRequest, ReadResponse, ReadSecurity, StreamContext}
+  alias JidoCodeWeb.{ProductRequest, ReadResponse, ReadSecurity, StreamHTML}
 
   @max_event_bytes 131_072
   def max_event_bytes, do: @max_event_bytes
 
   def deliver(conn) do
-    context = conn.private.stream_context
-
     body =
       "id: " <>
-        StreamContext.cursor(context) <>
+        conn.assigns.stream_cursor <>
         "\n" <>
         Dstar.Elements.format_patch(conn.private.stream_snapshot,
           selector: "#product-owned-content"
@@ -68,8 +66,8 @@ defmodule JidoCodeWeb.StreamDelivery do
     remaining = max(lifecycle.deadline - System.monotonic_time(:millisecond), 0)
 
     receive do
-      {:product_stream, ^lease, {:closed, _reason}} ->
-        terminal(conn)
+      {:product_stream, ^lease, {:closed, reason}} ->
+        terminal(conn, reason)
 
       {:DOWN, ^monitor, :process, _, _} ->
         terminal(conn)
@@ -82,12 +80,12 @@ defmodule JidoCodeWeb.StreamDelivery do
         else
           {:error, _} ->
             StreamCoordinator.terminate_owner(lease, :revoked)
-            terminal(conn)
+            terminal(conn, :revoked)
         end
     after
       remaining ->
         StreamCoordinator.terminate_owner(lease, :expired)
-        terminal(conn)
+        terminal(conn, :expired)
     end
   end
 
@@ -104,9 +102,25 @@ defmodule JidoCodeWeb.StreamDelivery do
          do: {:ok, conn}
   end
 
-  defp terminal(conn) do
-    # One fixed, unprotected terminal frame uses the reserved terminal allowance.
-    case chunk(conn, "event: datastar-stream-status\ndata: state closed\n\n") do
+  def terminal_frame(reason) do
+    state = if reason in [:revoked, :expired], do: reason, else: :closed
+
+    StreamHTML.terminal(%{state: state})
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Dstar.Elements.format_patch(selector: "#product-shell")
+  end
+
+  defp terminal(conn, reason \\ :closed) do
+    # One fixed, unprotected terminal patch replaces all old scope/account DOM.
+    frame = terminal_frame(reason)
+
+    frame =
+      if byte_size(frame) <= StreamCoordinator.limits().terminal_bytes,
+        do: frame,
+        else: ": closed\n\n"
+
+    case chunk(conn, frame) do
       {:ok, conn} -> conn
       {:error, _} -> conn
     end
