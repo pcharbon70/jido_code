@@ -48,20 +48,20 @@ Back to plan: [README](./README.md)
       - [x] 5.2.1.3 Subtask - Exercise identity/store/asset outage, graph lag, timeout, deploy restart, stale cache, revocation, clock skew, malformed/hostile content, and maintenance/read-only fallback.
       - [x] 5.2.1.4 Subtask - Verify no protected response caching, referrer/log/telemetry leakage, raw IRI exposure, secret rendering, or cross-scope diagnostic detail.
 
-  - [ ] 5.3 Section - Assemble the HUI3 product baseline.
+  - [x] 5.3 Section - Assemble the HUI3 product baseline.
 
     This section reconciles route, component, projection, security, and human
     evidence and freezes the stable roots Milestone D may enhance.
 
-    - [ ] 5.3.1 Task {#huic-p05-baseline} [repo: jido_code] [after: {#huic-p05-operations}] - Publish the accepted native shell and fragment-candidate manifest.
+    - [x] 5.3.1 Task {#huic-p05-baseline} [repo: jido_code] [after: {#huic-p05-operations}] - Publish the accepted native shell and fragment-candidate manifest.
 
       This task defines the exact pages, projection roots, DOM IDs, focus
       targets, and state envelopes live delivery must preserve.
 
-      - [ ] 5.3.1.1 Subtask - Inventory every accepted route/view model/component/root/state/focus target, authorization owner, query/limit, native interaction, and unsupported placeholder.
-      - [ ] 5.3.1.2 Subtask - Reconcile identity/session/revocation, component/design, projection/cache, readiness, wiki opt-out/cost, and accessibility evidence.
-      - [ ] 5.3.1.3 Subtask - Define Milestone D enhancement candidates and prohibit changes that break native behavior, stable identity, field authorization, or truthful state.
-      - [ ] 5.3.1.4 Subtask - Create `hypermedia-ui-milestone-c-phase-05-receipt.md` in merge-pending state with HUI-C5/HUI3 evidence and reopening conditions.
+      - [x] 5.3.1.1 Subtask - Inventory every accepted route/view model/component/root/state/focus target, authorization owner, query/limit, native interaction, and unsupported placeholder.
+      - [x] 5.3.1.2 Subtask - Reconcile identity/session/revocation, component/design, projection/cache, readiness, wiki opt-out/cost, and accessibility evidence.
+      - [x] 5.3.1.3 Subtask - Define Milestone D enhancement candidates and prohibit changes that break native behavior, stable identity, field authorization, or truthful state.
+      - [x] 5.3.1.4 Subtask - Create `hypermedia-ui-milestone-c-phase-05-receipt.md` in merge-pending state with HUI-C5/HUI3 evidence and reopening conditions.
 
   - [ ] 5.4 Section - Phase 5 Integration Tests.
 
