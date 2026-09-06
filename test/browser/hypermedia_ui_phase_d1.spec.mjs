@@ -11,12 +11,17 @@ const signIn = async (page, path = "/factory/fleet") => {
 test("finite reads preserve the shell, typed intent, focus and production CSP", async ({page}, info) => {
   test.skip(info.project.name === "chromium-no-js")
   const errors = []
+  const cspViolations = []
   page.on("pageerror", error => errors.push(error.message))
+  await page.exposeFunction("recordD1CSPViolation", event => cspViolations.push(event))
+  await page.addInitScript(() => {
+    document.addEventListener("securitypolicyviolation", event => {
+      window.recordD1CSPViolation({directive: event.violatedDirective, blockedURI: event.blockedURI, sample: event.sample})
+    })
+  })
   await signIn(page)
   await page.evaluate(() => {
     window.originalShell = document.getElementById("product-shell")
-    window.cspViolations = []
-    document.addEventListener("securitypolicyviolation", e => window.cspViolations.push(e.violatedDirective))
   })
   const input = page.locator("#product-filter-search-query")
   await input.fill("beta")
@@ -36,7 +41,7 @@ test("finite reads preserve the shell, typed intent, focus and production CSP", 
   await expect(input).toHaveValue("beta")
   await expect(page.locator("#product-read-status")).toContainText("View refreshed")
   expect(await page.evaluate(() => window.originalShell === document.getElementById("product-shell"))).toBe(true)
-  expect(await page.evaluate(() => window.cspViolations)).toEqual([])
+  expect(cspViolations).toEqual([])
   expect(errors).toEqual([])
   await page.locator("#product-pagination-next").click()
   await expect(page).toHaveURL(/page=2/)

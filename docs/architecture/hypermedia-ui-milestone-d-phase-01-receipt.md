@@ -78,6 +78,15 @@ subscription, server Scripts event, or second product runtime.
 
 Status: **merge-pending**
 
+Post-merge reopening: PR #127 merged as
+`c73fb6d44ea305b86acc504114ac7036bbd7caa1`, but one Firefox CSP assertion passed
+only on retry. Early event capture reproduced the retained Vue bootstrap policy
+denial in 15/15 runs. The prior local totals below do not supersede that failure.
+The [compatibility CSP repair](./hypermedia-ui-compatibility-csp-repair.md) defers
+unused upstream policy creation and captures violations before navigation;
+repair qualification and a newly pinned merged candidate are required before
+D1 can close or D2 can start. The enforcing CSP and every gate remain unchanged.
+
 The 28-test focused parser/controller/limiter/architecture/runtime-inventory
 matrix passes. It includes 1,000 bounded fuzz inputs, all ten route namespaces,
 all ten projection states, single-root and byte caps, real CSRF enforcement,
