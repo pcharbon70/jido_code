@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_c_phase_04
 parent_plan: plan.jido_code_hypermedia_ui_milestone_c
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -12,7 +12,7 @@ projections for parallel factory oversight without adding semantic controls.
 
 Back to plan: [README](./README.md)
 
-- [ ] 4 Phase - Deliver truthful read-only factory, project, and attempt oversight.
+- [x] 4 Phase - Deliver truthful read-only factory, project, and attempt oversight.
 
   This phase closes HUI-C4 by answering what needs attention, what each project
   is doing, and what an attempt currently means using durable graph truth.
@@ -82,7 +82,7 @@ Back to plan: [README](./README.md)
       - [x] 4.3.1.3 Subtask - Key caches by exact principal/session generation/scope/grants/query/version and prevent protected shared/browser/proxy caching.
       - [x] 4.3.1.4 Subtask - Add safe query latency/row/truncation/cache telemetry without protected values, raw IRIs, user input, or cross-scope dimensions.
 
-  - [ ] 4.4 Section - Phase 4 Integration Tests.
+  - [x] 4.4 Section - Phase 4 Integration Tests.
 
     This final section proves read-only factory oversight is bounded,
     authorized, truthful, and effect-free across parallel scopes.
@@ -97,11 +97,11 @@ Back to plan: [README](./README.md)
       - [x] 4.4.1.3 Subtask - Exercise large fleets, parallel repositories/attempts, unsupported capabilities, wiki opt-out, zero/nonzero costs, hostile labels, and no semantic write effects.
       - [x] 4.4.1.4 Subtask - Run real-store/controller/browser/accessibility/security/load smoke suites, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 4.4.2 Task {#huic-p04-phase-receipt} [repo: jido_code] [after: {#huic-p04-integration}] - Publish and pin the Phase 4 receipt.
+    - [x] 4.4.2 Task {#huic-p04-phase-receipt} [repo: jido_code] [after: {#huic-p04-integration}] - Publish and pin the Phase 4 receipt.
 
       This task records HUI-C4 evidence in
       `docs/architecture/hypermedia-ui-milestone-c-phase-04-receipt.md`.
 
       - [x] 4.4.2.1 Subtask - Keep HUI-C4 merge-pending on unreviewed query, unbounded read, cross-scope disclosure/inference, stale hidden rows, fabricated readiness, identity conflation, or read-side effect.
       - [x] 4.4.2.2 Subtask - Record query/view-model/fixture/limit/cache evidence, failures, limitations, and all reopening conditions.
-      - [ ] 4.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 4 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 5.
+      - [x] 4.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 4 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 5.

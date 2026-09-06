@@ -6,11 +6,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC4 do
   @receipt_path "docs/architecture/hypermedia-ui-milestone-c-phase-04-receipt.md"
   @baseline "3515b1f3ba0c2e8dfdde0c77a2782a2873f3ee42"
   @predecessor "fa5203a9aefe08d741b2898a01299c7d960c80d9"
-  @implementation_pr nil
-  @implementation_head nil
-  @merged_candidate nil
-  @merge_date nil
-  @clean_checkout_jobs nil
+  @implementation_pr 123
+  @implementation_head "2deba683754c28b7a3343d22fd74addc49d9e9d0"
+  @merged_candidate "4532ff304816ad0a229192f0e0bc0f9a3abb66da"
+  @merge_date "2026-09-06"
+  @clean_checkout_jobs %{
+    "verify" => %{"id" => 101_436_837_030, "duration" => "22m27s", "result" => "pass"},
+    "dialyzer" => %{"id" => 101_434_959_747, "duration" => "1m50s", "result" => "pass"}
+  }
   @sections ~w[4.1 4.2 4.3 4.4]
   @profiles ~w[chromium firefox webkit chromium-no-js chromium-touch]
   @surfaces ~w[factory fleet projects project project_attempts project_wiki project_dependencies attempt]

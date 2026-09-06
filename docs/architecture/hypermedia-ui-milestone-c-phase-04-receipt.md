@@ -2,13 +2,14 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the HUI-C4 implementation candidate while review,
-clean-checkout CI, merge, and immutable candidate pinning remain pending. It
-does not authorize Milestone C Phase 5. A narrow closure change must replace
-every merge-pending marker with the actual implementation PR, full merge SHA,
-merge date, and clean-checkout job evidence before this gate can be accepted.
+This receipt accepts HUI-C4 only at merged implementation candidate
+`4532ff304816ad0a229192f0e0bc0f9a3abb66da`. Implementation pull request #123
+passed the required clean-checkout verify and Dialyzer jobs and merged on
+2026-09-06. This narrowly scoped closure transition pins that immutable
+candidate and authorizes Milestone C Phase 5 subject to every reopening
+condition below.
 
 All HUI-B2/HUI-B4 and HUI-C1 through HUI-C3 reopening conditions remain
 cumulative and binding. Nothing here weakens or reinterprets them.
@@ -22,16 +23,16 @@ cumulative and binding. Nothing here weakens or reinterprets them.
 | Section 4.1 | `56fbb5b2c6f439f8fd9124b74d186b5bfc480169` - attention, health, fleet, and project-catalog projections |
 | Section 4.2 | `528e9b975bb98ea15680a9a944503e26eb4e5a30` - project and attempt read workspaces |
 | Section 4.3 | `5ef1935338473a2c8aa891e0af0d0a2f7c568189` - canonical states, refresh, cache isolation, and telemetry |
-| Section 4.4 | `implementation-PR-head-merge-pending` - integrated store, controller, browser, architecture, and repository evidence |
-| Implementation PR head | `merge-pending` |
-| Merged candidate | `merge-pending` |
+| Section 4.4 | `2deba683754c28b7a3343d22fd74addc49d9e9d0` - integrated store, controller, browser, architecture, and repository evidence |
+| Implementation PR head | `2deba683754c28b7a3343d22fd74addc49d9e9d0` - implementation PR #123 |
+| Merged candidate | `4532ff304816ad0a229192f0e0bc0f9a3abb66da` - merge commit for implementation PR #123 |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `4532ff304816ad0a229192f0e0bc0f9a3abb66da`
+Merge date: `2026-09-06`
 
 ## Gate HUI-C4.1 - Attention And Fleet Projections
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The candidate uses the reviewed QueryCatalog protocol version `2.11.0`
 through a closed query-binding adapter. Factory attention derives only from
@@ -51,7 +52,7 @@ totals, facets, errors, timing dimensions, or browser state.
 
 ## Gate HUI-C4.2 - Project And Attempt Read Workspaces
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Project overview, attempts, wiki, and dependency pages compose independently
 authorized bounded reads. Repository identity, desired/current work, attempt
@@ -70,7 +71,7 @@ button exists.
 
 ## Gate HUI-C4.3 - Projection States, Refresh, Cache, And Telemetry
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Every projection family normalizes to exactly ready, empty, stale, incomplete,
 contradicted, truncated, unauthorized, unavailable, maintenance, or recovery.
@@ -94,7 +95,7 @@ other protected dimension. HTTP responses remain `private, no-store`.
 
 ## Gate HUI-C4.4 - Integrated Projection Candidate
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The focused matrix covers reviewed binding admission, all canonical and source
 outcome aliases, bounds, sorting/filtering/pagination, contradiction, timeout,
@@ -120,8 +121,12 @@ with 0 failures. The exact Playwright command
 applicable cases, skipped 8 deliberately profile-inapplicable cases, and
 failed 0 in 17.2 seconds. Strict production compilation passes without
 warnings, the architecture checker passes, and `mix precommit` passes all
-1,378 tests with 0 failures. Clean-checkout CI jobs and immutable PR
-provenance remain merge-pending until the candidate is complete and merged.
+1,378 tests with 0 failures. On implementation PR #123, Dialyzer job
+`101434959747` passed in 1m50s. Verify's first run encountered the existing
+`StoreServerTest` temporary-directory cleanup race after completing the suite;
+its unchanged-head rerun job `101436837030` passed in 22m27s. These exact
+results and immutable PR/merge provenance are recorded in the executable
+HUI-C4 manifest.
 
 ## Configuration, Exceptions, And Limitations
 
@@ -135,8 +140,8 @@ speech-output evidence; that release evidence remains assigned to HUI-C5.
 
 ## Gate HUI-C4 Reopening Conditions
 
-HUI-C4 remains merge-pending, and reopens after acceptance, if any predecessor
-gate reopens; if a query is unreviewed, caller-authored, version-drifting,
+HUI-C4 reopens after acceptance if any predecessor gate reopens; if a query is
+unreviewed, caller-authored, version-drifting,
 unbounded, raw SPARQL, store-coupled from a controller, or capable of a
 semantic effect; if candidate, scan, row, page, text, byte, timeout, history,
 or derived-explanation bounds disappear; or if process liveness, absence of

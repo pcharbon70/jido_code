@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "phase": "HUI-C4",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "recorded_on": "2026-09-06",
   "baseline_commit": "3515b1f3ba0c2e8dfdde0c77a2782a2873f3ee42",
   "predecessor_candidate": "fa5203a9aefe08d741b2898a01299c7d960c80d9",
@@ -11,13 +11,16 @@
     "4.2": "528e9b975bb98ea15680a9a944503e26eb4e5a30",
     "4.3": "5ef1935338473a2c8aa891e0af0d0a2f7c568189"
   },
-  "receipt_status": "merge_pending",
-  "clean_checkout_ci": "pending",
-  "implementation_pr": null,
-  "implementation_pr_head": null,
-  "merged_candidate": null,
-  "merge_date": null,
-  "clean_checkout_jobs": null,
+  "receipt_status": "accepted_at_merged_candidate",
+  "clean_checkout_ci": "pass",
+  "implementation_pr": 123,
+  "implementation_pr_head": "2deba683754c28b7a3343d22fd74addc49d9e9d0",
+  "merged_candidate": "4532ff304816ad0a229192f0e0bc0f9a3abb66da",
+  "merge_date": "2026-09-06",
+  "clean_checkout_jobs": {
+    "verify": {"id": 101436837030, "duration": "22m27s", "result": "pass"},
+    "dialyzer": {"id": 101434959747, "duration": "1m50s", "result": "pass"}
+  },
   "query_contract": {
     "version": "2.11.0",
     "surfaces": ["factory", "fleet", "projects", "project", "project_attempts", "project_wiki", "project_dependencies", "attempt"],
@@ -81,11 +84,11 @@
   ],
   "exceptions": [],
   "source_digests": {
-    "docs/architecture/hypermedia-ui-milestone-c-phase-04-receipt.md": "bb9e2c40614290996c7ad8c12914c49e86bbed41efc280595c68da4e39573601",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-04-attention-fleet-project-and-attempt-projections.md": "ade876ce1a4060bbabed53a0f1634c166aba9c10f524e41c1c4025465aa0023a",
+    "docs/architecture/hypermedia-ui-milestone-c-phase-04-receipt.md": "546f65e087d52c1e73175ba222df3f1ff47be9b01aa85857e8e353ccde4f8e08",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-04-attention-fleet-project-and-attempt-projections.md": "ff62801aa5640785456e26ff2c107549f571701ab3466640c627f863b1690785",
     "lib/jido_code/application.ex": "5ef8dab9a0606ad1d94dc09600c33d09d42c9e98928c8d9b7f9319596f2f8caf",
     "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "912ea4caa087578a616d52870b14a6dcc2fcd255e2dfa5ccce36caeba6704686",
-    "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "e709943963dc88b1a9b6a7fbfd3d9bb5973dc6b24e4dd39a740e90d7b1baea57",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "56e0b9a49a0602479838f0ac36d522f6f4f30c8113e7160d3058298841d6f82a",
     "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "10523be8f53d295e6a6fd036f1c9b81aaccc632a9ec0152022a2febaca9c5f99",
     "lib/jido_code/product.ex": "3e92cdaaa2c3f3b081f6aa312310b95b1902a81ca40662c38db74b812002f3ab",
     "lib/jido_code/product/graph_read_projection_provider.ex": "e50c39811e4b348d283dad5ad8f4a7c792cc2819bae6192a7c26f4d4f985e9dd",
