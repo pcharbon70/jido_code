@@ -22,7 +22,7 @@ defmodule JidoCodeWeb.ProductController do
   def serve(conn, params, spec, template) do
     case prepare(conn, params, spec) do
       {:ok, conn, page, projection, view_model} ->
-        render(conn, template,
+        respond(conn, template,
           page: page,
           projection: projection,
           view_model: view_model,
@@ -39,12 +39,23 @@ defmodule JidoCodeWeb.ProductController do
   def prepare(conn, params, spec) do
     case ProductRequest.authorize(conn, spec, params) do
       {:ok, conn, page} ->
+        conn =
+          Plug.Conn.put_private(conn, :read_authorization, {spec, params, page.authorization})
+
         projection = load_projection(conn, page)
 
         {:ok, conn, page, projection, ProductPageViewModel.build(conn, page, projection)}
 
       {:error, conn} ->
         {:error, conn}
+    end
+  end
+
+  def respond(conn, template, assigns) do
+    if conn.assigns[:enhanced_read] do
+      JidoCodeWeb.ReadResponse.render(conn, template, assigns)
+    else
+      render(conn, template, assigns)
     end
   end
 

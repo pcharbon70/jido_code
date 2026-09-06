@@ -67,7 +67,7 @@ defmodule JidoCodeWeb.AccountController do
     do: Map.merge(@session, %{key: key, title: title, summary: summary, query: []})
 
   defp render_page(conn, template, page, view_model, extra) do
-    render(
+    ProductController.respond(
       conn,
       template,
       [

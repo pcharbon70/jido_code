@@ -193,7 +193,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
   def validate(_incomplete, _root), do: ["HUI-B2 manifest set is incomplete"]
 
   @spec check_product_sources([{String.t(), String.t()}]) :: [String.t()]
-  def check_product_sources(sources) do
+  def check_product_sources(sources, root \\ File.cwd!()) do
     sources
     |> Enum.flat_map(fn {path, source} ->
       [
@@ -215,6 +215,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
         {
           Enum.all?([
             not MapSet.member?(@hui_b3_qualification_consumer_paths, path),
+            not accepted_read_expressions?(root, path, source),
             Path.extname(path) in [".ex", ".heex"],
             Regex.match?(~r/data-on:/, source)
           ]),
@@ -231,6 +232,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
     |> Enum.uniq()
     |> Enum.sort()
   end
+
+  defp accepted_read_expressions?(root, "lib/jido_code_web/read_enhancement.ex" = path, source) do
+    HypermediaUISuccessorEvidence.phase_d1_mutable_path?(path) and
+      HypermediaUISuccessorEvidence.digest(root, path) ==
+        Base.encode16(:crypto.hash(:sha256, source), case: :lower)
+  end
+
+  defp accepted_read_expressions?(_root, _path, _source), do: false
 
   @spec validate_closure(String.t(), String.t()) :: [String.t()]
   def validate_closure(plan, receipt) do

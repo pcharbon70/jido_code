@@ -27,7 +27,8 @@ defmodule JidoCode.Application do
         JidoCode.Runtime.Supervisor,
         {Phoenix.PubSub, name: JidoCode.PubSub},
         JidoCode.Identity.Store,
-        JidoCode.Product.ReadProjectionCache
+        JidoCode.Product.ReadProjectionCache,
+        JidoCode.Product.ReadRequestLimiter
       ] ++
         qualification_children ++
         [

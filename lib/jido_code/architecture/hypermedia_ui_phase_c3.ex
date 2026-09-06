@@ -323,7 +323,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC3 do
 
                 next =
                   if current == expected or
-                       (HypermediaUISuccessorEvidence.phase_c4_mutable_path?(path) and
+                       ((HypermediaUISuccessorEvidence.phase_c4_mutable_path?(path) or
+                           HypermediaUISuccessorEvidence.phase_d1_mutable_path?(path)) and
                           successor == current),
                      do: acc,
                      else: [

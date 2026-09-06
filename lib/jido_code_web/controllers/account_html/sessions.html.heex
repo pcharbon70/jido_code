@@ -15,8 +15,8 @@
 
     <ul id="session-list" class="grid gap-4">
       <li
-        :for={{session, index} <- Enum.with_index(@sessions, 1)}
-        id={"session-item-#{index}"}
+        :for={session <- @sessions}
+        id={"session-item-#{session.management_ref}"}
         data-current-session={session.current && "true"}
         class="rounded-lg border border-border bg-card p-5"
       >
@@ -44,11 +44,15 @@
           </div>
           <.form
             for={session.form}
-            id={"session-revoke-form-#{index}"}
+            id={"session-revoke-form-#{session.management_ref}"}
             action={~p"/account/sessions/#{session.management_ref}"}
             method="delete"
           >
-            <UI.button id={"session-revoke-submit-#{index}"} type="submit" variant={:outline}>
+            <UI.button
+              id={"session-revoke-submit-#{session.management_ref}"}
+              type="submit"
+              variant={:outline}
+            >
               {if(session.current, do: "End this session", else: "End session")}
             </UI.button>
           </.form>
