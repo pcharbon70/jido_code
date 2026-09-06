@@ -18,6 +18,17 @@ defmodule JidoCodeWeb.ReadSignals do
   @max_bytes 2_048
   @max_keys 5
 
+  @type diagnostic ::
+          :invalid_shape
+          | :invalid_json
+          | :invalid_utf8
+          | :oversized
+          | :too_deep
+          | :duplicate_key
+          | :too_many_keys
+          | :unknown_key
+          | :invalid_value
+
   def surfaces, do: @surfaces
   def max_bytes, do: @max_bytes
   def namespace(surface) when surface in @surfaces, do: "read_" <> Atom.to_string(surface)
@@ -41,6 +52,7 @@ defmodule JidoCodeWeb.ReadSignals do
     }
   end
 
+  @spec decode(atom(), term()) :: {:ok, map()} | {:error, diagnostic()}
   def decode(surface, raw) when surface in @surfaces and is_binary(raw) do
     with :ok <- bounded(raw),
          :ok <- shallow(raw),

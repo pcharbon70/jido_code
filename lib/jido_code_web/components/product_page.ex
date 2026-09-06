@@ -93,26 +93,27 @@ defmodule JidoCodeWeb.Components.ProductPage do
               reset={%{label: "Clear filters", href: @conn.request_path}}
             />
 
-            <.link
+            <UI.link
               :if={ReadEnhancement.supported?(@page.key)}
               id="product-read-refresh"
               href={@page.canonical_url}
               class="justify-self-start rounded text-sm font-medium underline underline-offset-4 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4"
             >
               Refresh this view
-            </.link>
+            </UI.link>
 
-            <.read_content :if={@inner_block != []} conn={@conn} page={@page} view_model={@view_model}>
-              {render_slot(@inner_block)}
+            <.read_content conn={@conn} page={@page} view_model={@view_model}>
+              <%= if @inner_block == [] do %>
+                <App.empty_state
+                  id="product-projection-unavailable"
+                  state={:unavailable}
+                  title="Projection not configured"
+                  message="This durable page is available, but its bounded read projection is introduced in Phase 4."
+                />
+              <% else %>
+                {render_slot(@inner_block)}
+              <% end %>
             </.read_content>
-
-            <App.empty_state
-              :if={@inner_block == []}
-              id="product-projection-unavailable"
-              state={:unavailable}
-              title="Projection not configured"
-              message="This durable page is available, but its bounded read projection is introduced in Phase 4."
-            />
 
             <.form
               for={@view_model.sign_out_form}

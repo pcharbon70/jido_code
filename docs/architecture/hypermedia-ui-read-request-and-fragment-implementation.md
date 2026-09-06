@@ -112,6 +112,9 @@ client deadline and no retry/reconnect. HTTP, network, timeout, or missing-patch
 failure removes all earlier protected children and presents a fixed local
 transport alert plus an ordinary full-page reload link. No optimistic result,
 cached HTML, hidden row, or authority-bearing local state is retained.
+Lost/stale/denied/unavailable authority (401/403/404/409/503) also removes the
+earlier scope/account/navigation shell; only a safe main landmark, transport
+alert, and native reload remain. Removed protected controls are never restored.
 
 ## Reopening Conditions
 

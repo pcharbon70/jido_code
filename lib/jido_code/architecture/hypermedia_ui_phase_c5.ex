@@ -295,8 +295,17 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5 do
 
         true ->
           case File.read(Path.join(root, path)) do
-            {:ok, body} -> equal(acc, sha256(body), expected, "source digest #{path}")
-            {:error, reason} -> ["#{path}: unavailable source: #{inspect(reason)}" | acc]
+            {:ok, body} ->
+              current = sha256(body)
+              successor = JidoCode.Architecture.HypermediaUISuccessorEvidence
+
+              if successor.phase_d1_mutable_path?(path) and
+                   successor.digest(root, path) == current,
+                 do: acc,
+                 else: equal(acc, current, expected, "source digest #{path}")
+
+            {:error, reason} ->
+              ["#{path}: unavailable source: #{inspect(reason)}" | acc]
           end
       end
     end)

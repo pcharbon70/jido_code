@@ -23,7 +23,7 @@ defmodule JidoCode.Product.ReadRequestLimiter do
 
   @impl true
   def handle_call({:acquire, principal}, {pid, _}, state)
-      when is_binary(principal) and byte_size(principal) <= 512 do
+      when is_binary(principal) and byte_size(principal) in 1..512 do
     now = System.monotonic_time(:millisecond)
     windows = Map.reject(state.windows, fn {_, {started, _}} -> now - started >= @window_ms end)
     {started, count} = Map.get(windows, principal, {now, 0})
@@ -43,6 +43,9 @@ defmodule JidoCode.Product.ReadRequestLimiter do
       {:reply, {:ok, lease}, next}
     end
   end
+
+  def handle_call({:acquire, _invalid}, _from, state),
+    do: {:reply, {:error, :unavailable}, state}
 
   @impl true
   def handle_cast({:release, lease}, state) do

@@ -75,6 +75,9 @@ test("failed or empty responses clear prior rows and leave a native reload", asy
     await expect(page.locator("#earlier-protected-row")).toHaveCount(0)
     await expect(page.locator("#product-read-reload")).toBeVisible()
     await expect(page.locator("#product-read-status")).toHaveAttribute("role", "alert")
+    if ([401, 403, 404, 409, 503].includes(status)) {
+      await expect(page.locator("#product-context, #product-account-menu, #product-primary-navigation")).toHaveCount(0)
+    }
     await page.unroute("**/ui/reads/fleet")
   }
 })
@@ -126,4 +129,51 @@ test("disabled JavaScript keeps filtering, pagination, refresh and sign-out nati
   await expect(page).toHaveURL(/page=2/)
   await page.locator("#product-sign-out-submit").click()
   await expect(page).toHaveURL(/\/sign-in$/)
+})
+
+test("latest intent wins, clear filters normalize, and history reauthorizes", async ({page}, info) => {
+  test.skip(info.project.name !== "chromium")
+  await signIn(page)
+  await page.route("**/ui/reads/fleet", async route => {
+    const response = await route.fetch({headers: {...await route.request().allHeaders(), "sec-fetch-site": "same-origin", "accept-encoding": "identity"}})
+    if (route.request().postDataJSON().read_fleet.q === "first") await new Promise(resolve => setTimeout(resolve, 400))
+    await route.fulfill({response})
+  })
+  const input = page.locator("#product-filter-search-query")
+  await input.fill("first")
+  const first = page.waitForRequest(r => r.url().includes("/ui/reads/fleet"))
+  await input.press("Enter")
+  await first
+  await input.fill("second")
+  await input.press("Enter")
+  await expect(page).toHaveURL(/q=second$/)
+  await expect(page.locator("#product-owned-content")).toHaveAttribute("data-read-url", "/factory/fleet?q=second")
+  await page.waitForTimeout(500)
+  await expect(page).toHaveURL(/q=second$/)
+  await page.getByRole("link", {name: "Clear filters"}).click()
+  await expect(page).toHaveURL(/\/factory\/fleet$/)
+  await expect(input).toHaveValue("")
+  await page.goBack()
+  await expect(page).toHaveURL(/q=second$/)
+  await expect(input).toHaveValue("second")
+  await page.goto("/projects/project_browser_alpha")
+  await expect(page.locator("#product-filter-search-query")).toHaveValue("")
+  await expect(page.locator("[data-product-route]")).toHaveAttribute("data-read-namespace", "read_project")
+})
+
+test("removing a focused projection control focuses its current status", async ({page}, info) => {
+  test.skip(info.project.name !== "chromium")
+  await signIn(page)
+  await page.locator("#product-owned-content").evaluate(root => {
+    const link = document.createElement("a")
+    link.id = "prior-row-link"
+    link.href = "/factory/fleet"
+    link.textContent = "Retry this projection"
+    root.append(link)
+  })
+  await page.locator("#prior-row-link").focus()
+  await page.keyboard.press("Enter")
+  await expect(page.locator("#prior-row-link")).toHaveCount(0)
+  await expect(page.locator("#product-read-status")).toBeFocused()
+  await expect(page.getByRole("heading", {level: 1})).toHaveText("Fleet")
 })

@@ -72,7 +72,8 @@ defmodule JidoCodeWeb.ReadControllerTest do
         request(context)
         |> post(route, Jason.encode!(%{JidoCodeWeb.ReadSignals.namespace(surface) => %{}}))
 
-      document = response |> html_response(200) |> LazyHTML.from_document()
+      document = response |> html_response(200) |> LazyHTML.from_fragment()
+      assert Enum.count(LazyHTML.to_tree(document), &match?({_, _, _}, &1)) == 1
       assert Enum.any?(LazyHTML.query(document, "##{root}")), "missing #{root} on #{surface}"
       assert get_resp_header(response, "cache-control") == ["no-store, private"]
       assert get_resp_header(response, "referrer-policy") == ["no-referrer"]
@@ -141,6 +142,18 @@ defmodule JidoCodeWeb.ReadControllerTest do
     assert JidoCodeWeb.ReadResponse.within_limit?(String.duplicate("x", limit))
     refute JidoCodeWeb.ReadResponse.within_limit?(String.duplicate("x", limit + 1))
     refute JidoCodeWeb.ReadResponse.within_limit?(String.duplicate("é", limit))
+  end
+
+  test "non-enhanced placeholder routes retain native errors, notices and pagination", context do
+    response = context.page |> recycle() |> get("/operations?q=" <> String.duplicate("x", 129))
+    document = response |> html_response(200) |> LazyHTML.from_document()
+
+    for id <-
+          ~w(product-error-summary product-notice-1 product-pagination product-projection-unavailable) do
+      assert Enum.any?(LazyHTML.query(document, "##{id}")), "missing native #{id}"
+    end
+
+    refute Enum.any?(LazyHTML.query(document, "[data-read-endpoint], #product-read-refresh"))
   end
 
   test "closed transport rejects hostile bodies and non-read methods without querying", context do

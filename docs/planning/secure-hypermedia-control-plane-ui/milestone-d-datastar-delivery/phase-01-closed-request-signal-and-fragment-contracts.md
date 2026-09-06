@@ -72,9 +72,9 @@ Back to plan: [README](./README.md)
       This task tests every schema/action/root and its native fallback in real
       browsers with production CSP/assets.
 
-      - [ ] 1.4.1.1 Subtask - Exercise valid/default/unknown/duplicate/malformed/oversized/deep signal values, forbidden authority keys, scope switching, pagination/filter/search, and rate bounds.
-      - [ ] 1.4.1.2 Subtask - Exercise CSRF/Origin/Fetch Metadata/content-type/method/CSP/injection/cache/referrer/log cases and exact authorization/redaction for each handler.
-      - [ ] 1.4.1.3 Subtask - Exercise every fragment/projection state, unavailable/concealed row clearing, focus/selection/dialog/disclosure/scroll preservation, patch limit, and native full-page fallback.
+      - [x] 1.4.1.1 Subtask - Exercise valid/default/unknown/duplicate/malformed/oversized/deep signal values, forbidden authority keys, scope switching, pagination/filter/search, and rate bounds.
+      - [x] 1.4.1.2 Subtask - Exercise CSRF/Origin/Fetch Metadata/content-type/method/CSP/injection/cache/referrer/log cases and exact authorization/redaction for each handler.
+      - [x] 1.4.1.3 Subtask - Exercise every fragment/projection state, unavailable/concealed row clearing, focus/selection/dialog/disclosure/scroll preservation, patch limit, and native full-page fallback.
       - [ ] 1.4.1.4 Subtask - Run parser/property/controller/browser/accessibility/security/architecture suites, `mix precommit`, and clean-checkout CI.
 
     - [ ] 1.4.2 Task {#huid-p01-phase-receipt} [repo: jido_code] [after: {#huid-p01-integration}] - Publish and pin the Phase 1 receipt.
@@ -82,6 +82,6 @@ Back to plan: [README](./README.md)
       This task records HUI-D1 evidence in
       `docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md`.
 
-      - [ ] 1.4.2.1 Subtask - Keep HUI-D1 merge-pending on open/authority-bearing signals, generic handlers, CSRF/CSP bypass, unbounded patches, incoherent state, hidden-row retention, focus loss, or broken native parity.
-      - [ ] 1.4.2.2 Subtask - Record schema/route/root/limit/CSP/browser evidence, failures, limitations, and all reopening conditions.
+      - [x] 1.4.2.1 Subtask - Keep HUI-D1 merge-pending on open/authority-bearing signals, generic handlers, CSRF/CSP bypass, unbounded patches, incoherent state, hidden-row retention, focus loss, or broken native parity.
+      - [x] 1.4.2.2 Subtask - Record schema/route/root/limit/CSP/browser evidence, failures, limitations, and all reopening conditions.
       - [ ] 1.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 1 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 2.

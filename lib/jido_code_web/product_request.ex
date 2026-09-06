@@ -297,13 +297,13 @@ defmodule JidoCodeWeb.ProductRequest do
   defp canonical_url(path, query),
     do: JidoCodeWeb.Endpoint.url() <> path <> "?" <> URI.encode_query(query)
 
+  defp secure(%{assigns: %{enhanced_read: _}} = conn),
+    do: JidoCodeWeb.ReadSecurity.private_response(conn)
+
   defp secure(conn) do
     conn
     |> put_resp_header("cache-control", "no-store, private")
-    |> put_resp_header(
-      "referrer-policy",
-      if(conn.assigns[:enhanced_read], do: "no-referrer", else: "origin")
-    )
+    |> put_resp_header("referrer-policy", "origin")
     |> put_resp_header("x-robots-tag", "noindex, nofollow")
   end
 

@@ -4,6 +4,7 @@ import {action, actions} from "../vendor/datastar/datastar.js"
 // This state holds presentation intent, never identity, scope, grants or revisions.
 const pending = new WeakMap()
 const queryKeys = new Set(["q", "state", "sort", "direction", "page"])
+let historyPath = location.pathname + location.search
 
 const intent = (section, event) => {
   if (event.type === "submit") {
@@ -21,7 +22,7 @@ const intent = (section, event) => {
   return Object.fromEntries(pairs)
 }
 
-const clearProtectedContent = () => {
+const clearProtectedContent = (terminal = false) => {
   const root = document.getElementById("product-owned-content")
   if (!root) return
   const status = document.createElement("p")
@@ -36,6 +37,15 @@ const clearProtectedContent = () => {
   // Never retain hidden rows, templates, or old protected HTML after a failed read.
   root.replaceChildren(status, link)
   delete root.dataset.readUrl
+  if (terminal) {
+    // Lost/stale authority also invalidates the old scope/account/navigation shell.
+    const shell = document.getElementById("product-shell")
+    const main = document.createElement("main")
+    main.id = "product-main"
+    main.className = "mx-auto grid max-w-3xl gap-6 p-8"
+    main.append(root)
+    shell?.replaceChildren(main)
+  }
 }
 
 const remember = () => {
@@ -86,16 +96,22 @@ action({
     let saved = remember()
     const priorReceipt = document.getElementById("product-owned-content")?.dataset.readReceipt
     let failed = false
+    let terminal = false
     const onFetch = ({detail}) => {
       if (detail.el !== section) return
-      if (detail.type === "error") failed = true
+      if (detail.type === "error") {
+        failed = true
+        terminal = [401, 403, 404, 409, 503].includes(Number(detail.argsRaw?.status))
+      }
       if (detail.type === "datastar-patch-elements") saved = remember()
     }
     document.addEventListener("datastar-fetch", onFetch, true)
     section.setAttribute("aria-busy", "true")
     const timeout = setTimeout(() => {
       if (pending.get(section) === controller) {
+        const current = remember()
         clearProtectedContent()
+        restore(current)
         controller.abort()
       }
     }, 20_000)
@@ -108,12 +124,16 @@ action({
         retryMaxCount: 0,
       })
       if (controller.signal.aborted || pending.get(section) !== controller) return
-      if (failed) clearProtectedContent()
+      if (failed) {
+        saved = remember()
+        clearProtectedContent(terminal)
+      }
       else {
         const root = document.getElementById("product-owned-content")
         const path = root?.dataset.readUrl
         if (path && root.dataset.readReceipt && root.dataset.readReceipt !== priorReceipt) {
           if (path !== location.pathname + location.search) history.pushState(null, "", path)
+          historyPath = location.pathname + location.search
           const normalized = new URL(path, location.origin).searchParams
           for (const {node, value} of formFields) {
             if (node.isConnected && node.value === value) node.value = normalized.get(node.name) ?? (node.name === "state" ? "all" : "")
@@ -125,7 +145,11 @@ action({
       }
       restore(saved)
     } catch {
-      if (!controller.signal.aborted && pending.get(section) === controller) clearProtectedContent()
+      if (!controller.signal.aborted && pending.get(section) === controller) {
+        const current = remember()
+        clearProtectedContent()
+        restore(current)
+      }
     } finally {
       clearTimeout(timeout)
       document.removeEventListener("datastar-fetch", onFetch, true)
@@ -140,5 +164,7 @@ action({
 // Native navigation discards all ephemeral state. No authority or filters persist
 // in browser storage; a history traversal obtains a newly authorized full page.
 window.addEventListener("popstate", () => {
-  if (document.querySelector("[data-read-endpoint]")) location.reload()
+  const path = location.pathname + location.search
+  // In-page anchors (especially the skip link) must retain native focus.
+  if (path !== historyPath && document.querySelector("[data-read-endpoint]")) location.reload()
 })

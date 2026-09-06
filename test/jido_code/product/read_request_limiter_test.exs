@@ -36,14 +36,37 @@ defmodule JidoCode.Product.ReadRequestLimiterTest do
     Enum.each(leases, &Limiter.release(&1, server))
     task = Task.async(fn -> Limiter.acquire("departed", server) end)
     {:ok, lease} = Task.await(task)
-    # DOWN is processed by the limiter before this same-sender synchronization barrier.
-    send(server, {:DOWN, lease, :process, task.pid, :normal})
-    refute Map.has_key?(:sys.get_state(server).leases, lease)
+    assert_released(server, lease, 10)
 
     :sys.replace_state(server, fn state ->
       %{state | windows: %{"expired" => {System.monotonic_time(:millisecond) - 60_001, 30}}}
     end)
 
     assert {:ok, _lease} = Limiter.acquire("expired", server)
+  end
+
+  test "bounds distinct principal windows and fails closed for invalid owners", %{server: server} do
+    for i <- 1..256 do
+      {:ok, lease} = Limiter.acquire("principal-#{i}", server)
+      Limiter.release(lease, server)
+    end
+
+    assert {:error, :rate_limited} = Limiter.acquire("principal-overflow", server)
+    assert map_size(:sys.get_state(server).windows) == 256
+
+    for principal <- [nil, "", String.duplicate("x", 513)] do
+      assert {:error, :unavailable} = Limiter.acquire(principal, server)
+    end
+
+    assert Process.alive?(server)
+  end
+
+  defp assert_released(server, lease, attempts) do
+    if Map.has_key?(:sys.get_state(server).leases, lease) and attempts > 0 do
+      Process.sleep(10)
+      assert_released(server, lease, attempts - 1)
+    else
+      refute Map.has_key?(:sys.get_state(server).leases, lease)
+    end
   end
 end
