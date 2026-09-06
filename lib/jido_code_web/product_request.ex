@@ -21,6 +21,8 @@ defmodule JidoCodeWeb.ProductRequest do
   @ref ~r/\A[A-Za-z0-9][A-Za-z0-9_-]*\z/
   @lenses ~w[source dependencies history architecture security quality]
   @states ~w(all active waiting blocked verifying complete)
+  @sorts ~w[project work agent stage health freshness]
+  @directions ~w[ascending descending]
 
   @type resource_spec ::
           :factory
@@ -108,7 +110,7 @@ defmodule JidoCodeWeb.ProductRequest do
 
     {query, errors} =
       params
-      |> Map.take(["q", "state", "page"])
+      |> Map.take(["q", "state", "sort", "direction", "page"])
       |> Enum.reduce({%{}, []}, fn {key, value}, {acc, errors} ->
         if MapSet.member?(allowed, key) do
           case normalize_query_value(key, value) do
@@ -141,6 +143,20 @@ defmodule JidoCodeWeb.ProductRequest do
   defp query_error("page"),
     do: %{key: "page", label: "Page must be between 1 and 100.", target_id: "product-pagination"}
 
+  defp query_error("sort"),
+    do: %{
+      key: "sort",
+      label: "Choose an available sort field.",
+      target_id: "product-filter-search"
+    }
+
+  defp query_error("direction"),
+    do: %{
+      key: "direction",
+      label: "Choose ascending or descending order.",
+      target_id: "product-filter-search"
+    }
+
   defp normalize_query_value("q", value)
        when is_binary(value) and byte_size(value) <= @maximum_query_bytes do
     case String.trim(value) do
@@ -158,6 +174,14 @@ defmodule JidoCodeWeb.ProductRequest do
       {page, ""} when page in 1..@maximum_page -> {:ok, if(page == 1, do: nil, else: page)}
       _invalid -> {:error, :invalid_route_parameter}
     end
+  end
+
+  defp normalize_query_value("sort", value) when value in @sorts do
+    {:ok, if(value == "project", do: nil, else: value)}
+  end
+
+  defp normalize_query_value("direction", value) when value in @directions do
+    {:ok, if(value == "ascending", do: nil, else: value)}
   end
 
   defp normalize_query_value(_key, _value), do: {:error, :invalid_route_parameter}

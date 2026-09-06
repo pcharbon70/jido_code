@@ -9,6 +9,7 @@ defmodule JidoCodeWeb.ProductPageViewModel do
   alias JidoCode.Identity.AuthorityBuilder
   alias JidoCode.Identity.AuthorizationResult
   alias JidoCode.Identity.Store
+  alias JidoCode.Product.ReadProjection
 
   @maximum_projects 50
   @state_options [
@@ -41,7 +42,7 @@ defmodule JidoCodeWeb.ProductPageViewModel do
   }
 
   @spec build(Plug.Conn.t(), map()) :: map()
-  def build(conn, page) do
+  def build(conn, page, projection \\ nil) do
     human = Map.fetch!(conn.assigns, :authenticated_human)
     session_ref = human.session_ref
     project = project_context(page)
@@ -55,7 +56,7 @@ defmodule JidoCodeWeb.ProductPageViewModel do
     %{
       brand: %{label: "JidoCode", href: "/factory", service_label: "Secure factory control plane"},
       principal: principal(human),
-      context: context(page, human, project),
+      context: context(page, human, project, projection),
       primary_navigation: primary,
       utility_navigation: utility,
       responsive_navigation: primary ++ utility ++ account_actions,
@@ -65,11 +66,11 @@ defmodule JidoCodeWeb.ProductPageViewModel do
         Phoenix.Component.to_form(%{"project_ref" => current_project || ""}, as: :project_switch),
       breadcrumbs: breadcrumbs(page, project),
       attempt: attempt_context(page, project),
-      notices: notices(page),
-      support: support(page),
+      notices: notices(page, projection),
+      support: support(page, projection),
       filter: filter,
       page_actions: page_actions(page, project),
-      pagination: pagination(page),
+      pagination: pagination(page, projection),
       errors: page.query_errors,
       sign_out_form: Phoenix.Component.to_form(%{}, as: :sign_out)
     }
@@ -83,7 +84,7 @@ defmodule JidoCodeWeb.ProductPageViewModel do
     }
   end
 
-  defp context(page, human, project) do
+  defp context(page, human, project, projection) do
     authorization = page.authorization
 
     roles =
@@ -92,15 +93,16 @@ defmodule JidoCodeWeb.ProductPageViewModel do
         _session -> []
       end
 
+    {readiness, readiness_label, explanation} = projection_readiness(projection)
+
     %{
       route_label: Map.fetch!(@route_labels, page.key),
       scope_label: if(project, do: "Project #{project.project_ref}", else: "Factory"),
       role_label: role_label(roles),
       assurance_label: assurance_label(human.session.assurance),
-      readiness: :limited,
-      readiness_label: "Read projection pending",
-      explanation:
-        "Identity and route authority are current. Read projection data remains unavailable until its accepted provider is connected."
+      readiness: readiness,
+      readiness_label: readiness_label,
+      explanation: explanation
     }
   end
 
@@ -387,7 +389,7 @@ defmodule JidoCodeWeb.ProductPageViewModel do
     |> Enum.map(fn item -> if(item.current, do: Map.delete(item, :href), else: item) end)
   end
 
-  defp notices(_page) do
+  defp notices(_page, nil) do
     [
       %{
         kind: :maintenance,
@@ -398,11 +400,48 @@ defmodule JidoCodeWeb.ProductPageViewModel do
     ]
   end
 
-  defp support(page) do
+  defp notices(_page, %ReadProjection{source_outcome: :unconfigured}) do
+    [
+      %{
+        kind: :maintenance,
+        title: "Projection not configured",
+        message:
+          "The durable route is available, but this deployment has no configured knowledge-store read adapter."
+      }
+    ]
+  end
+
+  defp notices(_page, %ReadProjection{state: state})
+       when state in [:unavailable, :maintenance, :recovery] do
+    [
+      %{
+        kind: :degraded,
+        title: "Projection unavailable",
+        message:
+          "Current projection rows were cleared. Use the native retry link when the trusted source is available."
+      }
+    ]
+  end
+
+  defp notices(_page, %ReadProjection{state: state})
+       when state in [:stale, :incomplete, :contradicted, :truncated] do
+    [
+      %{
+        kind: :maintenance,
+        title: "Projection requires care",
+        message:
+          "The current authorized projection is #{state}; review its provenance and limitation notice."
+      }
+    ]
+  end
+
+  defp notices(_page, %ReadProjection{}), do: []
+
+  defp support(page, projection) do
     %{
       metadata: [
         %{key: "route", label: "Route", value: Map.fetch!(@route_labels, page.key)},
-        %{key: "freshness", label: "Freshness", value: "No projection loaded"}
+        %{key: "freshness", label: "Freshness", value: support_freshness(projection)}
       ],
       links: [
         %{key: "account", label: "Account", href: "/account", current: false},
@@ -457,7 +496,10 @@ defmodule JidoCodeWeb.ProductPageViewModel do
 
   defp page_actions(_page, _project), do: []
 
-  defp pagination(page) do
+  defp pagination(page, %ReadProjection{source_outcome: :unconfigured}), do: pagination(page, nil)
+  defp pagination(_page, %ReadProjection{}), do: nil
+
+  defp pagination(page, _projection) do
     if "page" in page.query_fields do
       current = Map.get(page.query, "page", 1)
       path = URI.parse(page.canonical_url).path
@@ -503,4 +545,35 @@ defmodule JidoCodeWeb.ProductPageViewModel do
   defp assurance_label(:baseline), do: "Baseline assurance"
   defp assurance_label(:phishing_resistant), do: "Phishing-resistant assurance"
   defp assurance_label(:action_bound_step_up), do: "Current action-bound step-up"
+
+  defp projection_readiness(nil) do
+    {:limited, "Read projection pending",
+     "Identity and route authority are current. Read projection data remains unavailable until its accepted provider is connected."}
+  end
+
+  defp projection_readiness(%ReadProjection{source_outcome: :unconfigured}) do
+    {:limited, "Read adapter not configured",
+     "Identity and route authority are current. This deployment has not configured the reviewed graph read adapter."}
+  end
+
+  defp projection_readiness(%ReadProjection{state: state}) when state in [:ready, :empty] do
+    {:ready, "Authorized projection ready",
+     "Identity, route authority, and the bounded read projection were rebuilt from current reviewed sources."}
+  end
+
+  defp projection_readiness(%ReadProjection{state: state})
+       when state in [:stale, :incomplete, :contradicted, :truncated] do
+    {:limited, "Projection #{state}",
+     "Identity and route authority are current. Projection provenance reports a bounded limitation."}
+  end
+
+  defp projection_readiness(%ReadProjection{}) do
+    {:unavailable, "Projection unavailable",
+     "Identity and route authority are current, but protected projection rows are unavailable and were cleared."}
+  end
+
+  defp support_freshness(nil), do: "No projection loaded"
+
+  defp support_freshness(%ReadProjection{freshness: freshness}),
+    do: freshness |> Atom.to_string() |> String.capitalize()
 end

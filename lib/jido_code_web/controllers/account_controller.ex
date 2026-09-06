@@ -7,7 +7,7 @@ defmodule JidoCodeWeb.AccountController do
   @session %{resource: :session, operation: :compatibility_product, area: :developer}
 
   def show(conn, params) do
-    with {:ok, conn, page, view_model} <-
+    with {:ok, conn, page, _projection, view_model} <-
            ProductController.prepare(
              conn,
              params,
@@ -23,7 +23,7 @@ defmodule JidoCodeWeb.AccountController do
   end
 
   def sessions(conn, params) do
-    with {:ok, conn, page, view_model} <-
+    with {:ok, conn, page, _projection, view_model} <-
            ProductController.prepare(
              conn,
              params,

@@ -40,6 +40,6 @@ defmodule JidoCodeWeb.FactoryController do
         key: key,
         title: title,
         summary: summary,
-        query: ["q", "state", "page"]
+        query: ["q", "state", "sort", "direction", "page"]
       })
 end

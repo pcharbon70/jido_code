@@ -4,4 +4,49 @@
   current_scope={@current_scope}
   page={@page}
   view_model={@view_model}
-/>
+>
+  <% trust = ReadProjectionView.trust(@projection) %>
+  <Projection.trust_header
+    id="project-overview-trust"
+    state={trust.state}
+    revision={trust.revision}
+    freshness={trust.freshness}
+    source={trust.source}
+    as_of={trust.as_of}
+    completeness={trust.completeness}
+  />
+  <ReadWorkspace.metadata_panel
+    id="project-overview-identity"
+    state={@projection.state}
+    title={if(@projection.project, do: @projection.project.label, else: "Project overview")}
+    items={ReadProjectionView.project_metadata(@projection)}
+  />
+  <Projection.health_summary
+    id="project-overview-work"
+    state={@projection.state}
+    title="Desired and current work"
+    items={ReadProjectionView.work_health(@projection)}
+    retry_href={ReadProjectionView.retry_href(@page)}
+  />
+  <ReadWorkspace.bounded_collection
+    id="project-overview-attempts"
+    state={@projection.state}
+    title="Active and recent attempts"
+    items={ReadProjectionView.attempt_items(@projection)}
+    empty_message="No authorized active or recent attempts are available."
+    retry_href={ReadProjectionView.retry_href(@page)}
+  />
+  <ReadWorkspace.metadata_panel
+    id="project-overview-wiki"
+    state={@projection.state}
+    title="Repository wiki"
+    items={ReadProjectionView.wiki_metadata(@projection)}
+  />
+  <Projection.health_summary
+    id="project-overview-capabilities"
+    state={@projection.state}
+    title="Project capability truth"
+    items={ReadProjectionView.capability_health(@projection)}
+    retry_href={ReadProjectionView.retry_href(@page)}
+  />
+</.placeholder>

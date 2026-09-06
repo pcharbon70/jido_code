@@ -3,5 +3,8 @@ defmodule JidoCodeWeb.FactoryHTML do
 
   import JidoCodeWeb.Components.ProductPage
 
+  alias JidoCodeWeb.Components.Projection
+  alias JidoCodeWeb.ReadProjectionView
+
   embed_templates "factory_html/*"
 end

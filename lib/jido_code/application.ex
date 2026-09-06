@@ -26,7 +26,8 @@ defmodule JidoCode.Application do
         {Task.Supervisor, name: JidoCode.Factory.Model.StreamSupervisor},
         JidoCode.Runtime.Supervisor,
         {Phoenix.PubSub, name: JidoCode.PubSub},
-        JidoCode.Identity.Store
+        JidoCode.Identity.Store,
+        JidoCode.Product.ReadProjectionCache
       ] ++
         qualification_children ++
         [

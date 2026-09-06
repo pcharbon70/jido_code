@@ -4,6 +4,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
   alias JidoCode.Architecture.HypermediaUIPhaseA1
   alias JidoCode.Architecture.HypermediaUIPhaseC1
   alias JidoCode.Architecture.HypermediaUIPhaseC3
+  alias JidoCode.Architecture.HypermediaUIPhaseC4
   alias JidoCode.Knowledge.CommandRegistry
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.QueryCatalog
@@ -37,11 +38,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
   test "the supervision inventory matches live OTP child ids" do
     supervision = manifests!().runtime["supervision"]
     successor = successor!()
+    c4_successor = c4_successor!()
 
     expected_children =
       Enum.sort(
         supervision["application_child_ids"] ++
-          successor["runtime_successor"]["application_child_ids"]
+          successor["runtime_successor"]["application_child_ids"] ++
+          c4_successor["runtime_successor"]["application_child_ids"]
       )
 
     assert child_ids(JidoCode.Supervisor) == expected_children
@@ -129,6 +132,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
 
   defp c3_successor! do
     assert {:ok, evidence} = HypermediaUIPhaseC3.load()
+    evidence
+  end
+
+  defp c4_successor! do
+    assert {:ok, evidence} = HypermediaUIPhaseC4.load()
     evidence
   end
 
