@@ -1,5 +1,25 @@
 import {expect, test} from "@playwright/test"
 
+// All browser suites deliberately share the named operator fixture. Respect its
+// production 30-read/16-stream per-minute budgets instead of widening them or
+// retrying 429s. A fresh window also makes selected D1+D2 runs reproducible.
+test.beforeAll(async ({}, info) => {
+  info.setTimeout(90_000)
+  await new Promise(resolve => setTimeout(resolve, 61_000))
+})
+
+test.afterEach(async ({context}) => {
+  // Revoke this fixture session explicitly. Browser destruction alone may leave
+  // an HTTP owner until its bounded idle deadline, consuming principal capacity.
+  const cleanup = await context.newPage()
+  await cleanup.goto("/factory/fleet")
+  if (!new URL(cleanup.url()).pathname.startsWith("/sign-in")) {
+    await cleanup.locator("#product-sign-out-submit").click()
+    await expect(cleanup).toHaveURL(/\/sign-in/)
+  }
+  await cleanup.close()
+})
+
 const signIn = async page => {
   await page.goto("/factory/fleet")
   await page.locator("input[name='session[login]']").fill("operator@example.test")
@@ -144,4 +164,119 @@ test("without JavaScript the connection link is an ordinary authorized page refr
   await expect(page).toHaveURL(/\/factory\/fleet$/)
   await expect(page.locator("#product-stream-status")).toContainText("Not connected")
   await expect(page.locator("#product-owned-content")).not.toHaveAttribute("data-stream-cursor", /.+/)
+})
+
+for (const [protocol, origin] of [
+  ["HTTP/1", `http://127.0.0.1:${process.env.HUI_B3_PROXY_PORT || 4414}`],
+  ["HTTP/2", `https://127.0.0.1:${process.env.HUI_B4_HTTP2_PROXY_PORT || 4415}`],
+]) {
+  test(`${protocol} proxy delivers the initial event without buffering until EOF`, async ({page}, info) => {
+    test.skip(info.project.name !== "chromium")
+    const violations = []
+    await page.exposeFunction("recordProxyCSPViolation", value => violations.push(value))
+    await page.addInitScript(() => document.addEventListener("securitypolicyviolation", event => {
+      window.recordProxyCSPViolation(event.violatedDirective)
+    }))
+    await page.goto(`${origin}/factory/fleet`)
+    await page.locator("input[name='session[login]']").fill("operator@example.test")
+    await page.locator("input[name='session[credential]']").fill("test-named-human-credential")
+    await page.locator("#human-sign-in-submit").click()
+    await expect(page).toHaveURL(/\/factory\/fleet$/)
+    const pending = page.waitForResponse(response => response.url().includes("/ui/streams/fleet"))
+    await page.locator("#product-stream-connect").click()
+    const response = await pending
+    expect(response.status()).toBe(200)
+    expect(response.headers()["x-hui-b3-proxy-mode"]).toBe("unbuffered-sse")
+    expect(response.headers()["cache-control"]).toBe("no-store, private")
+    if (protocol === "HTTP/2") expect(response.headers()["x-hui-b4-ingress-protocol"]).toBe("h2")
+    await expect(page.locator("#product-stream-status")).toContainText("Connected.")
+    for (const selector of ["script[src]", "link[rel='stylesheet']"]) {
+      const urls = await page.locator(selector).evaluateAll(nodes => nodes.map(node => node.src || node.href))
+      expect(urls).toHaveLength(1)
+      expect(new URL(urls[0]).origin).toBe(origin)
+    }
+    expect(violations).toEqual([])
+    await page.locator("#product-sign-out-submit").click()
+    await expect(page).toHaveURL(/\/sign-in/)
+  })
+}
+
+test("copied tab correlation takes over only inside the same trusted session", async ({page, context, browser}, info) => {
+  test.skip(info.project.name !== "chromium")
+  await signIn(page)
+  let correlation
+  page.on("request", request => {
+    if (request.url().includes("/ui/streams/fleet")) correlation = request.postDataJSON().stream.tab
+  })
+  await page.locator("#product-stream-connect").click()
+  await expect(page.locator("#product-stream-status")).toContainText("Connected.")
+  const copy = await context.newPage()
+  await copy.goto("/factory/fleet")
+  await copy.route("**/ui/streams/fleet", route => {
+    const payload = route.request().postDataJSON()
+    payload.stream.tab = correlation
+    return route.continue({postData: JSON.stringify(payload)})
+  })
+  await copy.locator("#product-stream-connect").click()
+  await expect(copy.locator("#product-stream-status")).toContainText("Connected.")
+  await expect(page.locator("#product-shell")).toHaveAttribute("data-stream-terminal", "closed")
+  const separate = await browser.newContext()
+  try {
+    const isolated = await separate.newPage()
+    await signIn(isolated)
+    await isolated.route("**/ui/streams/fleet", route => {
+      const payload = route.request().postDataJSON()
+      payload.stream.tab = correlation
+      return route.continue({postData: JSON.stringify(payload)})
+    })
+    await isolated.locator("#product-stream-connect").click()
+    await expect(isolated.locator("#product-stream-status")).toContainText("Connected.")
+    await expect(copy.locator("#product-stream-status")).toContainText("Connected.")
+    await isolated.locator("#product-sign-out-submit").click()
+  } finally { await separate.close() }
+  await copy.locator("#product-sign-out-submit").click()
+  await copy.close()
+})
+
+test("blocked browser storage does not prevent connection or acquire authority", async ({page}, info) => {
+  test.skip(info.project.name !== "chromium")
+  await page.addInitScript(() => {
+    for (const key of ["sessionStorage", "localStorage"]) {
+      Object.defineProperty(window, key, {get() { throw new Error("storage unavailable") }})
+    }
+  })
+  await signIn(page)
+  await page.locator("#product-stream-connect").click()
+  await expect(page.locator("#product-stream-status")).toContainText("Connected.")
+  await page.locator("#product-sign-out-submit").click()
+  await expect(page).toHaveURL(/\/sign-in/)
+})
+
+test("a pending finite refresh cannot race a stream for the earlier query", async ({page}, info) => {
+  test.skip(info.project.name !== "chromium")
+  await signIn(page)
+  let release
+  const held = new Promise(resolve => { release = resolve })
+  const streams = []
+  page.on("request", request => { if (request.url().includes("/ui/streams/fleet")) streams.push(request) })
+  await page.route("**/ui/reads/fleet", async route => {
+    const response = await route.fetch({headers: {...await route.request().allHeaders(), "sec-fetch-site": "same-origin", "accept-encoding": "identity"}})
+    await held
+    await route.fulfill({response})
+  })
+  try {
+    await page.locator("#product-filter-search-query").fill("beta")
+    const started = page.waitForRequest(request => request.url().includes("/ui/reads/fleet"))
+    await page.locator("#product-filter-search-query").press("Enter")
+    await started
+    await page.locator("#product-stream-connect").click()
+    await expect(page.locator("#product-stream-status")).toContainText("after this refresh finishes")
+    expect(streams).toHaveLength(0)
+  } finally { release() }
+  await expect(page).toHaveURL(/q=beta$/)
+  await page.locator("#product-stream-connect").click()
+  await expect(page.locator("#product-stream-status")).toContainText("Connected.")
+  expect(streams).toHaveLength(1)
+  expect(streams[0].postDataJSON().read_fleet).toEqual({q: "beta"})
+  await expect(page.locator("#product-owned-content")).toHaveAttribute("data-read-url", "/factory/fleet?q=beta")
 })

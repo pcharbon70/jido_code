@@ -45,6 +45,7 @@ defmodule JidoCodeWeb.StreamIntentTest do
       route: "/projects/project/attempts/attempt",
       projection: :attempt,
       query: %{},
+      fingerprint: %{policy_revision: "policy-1"},
       tab: @tab
     }
 
@@ -64,6 +65,7 @@ defmodule JidoCodeWeb.StreamIntentTest do
           :route,
           :projection,
           :query,
+          :fingerprint,
           :tab
         ] do
       assert {:error, :invalid_cursor} =

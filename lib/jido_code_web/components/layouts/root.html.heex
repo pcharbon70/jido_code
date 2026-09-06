@@ -19,7 +19,7 @@
       names={JidoCodeWeb.FrontendAssets.asset_names()}
       manifest={JidoCodeWeb.FrontendAssets.vite_manifest()}
       dev_server={PhoenixVite.Components.has_vite_watcher?(JidoCodeWeb.Endpoint)}
-      to_url={fn path -> static_url(@conn, path) end}
+      to_url={fn path -> static_path(@conn, path) end}
     />
   </head>
   <body>

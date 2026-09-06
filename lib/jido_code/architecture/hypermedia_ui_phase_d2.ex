@@ -45,6 +45,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     lib/jido_code/product/stream_coordinator.ex
     lib/jido_code/product/stream_owner_guard.ex
     lib/jido_code_web/components/product_page.ex
+    lib/jido_code_web/components/layouts/root.html.heex
     lib/jido_code_web/controllers/stream_controller.ex
     lib/jido_code_web/controllers/stream_html.ex
     lib/jido_code_web/plugs/read_body.ex
@@ -69,7 +70,10 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     test/jido_code_web/controllers/stream_controller_test.exs
     test/jido_code_web/stream_intent_test.exs
     test/jido_code_web/stream_reauthorization_test.exs
+    test/jido_code_web/stream_http_test.exs
     test/browser/hypermedia_ui_phase_d2.spec.mjs
+    test/accessibility/hypermedia_ui_phase_d2_orca.mjs
+    scripts/qualify_hui_d2_orca.sh
     test/support/deny_stream_authority_adapter.ex
   ]
 
@@ -185,6 +189,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     |> contains(root, "assets/js/stream_connection.js", "retry <= 2")
     |> contains(root, "assets/js/stream_connection.js", "event.stopImmediatePropagation()")
     |> contains(root, "lib/jido_code_web/read_enhancement.ex", "@openStream(evt)")
+    |> contains(
+      root,
+      "lib/jido_code_web/components/layouts/root.html.heex",
+      "static_path(@conn, path)"
+    )
   end
 
   defp predecessor_digests(root) do
@@ -211,19 +220,35 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     do:
       errors
       |> equal(evidence["completed_sections"], @sections, "completed sections")
+      |> local_verification(evidence)
       |> pending(evidence, root)
 
   defp lifecycle(errors, %{"status" => "accepted_at_merged_candidate"} = evidence, root) do
     errors
     |> equal(evidence["completed_sections"], @sections, "completed sections")
     |> equal(evidence["merged_candidate"], @merged_candidate, "merged candidate")
-    |> equal(
-      is_binary(@merged_candidate) and byte_size(@merged_candidate || "") == 40,
-      true,
-      "full candidate SHA"
-    )
+    |> equal(full_sha?(@merged_candidate), true, "full candidate SHA")
+    |> local_verification(evidence)
     |> equal(evidence["clean_checkout_ci"], "pass", "clean checkout CI")
+    |> equal(valid_jobs?(evidence["clean_checkout_jobs"]), true, "clean checkout jobs")
+    |> equal(
+      is_integer(evidence["implementation_pr"]) and evidence["implementation_pr"] > 0,
+      true,
+      "implementation PR"
+    )
+    |> equal(
+      match?({:ok, _}, Date.from_iso8601(evidence["merge_date"] || "")),
+      true,
+      "merge date"
+    )
+    |> equal(
+      Enum.all?(@sections, &full_sha?(get_in(evidence, ["section_commits", &1]))),
+      true,
+      "section commit provenance"
+    )
     |> contains(root, @receipt, "Status: **accepted-at-merged-candidate**")
+    |> contains(root, @receipt, "Merged candidate: `#{evidence["merged_candidate"]}`")
+    |> contains(root, @receipt, "Merge date: `#{evidence["merge_date"]}`")
     |> contains(root, @plan, "- [x] 2 Phase")
     |> contains(root, @plan, "- [x] 2.4 Section")
     |> contains(root, @plan, "- [x] 2.4.2 Task")
@@ -231,6 +256,38 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
   end
 
   defp lifecycle(errors, _, _), do: ["unsupported lifecycle" | errors]
+
+  defp local_verification(errors, evidence) do
+    errors
+    |> equal(evidence["local_verification"], "pass", "local verification")
+    |> equal(
+      evidence["qualification"],
+      %{
+        "real_http_production_supervision" => "pass",
+        "count_rate_event_queue_and_deadline_limits" => "pass",
+        "slow_reader_process_node_restart_and_drain" => "pass",
+        "all_eight_generations_query_idle_and_stale_reconnect" => "pass",
+        "private_audit_and_telemetry" => "pass",
+        "browser_native_keyboard_focus_sleep_retry_takeover_and_csp" => "pass",
+        "http1_and_http2_proxy" => "pass",
+        "named_orca" => "pass",
+        "precommit" => "pass"
+      },
+      "integration qualification matrix"
+    )
+  end
+
+  defp valid_jobs?(jobs) when is_map(jobs) do
+    Enum.all?(~w[verify dialyzer], fn name ->
+      case jobs[name] do
+        %{"id" => id, "result" => "pass"} when is_integer(id) and id > 0 -> true
+        _ -> false
+      end
+    end)
+  end
+
+  defp valid_jobs?(_), do: false
+  defp full_sha?(value), do: is_binary(value) and Regex.match?(~r/\A[0-9a-f]{40}\z/, value)
 
   defp pending(errors, evidence, root) do
     errors

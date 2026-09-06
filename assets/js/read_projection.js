@@ -3,6 +3,7 @@ import {action, actions} from "../vendor/datastar/datastar.js"
 // Only explicit user gestures initiate a finite read. No subscriptions or retries.
 // This state holds presentation intent, never identity, scope, grants or revisions.
 const pending = new WeakMap()
+export const readInFlight = section => pending.has(section)
 const queryKeys = new Set(["q", "state", "sort", "direction", "page"])
 let historyPath = location.pathname + location.search
 

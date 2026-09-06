@@ -72,6 +72,7 @@ defmodule JidoCodeWeb.StreamContext do
       :route,
       :projection,
       :query,
+      :fingerprint,
       :tab
     ])
     |> :erlang.term_to_binary([:deterministic])

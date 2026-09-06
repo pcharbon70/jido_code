@@ -1,5 +1,5 @@
 import {action, actions} from "../vendor/datastar/datastar.js"
-import {clearProtectedContent, remember, restore} from "./read_projection.js"
+import {clearProtectedContent, readInFlight, remember, restore} from "./read_projection.js"
 
 // Transport correlation only. Identity, scope and revisions stay on the server.
 const randomId = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))))
@@ -132,6 +132,10 @@ action({
     if (event.type !== "click" || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     if (!event.target.closest("#product-stream-connect")) return
     event.preventDefault()
+    if (readInFlight(context.el.closest("[data-read-endpoint]"))) {
+      status("Connect again after this refresh finishes.")
+      return
+    }
     await run(context, context.el)
   },
 })

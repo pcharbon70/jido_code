@@ -72,9 +72,9 @@ Back to plan: [README](./README.md)
       This task uses real HTTP streaming and production supervision rather than
       direct process-only tests.
 
-      - [ ] 2.4.1.1 Subtask - Exercise authentication/CSRF/Origin/content negotiation, copied refs, cross-scope routes, missing/invalid tab IDs, duplicate/takeover races, and authorization before response start.
-      - [ ] 2.4.1.2 Subtask - Exercise connection/rate/event/patch/queue/lifetime/heartbeat/backoff limits, slow readers, overflow, disconnect, zombie clients, process/node failure, and deploy drain.
-      - [ ] 2.4.1.3 Subtask - Exercise hard expiry and every revocation generation before connect, while idle, while queued/querying, before patch, during reconnect, and after browser sleep.
+      - [x] 2.4.1.1 Subtask - Exercise authentication/CSRF/Origin/content negotiation, copied refs, cross-scope routes, missing/invalid tab IDs, duplicate/takeover races, and authorization before response start.
+      - [x] 2.4.1.2 Subtask - Exercise connection/rate/event/patch/queue/lifetime/heartbeat/backoff limits, slow readers, overflow, disconnect, zombie clients, process/node failure, and deploy drain.
+      - [x] 2.4.1.3 Subtask - Exercise hard expiry and every revocation generation before connect, while idle, while queued/querying, before patch, during reconnect, and after browser sleep.
       - [ ] 2.4.1.4 Subtask - Run stream/resource/security/telemetry/proxy smoke suites, `mix precommit`, and clean-checkout CI.
 
     - [ ] 2.4.2 Task {#huid-p02-phase-receipt} [repo: jido_code] [after: {#huid-p02-integration}] - Publish and pin the Phase 2 receipt.
@@ -82,6 +82,6 @@ Back to plan: [README](./README.md)
       This task records HUI-D2 evidence in
       `docs/architecture/hypermedia-ui-milestone-d-phase-02-receipt.md`.
 
-      - [ ] 2.4.2.1 Subtask - Keep HUI-D2 merge-pending on authorization after response start, unbounded connection/queue/lifetime, zombie cleanup failure, tab-derived authority, protected replay, revocation leak, or reconnect bypass.
-      - [ ] 2.4.2.2 Subtask - Record exact limits/config/supervision/telemetry/load fixtures, failures, limitations, and all reopening conditions.
+      - [x] 2.4.2.1 Subtask - Keep HUI-D2 merge-pending on authorization after response start, unbounded connection/queue/lifetime, zombie cleanup failure, tab-derived authority, protected replay, revocation leak, or reconnect bypass.
+      - [x] 2.4.2.2 Subtask - Record exact limits/config/supervision/telemetry/load fixtures, failures, limitations, and all reopening conditions.
       - [ ] 2.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 2 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 3.

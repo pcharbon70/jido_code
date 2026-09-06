@@ -26,4 +26,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2Test do
       refute Phase.validate(mutated, File.cwd!()) == []
     end
   end
+
+  test "integration acceptance cannot omit real HTTP, browser, accessibility or precommit evidence" do
+    assert {:ok, evidence} = Phase.load()
+    candidate = Map.put(evidence, "status", "integration_candidate_merge_pending")
+
+    for key <- ["local_verification", "qualification"] do
+      refute Phase.validate(Map.put(candidate, key, nil), File.cwd!()) == []
+    end
+  end
 end

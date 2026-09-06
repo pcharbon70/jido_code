@@ -1,7 +1,7 @@
 # Product Stream Coordinator Implementation
 
 Owner: JidoCode web, security and operations maintainers. Gate: HUI-D2.
-Status: sections 2.1–2.3 candidate; real HTTP/integration qualification is pending.
+Status: sections 2.1–2.4 integration candidate; clean CI, merge and pinning are pending.
 
 ## Admission and Identity
 
@@ -17,7 +17,8 @@ Missing/invalid correlations have zero fallback capacity. No cookie-derived
 replacement tab, shared anonymous stream or default grant exists. A cursor is
 at most 256 ASCII bytes, signed by Phoenix.Token, valid for 120 seconds and bound
 to server-known subject, session/generation, account generation, tenant, project,
-resource, fixed route/projection, normalized query and tab. Last-Event-ID must be
+resource, fixed route/projection, normalized query, complete authority fingerprint
+and tab. Last-Event-ID must be
 absent or exactly equal that cursor. Cursor acceptance always means a new current
 snapshot, never replay. It contains only a digest, never data or an authority grant.
 
@@ -133,15 +134,56 @@ fresh server authorization. Terminal admission outcomes do not retry.
 Each attempt has a distinct detached event origin. A capture-phase listener drops
 already-buffered patches from replaced/aborted origins before the SDK applies
 them. Finite read intent cancels the connection and requires deliberate manual
-reconnection. Offline, pagehide, deadline and bfcache restoration clear protected
+reconnection. A stream gesture during an in-flight finite refresh asks for a new
+gesture after completion, preventing an earlier query from racing the finite
+result. This is presentation ordering, never an authorization decision.
+Offline, pagehide, deadline and bfcache restoration clear protected
 content and do not revive a socket. Focus restoration applies only to surviving
 controls. Status distinguishes access checks from data freshness: D2 sends an
 initial snapshot and heartbeats; domain-change subscriptions belong to D3.
 
-## Pending Qualification
+## Integration Qualification
 
-Section 2.4 qualifies real HTTP under production supervision, browser/proxy,
-accessibility and failure matrices. Focused browser coverage currently passes
-in the five configured profiles (9 applicable checks, 21 deliberate skips),
-including cross-tab logout, bounded retry, sleep/wake, stale frames and native
-fallback. This is not yet complete phase acceptance.
+`StreamHTTPTest` starts a real Bandit listener with the application Endpoint and
+the actual application-owned coordinator/watchdog supervisor. The reviewed query
+provider is replaced only with bounded test projection data. Named sign-in, cookie
+rotation and CSRF use real HTTP and Req. A separate passive TCP fixture intentionally
+does not read its small receive buffer; a disposable child BEAM VM proves that
+whole-node termination closes the stream. No test backdoor route or production
+limit override was added.
+
+The 13 HTTP cases cover pre-header security/schema/scope rejection; initial events
+before EOF; private headers and bounded framing; duplicate/cross-route takeover;
+session/principal concurrency caps; reduced tenant/factory/admission exhaustion;
+encoded/cumulative/event overflow; heartbeats and expiry; disconnect/owner/coordinator
+failure and drain; a blocked query; all eight lost-hint generation changes while
+idle and while querying; stale same-tab Last-Event-ID/cursor reconnect; hard expiry;
+and passive readers/node death. A fingerprint is now part of cursor binding, so
+the reconnect test cannot accidentally pass merely by changing tab correlation.
+
+HTTP fixtures accelerate positive timers (100ms checks, 200ms heartbeats, 700ms
+idle; selected 200ms admission), lower individual exhaustion limits and restore
+the production child between cases. Production values remain those above. Some
+transports can retain a disconnected owner until the independent idle deadline;
+response arrival also precedes controller `after` cleanup. Tests assert bounded
+convergence, not same-instant cleanup. The passive-reader fixture does not claim
+kernel send-buffer saturation: D2 sends only one bounded protected snapshot.
+Independent blocked-writer/watchdog tests supply that complementary failure fence.
+
+Browser fixtures share a named principal with predecessor suites. Each D2 profile
+waits for a fresh 61-second rate window, and each case explicitly signs out its
+session to avoid accumulating idle owners. No 429 retry or widened limit masks
+exhaustion. Coverage includes local-only storage-disabled operation, copied-tab
+same-session takeover versus separate-session isolation, fixed retry/backoff,
+late frames, sleep/wake, focus, native fallback, and HTTP/1 plus TLS HTTP/2 proxy
+delivery before EOF. Proxy testing exposed absolute upstream asset URLs; the
+layout now uses `static_path` for the same single local bundles. CSP is unchanged.
+The accepted test HTTP/2 proxy's origin normalization remains a fixture, not a
+production proxy trust policy or D4 deployment claim.
+
+Named Orca qualification runs `scripts/qualify_hui_d2_orca.sh`: keyboard connect,
+spoken connected status, retained focus, cross-tab revocation, safe alert focus
+and keyboard access to the native reload link. Raw speech/browser traces remain
+ephemeral. Full precommit and cumulative browser results are recorded in the
+phase receipt before the implementation PR; acceptance still requires clean CI,
+merge and a narrowly scoped merged-candidate closure.
