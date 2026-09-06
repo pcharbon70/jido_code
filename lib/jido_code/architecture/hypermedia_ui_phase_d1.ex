@@ -3,7 +3,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD1 do
   @manifest "priv/architecture/hypermedia_ui/phase_d1_implementation_evidence.json"
   @plan "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md"
   @receipt "docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md"
-  @merged_candidate nil
+  @merged_candidate "c73fb6d44ea305b86acc504114ac7036bbd7caa1"
   @baseline "4d0e3918d732d87ebaad36e56ef90cc781e51d62"
   @predecessor "5987a7a4a43505b035f5a566588d5201e98686f7"
   @section_commits %{

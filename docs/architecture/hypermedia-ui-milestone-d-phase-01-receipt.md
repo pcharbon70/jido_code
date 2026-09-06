@@ -2,13 +2,14 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-HUI-D1 implements closed, finite request/fragment delivery. It remains
-merge-pending until the exact implementation head passes clean-checkout CI,
-merges, and this receipt pins the full merged candidate. Phase D2 is not yet
-authorized. All HUI-A through HUI-C and program HUI3 reopening conditions remain
-cumulative and binding; none are weakened or reinterpreted.
+HUI-D1 is accepted at merged implementation candidate
+`c73fb6d44ea305b86acc504114ac7036bbd7caa1`. Implementation PR #127 passed
+clean-checkout verification and Dialyzer on its exact head before merging on
+2026-09-06. Phase D2 is authorized only from this pinned baseline. All HUI-A
+through HUI-C and program HUI3 reopening conditions remain cumulative and
+binding; none are weakened or reinterpreted.
 
 ## Candidate Provenance
 
@@ -19,12 +20,15 @@ cumulative and binding; none are weakened or reinterpreted.
 | Section 1.1: closed signal schemas | `5f2c2de7b86469af615da93e99bdd7516aff076f` |
 | Section 1.2: explicit authorized handlers | `9a7228a9e04e14fed0dc6c4becbb2abfd15f3fc0` |
 | Section 1.3: coherent HEEx fragments | `23a153e703108a972377f76fcddee946bd50ae1b` |
-| Section 1.4 / implementation head | Pending section commit |
-| Merged candidate | Pending implementation merge |
+| Section 1.4 / implementation head, PR #127 | `e89d4859a2e5b850564667045a4a1be86a44f7cc` |
+| Merged candidate, PR #127 | `c73fb6d44ea305b86acc504114ac7036bbd7caa1` |
+
+Merged candidate: `c73fb6d44ea305b86acc504114ac7036bbd7caa1`
+Merge date: `2026-09-06`
 
 ## Gate HUI-D1.1 - Closed Request Intent
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Ten code-owned `read_<surface>` namespaces admit only reviewed native filter,
 search, sort, direction, and page intent. Account/session refresh admits no
@@ -37,7 +41,7 @@ and idempotency are prohibited. Unsupported cursors/views remain rejected.
 
 ## Gate HUI-D1.2 - Explicit Authorized Read Handlers
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Ten explicit POST controller routes reuse the accepted native queries and
 typed view models. Server-side route/query/row/field authorization is followed
@@ -55,7 +59,7 @@ globally, and 256 rate-window keys. Caller death and completion release leases.
 
 ## Gate HUI-D1.3 - Coherent Fragments And Native Parity
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 One finite HTML outer morph updates `product-owned-content` with a 131,072-byte
 ceiling. The existing HEEx templates render full and partial pages through the
@@ -76,7 +80,7 @@ subscription, server Scripts event, or second product runtime.
 
 ## Gate HUI-D1.4 - Integration Candidate
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The 28-test focused parser/controller/limiter/architecture/runtime-inventory
 matrix passes. It includes 1,000 bounded fuzz inputs, all ten route namespaces,
@@ -102,7 +106,13 @@ filters the existing 178 warnings with no new finding or unnecessary filter;
 the ignore file is unchanged. The pinned Datastar bundle remains SHA-256
 `5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65`.
 
-Clean-checkout CI and the implementation merge remain pending. Reproduction:
+Clean-checkout `verify` job 101499570019 passed in 18m4s and `dialyzer` job
+101499569926 passed in 1m49s on the unchanged PR #127 head. The first CI attempt
+completed successfully, including application, browser/proxy, dependency audit,
+and production-asset checks. PR #127 merged on 2026-09-06; this narrow closure
+pins that exact merged candidate without changing product behavior.
+
+Reproduction:
 `mix precommit`; `MIX_ENV=prod mix compile --warnings-as-errors`;
 `mix dialyzer --format short`; `MIX_ENV=test mix assets.build`;
 `npx playwright test`; and the D1/C5 Orca scripts under
