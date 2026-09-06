@@ -32,20 +32,20 @@ Back to plan: [README](./README.md)
       - [x] 2.1.1.3 Subtask - Define deterministic duplicate/takeover behavior by trusted browser session plus tab/route identity, including old-stream terminal close and race handling.
       - [x] 2.1.1.4 Subtask - Reject missing/invalid/oversized/reused correlation values under bounded fallback limits without treating them as grants.
 
-  - [ ] 2.2 Section - Implement supervised lifecycle, limits, and backpressure.
+  - [x] 2.2 Section - Implement supervised lifecycle, limits, and backpressure.
 
     This section centralizes stream ownership and ensures slow, abandoned, or
     malicious clients cannot create unbounded process or memory growth.
 
-    - [ ] 2.2.1 Task {#huid-p02-coordinator} [repo: jido_code] [after: {#huid-p02-admission}] - Implement the page/tab stream coordinator under supervision.
+    - [x] 2.2.1 Task {#huid-p02-coordinator} [repo: jido_code] [after: {#huid-p02-admission}] - Implement the page/tab stream coordinator under supervision.
 
       This task owns state transitions, queues, event encoding, cancellation,
       telemetry, and cleanup; page modules do not own independent stream loops.
 
-      - [ ] 2.2.1.1 Subtask - Define admitted/connected/idle/retrying/revoked/expired/closing/closed states and trusted route/scope/subscription/generation/expiry state.
-      - [ ] 2.2.1.2 Subtask - Enforce per-principal/session/tenant/factory connection counts, admission rate, event rate, event/patch bytes, queue depth/bytes, lifetime, heartbeat, retry/backoff, and idle limits.
-      - [ ] 2.2.1.3 Subtask - Coalesce safe hints, drop superseded nonterminal work, terminate overflow/slow clients safely, and prevent protected payload replay after queue or scope change.
-      - [ ] 2.2.1.4 Subtask - Handle client disconnect, process/node failure, deploy drain, timeout, exception, cancellation, and supervisor restart with deterministic cleanup.
+      - [x] 2.2.1.1 Subtask - Define admitted/connected/idle/retrying/revoked/expired/closing/closed states and trusted route/scope/subscription/generation/expiry state.
+      - [x] 2.2.1.2 Subtask - Enforce per-principal/session/tenant/factory connection counts, admission rate, event rate, event/patch bytes, queue depth/bytes, lifetime, heartbeat, retry/backoff, and idle limits.
+      - [x] 2.2.1.3 Subtask - Coalesce safe hints, drop superseded nonterminal work, terminate overflow/slow clients safely, and prevent protected payload replay after queue or scope change.
+      - [x] 2.2.1.4 Subtask - Handle client disconnect, process/node failure, deploy drain, timeout, exception, cancellation, and supervisor restart with deterministic cleanup.
 
   - [ ] 2.3 Section - Integrate hard expiry and live revocation.
 

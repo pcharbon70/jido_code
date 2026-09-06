@@ -1,7 +1,7 @@
 # HUI-D2 — Authorized Page/Tab Stream Coordinator Receipt
 
-Status: **merge-pending**. Section 2.1 admission is implemented. Long-lived
-lifecycle, revocation, browser delivery and integration acceptance are pending.
+Status: **merge-pending**. Sections 2.1–2.2 admission and supervised lifecycle are
+implemented. Live revocation, browser delivery and integration acceptance remain pending.
 
 ## Candidate Provenance
 
@@ -19,6 +19,11 @@ Section 2.1: closed intent/cursor, coordinator admission, ten controller routes,
 page-versus-stream grants, pre-header failures and D1 regression tests pass.
 The initial missing HEEx format selection was corrected. Successor evidence
 retains D1's original source digests; its negative drift tests remain binding.
+
+Section 2.2: coordinator/watchdog supervision, hard count/rate/byte/event/credit
+limits, independent session/connection/idle deadlines, blocked-owner termination,
+drain, crash/restart cleanup and private telemetry have focused executable tests.
+This is not yet the real HTTP/proxy/browser integration acceptance of section 2.4.
 
 The executable source inventory and section evidence are in
 `priv/architecture/hypermedia_ui/phase_d2_implementation_evidence.json`.

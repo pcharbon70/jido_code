@@ -38,9 +38,15 @@ defmodule JidoCodeWeb.StreamControllerTest do
     end)
 
     :sys.replace_state(ReadRequestLimiter, fn _ -> %{windows: %{}, leases: %{}} end)
-    :sys.replace_state(StreamCoordinator, fn state -> %{state | windows: %{}, nonces: %{}} end)
+    limits = :sys.get_state(StreamCoordinator).limits
+
+    :sys.replace_state(StreamCoordinator, fn state ->
+      %{state | windows: %{}, nonces: %{}, limits: %{limits | idle_ms: 1_000}}
+    end)
 
     on_exit(fn ->
+      :sys.replace_state(StreamCoordinator, &%{&1 | limits: limits})
+
       Enum.each(prior, fn {key, value} ->
         if value == nil,
           do: Application.delete_env(:jido_code, key),

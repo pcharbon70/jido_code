@@ -20,6 +20,7 @@ defmodule JidoCode.Product.StreamCoordinatorTest do
              Coordinator.admit(%{context | request: "second", route: "/projects"}, server)
 
     assert_receive {:product_stream, ^first, {:closed, :takeover}}
+    assert :ok = Coordinator.release(first, server)
     assert {:error, :closed} = Coordinator.active(first, server)
     assert :ok = Coordinator.active(second, server)
     assert %{connections: 1, nonce_keys: 2} = Coordinator.stats(server)

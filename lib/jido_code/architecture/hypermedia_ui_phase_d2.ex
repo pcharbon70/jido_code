@@ -39,6 +39,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     lib/jido_code/architecture/hypermedia_ui_phase_d2.ex
     lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex
     lib/jido_code/product/stream_coordinator.ex
+    lib/jido_code/product/stream_owner_guard.ex
     lib/jido_code_web/controllers/stream_controller.ex
     lib/jido_code_web/plugs/read_body.ex
     lib/jido_code_web/product_controller.ex
@@ -55,6 +56,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
     test/jido_code/architecture/hypermedia_ui_phase_a1_test.exs
     test/jido_code/architecture/hypermedia_ui_phase_d2_test.exs
     test/jido_code/product/stream_coordinator_test.exs
+    test/jido_code/product/stream_lifecycle_test.exs
     test/jido_code_web/controllers/stream_controller_test.exs
     test/jido_code_web/stream_intent_test.exs
     test/support/deny_stream_authority_adapter.ex
@@ -90,11 +92,26 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
       evidence["runtime_successor"],
       %{
         "routes" => Enum.map(@paths, &%{"method" => "POST", "path" => &1}),
-        "application_child_ids" => ["JidoCode.Product.StreamCoordinator"]
+        "application_child_ids" => [
+          "JidoCode.Product.StreamOwnerSupervisor",
+          "JidoCode.Product.StreamCoordinator"
+        ]
       },
       "runtime inventory"
     )
     |> equal(evidence["exceptions"], [], "exceptions")
+    |> equal(
+      evidence["limits"],
+      Map.new(JidoCode.Product.StreamCoordinator.limits(), fn {key, value} ->
+        {Atom.to_string(key), value}
+      end),
+      "fixed runtime limits"
+    )
+    |> equal(
+      evidence["states"],
+      ~w[admitted connected idle retrying revoked expired closing closed],
+      "lifecycle states"
+    )
     |> equal(
       evidence["predecessor_source_digests"],
       predecessor_digests(root),

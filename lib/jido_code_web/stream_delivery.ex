@@ -1,5 +1,5 @@
 defmodule JidoCodeWeb.StreamDelivery do
-  @moduledoc "Shared SSE encoding and the last fresh authority fence before response start."
+  @moduledoc "One shared bounded HTTP delivery loop; page controllers never own stream processes."
   import Plug.Conn
   alias JidoCode.Product.StreamCoordinator
   alias JidoCodeWeb.{ProductRequest, ReadResponse, ReadSecurity, StreamContext}
@@ -20,7 +20,27 @@ defmodule JidoCodeWeb.StreamDelivery do
 
     with true <- byte_size(body) <= @max_event_bytes,
          :ok <- reauthorize(conn),
-         :ok <- StreamCoordinator.active(conn.private.stream_lease) do
+         {:ok, lifecycle} <- StreamCoordinator.connect(conn.private.stream_lease) do
+      monitor = Process.monitor(lifecycle.coordinator)
+
+      try do
+        start_response(conn, body, lifecycle, monitor)
+      after
+        Process.demonitor(monitor, [:flush])
+      end
+    else
+      false -> ReadSecurity.reject(conn, 503)
+      {:error, :revoked} -> ReadSecurity.reject(conn, 401)
+      {:error, _} -> ReadSecurity.reject(conn, 409)
+    end
+  end
+
+  defp start_response(conn, body, lifecycle, monitor) do
+    lease = conn.private.stream_lease
+
+    with :ok <- reauthorize(conn),
+         :ok <- StreamCoordinator.reserve(lease, byte_size(body)),
+         :ok <- StreamCoordinator.active(lease) do
       conn =
         conn
         |> ReadSecurity.private_response()
@@ -29,13 +49,66 @@ defmodule JidoCodeWeb.StreamDelivery do
         |> send_chunked(200)
 
       case chunk(conn, body) do
-        {:ok, conn} -> conn
-        {:error, _} -> conn
+        {:ok, conn} ->
+          case StreamCoordinator.sent(lease) do
+            :ok -> loop(put_private(conn, :stream_snapshot, nil), lifecycle, monitor)
+            _ -> terminal(conn)
+          end
+
+        {:error, _} ->
+          conn
       end
     else
-      false -> ReadSecurity.reject(conn, 503)
-      {:error, :revoked} -> ReadSecurity.reject(conn, 401)
-      {:error, _} -> ReadSecurity.reject(conn, 409)
+      _ -> ReadSecurity.reject(conn, 409)
+    end
+  end
+
+  defp loop(conn, lifecycle, monitor) do
+    lease = conn.private.stream_lease
+    remaining = max(lifecycle.deadline - System.monotonic_time(:millisecond), 0)
+
+    receive do
+      {:product_stream, ^lease, {:closed, _reason}} ->
+        terminal(conn)
+
+      {:DOWN, ^monitor, :process, _, _} ->
+        terminal(conn)
+
+      {:product_stream, ^lease, {:check, heartbeat?}} ->
+        with :ok <- reauthorize(conn),
+             :ok <- StreamCoordinator.checked(lease),
+             {:ok, conn} <- heartbeat(conn, heartbeat?) do
+          loop(conn, lifecycle, monitor)
+        else
+          {:error, _} ->
+            StreamCoordinator.terminate_owner(lease, :revoked)
+            terminal(conn)
+        end
+    after
+      remaining ->
+        StreamCoordinator.terminate_owner(lease, :expired)
+        terminal(conn)
+    end
+  end
+
+  defp heartbeat(conn, false), do: {:ok, conn}
+
+  defp heartbeat(conn, true) do
+    body = ": heartbeat\n\n"
+    lease = conn.private.stream_lease
+
+    with :ok <- StreamCoordinator.reserve(lease, byte_size(body)),
+         :ok <- StreamCoordinator.active(lease),
+         {:ok, conn} <- chunk(conn, body),
+         :ok <- StreamCoordinator.sent(lease),
+         do: {:ok, conn}
+  end
+
+  defp terminal(conn) do
+    # One fixed, unprotected terminal frame uses the reserved terminal allowance.
+    case chunk(conn, "event: datastar-stream-status\ndata: state closed\n\n") do
+      {:ok, conn} -> conn
+      {:error, _} -> conn
     end
   end
 
