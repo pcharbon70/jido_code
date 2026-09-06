@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue"
 import liveVuePlugin from "live_vue/vitePlugin"
 import tailwindcss from "@tailwindcss/vite"
 import {fileURLToPath} from "node:url"
+import {vueCSPCompatibility} from "./vue_csp_compatibility.mjs"
 
 const phoenixHost = process.env.PHX_HOST ?? "localhost"
 const phoenixPort = process.env.PORT ?? "4000"
@@ -22,7 +23,9 @@ export default defineConfig({
     cors: {origin: [...new Set(allowedOrigins)]},
   },
   optimizeDeps: {
-    include: ["live_vue", "phoenix", "phoenix_html", "phoenix_live_view"],
+    include: ["phoenix", "phoenix_html", "phoenix_live_view"],
+    // Keep Vue's exact-source first-use transform on the development path too.
+    exclude: ["live_vue", "vue", "@vue/runtime-dom"],
   },
   ssr: {noExternal: process.env.NODE_ENV === "production" ? true : undefined},
   build: {
@@ -41,5 +44,5 @@ export default defineConfig({
       "phoenix-colocated": `${process.env.MIX_BUILD_PATH}/phoenix-colocated`,
     },
   },
-  plugins: [tailwindcss(), vue(), liveVuePlugin()],
+  plugins: [vueCSPCompatibility(), tailwindcss(), vue(), liveVuePlugin()],
 })

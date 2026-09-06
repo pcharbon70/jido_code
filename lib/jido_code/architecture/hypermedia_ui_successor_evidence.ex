@@ -4,6 +4,7 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @phase_d1_manifest "priv/architecture/hypermedia_ui/phase_d1_implementation_evidence.json"
   @phase_d1_mutable_paths ~w[
     assets/js/app.js
+    assets/vite.config.mjs
     lib/jido_code/application.ex
     lib/jido_code/architecture/hypermedia_ui_phase_b2.ex
     lib/jido_code/architecture/hypermedia_ui_phase_c3.ex

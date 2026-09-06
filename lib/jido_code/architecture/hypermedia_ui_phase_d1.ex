@@ -34,6 +34,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD1 do
   @required_sources ~w[
     assets/js/app.js
     assets/js/read_projection.js
+    assets/vite.config.mjs
+    assets/vue_csp_compatibility.mjs
+    docs/architecture/hypermedia-ui-compatibility-csp-repair.md
     docs/architecture/hypermedia-ui-read-request-and-fragment-implementation.md
     docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md
     docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md
@@ -71,6 +74,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD1 do
     scripts/qualify_hui_d1_orca.sh
     test/accessibility/hypermedia_ui_phase_d1_orca.mjs
     test/browser/hypermedia_ui_phase_d1.spec.mjs
+    test/assets/vue_csp_compatibility_test.mjs
+    test/jido_code/architecture/vue_csp_compatibility_test.exs
     test/jido_code/architecture/hypermedia_ui_phase_a1_test.exs
     test/jido_code/architecture/hypermedia_ui_phase_d1_test.exs
     test/jido_code/product/read_request_limiter_test.exs
