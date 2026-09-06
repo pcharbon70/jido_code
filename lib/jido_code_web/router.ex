@@ -37,6 +37,31 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.ReadSecurity
   end
 
+  pipeline :stream_browser do
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {JidoCodeWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug JidoCodeWeb.ReadSecurity
+    plug JidoCodeWeb.StreamSecurity
+  end
+
+  scope "/ui/streams", JidoCodeWeb do
+    pipe_through :stream_browser
+
+    post "/factory", StreamController, :factory
+    post "/fleet", StreamController, :fleet
+    post "/projects", StreamController, :projects
+    post "/projects/:project_ref/overview", StreamController, :project
+    post "/projects/:project_ref/attempts", StreamController, :project_attempts
+    post "/projects/:project_ref/wiki", StreamController, :project_wiki
+    post "/projects/:project_ref/dependencies", StreamController, :project_dependencies
+    post "/projects/:project_ref/attempts/:attempt_ref", StreamController, :attempt
+    post "/account", StreamController, :account
+    post "/sessions", StreamController, :sessions
+  end
+
   scope "/ui/reads", JidoCodeWeb do
     pipe_through [:browser, :enhanced_read]
 

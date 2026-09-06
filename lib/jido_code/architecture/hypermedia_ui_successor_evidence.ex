@@ -1,6 +1,28 @@
 defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @moduledoc false
 
+  @phase_d2_manifest "priv/architecture/hypermedia_ui/phase_d2_implementation_evidence.json"
+  @phase_d2_mutable_paths ~w[
+    assets/js/app.js
+    assets/js/read_projection.js
+    lib/jido_code/application.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_c3.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_c4.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_c5.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_d1.ex
+    lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex
+    lib/jido_code_web/components/product_page.ex
+    lib/jido_code_web/plugs/read_body.ex
+    lib/jido_code_web/product_controller.ex
+    lib/jido_code_web/product_request.ex
+    lib/jido_code_web/read_enhancement.ex
+    lib/jido_code_web/read_response.ex
+    lib/jido_code_web/read_signals.ex
+    lib/jido_code_web/router.ex
+    lib/mix/tasks/architecture.check.ex
+    test/jido_code/architecture/hypermedia_ui_phase_a1_test.exs
+  ]
+
   @phase_d1_manifest "priv/architecture/hypermedia_ui/phase_d1_implementation_evidence.json"
   @phase_d1_mutable_paths ~w[
     assets/js/app.js
@@ -105,7 +127,8 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @spec digest(Path.t(), String.t()) :: String.t() | nil
   def digest(root, path) do
-    phase_digest(root, path, @phase_d1_manifest, @phase_d1_mutable_paths, "HUI-D1") ||
+    phase_digest(root, path, @phase_d2_manifest, @phase_d2_mutable_paths, "HUI-D2") ||
+      phase_digest(root, path, @phase_d1_manifest, @phase_d1_mutable_paths, "HUI-D1") ||
       phase_digest(root, path, @phase_c5_manifest, @phase_c5_mutable_paths, "HUI-C5") ||
       phase_digest(root, path, @phase_c4_manifest, @phase_c4_mutable_paths, "HUI-C4") ||
       phase_digest(root, path, @phase_c3_manifest, @phase_c3_mutable_paths, "HUI-C3") ||
@@ -116,7 +139,8 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @spec mutable_path?(String.t()) :: boolean()
   def mutable_path?(path),
     do:
-      phase_d1_mutable_path?(path) or phase_c5_mutable_path?(path) or phase_c4_mutable_path?(path) or
+      phase_d2_mutable_path?(path) or phase_d1_mutable_path?(path) or phase_c5_mutable_path?(path) or
+        phase_c4_mutable_path?(path) or
         phase_c3_mutable_path?(path) or
         phase_c2_mutable_path?(path) or phase_c1_mutable_path?(path)
 
@@ -125,6 +149,19 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @spec phase_d1_mutable_path?(String.t()) :: boolean()
   def phase_d1_mutable_path?(path), do: path in @phase_d1_mutable_paths
+
+  @spec phase_d2_mutable_path?(String.t()) :: boolean()
+  def phase_d2_mutable_path?(path), do: path in @phase_d2_mutable_paths
+
+  def d2_predecessor_digest(root, path) do
+    with true <- path in @phase_d2_mutable_paths,
+         {:ok, body} <- File.read(Path.join(root, @phase_d2_manifest)),
+         {:ok, %{"phase" => "HUI-D2"} = evidence} <- Jason.decode(body) do
+      get_in(evidence, ["predecessor_source_digests", path])
+    else
+      _ -> nil
+    end
+  end
 
   @spec phase_c4_mutable_path?(String.t()) :: boolean()
   def phase_c4_mutable_path?(path), do: path in @phase_c4_mutable_paths

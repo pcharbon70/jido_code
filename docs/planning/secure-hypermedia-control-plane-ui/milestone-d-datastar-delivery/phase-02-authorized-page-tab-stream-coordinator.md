@@ -17,20 +17,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-D2 by ensuring long-lived responses cannot outlive
   current session/scope authority or exhaust factory resources.
 
-  - [ ] 2.1 Section - Implement stream admission and trusted connection identity.
+  - [x] 2.1 Section - Implement stream admission and trusted connection identity.
 
     This section authorizes the exact page/resource before response start and
     treats tab IDs and reconnect cursors only as untrusted correlation input.
 
-    - [ ] 2.1.1 Task {#huid-p02-admission} [repo: jido_code] [after: {#huid-p01-phase-receipt}] - Implement explicit SSE route admission and takeover keys.
+    - [x] 2.1.1 Task {#huid-p02-admission} [repo: jido_code] [after: {#huid-p01-phase-receipt}] - Implement explicit SSE route admission and takeover keys.
 
       This task binds connections to current server-known principal/session,
       route, scope, generation, and expiry.
 
-      - [ ] 2.1.1.1 Subtask - Add explicit per-page stream routes with authentication, CSRF/Origin/Fetch Metadata, content negotiation, route/resource resolution, and authorization before headers/body.
-      - [ ] 2.1.1.2 Subtask - Derive trusted principal/session generation/tenant/repository/attempt/route/projection identity server-side and validate bounded random tab/cursor inputs separately.
-      - [ ] 2.1.1.3 Subtask - Define deterministic duplicate/takeover behavior by trusted browser session plus tab/route identity, including old-stream terminal close and race handling.
-      - [ ] 2.1.1.4 Subtask - Reject missing/invalid/oversized/reused correlation values under bounded fallback limits without treating them as grants.
+      - [x] 2.1.1.1 Subtask - Add explicit per-page stream routes with authentication, CSRF/Origin/Fetch Metadata, content negotiation, route/resource resolution, and authorization before headers/body.
+      - [x] 2.1.1.2 Subtask - Derive trusted principal/session generation/tenant/repository/attempt/route/projection identity server-side and validate bounded random tab/cursor inputs separately.
+      - [x] 2.1.1.3 Subtask - Define deterministic duplicate/takeover behavior by trusted browser session plus tab/route identity, including old-stream terminal close and race handling.
+      - [x] 2.1.1.4 Subtask - Reject missing/invalid/oversized/reused correlation values under bounded fallback limits without treating them as grants.
 
   - [ ] 2.2 Section - Implement supervised lifecycle, limits, and backpressure.
 

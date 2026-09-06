@@ -6,6 +6,16 @@ defmodule JidoCodeWeb.Plugs.ReadBody do
   def init(options), do: options
 
   def call(%{request_path: "/ui/reads/" <> _} = conn, _options) do
+    accept_body(conn)
+  end
+
+  def call(%{request_path: "/ui/streams/" <> _} = conn, _options) do
+    accept_body(conn)
+  end
+
+  def call(conn, _options), do: conn
+
+  defp accept_body(conn) do
     conn = JidoCodeWeb.ReadSecurity.private_response(conn)
 
     cond do
@@ -25,8 +35,6 @@ defmodule JidoCodeWeb.Plugs.ReadBody do
         read(conn)
     end
   end
-
-  def call(conn, _options), do: conn
 
   defp read(conn) do
     case read_body(conn,

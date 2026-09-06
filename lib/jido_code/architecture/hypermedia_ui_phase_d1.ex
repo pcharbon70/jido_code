@@ -164,12 +164,13 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD1 do
     Enum.reduce(sources, errors, fn {path, digest}, acc ->
       case File.read(Path.join(root, path)) do
         {:ok, body} ->
-          equal(
-            acc,
-            Base.encode16(:crypto.hash(:sha256, body), case: :lower),
-            digest,
-            "source digest #{path}"
-          )
+          current = Base.encode16(:crypto.hash(:sha256, body), case: :lower)
+          successor = JidoCode.Architecture.HypermediaUISuccessorEvidence
+
+          if successor.phase_d2_mutable_path?(path) and successor.digest(root, path) == current and
+               successor.d2_predecessor_digest(root, path) == digest,
+             do: acc,
+             else: equal(acc, current, digest, "source digest #{path}")
 
         _ ->
           ["source unavailable #{path}" | acc]

@@ -299,7 +299,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5 do
               current = sha256(body)
               successor = JidoCode.Architecture.HypermediaUISuccessorEvidence
 
-              if successor.phase_d1_mutable_path?(path) and
+              if (successor.phase_d1_mutable_path?(path) or successor.phase_d2_mutable_path?(path)) and
                    successor.digest(root, path) == current,
                  do: acc,
                  else: equal(acc, current, expected, "source digest #{path}")

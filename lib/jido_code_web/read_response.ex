@@ -37,6 +37,9 @@ defmodule JidoCodeWeb.ReadResponse do
           not within_limit?(body) ->
             ReadSecurity.reject(conn, 503)
 
+          conn.private[:stream_intent] != nil ->
+            put_private(conn, :stream_snapshot, body)
+
           true ->
             conn
             |> ReadSecurity.private_response()
@@ -53,7 +56,7 @@ defmodule JidoCodeWeb.ReadResponse do
 
   # Access timestamps and correlation IDs are deliberately not an authority fence.
   # All grants, generations, redaction, assurance and resource/graph revisions are.
-  defp fingerprint(%AuthorizationResult{} = result) do
+  def fingerprint(%AuthorizationResult{} = result) do
     result
     |> Map.take([
       :decision,
@@ -68,5 +71,5 @@ defmodule JidoCodeWeb.ReadResponse do
     |> Map.put(:scope, Map.drop(result.current_scope, [:idle_expires_at]))
   end
 
-  defp fingerprint(session), do: session
+  def fingerprint(session), do: session
 end
