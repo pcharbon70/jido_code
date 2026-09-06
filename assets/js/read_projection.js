@@ -3,6 +3,7 @@ import {action, actions} from "../vendor/datastar/datastar.js"
 // Only explicit user gestures initiate a finite read. No subscriptions or retries.
 // This state holds presentation intent, never identity, scope, grants or revisions.
 const pending = new WeakMap()
+export const readInFlight = section => pending.has(section)
 const queryKeys = new Set(["q", "state", "sort", "direction", "page"])
 let historyPath = location.pathname + location.search
 
@@ -15,6 +16,7 @@ const intent = (section, event) => {
   if (event.type !== "click" || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null
   const link = event.target.closest("a[href]")
   if (!link || link.target || link.hasAttribute("download")) return null
+  if (link.id === "product-stream-connect") return null
   const url = new URL(link.href, location.href)
   if (url.origin !== location.origin || url.pathname !== section.dataset.readNative || url.hash) return null
   const pairs = [...url.searchParams]
@@ -22,7 +24,7 @@ const intent = (section, event) => {
   return Object.fromEntries(pairs)
 }
 
-const clearProtectedContent = (terminal = false) => {
+export const clearProtectedContent = (terminal = false) => {
   const root = document.getElementById("product-owned-content")
   if (!root) return
   const status = document.createElement("p")
@@ -37,6 +39,7 @@ const clearProtectedContent = (terminal = false) => {
   // Never retain hidden rows, templates, or old protected HTML after a failed read.
   root.replaceChildren(status, link)
   delete root.dataset.readUrl
+  delete root.dataset.streamCursor
   if (terminal) {
     // Lost/stale authority also invalidates the old scope/account/navigation shell.
     const shell = document.getElementById("product-shell")
@@ -48,7 +51,7 @@ const clearProtectedContent = (terminal = false) => {
   }
 }
 
-const remember = () => {
+export const remember = () => {
   const focused = document.activeElement
   const selection = focused instanceof HTMLInputElement || focused instanceof HTMLTextAreaElement
     ? [focused.selectionStart, focused.selectionEnd, focused.selectionDirection] : null
@@ -58,7 +61,7 @@ const remember = () => {
   return {focused, selection, formAction, opened, x: scrollX, y: scrollY}
 }
 
-const restore = (saved) => {
+export const restore = (saved) => {
   for (const {node, modal} of saved.opened) {
     // Restore only surviving elements; never resurrect removed protected content.
     if (node.isConnected && !node.open) {
@@ -87,6 +90,7 @@ action({
     // Failed transport leaves an ordinary native reload link, without auto retry.
     if (event.target.closest?.("#product-read-reload")) return
     event.preventDefault()
+    document.dispatchEvent(new CustomEvent("product-read-intent", {detail: {section}}))
     const previous = pending.get(section)
     previous?.abort()
     const controller = new AbortController()

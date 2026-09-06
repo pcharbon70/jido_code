@@ -37,14 +37,22 @@ defmodule JidoCodeWeb.ProductController do
   end
 
   def prepare(conn, params, spec) do
+    {conn, spec} =
+      if conn.private[:stream_intent],
+        do:
+          {Plug.Conn.put_private(conn, :read_reauthorization_point, :before_stream_subscription),
+           Map.put(spec, :action, :stream)},
+        else: {conn, spec}
+
     case ProductRequest.authorize(conn, spec, params) do
       {:ok, conn, page} ->
         conn =
           Plug.Conn.put_private(conn, :read_authorization, {spec, params, page.authorization})
 
-        projection = load_projection(conn, page)
-
-        {:ok, conn, page, projection, ProductPageViewModel.build(conn, page, projection)}
+        with {:ok, conn} <- JidoCodeWeb.StreamAdmission.acquire(conn, page) do
+          projection = load_projection(conn, page)
+          {:ok, conn, page, projection, ProductPageViewModel.build(conn, page, projection)}
+        end
 
       {:error, conn} ->
         {:error, conn}

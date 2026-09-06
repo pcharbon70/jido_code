@@ -54,10 +54,7 @@ defmodule JidoCodeWeb.ReadSignals do
 
   @spec decode(atom(), term()) :: {:ok, map()} | {:error, diagnostic()}
   def decode(surface, raw) when surface in @surfaces and is_binary(raw) do
-    with :ok <- bounded(raw),
-         :ok <- shallow(raw),
-         {:ok, %OrderedObject{values: pairs}} <- Jason.decode(raw, objects: :ordered_objects),
-         :ok <- unique(pairs),
+    with {:ok, pairs} <- decode_object(raw),
          [{name, %OrderedObject{values: values}}] <- pairs,
          true <- name == namespace(surface),
          :ok <- unique(values),
@@ -77,6 +74,22 @@ defmodule JidoCodeWeb.ReadSignals do
   end
 
   def decode(_surface, _raw), do: {:error, :invalid_shape}
+
+  @doc "Shared bounded, depth-two, duplicate-preserving outer object decoder."
+  def decode_object(raw) when is_binary(raw) do
+    with :ok <- bounded(raw),
+         :ok <- shallow(raw),
+         {:ok, %OrderedObject{values: pairs}} <- Jason.decode(raw, objects: :ordered_objects),
+         :ok <- unique(pairs) do
+      {:ok, pairs}
+    else
+      {:error, %Jason.DecodeError{}} -> {:error, :invalid_json}
+      {:error, reason} -> {:error, reason}
+      _ -> {:error, :invalid_shape}
+    end
+  end
+
+  def decode_object(_raw), do: {:error, :invalid_shape}
 
   # Scan depth before JSON allocation, respecting quoted/escaped delimiters.
   defp shallow(raw), do: shallow(raw, 0, false, false)

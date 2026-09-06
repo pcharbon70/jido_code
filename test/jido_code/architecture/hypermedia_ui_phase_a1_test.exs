@@ -6,6 +6,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
   alias JidoCode.Architecture.HypermediaUIPhaseC3
   alias JidoCode.Architecture.HypermediaUIPhaseC4
   alias JidoCode.Architecture.HypermediaUIPhaseD1
+  alias JidoCode.Architecture.HypermediaUIPhaseD2
   alias JidoCode.Knowledge.CommandRegistry
   alias JidoCode.Knowledge.GraphRegistry
   alias JidoCode.Knowledge.QueryCatalog
@@ -23,7 +24,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
       (manifests.runtime["routes"] ++
          successor["runtime_successor"]["routes"] ++
          c3_successor["runtime_successor"]["routes"] ++
-         d1_successor!()["runtime_successor"]["routes"])
+         d1_successor!()["runtime_successor"]["routes"] ++
+         d2_successor!()["runtime_successor"]["routes"])
       |> Enum.reject(&(&1["id"] == "development_dashboard"))
       |> Enum.map(&{&1["method"], &1["path"]})
       |> Enum.sort()
@@ -47,7 +49,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
         supervision["application_child_ids"] ++
           successor["runtime_successor"]["application_child_ids"] ++
           c4_successor["runtime_successor"]["application_child_ids"] ++
-          d1_successor!()["runtime_successor"]["application_child_ids"]
+          d1_successor!()["runtime_successor"]["application_child_ids"] ++
+          d2_successor!()["runtime_successor"]["application_child_ids"]
       )
 
     assert child_ids(JidoCode.Supervisor) == expected_children
@@ -152,6 +155,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseA1Test do
 
   defp d1_successor! do
     assert {:ok, evidence} = HypermediaUIPhaseD1.load()
+    evidence
+  end
+
+  defp d2_successor! do
+    assert {:ok, evidence} = HypermediaUIPhaseD2.load()
     evidence
   end
 end

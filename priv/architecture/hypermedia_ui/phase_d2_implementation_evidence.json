@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-D2",
+  "status": "integration_candidate_merge_pending",
+  "baseline_commit": "852215a71fae707bd7bd89ea822e2963b695ec5b",
+  "predecessor_candidate": "7118bf337639c5ecdd5f2567dafbc761a5e09165",
+  "merged_candidate": null,
+  "clean_checkout_ci": "pending",
+  "completed_sections": [
+    "2.1",
+    "2.2",
+    "2.3",
+    "2.4"
+  ],
+  "section_commits": {
+    "2.1": "16b9a187de9c74bed1209d16965bdcdf35e44423",
+    "2.2": "4b4b0a4d0f5a37475bca027a047085f7c975819a",
+    "2.3": "3be4660e030e48f30bdecc85d5e1917d7958a966"
+  },
+  "invariants": [
+    "authentication_csrf_origin_metadata_and_negotiation_precede_response_start",
+    "exact_stream_resource_query_and_field_authority_is_server_owned",
+    "bounded_correlation_and_signed_cursors_never_restore_authority",
+    "trusted_session_tab_takeover_invalidates_the_old_lease",
+    "principal_session_tenant_factory_rate_and_memory_caps_are_hard",
+    "one_supervised_coordinator_owns_lifecycle_and_cleanup",
+    "bounded_encoded_events_and_coalesced_control_credit_prevent_protected_replay",
+    "hard_session_connection_idle_and_slow_owner_deadlines_ignore_traffic",
+    "all_eight_revocation_generations_and_periodic_fresh_checks_are_binding",
+    "terminal_authority_change_clears_protected_content_and_suppresses_reconnect",
+    "native_fallback_focus_csp_and_predecessor_reopenings_remain_binding",
+    "real_http_browser_proxy_failure_and_clean_checkout_tests_precede_merge_acceptance"
+  ],
+  "runtime_successor": {
+    "routes": [
+      {
+        "method": "POST",
+        "path": "/ui/streams/factory"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/fleet"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/projects"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/projects/:project_ref/overview"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/projects/:project_ref/attempts"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/projects/:project_ref/wiki"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/projects/:project_ref/dependencies"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/projects/:project_ref/attempts/:attempt_ref"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/account"
+      },
+      {
+        "method": "POST",
+        "path": "/ui/streams/sessions"
+      }
+    ],
+    "application_child_ids": [
+      "JidoCode.Product.StreamOwnerSupervisor",
+      "JidoCode.Product.StreamCoordinator"
+    ]
+  },
+  "exceptions": [],
+  "source_digests": {
+    "assets/js/app.js": "98c93be0c42eb58b5b27622df4df0ed5f1ec107191b7f23027c63bb6941592f7",
+    "assets/js/read_projection.js": "af05845e0cddd65ba9a1644b890a883a72d53501635289a681130fa266a1fe8a",
+    "assets/js/stream_connection.js": "43e71f848f69178331de5708765c3e295a1268a972744c263cf7aae443b5fd59",
+    "docs/architecture/hypermedia-ui-milestone-d-phase-02-receipt.md": "d6550afd218a89318292de56793c880fc02cee11c9e038a3a21ccfb30612fe71",
+    "docs/architecture/hypermedia-ui-stream-coordinator-implementation.md": "3132e55666312b1e28aaa205bfa377d13f1840a9fed41cb532668250e606fec7",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-02-authorized-page-tab-stream-coordinator.md": "a550274ec3c3fa575ac9907b4c11f1d0603c4eeabb547b928232cbc4972d9e4b",
+    "lib/jido_code/application.ex": "f0fd140f629e856b3fa64437a3e04adbd3b4b99ac9f1fd8717362d285445154b",
+    "lib/jido_code/identity/store.ex": "11668bffb50b8a132bee36b3bd22a8f9c9190d4aa3ba4a702ed21a75e7119e4d",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "92615a8cfba7e87534dc2d542f25ab9cb3e347c7bb5fa374390eb9eeee73fa70",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "6bdf4f450f55f6fdf685d5e6e63c2f7a796255bbc46a50f1339c7b214ead0b0c",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c5.ex": "4e8b6f63c5ba4b99ac0cbd353ef9e132b7fe09fc505ea5a9ef9a4f2cc69c5d19",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d1.ex": "28b0db344cb1188cc0861fafcc7902348893cf6037c04f3e1b02f19766ccd499",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d2.ex": "4818b15b8aea5538ecee751b3e0023ac1fd27e4904a40e322452db4b09638cf8",
+    "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "3c140bf7886e24ca3022c3982d760ea758eacd762ce76e5eff6b0be1af87d5aa",
+    "lib/jido_code/product/stream_coordinator.ex": "57ce4e6aa37047dfe1622f711e3ac7c42d806a9bafaabc0e52078d1e15f2ec1e",
+    "lib/jido_code/product/stream_owner_guard.ex": "311cd71b7adeb027554a89348f99c9b811172b86dfeb1d7c98467c81c4eb727f",
+    "lib/jido_code_web/components/product_page.ex": "76a310a5c6b3cd9b2a1b3fd0d50e111bcde3f283be52648fff847d6577d15c9b",
+    "lib/jido_code_web/components/layouts/root.html.heex": "eb6461629fcb9664048970e08228ee3d6d2a1233dad7f394a03064290230cd0a",
+    "lib/jido_code_web/controllers/stream_controller.ex": "757fa55e588fabd41c5ccd3936d602993d42c8745fa789ba56cdfb0dc84188f0",
+    "lib/jido_code_web/controllers/stream_html.ex": "546d24a5b9cc9efe76a6448f602289b1035a6f8345d959a56c9fe70ea2dfacf6",
+    "lib/jido_code_web/plugs/read_body.ex": "03f7d119bd69de7159a0046b6417a677139be8ac4e3c5802b09464faf2e213df",
+    "lib/jido_code_web/product_controller.ex": "811af31c7740dfddf09db0ebf02685d1a5a05c65834002ba91e0702d4d7d61fc",
+    "lib/jido_code_web/product_request.ex": "4a6a02dd47c3f7b8e3132210166165a79d0b4328998ab5b7b690050379497cdc",
+    "lib/jido_code_web/read_response.ex": "8275df7aff6c59536b068a471219dafaaa21a44864a0218eb9713351575293f7",
+    "lib/jido_code_web/read_enhancement.ex": "81973348c7a24fb56bc4d472a0103bfb54688344545a19440f4b65a9625e7231",
+    "lib/jido_code_web/read_signals.ex": "fe5f32b971a7cdfb450ad620a3f2f842332fb5528d708ae819d37c1f9f29a94d",
+    "lib/jido_code_web/router.ex": "3f7f0caf11f5589989fa1df25aff34e15b5e9faa0da374209443061846169eb6",
+    "lib/jido_code_web/stream_admission.ex": "78f826807a4956c7745beeadddf5d3982c9bd526d8c9cc734b4cedd453cc465a",
+    "lib/jido_code_web/stream_context.ex": "44857ca9f97919196ba82dffcffe5b9c746e5aef10b8af362783c6c6a747ed3d",
+    "lib/jido_code_web/stream_delivery.ex": "db418192c3dad63391084cbecfc68679b0b59d06279d9d277cee708fff3905ac",
+    "lib/jido_code_web/stream_intent.ex": "10fa48007f8276a39f1b7d2512afc249adff457fe890c38bd5afb2bf5e71fade",
+    "lib/jido_code_web/stream_security.ex": "892d1d4296a152498472daf1bcfb5c8b0e18074db850b2586e3b730c6584cd02",
+    "lib/mix/tasks/architecture.check.ex": "65a8cbd79ab1290485bead8212c13d0f1f6acff272c1ce1cac385c598e7da614",
+    "test/jido_code/architecture/hypermedia_ui_phase_a1_test.exs": "d7a0843771a2bba05fd0c77dc31a18dda85773591adf86b3dc8cc0021349b900",
+    "test/jido_code/architecture/hypermedia_ui_phase_d2_test.exs": "8d7f0a2a12484dab93b676de61cd467b0a2279f9fac3c8d5ab3ced9f889307c6",
+    "test/jido_code/product/stream_coordinator_test.exs": "d66406c4b1d59090a309b71837b826f3956b61bb4995fe4cafd96fdccb3337e0",
+    "test/jido_code/product/stream_lifecycle_test.exs": "4d273079856e0a4f75a21d9c2c477bd11dda9a876437f5a493ba40dd1ef93d71",
+    "test/jido_code/product/stream_revocation_test.exs": "152d67fbfdd59125412428699b417977fd61da36c62083e104a731290b5794c8",
+    "test/jido_code/identity/session_lifecycle_test.exs": "4286cd3b7f9306d31bd8d19dce6fef0f60d32d9be1360e8dce3a7fa2b9762997",
+    "test/jido_code_web/controllers/stream_controller_test.exs": "de3aedc0ff7629ae71d91ed45a959c258de5ba7062cc1ea04188eaeda5ec9462",
+    "test/jido_code_web/stream_intent_test.exs": "ae059fac29135f66596a2ed3c9942d8128c68deba06e5947a2f9c13e2ae84325",
+    "test/jido_code_web/stream_reauthorization_test.exs": "8e961af8ff39aaddc01620854cf3f677fedce0b20ec0fa5a9357c409d97b77a3",
+    "test/jido_code_web/stream_http_test.exs": "8b72bffa1df9e5ab20ad7379df6ba5f263893cb54950ed80aa1ec32240d8e209",
+    "test/browser/hypermedia_ui_phase_d2.spec.mjs": "6298b2a7e62d09d03ef4e9e8d0f44b9577bf9eb01876e01356d80e8e1fa79846",
+    "test/accessibility/hypermedia_ui_phase_d2_orca.mjs": "0ccd761508dd1dbbf76e67b2d2035ebf0a6551ca534e77c95540e79cffbe9e84",
+    "scripts/qualify_hui_d2_orca.sh": "383c42feea17ef5f5f18735d726701e9e7e28d11be65b12246a731a19f33cfdb",
+    "test/support/deny_stream_authority_adapter.ex": "52bb73352564cd11ca0954d5ada71248e3ef7462d869b4896a1589572e7c1b53"
+  },
+  "predecessor_source_digests": {
+    "assets/js/app.js": "5ff35d53b9537b013e67c5bc1486ef5564a89f41b7581a26b60480a91abbc928",
+    "assets/js/read_projection.js": "a2d09053244a9f5852abb6c9e06a5068791de38a2f9fc35456145fadecdf0694",
+    "lib/jido_code/application.ex": "cd2c2e78403d64259518f1f6444d4151c2ac5c89da2752c05ba4bb2610ec9d73",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "41f1655e04f4b59830927d418d122d9ae9d267683e77f70476fb4d7f971213d0",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "aec8fda78f04d5061e8c59139e5c87a36e7d7c1c9faa39baae4a2db498759a41",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c5.ex": "cbee9881a7536d35af37a0ce12f4dcfc25b5ecdcfa3479dc59cef991cd54eb31",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d1.ex": "e95c36b20850371dba7c237eb16575afc2b476f3dfda33ca740371a99a9291e1",
+    "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "435395cc3e3729671ef0321247f234cc6ea85fc20e0cfd12012823440b5d31cb",
+    "lib/jido_code_web/components/product_page.ex": "63463e3f65c597ef71df606bde008b5e5c20a763e33f1ed9fcb56000c1ebc53a",
+    "lib/jido_code_web/plugs/read_body.ex": "f95e45c1d5c25a9211cdb22601c3b211b1e205124d45e1d7afc0b91a2780d16a",
+    "lib/jido_code_web/product_controller.ex": "3275a524dba3518d693e0abc37b1e52a87dfd82b7b606a8b117b7693838dccf5",
+    "lib/jido_code_web/product_request.ex": "c809786302822305977204ef9738477e051e1928fd4b6492c02740bd433d9698",
+    "lib/jido_code_web/read_enhancement.ex": "8039d08fe3d0d65a70a689aaf3c09d6f8d4f52d7ea7df8890254cc8f7abfc1cb",
+    "lib/jido_code_web/read_response.ex": "786159b1ff63ae5be066f351f4ecf41c18698107221486d5f31d165c78101135",
+    "lib/jido_code_web/read_signals.ex": "c6c15eb1d910574f63c5581a00521de2e8e19cc92b71fb0e8bf9dfc18bc63641",
+    "lib/jido_code_web/router.ex": "7e0c08ee4e846b7a8841a581597ea43f8e2a202421086ff7e8680486521e723e",
+    "lib/mix/tasks/architecture.check.ex": "ea0ffa6afe25ebc995a8e394b0cccf1446912e2f801088a70b1d497b309d285a",
+    "test/jido_code/architecture/hypermedia_ui_phase_a1_test.exs": "0e4e53faf8913cbf9fe37e6eb7d5fe33f41e4b4f5db153b3aa7b1defd89a42ee"
+  },
+  "limits": {
+    "factory": 32,
+    "principal": 4,
+    "session": 2,
+    "tenant": 16,
+    "admissions": 16,
+    "window_ms": 60000,
+    "rate_keys": 256,
+    "nonce_keys": 1024,
+    "nonce_ms": 120000,
+    "lifetime_ms": 60000,
+    "idle_ms": 30000,
+    "admitted_ms": 10000,
+    "heartbeat_ms": 5000,
+    "reauthorize_ms": 2000,
+    "work_ms": 2000,
+    "grace_ms": 250,
+    "tick_ms": 100,
+    "event_bytes": 131072,
+    "total_bytes": 1048576,
+    "events": 120,
+    "event_interval_ms": 100,
+    "queued_hints": 1,
+    "queued_payload_bytes": 0,
+    "retry_max": 2,
+    "retry_initial_ms": 1000,
+    "retry_max_ms": 2000,
+    "terminal_bytes": 1024
+  },
+  "states": [
+    "admitted",
+    "connected",
+    "idle",
+    "retrying",
+    "revoked",
+    "expired",
+    "closing",
+    "closed"
+  ],
+  "local_verification": "pass",
+  "qualification": {
+    "real_http_production_supervision": "pass",
+    "count_rate_event_queue_and_deadline_limits": "pass",
+    "slow_reader_process_node_restart_and_drain": "pass",
+    "all_eight_generations_query_idle_and_stale_reconnect": "pass",
+    "private_audit_and_telemetry": "pass",
+    "browser_native_keyboard_focus_sleep_retry_takeover_and_csp": "pass",
+    "http1_and_http2_proxy": "pass",
+    "named_orca": "pass",
+    "precommit": "pass"
+  }
+}

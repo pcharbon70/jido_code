@@ -28,7 +28,10 @@ defmodule JidoCode.Application do
         {Phoenix.PubSub, name: JidoCode.PubSub},
         JidoCode.Identity.Store,
         JidoCode.Product.ReadProjectionCache,
-        JidoCode.Product.ReadRequestLimiter
+        JidoCode.Product.ReadRequestLimiter,
+        {DynamicSupervisor,
+         name: JidoCode.Product.StreamOwnerSupervisor, strategy: :one_for_one, max_children: 32},
+        JidoCode.Product.StreamCoordinator
       ] ++
         qualification_children ++
         [

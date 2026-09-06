@@ -5,6 +5,29 @@ defmodule JidoCode.Identity.SessionLifecycleTest do
 
   @credential "correct horse battery staple"
 
+  test "non-touching background validation leaves timestamps unchanged and cannot extend idle expiry" do
+    store = start_store()
+    now = ~U[2026-09-05 12:00:00Z]
+    authentication = authenticate(store, now)
+    assert {:ok, session} = Store.issue_session(store, authentication, now: now)
+
+    for seconds <- [30, 60, 90, 119] do
+      assert {:ok, %{session: current}} =
+               Store.validate_session(store, session.session_ref,
+                 now: DateTime.add(now, seconds, :second),
+                 touch: false
+               )
+
+      assert current == session
+    end
+
+    assert {:error, :expired} =
+             Store.validate_session(store, session.session_ref,
+               now: DateTime.add(now, 120, :second),
+               touch: false
+             )
+  end
+
   test "issues only server-side bounded state and enforces idle and hard expiry" do
     store = start_store()
     now = ~U[2026-09-05 12:00:00Z]

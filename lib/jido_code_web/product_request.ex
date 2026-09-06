@@ -35,6 +35,19 @@ defmodule JidoCodeWeb.ProductRequest do
   def authorize(conn, spec, params) when is_map(spec) and is_map(params) do
     conn = secure(conn)
 
+    case evaluate(conn, spec, params) do
+      {:ok, page} -> {:ok, assign_authorization(conn, page.authorization), page}
+      {:error, :invalid_route_parameter} -> {:error, not_found(conn)}
+      {:error, :concealed_not_found} -> {:error, not_found(conn)}
+      {:error, :denied} -> {:error, forbidden(conn)}
+      {:error, :step_up_required} -> {:error, step_up(conn)}
+      {:error, :revoked} -> {:error, expired(conn)}
+      {:error, _unavailable} -> {:error, unavailable(conn)}
+    end
+  end
+
+  @doc "Evaluates fresh exact authority without sending an HTTP response (also after SSE start)."
+  def evaluate(conn, spec, params) when is_map(spec) and is_map(params) do
     with {:ok, route_params} <- normalize_route_params(spec, params),
          {:ok, query, query_errors} <- normalize_query(Map.get(spec, :query, []), params),
          {:ok, authorization} <- authorize_resource(conn, spec, route_params),
@@ -52,14 +65,7 @@ defmodule JidoCodeWeb.ProductRequest do
         canonical_url: canonical_url(conn.request_path, query)
       }
 
-      {:ok, assign_authorization(conn, authorization), page}
-    else
-      {:error, :invalid_route_parameter} -> {:error, not_found(conn)}
-      {:error, :concealed_not_found} -> {:error, not_found(conn)}
-      {:error, :denied} -> {:error, forbidden(conn)}
-      {:error, :step_up_required} -> {:error, step_up(conn)}
-      {:error, :revoked} -> {:error, expired(conn)}
-      {:error, _unavailable} -> {:error, unavailable(conn)}
+      {:ok, page}
     end
   end
 
@@ -211,13 +217,14 @@ defmodule JidoCodeWeb.ProductRequest do
            AuthorityBuilder.request(
              Map.fetch!(spec, :operation),
              Map.fetch!(spec, :area),
-             :page,
+             Map.get(spec, :action, :page),
              resource_ref(spec.resource, route_params),
              reauthorization_point:
                conn.private[:read_reauthorization_point] || :before_response_start,
              correlation_ref: conn.assigns[:request_id] || route_correlation(conn)
            ),
-         {:ok, authorization} <- AuthorityBuilder.build(session_ref, request),
+         {:ok, authorization} <-
+           AuthorityBuilder.build(session_ref, request, touch: Map.get(spec, :action) != :stream),
          :allowed <- authorization.decision do
       {:ok, authorization}
     else
@@ -239,7 +246,8 @@ defmodule JidoCodeWeb.ProductRequest do
                conn.private[:read_reauthorization_point] || :before_response_start,
              correlation_ref: (conn.assigns[:request_id] || route_correlation(conn)) <> "-parent"
            ),
-         {:ok, authorization} <- AuthorityBuilder.build(session_ref, request),
+         {:ok, authorization} <-
+           AuthorityBuilder.build(session_ref, request, touch: Map.get(spec, :action) != :stream),
          :allowed <- authorization.decision,
          true <- authorization.current_scope.resource_kind == elem(spec.resource, 2) do
       {:ok, authorization}

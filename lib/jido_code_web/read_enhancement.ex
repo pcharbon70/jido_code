@@ -23,6 +23,15 @@ defmodule JidoCodeWeb.ReadEnhancement do
     uri.path <> if(uri.query, do: "?" <> uri.query, else: "")
   end
 
+  def stream_attributes(page) do
+    [
+      {"data-stream-endpoint",
+       String.replace_prefix(endpoint(page), "/ui/reads/", "/ui/streams/")},
+      {"data-stream-namespace", ReadSignals.namespace(page.key)},
+      {"data-on:click", "@openStream(evt)"}
+    ]
+  end
+
   defp endpoint(%{key: :factory}), do: "/ui/reads/factory"
   defp endpoint(%{key: :fleet}), do: "/ui/reads/fleet"
   defp endpoint(%{key: :projects}), do: "/ui/reads/projects"
