@@ -87,21 +87,21 @@ Back to plan: [README](./README.md)
     This final section proves read-only factory oversight is bounded,
     authorized, truthful, and effect-free across parallel scopes.
 
-    - [ ] 4.4.1 Task {#huic-p04-integration} [repo: jido_code] [after: {#huic-p04-states}] - Execute the HUI-C4 projection and isolation matrix.
+    - [x] 4.4.1 Task {#huic-p04-integration} [repo: jido_code] [after: {#huic-p04-states}] - Execute the HUI-C4 projection and isolation matrix.
 
       This task uses real TripleStore projections and several repositories,
       attempts, users, roles, and readiness states.
 
-      - [ ] 4.4.1.1 Subtask - Exercise attention, fleet, project, and attempt queries across all lifecycle/outcome/readiness/projection states, bounds, pagination, search, stale, contradiction, timeout, and error cases.
-      - [ ] 4.4.1.2 Subtask - Exercise field/row/query authorization, copied refs, totals/facets/timing inference, cache isolation, role/delegation/project/graph revocation, and concealed/unavailable replacement.
-      - [ ] 4.4.1.3 Subtask - Exercise large fleets, parallel repositories/attempts, unsupported capabilities, wiki opt-out, zero/nonzero costs, hostile labels, and no semantic write effects.
-      - [ ] 4.4.1.4 Subtask - Run real-store/controller/browser/accessibility/security/load smoke suites, `mix precommit`, and clean-checkout CI.
+      - [x] 4.4.1.1 Subtask - Exercise attention, fleet, project, and attempt queries across all lifecycle/outcome/readiness/projection states, bounds, pagination, search, stale, contradiction, timeout, and error cases.
+      - [x] 4.4.1.2 Subtask - Exercise field/row/query authorization, copied refs, totals/facets/timing inference, cache isolation, role/delegation/project/graph revocation, and concealed/unavailable replacement.
+      - [x] 4.4.1.3 Subtask - Exercise large fleets, parallel repositories/attempts, unsupported capabilities, wiki opt-out, zero/nonzero costs, hostile labels, and no semantic write effects.
+      - [x] 4.4.1.4 Subtask - Run real-store/controller/browser/accessibility/security/load smoke suites, `mix precommit`, and clean-checkout CI.
 
     - [ ] 4.4.2 Task {#huic-p04-phase-receipt} [repo: jido_code] [after: {#huic-p04-integration}] - Publish and pin the Phase 4 receipt.
 
       This task records HUI-C4 evidence in
       `docs/architecture/hypermedia-ui-milestone-c-phase-04-receipt.md`.
 
-      - [ ] 4.4.2.1 Subtask - Keep HUI-C4 merge-pending on unreviewed query, unbounded read, cross-scope disclosure/inference, stale hidden rows, fabricated readiness, identity conflation, or read-side effect.
-      - [ ] 4.4.2.2 Subtask - Record query/view-model/fixture/limit/cache evidence, failures, limitations, and all reopening conditions.
+      - [x] 4.4.2.1 Subtask - Keep HUI-C4 merge-pending on unreviewed query, unbounded read, cross-scope disclosure/inference, stale hidden rows, fabricated readiness, identity conflation, or read-side effect.
+      - [x] 4.4.2.2 Subtask - Record query/view-model/fixture/limit/cache evidence, failures, limitations, and all reopening conditions.
       - [ ] 4.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 4 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 5.

@@ -245,7 +245,7 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
              options
            ),
          :ok <- ready(health),
-         {:ok, repository_scope} <- ResourceIdentity.scope(:repository, project.iri),
+         {:ok, repository_scope} <- registered_scope(project),
          {:ok, catalog_graph} <- GraphRegistry.graph_iri(:factory_catalog, %{}),
          {:ok, control_graph} <-
            GraphRegistry.graph_iri(:repository_control, %{repository: project.iri}),
@@ -318,7 +318,7 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
              options
            ),
          :ok <- ready(health),
-         {:ok, repository_scope} <- ResourceIdentity.scope(:repository, project.iri),
+         {:ok, repository_scope} <- registered_scope(project),
          {:ok, run_graph} <- GraphRegistry.graph_iri(:run_attempt, %{attempt: attempt.iri}),
          attempt_data <-
            load_attempt_data(
@@ -547,8 +547,9 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
 
     wiki = wiki_summary(optional_result(wiki_result))
 
-    {dependencies, dependency_result, dependency_capability} =
-      load_dependencies(wiki, project, repository_scope, authorization, options)
+    dependencies = []
+    dependency_result = nil
+    dependency_capability = :unconfigured
 
     outcomes =
       [enrollment, attempts_result, wiki_result, dependency_result | Map.values(work)]
@@ -603,8 +604,7 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
           work: work_counts,
           attempt_count: length(data.attempts),
           attempt_total_known?: optional_complete?(data.attempts_result),
-          dependency_count:
-            if(data.dependency_capability == :ready, do: length(data.dependencies), else: nil),
+          dependency_count: nil,
           cost: :unavailable,
           budget: :unavailable,
           alias_semantics: :one_conceptual_repository
@@ -644,11 +644,7 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
       owner: "Project owner",
       evidence: evidence_posture(work_counts),
       wiki: if(data.wiki, do: data.wiki.state, else: "Unavailable"),
-      dependencies:
-        if(data.dependency_capability == :ready,
-          do: "#{length(data.dependencies)} projected",
-          else: "Unavailable"
-        ),
+      dependencies: "Unavailable",
       budget: "Unavailable; missing observations are not zero",
       cost: "Unavailable; missing observations are not zero",
       provenance:
@@ -662,7 +658,7 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
       capability(:work_summary, "Desired and current work", outcome_state(data.work)),
       capability(:attempt_summary, "Attempt summaries", data.attempts_result.outcome),
       capability(:wiki, "Repository wiki", wiki_capability(data.wiki_result, data.wiki)),
-      capability(:dependencies, "Dependency summary", data.dependency_capability),
+      capability(:dependencies, "Dependency summary", :unconfigured),
       capability(:cost, "Cost and budget", :unconfigured),
       capability(:knowledge, "Additional knowledge lenses", :unconfigured),
       capability(:semantic_controls, "Semantic controls", :unconfigured)
@@ -714,48 +710,6 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
   end
 
   defp wiki_summary(_result), do: nil
-
-  defp load_dependencies(nil, _project, _scope, _authorization, _options),
-    do: {[], nil, :unconfigured}
-
-  defp load_dependencies(wiki, project, repository_scope, authorization, options) do
-    with snapshot when is_binary(snapshot) <- wiki.source_snapshot,
-         revision when is_binary(revision) <- wiki.source_fence,
-         {:ok, graph} <-
-           GraphRegistry.graph_iri(:source_revision, %{
-             repository: project.iri,
-             revision: revision
-           }) do
-      outcome =
-        optional_query(
-          options,
-          :source_dependencies,
-          %{graph: graph, snapshot: snapshot},
-          authorization.authority_context,
-          repository_scope
-        )
-
-      {dependency_rows(optional_result(outcome)), outcome,
-       if(outcome.outcome == :ok, do: :ready, else: :unavailable)}
-    else
-      _unavailable -> {[], nil, :unconfigured}
-    end
-  end
-
-  defp dependency_rows(%QueryResult{data: rows}) when is_list(rows) do
-    rows
-    |> Enum.map(fn row ->
-      %{
-        label: safe_scalar(term_value(row, "name"), "Source component"),
-        dependency: safe_scalar(term_value(row, "dependencyName"), "Dependency"),
-        status: "Observed in the exact source snapshot"
-      }
-    end)
-    |> Enum.uniq()
-    |> Enum.take(50)
-  end
-
-  defp dependency_rows(_result), do: []
 
   defp authorized_attempt_rows(_context, _project, nil, _options), do: []
 
@@ -1298,7 +1252,7 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
   defp safe_scalar(_value, fallback), do: fallback
 
   defp load_fleet_row(%{resource: resource, authorization: authorization}, options) do
-    with {:ok, scope} <- ResourceIdentity.scope(:repository, resource.iri),
+    with {:ok, scope} <- registered_scope(resource),
          {:ok, graph} <- GraphRegistry.graph_iri(:repository_control, %{repository: resource.iri}),
          {:ok, work_results} <- load_work(graph, authorization, scope, options),
          {:ok, attempts} <-
@@ -1871,6 +1825,10 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
     _error -> {:error, :unavailable}
   end
 
+  defp registered_scope(%JidoCode.Identity.Resource{graph_scope_iri: scope}) do
+    with :ok <- ResourceIdentity.validate(scope), do: {:ok, scope}
+  end
+
   defp authorize(context, surface, action, point, resource_ref, options) do
     {operation, area} = operation_area(surface)
     authorize_as(context, operation, area, action, point, resource_ref, options)
@@ -1894,7 +1852,6 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
          :allowed <- authorization.decision do
       {:ok, authorization}
     else
-      {:ok, %AuthorizationResult{decision: decision}} -> {:error, decision}
       decision when is_atom(decision) -> {:error, decision}
       {:error, reason} -> {:error, reason}
     end

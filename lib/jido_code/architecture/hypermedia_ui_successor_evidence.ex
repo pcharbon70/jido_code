@@ -1,6 +1,32 @@
 defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @moduledoc false
 
+  @phase_c4_manifest "priv/architecture/hypermedia_ui/phase_c4_implementation_evidence.json"
+  @phase_c4_mutable_paths ~w[
+    lib/jido_code/application.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_c3.ex
+    lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex
+    lib/jido_code_web/controllers/account_controller.ex
+    lib/jido_code_web/controllers/attempt_html.ex
+    lib/jido_code_web/controllers/attempt_html/show.html.heex
+    lib/jido_code_web/controllers/factory_controller.ex
+    lib/jido_code_web/controllers/factory_html.ex
+    lib/jido_code_web/controllers/factory_html/attention.html.heex
+    lib/jido_code_web/controllers/factory_html/fleet.html.heex
+    lib/jido_code_web/controllers/project_controller.ex
+    lib/jido_code_web/controllers/project_html.ex
+    lib/jido_code_web/controllers/project_html/attempts.html.heex
+    lib/jido_code_web/controllers/project_html/dependencies.html.heex
+    lib/jido_code_web/controllers/project_html/index.html.heex
+    lib/jido_code_web/controllers/project_html/overview.html.heex
+    lib/jido_code_web/controllers/project_html/wiki.html.heex
+    lib/jido_code_web/product_controller.ex
+    lib/jido_code_web/product_page_view_model.ex
+    lib/jido_code_web/product_request.ex
+    lib/mix/tasks/architecture.check.ex
+    test/jido_code/architecture/hypermedia_ui_phase_a1_test.exs
+  ]
+
   @phase_c3_manifest "priv/architecture/hypermedia_ui/phase_c3_implementation_evidence.json"
   @phase_c3_mutable_paths ~w[
     config/config.exs
@@ -50,7 +76,8 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @spec digest(Path.t(), String.t()) :: String.t() | nil
   def digest(root, path) do
-    phase_digest(root, path, @phase_c3_manifest, @phase_c3_mutable_paths, "HUI-C3") ||
+    phase_digest(root, path, @phase_c4_manifest, @phase_c4_mutable_paths, "HUI-C4") ||
+      phase_digest(root, path, @phase_c3_manifest, @phase_c3_mutable_paths, "HUI-C3") ||
       phase_digest(root, path, @phase_c2_manifest, @phase_c2_mutable_paths, "HUI-C2") ||
       phase_digest(root, path, @phase_c1_manifest, @phase_c1_mutable_paths, "HUI-C1")
   end
@@ -58,7 +85,11 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @spec mutable_path?(String.t()) :: boolean()
   def mutable_path?(path),
     do:
-      phase_c3_mutable_path?(path) or phase_c2_mutable_path?(path) or phase_c1_mutable_path?(path)
+      phase_c4_mutable_path?(path) or phase_c3_mutable_path?(path) or
+        phase_c2_mutable_path?(path) or phase_c1_mutable_path?(path)
+
+  @spec phase_c4_mutable_path?(String.t()) :: boolean()
+  def phase_c4_mutable_path?(path), do: path in @phase_c4_mutable_paths
 
   @spec phase_c3_mutable_path?(String.t()) :: boolean()
   def phase_c3_mutable_path?(path), do: path in @phase_c3_mutable_paths

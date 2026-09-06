@@ -5,7 +5,6 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
   alias JidoCode.Knowledge.AuthorityContext
   alias JidoCode.Knowledge.Health
   alias JidoCode.Knowledge.QueryResult
-  alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Product.GraphReadProjectionProvider
 
   test "derives bounded attention and fleet rows only from independently authorized projects" do
@@ -13,8 +12,8 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
     authority = authority()
     identity = identity()
     resources = resources()
-    alpha_scope = repository_scope!(Enum.at(resources, 0).iri)
-    hidden_scope = repository_scope!(Enum.at(resources, 2).iri)
+    alpha_scope = Enum.at(resources, 0).graph_scope_iri
+    hidden_scope = Enum.at(resources, 2).graph_scope_iri
 
     authorize = fn _context, operation, area, action, point, resource_ref ->
       send(test_pid, {:authorize, operation, area, action, point, resource_ref})
@@ -130,7 +129,7 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
   end
 
   defp query_fixture(resources, options) do
-    scopes = Map.new(resources, &{repository_scope!(&1.iri), &1.project_ref})
+    scopes = Map.new(resources, &{&1.graph_scope_iri, &1.project_ref})
     truncated? = Keyword.get(options, :truncated?, false)
 
     fn name, _version, parameters, _authority, scope, _query_options ->
@@ -247,11 +246,6 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
       })
 
     authority
-  end
-
-  defp repository_scope!(repository) do
-    {:ok, scope} = ResourceIdentity.scope(:repository, repository)
-    scope
   end
 
   defp ready_health do

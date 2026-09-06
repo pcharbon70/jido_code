@@ -241,5 +241,4 @@ defmodule JidoCode.Product.ReadProjection do
   end
 
   defp safe_warning(value) when is_atom(value), do: value
-  defp safe_warning(_value), do: :unavailable
 end
