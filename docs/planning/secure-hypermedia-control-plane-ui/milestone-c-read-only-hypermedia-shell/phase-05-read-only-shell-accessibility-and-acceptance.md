@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_c_phase_05
 parent_plan: plan.jido_code_hypermedia_ui_milestone_c
-status: proposed
+status: completed
 intent: feature
 ---
 
@@ -13,7 +13,7 @@ and production-like operations before live delivery is allowed.
 
 Back to plan: [README](./README.md)
 
-- [ ] 5 Phase - Accept the secure native read-only shell at a merged candidate.
+- [x] 5 Phase - Accept the secure native read-only shell at a merged candidate.
 
   This phase closes HUI-C5 and HUI3 by proving identity, routes, components,
   and projections work together without JavaScript or semantic side effects.
@@ -63,7 +63,7 @@ Back to plan: [README](./README.md)
       - [x] 5.3.1.3 Subtask - Define Milestone D enhancement candidates and prohibit changes that break native behavior, stable identity, field authorization, or truthful state.
       - [x] 5.3.1.4 Subtask - Create `hypermedia-ui-milestone-c-phase-05-receipt.md` in merge-pending state with HUI-C5/HUI3 evidence and reopening conditions.
 
-  - [ ] 5.4 Section - Phase 5 Integration Tests.
+  - [x] 5.4 Section - Phase 5 Integration Tests.
 
     This final section reruns the complete read-only shell from clean checkout
     across native browsers, real adapters, several scopes, and failure modes.
@@ -78,11 +78,11 @@ Back to plan: [README](./README.md)
       - [x] 5.4.1.3 Subtask - Run complete native supported-browser and manual accessibility journeys with production assets and exact candidate configuration.
       - [x] 5.4.1.4 Subtask - Run all Milestone C and prior regression suites, architecture/security/a11y checks, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 5.4.2 Task {#huic-p05-phase-receipt} [repo: jido_code] [after: {#huic-p05-integration}] - Publish and pin the Phase 5 receipt and HUI3 closure.
+    - [x] 5.4.2 Task {#huic-p05-phase-receipt} [repo: jido_code] [after: {#huic-p05-integration}] - Publish and pin the Phase 5 receipt and HUI3 closure.
 
       This task records HUI-C5/HUI3 evidence in
       `docs/architecture/hypermedia-ui-milestone-c-phase-05-receipt.md`.
 
       - [x] 5.4.2.1 Subtask - Keep HUI3 merge-pending on identity/scope leak, route/projection gap, broken native path, inaccessible critical journey, unbounded read, false readiness, effectful read, or non-reproducible adapter evidence.
       - [x] 5.4.2.2 Subtask - Record exact candidate/config/route/query/component/browser/AT/adapter evidence, exceptions, limitations, and every reopening condition.
-      - [ ] 5.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 5 Integration Tests section, receipt task, pinning subtask, and Milestone C completion before authorizing Milestone D Phase 1.
+      - [x] 5.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 5 Integration Tests section, receipt task, pinning subtask, and Milestone C completion before authorizing Milestone D Phase 1.

@@ -2,12 +2,13 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-HUI-C5 and program gate HUI3 remain merge-pending until this implementation
-pull request passes clean-checkout verification and Dialyzer and merges. The
-merged candidate and merge date must be pinned in a narrow closure change.
-Milestone D is not authorized by this receipt state.
+HUI-C5 and program gate HUI3 are accepted at merged implementation candidate
+`5987a7a4a43505b035f5a566588d5201e98686f7`. Implementation PR #125 passed
+clean-checkout verification and Dialyzer on its exact head before merging on
+2026-09-06. Milestone D is authorized only from this pinned baseline and all
+cumulative reopening conditions remain binding.
 
 All HUI-B2/HUI-B4 and HUI-C1 through HUI-C4 reopening conditions remain
 cumulative and binding. Nothing here weakens or reinterprets them.
@@ -21,16 +22,16 @@ cumulative and binding. Nothing here weakens or reinterprets them.
 | Section 5.1 | `18d9c7f9dbcc6045ed3815fcc7a297960f21bbbd` - native browser, WCAG, and Orca qualification |
 | Section 5.2 | `024de7793dbdbd5c4d9ec986ad958c72126a836b` - real-adapter, capacity, failure, privacy, and operations qualification |
 | Section 5.3 | `635bfb4f7454bdac284f7eb6320dc179de605680` - native shell and fragment-candidate baseline |
-| Section 5.4 | `candidate-head-pending` - integrated HUI-C5/HUI3 release evidence |
-| Implementation PR head | `merge-pending` |
-| Merged candidate | `merge-pending` |
+| Section 5.4 | `c63e77b2c1b489c2427d1b67590439ce2f369d77` - integrated HUI-C5/HUI3 release evidence |
+| Implementation PR head | `c63e77b2c1b489c2427d1b67590439ce2f369d77` - implementation PR #125 |
+| Merged candidate | `5987a7a4a43505b035f5a566588d5201e98686f7` - implementation PR #125 |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `5987a7a4a43505b035f5a566588d5201e98686f7`
+Merge date: `2026-09-06`
 
 ## Gate HUI-C5.1 - Native Browser And Accessibility
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The supported browser matrix is Chrome for Testing 151, Firefox 153, WebKit
 26.5, JavaScript-disabled Chrome 151, and Pixel 7/touch Chrome 151 on Linux.
@@ -52,7 +53,7 @@ limitation, and reopening conditions.
 
 ## Gate HUI-C5.2 - Adapters, Capacity, Privacy, And Operations
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The production-like adapter matrix uses integrity-protected persistent
 `JidoCode.Identity.Store`, the real RocksDB quad TripleStore and StoreServer
@@ -78,7 +79,7 @@ session, graph scope, or cross-scope diagnostic.
 
 ## Gate HUI-C5.3 - HUI3 Native Shell Baseline
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The machine manifest and companion architecture record inventory 27 accepted
 controller routes, ProductPageViewModel and ReadProjection shapes, five
@@ -96,7 +97,7 @@ accessibility, or resource bounds.
 
 ## Gate HUI-C5.4 / HUI3 - Integrated Release Candidate
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The 120-test focused matrix covers named identity, persistence, session,
 scope, revocation, routes, native navigation/forms, every projection state,
@@ -116,8 +117,12 @@ paths. The named Orca profile and production asset build also pass.
 
 Strict production compilation, the executable HUI-C5 architecture checker,
 and `mix precommit` pass. The repository suite contains 1,394 tests with zero
-failures. Clean-checkout verification and Dialyzer remain pending on the exact
-implementation PR head; no local result can substitute for those jobs.
+failures. Clean-checkout `verify` job 101476448118 passed in 22m29s on the
+unchanged implementation head, and `dialyzer` job 101473993080 passed in
+1m51s. The first `verify` attempt encountered the existing StoreServer test's
+temporary-directory cleanup race after 1,393 passing tests; the unchanged
+rerun completed the full application, browser/proxy, asset, and dependency
+audit workflow successfully.
 
 ## Configuration, Exceptions, And Limitations
 

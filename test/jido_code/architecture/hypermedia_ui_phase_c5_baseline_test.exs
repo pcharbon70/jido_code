@@ -11,7 +11,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5BaselineTest do
 
     assert baseline["phase"] == "HUI-C5"
     assert baseline["gate"] == "HUI3"
-    assert baseline["status"] == "fragment_candidate_merge_pending"
+    assert baseline["status"] == "accepted_at_merged_candidate"
     assert length(routes) == 27
     assert length(Enum.uniq_by(routes, &{&1["method"], &1["path"]})) == 27
     assert Enum.all?(routes, &complete_route?/1)
@@ -80,9 +80,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5BaselineTest do
     end
 
     receipt = File.read!("docs/architecture/hypermedia-ui-milestone-c-phase-05-receipt.md")
-    assert receipt =~ "Status: **merge-pending**"
-    assert receipt =~ "Merged candidate: `merge-pending`"
-    assert receipt =~ "Milestone D is not authorized"
+    assert receipt =~ "Status: **accepted-at-merged-candidate**"
+    assert receipt =~ "Merged candidate: `5987a7a4a43505b035f5a566588d5201e98686f7`"
+    assert receipt =~ "Milestone D is authorized only from this pinned baseline"
   end
 
   defp complete_route?(route) do
