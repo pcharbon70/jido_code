@@ -2,13 +2,14 @@
 
 ## Status
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
-This receipt records the HUI-C3 implementation candidate while clean-checkout
-CI and merged-candidate provenance remain pending. It grants no acceptance or
-release credit. Milestone C Phase 4 is not authorized until the implementation
-pull request passes, merges, and a narrowly scoped closure pull request pins
-the full merged candidate and date.
+This receipt accepts HUI-C3 only at merged implementation candidate
+`fa5203a9aefe08d741b2898a01299c7d960c80d9`. Implementation pull request #121
+passed the required clean-checkout verify and Dialyzer jobs and merged on
+2026-09-05. This narrowly scoped closure transition pins that immutable
+candidate and authorizes Milestone C Phase 4 subject to every reopening
+condition below.
 
 All HUI-B2/HUI-B4, HUI-C1, and HUI-C2 reopening conditions remain cumulative
 and binding. Nothing here weakens or reinterprets them.
@@ -22,16 +23,16 @@ and binding. Nothing here weakens or reinterprets them.
 | Section 3.1 | `4720fb46145e9d46d1c856b8516a8d946bbbb03b` - explicit authenticated route groups |
 | Section 3.2 | `26360a536c5082477235f08c31cb425b5653473f` - native product shell and view models |
 | Section 3.3 | `c7d4621ba666b6e180c3f6b6afd5d617d9b9159e` - native identity and session workflows |
-| Section 3.4 | `merge-pending` - integrated route, browser, architecture, and repository evidence |
-| Implementation PR head | `merge-pending` |
-| Merged candidate | `merge-pending` |
+| Section 3.4 | `306405e0e01d76a856b4c33639bd3b79744e02c2` - integrated route, browser, architecture, and repository evidence |
+| Implementation PR head | `306405e0e01d76a856b4c33639bd3b79744e02c2` - implementation PR #121 |
+| Merged candidate | `fa5203a9aefe08d741b2898a01299c7d960c80d9` - merge commit for implementation PR #121 |
 
-Merged candidate: `merge-pending`
-Merge date: `merge-pending`
+Merged candidate: `fa5203a9aefe08d741b2898a01299c7d960c80d9`
+Merge date: `2026-09-05`
 
 ## Gate HUI-C3.1 - Explicit Authenticated Route Groups
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The candidate owns explicit Phoenix controller actions and HEEx templates for
 factory attention/fleet, project catalog/overview/attempts/wiki/dependencies,
@@ -60,7 +61,7 @@ values render a linked error summary without becoming authority.
 
 ## Gate HUI-C3.2 - Full-Page Shell And Server View Models
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 `JidoCodeWeb.ProductPageViewModel` shapes current named-human display,
 assurance, route, exact membership explanation, independently authorized
@@ -86,7 +87,7 @@ revision, graph, incident, fence, or generation field.
 
 ## Gate HUI-C3.3 - Native Authentication And Session Workflows
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 Sign-in, sign-out, account, sessions, step-up, and recovery use ordinary
 controller routes and `to_form/2`/HEEx forms with CSRF and exact Origin
@@ -112,7 +113,7 @@ credential change in the unconfigured posture.
 
 ## Gate HUI-C3.4 - Integrated Route And Native-Browser Candidate
 
-Status: **merge-pending**
+Status: **accepted-at-merged-candidate**
 
 The 29 focused controller, identity, and architecture tests pass and cover
 route ownership, exact authorization, kinds and
@@ -150,14 +151,16 @@ attention, fleet, project, attempt, wiki, dependency, review, cost, incident,
 or governance projection before HUI-C4.
 
 The strict production compile and architecture checks pass. The repository
-precommit gate passes all 1,356 tests with 0 failures. Clean-checkout CI and
-immutable PR/merge provenance remain pending until the implementation pull
-request exists and merges; all results are recorded in the executable HUI-C3
-manifest.
+precommit gate passes all 1,356 tests with 0 failures. On implementation PR
+#121, clean-checkout Dialyzer job `101382702919` passed in 2m30s. Verify's first
+run encountered the existing `GraphTopologyTest` temporary-directory cleanup
+race after completing the suite; its unchanged-head rerun job `101385012698`
+passed in 20m10s. These exact results and immutable PR/merge provenance are
+recorded in the executable HUI-C3 manifest.
 
 ## Gate HUI-C3 Reopening Conditions
 
-HUI-C3 remains merge-pending, and later reopens after acceptance, if any
+HUI-C3 reopens after acceptance if any
 predecessor gate reopens; if a C3 controller page becomes LiveView/LiveVue/Vue,
 catch-all, client-routed, inline-scripted, remotely sourced, or Datastar-owned;
 if any route lacks an explicit controller/action/template, route admission,

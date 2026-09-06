@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "phase": "HUI-C3",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "recorded_on": "2026-09-05",
   "baseline_commit": "7c77e2270cf754b6a04d5f95e12ca070083902ae",
   "predecessor_candidate": "da7ab6a4478bb278aa31a7636fa92135843249ff",
@@ -11,13 +11,24 @@
     "3.2": "26360a536c5082477235f08c31cb425b5653473f",
     "3.3": "c7d4621ba666b6e180c3f6b6afd5d617d9b9159e"
   },
-  "receipt_status": "merge_pending",
-  "clean_checkout_ci": "pending",
-  "implementation_pr": null,
-  "implementation_pr_head": null,
-  "merged_candidate": null,
-  "merge_date": null,
-  "clean_checkout_jobs": null,
+  "receipt_status": "accepted_at_merged_candidate",
+  "clean_checkout_ci": "pass",
+  "implementation_pr": 121,
+  "implementation_pr_head": "306405e0e01d76a856b4c33639bd3b79744e02c2",
+  "merged_candidate": "fa5203a9aefe08d741b2898a01299c7d960c80d9",
+  "merge_date": "2026-09-05",
+  "clean_checkout_jobs": {
+    "verify": {
+      "id": 101385012698,
+      "duration": "20m10s",
+      "result": "pass"
+    },
+    "dialyzer": {
+      "id": 101382702919,
+      "duration": "2m30s",
+      "result": "pass"
+    }
+  },
   "routes": {
     "paths": [
       "/factory",
@@ -151,11 +162,11 @@
   "source_digests": {
     "config/config.exs": "c9c3c73aad390733f851108df550bd12f91a78ef543204ec3968ba21d4fc45d0",
     "config/test.exs": "087e53c1b68e948f10cf8b9ff2fcc31f70367e5647da6c65509e7c4d4170b2bf",
-    "docs/architecture/hypermedia-ui-milestone-c-phase-03-receipt.md": "311b9145f9675f086863cc107133a47b44d163323c4927da13bccaed44a56487",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-03-authenticated-shell-routes-and-native-navigation.md": "9af26e9a6720239b593305fb8d3ac329ecd46590d104b7c84b0ec7569276293f",
+    "docs/architecture/hypermedia-ui-milestone-c-phase-03-receipt.md": "7a25fc38a15d8d8fa9c2aea22f6b9616e13cb27c632136fcde8364287d397853",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-03-authenticated-shell-routes-and-native-navigation.md": "05222ff353dcfdf7e30ac37bfdce133db794c918b09c67684e1e2e34fcbca9a8",
     "lib/jido_code/architecture/hypermedia_ui_phase_c1.ex": "fff07bc7f98e5e21c3a6742f8f7a0fbc354223f479612ba1ba89ce201acd0109",
     "lib/jido_code/architecture/hypermedia_ui_phase_c2.ex": "50a4ce90ea4566fddc4fc055683a5949dafe6bd4e72703d248fe331d42241b5f",
-    "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "5d1f3acfe3d8f3e036f2eb43e598c8bbc7753be97487e745418a861ab7a17d3f",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "c7b00f809ef8de1a16993fcd5dcfe7cd6ac62620cf4f2fb1e281aa1cb3dd2f8d",
     "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "9c4523a928155ef7232025c9aa2023ce9a0b7ccdcda85f2a708cfdde6e762b1a",
     "lib/jido_code/identity/sessions.ex": "d37e95952aa12539744eff6b740336bacdb761e6851431041f6b46193ff0f84d",
     "lib/jido_code/identity/store.ex": "77d798d393b3abdd87dc0ba6d6ab53f0e4110f709fb3a713dcf067cd0a17a07a",
