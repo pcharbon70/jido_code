@@ -33,20 +33,20 @@ Back to plan: [README](./README.md)
       - [x] 5.1.1.3 Subtask - Exercise sign-in/session, factory triage, project switching, project/attempt drill-down, filtering/pagination, errors, stale/unavailable states, and restricted-area denial.
       - [x] 5.1.1.4 Subtask - Remediate violations and record exact browser/AT/version evidence, known limitations, owners, expiry, and reopening conditions.
 
-  - [ ] 5.2 Section - Qualify real adapters, capacity, privacy, and operations.
+  - [x] 5.2 Section - Qualify real adapters, capacity, privacy, and operations.
 
     This section proves shell behavior under production-sized data, outages,
     revocation, and cache/log/referrer constraints.
 
-    - [ ] 5.2.1 Task {#huic-p05-operations} [repo: jido_code] [after: {#huic-p05-accessibility}] - Execute production-like read-path and failure qualification.
+    - [x] 5.2.1 Task {#huic-p05-operations} [repo: jido_code] [after: {#huic-p05-accessibility}] - Execute production-like read-path and failure qualification.
 
       This task establishes latency/resource ceilings and honest degraded
       behavior before automatic live refresh can add load.
 
-      - [ ] 5.2.1.1 Subtask - Test real identity, TripleStore, filesystem/readiness, and asset adapters with supported browser/OS/proxy/TLS profiles and production builds.
-      - [ ] 5.2.1.2 Subtask - Measure page/query/render latency, memory, rows/bytes, cache behavior, large fleet pagination, several users/tabs, and rate/resource bounds against declared thresholds.
-      - [ ] 5.2.1.3 Subtask - Exercise identity/store/asset outage, graph lag, timeout, deploy restart, stale cache, revocation, clock skew, malformed/hostile content, and maintenance/read-only fallback.
-      - [ ] 5.2.1.4 Subtask - Verify no protected response caching, referrer/log/telemetry leakage, raw IRI exposure, secret rendering, or cross-scope diagnostic detail.
+      - [x] 5.2.1.1 Subtask - Test real identity, TripleStore, filesystem/readiness, and asset adapters with supported browser/OS/proxy/TLS profiles and production builds.
+      - [x] 5.2.1.2 Subtask - Measure page/query/render latency, memory, rows/bytes, cache behavior, large fleet pagination, several users/tabs, and rate/resource bounds against declared thresholds.
+      - [x] 5.2.1.3 Subtask - Exercise identity/store/asset outage, graph lag, timeout, deploy restart, stale cache, revocation, clock skew, malformed/hostile content, and maintenance/read-only fallback.
+      - [x] 5.2.1.4 Subtask - Verify no protected response caching, referrer/log/telemetry leakage, raw IRI exposure, secret rendering, or cross-scope diagnostic detail.
 
   - [ ] 5.3 Section - Assemble the HUI3 product baseline.
 
