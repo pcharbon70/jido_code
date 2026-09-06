@@ -14,6 +14,7 @@ defmodule Mix.Tasks.Architecture.Check do
   alias JidoCode.Architecture.HypermediaUIPhaseC2
   alias JidoCode.Architecture.HypermediaUIPhaseC3
   alias JidoCode.Architecture.HypermediaUIPhaseC4
+  alias JidoCode.Architecture.HypermediaUIPhaseC5
   alias JidoCode.Architecture.Violation
 
   @shortdoc "Checks graph-only persistence and module boundaries"
@@ -35,6 +36,7 @@ defmodule Mix.Tasks.Architecture.Check do
     hui_c2_errors = HypermediaUIPhaseC2.check() |> errors()
     hui_c3_errors = HypermediaUIPhaseC3.check() |> errors()
     hui_c4_errors = HypermediaUIPhaseC4.check() |> errors()
+    hui_c5_errors = HypermediaUIPhaseC5.check() |> errors()
 
     Enum.each(violations, &Mix.shell().error(Violation.format(&1)))
     Enum.each(hui_a1_errors, &Mix.shell().error("HUI-A1: #{&1}"))
@@ -49,13 +51,14 @@ defmodule Mix.Tasks.Architecture.Check do
     Enum.each(hui_c2_errors, &Mix.shell().error("HUI-C2: #{&1}"))
     Enum.each(hui_c3_errors, &Mix.shell().error("HUI-C3: #{&1}"))
     Enum.each(hui_c4_errors, &Mix.shell().error("HUI-C4: #{&1}"))
+    Enum.each(hui_c5_errors, &Mix.shell().error("HUI-C5: #{&1}"))
 
     count =
       length(violations) + length(hui_a1_errors) + length(hui_a2_errors) +
         length(hui_a3_errors) + length(hui_a4_errors) + length(hui_b1_errors) +
         length(hui_b2_errors) + length(hui_b3_errors) + length(hui_b4_errors) +
         length(hui_c1_errors) + length(hui_c2_errors) + length(hui_c3_errors) +
-        length(hui_c4_errors)
+        length(hui_c4_errors) + length(hui_c5_errors)
 
     if count == 0,
       do: Mix.shell().info("Architecture checks passed"),

@@ -20,7 +20,7 @@ cumulative and binding. Nothing here weakens or reinterprets them.
 | Accepted HUI-C4 implementation candidate | `4532ff304816ad0a229192f0e0bc0f9a3abb66da` - implementation PR #123 |
 | Section 5.1 | `18d9c7f9dbcc6045ed3815fcc7a297960f21bbbd` - native browser, WCAG, and Orca qualification |
 | Section 5.2 | `024de7793dbdbd5c4d9ec986ad958c72126a836b` - real-adapter, capacity, failure, privacy, and operations qualification |
-| Section 5.3 | `commit-pending` - native shell and fragment-candidate baseline |
+| Section 5.3 | `635bfb4f7454bdac284f7eb6320dc179de605680` - native shell and fragment-candidate baseline |
 | Section 5.4 | `candidate-head-pending` - integrated HUI-C5/HUI3 release evidence |
 | Implementation PR head | `merge-pending` |
 | Merged candidate | `merge-pending` |
@@ -96,11 +96,28 @@ accessibility, or resource bounds.
 
 ## Gate HUI-C5.4 / HUI3 - Integrated Release Candidate
 
-Status: **merge-pending-integration**
+Status: **merge-pending**
 
-The final focused, browser, production-build, architecture, repository, and
-clean-checkout results will be recorded by Section 5.4. No unchecked result or
-result from another candidate can accept this gate.
+The 120-test focused matrix covers named identity, persistence, session,
+scope, revocation, routes, native navigation/forms, every projection state,
+attention/fleet/project/attempt views, query/row/field authorization,
+cross-scope concealment, hostile content, privacy, cache isolation, bounded
+100-project/32-tab load, real TripleStore reads, adapter outage, restart,
+unsupported capabilities, accessibility manifests, and architecture drift.
+It passes with zero failures.
+
+The complete Playwright command enumerates 175 browser/profile combinations
+across the HUI-B3 and HUI-C2 through HUI-C5 suites. Chrome for Testing 151,
+Firefox 153, WebKit 26.5, JavaScript-disabled Chrome, and Pixel/touch Chrome
+produce 84 applicable passes, 91 explicit profile-inapplicable skips, and zero
+failures in 1m30s. It includes direct HTTP/1.1, streaming proxy, TLS HTTP/2,
+production assets, no-JavaScript, accessibility, fault, and native-shell
+paths. The named Orca profile and production asset build also pass.
+
+Strict production compilation, the executable HUI-C5 architecture checker,
+and `mix precommit` pass. The repository suite contains 1,394 tests with zero
+failures. Clean-checkout verification and Dialyzer remain pending on the exact
+implementation PR head; no local result can substitute for those jobs.
 
 ## Configuration, Exceptions, And Limitations
 

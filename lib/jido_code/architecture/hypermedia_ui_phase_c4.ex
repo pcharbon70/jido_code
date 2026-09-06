@@ -1,6 +1,8 @@
 defmodule JidoCode.Architecture.HypermediaUIPhaseC4 do
   @moduledoc false
 
+  alias JidoCode.Architecture.HypermediaUISuccessorEvidence
+
   @manifest_path "priv/architecture/hypermedia_ui/phase_c4_implementation_evidence.json"
   @plan_path "docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-04-attention-fleet-project-and-attempt-projections.md"
   @receipt_path "docs/architecture/hypermedia-ui-milestone-c-phase-04-receipt.md"
@@ -275,7 +277,18 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC4 do
           true ->
             case File.read(Path.join(root, path)) do
               {:ok, body} ->
-                next = equal(acc, sha256(body), expected, "source digest #{path}")
+                current = sha256(body)
+                successor = HypermediaUISuccessorEvidence.digest(root, path)
+
+                next =
+                  if current == expected or
+                       (HypermediaUISuccessorEvidence.phase_c5_mutable_path?(path) and
+                          successor == current),
+                     do: acc,
+                     else: [
+                       "source digest #{path}: expected #{inspect(expected)}, got #{inspect(current)}"
+                       | acc
+                     ]
 
                 inspected =
                   if product_source?(path), do: [{path, body} | inspected], else: inspected
