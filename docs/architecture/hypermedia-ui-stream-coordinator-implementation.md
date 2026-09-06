@@ -1,7 +1,8 @@
 # Product Stream Coordinator Implementation
 
 Owner: JidoCode web, security and operations maintainers. Gate: HUI-D2.
-Status: sections 2.1–2.4 integration candidate; clean CI, merge and pinning are pending.
+Status: sections 2.1–2.4 accepted at merged candidate
+`1d55390108763052998cc6f6e6dfc4ce319998c0` (2026-09-06, implementation PR #130).
 
 ## Admission and Identity
 
@@ -184,6 +185,7 @@ production proxy trust policy or D4 deployment claim.
 Named Orca qualification runs `scripts/qualify_hui_d2_orca.sh`: keyboard connect,
 spoken connected status, retained focus, cross-tab revocation, safe alert focus
 and keyboard access to the native reload link. Raw speech/browser traces remain
-ephemeral. Full precommit and cumulative browser results are recorded in the
-phase receipt before the implementation PR; acceptance still requires clean CI,
-merge and a narrowly scoped merged-candidate closure.
+ephemeral. The phase receipt records passing full precommit and cumulative
+browser results, exact clean-checkout jobs and the merged candidate. The narrow
+closure publishes that pin without changing runtime behavior or any reopening
+condition. D3 subscriptions and D4 production delivery acceptance remain separate.
