@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-C5",
+  "section": "5.1",
+  "recorded_on": "2026-09-06",
+  "target": "WCAG 2.2 AA",
+  "supported_platform": "Linux 6.8.0-51-generic x86_64",
+  "browser_profiles": [
+    {"name": "chromium", "engine": "Chrome for Testing", "version": "151.0.7922.34", "playwright_revision": "1234"},
+    {"name": "firefox", "engine": "Firefox", "version": "153.0", "playwright_revision": "1538"},
+    {"name": "webkit", "engine": "WebKit", "version": "26.5", "playwright_revision": "2336"},
+    {"name": "chromium-no-js", "engine": "Chrome for Testing", "version": "151.0.7922.34", "playwright_revision": "1234"},
+    {"name": "chromium-touch", "engine": "Chrome for Testing", "version": "151.0.7922.34", "playwright_revision": "1234"}
+  ],
+  "assistive_technology_profiles": [
+    {
+      "name": "Orca",
+      "version": "46.1",
+      "browser": "Google Chrome 140.0.7339.80",
+      "os": "Linux 6.8 x86_64",
+      "method": "AT-SPI speech-output debug qualification",
+      "journeys": ["sign-in", "factory-attention", "project-catalog", "project-overview", "attempt-workspace"],
+      "result": "pass"
+    }
+  ],
+  "coverage": {
+    "semantics_landmarks_headings": "pass",
+    "names_roles_values_descriptions": "pass",
+    "errors_status_and_link_purpose": "pass",
+    "keyboard_focus_order_and_visibility": "pass",
+    "zoom_200_and_400_percent_reflow": "pass",
+    "touch_and_44_css_pixel_targets": "pass",
+    "rtl_and_localization_growth": "pass",
+    "reduced_motion": "pass",
+    "forced_colors_high_contrast": "pass",
+    "light_dark_system_themes": "pass",
+    "print_and_narrow_widths": "pass",
+    "javascript_disabled_native_journey": "pass",
+    "restricted_area_concealment": "pass"
+  },
+  "browser_result": {
+    "applicable_passes": 14,
+    "deliberate_profile_skips": 6,
+    "failures": 0,
+    "duration": "21.2s"
+  },
+  "assistive_technology_result": {
+    "journeys": 5,
+    "asserted_speech_labels": ["Needs attention", "Fleet", "Projects", "Project overview", "Attempt workspace"],
+    "failures": 0
+  },
+  "commands": [
+    "npx playwright test test/browser/hypermedia_ui_phase_c5.spec.mjs",
+    "xvfb-run -a dbus-run-session -- scripts/qualify_hui_c5_orca.sh"
+  ],
+  "owners": ["web", "accessibility", "release"],
+  "reviewers": ["automated semantic matrix", "named Orca speech-output profile"],
+  "limitations": [
+    {
+      "id": "single-named-at-profile",
+      "detail": "The supported named screen-reader profile for Milestone C is Orca 46.1 with Chrome 140 on Linux; other screen readers and OS combinations are outside this milestone's declared support matrix.",
+      "owner": "accessibility",
+      "expires_on": "2026-12-06",
+      "reopens_on": "support-matrix expansion or browser, OS, AT-SPI, Orca, or Chrome version drift"
+    }
+  ],
+  "reopening_conditions": [
+    "a critical native journey loses keyboard or named screen-reader operability",
+    "semantic names, roles, values, descriptions, landmarks, headings, focus, errors, or status meaning regress",
+    "200 or 400 percent zoom, 320 CSS-pixel reflow, touch target, RTL, reduced-motion, forced-colors, theme, print, or no-JavaScript behavior regresses",
+    "browser, OS, assistive-technology, asset, route, component, or production-configuration identity drifts without requalification",
+    "a limitation, owner, expiry, result, command, or reopening condition is removed or represented as broader evidence"
+  ]
+}

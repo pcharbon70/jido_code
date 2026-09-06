@@ -18,20 +18,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-C5 and HUI3 by proving identity, routes, components,
   and projections work together without JavaScript or semantic side effects.
 
-  - [ ] 5.1 Section - Complete native browser and accessibility qualification.
+  - [x] 5.1 Section - Complete native browser and accessibility qualification.
 
     This section validates full user journeys rather than isolated components
     and treats essential workflow failures as release blockers.
 
-    - [ ] 5.1.1 Task {#huic-p05-accessibility} [repo: jido_code] [after: {#huic-p04-phase-receipt}] - Run WCAG 2.2 AA and assistive-technology qualification.
+    - [x] 5.1.1 Task {#huic-p05-accessibility} [repo: jido_code] [after: {#huic-p04-phase-receipt}] - Run WCAG 2.2 AA and assistive-technology qualification.
 
       This task proves named users can navigate, understand, and recover across
       the complete read-only shell.
 
-      - [ ] 5.1.1.1 Subtask - Audit semantics, landmarks/headings, labels/descriptions/errors, names/roles/values, focus order/visibility, status messages, link purpose, and target size.
-      - [ ] 5.1.1.2 Subtask - Exercise keyboard-only, supported screen readers, 200/400 percent zoom/reflow, touch, RTL, reduced motion, forced colors/high contrast, themes, print, and narrow widths.
-      - [ ] 5.1.1.3 Subtask - Exercise sign-in/session, factory triage, project switching, project/attempt drill-down, filtering/pagination, errors, stale/unavailable states, and restricted-area denial.
-      - [ ] 5.1.1.4 Subtask - Remediate violations and record exact browser/AT/version evidence, known limitations, owners, expiry, and reopening conditions.
+      - [x] 5.1.1.1 Subtask - Audit semantics, landmarks/headings, labels/descriptions/errors, names/roles/values, focus order/visibility, status messages, link purpose, and target size.
+      - [x] 5.1.1.2 Subtask - Exercise keyboard-only, supported screen readers, 200/400 percent zoom/reflow, touch, RTL, reduced motion, forced colors/high contrast, themes, print, and narrow widths.
+      - [x] 5.1.1.3 Subtask - Exercise sign-in/session, factory triage, project switching, project/attempt drill-down, filtering/pagination, errors, stale/unavailable states, and restricted-area denial.
+      - [x] 5.1.1.4 Subtask - Remediate violations and record exact browser/AT/version evidence, known limitations, owners, expiry, and reopening conditions.
 
   - [ ] 5.2 Section - Qualify real adapters, capacity, privacy, and operations.
 
