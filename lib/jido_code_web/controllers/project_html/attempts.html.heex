@@ -4,4 +4,37 @@
   current_scope={@current_scope}
   page={@page}
   view_model={@view_model}
-/>
+>
+  <% trust = ReadProjectionView.trust(@projection) %>
+  <Projection.trust_header
+    id="project-attempts-trust"
+    state={trust.state}
+    revision={trust.revision}
+    freshness={trust.freshness}
+    source={trust.source}
+    as_of={trust.as_of}
+    completeness={trust.completeness}
+  />
+  <ReadWorkspace.bounded_collection
+    id="project-attempts"
+    state={@projection.state}
+    title="Authorized attempts"
+    items={ReadProjectionView.attempt_items(@projection)}
+    empty_message="No authorized attempts match this project view."
+    retry_href={ReadProjectionView.retry_href(@page)}
+  />
+  <Projection.pagination
+    id="project-attempts-pagination"
+    page={@projection.pagination.page}
+    page_count={@projection.pagination.page_count}
+    previous_href={@projection.pagination.previous_href}
+    next_href={@projection.pagination.next_href}
+    summary={@projection.pagination.summary}
+  />
+  <Projection.health_summary
+    id="project-attempt-capabilities"
+    state={@projection.state}
+    title="Attempt-list capability truth"
+    items={ReadProjectionView.capability_health(@projection)}
+  />
+</.placeholder>

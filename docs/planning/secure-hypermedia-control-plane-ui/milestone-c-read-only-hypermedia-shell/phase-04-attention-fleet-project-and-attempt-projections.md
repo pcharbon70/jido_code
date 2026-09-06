@@ -42,30 +42,30 @@ Back to plan: [README](./README.md)
       - [x] 4.1.2.3 Subtask - Render composed, disabled, evaluation-only, unconfigured, unavailable, stale, partial, and error capability states without fabricated runnable controls.
       - [x] 4.1.2.4 Subtask - Prove rows/fields disappear or redact on current graph/role/project grants and never leak counts through totals, facets, errors, timing, or cache keys.
 
-  - [ ] 4.2 Section - Implement project and attempt read workspaces.
+  - [x] 4.2 Section - Implement project and attempt read workspaces.
 
     This section composes scoped project knowledge and durable attempt summaries
     while keeping interaction sessions, candidates, and runtimes distinct.
 
-    - [ ] 4.2.1 Task {#huic-p04-project} [repo: jido_code] [after: {#huic-p04-fleet}] - Implement project overview, attempts, wiki, dependency, and cost summaries.
+    - [x] 4.2.1 Task {#huic-p04-project} [repo: jido_code] [after: {#huic-p04-fleet}] - Implement project overview, attempts, wiki, dependency, and cost summaries.
 
       This task gives one repository-backed project a useful native dashboard
       from already reviewed projections.
 
-      - [ ] 4.2.1.1 Subtask - Render repository/source identity, desired/current state, branch/worktree policy, active/recent attempts, evidence/review posture, wiki enrollment/freshness, dependency summary, and budget/cost.
-      - [ ] 4.2.1.2 Subtask - Link to separately authorized attempts, wiki/dependency pages, reviews, costs, and knowledge placeholders without querying unapproved graph lenses.
-      - [ ] 4.2.1.3 Subtask - Apply field-level redaction, bounded history, projection states, source provenance, current revisions, and truthful unsupported capability notices.
-      - [ ] 4.2.1.4 Subtask - Keep project alias semantics explicit and reject inferred multi-repository grouping or cross-repository aggregation not accepted by contract.
+      - [x] 4.2.1.1 Subtask - Render repository/source identity, desired/current state, branch/worktree policy, active/recent attempts, evidence/review posture, wiki enrollment/freshness, dependency summary, and budget/cost.
+      - [x] 4.2.1.2 Subtask - Link to separately authorized attempts, wiki/dependency pages, reviews, costs, and knowledge placeholders without querying unapproved graph lenses.
+      - [x] 4.2.1.3 Subtask - Apply field-level redaction, bounded history, projection states, source provenance, current revisions, and truthful unsupported capability notices.
+      - [x] 4.2.1.4 Subtask - Keep project alias semantics explicit and reject inferred multi-repository grouping or cross-repository aggregation not accepted by contract.
 
-    - [ ] 4.2.2 Task {#huic-p04-attempt} [repo: jido_code] [after: {#huic-p04-project}] - Implement the read-only attempt workspace skeleton.
+    - [x] 4.2.2 Task {#huic-p04-attempt} [repo: jido_code] [after: {#huic-p04-project}] - Implement the read-only attempt workspace skeleton.
 
       This task creates the durable route and trust summary that Milestone E
       later enriches with causal timelines and commands.
 
-      - [ ] 4.2.2.1 Subtask - Render attempt identity, task/repository, agent/profile/runtime, branch/worktree, owner, lifecycle and outcome rails, current revision/fence, freshness, and budget posture.
-      - [ ] 4.2.2.2 Subtask - Render bounded interaction/artifact/effect/verification/decision/receipt/cost summary counts and recent items with separately authorized detail links.
-      - [ ] 4.2.2.3 Subtask - Label plan versus observed state, claimed versus independently verified evidence, candidate versus externally applied source, and running versus semantically progressing.
-      - [ ] 4.2.2.4 Subtask - Render controls as unavailable until Milestone E; do not add pause, stop, retry, approve, or other decorative buttons.
+      - [x] 4.2.2.1 Subtask - Render attempt identity, task/repository, agent/profile/runtime, branch/worktree, owner, lifecycle and outcome rails, current revision/fence, freshness, and budget posture.
+      - [x] 4.2.2.2 Subtask - Render bounded interaction/artifact/effect/verification/decision/receipt/cost summary counts and recent items with separately authorized detail links.
+      - [x] 4.2.2.3 Subtask - Label plan versus observed state, claimed versus independently verified evidence, candidate versus externally applied source, and running versus semantically progressing.
+      - [x] 4.2.2.4 Subtask - Render controls as unavailable until Milestone E; do not add pause, stop, retry, approve, or other decorative buttons.
 
   - [ ] 4.3 Section - Complete projection-state and cache isolation behavior.
 
