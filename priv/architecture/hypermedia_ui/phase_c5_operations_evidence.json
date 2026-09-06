@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-C5",
+  "section": "5.2",
+  "recorded_on": "2026-09-06",
+  "profile": "read-only-shell-production-like-v1",
+  "adapter_posture": {
+    "named_identity": {"adapter": "JidoCode.Identity.Store", "mode": "integrity-protected persistent snapshot", "result": "pass"},
+    "graph_authority": {"adapter": "JidoCode.Identity.Authority.Unconfigured", "mode": "production default fail-closed posture", "result": "pass_unavailable"},
+    "triple_store": {"adapter": "JidoCode.Knowledge.TripleStore", "backend": "RocksDB quad store", "result": "pass"},
+    "filesystem_readiness": {"adapter": "JidoCode.Knowledge.StoreServer", "mode": "isolated temporary root, verified ontology and store health", "result": "pass"},
+    "assets": {"adapter": "PhoenixVite.Npm/Vite", "mode": "production bundle with local immutable assets", "result": "pass"},
+    "proxy_tls": {"profiles": ["direct HTTP/1.1", "streaming HTTP/1.1 reverse proxy", "TLS HTTP/2 reverse proxy"], "result": "pass"}
+  },
+  "thresholds": {
+    "candidate_limit": 100,
+    "scan_limit": 24,
+    "page_rows": 20,
+    "queries_per_factory_surface": 121,
+    "surface_timeout_ms": 5500,
+    "serialized_projection_bytes": 262144,
+    "parallel_users": 8,
+    "tabs_per_user": 4,
+    "cache_entries": 512,
+    "cache_fresh_ms": 5000,
+    "cache_retention_ms": 30000,
+    "cache_process_memory_bytes": 16777216,
+    "cache_operation_p95_ms": 25
+  },
+  "production_asset_build": {
+    "command": "MIX_ENV=test mix assets.build",
+    "vite_version": "7.3.6",
+    "result": "pass",
+    "package_lock_sha256": "8a4b2384bdaf539731dd7eefa169cacaea38bcf689c2a59108ff6de5456addda",
+    "mix_lock_sha256": "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b",
+    "vite_manifest_sha256": "ea7905d6f860c9f391296b00b63602bb018ccef5e16bb30aa449bdf841adb3f1",
+    "javascript_sha256": "86c169862243fea99436485f9180890473653df1893271104e6b3cd594473c32",
+    "css_sha256": "ac8db698e89bca255e3a97c22fe05bcf7208de90b1ed4bcd2e63f510ce634159"
+  },
+  "failure_matrix": {
+    "identity_unavailable": "pass",
+    "store_unavailable": "pass",
+    "asset_missing_or_remote": "pass",
+    "graph_lag_and_stale": "pass",
+    "query_timeout": "pass",
+    "deploy_restart": "pass",
+    "stale_cache": "pass",
+    "revocation": "pass",
+    "clock_skew": "pass",
+    "malformed_and_hostile_content": "pass",
+    "maintenance_and_read_only_fallback": "pass"
+  },
+  "privacy_matrix": {
+    "protected_response_private_no_store": "pass",
+    "referrer_origin_only": "pass",
+    "safe_closed_telemetry_dimensions": "pass",
+    "raw_iri_absent": "pass",
+    "credentials_and_secrets_absent": "pass",
+    "cross_scope_diagnostics_concealed": "pass",
+    "browser_storage_contains_no_authority": "pass"
+  },
+  "commands": [
+    "mix test test/jido_code/product/read_only_shell_operations_phase_c5_test.exs test/jido_code_web/controllers/read_only_shell_privacy_phase_c5_test.exs",
+    "MIX_ENV=test mix assets.build",
+    "npx playwright test"
+  ],
+  "limitations": [
+    {
+      "id": "production-graph-authority-unconfigured",
+      "detail": "The production graph-authority adapter remains deliberately unconfigured and is qualified only for its fail-closed unavailable result; live named-human grants require a later selected adapter and fresh real-adapter qualification.",
+      "owner": "identity",
+      "expires_on": "2026-12-06",
+      "reopens_on": "selection or configuration of a production graph-authority adapter"
+    },
+    {
+      "id": "local-production-like-topology",
+      "detail": "Capacity and fault thresholds qualify one local Linux node and bounded synthetic concurrency; distributed sustained-load and deployment observation remain Milestone G scope.",
+      "owner": "operations",
+      "expires_on": "2026-12-06",
+      "reopens_on": "topology, capacity profile, runtime, store, proxy, or deployment change"
+    }
+  ],
+  "reopening_conditions": [
+    "a real adapter, dependency, lockfile, build, browser, proxy, TLS, OS, fixture, query, schema, or ontology identity drifts",
+    "any declared latency, memory, row, byte, cache, concurrency, timeout, or resource threshold is exceeded",
+    "an outage, timeout, lag, restart, stale, revocation, skew, malformed-content, or maintenance path exposes old data or reports false readiness",
+    "protected responses become cacheable or leak identity, authority, scope, IRI, secret, content, query, or cross-scope diagnostics through HTML, headers, referrers, logs, telemetry, caches, or browser storage",
+    "the unconfigured production graph-authority posture is described as a live grant adapter",
+    "a limitation, owner, expiry, result, command, threshold, or reopening condition is removed or weakened"
+  ]
+}

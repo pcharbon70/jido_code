@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "phase": "HUI-C5",
+  "gate": "HUI3",
+  "status": "fragment_candidate_merge_pending",
+  "recorded_on": "2026-09-06",
+  "authorized_baseline": "2542e9ceed021d42dbbde6cdc9eb9e9613c8546f",
+  "predecessor_candidates": {
+    "HUI-C1": "4a6fa78443463a8c8cd8ed039119cef8ba6e3b1b",
+    "HUI-C2": "da7ab6a4478bb278aa31a7636fa92135843249ff",
+    "HUI-C3": "fa5203a9aefe08d741b2898a01299c7d960c80d9",
+    "HUI-C4": "4532ff304816ad0a229192f0e0bc0f9a3abb66da"
+  },
+  "shell": {
+    "page_view_model": "JidoCodeWeb.ProductPageViewModel",
+    "projection_view_model": "JidoCode.Product.ReadProjection",
+    "page_component": "JidoCodeWeb.Components.ProductPage",
+    "facades": [
+      "JidoCodeWeb.Components.UI",
+      "JidoCodeWeb.Components.Application",
+      "JidoCodeWeb.Components.Projection",
+      "JidoCodeWeb.Components.ReadWorkspace"
+    ],
+    "shell_root": "product-shell",
+    "main_focus_target": "product-main",
+    "content_root": "product-owned-content",
+    "error_focus_contract": "product-error-summary links target exact invalid controls",
+    "authority_owner": "JidoCodeWeb.ProductRequest",
+    "projection_owner": "JidoCode.Product.GraphReadProjectionProvider",
+    "cache_owner": "JidoCode.Product.ReadProjectionCache"
+  },
+  "routes": [
+    {"method": "GET", "path": "/sign-in", "controller": "AuthController.new", "root": "human-sign-in", "focus": "human-sign-in-title", "authority": "public authentication entry", "native": "link and POST form"},
+    {"method": "POST", "path": "/sign-in", "controller": "AuthController.create", "root": "redirect_or_human-sign-in", "focus": "human-sign-in-error", "authority": "Identity.Store authentication", "native": "CSRF-protected form submit"},
+    {"method": "GET", "path": "/recovery", "controller": "AuthController.recovery_new", "root": "human-recovery", "focus": "human-recovery-title", "authority": "public generic recovery entry", "native": "link and POST form"},
+    {"method": "POST", "path": "/recovery", "controller": "AuthController.recovery_create", "root": "human-recovery", "focus": "human-recovery-notice", "authority": "Identity.Store generic recovery", "native": "CSRF-protected form submit"},
+    {"method": "DELETE", "path": "/sign-out", "controller": "AuthController.delete", "root": "redirect_to_sign-in", "focus": "human-sign-in-title", "authority": "current browser session", "native": "CSRF-protected form submit"},
+    {"method": "DELETE", "path": "/sessions", "controller": "AuthController.delete_all", "root": "redirect_to_sign-in", "focus": "human-sign-in-title", "authority": "current named human", "native": "CSRF-protected form submit"},
+    {"method": "GET", "path": "/step-up", "controller": "AuthController.step_up_new", "root": "human-step-up", "focus": "human-step-up-title", "authority": "current browser session", "native": "link and POST form"},
+    {"method": "POST", "path": "/step-up", "controller": "AuthController.step_up_create", "root": "human-step-up", "focus": "human-step-up-error", "authority": "Identity.Store assurance ceremony", "native": "CSRF-protected form submit"},
+    {"method": "DELETE", "path": "/account/sessions/:management_ref", "controller": "AccountController.revoke", "root": "session-management", "focus": "session-management-title", "authority": "current named human and non-bearer management ref", "native": "CSRF-protected form submit"},
+    {"method": "GET", "path": "/factory", "controller": "FactoryController.attention", "root": "product-page-factory", "focus": "product-main", "authority": "factory_shell/developer/page", "native": "links and GET filters"},
+    {"method": "GET", "path": "/factory/fleet", "controller": "FactoryController.fleet", "root": "product-page-fleet", "focus": "product-main", "authority": "factory_shell/developer/page", "native": "links, GET filters, and pagination"},
+    {"method": "GET", "path": "/projects", "controller": "ProjectController.index", "root": "product-page-projects", "focus": "product-main", "authority": "project_page/developer/page at factory", "native": "links, GET filters, and pagination"},
+    {"method": "GET", "path": "/projects/switch", "controller": "ProjectController.switch", "root": "redirect_to_authorized_project", "focus": "product-main", "authority": "project_page/developer/page", "native": "GET project switcher"},
+    {"method": "GET", "path": "/projects/:project_ref", "controller": "ProjectController.overview", "root": "product-page-project", "focus": "product-main", "authority": "project_page/developer/page", "native": "links and GET filters"},
+    {"method": "GET", "path": "/projects/:project_ref/attempts", "controller": "ProjectController.attempts", "root": "product-page-project_attempts", "focus": "product-main", "authority": "project_page/developer/page", "native": "links, GET filters, and pagination"},
+    {"method": "GET", "path": "/projects/:project_ref/wiki", "controller": "ProjectController.wiki", "root": "product-page-project_wiki", "focus": "product-main", "authority": "project_page/developer/page", "native": "links and GET retry"},
+    {"method": "GET", "path": "/projects/:project_ref/dependencies", "controller": "ProjectController.dependencies", "root": "product-page-project_dependencies", "focus": "product-main", "authority": "project_page/developer/page", "native": "links and GET retry"},
+    {"method": "GET", "path": "/projects/:project_ref/attempts/:attempt_ref", "controller": "AttemptController.show", "root": "product-page-attempt", "focus": "product-main", "authority": "project_page/developer/page after parent admission", "native": "links, GET filters, and retry"},
+    {"method": "GET", "path": "/projects/:project_ref/knowledge/:lens", "controller": "KnowledgeController.show", "root": "product-page-knowledge", "focus": "product-main", "authority": "knowledge_page/knowledge/page", "native": "links; unavailable placeholder"},
+    {"method": "GET", "path": "/reviews/:candidate_ref", "controller": "ReviewController.show", "root": "product-page-review", "focus": "product-main", "authority": "evidence_page/reviewer/page", "native": "links; unavailable placeholder"},
+    {"method": "GET", "path": "/operations", "controller": "OperationsController.index", "root": "product-page-operations", "focus": "product-main", "authority": "operations_page/operations/page", "native": "links; unavailable placeholder"},
+    {"method": "GET", "path": "/operations/costs", "controller": "OperationsController.costs", "root": "product-page-costs", "focus": "product-main", "authority": "cost_page/cost/page", "native": "links; unavailable placeholder"},
+    {"method": "GET", "path": "/security", "controller": "SecurityController.index", "root": "product-page-security", "focus": "product-main", "authority": "security_page/security/page", "native": "links; unavailable placeholder"},
+    {"method": "GET", "path": "/security/incidents", "controller": "SecurityController.incidents", "root": "product-page-incidents", "focus": "product-main", "authority": "security_page/security/page", "native": "links; unavailable placeholder"},
+    {"method": "GET", "path": "/governance", "controller": "GovernanceController.index", "root": "product-page-governance", "focus": "product-main", "authority": "administration_page/administration/page", "native": "links; unavailable placeholder"},
+    {"method": "GET", "path": "/account", "controller": "AccountController.show", "root": "product-page-account", "focus": "product-main", "authority": "current browser session", "native": "links"},
+    {"method": "GET", "path": "/account/sessions", "controller": "AccountController.sessions", "root": "product-page-sessions", "focus": "product-main", "authority": "current browser session", "native": "links and DELETE forms"}
+  ],
+  "projection_candidates": [
+    {"surface": "factory", "route": "/factory", "roots": ["factory-attention", "factory-health", "factory-attention-family-coverage", "factory-fleet-preview", "factory-capability-truth"], "native": "GET filter, project links, retry", "authorization": "factory route then each project row and field", "query": "2.11.0", "limits": "100 candidates, 24 scans, 20 rows, 5.5s"},
+    {"surface": "fleet", "route": "/factory/fleet", "roots": ["factory-fleet", "factory-fleet-capability-truth"], "native": "GET filter, sort, pagination, project links, retry", "authorization": "factory route then each project row and field", "query": "2.11.0", "limits": "100 candidates, 24 scans, 20 rows, 5.5s"},
+    {"surface": "projects", "route": "/projects", "roots": ["project-catalog"], "native": "GET filter, pagination, project links, retry", "authorization": "factory route then each project row and field", "query": "2.11.0", "limits": "100 candidates, 24 scans, 20 rows, 5.5s"},
+    {"surface": "project", "route": "/projects/:project_ref", "roots": ["project-overview-identity", "project-overview-work", "project-overview-attempts", "project-overview-wiki", "project-overview-capabilities"], "native": "links and retry", "authorization": "exact project route, query, field, and destination", "query": "2.11.0", "limits": "50 attempts, 20 page rows, 5.5s"},
+    {"surface": "project_attempts", "route": "/projects/:project_ref/attempts", "roots": ["project-attempts", "project-attempts-pagination", "project-attempt-capabilities"], "native": "GET filter, pagination, attempt links, retry", "authorization": "exact project then each attempt row and field", "query": "2.11.0", "limits": "50 attempts, 20 page rows, 5.5s"},
+    {"surface": "project_wiki", "route": "/projects/:project_ref/wiki", "roots": ["project-wiki-summary", "project-wiki-capabilities"], "native": "links and retry", "authorization": "exact project, enrollment, edition, and field", "query": "2.11.0", "limits": "default-off enrollment, one current edition, 5.5s"},
+    {"surface": "project_dependencies", "route": "/projects/:project_ref/dependencies", "roots": ["project-dependencies", "project-dependency-capabilities"], "native": "links and retry", "authorization": "exact project, snapshot, and field", "query": "2.11.0", "limits": "50 dependency rows, 5.5s"},
+    {"surface": "attempt", "route": "/projects/:project_ref/attempts/:attempt_ref", "roots": ["attempt-workspace-summary", "attempt-workspace-counts", "attempt-workspace-recent", "attempt-workspace-semantics", "attempt-workspace-capabilities"], "native": "GET filter, links, and retry", "authorization": "exact parent, attempt, evidence, field, and destination", "query": "2.11.0", "limits": "12 recent items, 24 metadata items, 5.5s"}
+  ],
+  "state_envelope": ["ready", "empty", "stale", "incomplete", "contradicted", "truncated", "unauthorized", "unavailable", "maintenance", "recovery"],
+  "reconciled_evidence": {
+    "identity_session_revocation": "phase_c1_implementation_evidence.json and phase_c3_implementation_evidence.json",
+    "component_design_assets": "phase_c2_implementation_evidence.json",
+    "routes_native_navigation": "phase_c3_implementation_evidence.json",
+    "projection_cache_readiness_wiki_cost": "phase_c4_implementation_evidence.json",
+    "accessibility": "phase_c5_accessibility_evidence.json",
+    "adapters_capacity_privacy_operations": "phase_c5_operations_evidence.json"
+  },
+  "unsupported_placeholders": [
+    "production graph-authority grants",
+    "phishing-resistant step-up and independent recovery",
+    "semantic pause, stop, retry-command, approval, and other effects",
+    "interaction, receipt, aggregate cost, cost-detail, incident, and exact dependency projections without reviewed contracts",
+    "knowledge lenses, reviews, operations, cost, security, incident, and governance projections before their owning milestones"
+  ],
+  "milestone_d_candidates": [
+    "authorized snapshot and bounded replacement for each listed projection root",
+    "application-owned SSE coordination with maximum lifetime and reauthorization before every protected patch",
+    "static reviewed Datastar expressions for ephemeral filter and refresh intent",
+    "focus and reading-position preservation around server-rendered replacements",
+    "explicit replacement, close, and reconnect-suppression outcomes on revocation"
+  ],
+  "enhancement_prohibitions": [
+    "no removal or weakening of ordinary links, GET forms, pagination, retry, sign-out, or JavaScript-disabled behavior",
+    "no change to route, resource, attempt, candidate, interaction-session, wiki-edition, graph, or source identity semantics",
+    "no browser-selected actor, authority, scope, grant, delegation, assurance, revision, graph, state, or capability",
+    "no query, field, row, destination, patch, stream, or cache use without current server authorization",
+    "no replacement that omits canonical state, freshness, completeness, provenance, warnings, readiness, or unsupported-capability truth",
+    "no unbounded patch, stream lifetime, connection, query, row, byte, history, cache, or telemetry dimension",
+    "no inline script, inline event handler, remote asset, product LiveView, LiveVue island, or executable server/user content"
+  ],
+  "reopening_conditions": [
+    "an accepted route, view model, component facade, stable root, focus target, state, authorization owner, query version, limit, native interaction, or unsupported placeholder drifts",
+    "identity, session, revocation, scope, component, projection, cache, readiness, wiki, cost, accessibility, adapter, capacity, privacy, or operations evidence no longer reconciles",
+    "Milestone D changes native behavior, stable identity, exact authorization, bounded reads, truthful state, privacy, or accessibility",
+    "a new fragment candidate, route, projection, field, query, component, browser profile, or live-delivery behavior appears without fresh qualification",
+    "a limitation, prohibition, unsupported placeholder, or reopening condition is removed or weakened"
+  ]
+}
