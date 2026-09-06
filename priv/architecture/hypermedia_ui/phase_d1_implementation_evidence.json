@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "phase": "HUI-D1",
-  "status": "integration_candidate_merge_pending",
+  "status": "accepted_at_merged_candidate",
   "recorded_on": "2026-09-06",
   "baseline_commit": "4d0e3918d732d87ebaad36e56ef90cc781e51d62",
   "predecessor_candidate": "5987a7a4a43505b035f5a566588d5201e98686f7",
@@ -16,12 +16,23 @@
     "1.2": "9a7228a9e04e14fed0dc6c4becbb2abfd15f3fc0",
     "1.3": "23a153e703108a972377f76fcddee946bd50ae1b"
   },
-  "merged_candidate": null,
-  "implementation_pr": null,
-  "merge_date": null,
+  "merged_candidate": "7118bf337639c5ecdd5f2567dafbc761a5e09165",
+  "implementation_pr": 127,
+  "merge_date": "2026-09-06",
   "local_verification": "pass",
-  "clean_checkout_ci": "pending",
-  "clean_checkout_jobs": {},
+  "clean_checkout_ci": "pass",
+  "clean_checkout_jobs": {
+    "verify": {
+      "id": 101506610095,
+      "duration": "18m52s",
+      "result": "pass"
+    },
+    "dialyzer": {
+      "id": 101506609785,
+      "duration": "1m41s",
+      "result": "pass"
+    }
+  },
   "limits": {
     "request_bytes": 2048,
     "namespace_count": 1,
@@ -107,14 +118,14 @@
     "clean_checkout_ci_and_merged_candidate_are_required_for_closure"
   ],
   "integration": {
-    "focused_tests": 28,
-    "precommit_tests": 1416,
+    "focused_tests": 29,
+    "precommit_tests": 1417,
     "precommit_failures": 0,
-    "precommit_seconds": 674.4,
+    "precommit_seconds": 663.1,
     "browser_applicable_passes": 99,
     "browser_deliberate_skips": 111,
     "browser_failures": 0,
-    "browser_duration": "1.8m",
+    "browser_duration": "1.9m",
     "d1_browser_passes": 15,
     "d1_browser_skips": 20,
     "strict_production_compile": "pass",
@@ -141,14 +152,14 @@
     "assets/vue_csp_compatibility.mjs": "49a45a84bbf804bb55410c0d4ef8ddb4d40c33dc268fe08d384aa9524387c6b9",
     "docs/architecture/hypermedia-ui-compatibility-csp-repair.md": "3ab82e219775500d74e33e54276446375c10ef7e984b8c1fcd0d1726fbe8d185",
     "docs/architecture/hypermedia-ui-read-request-and-fragment-implementation.md": "81cc74870f365fb19e985a219d5e9529fef4e5c9f4bf3b0ee56181870d9c9bc0",
-    "docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md": "6059ca497cd50ef228302af720b94226149232f7caf44a09925896f87a952026",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md": "b2b07ba181409e24220812ff5aba3dfbf1d65e8a3a4d4611b461ee91a0f407a5",
+    "docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md": "cdfc8b742f5fcaf8c0480e9ac0161adc0f79c8dc2b980661b12f45c0ca50057e",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md": "93136e38d1f3e10046a1f4aaf67f28677772e7287182e96945d691a5a4061a84",
     "lib/jido_code/application.ex": "cd2c2e78403d64259518f1f6444d4151c2ac5c89da2752c05ba4bb2610ec9d73",
     "lib/jido_code/architecture/hypermedia_ui_phase_b2.ex": "afda81084cb6d6c99391b6583214f19af45f0e69e68369b559342f71d8e9b9cf",
     "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "41f1655e04f4b59830927d418d122d9ae9d267683e77f70476fb4d7f971213d0",
     "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "aec8fda78f04d5061e8c59139e5c87a36e7d7c1c9faa39baae4a2db498759a41",
     "lib/jido_code/architecture/hypermedia_ui_phase_c5.ex": "cbee9881a7536d35af37a0ce12f4dcfc25b5ecdcfa3479dc59cef991cd54eb31",
-    "lib/jido_code/architecture/hypermedia_ui_phase_d1.ex": "fdd9e1dbb3999d9290c0104f62da14832da3a499152f2f4d156a43106382ed1b",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d1.ex": "e95c36b20850371dba7c237eb16575afc2b476f3dfda33ca740371a99a9291e1",
     "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "435395cc3e3729671ef0321247f234cc6ea85fc20e0cfd12012823440b5d31cb",
     "lib/jido_code/product/read_request_limiter.ex": "d59c822a94d1aaf8a9ecbd66af14d9a09da7ca5a3c8d2ae7e38446ffb75c9980",
     "lib/jido_code_web/components/product_page.ex": "63463e3f65c597ef71df606bde008b5e5c20a763e33f1ed9fcb56000c1ebc53a",
@@ -195,7 +206,14 @@
     "browser_failures": 0,
     "firefox_repetitions": 10,
     "retries": 0,
-    "full_precommit": "pending",
-    "clean_checkout_ci": "pending"
-  }
+    "full_precommit": "pass",
+    "clean_checkout_ci": "pass",
+    "named_at": "pass",
+    "development_transform": "pass",
+    "ci_browser_duration": "2.3m"
+  },
+  "implementation_pr_head": "e89d4859a2e5b850564667045a4a1be86a44f7cc",
+  "original_implementation_merge": "c73fb6d44ea305b86acc504114ac7036bbd7caa1",
+  "repair_pr": 129,
+  "repair_pr_head": "8e4fd0c6593f3060f0b26388a1cbd773b0300ece"
 }
