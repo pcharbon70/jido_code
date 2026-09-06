@@ -17,20 +17,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-D1 by making every enhanced request independently
   validated, authorized, CSP/CSRF-safe, and equivalent to a native workflow.
 
-  - [ ] 1.1 Section - Define and implement per-page signal schemas.
+  - [x] 1.1 Section - Define and implement per-page signal schemas.
 
     This section admits only bounded presentation/request intent and rejects
     browser attempts to provide identity, grants, resources, or revisions.
 
-    - [ ] 1.1.1 Task {#huid-p01-signals} [repo: jido_code] [after: {#huic-p05-phase-receipt}] - Implement closed signal namespaces and parsers.
+    - [x] 1.1.1 Task {#huid-p01-signals} [repo: jido_code] [after: {#huic-p05-phase-receipt}] - Implement closed signal namespaces and parsers.
 
       This task gives each route/action its own typed allowed subset, limits,
       normalization, defaults, and safe reset behavior.
 
-      - [ ] 1.1.1.1 Subtask - Define global/local namespaces and allowlisted filter/sort/search/cursor/page/view/overlay/pause-visual-update keys by route/action.
-      - [ ] 1.1.1.2 Subtask - Enforce key count, nesting depth, scalar/list length, UTF-8, aggregate bytes, enum/range, duplicate-key, unknown-key, and normalization limits.
-      - [ ] 1.1.1.3 Subtask - Reject principal/session/tenant/project/resource/graph/grant/delegation/assurance/revision/fence/profile/idempotency/command fields and scope-reset unsafe state.
-      - [ ] 1.1.1.4 Subtask - Add typed safe diagnostics and property/fuzz fixtures without reflecting secrets, raw protected values, or parser internals.
+      - [x] 1.1.1.1 Subtask - Define global/local namespaces and allowlisted filter/sort/search/cursor/page/view/overlay/pause-visual-update keys by route/action.
+      - [x] 1.1.1.2 Subtask - Enforce key count, nesting depth, scalar/list length, UTF-8, aggregate bytes, enum/range, duplicate-key, unknown-key, and normalization limits.
+      - [x] 1.1.1.3 Subtask - Reject principal/session/tenant/project/resource/graph/grant/delegation/assurance/revision/fence/profile/idempotency/command fields and scope-reset unsafe state.
+      - [x] 1.1.1.4 Subtask - Add typed safe diagnostics and property/fuzz fixtures without reflecting secrets, raw protected values, or parser internals.
 
   - [ ] 1.2 Section - Implement explicit enhanced request handlers.
 
