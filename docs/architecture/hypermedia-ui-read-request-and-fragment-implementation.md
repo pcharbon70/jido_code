@@ -31,6 +31,32 @@ defines their semantics; sending them is rejected. No actor, session, tenant,
 project authority, graph, grant, delegation, assurance, profile, fence,
 revision, CSRF, idempotency, or command field is admitted.
 
+## Explicit Read Handlers
+
+Ten fixed POST routes under `/ui/reads` map to the existing factory, fleet,
+project catalog, overview, attempts, wiki, dependencies, attempt, account,
+and session controller actions. There is no caller-selected handler or query.
+Graph reads use the same bounded provider and field-shaped view models as
+native GETs. After rendering, trusted identity, exact parent/resource scope,
+grants, policy/graph revisions, assurance, redaction, and revocation generations
+are reconstructed again; a changed authority fence returns 409 without the
+earlier content. Expiry/revocation returns 401, concealment 404, denial/step-up
+403, unavailable authority 503. Identity-only reads validate the session anew.
+
+Admission requires POST, JSON, no URL query, `Datastar-Request: true`, an exact
+same-origin Origin and `Sec-Fetch-Site: same-origin`, and the standard browser
+pipeline's CSRF token in the header. Raw JSON is bounded before generic parsing
+and parameter logging; duplicate keys survive until the closed parser checks
+them. Bodies never become logged controller params. Responses are private,
+no-store, no-referrer, nosniff, and noindex, including transport errors.
+
+A disposable supervised limiter admits 30 reads/minute/principal, at most two
+concurrent reads/principal and 16 globally, and at most 256 rate-window keys.
+Leases are released after responses or caller death. Limits return 429 with a
+60-second Retry-After; missing limiter state fails closed with 503. No grant,
+query result, or protected projection is stored there. These are single-node
+bounds; distributed admission remains later operational scope.
+
 ## Reopening Conditions
 
 Reopen HUI-D1 if a signal gains authority, an unknown/duplicate/deep/oversized

@@ -32,20 +32,20 @@ Back to plan: [README](./README.md)
       - [x] 1.1.1.3 Subtask - Reject principal/session/tenant/project/resource/graph/grant/delegation/assurance/revision/fence/profile/idempotency/command fields and scope-reset unsafe state.
       - [x] 1.1.1.4 Subtask - Add typed safe diagnostics and property/fuzz fixtures without reflecting secrets, raw protected values, or parser internals.
 
-  - [ ] 1.2 Section - Implement explicit enhanced request handlers.
+  - [x] 1.2 Section - Implement explicit enhanced request handlers.
 
     This section maps each request class to one ordinary controller boundary,
     trusted authority decision, reviewed query, and native equivalent.
 
-    - [ ] 1.2.1 Task {#huid-p01-requests} [repo: jido_code] [after: {#huid-p01-signals}] - Implement filter, search, sort, pagination, and view handlers.
+    - [x] 1.2.1 Task {#huid-p01-requests} [repo: jido_code] [after: {#huid-p01-signals}] - Implement filter, search, sort, pagination, and view handlers.
 
       This task prevents generic/catch-all hypermedia dispatch and preserves
       HTTP method, cache, privacy, and error semantics.
 
-      - [ ] 1.2.1.1 Subtask - Add explicit routes/actions for each admitted read intent and map them to the same bounded view-model/query functions as native pages.
-      - [ ] 1.2.1.2 Subtask - Reconstruct current trusted authority and canonical resource scope server-side; authorize before query and after field shaping.
-      - [ ] 1.2.1.3 Subtask - Enforce GET safety, non-GET CSRF header/body, Origin/Fetch Metadata, same-origin content types, no-store/referrer/log policy, and rate limits.
-      - [ ] 1.2.1.4 Subtask - Return safe native full-page fallback or explicit fragment/error response without hidden rows, optimistic state, or transport-specific truth.
+      - [x] 1.2.1.1 Subtask - Add explicit routes/actions for each admitted read intent and map them to the same bounded view-model/query functions as native pages.
+      - [x] 1.2.1.2 Subtask - Reconstruct current trusted authority and canonical resource scope server-side; authorize before query and after field shaping.
+      - [x] 1.2.1.3 Subtask - Enforce GET safety, non-GET CSRF header/body, Origin/Fetch Metadata, same-origin content types, no-store/referrer/log policy, and rate limits.
+      - [x] 1.2.1.4 Subtask - Return safe native full-page fallback or explicit fragment/error response without hidden rows, optimistic state, or transport-specific truth.
 
   - [ ] 1.3 Section - Implement stable coherent fragment boundaries.
 

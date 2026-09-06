@@ -187,8 +187,19 @@ defmodule JidoCodeWeb.ProductRequest do
   defp normalize_query_value(_key, _value), do: {:error, :invalid_route_parameter}
 
   defp authorize_resource(conn, %{resource: :session}, _params) do
-    case conn.assigns[:authenticated_human] do
-      %{session_ref: session_ref} -> {:ok, %{decision: :allowed, session_ref: session_ref}}
+    with %{session_ref: session_ref} <- conn.assigns[:authenticated_human],
+         {:ok, %{session: session, account: account}} <-
+           JidoCode.Identity.Sessions.validate(session_ref, touch: false) do
+      {:ok,
+       %{
+         decision: :allowed,
+         session_ref: session_ref,
+         subject_ref: account.subject_ref,
+         session_generation: session.session_generation,
+         account_generation: session.account_generation,
+         assurance: session.assurance
+       }}
+    else
       _missing -> {:error, :revoked}
     end
   end
@@ -202,7 +213,8 @@ defmodule JidoCodeWeb.ProductRequest do
              Map.fetch!(spec, :area),
              :page,
              resource_ref(spec.resource, route_params),
-             reauthorization_point: :before_response_start,
+             reauthorization_point:
+               conn.private[:read_reauthorization_point] || :before_response_start,
              correlation_ref: conn.assigns[:request_id] || route_correlation(conn)
            ),
          {:ok, authorization} <- AuthorityBuilder.build(session_ref, request),
@@ -223,7 +235,8 @@ defmodule JidoCodeWeb.ProductRequest do
              :developer,
              :page,
              params.parent_ref,
-             reauthorization_point: :before_response_start,
+             reauthorization_point:
+               conn.private[:read_reauthorization_point] || :before_response_start,
              correlation_ref: (conn.assigns[:request_id] || route_correlation(conn)) <> "-parent"
            ),
          {:ok, authorization} <- AuthorityBuilder.build(session_ref, request),
@@ -287,7 +300,10 @@ defmodule JidoCodeWeb.ProductRequest do
   defp secure(conn) do
     conn
     |> put_resp_header("cache-control", "no-store, private")
-    |> put_resp_header("referrer-policy", "origin")
+    |> put_resp_header(
+      "referrer-policy",
+      if(conn.assigns[:enhanced_read], do: "no-referrer", else: "origin")
+    )
     |> put_resp_header("x-robots-tag", "noindex, nofollow")
   end
 
@@ -297,11 +313,17 @@ defmodule JidoCodeWeb.ProductRequest do
   defp unavailable(conn),
     do: send_resp(conn, :service_unavailable, "The product authority is unavailable.")
 
+  defp expired(%{assigns: %{enhanced_read: _}} = conn),
+    do: conn |> ProductAuth.delete_session() |> JidoCodeWeb.ReadSecurity.reject(401)
+
   defp expired(conn) do
     conn
     |> ProductAuth.delete_session()
     |> redirect(to: "/sign-in?" <> URI.encode_query(%{"reason" => "expired"}))
   end
+
+  defp step_up(%{assigns: %{enhanced_read: _}} = conn),
+    do: JidoCodeWeb.ReadSecurity.reject(conn, 403)
 
   defp step_up(conn) do
     return_to = ProductAuth.safe_return_path(request_path_with_query(conn))

@@ -33,6 +33,25 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.Plugs.RequireSameOrigin
   end
 
+  pipeline :enhanced_read do
+    plug JidoCodeWeb.ReadSecurity
+  end
+
+  scope "/ui/reads", JidoCodeWeb do
+    pipe_through [:browser, :enhanced_read]
+
+    post "/factory", ReadController, :factory
+    post "/fleet", ReadController, :fleet
+    post "/projects", ReadController, :projects
+    post "/projects/:project_ref/overview", ReadController, :project
+    post "/projects/:project_ref/attempts", ReadController, :project_attempts
+    post "/projects/:project_ref/wiki", ReadController, :project_wiki
+    post "/projects/:project_ref/dependencies", ReadController, :project_dependencies
+    post "/projects/:project_ref/attempts/:attempt_ref", ReadController, :attempt
+    post "/account", ReadController, :account
+    post "/sessions", ReadController, :sessions
+  end
+
   for area <- JidoCode.Identity.RoutePolicy.areas() do
     pipeline String.to_atom("authorize_#{area}") do
       plug JidoCodeWeb.Plugs.RequireProductArea, area
