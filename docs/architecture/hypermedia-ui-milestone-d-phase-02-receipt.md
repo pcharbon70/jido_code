@@ -1,8 +1,9 @@
 # HUI-D2 — Authorized Page/Tab Stream Coordinator Receipt
 
-Status: **merge-pending**. Sections 2.1–2.4 admission, supervised lifecycle,
-revocation and integration qualification are implemented. Clean-checkout CI,
-merge and merged-candidate pinning remain required for acceptance.
+Status: **accepted-at-merged-candidate**. Sections 2.1–2.4 admission, supervised
+lifecycle, revocation and integration qualification passed clean-checkout CI and
+merged in implementation PR #130. The pinned candidate below is the only D2
+baseline; every predecessor and D2 reopening condition remains binding.
 
 ## Candidate Provenance
 
@@ -11,11 +12,22 @@ merge and merged-candidate pinning remain required for acceptance.
 - Section 2.1: `16b9a187de9c74bed1209d16965bdcdf35e44423`.
 - Section 2.2: `4b4b0a4d0f5a37475bca027a047085f7c975819a`.
 - Section 2.3: `3be4660e030e48f30bdecc85d5e1917d7958a966`.
-- Implementation PR, section 2.4 commit, merged candidate, merge date and clean-checkout jobs: pending.
+- Section 2.4: `33aa29220f1de3d9abf319d5c15e64e03bb1e71a`.
+- Implementation PR: [#130](https://github.com/pcharbon70/jido_code/pull/130).
+
+Merged candidate: `1d55390108763052998cc6f6e6dfc4ce319998c0`
+Merge date: `2026-09-06`
+
+Clean-checkout jobs on the exact implementation head: [verify 101528874736](https://github.com/pcharbon70/jido_code/actions/runs/34048916379/job/101528874736)
+(27m9s) and [Dialyzer 101528874615](https://github.com/pcharbon70/jido_code/actions/runs/34048916353/job/101528874615)
+(1m33s). Both completed successfully before the implementation merge. Completed
+logs confirm all test totals below and no browser retries or flaky passes.
 
 ## Gate HUI-D2
 
-**merge-pending**. No subsequent phase is authorized by this receipt.
+**accepted-at-merged-candidate**. D3 is authorized only from the pinned candidate
+after this closure is published on main. Gate reopening is independent of every
+checkbox, and no scope, limit or predecessor invariant is weakened.
 
 ## Evidence
 
@@ -43,13 +55,14 @@ Section 2.4 qualification: the real HTTP/production-supervision matrix passes
 checks. Named Orca connection/status/revocation/reload speech and focus passes.
 The layout now emits same-origin asset paths after proxy testing exposed the
 upstream-origin CSP mismatch; neither CSP nor any predecessor gate was weakened.
-The cumulative browser run passes 112 checks with 148 deliberate profile skips
-(260 combinations, 7.2 minutes), with no failures or retries. The final finite-read/
-stream ordering guard then passes all 10 applicable Chromium stream/proxy checks
-(one native-profile skip, 1.3 minutes). Strict development/production compilation
-and Dialyzer pass with the existing 178 filters and no new or unused filter.
-`mix precommit` passes 1,468 tests with zero failures in 663.1 seconds. No phase
-acceptance is claimed before clean-checkout CI and merged-candidate pinning.
+The final cumulative browser matrix passes 113 checks with 152 deliberate profile
+skips (265 combinations): 7.3 minutes locally and 8.1 minutes in clean-checkout CI,
+with no failures, retries or flaky passes. It includes the final finite-read/stream
+ordering guard. Named Orca 46.1 with Chrome 140.0.7339.80 passes again on the final
+committed assets; speech traces remain ephemeral. Strict development/production
+compilation and Dialyzer pass with the existing 178 filters and no new or unused
+filter. `mix precommit` passes 1,468 tests with zero failures in both local runs
+(663.1 and 667.1 seconds) and clean-checkout CI (953.9 seconds).
 Transport cleanup and reduced-clock/limit fixtures are described explicitly
 in the implementation contract; D4 global/deployment capacity is not claimed.
 

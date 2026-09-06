@@ -5,7 +5,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
   @receipt "docs/architecture/hypermedia-ui-milestone-d-phase-02-receipt.md"
   @baseline "852215a71fae707bd7bd89ea822e2963b695ec5b"
   @predecessor "7118bf337639c5ecdd5f2567dafbc761a5e09165"
-  @merged_candidate nil
+  @merged_candidate "1d55390108763052998cc6f6e6dfc4ce319998c0"
   @sections ~w[2.1 2.2 2.3 2.4]
   @paths ~w[
     /ui/streams/factory /ui/streams/fleet /ui/streams/projects
