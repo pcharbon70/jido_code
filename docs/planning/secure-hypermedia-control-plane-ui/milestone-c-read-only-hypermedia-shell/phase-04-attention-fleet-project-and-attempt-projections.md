@@ -67,20 +67,20 @@ Back to plan: [README](./README.md)
       - [x] 4.2.2.3 Subtask - Label plan versus observed state, claimed versus independently verified evidence, candidate versus externally applied source, and running versus semantically progressing.
       - [x] 4.2.2.4 Subtask - Render controls as unavailable until Milestone E; do not add pause, stop, retry, approve, or other decorative buttons.
 
-  - [ ] 4.3 Section - Complete projection-state and cache isolation behavior.
+  - [x] 4.3 Section - Complete projection-state and cache isolation behavior.
 
     This section ensures errors, stale data, authorization change, and cache
     reuse cannot preserve rows or imply truth that is no longer available.
 
-    - [ ] 4.3.1 Task {#huic-p04-states} [repo: jido_code] [after: {#huic-p04-attempt}] - Implement all projection states and safe refresh semantics.
+    - [x] 4.3.1 Task {#huic-p04-states} [repo: jido_code] [after: {#huic-p04-attempt}] - Implement all projection states and safe refresh semantics.
 
       This task gives every page a coherent state envelope independent of
       transport connection status.
 
-      - [ ] 4.3.1.1 Subtask - Implement loading, ready, empty, stale, partial, truncated, denied/concealed, unavailable, unconfigured, and error outcomes for every projection family.
-      - [ ] 4.3.1.2 Subtask - Clear previously visible data on concealment/unavailability, bound stale retention, distinguish retryable/terminal errors, and provide safe native retry.
-      - [ ] 4.3.1.3 Subtask - Key caches by exact principal/session generation/scope/grants/query/version and prevent protected shared/browser/proxy caching.
-      - [ ] 4.3.1.4 Subtask - Add safe query latency/row/truncation/cache telemetry without protected values, raw IRIs, user input, or cross-scope dimensions.
+      - [x] 4.3.1.1 Subtask - Implement loading, ready, empty, stale, partial, truncated, denied/concealed, unavailable, unconfigured, and error outcomes for every projection family.
+      - [x] 4.3.1.2 Subtask - Clear previously visible data on concealment/unavailability, bound stale retention, distinguish retryable/terminal errors, and provide safe native retry.
+      - [x] 4.3.1.3 Subtask - Key caches by exact principal/session generation/scope/grants/query/version and prevent protected shared/browser/proxy caching.
+      - [x] 4.3.1.4 Subtask - Add safe query latency/row/truncation/cache telemetry without protected values, raw IRIs, user input, or cross-scope dimensions.
 
   - [ ] 4.4 Section - Phase 4 Integration Tests.
 

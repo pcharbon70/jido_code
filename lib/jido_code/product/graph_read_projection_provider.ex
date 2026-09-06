@@ -22,7 +22,9 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
   alias JidoCode.Knowledge.Readiness
   alias JidoCode.Knowledge.ResourceIdentity
   alias JidoCode.Product.ReadProjection
+  alias JidoCode.Product.ReadProjectionCache
   alias JidoCode.Product.ReadProjectionQuery
+  alias JidoCode.Product.ReadProjectionTelemetry
 
   @query_version "2.11.0"
   @supported_surfaces [
@@ -49,19 +51,117 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
     surface = get_in(context, [:page, :key])
 
     if surface in @supported_surfaces do
+      started_at = System.monotonic_time(:millisecond)
       timeout = Keyword.get(options, :surface_timeout_ms, @surface_timeout_ms)
-      task = Task.async(fn -> guarded_load(context, options) end)
+      task = Task.async(fn -> cached_load(context, options) end)
 
-      case Task.yield(task, timeout) || Task.shutdown(task, :brutal_kill) do
-        {:ok, result} -> result
-        _timeout -> {:ok, ReadProjection.unavailable(surface, :error)}
-      end
+      result =
+        case Task.yield(task, timeout) || Task.shutdown(task, :brutal_kill) do
+          {:ok, result} -> result
+          _timeout -> {:ok, ReadProjection.unavailable(surface, :error)}
+        end
+
+      emit_telemetry(System.monotonic_time(:millisecond) - started_at, surface, result)
+      result
     else
       {:error, :unsupported_read_projection_surface}
     end
   end
 
   def load(_context, _options), do: {:error, :invalid_read_projection_context}
+
+  defp cached_load(context, options) do
+    case Keyword.get(options, :cache_server, ReadProjectionCache) do
+      nil ->
+        guarded_load(context, options)
+
+      cache_server ->
+        with {:ok, key} <- ReadProjectionCache.key(context) do
+          now_ms = cache_now(options)
+
+          case ReadProjectionCache.fetch(cache_server, key, now_ms) do
+            {:fresh, projection} ->
+              serve_cache_hit(context, options, cache_server, key, projection)
+
+            {:stale, _projection} ->
+              refresh_cache(context, options, cache_server, key, now_ms, :refresh)
+
+            :miss ->
+              refresh_cache(context, options, cache_server, key, now_ms, :miss)
+          end
+        else
+          {:error, :invalid_cache_context} -> guarded_load(context, options)
+        end
+    end
+  end
+
+  defp serve_cache_hit(context, options, cache_server, key, projection) do
+    surface = context.page.key
+    resource_ref = cache_resource_ref(context.page)
+
+    case authorize(
+           context,
+           surface,
+           :query,
+           :before_field_shaping,
+           resource_ref,
+           options
+         ) do
+      {:ok, %{decision: :allowed}} ->
+        {:ok, %{projection | cache: %{status: :hit}}}
+
+      {:error, outcome} when is_atom(outcome) ->
+        :ok = ReadProjectionCache.invalidate(cache_server, key)
+        {:ok, invalidated_projection(surface, outcome)}
+
+      _invalid ->
+        :ok = ReadProjectionCache.invalidate(cache_server, key)
+        {:ok, invalidated_projection(surface, :unavailable)}
+    end
+  end
+
+  defp refresh_cache(context, options, cache_server, key, now_ms, cache_status) do
+    case guarded_load(context, options) do
+      {:ok, %ReadProjection{} = projection} ->
+        if ReadProjectionCache.cacheable?(projection) do
+          :ok = ReadProjectionCache.put(cache_server, key, projection, now_ms)
+          {:ok, %{projection | cache: %{status: cache_status}}}
+        else
+          :ok = ReadProjectionCache.invalidate(cache_server, key)
+          {:ok, %{projection | cache: %{status: :invalidated}}}
+        end
+
+      other ->
+        :ok = ReadProjectionCache.invalidate(cache_server, key)
+        other
+    end
+  end
+
+  defp invalidated_projection(surface, outcome) do
+    source_outcome =
+      if outcome in [:denied, :concealed, :concealed_not_found, :revoked, :step_up_required],
+        do: :denied,
+        else: :unavailable
+
+    projection = ReadProjection.unavailable(surface, source_outcome)
+    %{projection | cache: %{status: :invalidated}}
+  end
+
+  defp cache_resource_ref(%{key: surface}) when surface in [:factory, :fleet, :projects],
+    do: :factory
+
+  defp cache_resource_ref(%{route_params: %{resource_ref: resource_ref}}), do: resource_ref
+
+  defp cache_now(options) do
+    clock = Keyword.get(options, :cache_clock, fn -> System.monotonic_time(:millisecond) end)
+    clock.()
+  end
+
+  defp emit_telemetry(duration_ms, surface, result) do
+    ReadProjectionTelemetry.emit(max(duration_ms, 0), surface, result)
+  rescue
+    _error -> :ok
+  end
 
   defp guarded_load(context, options) do
     do_load(context, options)
