@@ -3,7 +3,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD1 do
   @manifest "priv/architecture/hypermedia_ui/phase_d1_implementation_evidence.json"
   @plan "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md"
   @receipt "docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md"
-  @merged_candidate "c73fb6d44ea305b86acc504114ac7036bbd7caa1"
+  @merged_candidate "7118bf337639c5ecdd5f2567dafbc761a5e09165"
   @baseline "4d0e3918d732d87ebaad36e56ef90cc781e51d62"
   @predecessor "5987a7a4a43505b035f5a566588d5201e98686f7"
   @section_commits %{
@@ -34,6 +34,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD1 do
   @required_sources ~w[
     assets/js/app.js
     assets/js/read_projection.js
+    assets/vite.config.mjs
+    assets/vue_csp_compatibility.mjs
+    docs/architecture/hypermedia-ui-compatibility-csp-repair.md
     docs/architecture/hypermedia-ui-read-request-and-fragment-implementation.md
     docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md
     docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md
@@ -71,6 +74,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD1 do
     scripts/qualify_hui_d1_orca.sh
     test/accessibility/hypermedia_ui_phase_d1_orca.mjs
     test/browser/hypermedia_ui_phase_d1.spec.mjs
+    test/assets/vue_csp_compatibility_test.mjs
+    test/jido_code/architecture/vue_csp_compatibility_test.exs
     test/jido_code/architecture/hypermedia_ui_phase_a1_test.exs
     test/jido_code/architecture/hypermedia_ui_phase_d1_test.exs
     test/jido_code/product/read_request_limiter_test.exs

@@ -4,10 +4,11 @@
 
 Status: **accepted-at-merged-candidate**
 
-HUI-D1 is accepted at merged implementation candidate
-`c73fb6d44ea305b86acc504114ac7036bbd7caa1`. Implementation PR #127 passed
-clean-checkout verification and Dialyzer on its exact head before merging on
-2026-09-06. Phase D2 is authorized only from this pinned baseline. All HUI-A
+HUI-D1 is accepted at repaired merged implementation candidate
+`7118bf337639c5ecdd5f2567dafbc761a5e09165`. Implementation PR #127 was followed
+by required CSP repair PR #129, which passed clean-checkout verification and
+Dialyzer without a browser retry before merging on 2026-09-06. Phase D2 is
+authorized only from this pinned baseline. All HUI-A
 through HUI-C and program HUI3 reopening conditions remain cumulative and
 binding; none are weakened or reinterpreted.
 
@@ -21,9 +22,11 @@ binding; none are weakened or reinterpreted.
 | Section 1.2: explicit authorized handlers | `9a7228a9e04e14fed0dc6c4becbb2abfd15f3fc0` |
 | Section 1.3: coherent HEEx fragments | `23a153e703108a972377f76fcddee946bd50ae1b` |
 | Section 1.4 / implementation head, PR #127 | `e89d4859a2e5b850564667045a4a1be86a44f7cc` |
-| Merged candidate, PR #127 | `c73fb6d44ea305b86acc504114ac7036bbd7caa1` |
+| Original implementation merge, PR #127; gate subsequently reopened | `c73fb6d44ea305b86acc504114ac7036bbd7caa1` |
+| CSP repair head, PR #129 | `8e4fd0c6593f3060f0b26388a1cbd773b0300ece` |
+| Accepted repaired merged candidate, PR #129 | `7118bf337639c5ecdd5f2567dafbc761a5e09165` |
 
-Merged candidate: `c73fb6d44ea305b86acc504114ac7036bbd7caa1`
+Merged candidate: `7118bf337639c5ecdd5f2567dafbc761a5e09165`
 Merge date: `2026-09-06`
 
 ## Gate HUI-D1.1 - Closed Request Intent
@@ -82,17 +85,28 @@ subscription, server Scripts event, or second product runtime.
 
 Status: **accepted-at-merged-candidate**
 
-The 28-test focused parser/controller/limiter/architecture/runtime-inventory
+Post-merge reopening: PR #127 merged as
+`c73fb6d44ea305b86acc504114ac7036bbd7caa1`, but one Firefox CSP assertion passed
+only on retry. Early event capture reproduced the retained Vue bootstrap policy
+denial in 15/15 runs. The original local pass did not supersede that failure.
+The [compatibility CSP repair](./hypermedia-ui-compatibility-csp-repair.md) defers
+unused upstream policy creation and captures violations before navigation;
+PR #129 supplied fresh qualification and the newly pinned repaired candidate.
+Ten extra Firefox runs pass without retries, as do the four Node adaptation
+contracts and both named AT journeys. The development Vite transform is also
+verified. The enforcing CSP and every gate remain unchanged.
+
+The 29-test focused parser/controller/limiter/architecture/runtime-inventory/CSP
 matrix passes. It includes 1,000 bounded fuzz inputs, all ten route namespaces,
 all ten projection states, single-root and byte caps, real CSRF enforcement,
 cross-origin/IDOR/concealment, revocation during shaping, rate-key/concurrency
-bounds, and native placeholders. `mix precommit` passes with 1,416 tests and
-zero failures in 674.4 seconds. Follow-up native and D1 checks validate the
+bounds, and native placeholders. `mix precommit` passes with 1,417 tests and
+zero failures in 663.1 seconds. Follow-up native and D1 checks validate the
 refresh link through the existing UI facade.
 
 The complete real-browser suite enumerates 210 browser/profile combinations:
 99 applicable passes, 111 explicit profile-inapplicable skips, zero failures
-in 1.8 minutes. It covers production CSP/assets, proxy/TLS, native keyboard and
+in 1.9 minutes. It covers production CSP/assets, proxy/TLS, native keyboard and
 no-JavaScript behavior, all ten finite read routes, coherent state/row clearing,
 scope reset, latest-request wins, query history, focus/selection, disclosure,
 dialog, removed-control focus, and terminal account/scope-shell clearing.
@@ -106,11 +120,12 @@ filters the existing 178 warnings with no new finding or unnecessary filter;
 the ignore file is unchanged. The pinned Datastar bundle remains SHA-256
 `5d6b7794a50a83d82da962aec5e382f5ae83ac7afbc751f903f7a9c6bd433c65`.
 
-Clean-checkout `verify` job 101499570019 passed in 18m4s and `dialyzer` job
-101499569926 passed in 1m49s on the unchanged PR #127 head. The first CI attempt
-completed successfully, including application, browser/proxy, dependency audit,
-and production-asset checks. PR #127 merged on 2026-09-06; this narrow closure
-pins that exact merged candidate without changing product behavior.
+Clean-checkout `verify` job 101506610095 passed in 18m52s and `dialyzer` job
+101506609785 passed in 1m41s on the unchanged PR #129 head. The log confirms
+1,417 tests with zero failures and 99 browser passes / 111 profile skips in
+2.3 minutes, with no flaky/retried browser test. Dependency audit and production
+asset checks also pass. PR #129 merged at 2026-09-06T15:14:24Z; this narrow
+closure pins that repaired candidate without changing product behavior.
 
 Reproduction:
 `mix precommit`; `MIX_ENV=prod mix compile --warnings-as-errors`;
