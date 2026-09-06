@@ -3,5 +3,8 @@ defmodule JidoCodeWeb.ProjectHTML do
 
   import JidoCodeWeb.Components.ProductPage
 
+  alias JidoCodeWeb.Components.Projection
+  alias JidoCodeWeb.ReadProjectionView
+
   embed_templates "project_html/*"
 end

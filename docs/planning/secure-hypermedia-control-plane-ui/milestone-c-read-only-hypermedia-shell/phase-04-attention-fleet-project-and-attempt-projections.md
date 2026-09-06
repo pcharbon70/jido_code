@@ -17,30 +17,30 @@ Back to plan: [README](./README.md)
   This phase closes HUI-C4 by answering what needs attention, what each project
   is doing, and what an attempt currently means using durable graph truth.
 
-  - [ ] 4.1 Section - Implement attention and factory-fleet projections.
+  - [x] 4.1 Section - Implement attention and factory-fleet projections.
 
     This section provides exception-oriented entry points and bounded fleet
     scanning rather than requiring humans to open every running agent.
 
-    - [ ] 4.1.1 Task {#huic-p04-attention} [repo: jido_code] [after: {#huic-p03-phase-receipt}] - Implement reviewed attention and health projections.
+    - [x] 4.1.1 Task {#huic-p04-attention} [repo: jido_code] [after: {#huic-p03-phase-receipt}] - Implement reviewed attention and health projections.
 
       This task derives actionable attention with provenance and no hidden
       durable acknowledgement semantics.
 
-      - [ ] 4.1.1.1 Subtask - Define reviewed queries/view models for blocked, failed, stale, budget-near, verification-needed, approval-needed, incident, and unavailable attention families.
-      - [ ] 4.1.1.2 Subtask - Include resource/scope, severity, reason, lifecycle/outcome, freshness/revision, owner, evidence, readiness, and authorized durable destination.
-      - [ ] 4.1.1.3 Subtask - Bound family counts, rows, sort/filter/page, query time/bytes, and derived explanations; make partial/truncated/contradictory data explicit.
-      - [ ] 4.1.1.4 Subtask - Distinguish derived current attention from any future user acknowledgement resource and never infer semantic progress from process liveness alone.
+      - [x] 4.1.1.1 Subtask - Define reviewed queries/view models for blocked, failed, stale, budget-near, verification-needed, approval-needed, incident, and unavailable attention families.
+      - [x] 4.1.1.2 Subtask - Include resource/scope, severity, reason, lifecycle/outcome, freshness/revision, owner, evidence, readiness, and authorized durable destination.
+      - [x] 4.1.1.3 Subtask - Bound family counts, rows, sort/filter/page, query time/bytes, and derived explanations; make partial/truncated/contradictory data explicit.
+      - [x] 4.1.1.4 Subtask - Distinguish derived current attention from any future user acknowledgement resource and never infer semantic progress from process liveness alone.
 
-    - [ ] 4.1.2 Task {#huic-p04-fleet} [repo: jido_code] [after: {#huic-p04-attention}] - Implement fleet and project-summary projections.
+    - [x] 4.1.2 Task {#huic-p04-fleet} [repo: jido_code] [after: {#huic-p04-attention}] - Implement fleet and project-summary projections.
 
       This task lets developers scan many parallel repositories/attempts while
       retaining exact scope isolation and honest composition readiness.
 
-      - [ ] 4.1.2.1 Subtask - Query bounded repository/project identity, enrollment, desired/current state, health, attempts, agent/runtime posture, verification, wiki, cost/budget, and incident summaries.
-      - [ ] 4.1.2.2 Subtask - Implement authorized filter/sort/page/search fields, safe labels, opaque links, server-known totals/unknown totals, and current source/as-of revisions.
-      - [ ] 4.1.2.3 Subtask - Render composed, disabled, evaluation-only, unconfigured, unavailable, stale, partial, and error capability states without fabricated runnable controls.
-      - [ ] 4.1.2.4 Subtask - Prove rows/fields disappear or redact on current graph/role/project grants and never leak counts through totals, facets, errors, timing, or cache keys.
+      - [x] 4.1.2.1 Subtask - Query bounded repository/project identity, enrollment, desired/current state, health, attempts, agent/runtime posture, verification, wiki, cost/budget, and incident summaries.
+      - [x] 4.1.2.2 Subtask - Implement authorized filter/sort/page/search fields, safe labels, opaque links, server-known totals/unknown totals, and current source/as-of revisions.
+      - [x] 4.1.2.3 Subtask - Render composed, disabled, evaluation-only, unconfigured, unavailable, stale, partial, and error capability states without fabricated runnable controls.
+      - [x] 4.1.2.4 Subtask - Prove rows/fields disappear or redact on current graph/role/project grants and never leak counts through totals, facets, errors, timing, or cache keys.
 
   - [ ] 4.2 Section - Implement project and attempt read workspaces.
 

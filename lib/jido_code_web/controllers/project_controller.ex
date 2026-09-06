@@ -91,5 +91,10 @@ defmodule JidoCodeWeb.ProjectController do
 
   defp spec(base, key, title, summary),
     do:
-      Map.merge(base, %{key: key, title: title, summary: summary, query: ["q", "state", "page"]})
+      Map.merge(base, %{
+        key: key,
+        title: title,
+        summary: summary,
+        query: ["q", "state", "sort", "direction", "page"]
+      })
 end

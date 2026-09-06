@@ -4,4 +4,36 @@
   current_scope={@current_scope}
   page={@page}
   view_model={@view_model}
-/>
+>
+  <% trust = ReadProjectionView.trust(@projection) %>
+  <Projection.trust_header
+    id="factory-fleet-trust"
+    state={trust.state}
+    revision={trust.revision}
+    freshness={trust.freshness}
+    source={trust.source}
+    as_of={trust.as_of}
+    completeness={trust.completeness}
+  />
+  <Projection.fleet_project_table
+    id="factory-fleet"
+    state={@projection.state}
+    rows={@projection.fleet}
+    sort_column={ReadProjectionView.sort_column(@projection)}
+    sort_direction={ReadProjectionView.sort_direction(@projection)}
+    sort_hrefs={ReadProjectionView.sort_hrefs(@projection)}
+    page={@projection.pagination.page}
+    page_count={@projection.pagination.page_count}
+    previous_href={@projection.pagination.previous_href}
+    next_href={@projection.pagination.next_href}
+    page_summary={@projection.pagination.summary}
+    retry_href={ReadProjectionView.retry_href(@page)}
+  />
+  <Projection.health_summary
+    id="factory-fleet-capability-truth"
+    state={@projection.state}
+    title="Capability truth"
+    items={ReadProjectionView.capability_health(@projection)}
+    retry_href={ReadProjectionView.retry_href(@page)}
+  />
+</.placeholder>
