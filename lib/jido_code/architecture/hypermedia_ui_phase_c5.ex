@@ -10,11 +10,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5 do
   @receipt_path "docs/architecture/hypermedia-ui-milestone-c-phase-05-receipt.md"
   @authorized_baseline "2542e9ceed021d42dbbde6cdc9eb9e9613c8546f"
   @predecessor_candidate "4532ff304816ad0a229192f0e0bc0f9a3abb66da"
-  @implementation_pr 0
-  @implementation_head "merge-pending"
-  @merged_candidate "merge-pending"
-  @merge_date "merge-pending"
-  @clean_checkout_jobs %{}
+  @implementation_pr 125
+  @implementation_head "c63e77b2c1b489c2427d1b67590439ce2f369d77"
+  @merged_candidate "5987a7a4a43505b035f5a566588d5201e98686f7"
+  @merge_date "2026-09-06"
+  @clean_checkout_jobs %{
+    "verify" => %{"id" => 101_476_448_118, "duration" => "22m29s", "result" => "pass"},
+    "dialyzer" => %{"id" => 101_473_993_080, "duration" => "1m51s", "result" => "pass"}
+  }
   @sections ~w[5.1 5.2 5.3 5.4]
   @section_commits %{
     "5.1" => "18d9c7f9dbcc6045ed3815fcc7a297960f21bbbd",

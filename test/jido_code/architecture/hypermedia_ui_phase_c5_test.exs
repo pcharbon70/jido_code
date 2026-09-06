@@ -4,7 +4,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5Test do
   alias JidoCode.Architecture.HypermediaUIPhaseC5
   alias JidoCode.Architecture.HypermediaUISuccessorEvidence
 
-  test "accepts the complete merge-pending HUI-C5 and HUI3 candidate" do
+  test "accepts the complete merged HUI-C5 and HUI3 candidate" do
     assert HypermediaUIPhaseC5.check() == {:ok, []}
   end
 
