@@ -47,20 +47,20 @@ Back to plan: [README](./README.md)
       - [x] 1.2.1.3 Subtask - Enforce GET safety, non-GET CSRF header/body, Origin/Fetch Metadata, same-origin content types, no-store/referrer/log policy, and rate limits.
       - [x] 1.2.1.4 Subtask - Return safe native full-page fallback or explicit fragment/error response without hidden rows, optimistic state, or transport-specific truth.
 
-  - [ ] 1.3 Section - Implement stable coherent fragment boundaries.
+  - [x] 1.3 Section - Implement stable coherent fragment boundaries.
 
     This section updates the smallest complete authorized projection while
     preserving focus, navigation, overlays, and projection-state integrity.
 
-    - [ ] 1.3.1 Task {#huid-p01-fragments} [repo: jido_code] [after: {#huid-p01-requests}] - Implement HEEx fragment renderers and patch metadata.
+    - [x] 1.3.1 Task {#huid-p01-fragments} [repo: jido_code] [after: {#huid-p01-requests}] - Implement HEEx fragment renderers and patch metadata.
 
       This task renders fragments from the same typed view models as full pages
       and never accepts raw HTML or browser-authored state.
 
-      - [ ] 1.3.1.1 Subtask - Register stable roots for attention, health, fleet, project summary/attempts/wiki/cost, attempt header/summary, session/account, and errors.
-      - [ ] 1.3.1.2 Subtask - Render data, projection state, revision, freshness, provenance, truncation, readiness, redaction, and accessible status atomically per root.
-      - [ ] 1.3.1.3 Subtask - Preserve focused form/input selection, open native dialog/disclosure, navigation, scroll/reading position, selected row/view, and explicit post-request focus.
-      - [ ] 1.3.1.4 Subtask - Enforce HEEx escaping/sanitization, static Datastar expressions, HTTP CSP nonce mode, bounded patch bytes/root count, and no Dstar Scripts.
+      - [x] 1.3.1.1 Subtask - Register stable roots for attention, health, fleet, project summary/attempts/wiki/cost, attempt header/summary, session/account, and errors.
+      - [x] 1.3.1.2 Subtask - Render data, projection state, revision, freshness, provenance, truncation, readiness, redaction, and accessible status atomically per root.
+      - [x] 1.3.1.3 Subtask - Preserve focused form/input selection, open native dialog/disclosure, navigation, scroll/reading position, selected row/view, and explicit post-request focus.
+      - [x] 1.3.1.4 Subtask - Enforce HEEx escaping/sanitization, static Datastar expressions, HTTP CSP nonce mode, bounded patch bytes/root count, and no Dstar Scripts.
 
   - [ ] 1.4 Section - Phase 1 Integration Tests.
 

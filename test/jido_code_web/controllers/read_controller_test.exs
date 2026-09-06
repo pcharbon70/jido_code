@@ -104,6 +104,45 @@ defmodule JidoCodeWeb.ReadControllerTest do
            }
   end
 
+  test "fragments contain one complete escaped projection and clear protected states", context do
+    for state <- JidoCode.Product.ReadProjection.canonical_states() do
+      projection =
+        Fixture.projection(:fleet, %{
+          state: state,
+          fleet: [
+            Fixture.fleet_row("<script>private</script>", "/projects/project_browser_alpha")
+          ]
+        })
+
+      Application.put_env(:jido_code, :read_projection_fixture, %{fleet: projection})
+      response = request(context) |> post("/ui/reads/fleet", ~s({"read_fleet":{}}))
+      document = response |> html_response(200) |> LazyHTML.from_fragment()
+      assert length(Enum.to_list(LazyHTML.query(document, "#product-owned-content"))) == 1
+
+      assert Enum.any?(
+               LazyHTML.query(document, "#factory-fleet-trust[data-projection-state='#{state}']")
+             )
+
+      assert Enum.any?(LazyHTML.query(document, "#product-read-errors"))
+      refute Enum.any?(LazyHTML.query(document, "script, #product-shell, html, head"))
+      assert byte_size(response.resp_body) <= JidoCodeWeb.ReadResponse.max_patch_bytes()
+
+      if JidoCode.Product.ReadProjection.protected_state?(state) or state == :empty do
+        refute LazyHTML.text(document) =~ "private"
+      else
+        assert LazyHTML.text(document) =~ "<script>private</script>"
+      end
+    end
+  end
+
+  test "the final patch limit is a byte bound, independent of provider truncation" do
+    limit = JidoCodeWeb.ReadResponse.max_patch_bytes()
+    assert JidoCodeWeb.ReadResponse.max_roots() == 1
+    assert JidoCodeWeb.ReadResponse.within_limit?(String.duplicate("x", limit))
+    refute JidoCodeWeb.ReadResponse.within_limit?(String.duplicate("x", limit + 1))
+    refute JidoCodeWeb.ReadResponse.within_limit?(String.duplicate("é", limit))
+  end
+
   test "closed transport rejects hostile bodies and non-read methods without querying", context do
     for {body, status} <- [
           {~s({"read_fleet":{"q":"a","q":"b"}}), 422},
