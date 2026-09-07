@@ -1,7 +1,7 @@
 ---
 id: plan.jido_code_hypermedia_ui_milestone_d_phase_02
 parent_plan: plan.jido_code_hypermedia_ui_milestone_d
-status: proposed
+status: completed
 intent: feature
 ---
 

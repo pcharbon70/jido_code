@@ -70,9 +70,9 @@
     "test/jido_code_web/stream_continuity_test.exs": "9b6bbd85a2c986fae4e83699b477bff2f46966d05b01090408ac2e3735fa53f0",
     "test/browser/hypermedia_ui_phase_d3.spec.mjs": "bd05ff59681501bc1efc0a51471652cfec024b63f16f4763edc051115c8cfa69",
     "docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md": "db8bdf45baf848091b272abe760ca337cad02082c6949c100ad4213a070a77f6",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-03-projection-subscription-convergence-and-revocation.md": "6a5f76b28f8d1dacbb3b2c4a9296a6116d6647682061e7615c9cac0466e4fc97",
-    "lib/jido_code/architecture/hypermedia_ui_phase_d3.ex": "afe02c7eb684d07954adfcc2ad13ffa6a7607e2bca92ae99b27f4cf85e49a9bc",
-    "test/jido_code/architecture/hypermedia_ui_phase_d3_test.exs": "134bfe6fe96a453ed61b4cdf23cd91741c4119ced3dab23bfdfd5bca0d941161"
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-03-projection-subscription-convergence-and-revocation.md": "fda9d073a098849933b32aaaba57a4070a07e22f889e1fb2274726babc80721a",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d3.ex": "660d48489982bf4af2d1c78b9cf8d4eb5682dfdd656149f4f20e4c1c35f74962",
+    "test/jido_code/architecture/hypermedia_ui_phase_d3_test.exs": "a1302dfd346cb93f144c398fc6e7bc88a6e813e1f4065b7aa0b54064c26dac42"
   },
   "section_commits": {
     "3.1": "2ea899aea0be203c8d136eb8e47424ce07ae7cf5",

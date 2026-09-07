@@ -153,7 +153,7 @@
     "docs/architecture/hypermedia-ui-compatibility-csp-repair.md": "3ab82e219775500d74e33e54276446375c10ef7e984b8c1fcd0d1726fbe8d185",
     "docs/architecture/hypermedia-ui-read-request-and-fragment-implementation.md": "81cc74870f365fb19e985a219d5e9529fef4e5c9f4bf3b0ee56181870d9c9bc0",
     "docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md": "cdfc8b742f5fcaf8c0480e9ac0161adc0f79c8dc2b980661b12f45c0ca50057e",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md": "93136e38d1f3e10046a1f4aaf67f28677772e7287182e96945d691a5a4061a84",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md": "ebbce379f1b9b86bfcacb8757f31197f0a2b06c67fb4e8e6eb14a06445428509",
     "lib/jido_code/application.ex": "cd2c2e78403d64259518f1f6444d4151c2ac5c89da2752c05ba4bb2610ec9d73",
     "lib/jido_code/architecture/hypermedia_ui_phase_b2.ex": "afda81084cb6d6c99391b6583214f19af45f0e69e68369b559342f71d8e9b9cf",
     "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "41f1655e04f4b59830927d418d122d9ae9d267683e77f70476fb4d7f971213d0",
