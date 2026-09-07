@@ -20,6 +20,12 @@ const status = text => {
 const stop = (session, clear = false) => {
   if (!session || active !== session) return
   active = null
+  const pauseControl = document.getElementById("product-stream-pause")
+  if (pauseControl) {
+    pauseControl.hidden = true
+    pauseControl.setAttribute("aria-pressed", "false")
+    pauseControl.textContent = "Pause visual updates"
+  }
   clearTimeout(session.deadlineTimer)
   session.cancel.abort()
   session.attempt?.controller.abort()
@@ -63,6 +69,20 @@ document.addEventListener("datastar-fetch", event => {
     if (Date.now() >= session.deadline) stop(session, true)
     return
   }
+  if (argsRaw.delivery !== undefined &&
+      (!["visual", "required"].includes(argsRaw.delivery) || argsRaw.nudge !== session.surface ||
+       argsRaw.selector !== "#product-owned-content")) {
+    event.stopImmediatePropagation()
+    stop(session, true)
+    return
+  }
+  if (argsRaw.delivery === "visual" && session.visualPaused) {
+    // Discard the entire event, including its HTML. Resume always re-queries;
+    // no protected payload is retained as a paused/replay queue.
+    event.stopImmediatePropagation()
+    status("Visual updates paused. New data is available; resume or refresh to load it. Access checks remain active.")
+    return
+  }
   const saved = remember()
   queueMicrotask(() => {
     if (active !== session || session.attempt !== attempt) return
@@ -75,7 +95,9 @@ document.addEventListener("datastar-fetch", event => {
     const cursor = document.getElementById("product-owned-content")?.dataset.streamCursor
     if (cursor) {
       session.cursor = cursor
-      status("Connected. Access is checked regularly; use refresh for newer data.")
+      status(session.visualPaused
+        ? "Visual updates paused. Access checks remain active."
+        : "Connected. Data freshness is shown with the projection.")
     }
     restore(saved)
   })
@@ -83,8 +105,12 @@ document.addEventListener("datastar-fetch", event => {
 
 const run = async (context, controls) => {
   stop(active)
-  const session = {cancel: new AbortController(), attempt: null, cursor: null, deadline: Date.now() + maxLifetimeMs}
+  const session = {cancel: new AbortController(), attempt: null, cursor: null,
+    surface: controls.dataset.streamNamespace.replace(/^read_/, ""), visualPaused: false,
+    deadline: Date.now() + maxLifetimeMs}
   active = session
+  const pauseControl = document.getElementById("product-stream-pause")
+  if (pauseControl) pauseControl.hidden = false
   session.deadlineTimer = setTimeout(() => stop(session, true), maxLifetimeMs)
   const query = Object.fromEntries([...new URL(location.href).searchParams].filter(([key]) => queryKeys.has(key)))
 
@@ -130,6 +156,19 @@ action({
   name: "openStream",
   apply: async (context, event) => {
     if (event.type !== "click" || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    const pauseControl = event.target.closest("#product-stream-pause")
+    if (pauseControl && active) {
+      event.preventDefault()
+      if (active.visualPaused) {
+        await run(context, context.el)
+      } else {
+        active.visualPaused = true
+        pauseControl.setAttribute("aria-pressed", "true")
+        pauseControl.textContent = "Resume with fresh data"
+        status("Visual updates paused. Displayed data is not being refreshed; access checks remain active.")
+      }
+      return
+    }
     if (!event.target.closest("#product-stream-connect")) return
     event.preventDefault()
     if (readInFlight(context.el.closest("[data-read-endpoint]"))) {

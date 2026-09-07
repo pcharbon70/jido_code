@@ -2,6 +2,8 @@ defmodule JidoCodeWeb.StreamDelivery do
   @moduledoc "One shared bounded HTTP delivery loop; page controllers never own stream processes."
   import Plug.Conn
   alias JidoCode.Product.StreamCoordinator
+  alias JidoCode.Product.StreamSubscription
+  alias JidoCode.Product.StreamConvergence
   alias JidoCodeWeb.{ProductRequest, ReadResponse, ReadSecurity, StreamHTML}
 
   @max_event_bytes 131_072
@@ -22,7 +24,22 @@ defmodule JidoCodeWeb.StreamDelivery do
       monitor = Process.monitor(lifecycle.coordinator)
 
       try do
-        start_response(conn, body, lifecycle, monitor)
+        case StreamSubscription.open(conn.private.stream_binding, conn.private.stream_projection) do
+          {:ok, subscription} ->
+            try do
+              start_response(
+                put_private(conn, :stream_subscription, subscription),
+                body,
+                lifecycle,
+                monitor
+              )
+            after
+              StreamSubscription.close(subscription)
+            end
+
+          {:error, _} ->
+            ReadSecurity.reject(conn, 503)
+        end
       after
         Process.demonitor(monitor, [:flush])
       end
@@ -49,8 +66,21 @@ defmodule JidoCodeWeb.StreamDelivery do
       case chunk(conn, body) do
         {:ok, conn} ->
           case StreamCoordinator.sent(lease) do
-            :ok -> loop(put_private(conn, :stream_snapshot, nil), lifecycle, monitor)
-            _ -> terminal(conn)
+            :ok ->
+              revision =
+                Map.get(conn.private.stream_projection || %{}, :dataset_revision) ||
+                  conn.private.stream_context.minimum_revision
+
+              conn =
+                conn
+                |> put_private(:stream_snapshot, nil)
+                |> put_private(:stream_projection, nil)
+                |> put_private(:stream_evaluated_revision, revision)
+
+              loop(conn, lifecycle, monitor)
+
+            _ ->
+              terminal(conn)
           end
 
         {:error, _} ->
@@ -74,19 +104,96 @@ defmodule JidoCodeWeb.StreamDelivery do
 
       {:product_stream, ^lease, {:check, heartbeat?}} ->
         with :ok <- reauthorize(conn),
+             {:ok, conn, refreshed?} <- refresh(conn),
              :ok <- StreamCoordinator.checked(lease),
-             {:ok, conn} <- heartbeat(conn, heartbeat?) do
+             {:ok, conn} <- heartbeat(conn, heartbeat? and not refreshed?) do
           loop(conn, lifecycle, monitor)
         else
-          {:error, _} ->
-            StreamCoordinator.terminate_owner(lease, :revoked)
-            terminal(conn, :revoked)
+          {:reconnect, conn} ->
+            conn
+
+          {:error, reason} ->
+            state =
+              if reason in [:revoked, :changed, :denied, :concealed_not_found, :step_up_required],
+                do: :revoked,
+                else: :unavailable
+
+            StreamCoordinator.terminate_owner(lease, state)
+            terminal(conn, state)
         end
     after
       remaining ->
         StreamCoordinator.terminate_owner(lease, :expired)
         terminal(conn, :expired)
     end
+  end
+
+  defp refresh(conn) do
+    subscription = conn.private.stream_subscription
+
+    case StreamSubscription.poll(subscription) do
+      :idle ->
+        {:ok, conn, false}
+
+      {:refresh, reason} ->
+        StreamConvergence.emit(reason, conn.private.stream_context.projection)
+        refresh_projection(conn, subscription)
+
+      {:error, :subscription_lost} ->
+        StreamConvergence.emit(:subscription_lost, conn.private.stream_context.projection)
+        with {:ok, conn, true} <- recover(conn), do: {:reconnect, conn}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp refresh_projection(conn, subscription) do
+    started = System.monotonic_time(:millisecond)
+
+    with {:ok, frame, revision} <- JidoCodeWeb.StreamUpdate.render(conn),
+         :ok <- StreamSubscription.evaluated(subscription, revision),
+         {:ok, conn} <- write_update(conn, frame) do
+      StreamConvergence.emit(
+        :refreshed,
+        conn.private.stream_context.projection,
+        System.monotonic_time(:millisecond) - started
+      )
+
+      {:ok, put_private(conn, :stream_evaluated_revision, revision), true}
+    else
+      {:retry, reason} ->
+        StreamConvergence.emit(reason, conn.private.stream_context.projection)
+        recover(conn)
+
+      {:error, reason} when reason in [:read_projection_unavailable, :unavailable] ->
+        case StreamSubscription.evaluated(subscription, nil) do
+          {:retry, _} -> recover(conn)
+          other -> other
+        end
+
+      {:error, reason} ->
+        StreamConvergence.emit(reason, conn.private.stream_context.projection)
+        {:error, reason}
+    end
+  end
+
+  defp recover(conn) do
+    with {:ok, frame, _} <- JidoCodeWeb.StreamUpdate.recovery(conn),
+         {:ok, conn} <- write_update(conn, frame),
+         do: {:ok, conn, true}
+  end
+
+  defp write_update(conn, frame) do
+    lease = conn.private.stream_lease
+
+    with :ok <- reauthorize(conn),
+         :ok <- StreamCoordinator.reserve(lease, byte_size(frame)),
+         :ok <- reauthorize(conn),
+         :ok <- StreamCoordinator.active(lease),
+         {:ok, conn} <- chunk(conn, frame),
+         :ok <- StreamCoordinator.sent(lease),
+         do: {:ok, conn}
   end
 
   defp heartbeat(conn, false), do: {:ok, conn}

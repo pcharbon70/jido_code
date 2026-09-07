@@ -5,10 +5,12 @@ defmodule JidoCodeWeb.StreamAdmission do
 
   def acquire(conn, page) do
     if conn.private[:stream_intent] do
-      with {:ok, context} <- StreamContext.build(conn, page),
+      with {:ok, binding} <- JidoCode.Product.StreamProjectionRegistry.build(page),
+           {:ok, context} <- StreamContext.build(conn, page),
            {:ok, lease} <- StreamCoordinator.admit(context) do
         {:ok,
          conn
+         |> Plug.Conn.put_private(:stream_binding, binding)
          |> Plug.Conn.put_private(:stream_context, context)
          |> Plug.Conn.put_private(:stream_lease, lease)}
       else

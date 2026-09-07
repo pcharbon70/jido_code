@@ -32,28 +32,45 @@ defmodule JidoCodeWeb.StreamContext do
              intent.cursor,
              Plug.Conn.get_req_header(conn, "last-event-id")
            ) do
-        :ok -> {:ok, context}
-        _ -> {:error, :invalid_cursor}
+        :ok ->
+          {:ok, revision} = cursor_revision(context, intent.cursor)
+          {:ok, Map.put(context, :minimum_revision, revision)}
+
+        _ ->
+          {:error, :invalid_cursor}
       end
     end
   end
 
-  def cursor(context) do
-    Phoenix.Token.sign(JidoCodeWeb.Endpoint, "product-stream-cursor-v1", digest(context))
+  def cursor(context, revision \\ 0) when is_integer(revision) and revision >= 0 do
+    Phoenix.Token.sign(
+      JidoCodeWeb.Endpoint,
+      "product-stream-cursor-v1",
+      {digest(context), revision}
+    )
+  end
+
+  def cursor_revision(_context, nil), do: {:ok, 0}
+
+  def cursor_revision(context, cursor) do
+    expected = digest(context)
+
+    case Phoenix.Token.verify(JidoCodeWeb.Endpoint, "product-stream-cursor-v1", cursor,
+           max_age: 120
+         ) do
+      {:ok, {^expected, revision}}
+      when is_integer(revision) and revision in 0..9_223_372_036_854_775_807 ->
+        {:ok, revision}
+
+      _ ->
+        {:error, :invalid_cursor}
+    end
   end
 
   def validate_cursor(context, cursor, headers) when headers == [] or headers == [cursor] do
-    case cursor do
-      nil ->
-        :ok
-
-      value ->
-        case Phoenix.Token.verify(JidoCodeWeb.Endpoint, "product-stream-cursor-v1", value,
-               max_age: 120
-             ) do
-          {:ok, digest} -> if digest == digest(context), do: :ok, else: {:error, :invalid_cursor}
-          _ -> {:error, :invalid_cursor}
-        end
+    case cursor_revision(context, cursor) do
+      {:ok, _} -> :ok
+      _ -> {:error, :invalid_cursor}
     end
   end
 
