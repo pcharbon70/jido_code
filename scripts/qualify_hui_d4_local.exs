@@ -58,6 +58,20 @@ end)
         {"HUI_D4_CREDENTIAL", credential}], stderr_to_stdout: true)
 IO.write(restarted_output)
 
+for browser <- ["firefox", "webkit"] do
+  {browser_output, 0} = System.cmd("node", ["scripts/qualify_hui_d4_local.mjs"],
+    env: [{"HUI_D4_BASE", base}, {"HUI_D4_LOGIN", "local-proof@example.test"},
+          {"HUI_D4_CREDENTIAL", credential}, {"HUI_D4_BROWSER", browser}], stderr_to_stdout: true)
+  IO.write(browser_output)
+end
+
+if System.get_env("HUI_D4_ORCA") == "true" do
+  {orca_output, 0} = System.cmd("dbus-run-session", ["--", "xvfb-run", "-a", "bash", "scripts/qualify_hui_d4_orca.sh"],
+    env: [{"HUI_D4_BASE", base}, {"HUI_D4_LOGIN", "local-proof@example.test"},
+          {"HUI_D4_CREDENTIAL", credential}], stderr_to_stdout: true)
+  IO.write(orca_output)
+end
+
 sample = fn sample, peak, remaining ->
   receive do
     :stop -> peak
@@ -118,6 +132,16 @@ IO.puts(Jason.encode!(%{peaks: peaks, cpu_runtime_ms: cpu_after - cpu_before,
 :ok = JidoCode.LocalDeployment.drain()
 Process.sleep(500)
 %{connections: 0, queued_payload_bytes: 0} = JidoCode.Product.StreamCoordinator.stats()
+{:ok, authentication} = JidoCode.Identity.authenticate("local-proof@example.test", credential)
+{:ok, session} = JidoCode.Identity.Sessions.issue(authentication)
+before_rollback = JidoCode.Knowledge.StoreServer.summary().dataset_revision
+:ok = JidoCode.Product.DeliveryControl.disable()
+{native_output, native_result} = System.cmd("node", ["scripts/qualify_hui_d4_native.mjs"],
+  env: [{"HUI_D4_BASE", base}, {"HUI_D4_LOGIN", "local-proof@example.test"},
+        {"HUI_D4_CREDENTIAL", credential}], stderr_to_stdout: true)
+IO.write(native_output)
+{:ok, _} = JidoCode.Identity.Sessions.validate(session.session_ref, touch: false)
+^before_rollback = JidoCode.Knowledge.StoreServer.summary().dataset_revision
 :ok = Application.stop(:jido_code)
 IO.puts("Local production qualification exit=#{result}; disposable evidence data: #{root}")
-if result != 0 or restarted_result != 0 or load_result != 0, do: System.halt(1)
+if result != 0 or restarted_result != 0 or load_result != 0 or native_result != 0, do: System.halt(1)

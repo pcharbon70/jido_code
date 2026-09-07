@@ -45,6 +45,9 @@ defmodule JidoCodeWeb.ReadResponse do
     case ProductRequest.authorize(conn, spec, params) do
       {:ok, conn, %{authorization: current}} ->
         cond do
+          not JidoCode.Product.DeliveryControl.enabled?() ->
+            ReadSecurity.reject(conn, 503)
+
           fingerprint(original) != fingerprint(current) ->
             ReadSecurity.reject(conn, 409)
 

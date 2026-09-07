@@ -3,6 +3,10 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @phase_d4_manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
   @phase_d4_mutable_paths ~w[
+    lib/jido_code_web/read_enhancement.ex
+    lib/jido_code_web/read_response.ex
+    lib/jido_code_web/stream_delivery.ex
+    lib/jido_code_web/controllers/read_controller.ex
     lib/jido_code/product/stream_coordinator.ex
     lib/jido_code_web/router.ex
     config/runtime.exs

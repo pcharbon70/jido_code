@@ -1,5 +1,16 @@
 import Config
 
+case System.get_env("JIDO_CODE_LIVE_DELIVERY") do
+  value when value in [nil, "true"] ->
+    config :jido_code, :hypermedia_delivery_enabled, true
+
+  "false" ->
+    config :jido_code, :hypermedia_delivery_enabled, false
+
+  _ ->
+    raise "JIDO_CODE_LIVE_DELIVERY must be true or false"
+end
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration

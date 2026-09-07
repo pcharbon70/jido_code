@@ -1,9 +1,10 @@
-import {chromium, expect} from "@playwright/test"
+import {chromium, firefox, webkit, expect} from "@playwright/test"
 import assert from "node:assert/strict"
 
-const browser = await chromium.launch({headless: true})
+const engine = process.env.HUI_D4_BROWSER || "chromium"
+const browser = await ({chromium, firefox, webkit})[engine].launch({headless: true})
 try {
-  const context = await browser.newContext()
+  const context = await browser.newContext({reducedMotion: "reduce"})
   const page = await context.newPage()
   const errors = []
   page.on("pageerror", error => errors.push(error.message))
@@ -39,7 +40,7 @@ try {
   await expect(page.locator("#product-owned-content")).toHaveCount(0)
   assert.deepEqual(errors, [])
   assert.equal(await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length), 0)
-  console.log(JSON.stringify({profile: "local-loopback-v1", browser: browser.version(),
+  console.log(JSON.stringify({profile: "local-loopback-v1", engine, browser: browser.version(),
     production_build: true, named_human_graph: "pass", cookie: "pass",
     direct_stream: "pass", periodic_refresh: "pass", offline_recovery: "pass", paused_revocation: "pass",
     service_workers: 0, page_errors: 0}))

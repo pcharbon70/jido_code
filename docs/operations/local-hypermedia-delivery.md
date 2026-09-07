@@ -123,3 +123,23 @@ restart the single owner; preserve stores and use the integrity runbook for
 store errors. Escalate persistent failures with the fixed counters, versions,
 configuration digest and sanitized failure class only—never raw streams,
 credentials or store snapshots. External monitoring is optional.
+
+## Disable-delivery rollback
+
+Call `JidoCode.Product.DeliveryControl.disable/0` in the trusted local runtime.
+It disables both finite read enhancement and live streams, then drains owners.
+Existing stream clients receive terminal replacement; old enhanced clients are
+rejected before new read admission and again before protected delivery. Native
+GET pages, ordinary forms, sign-in/out, sessions and graph truth are unchanged.
+Set `JIDO_CODE_LIVE_DELIVERY=false` in the private environment to retain native
+mode after the next BEAM restart. This flag is not a browser signal or route.
+To re-enable, set it to `true` and restart the single owner safely; there is no
+hot undrain operation that could revive an old lease.
+
+Run the production qualification after asset build with
+`MIX_ENV=prod mix run --no-start scripts/qualify_hui_d4_local.exs`.
+It creates private disposable stores and credentials, verifies three browser
+engines and JavaScript-disabled rollback, and leaves its temporary stores for
+failure inspection. `HUI_D4_ORCA=true` also runs isolated Xvfb/Orca speech and
+keyboard checks; it requires Orca, Xvfb, D-Bus and Google Chrome. Generated
+credentials and raw protected stream bodies must never enter retained evidence.

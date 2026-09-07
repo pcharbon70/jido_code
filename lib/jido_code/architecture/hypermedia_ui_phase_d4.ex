@@ -3,6 +3,15 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   alias JidoCode.Architecture.HypermediaUISuccessorEvidence
   @manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
   @sources ~w[
+    scripts/qualify_hui_d4_native.mjs
+    scripts/qualify_hui_d4_orca.sh
+    test/accessibility/hypermedia_ui_phase_d4_orca.mjs
+    lib/jido_code/product/delivery_control.ex
+    lib/jido_code_web/read_enhancement.ex
+    lib/jido_code_web/read_response.ex
+    lib/jido_code_web/stream_delivery.ex
+    lib/jido_code_web/controllers/read_controller.ex
+    test/jido_code_web/delivery_rollback_test.exs
     lib/jido_code/product/stream_coordinator.ex
     lib/jido_code/product/stream_pressure.ex
     lib/jido_code/product/stream_metrics.ex

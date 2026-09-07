@@ -42,6 +42,21 @@ ms across schedulers. There were no query errors or slow-owner warnings.
 These are small-corpus smoke measurements, not a large-corpus soak, minimum
 hardware promise, percentile SLO, or cross-OS performance acceptance.
 
+Section 4.3 adds the trusted disable-delivery switch and closes both new
+enhanced admission and protected-delivery races while preserving native routes.
+Its real HTTP rollback test passes. The production runner passes Chromium
+151.0.7922.34, Firefox 153.0 and WebKit 26.5 for signed-in real graph reads,
+direct SSE, periodic refresh, reduced-motion configuration, offline clearing,
+and cross-tab revocation while paused. All three engines pass JavaScript-off
+native sign-in, navigation/reload and sign-out after rollback. A pre-existing
+session remains valid and the graph revision is unchanged by rollback.
+
+The named production Orca/Xvfb run passes announced connected/paused/reload
+states, keyboard activation, focus preservation and terminal revocation focus
+(`/tmp/hui-d4-orca.I91ccX`, ephemeral speech artifacts). Desktop portal/FUSE
+warnings occurred outside the application; they did not replace or satisfy
+the speech/focus assertions. No independent reviewer approval is claimed.
+
 ## Gate HUI-D4 / HUI4
 
 **merge-pending**. Milestone E is not authorized.
