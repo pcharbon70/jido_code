@@ -16,7 +16,11 @@ defmodule JidoCodeWeb.ReadResponse do
           assign(
             conn,
             :stream_cursor,
-            JidoCodeWeb.StreamContext.cursor(conn.private.stream_context)
+            JidoCodeWeb.StreamContext.cursor(
+              conn.private.stream_context,
+              Map.get(assigns[:projection] || %{}, :dataset_revision) ||
+                conn.private.stream_context.minimum_revision
+            )
           ),
         else: conn
 
@@ -44,6 +48,9 @@ defmodule JidoCodeWeb.ReadResponse do
           fingerprint(original) != fingerprint(current) ->
             ReadSecurity.reject(conn, 409)
 
+          stale_stream_snapshot?(conn, assigns[:projection]) ->
+            ReadSecurity.reject(conn, 503)
+
           not within_limit?(body) ->
             ReadSecurity.reject(conn, 503)
 
@@ -66,6 +73,13 @@ defmodule JidoCodeWeb.ReadResponse do
         conn
     end
   end
+
+  defp stale_stream_snapshot?(%{private: %{stream_context: context}}, %{
+         dataset_revision: revision
+       })
+       when is_integer(revision), do: revision < context.minimum_revision
+
+  defp stale_stream_snapshot?(_, _), do: false
 
   # Access timestamps and correlation IDs are deliberately not an authority fence.
   # All grants, generations, redaction, assurance and resource/graph revisions are.

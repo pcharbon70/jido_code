@@ -38,7 +38,7 @@ test("periodic server re-query patches current truth while keeping shell and foc
   await expect(root).not.toHaveAttribute("data-read-receipt", initial, {timeout: 10_000})
   await expect(connect).toBeFocused()
   expect(await page.evaluate(() => window.d3Shell === document.getElementById("product-shell"))).toBe(true)
-  await expect(page.locator("#factory-fleet")).toHaveAttribute("data-projection-state", "unavailable")
+  await expect(page.locator("#factory-fleet")).toHaveAttribute("data-projection-state", "recovery")
   expect(errors).toEqual([])
 })
 

@@ -43,6 +43,24 @@ The event's protected HTML is immediately discarded, not buffered. Resume
 starts a new snapshot request. Unavailable/security/session replacements bypass
 visual pause. Connection and data freshness remain separately labelled.
 
+Section 3.3 compares query results with both the last evaluated revision and
+coalesced hints before delivery. Gaps are observable, never replayed. Lag,
+backward results and unavailable queries clear the affected content into a
+required recovery fragment, retry after 1/2 seconds (quantized by the 2-second
+authorization clock), and stop after three failures. New hints cannot bypass
+backoff. A successful fresh result resets the failure count. Lost subscription
+processes clear content and close the response; the existing client allows at
+most two fresh reconnects with 1/2-second delays inside its original deadline.
+Revocation, concealment and expiry never take that transient path.
+
+Signed cursors now include the last server-evaluated revision as a continuity
+floor, bound to the existing full identity/session/tab/route/resource/filter/
+authority fingerprint. A reconnect still runs a fresh query; a result older
+than that verified floor cannot start a protected response. Unknown legacy
+cursors fail closed and require a new explicit connection. Only fixed outcome
+and projection labels and bounded count/duration measurements enter convergence
+telemetry. Initial projection payloads are dropped after initial delivery.
+
 ## Reopening Conditions
 
 The gate reopens independently of checkbox state if:

@@ -47,20 +47,20 @@ Back to plan: [README](./README.md)
       - [x] 3.2.1.3 Subtask - Emit closed named nudges when current filter/cursor intent is required; validate the resulting bounded request through the Phase 1 schema.
       - [x] 3.2.1.4 Subtask - Implement paused/new-visual-updates mode for nonessential tables/timelines while retaining security/revocation/session patches and truthful freshness.
 
-  - [ ] 3.3 Section - Implement reconnect, replay scope, and convergence recovery.
+  - [x] 3.3 Section - Implement reconnect, replay scope, and convergence recovery.
 
     This section guarantees a reconnect loads a current authorized snapshot and
     eventually converges despite lost, duplicated, reordered, or stale hints.
 
-    - [ ] 3.3.1 Task {#huid-p03-convergence} [repo: jido_code] [after: {#huid-p03-delivery}] - Implement initial snapshot, reconnect, and revision convergence.
+    - [x] 3.3.1 Task {#huid-p03-convergence} [repo: jido_code] [after: {#huid-p03-delivery}] - Implement initial snapshot, reconnect, and revision convergence.
 
       This task treats replay cursors as scoped optimization only and falls back
       to fresh reviewed queries whenever safety or continuity is uncertain.
 
-      - [ ] 3.3.1.1 Subtask - On connect/reconnect load current authorized snapshots before incremental delivery and label connection separately from data freshness.
-      - [ ] 3.3.1.2 Subtask - Scope any replay cursor to principal/session generation/tab/route/repository/attempt/projection and reject stale, copied, unknown, or post-revocation cursors.
-      - [ ] 3.3.1.3 Subtask - Detect hint gaps, outdated revisions, query/patch failure, process/node/deploy restart, graph lag, and subscription loss; schedule bounded fresh re-query with backoff.
-      - [ ] 3.3.1.4 Subtask - Record safe convergence metrics and stop terminal retry loops on concealment, session expiry, revocation, unsupported route, or permanent failure.
+      - [x] 3.3.1.1 Subtask - On connect/reconnect load current authorized snapshots before incremental delivery and label connection separately from data freshness.
+      - [x] 3.3.1.2 Subtask - Scope any replay cursor to principal/session generation/tab/route/repository/attempt/projection and reject stale, copied, unknown, or post-revocation cursors.
+      - [x] 3.3.1.3 Subtask - Detect hint gaps, outdated revisions, query/patch failure, process/node/deploy restart, graph lag, and subscription loss; schedule bounded fresh re-query with backoff.
+      - [x] 3.3.1.4 Subtask - Record safe convergence metrics and stop terminal retry loops on concealment, session expiry, revocation, unsupported route, or permanent failure.
 
   - [ ] 3.4 Section - Phase 3 Integration Tests.
 

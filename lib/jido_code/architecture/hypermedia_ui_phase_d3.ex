@@ -16,15 +16,19 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
     lib/jido_code_web/product_controller.ex
     lib/jido_code_web/read_response.ex
     lib/jido_code_web/stream_admission.ex
+    lib/jido_code_web/stream_context.ex
     lib/jido_code_web/stream_delivery.ex
     lib/jido_code_web/stream_update.ex
     lib/mix/tasks/architecture.check.ex
     lib/jido_code/knowledge/projection_subscription.ex
     lib/jido_code/product/stream_projection_registry.ex
     lib/jido_code/product/stream_subscription.ex
+    lib/jido_code/product/stream_convergence.ex
     test/jido_code/product/stream_subscription_test.exs
     test/jido_code_web/stream_projection_registry_test.exs
     test/jido_code_web/stream_update_test.exs
+    test/jido_code_web/stream_recovery_test.exs
+    test/jido_code_web/stream_continuity_test.exs
     test/browser/hypermedia_ui_phase_d3.spec.mjs
     docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md
     docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-03-projection-subscription-convergence-and-revocation.md

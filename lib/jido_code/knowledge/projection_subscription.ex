@@ -72,6 +72,8 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
          families: families,
          last_revision: revision,
          hinted_revision: revision,
+         failures: 0,
+         retry_at: nil,
          pending: false,
          next_refresh: monotonic() + 5_000
        }}
@@ -112,11 +114,20 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
   end
 
   @impl true
+  def handle_call(:poll, {owner, _}, %{mode: :page_stream, owner: owner, failures: 3} = state),
+    do: {:reply, {:error, :recovery_exhausted}, state}
+
   def handle_call(:poll, {owner, _}, %{mode: :page_stream, owner: owner} = state) do
     due = state.hinted_revision > state.last_revision or monotonic() >= state.next_refresh
 
-    if due and not state.pending do
-      reason = if state.hinted_revision > state.last_revision, do: :hint, else: :reconcile
+    if due and not state.pending and (state.retry_at == nil or monotonic() >= state.retry_at) do
+      reason =
+        cond do
+          state.hinted_revision > state.last_revision + 1 -> :gap
+          state.hinted_revision > state.last_revision -> :hint
+          true -> :reconcile
+        end
+
       {:reply, {:refresh, reason}, %{state | pending: true}}
     else
       {:reply, :idle, state}
@@ -129,12 +140,21 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
         %{mode: :page_stream, owner: owner, pending: true} = state
       )
       when is_integer(revision) and revision >= 0 do
-    if revision >= state.last_revision do
+    if revision >= state.last_revision and revision >= state.hinted_revision do
       {:reply, :ok,
-       %{state | last_revision: revision, pending: false, next_refresh: monotonic() + 5_000}}
+       %{
+         state
+         | last_revision: revision,
+           pending: false,
+           failures: 0,
+           retry_at: nil,
+           next_refresh: monotonic() + 5_000
+       }}
     else
-      {:reply, {:error, :stale_revision},
-       %{state | pending: false, next_refresh: monotonic() + 5_000}}
+      failed_refresh(
+        state,
+        if(revision < state.last_revision, do: :stale_revision, else: :graph_lag)
+      )
     end
   end
 
@@ -143,7 +163,7 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
         {owner, _},
         %{mode: :page_stream, owner: owner, pending: true} = state
       ),
-      do: {:reply, :ok, %{state | pending: false, next_refresh: monotonic() + 5_000}}
+      do: failed_refresh(state, :query_unavailable)
 
   def handle_call(_request, _from, %{mode: :page_stream} = state),
     do: {:reply, {:error, :invalid_subscription_request}, state}
@@ -185,7 +205,9 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
 
     cond do
       count > 64 ->
-        {:stop, :subscription_overflow, state}
+        # A normal shutdown avoids OTP logging the last hint's scoped receipt
+        # identifiers. The owner observes loss and emits fixed safe telemetry.
+        {:stop, :normal, state}
 
       event.scope_iri in state.scopes and is_integer(event.dataset_revision) and
         event.dataset_revision in 1..9_223_372_036_854_775_807 and
@@ -273,4 +295,20 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
   end
 
   defp monotonic, do: System.monotonic_time(:millisecond)
+
+  defp failed_refresh(state, reason) do
+    failures = state.failures + 1
+    retry_at = monotonic() + min(1_000 * Integer.pow(2, failures - 1), 4_000)
+
+    next = %{
+      state
+      | pending: false,
+        failures: failures,
+        retry_at: retry_at,
+        next_refresh: retry_at
+    }
+
+    reply = if failures >= 3, do: {:error, :recovery_exhausted}, else: {:retry, reason}
+    {:reply, reply, next}
+  end
 end

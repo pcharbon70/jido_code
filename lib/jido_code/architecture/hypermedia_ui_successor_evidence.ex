@@ -11,6 +11,7 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
     lib/jido_code_web/product_controller.ex
     lib/jido_code_web/read_response.ex
     lib/jido_code_web/stream_admission.ex
+    lib/jido_code_web/stream_context.ex
     lib/jido_code_web/stream_delivery.ex
     lib/mix/tasks/architecture.check.ex
   ]
