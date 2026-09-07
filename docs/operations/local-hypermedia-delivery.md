@@ -7,6 +7,16 @@ Use the pinned repository toolchain. macOS, Windows, shared/network stores,
 LAN/public exposure, TLS/HTTP2, tunnels, proxies and clusters are not claimed.
 Existing proxy tests remain regressions, not deployment infrastructure.
 
+The candidate qualification pin is Playwright 1.63.0 (Chromium 153.0.8010.12,
+Firefox 155.0, WebKit 26.6). Historical receipts retain their original pins.
+WebKit 26.5 is not qualified for D4 live delivery: repeated production runs
+exposed delayed fetch chunks, consistent with
+[WebKit bug 322545](https://bugs.webkit.org/show_bug.cgi?id=322545).
+Do not work around that failure by relaxing authorization, increasing the
+delivery timeout, or claiming an earlier smoke pass as current acceptance.
+Install the pinned browser runtimes with `npx playwright install --with-deps`
+on the qualification host. Native fallback remains separately tested.
+
 ## Install
 
 Configure separate absolute private `JIDO_CODE_STORE_ROOT`,

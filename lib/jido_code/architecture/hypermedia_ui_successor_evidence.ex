@@ -3,6 +3,11 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @phase_d4_manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
   @phase_d4_mutable_paths ~w[
+    lib/jido_code/architecture/hypermedia_ui_phase_c5.ex
+    test/jido_code/architecture/hypermedia_ui_phase_c5_operations_test.exs
+    package.json
+    package-lock.json
+    lib/jido_code/architecture/hypermedia_ui_phase_b3.ex
     lib/jido_code_web/read_enhancement.ex
     lib/jido_code_web/read_response.ex
     lib/jido_code_web/stream_delivery.ex
@@ -20,6 +25,26 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   ]
 
   def phase_d4_mutable_paths, do: @phase_d4_mutable_paths
+
+  def current_playwright_version(root) do
+    with {:ok, body} <- File.read(Path.join(root, @phase_d4_manifest)),
+         {:ok, %{"browser_toolchain" => "1.63.0"} = evidence} <- Jason.decode(body),
+         true <-
+           Enum.all?(~w[package.json package-lock.json], fn path ->
+             case File.read(Path.join(root, path)) do
+               {:ok, source} ->
+                 get_in(evidence, ["source_digests", path]) ==
+                   Base.encode16(:crypto.hash(:sha256, source), case: :lower)
+
+               _ ->
+                 false
+             end
+           end) do
+      "1.63.0"
+    else
+      _ -> "1.62.0"
+    end
+  end
 
   def d4_override?(root, path, expected) do
     with true <- path in @phase_d4_mutable_paths,

@@ -20,27 +20,41 @@ try {
   }
   for (const page of pages) {
     await page.exposeFunction("countD4Patch", bytes => { patches++; patchBytes += bytes })
-    await page.evaluate(() => document.addEventListener("datastar-fetch", event => {
-      if (event.detail.type === "datastar-patch-elements") {
-        window.countD4Patch(new TextEncoder().encode(event.detail.argsRaw.elements || "").byteLength)
-      }
-    }))
-    await page.locator("#product-stream-connect").click()
-    await expect(page.locator("#product-stream-status")).toContainText("Connected.")
   }
-  const extra = await pages[0].context().newPage()
-  await extra.goto(`${process.env.HUI_D4_BASE}/factory/fleet`)
-  const rejected = extra.waitForResponse(response => response.url().includes("/ui/streams/"))
-  await extra.locator("#product-stream-connect").click()
-  assert.equal((await rejected).status(), 429)
-  await extra.close()
-  await Promise.all(pages.map(async page => {
-    const before = await page.locator("#product-owned-content").getAttribute("data-read-receipt")
-    await expect(page.locator("#product-owned-content")).not.toHaveAttribute("data-read-receipt", before, {timeout: 10_000})
-  }))
-  assert.ok(patches >= 8)
+  for (let round = 0; round < 3; round++) {
+    if (round) {
+      await Promise.all(pages.map(page => page.goto(`${process.env.HUI_D4_BASE}/factory/fleet`)))
+      // A disconnected socket is discovered by the bounded write/heartbeat
+      // path. Do not demand a fifth lease while old owners are still retiring.
+      await pages[0].waitForTimeout(8_000)
+    }
+    for (const page of pages) {
+      await page.evaluate(() => document.addEventListener("datastar-fetch", event => {
+        if (event.detail.type === "datastar-patch-elements") {
+          window.countD4Patch(new TextEncoder().encode(event.detail.argsRaw.elements || "").byteLength)
+        }
+      }))
+      await page.locator("#product-stream-connect").click()
+      await expect(page.locator("#product-stream-status")).toContainText("Connected.")
+    }
+    if (round === 0) {
+      const extra = await pages[0].context().newPage()
+      await extra.goto(`${process.env.HUI_D4_BASE}/factory/fleet`)
+      const rejected = extra.waitForResponse(response => response.url().includes("/ui/streams/"))
+      await extra.locator("#product-stream-connect").click()
+      assert.equal((await rejected).status(), 429)
+      await extra.close()
+    }
+    await pages[0].waitForTimeout(18_000)
+    await Promise.all(pages.map(async page => {
+      const before = await page.locator("#product-owned-content").getAttribute("data-read-receipt")
+      await expect(page.locator("#product-owned-content")).not.toHaveAttribute("data-read-receipt", before, {timeout: 8_000})
+      await expect(page.locator("#product-stream-status")).toContainText("Connected.")
+    }))
+  }
+  assert.ok(patches >= 24)
   console.log(JSON.stringify({load: "four tabs, two sessions, one named human, empty factory",
-    patches, patchBytes, elapsed_ms: Date.now() - started, fifth_stream: "rejected"}))
+    rounds: 3, patches, patchBytes, elapsed_ms: Date.now() - started, fifth_stream: "rejected"}))
 } finally {
   await browser.close()
 }

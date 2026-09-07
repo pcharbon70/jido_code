@@ -57,6 +57,77 @@ states, keyboard activation, focus preservation and terminal revocation focus
 warnings occurred outside the application; they did not replace or satisfy
 the speech/focus assertions. No independent reviewer approval is claimed.
 
+## Section 4.4 Integration Record (in progress)
+
+The real LocalGraph authority adapter now has a non-empty HTTP integration:
+two repositories are enrolled through semantic commands, the authorized
+repository converges into the stream, and the other repository stays absent
+and returns 404 on direct navigation. Reading does not change graph revision.
+There is no fixture principal substitution in this test.
+
+The full precommit run passed 1,507 tests (seed 597252, 775.4 seconds).
+The pre-upgrade browser matrix passed 123 tests with 162 declared applicability
+skips in 13 minutes. Normal-environment Dialyzer passed with its existing
+178 filters and no new unfiltered warning. These runs do not by themselves
+qualify the subsequent browser-toolchain upgrade.
+
+Production fault probes stop the real query runner and identity store, and
+kill the coordinator. Protected content was cleared in approximately 2.3
+seconds for service outages and 7–8 milliseconds for coordinator failure;
+fresh navigation recovered and graph revision stayed unchanged. One probe
+also encountered a failed reconnect after query recovery: the unavailable
+query runner correctly triggers pressure degradation. The harness now waits
+for the existing ten-low-sample recovery window before fresh admission.
+Repeated production probes pass without weakening that guard. The latest
+query/identity/coordinator cleanup measurements were 2,317/2,308/2 ms.
+
+Repeated WebKit 26.5 production runs failed the unchanged 10-second refresh
+assertion. Diagnostic runs at 20 seconds observed delivery around 11 seconds;
+those diagnostic passes are **not** acceptance. TCP nodelay and padding
+experiments did not fix the issue and were removed. The behavior matches
+[WebKit bug 322545](https://bugs.webkit.org/show_bug.cgi?id=322545), whose
+[upstream fix](https://github.com/WebKit/WebKit/pull/72494) landed August 27.
+The candidate pins Playwright 1.63.0: Chromium 153.0.8010.12, Firefox 155.0
+and WebKit 26.6. All three pass production qualification with the original
+10-second assertion, including restart, offline clearing, paused revocation
+and native-only rollback. The new regression matrix passed 105 tests outside
+WebKit; its 42 WebKit launch failures were missing host libraries, not failed
+product assertions. After isolated Ubuntu library installation in the temporary
+browser cache, the complete WebKit project passed 21 tests with 36 applicability
+skips. Clean-checkout CI must still repeat the complete matrix together.
+The earlier WebKit smoke result above is historical only.
+
+The latest production load run completed three rounds in 85,383 ms: four tabs,
+two sessions, one named human and an empty factory, under two bounded SHA-256
+workers. It delivered 60 patches / 271,080 HTML bytes and rejected the fifth
+stream. Peaks: 404,137,912 BEAM bytes, 658,223,104 RSS bytes, 5,218 BEAM processes,
+11 process sockets, run queue three, query queue one, four streams and zero
+queued protected payload bytes. Query errors and pressure entries were zero.
+Reload rounds allow the existing disconnect-cleanup window before reconnecting;
+immediate replacement admission can correctly encounter the four-lease ceiling.
+This bounded empty-corpus run is not the full production corpus or soak gate.
+
+A subsequent full precommit run had two failures in 1,507 tests: a historical
+package-lock assertion and a test command timestamp truncated before its newly
+created grant. Both were corrected and their focused reruns passed. Historical
+asset evidence remains unchanged; the current browser pin uses bounded successor
+provenance. The grant test now keeps full timestamp precision.
+Final `mix precommit --failed` passed architecture, formatting and compilation
+checks and both previously failed tests (seed 330435, 10.1 seconds).
+
+Declared local hardware: Intel Core i7-12700F, 20 online logical CPUs,
+65,619,420 KiB physical RAM, Linux Mint 22.1 x86_64. The production runner emits
+the exact candidate/dirty-state, normalized asset-manifest digest, transport
+digest (including its ephemeral port), fixed limits, runtime versions, bounded
+resource peaks and privacy-safe counters. Disposable data is never a release
+artifact. CI repeats production qualification after building digested assets.
+
+Outstanding acceptance evidence includes several-scope production corpus/soak
+reconciliation, the remaining storm and
+slow-reader/upgrade-failure matrix, actual workstation suspend/resume evidence,
+independent security/accessibility/operations-release review, clean-checkout
+CI, and merged-candidate closure. No exception or waiver is inferred.
+
 ## Gate HUI-D4 / HUI4
 
 **merge-pending**. Milestone E is not authorized.

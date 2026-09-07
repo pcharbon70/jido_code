@@ -100,3 +100,10 @@ jobs:
           # never a real credential.
           JIDO_CODE_OPERATOR_TOKEN: "ci-only-asset-build-token"
         run: mix assets.deploy
+
+      - name: Qualify HUI-D4 direct local production delivery
+        env:
+          MIX_ENV: prod
+          SECRET_KEY_BASE: "${{ github.sha }}${{ github.sha }}"
+          JIDO_CODE_OPERATOR_TOKEN: "ci-only-local-qualification-build-token"
+        run: mix run --no-start scripts/qualify_hui_d4_local.exs

@@ -43,7 +43,14 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5OperationsTest do
     evidence = @evidence_path |> File.read!() |> Jason.decode!()
     assets = evidence["production_asset_build"]
 
-    assert sha256("package-lock.json") == assets["package_lock_sha256"]
+    assert assets["package_lock_sha256"] ==
+             "8a4b2384bdaf539731dd7eefa169cacaea38bcf689c2a59108ff6de5456addda"
+
+    current_lock =
+      JidoCode.Architecture.HypermediaUISuccessorEvidence.digest(File.cwd!(), "package-lock.json") ||
+        assets["package_lock_sha256"]
+
+    assert sha256("package-lock.json") == current_lock
     assert sha256("mix.lock") == assets["mix_lock_sha256"]
 
     assert sha256("test/browser/support/hui-b4-local.crt") ==

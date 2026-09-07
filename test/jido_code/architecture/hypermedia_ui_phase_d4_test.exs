@@ -11,6 +11,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4Test do
           {"predecessor_source_digests", %{}},
           {"baseline_commit", "wrong"},
           {"status", "accepted_at_merged_candidate"},
+          {"completed_sections", ["4.1"]},
+          {"independent_reviews", "self-approved"},
+          {"browser_toolchain", "1.62.0"},
           {"merged_candidate", "invented"}
         ] do
       refute Phase.validate(Map.put(evidence, key, value), File.cwd!()) == []
