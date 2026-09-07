@@ -1,17 +1,33 @@
 # HUI-D3 — Projection Subscription and Convergence Receipt
 
-Status: **merge-pending**. Sections 3.1–3.4 passed local qualification; clean-checkout
-implementation PR checks and merged-candidate pinning remain required.
+Status: **accepted-at-merged-candidate**. Sections 3.1–3.4 passed local qualification
+and clean-checkout CI, and implementation PR #132 merged. Every predecessor and D3
+reopening condition remains binding.
 
 ## Candidate Provenance
 
 - Authorized baseline: `c39f90316cb90d85a9413c2cc9da0115fdd65a9a` (D2 closure PR #131).
 - Accepted predecessor: `1d55390108763052998cc6f6e6dfc4ce319998c0`.
-- Section commits, implementation PR, clean-checkout jobs and merged candidate: pending.
+- Merged candidate: `a25d1ba65138935bbd065e09518bcdc7c7945301`.
+- Merge date: `2026-09-07` (13:27:26 UTC).
+- Implementation: [PR #132](https://github.com/pcharbon70/jido_code/pull/132).
+- Section 3.1: `2ea899aea0be203c8d136eb8e47424ce07ae7cf5`.
+- Section 3.2: `8faea32135d5ce0c0f3f6af8421395f043656461`.
+- Section 3.3: `909bbd13ba19ae20bd65cfb48f0ec1e2ea02d408`.
+- Section 3.4 and checked PR head: `9a6b388726f563e88b3cb0a25e0a0697b67152d2`.
+- Clean-checkout [verification job 101748912441](https://github.com/pcharbon70/jido_code/actions/runs/34124199599/job/101748912441): passed, 1,493 tests,
+  123 browser checks, 162 applicability skips, no failures or retries; audits and
+  production asset build passed.
+- Clean-checkout [Dialyzer job 101748909202](https://github.com/pcharbon70/jido_code/actions/runs/34124199595/job/101748909202): passed, 178 existing filtered warnings,
+  zero new warnings or unused filters.
+- This narrowly scoped closure publishes the post-merge provenance transition;
+  the merged implementation candidate above is the accepted runtime baseline.
 
 ## Gate HUI-D3
 
-**merge-pending**. Phase D4 is not authorized by this receipt.
+**accepted-at-merged-candidate**. Phase D4 may start from this pinned baseline
+after this closure is published on main. Gate reopening is independent of every
+checkbox and applies whenever any listed invariant fails.
 
 ## Evidence
 

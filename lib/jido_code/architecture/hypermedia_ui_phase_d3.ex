@@ -4,7 +4,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
   @manifest "priv/architecture/hypermedia_ui/phase_d3_implementation_evidence.json"
   @plan "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-03-projection-subscription-convergence-and-revocation.md"
   @receipt "docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md"
-  @merged_candidate nil
+  @merged_candidate "a25d1ba65138935bbd065e09518bcdc7c7945301"
   @sections ~w[3.1 3.2 3.3 3.4]
   @qualifications ~w[real_store http_faults registered_routes scoped_replay browser_matrix named_orca predecessor_gates precommit dialyzer]
   @invariants ~w[hint_is_not_truth registered_server_scope fresh_query_and_patch_authority scoped_cursor bounded_reconciliation terminal_revocation paused_security_bypass bounded_resources_and_cleanup predecessor_gates]
