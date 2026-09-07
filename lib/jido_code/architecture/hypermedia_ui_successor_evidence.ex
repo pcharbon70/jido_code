@@ -1,6 +1,32 @@
 defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @moduledoc false
 
+  @phase_d3_manifest "priv/architecture/hypermedia_ui/phase_d3_implementation_evidence.json"
+  @phase_d3_mutable_paths ~w[
+    assets/js/stream_connection.js
+    assets/js/read_projection.js
+    lib/jido_code/architecture/hypermedia_ui_phase_d2.ex
+    lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex
+    lib/jido_code_web/components/product_page.ex
+    lib/jido_code_web/product_controller.ex
+    lib/jido_code_web/read_response.ex
+    lib/jido_code_web/stream_admission.ex
+    lib/jido_code_web/stream_delivery.ex
+    lib/mix/tasks/architecture.check.ex
+  ]
+
+  def phase_d3_mutable_path?(path), do: path in @phase_d3_mutable_paths
+
+  def d3_predecessor_digest(root, path) do
+    with true <- path in @phase_d3_mutable_paths,
+         {:ok, body} <- File.read(Path.join(root, @phase_d3_manifest)),
+         {:ok, %{"phase" => "HUI-D3"} = evidence} <- Jason.decode(body) do
+      get_in(evidence, ["predecessor_source_digests", path])
+    else
+      _ -> nil
+    end
+  end
+
   @phase_d2_manifest "priv/architecture/hypermedia_ui/phase_d2_implementation_evidence.json"
   @phase_d2_mutable_paths ~w[
     assets/js/app.js
@@ -129,7 +155,8 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @spec digest(Path.t(), String.t()) :: String.t() | nil
   def digest(root, path) do
-    phase_digest(root, path, @phase_d2_manifest, @phase_d2_mutable_paths, "HUI-D2") ||
+    phase_digest(root, path, @phase_d3_manifest, @phase_d3_mutable_paths, "HUI-D3") ||
+      phase_digest(root, path, @phase_d2_manifest, @phase_d2_mutable_paths, "HUI-D2") ||
       phase_digest(root, path, @phase_d1_manifest, @phase_d1_mutable_paths, "HUI-D1") ||
       phase_digest(root, path, @phase_c5_manifest, @phase_c5_mutable_paths, "HUI-C5") ||
       phase_digest(root, path, @phase_c4_manifest, @phase_c4_mutable_paths, "HUI-C4") ||
@@ -141,7 +168,8 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
   @spec mutable_path?(String.t()) :: boolean()
   def mutable_path?(path),
     do:
-      phase_d2_mutable_path?(path) or phase_d1_mutable_path?(path) or phase_c5_mutable_path?(path) or
+      phase_d3_mutable_path?(path) or phase_d2_mutable_path?(path) or phase_d1_mutable_path?(path) or
+        phase_c5_mutable_path?(path) or
         phase_c4_mutable_path?(path) or
         phase_c3_mutable_path?(path) or
         phase_c2_mutable_path?(path) or phase_c1_mutable_path?(path)

@@ -2,6 +2,7 @@ defmodule JidoCodeWeb.StreamDelivery do
   @moduledoc "One shared bounded HTTP delivery loop; page controllers never own stream processes."
   import Plug.Conn
   alias JidoCode.Product.StreamCoordinator
+  alias JidoCode.Product.StreamSubscription
   alias JidoCodeWeb.{ProductRequest, ReadResponse, ReadSecurity, StreamHTML}
 
   @max_event_bytes 131_072
@@ -22,7 +23,22 @@ defmodule JidoCodeWeb.StreamDelivery do
       monitor = Process.monitor(lifecycle.coordinator)
 
       try do
-        start_response(conn, body, lifecycle, monitor)
+        case StreamSubscription.open(conn.private.stream_binding, conn.private.stream_projection) do
+          {:ok, subscription} ->
+            try do
+              start_response(
+                put_private(conn, :stream_subscription, subscription),
+                body,
+                lifecycle,
+                monitor
+              )
+            after
+              StreamSubscription.close(subscription)
+            end
+
+          {:error, _} ->
+            ReadSecurity.reject(conn, 503)
+        end
       after
         Process.demonitor(monitor, [:flush])
       end

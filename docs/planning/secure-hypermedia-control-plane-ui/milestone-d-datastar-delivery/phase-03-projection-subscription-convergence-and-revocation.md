@@ -17,20 +17,20 @@ Back to plan: [README](./README.md)
   This phase closes HUI-D3 by re-querying current authorized projections after
   lossy hints, reconnect, restart, and scope change.
 
-  - [ ] 3.1 Section - Map route projections to server-owned subscriptions.
+  - [x] 3.1 Section - Map route projections to server-owned subscriptions.
 
     This section gives each page a closed set of graph-family hints and
     reviewed refresh callbacks based on trusted route state.
 
-    - [ ] 3.1.1 Task {#huid-p03-subscriptions} [repo: jido_code] [after: {#huid-p02-phase-receipt}] - Adapt `ProjectionSubscription` for page stream delivery.
+    - [x] 3.1.1 Task {#huid-p03-subscriptions} [repo: jido_code] [after: {#huid-p02-phase-receipt}] - Adapt `ProjectionSubscription` for page stream delivery.
 
       This task preserves evaluated server revisions, authorization, coalescing,
       and refresh ownership from the accepted bounded-projection contract.
 
-      - [ ] 3.1.1.1 Subtask - Register route/projection families, reviewed query callbacks, allowed graph-family hints, fragment roots, and required server-known scope/filter inputs.
-      - [ ] 3.1.1.2 Subtask - Build subscriptions from trusted current route/resource/authority and refuse caller-selected graphs, query names, fragment roots, or refresh functions.
-      - [ ] 3.1.1.3 Subtask - Coalesce graph-family/revision hints without carrying display data, protected IDs, user values, or browser-authoritative revision claims.
-      - [ ] 3.1.1.4 Subtask - Cancel/rebuild subscriptions on route/scope/filter/session generation changes and clean them on stream closure/restart.
+      - [x] 3.1.1.1 Subtask - Register route/projection families, reviewed query callbacks, allowed graph-family hints, fragment roots, and required server-known scope/filter inputs.
+      - [x] 3.1.1.2 Subtask - Build subscriptions from trusted current route/resource/authority and refuse caller-selected graphs, query names, fragment roots, or refresh functions.
+      - [x] 3.1.1.3 Subtask - Coalesce graph-family/revision hints without carrying display data, protected IDs, user values, or browser-authoritative revision claims.
+      - [x] 3.1.1.4 Subtask - Cancel/rebuild subscriptions on route/scope/filter/session generation changes and clean them on stream closure/restart.
 
   - [ ] 3.2 Section - Implement patch and bounded nudge delivery.
 

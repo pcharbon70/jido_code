@@ -48,7 +48,10 @@ defmodule JidoCodeWeb.ReadResponse do
             ReadSecurity.reject(conn, 503)
 
           conn.private[:stream_intent] != nil ->
-            put_private(conn, :stream_snapshot, body)
+            conn
+            |> put_private(:stream_snapshot, body)
+            |> put_private(:stream_projection, assigns[:projection])
+            |> put_private(:stream_render, {Phoenix.Controller.view_module(conn), template})
 
           true ->
             conn

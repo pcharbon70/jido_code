@@ -20,6 +20,13 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
 
   @default_debounce 10
 
+  @doc "A pull-credit subscription: only its HTTP owner can request or acknowledge work."
+  def start_page_stream(options), do: GenServer.start(__MODULE__, {:page_stream, options})
+  def poll(server), do: GenServer.call(server, :poll, 1_000)
+  def evaluated(server, revision), do: GenServer.call(server, {:evaluated, revision}, 1_000)
+
+  def page_limits, do: %{scopes: 2, families: 20, mailbox: 64, refresh_ms: 5_000}
+
   def start_link(options) do
     case Keyword.get(options, :name) do
       nil -> GenServer.start_link(__MODULE__, options)
@@ -39,6 +46,40 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
     do: GenServer.cast(server, {:reauthorize, authority})
 
   @impl true
+  def init({:page_stream, options}) do
+    scopes = Keyword.fetch!(options, :scopes)
+    families = Keyword.fetch!(options, :families)
+    owner = Keyword.fetch!(options, :owner)
+    revision = Keyword.fetch!(options, :last_revision)
+
+    with true <- is_pid(owner) and is_list(scopes) and length(scopes) in 1..2,
+         true <-
+           Enum.all?(
+             scopes,
+             &(ResourceIdentity.validate(&1) == :ok and
+                 (subscription_scope?(&1) or String.contains?(&1, "/repo/")))
+           ),
+         true <- is_list(families) and length(families) in 1..20,
+         true <- Enum.all?(families, &(&1 in JidoCode.Knowledge.GraphRegistry.families())),
+         true <- is_integer(revision) and revision >= 0,
+         true <- Enum.all?(scopes, &(ChangeFeed.subscribe(&1) == :ok)) do
+      {:ok,
+       %{
+         mode: :page_stream,
+         owner: owner,
+         monitor: Process.monitor(owner),
+         scopes: scopes,
+         families: families,
+         last_revision: revision,
+         hinted_revision: revision,
+         pending: false,
+         next_refresh: monotonic() + 5_000
+       }}
+    else
+      _ -> {:stop, :invalid_page_subscription}
+    end
+  end
+
   def init(options) do
     scope_iri = Keyword.fetch!(options, :scope_iri)
     authority = Keyword.fetch!(options, :authority)
@@ -71,9 +112,40 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
   end
 
   @impl true
+  def handle_call(:poll, {owner, _}, %{mode: :page_stream, owner: owner} = state) do
+    due = state.hinted_revision > state.last_revision or monotonic() >= state.next_refresh
+
+    if due and not state.pending do
+      reason = if state.hinted_revision > state.last_revision, do: :hint, else: :reconcile
+      {:reply, {:refresh, reason}, %{state | pending: true}}
+    else
+      {:reply, :idle, state}
+    end
+  end
+
+  def handle_call(
+        {:evaluated, revision},
+        {owner, _},
+        %{mode: :page_stream, owner: owner, pending: true} = state
+      )
+      when is_integer(revision) and revision >= 0 do
+    if revision >= state.last_revision do
+      {:reply, :ok,
+       %{state | last_revision: revision, pending: false, next_refresh: monotonic() + 5_000}}
+    else
+      {:reply, {:error, :stale_revision},
+       %{state | pending: false, next_refresh: monotonic() + 5_000}}
+    end
+  end
+
+  def handle_call(_request, _from, %{mode: :page_stream} = state),
+    do: {:reply, {:error, :invalid_subscription_request}, state}
+
   def handle_call(:last_revision, _from, state), do: {:reply, state.last_revision, state}
 
   @impl true
+  def handle_cast(_message, %{mode: :page_stream} = state), do: {:noreply, state}
+
   def handle_cast({:reconnect, current_revision}, state)
       when is_integer(current_revision) and current_revision >= 0 do
     {:noreply, hint_refresh(state, current_revision)}
@@ -95,6 +167,35 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
   end
 
   @impl true
+  def handle_info(
+        {:DOWN, monitor, :process, owner, _},
+        %{mode: :page_stream, monitor: monitor, owner: owner} = state
+      ),
+      do: {:stop, :normal, state}
+
+  def handle_info({:jido_code_change, %ChangeEvent{} = event}, %{mode: :page_stream} = state) do
+    {:message_queue_len, count} = Process.info(self(), :message_queue_len)
+
+    cond do
+      count > 64 ->
+        {:stop, :subscription_overflow, state}
+
+      event.scope_iri in state.scopes and is_integer(event.dataset_revision) and
+        event.dataset_revision in 1..9_223_372_036_854_775_807 and
+        is_list(event.affected_graphs) and length(event.affected_graphs) <= 20 and
+          Enum.any?(event.affected_graphs, fn
+            %{family: family} -> family in state.families
+            _ -> false
+          end) ->
+        {:noreply, %{state | hinted_revision: max(state.hinted_revision, event.dataset_revision)}}
+
+      true ->
+        {:noreply, state}
+    end
+  end
+
+  def handle_info(_message, %{mode: :page_stream} = state), do: {:noreply, state}
+
   def handle_info({:jido_code_change, %ChangeEvent{scope_iri: scope} = event}, state)
       when scope == state.scope_iri do
     {:noreply, hint_refresh(state, event.dataset_revision)}
@@ -163,4 +264,6 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
       "/attempt/"
     ])
   end
+
+  defp monotonic, do: System.monotonic_time(:millisecond)
 end
