@@ -19,6 +19,7 @@ defmodule JidoCodeWeb.Endpoint do
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
 
+  plug JidoCodeWeb.Plugs.LocalTransport
   plug JidoCodeWeb.Plugs.ContentSecurityPolicy
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -46,12 +47,17 @@ defmodule JidoCodeWeb.Endpoint do
     plug Phoenix.CodeReloader
   end
 
-  plug Phoenix.LiveDashboard.RequestLogger,
-    param_key: "request_logger",
-    cookie_key: "request_logger"
+  if code_reloading? do
+    plug Phoenix.LiveDashboard.RequestLogger,
+      param_key: "request_logger",
+      cookie_key: "request_logger"
+  end
 
   plug Plug.RequestId
-  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+
+  plug Plug.Telemetry,
+    event_prefix: [:phoenix, :endpoint],
+    log: {JidoCode.LocalDeployment, :request_log_level, []}
 
   plug JidoCodeWeb.Plugs.ReadBody
 
@@ -63,7 +69,18 @@ defmodule JidoCodeWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-  plug Plug.Session, @session_options
+  plug :browser_session
   plug JidoCodeWeb.Plugs.ProductCanonicalPath
   plug JidoCodeWeb.Router
+
+  defp browser_session(conn, _options) do
+    # Only the validated loopback profile may use a non-Secure HTTP cookie.
+    # All other builds retain their accepted compile-time cookie policy.
+    options =
+      if JidoCode.LocalDeployment.active?(),
+        do: Keyword.put(@session_options, :secure, false),
+        else: @session_options
+
+    Plug.Session.call(conn, Plug.Session.init(options))
+  end
 end

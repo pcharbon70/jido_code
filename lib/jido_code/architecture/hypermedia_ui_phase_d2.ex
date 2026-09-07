@@ -152,8 +152,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD2 do
           current = Base.encode16(:crypto.hash(:sha256, body), case: :lower)
           successor = JidoCode.Architecture.HypermediaUISuccessorEvidence
 
-          if successor.phase_d3_mutable_path?(path) and successor.digest(root, path) == current and
-               successor.d3_predecessor_digest(root, path) == expected,
+          if successor.d4_override?(root, path, expected) or
+               (successor.phase_d3_mutable_path?(path) and successor.digest(root, path) == current and
+                  successor.d3_predecessor_digest(root, path) == expected),
              do: acc,
              else: equal(acc, current, expected, "source digest #{path}")
 

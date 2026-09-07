@@ -16,8 +16,10 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
-if System.get_env("PHX_SERVER") do
-  config :jido_code, JidoCodeWeb.Endpoint, server: true
+case System.get_env("PHX_SERVER") do
+  "true" -> config :jido_code, JidoCodeWeb.Endpoint, server: true
+  value when value in [nil, "false"] -> :ok
+  _ -> raise "PHX_SERVER must be true or false"
 end
 
 case System.get_env("JIDO_CODE_HUI_QUALIFICATION_ENABLED") do
@@ -172,61 +174,31 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
+  {:ok, transport} = JidoCode.LocalDeployment.transport(System.get_env())
+  config :jido_code, :deployment_profile, JidoCode.LocalDeployment.profile()
+  config :jido_code, :dns_cluster_query, nil
 
-  config :jido_code, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :jido_code, :human_identity, authority_adapter: JidoCode.Identity.Authority.LocalGraph
+
+  if System.get_env("PHX_SERVER") == "true" and
+       System.get_env("JIDO_CODE_HUMAN_IDENTITY_ENABLED") != "true" do
+    raise "local production serving requires JIDO_CODE_HUMAN_IDENTITY_ENABLED=true"
+  end
 
   config :jido_code, :knowledge_store,
     enabled: true,
-    root: System.get_env("JIDO_CODE_STORE_ROOT") || "/var/lib/jido_code/knowledge",
-    backup_root: System.get_env("JIDO_CODE_BACKUP_ROOT") || "/var/lib/jido_code/backups",
+    root:
+      System.get_env("JIDO_CODE_STORE_ROOT") ||
+        Path.join(System.user_home!(), ".local/share/jido_code/knowledge"),
+    backup_root:
+      System.get_env("JIDO_CODE_BACKUP_ROOT") ||
+        Path.join(System.user_home!(), ".local/share/jido_code/backups"),
     schema: :quad,
     schema_version: 1,
     durability: :sync,
     open_timeout: 15_000
 
-  config :jido_code, JidoCodeWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
-    http: [
-      # Enable IPv6 and bind on all interfaces.
-      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-      # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
-      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0},
-      port: port
-    ],
-    secret_key_base: secret_key_base
-
-  # ## SSL Support
-  #
-  # To get SSL working, you will need to add the `https` key
-  # to your endpoint configuration:
-  #
-  #     config :jido_code, JidoCodeWeb.Endpoint,
-  #       https: [
-  #         ...,
-  #         port: 443,
-  #         cipher_suite: :strong,
-  #         keyfile: System.get_env("SOME_APP_SSL_KEY_PATH"),
-  #         certfile: System.get_env("SOME_APP_SSL_CERT_PATH")
-  #       ]
-  #
-  # The `cipher_suite` is set to `:strong` to support only the
-  # latest and more secure SSL ciphers. This means old browsers
-  # and clients may not be supported. You can set it to
-  # `:compatible` for wider support.
-  #
-  # `:keyfile` and `:certfile` expect an absolute path to the key
-  # and cert in disk or a relative path inside priv, for example
-  # "priv/ssl/server.key". For all supported SSL configuration
-  # options, see https://hexdocs.pm/plug/Plug.SSL.html#configure/1
-  #
-  # We also recommend setting `force_ssl` in your config/prod.exs,
-  # ensuring no data is ever sent via http, always redirecting to https:
-  #
-  #     config :jido_code, JidoCodeWeb.Endpoint,
-  #       force_ssl: [hsts: true]
-  #
-  # Check `Plug.SSL` for all available options in `force_ssl`.
+  config :jido_code,
+         JidoCodeWeb.Endpoint,
+         Keyword.put(transport, :secret_key_base, secret_key_base)
 end
