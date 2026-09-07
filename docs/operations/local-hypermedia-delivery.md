@@ -83,3 +83,43 @@ migration, never a shared-operator alias or silent re-bootstrap.
 See [install/upgrade/rollback](./install-upgrade-and-rollback.md) for store
 restrictions. Capacity measurements, production/browser/AT fault evidence and
 independent review are required before D4 accepts this candidate.
+
+## Capacity and local response
+
+The local candidate reduces the factory and tenant stream ceilings to four.
+Principal remains four and session two. Other D2 byte/event/retry/time ceilings
+remain unchanged. A fifth stream is rejected; saturation does not allocate an
+extra protected owner. These conservative limits still require qualification
+against the declared corpus and workload before a capacity claim is accepted.
+
+The local coordinator samples BEAM memory, its run queue and the query runner's
+mailbox once per second. Three consecutive samples at or above 512 MiB BEAM
+memory, eight queued queries, or over twice the online scheduler count in the
+run queue enter degradation. Active streams receive terminal closure, new
+admission returns unavailable, and native pages remain available under their
+own admission limits. Recovery requires ten consecutive samples below 384 MiB,
+at most two queued queries and at most one run-queue item per scheduler.
+Recovery never reconnects a browser automatically: it requires fresh admission.
+This is a BEAM pressure signal, not a measurement of total workstation RAM or
+native RocksDB memory, and does not replace OS resource diagnostics.
+
+`JidoCode.Product.StreamCoordinator.stats/0` returns fixed-cardinality counters
+and connection/queue state. Counters reset on coordinator restart and saturate
+instead of allocating more keys. There are no human, session, tenant, graph,
+query-value or payload dimensions. Reserved frames/bytes include heartbeats
+and may include unsent reservations; they are not claimed as delivered patches.
+Cursor reconnects are correlation observations, not authority or an exact count
+of browser retries. Convergence and query durations are aggregate milliseconds,
+not percentiles. Existing lifecycle close observations may exceed unique closed
+connections. Slow-owner/guard failures are cleanup warnings, not proof that a
+zombie remains alive.
+
+On pressure, repeated rejections, query failures or slow-owner warnings, stop
+opening live tabs, use native refresh, inspect host CPU/RAM/disk health, and
+confirm graph/identity readiness. Do not raise ceilings, disable authorization
+or bypass a failed query. After the low-water window, explicitly reconnect and
+verify current graph revision/freshness. If cleanup does not finish, drain and
+restart the single owner; preserve stores and use the integrity runbook for
+store errors. Escalate persistent failures with the fixed counters, versions,
+configuration digest and sanitized failure class only—never raw streams,
+credentials or store snapshots. External monitoring is optional.

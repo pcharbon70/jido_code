@@ -31,7 +31,7 @@ defmodule JidoCode.Application do
         JidoCode.Product.ReadRequestLimiter,
         {DynamicSupervisor,
          name: JidoCode.Product.StreamOwnerSupervisor, strategy: :one_for_one, max_children: 32},
-        JidoCode.Product.StreamCoordinator
+        {JidoCode.Product.StreamCoordinator, limits: JidoCode.LocalDeployment.stream_limits()}
       ] ++
         qualification_children ++
         [

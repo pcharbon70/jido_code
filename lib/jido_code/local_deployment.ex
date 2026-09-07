@@ -7,6 +7,8 @@ defmodule JidoCode.LocalDeployment do
 
   def request_log_level(_conn), do: if(active?(), do: false, else: :info)
 
+  def stream_limits, do: if(active?(), do: %{factory: 4, tenant: 4}, else: %{})
+
   def transport(env) when is_map(env) do
     with profile when profile in [nil, @profile] <- env["JIDO_CODE_DEPLOYMENT_PROFILE"],
          host when host in ["127.0.0.1", "localhost"] <- env["PHX_HOST"] || "127.0.0.1",

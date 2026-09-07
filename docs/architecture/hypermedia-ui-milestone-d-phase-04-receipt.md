@@ -21,9 +21,26 @@ Seven focused checks pass, including a real store grant and outage case.
 The production-build Chromium 151.0.7922.34 runner passes direct delivery,
 periodic refresh, offline clearing/recovery and paused cross-tab revocation.
 Request-parameter logging is disabled in production without detaching the
-Phoenix telemetry logger. Production restart qualification is in progress.
+Phoenix telemetry logger. Production restart preserves the graph revision and
+the persisted named-human login; the same browser checks pass after restart.
 These checks do not substitute for load/fault, complete browser/AT or
 independent-review evidence. No section is accepted yet.
+
+Section 4.2 adds fixed-cardinality in-memory counters, a four-stream local
+factory/tenant envelope, and pressure admission with three-high/ten-low sample
+hysteresis. Seven pressure/coordinator tests pass, including rejection without
+allocation and refusal to retain arbitrary telemetry keys or payloads.
+
+On Linux Mint 22.1, OTP 28 / Elixir 1.19.5, 20 online schedulers, production
+Chromium 151.0.7922.34 sustained four live tabs in two sessions with two SHA-256
+workers each retaining 64 MiB. The empty-factory workload delivered eight
+patches (36,144 HTML bytes) in 7,499 ms and rejected a fifth stream. Peaks were
+369,885,136 BEAM bytes, 564,482,048 process RSS bytes, 1,124 BEAM processes,
+nine process sockets, run queue two, query queue zero, four streams and zero
+queued protected payload bytes. The measured interval used 21,364 CPU-runtime
+ms across schedulers. There were no query errors or slow-owner warnings.
+These are small-corpus smoke measurements, not a large-corpus soak, minimum
+hardware promise, percentile SLO, or cross-OS performance acceptance.
 
 ## Gate HUI-D4 / HUI4
 
