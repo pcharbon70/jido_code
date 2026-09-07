@@ -24,8 +24,24 @@ closed while production graph authority is unconfigured.
 
 Lifecycle closure stops the subscription; an independent owner monitor also
 cleans up after normal exit, failure or coordinator termination. Subscription
-state stores no event, result, display value or replay queue. Section 3.2 will
-consume refresh credits under the existing pre-patch authorization fence.
+state stores no event, result, display value or replay queue.
+
+Section 3.2 consumes refresh credits under the existing pre-patch authorization
+fence. Initial and incremental stream queries bypass the disposable projection
+cache and use the reviewed provider with a 1,500 ms surface deadline inside the
+2,000 ms owner watchdog. Route authorization is reconstructed before query and
+again after query/render and before transport. The evaluated query revision is
+checked before delivery; hint revisions are never rendered.
+
+Each coherent patch has one `#product-owned-content` root. Its encoded event,
+including closed `nudge` (registered projection name) and `delivery`
+(`visual`/`required`) metadata, shares D2's byte/rate/count budget. Metadata is
+not a graph revision, query selector, expression or executable callback. The
+client may turn a visual update into a named new-data notice while paused;
+the offered refresh/form remains the existing closed D1 request path.
+The event's protected HTML is immediately discarded, not buffered. Resume
+starts a new snapshot request. Unavailable/security/session replacements bypass
+visual pause. Connection and data freshness remain separately labelled.
 
 ## Reopening Conditions
 

@@ -68,20 +68,32 @@ defmodule JidoCodeWeb.ProductController do
   end
 
   defp load_projection(conn, %{key: key} = page) when key in @read_surfaces do
-    context = %{
-      session_ref: conn.assigns.authenticated_human.session_ref,
-      current_scope: conn.assigns.current_scope,
-      product_identity: conn.assigns.product_identity,
-      authority: conn.assigns.authority,
-      authorization: conn.assigns.authorization,
-      page: page
-    }
+    options =
+      if conn.private[:stream_intent],
+        do: [cache_server: nil, surface_timeout_ms: 1_500],
+        else: []
 
-    case Product.read_projection(context) do
+    case projection_result(conn, page, options) do
       {:ok, projection} -> projection
       {:error, _reason} -> ReadProjection.unavailable(key, :error)
     end
   end
 
   defp load_projection(_conn, _page), do: nil
+
+  def stream_projection(conn, page),
+    do: projection_result(conn, page, cache_server: nil, surface_timeout_ms: 1_500)
+
+  defp projection_result(conn, page, options) do
+    context = %{
+      session_ref: conn.assigns.authenticated_human.session_ref,
+      current_scope: page.authorization.current_scope,
+      product_identity: page.authorization.product_identity,
+      authority: page.authorization.authority_context,
+      authorization: page.authorization,
+      page: page
+    }
+
+    Product.read_projection(context, options)
+  end
 end

@@ -32,20 +32,20 @@ Back to plan: [README](./README.md)
       - [x] 3.1.1.3 Subtask - Coalesce graph-family/revision hints without carrying display data, protected IDs, user values, or browser-authoritative revision claims.
       - [x] 3.1.1.4 Subtask - Cancel/rebuild subscriptions on route/scope/filter/session generation changes and clean them on stream closure/restart.
 
-  - [ ] 3.2 Section - Implement patch and bounded nudge delivery.
+  - [x] 3.2 Section - Implement patch and bounded nudge delivery.
 
     This section emits current server-rendered fragments when possible and
     uses named nudges only when harmless tab-local intent must be resent.
 
-    - [ ] 3.2.1 Task {#huid-p03-delivery} [repo: jido_code] [after: {#huid-p03-subscriptions}] - Implement authorized re-query, fragment, and nudge dispatch.
+    - [x] 3.2.1 Task {#huid-p03-delivery} [repo: jido_code] [after: {#huid-p03-subscriptions}] - Implement authorized re-query, fragment, and nudge dispatch.
 
       This task never patches from hint payloads or asks the browser to decide
       what revision is current.
 
-      - [ ] 3.2.1.1 Subtask - Reauthorize and execute the registered reviewed query at a server-known revision after admitted hints, timers, reconnect, and explicit refresh.
-      - [ ] 3.2.1.2 Subtask - Render coherent fragments with current state/revision/freshness/provenance and enforce per-root/response/interval byte and rate limits.
-      - [ ] 3.2.1.3 Subtask - Emit closed named nudges when current filter/cursor intent is required; validate the resulting bounded request through the Phase 1 schema.
-      - [ ] 3.2.1.4 Subtask - Implement paused/new-visual-updates mode for nonessential tables/timelines while retaining security/revocation/session patches and truthful freshness.
+      - [x] 3.2.1.1 Subtask - Reauthorize and execute the registered reviewed query at a server-known revision after admitted hints, timers, reconnect, and explicit refresh.
+      - [x] 3.2.1.2 Subtask - Render coherent fragments with current state/revision/freshness/provenance and enforce per-root/response/interval byte and rate limits.
+      - [x] 3.2.1.3 Subtask - Emit closed named nudges when current filter/cursor intent is required; validate the resulting bounded request through the Phase 1 schema.
+      - [x] 3.2.1.4 Subtask - Implement paused/new-visual-updates mode for nonessential tables/timelines while retaining security/revocation/session patches and truthful freshness.
 
   - [ ] 3.3 Section - Implement reconnect, replay scope, and convergence recovery.
 

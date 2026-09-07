@@ -13,6 +13,20 @@ defmodule JidoCode.Product.StreamSubscription do
     )
   end
 
+  def poll(nil), do: :idle
+
+  def poll(pid) do
+    ProjectionSubscription.poll(pid)
+  catch
+    :exit, _ -> {:error, :subscription_lost}
+  end
+
+  def evaluated(pid, revision) do
+    ProjectionSubscription.evaluated(pid, revision)
+  catch
+    :exit, _ -> {:error, :subscription_lost}
+  end
+
   def close(nil), do: :ok
 
   def close(pid) do

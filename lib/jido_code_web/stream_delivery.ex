@@ -90,8 +90,9 @@ defmodule JidoCodeWeb.StreamDelivery do
 
       {:product_stream, ^lease, {:check, heartbeat?}} ->
         with :ok <- reauthorize(conn),
+             {:ok, conn, refreshed?} <- refresh(conn),
              :ok <- StreamCoordinator.checked(lease),
-             {:ok, conn} <- heartbeat(conn, heartbeat?) do
+             {:ok, conn} <- heartbeat(conn, heartbeat? and not refreshed?) do
           loop(conn, lifecycle, monitor)
         else
           {:error, _} ->
@@ -102,6 +103,30 @@ defmodule JidoCodeWeb.StreamDelivery do
       remaining ->
         StreamCoordinator.terminate_owner(lease, :expired)
         terminal(conn, :expired)
+    end
+  end
+
+  defp refresh(conn) do
+    subscription = conn.private.stream_subscription
+
+    case StreamSubscription.poll(subscription) do
+      :idle ->
+        {:ok, conn, false}
+
+      {:refresh, _reason} ->
+        lease = conn.private.stream_lease
+
+        with {:ok, frame, revision} <- JidoCodeWeb.StreamUpdate.render(conn),
+             :ok <- StreamSubscription.evaluated(subscription, revision),
+             :ok <- StreamCoordinator.reserve(lease, byte_size(frame)),
+             :ok <- reauthorize(conn),
+             :ok <- StreamCoordinator.active(lease),
+             {:ok, conn} <- chunk(conn, frame),
+             :ok <- StreamCoordinator.sent(lease),
+             do: {:ok, conn, true}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

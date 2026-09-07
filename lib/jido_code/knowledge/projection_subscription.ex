@@ -138,6 +138,13 @@ defmodule JidoCode.Knowledge.ProjectionSubscription do
     end
   end
 
+  def handle_call(
+        {:evaluated, nil},
+        {owner, _},
+        %{mode: :page_stream, owner: owner, pending: true} = state
+      ),
+      do: {:reply, :ok, %{state | pending: false, next_refresh: monotonic() + 5_000}}
+
   def handle_call(_request, _from, %{mode: :page_stream} = state),
     do: {:reply, {:error, :invalid_subscription_request}, state}
 

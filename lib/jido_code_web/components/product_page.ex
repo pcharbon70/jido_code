@@ -116,6 +116,15 @@ defmodule JidoCodeWeb.Components.ProductPage do
               >
                 Refresh and connect
               </UI.link>
+              <UI.button
+                id="product-stream-pause"
+                type="button"
+                hidden
+                aria-pressed="false"
+                aria-describedby="product-stream-status"
+              >
+                Pause visual updates
+              </UI.button>
               <p
                 id="product-stream-status"
                 role="status"

@@ -7,7 +7,8 @@
   "merged_candidate": null,
   "clean_checkout_ci": "pending",
   "completed_sections": [
-    "3.1"
+    "3.1",
+    "3.2"
   ],
   "invariants": [
     "hint_is_not_truth",
@@ -34,24 +35,30 @@
     "lib/mix/tasks/architecture.check.ex": "65a8cbd79ab1290485bead8212c13d0f1f6acff272c1ce1cac385c598e7da614"
   },
   "source_digests": {
-    "assets/js/stream_connection.js": "43e71f848f69178331de5708765c3e295a1268a972744c263cf7aae443b5fd59",
+    "assets/js/stream_connection.js": "51119c6c0072ec4187164617c2c601a208c0e5eb273c8a8495f52f1b855958a0",
     "assets/js/read_projection.js": "af05845e0cddd65ba9a1644b890a883a72d53501635289a681130fa266a1fe8a",
     "lib/jido_code/architecture/hypermedia_ui_phase_d2.ex": "21ebe640b50e81cab96c614040606f4b58930e33ac362cf4837e63bb9462e69e",
     "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "ca747008e1cc834b74242c4c5d0883b63b350b34b0c93483870b7114b596cafa",
-    "lib/jido_code_web/components/product_page.ex": "76a310a5c6b3cd9b2a1b3fd0d50e111bcde3f283be52648fff847d6577d15c9b",
-    "lib/jido_code_web/product_controller.ex": "811af31c7740dfddf09db0ebf02685d1a5a05c65834002ba91e0702d4d7d61fc",
+    "lib/jido_code_web/components/product_page.ex": "ed2bf22ceec050983d013dc59c42e36e35db97f4c6fa7eb37be47c1578a63fd6",
+    "lib/jido_code_web/product_controller.ex": "d79063a149f1ffac022d94c0ed19495ff41cc4554e271d58371e6731bf1b1840",
     "lib/jido_code_web/read_response.ex": "96cc4387ff4c54cc3f5c32fb426a99620915b9b54ad3e1cbad576558d526de85",
     "lib/jido_code_web/stream_admission.ex": "08096baf8a0818bc3be477f036991774980ffd251710eeee42da655231c711dd",
-    "lib/jido_code_web/stream_delivery.ex": "8f1a3a60baf7286073eaf38da8572d4e7c76b9173508a32821f782af1b7da767",
+    "lib/jido_code_web/stream_delivery.ex": "2e14c2e5aa87b294272dabb0579a095343fcba33795187d1392c3c01f8a9537c",
+    "lib/jido_code_web/stream_update.ex": "a433a75d368451af8923829b0b4f9b4f645e53a280f33429ece1699600f8002e",
     "lib/mix/tasks/architecture.check.ex": "b32edd6850c95e8a6bc739ce3ef8ec4f1a4e3156562945d532857fb54d2778c4",
-    "lib/jido_code/knowledge/projection_subscription.ex": "3b797d3e6a932acc524e26ead771e118d285d3a39d094b13296747503ac8497b",
+    "lib/jido_code/knowledge/projection_subscription.ex": "2e8427efa01d753aa34ed5ab53f150ed204c2efa1f75cb9a4f9ba362e75ecccd",
     "lib/jido_code/product/stream_projection_registry.ex": "b89d01d020206a81266f2cbf36d6f9139de2de89a60dbecaa5856bb2a5cd580d",
-    "lib/jido_code/product/stream_subscription.ex": "fc2488fb76c404422cecc004bfd91e811641f582b48d277d5d7bc56f7593dea3",
+    "lib/jido_code/product/stream_subscription.ex": "07eefb9fec5b82e6489c76572e7ba7b9aa471a5f039c0cc21cbdff03fb8b845a",
     "test/jido_code/product/stream_subscription_test.exs": "250b41b605c4bc60d5570c2d038a5c7eae8bb13cb32c081fa8dfc6df42650e20",
     "test/jido_code_web/stream_projection_registry_test.exs": "5671d74fb5616fbcf60ac7f9af1fe8401aa48ff6e388434bd50aacd353a945c9",
-    "docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md": "83c0593ccbd190c5483184cb7ecafb620f2b94fb804c49c5dd04e4f670b70eab",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-03-projection-subscription-convergence-and-revocation.md": "05e40bdb3eaaafac60232b8a52dcf77052e2114a1b3dcda8dc52f4b0c91a60a1",
-    "lib/jido_code/architecture/hypermedia_ui_phase_d3.ex": "9da9bba8a600aec0d4bad6d0061f3ae6ff22b7dd05ad50a2a4939227535646a8",
+    "test/jido_code_web/stream_update_test.exs": "0adeaab5b3ac6ef164bca306cde455d785c0eeeb48980dab82770b451b2b0e29",
+    "test/browser/hypermedia_ui_phase_d3.spec.mjs": "366011460c8f2ba7bf8507d08f1b135077481d694b645379e42d76502466b455",
+    "docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md": "ece55b5bb31b12db53c295def9c6191eba3c07f01bf2d4d5e009dfcd46dda0de",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-03-projection-subscription-convergence-and-revocation.md": "f0c1819189d6aa52261052e7c7356e2f7475a6f401f9ad53eeaefe0927bef4e9",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d3.ex": "6765c0227b0e4d6a8060cbdb86c6afa7e167f9b080bedf1a15dc4549378b11ff",
     "test/jido_code/architecture/hypermedia_ui_phase_d3_test.exs": "ffd58fd7f54a69498d0f90f57023b912bd3bbe6849b1a98b4bd9443d4fc5e66c"
+  },
+  "section_commits": {
+    "3.1": "2ea899aea0be203c8d136eb8e47424ce07ae7cf5"
   }
 }
