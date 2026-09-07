@@ -87,7 +87,7 @@
     "assets/js/stream_connection.js": "43e71f848f69178331de5708765c3e295a1268a972744c263cf7aae443b5fd59",
     "docs/architecture/hypermedia-ui-milestone-d-phase-02-receipt.md": "2dcd4ecee92be5b82745cee2fb35efc90ba114501875d74a13ffdae15eb323fb",
     "docs/architecture/hypermedia-ui-stream-coordinator-implementation.md": "df58acc75b704fc3d64a0d261d917a08a33c11aa4bbc827e9a725640e963b61d",
-    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-02-authorized-page-tab-stream-coordinator.md": "7d55dd9bac9ddf24050df237244cb7576e8c11215057056b9916b6928e4d8916",
+    "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-02-authorized-page-tab-stream-coordinator.md": "9e537abe4e418305b51e220fd45a00c0a53db252d6c334ad223cb696a78bda36",
     "lib/jido_code/application.ex": "f0fd140f629e856b3fa64437a3e04adbd3b4b99ac9f1fd8717362d285445154b",
     "lib/jido_code/identity/store.ex": "11668bffb50b8a132bee36b3bd22a8f9c9190d4aa3ba4a702ed21a75e7119e4d",
     "lib/jido_code/architecture/hypermedia_ui_phase_c3.ex": "92615a8cfba7e87534dc2d542f25ab9cb3e347c7bb5fa374390eb9eeee73fa70",

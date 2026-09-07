@@ -6,6 +6,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
   @receipt "docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md"
   @merged_candidate "a25d1ba65138935bbd065e09518bcdc7c7945301"
   @sections ~w[3.1 3.2 3.3 3.4]
+  @closed_predecessor_plans ~w[
+    docs/planning/secure-hypermedia-control-plane-ui/milestone-c-read-only-hypermedia-shell/phase-01-named-human-session-and-scope-foundation.md
+    docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-01-closed-request-signal-and-fragment-contracts.md
+    docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-02-authorized-page-tab-stream-coordinator.md
+  ]
   @qualifications ~w[real_store http_faults registered_routes scoped_replay browser_matrix named_orca predecessor_gates precommit dialyzer]
   @invariants ~w[hint_is_not_truth registered_server_scope fresh_query_and_patch_authority scoped_cursor bounded_reconciliation terminal_revocation paused_security_bypass bounded_resources_and_cleanup predecessor_gates]
   @sources ~w[
@@ -46,6 +51,18 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
   ]
   def sources, do: @sources
   def invariants, do: @invariants
+
+  @doc false
+  def completed_plan?(body) when is_binary(body) do
+    case String.split(body, "---", parts: 3) do
+      ["", frontmatter, _content] ->
+        statuses = Regex.scan(~r/^status: ([^\r\n]+)\r?$/m, frontmatter)
+        statuses == [["status: completed", "completed"]]
+
+      _ ->
+        false
+    end
+  end
 
   def load(root \\ File.cwd!()) do
     with {:ok, body} <- File.read(Path.join(root, @manifest)), do: Jason.decode(body)
@@ -107,6 +124,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
         end
       end)
 
+    errors =
+      Enum.reduce(@closed_predecessor_plans, errors, fn path, acc ->
+        equal(acc, completed_plan?(File.read!(Path.join(root, path))), true, "completed #{path}")
+      end)
+
     lifecycle(errors, e, root)
   end
 
@@ -139,6 +161,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
     |> contains(root, @receipt, "Merged candidate: `#{@merged_candidate}`")
     |> contains(root, @receipt, "Merge date: `#{e["merge_date"]}`")
     |> contains(root, @receipt, "Gate HUI-D3\n\n**accepted-at-merged-candidate**")
+    |> equal(completed_plan?(File.read!(Path.join(root, @plan))), true, "completed plan status")
     |> contains(root, @plan, "- [x] 3 Phase")
     |> contains(root, @plan, "- [x] 3.4 Section")
     |> contains(root, @plan, "- [x] 3.4.2 Task")
