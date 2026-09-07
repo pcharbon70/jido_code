@@ -12,7 +12,7 @@ projection subscriptions and graph revision hints without making SSE a truth log
 
 Back to plan: [README](./README.md)
 
-- [ ] 3 Phase - Deliver durable-truth convergence through bounded patches and nudges.
+- [x] 3 Phase - Deliver durable-truth convergence through bounded patches and nudges.
 
   This phase closes HUI-D3 by re-querying current authorized projections after
   lossy hints, reconnect, restart, and scope change.
@@ -62,12 +62,12 @@ Back to plan: [README](./README.md)
       - [x] 3.3.1.3 Subtask - Detect hint gaps, outdated revisions, query/patch failure, process/node/deploy restart, graph lag, and subscription loss; schedule bounded fresh re-query with backoff.
       - [x] 3.3.1.4 Subtask - Record safe convergence metrics and stop terminal retry loops on concealment, session expiry, revocation, unsupported route, or permanent failure.
 
-  - [ ] 3.4 Section - Phase 3 Integration Tests.
+  - [x] 3.4 Section - Phase 3 Integration Tests.
 
     This final section proves streams converge to authorized durable graph
     truth and never replay protected or stale browser-owned state.
 
-    - [ ] 3.4.1 Task {#huid-p03-integration} [repo: jido_code] [after: {#huid-p03-convergence}] - Execute the HUI-D3 subscription and convergence matrix.
+    - [x] 3.4.1 Task {#huid-p03-integration} [repo: jido_code] [after: {#huid-p03-convergence}] - Execute the HUI-D3 subscription and convergence matrix.
 
       This task injects real graph changes and delivery faults across several
       users, tabs, routes, repositories, and attempts.
@@ -75,13 +75,13 @@ Back to plan: [README](./README.md)
       - [x] 3.4.1.1 Subtask - Exercise each registered route/projection/hint/root, unknown graph/query/root, scope/filter change, subscription cancellation, and cleanup.
       - [x] 3.4.1.2 Subtask - Exercise lost/duplicate/reordered/delayed/coalesced hints, gap detection, stale revisions, query/patch failure, graph lag, process/node/deploy restart, and backoff.
       - [x] 3.4.1.3 Subtask - Exercise initial/reconnect snapshots, copied/stale replay cursors, sleep/wake, paused visual updates, field/scope revocation, concealment, expiry, and terminal retry suppression.
-      - [ ] 3.4.1.4 Subtask - Run real-store/stream/browser/accessibility/security/convergence suites, `mix precommit`, and clean-checkout CI.
+      - [x] 3.4.1.4 Subtask - Run real-store/stream/browser/accessibility/security/convergence suites, `mix precommit`, and clean-checkout CI.
 
-    - [ ] 3.4.2 Task {#huid-p03-phase-receipt} [repo: jido_code] [after: {#huid-p03-integration}] - Publish and pin the Phase 3 receipt.
+    - [x] 3.4.2 Task {#huid-p03-phase-receipt} [repo: jido_code] [after: {#huid-p03-integration}] - Publish and pin the Phase 3 receipt.
 
       This task records HUI-D3 evidence in
       `docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md`.
 
       - [x] 3.4.2.1 Subtask - Keep HUI-D3 merge-pending on hint-as-data, client revision authority, unregistered subscription, replay scope leak, non-convergence, stale protected patch, retry loop, or incomplete cleanup.
       - [x] 3.4.2.2 Subtask - Record registry/query/root/replay/limit/fault/convergence evidence, failures, limitations, and all reopening conditions.
-      - [ ] 3.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.
+      - [x] 3.4.2.3 Subtask - Pin the full merged SHA/date and check the phase, Phase 3 Integration Tests section, receipt task, and pinning subtask before authorizing Phase 4.
