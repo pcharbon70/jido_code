@@ -271,7 +271,7 @@ defmodule JidoCode.Identity.Store do
   end
 
   def handle_call({:registered_resources, kind, limit}, _from, state)
-      when kind in [:project] and is_integer(limit) and limit in 1..50 do
+      when kind in [:project, :attempt] and is_integer(limit) and limit in 1..100 do
     resources =
       state.data.resources
       |> Map.values()

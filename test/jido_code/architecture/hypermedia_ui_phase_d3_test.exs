@@ -11,7 +11,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3Test do
           {"invariants", []},
           {"predecessor_source_digests", %{}},
           {"baseline_commit", "wrong"},
-          {"status", "accepted_at_merged_candidate"}
+          {"status", "unsupported"},
+          {"merged_candidate", "wrong"}
         ] do
       refute Phase.validate(Map.put(e, key, value), File.cwd!()) == []
     end

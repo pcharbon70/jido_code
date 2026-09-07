@@ -3,6 +3,7 @@ defmodule JidoCode.Architecture.HypermediaUISuccessorEvidence do
 
   @phase_d3_manifest "priv/architecture/hypermedia_ui/phase_d3_implementation_evidence.json"
   @phase_d3_mutable_paths ~w[
+    lib/jido_code/identity/store.ex
     assets/js/stream_connection.js
     assets/js/read_projection.js
     lib/jido_code/architecture/hypermedia_ui_phase_d2.ex

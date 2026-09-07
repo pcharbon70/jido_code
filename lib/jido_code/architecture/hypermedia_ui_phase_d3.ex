@@ -6,8 +6,17 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
   @receipt "docs/architecture/hypermedia-ui-milestone-d-phase-03-receipt.md"
   @merged_candidate nil
   @sections ~w[3.1 3.2 3.3 3.4]
+  @qualifications ~w[real_store http_faults registered_routes scoped_replay browser_matrix named_orca predecessor_gates precommit dialyzer]
   @invariants ~w[hint_is_not_truth registered_server_scope fresh_query_and_patch_authority scoped_cursor bounded_reconciliation terminal_revocation paused_security_bypass bounded_resources_and_cleanup predecessor_gates]
   @sources ~w[
+    lib/jido_code/identity/store.ex
+    test/support/hypermedia_stream_http_fixture.ex
+    test/support/real_stream_projection_provider.ex
+    test/jido_code_web/stream_real_store_test.exs
+    test/jido_code_web/stream_convergence_http_test.exs
+    scripts/qualify_hui_d3_orca.sh
+    test/accessibility/hypermedia_ui_phase_d3_orca.mjs
+    docs/architecture/hypermedia-ui-milestone-d-phase-03-implementation.md
     assets/js/stream_connection.js
     assets/js/read_projection.js
     lib/jido_code/architecture/hypermedia_ui_phase_d2.ex
@@ -108,6 +117,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
     |> equal(sha?(@merged_candidate), true, "full merge SHA")
     |> equal(e["clean_checkout_ci"], "pass", "CI")
     |> equal(e["local_verification"], "pass", "qualification")
+    |> equal(e["qualifications"], Map.new(@qualifications, &{&1, "pass"}), "qualification matrix")
     |> equal(
       Enum.all?(@sections, &sha?(get_in(e, ["section_commits", &1]))),
       true,
@@ -127,6 +137,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
     )
     |> contains(root, @receipt, "Status: **accepted-at-merged-candidate**")
     |> contains(root, @receipt, "Merged candidate: `#{@merged_candidate}`")
+    |> contains(root, @receipt, "Merge date: `#{e["merge_date"]}`")
+    |> contains(root, @receipt, "Gate HUI-D3\n\n**accepted-at-merged-candidate**")
     |> contains(root, @plan, "- [x] 3 Phase")
     |> contains(root, @plan, "- [x] 3.4 Section")
     |> contains(root, @plan, "- [x] 3.4.2 Task")
@@ -154,7 +166,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
       do:
         errors
         |> equal(sections, @sections, "integration sections")
-        |> equal(e["local_verification"], "pass", "qualification"),
+        |> equal(e["local_verification"], "pass", "qualification")
+        |> equal(
+          e["qualifications"],
+          Map.new(@qualifications, &{&1, "pass"}),
+          "qualification matrix"
+        ),
       else: errors
   end
 

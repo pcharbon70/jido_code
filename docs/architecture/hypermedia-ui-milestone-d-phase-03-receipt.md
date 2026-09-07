@@ -1,6 +1,7 @@
 # HUI-D3 — Projection Subscription and Convergence Receipt
 
-Status: **merge-pending**. Implementation and integration qualification are in progress.
+Status: **merge-pending**. Sections 3.1–3.4 passed local qualification; clean-checkout
+implementation PR checks and merged-candidate pinning remain required.
 
 ## Candidate Provenance
 
@@ -60,6 +61,40 @@ than that verified floor cannot start a protected response. Unknown legacy
 cursors fail closed and require a new explicit connection. Only fixed outcome
 and projection labels and bounded count/duration measurements enter convergence
 telemetry. Initial projection payloads are dropped after initial delivery.
+
+## Integration Qualification
+
+The [implementation contract](hypermedia-ui-milestone-d-phase-03-implementation.md)
+records the closed registry, reviewed query/root bindings, scoped replay, numerical
+bounds, fault-to-test matrix and fixture/deployment limitations.
+
+- `mix precommit`: 1,493 tests, zero failures (800.7 seconds; seed 17338), including
+  all accepted predecessor architecture and security gates.
+- Full production-asset browser/proxy matrix: 123 passed, 162 applicability skips,
+  zero failures/retries (285 combinations across five profiles, 13.1 minutes).
+- Named Orca journey: keyboard connect/pause, truthful paused announcement, retained
+  focus, cross-tab revocation while paused, concealed terminal alert and native reload
+  focus passed. Executable script retained; ephemeral local speech evidence was
+  `/tmp/hui-d3-orca.eGFnmG`.
+- Real TripleStore/HTTP matrix: three tests passed, covering actual writer revisions,
+  complete hint loss, parallel route convergence, distinct named users sharing only
+  an untrusted tab value, independent revocation and subscription loss/reconnect.
+- Incremental all-route and fault HTTP matrix: four tests passed. Seeded D3 plus D2
+  HTTP/revocation/subscription regression: 32 tests passed (seed 3103).
+- Strict production compilation and Dialyzer passed. Dialyzer retained the existing
+  178 filters with no new warning or unused filter; no suppression was added.
+
+Integration found and fixed an existing registry/provider mismatch: reviewed queries
+request up to 100 projects or attempts, but the registry previously accepted only
+projects with a maximum of 50. The exact bounded interface now agrees, with negative
+limit/kind tests. Enumeration still grants nothing and field authorization remains
+mandatory. D2 source hashes are preserved in predecessor evidence, not rewritten.
+
+The real-store adapter retains actual named-human route/query/field checks but maps
+the authorized human to the independent dataset's explicitly granted fixture graph
+principal. This is not production graph-authority adapter acceptance. Initial failed
+fixture runs exposed the registry mismatch; corrected runs above passed. An initial
+copied AT runner still invoked D2; the corrected D3 runner was rerun successfully.
 
 ## Reopening Conditions
 
