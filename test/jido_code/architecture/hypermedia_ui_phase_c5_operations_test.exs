@@ -51,7 +51,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseC5OperationsTest do
         assets["package_lock_sha256"]
 
     assert sha256("package-lock.json") == current_lock
-    assert sha256("mix.lock") == assets["mix_lock_sha256"]
+
+    assert assets["mix_lock_sha256"] ==
+             "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b"
+
+    assert sha256("mix.lock") ==
+             JidoCode.Architecture.HypermediaUIPhaseD4.dependency_digest(File.cwd!(), "mix.lock")
 
     assert sha256("test/browser/support/hui-b4-local.crt") ==
              "f0458f35e0e0538bcae12bf5031d2d011fa7398390bd128e6238abb89dc02967"

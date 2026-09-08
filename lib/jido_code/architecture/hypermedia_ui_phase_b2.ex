@@ -509,7 +509,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB2 do
     errors =
       Enum.reduce(@source_hashes, errors, fn {path, expected}, acc ->
         expected =
-          HypermediaUISuccessorEvidence.digest(root, path) ||
+          JidoCode.Architecture.HypermediaUIPhaseD4.dependency_digest(root, path) ||
+            HypermediaUISuccessorEvidence.digest(root, path) ||
             Map.get(@hui_b3_qualified_source_hashes, path, expected)
 
         case File.read(Path.join(root, path)) do

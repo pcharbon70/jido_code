@@ -11,6 +11,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @sources ~w[
     mix.exs
     mix.lock
+    lib/jido_code/architecture/hypermedia_ui_phase_b2.ex
+    lib/jido_code/architecture/hypermedia_ui_phase_b4.ex
     scripts/qualify_hui_d4_resources.exs
     scripts/qualify_hui_d4_scopes.exs
     scripts/qualify_hui_d4_scopes.mjs
@@ -70,6 +72,28 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
     test/jido_code_web/local_transport_test.exs
   ]
   def sources, do: @sources
+
+  def dependency_input_valid?(path, body) do
+    baseline = @dependency_baseline[path]
+    restored = String.replace(body, @store_candidate, @store_predecessor)
+
+    is_binary(baseline) and String.contains?(body, @store_candidate) and
+      Base.encode16(:crypto.hash(:sha256, restored), case: :lower) == baseline
+  end
+
+  def dependency_digest(root, path) do
+    with true <- Map.has_key?(@dependency_baseline, path),
+         {:ok, evidence} <- load(root),
+         @store_candidate <- evidence["triple_store_candidate"],
+         {:ok, body} <- File.read(Path.join(root, path)),
+         true <- dependency_input_valid?(path, body),
+         digest = Base.encode16(:crypto.hash(:sha256, body), case: :lower),
+         ^digest <- get_in(evidence, ["source_digests", path]) do
+      digest
+    else
+      _ -> nil
+    end
+  end
 
   def load(root \\ File.cwd!()) do
     with {:ok, body} <- File.read(Path.join(root, @manifest)), do: Jason.decode(body)
