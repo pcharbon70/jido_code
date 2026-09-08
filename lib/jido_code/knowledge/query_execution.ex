@@ -16,6 +16,23 @@ defmodule JidoCode.Knowledge.QueryExecution do
 
   @policy_graph "https://jido.run/graph/factory/policy"
 
+  @doc "Evaluate the current grant for a reviewed query without returning graph content."
+  def authorize(store, metadata, %CatalogQueryRequest{} = request) do
+    with :ok <- verify_definition(request),
+         {:ok, snapshot} <-
+           SemanticSnapshot.read(store, metadata, Enum.uniq([@policy_graph | request.graph_iris])),
+         {:ok, authorization} <- QueryAuthorization.authorize(request, snapshot) do
+      {:ok,
+       %{
+         grant_ref: authorization.grant_iri,
+         delegation_ref: authorization.delegation_iri,
+         graph_revisions: Map.take(snapshot.graph_revisions, [@policy_graph])
+       }}
+    end
+  rescue
+    _ -> {:error, Error.new(:unavailable, :catalog_authorization)}
+  end
+
   @spec execute(TripleStore.store(), map(), CatalogQueryRequest.t()) ::
           {:ok, QueryResult.t()}
           | {:error, Error.t()}

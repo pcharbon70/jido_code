@@ -262,6 +262,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
   end
 
   defp validate_toolchain(errors, root) do
+    current_version = HypermediaUISuccessorEvidence.current_playwright_version(root)
     package = read_json(root, "package.json")
     lock = read_json(root, "package-lock.json")
     config = read(root, "playwright.config.mjs")
@@ -272,12 +273,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB3 do
     errors
     |> require_equal(
       get_in(package, ["devDependencies", "@playwright/test"]),
-      "1.62.0",
+      current_version,
       "direct Playwright pin"
     )
     |> require_equal(
       get_in(lock, ["packages", "node_modules/@playwright/test", "version"]),
-      "1.62.0",
+      current_version,
       "locked Playwright"
     )
     |> then(fn current ->

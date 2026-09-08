@@ -31,7 +31,7 @@ defmodule JidoCode.Application do
         JidoCode.Product.ReadRequestLimiter,
         {DynamicSupervisor,
          name: JidoCode.Product.StreamOwnerSupervisor, strategy: :one_for_one, max_children: 32},
-        JidoCode.Product.StreamCoordinator
+        {JidoCode.Product.StreamCoordinator, limits: JidoCode.LocalDeployment.stream_limits()}
       ] ++
         qualification_children ++
         [
@@ -69,6 +69,12 @@ defmodule JidoCode.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
+  @impl true
+  def prep_stop(state) do
+    JidoCode.LocalDeployment.drain()
+    state
+  end
+
   @impl true
   def config_change(changed, _new, removed) do
     JidoCodeWeb.Endpoint.config_change(changed, removed)

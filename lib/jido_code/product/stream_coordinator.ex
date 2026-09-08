@@ -2,6 +2,7 @@ defmodule JidoCode.Product.StreamCoordinator do
   @moduledoc "One supervised owner of bounded page/tab lifecycle; no protected payload queue."
   use GenServer
   alias JidoCode.Product.StreamOwnerGuard
+  alias JidoCode.Product.{StreamMetrics, StreamPressure}
   alias JidoCode.Identity.{RevocationEvent, Revocations}
 
   @states ~w[admitted connected idle retrying revoked expired closing closed]a
@@ -75,7 +76,22 @@ defmodule JidoCode.Product.StreamCoordinator do
       end)
 
     Process.send_after(self(), :tick, limits.tick_ms)
-    {:ok, %{leases: %{}, windows: %{}, nonces: %{}, draining: false, limits: limits}}
+    metrics = StreamMetrics.new()
+    if Process.whereis(__MODULE__) == self(), do: StreamMetrics.attach(metrics)
+
+    {:ok,
+     %{
+       leases: %{},
+       windows: %{},
+       nonces: %{},
+       draining: false,
+       limits: limits,
+       metrics: metrics,
+       pressure: StreamPressure.new(),
+       next_sample: now() + 1_000,
+       pressure_enabled:
+         Keyword.get(options, :pressure_enabled, JidoCode.LocalDeployment.active?())
+     }}
   end
 
   @impl true
@@ -94,16 +110,19 @@ defmodule JidoCode.Product.StreamCoordinator do
       min(context.hard_expires_at, context.idle_expires_at) - System.system_time(:millisecond)
 
     cond do
-      state.draining ->
+      state.draining or state.pressure.mode == :degraded ->
+        StreamMetrics.record(state.metrics, :rejected)
         {:reply, {:error, :unavailable}, state}
 
       Map.has_key?(state.nonces, nonce) ->
+        StreamMetrics.record(state.metrics, :duplicate)
         {:reply, {:error, :duplicate}, state}
 
       map_size(state.nonces) >= state.limits.nonce_keys or
         (not Map.has_key?(state.windows, context.subject) and
            map_size(state.windows) >= state.limits.rate_keys) or
         count >= state.limits.admissions or capped?(state, context) ->
+        StreamMetrics.record(state.metrics, :rejected)
         {:reply, {:error, :rate_limited}, state}
 
       remaining <= 0 ->
@@ -120,6 +139,9 @@ defmodule JidoCode.Product.StreamCoordinator do
                {StreamOwnerGuard, owner: owner, coordinator: self(), deadline: guard_deadline}
              ) do
           {:ok, guard} ->
+            if Map.get(context, :minimum_revision, 0) > 0,
+              do: StreamMetrics.record(state.metrics, :cursor_reconnect)
+
             state = if old, do: close(state, elem(old, 0), :takeover), else: state
             lease = Process.monitor(owner)
 
@@ -190,7 +212,9 @@ defmodule JidoCode.Product.StreamCoordinator do
        queued_payload_bytes: 0,
        rate_keys: map_size(state.windows),
        nonce_keys: map_size(state.nonces),
-       draining: state.draining
+       draining: state.draining,
+       pressure: state.pressure.mode,
+       metrics: StreamMetrics.snapshot(state.metrics)
      }, state}
   end
 
@@ -248,6 +272,9 @@ defmodule JidoCode.Product.StreamCoordinator do
     if reason do
       {:reply, {:error, reason}, close(state, lease, reason)}
     else
+      StreamMetrics.record(state.metrics, :frames_reserved)
+      StreamMetrics.record(state.metrics, :reserved_bytes, bytes)
+
       entry = %{
         entry
         | state: :connected,
@@ -319,6 +346,7 @@ defmodule JidoCode.Product.StreamCoordinator do
 
   def handle_info(:tick, state) do
     now = now()
+    state = sample_pressure(state, now)
 
     state =
       Enum.reduce(state.leases, prune(state, now), fn {lease, entry}, acc ->
@@ -459,6 +487,28 @@ defmodule JidoCode.Product.StreamCoordinator do
     }
 
   defp now, do: System.monotonic_time(:millisecond)
+
+  defp sample_pressure(%{pressure_enabled: false} = state, _now), do: state
+  defp sample_pressure(state, now) when now < state.next_sample, do: state
+
+  defp sample_pressure(state, now) do
+    pressure = StreamPressure.observe(state.pressure, StreamPressure.sample())
+    changed? = pressure.mode != state.pressure.mode
+    state = %{state | pressure: pressure, next_sample: now + 1_000}
+
+    if changed? do
+      StreamMetrics.record(
+        state.metrics,
+        if(pressure.mode == :degraded, do: :pressure_enter, else: :pressure_exit)
+      )
+
+      if pressure.mode == :degraded,
+        do: Enum.reduce(Map.keys(state.leases), state, &close(&2, &1, :overload)),
+        else: state
+    else
+      state
+    end
+  end
 
   defp emit(reason, entry),
     do:

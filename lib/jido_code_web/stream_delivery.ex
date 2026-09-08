@@ -234,6 +234,12 @@ defmodule JidoCodeWeb.StreamDelivery do
   end
 
   def reauthorize(conn) do
+    if JidoCode.Product.DeliveryControl.enabled?(),
+      do: reauthorize_enabled(conn),
+      else: {:error, :unavailable}
+  end
+
+  defp reauthorize_enabled(conn) do
     {spec, params, original} = conn.private.read_authorization
     conn = put_private(conn, :read_reauthorization_point, :before_each_protected_patch)
 

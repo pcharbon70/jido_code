@@ -77,7 +77,8 @@ defmodule JidoCodeWeb.ReadController do
   defp project_path(params), do: "/projects/" <> params["project_ref"]
 
   defp serve(conn, params, surface, native_path, controller, action) do
-    with {:ok, lease} <-
+    with true <- JidoCode.Product.DeliveryControl.enabled?(),
+         {:ok, lease} <-
            ReadRequestLimiter.acquire(conn.assigns.authenticated_human.account.subject_ref) do
       try do
         case ReadSignals.decode(surface, conn.private[:read_raw_body]) do
@@ -110,6 +111,9 @@ defmodule JidoCodeWeb.ReadController do
         ReadRequestLimiter.release(lease)
       end
     else
+      false ->
+        ReadSecurity.reject(conn, 503)
+
       {:error, :rate_limited} ->
         conn |> put_resp_header("retry-after", "60") |> ReadSecurity.reject(429)
 

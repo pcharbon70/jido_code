@@ -1,6 +1,11 @@
 defmodule JidoCodeWeb.Router do
   use JidoCodeWeb, :router
 
+  @route_log if(Application.compile_env(:jido_code, :runtime_mode) == :prod,
+               do: false,
+               else: :debug
+             )
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -47,7 +52,7 @@ defmodule JidoCodeWeb.Router do
     plug JidoCodeWeb.StreamSecurity
   end
 
-  scope "/ui/streams", JidoCodeWeb do
+  scope "/ui/streams", JidoCodeWeb, log: @route_log do
     pipe_through :stream_browser
 
     post "/factory", StreamController, :factory
@@ -62,7 +67,7 @@ defmodule JidoCodeWeb.Router do
     post "/sessions", StreamController, :sessions
   end
 
-  scope "/ui/reads", JidoCodeWeb do
+  scope "/ui/reads", JidoCodeWeb, log: @route_log do
     pipe_through [:browser, :enhanced_read]
 
     post "/factory", ReadController, :factory
@@ -89,14 +94,14 @@ defmodule JidoCodeWeb.Router do
     end
   end
 
-  scope "/", JidoCodeWeb do
+  scope "/", JidoCodeWeb, log: @route_log do
     pipe_through :browser
 
     get "/sign-in", AuthController, :new
     get "/recovery", AuthController, :recovery_new
   end
 
-  scope "/", JidoCodeWeb do
+  scope "/", JidoCodeWeb, log: @route_log do
     pipe_through [:browser, :require_same_origin]
 
     post "/sign-in", AuthController, :create
@@ -104,7 +109,7 @@ defmodule JidoCodeWeb.Router do
     delete "/sign-out", AuthController, :delete
   end
 
-  scope "/", JidoCodeWeb do
+  scope "/", JidoCodeWeb, log: @route_log do
     pipe_through [:browser, :require_authenticated_session, :require_same_origin]
 
     delete "/sessions", AuthController, :delete_all
@@ -112,7 +117,7 @@ defmodule JidoCodeWeb.Router do
     delete "/account/sessions/:management_ref", AccountController, :revoke
   end
 
-  scope "/api/v1", JidoCodeWeb.Api.V1 do
+  scope "/api/v1", JidoCodeWeb.Api.V1, log: @route_log do
     pipe_through [:api, :require_authenticated_api]
 
     get "/agent-offerings", AgentOfferingController, :index
@@ -123,7 +128,7 @@ defmodule JidoCodeWeb.Router do
   end
 
   if Application.compile_env(:jido_code, :hypermedia_qualification_build, false) do
-    scope "/__qualification", JidoCodeWeb.Qualification do
+    scope "/__qualification", JidoCodeWeb.Qualification, log: @route_log do
       pipe_through [:browser, :hypermedia_qualification]
 
       get "/hypermedia", HypermediaController, :index
@@ -137,7 +142,7 @@ defmodule JidoCodeWeb.Router do
     end
   end
 
-  scope "/", JidoCodeWeb do
+  scope "/", JidoCodeWeb, log: @route_log do
     pipe_through [:browser, :require_authenticated_session]
 
     get "/factory", FactoryController, :attention
@@ -163,7 +168,7 @@ defmodule JidoCodeWeb.Router do
     get "/step-up", AuthController, :step_up_new
   end
 
-  scope "/", JidoCodeWeb do
+  scope "/", JidoCodeWeb, log: @route_log do
     pipe_through [:browser, :require_authenticated_human]
 
     live_session :authenticated,
@@ -188,7 +193,7 @@ defmodule JidoCodeWeb.Router do
     # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
-    scope "/dev" do
+    scope "/dev", log: @route_log do
       pipe_through [:browser, :require_authenticated_human]
 
       live_dashboard "/dashboard", metrics: JidoCodeWeb.Telemetry

@@ -50,7 +50,24 @@ defmodule JidoCode.Knowledge.QueryRunner do
     {:ok, %{store_server: Keyword.get(options, :store_server, StoreServer)}}
   end
 
+  def authorize(name, version, parameters, authority, scope_iri, options \\ []) do
+    with {:ok, request} <-
+           CatalogQueryRequest.new(name, version, parameters, authority, scope_iri, options) do
+      server = Keyword.get(options, :server, __MODULE__)
+      GenServer.call(server, {:catalog_authorization, request, 1_000}, 1_250)
+    end
+  catch
+    :exit, _ -> {:error, Error.new(:unavailable, :catalog_authorization)}
+  end
+
   @impl true
+  def handle_call({:catalog_authorization, request, timeout}, _from, state) do
+    reply = StoreServer.request(state.store_server, {:catalog_authorization, request}, timeout)
+    {:reply, reply, state}
+  catch
+    :exit, _ -> {:reply, {:error, Error.new(:unavailable, :catalog_authorization)}, state}
+  end
+
   def handle_call({:graph_metadata, graph_iri, timeout}, _from, state) do
     reply = StoreServer.request(state.store_server, {:graph_metadata, graph_iri}, timeout)
     {:reply, reply, state}

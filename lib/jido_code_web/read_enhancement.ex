@@ -2,7 +2,8 @@ defmodule JidoCodeWeb.ReadEnhancement do
   @moduledoc "Code-owned routes and static expressions for native-first finite read enhancement."
   alias JidoCodeWeb.ReadSignals
 
-  def supported?(surface), do: surface in ReadSignals.surfaces()
+  def supported?(surface),
+    do: JidoCode.Product.DeliveryControl.enabled?() and surface in ReadSignals.surfaces()
 
   def attributes(page, conn) do
     if supported?(page.key) do

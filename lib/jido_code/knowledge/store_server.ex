@@ -43,6 +43,7 @@ defmodule JidoCode.Knowledge.StoreServer do
     graph_counts: :read,
     graph_metadata: :read,
     catalog_query: :read,
+    catalog_authorization: :read,
     semantic_snapshot: :write,
     command_outcome: :write,
     atomic_update: :write,
@@ -362,6 +363,13 @@ defmodule JidoCode.Knowledge.StoreServer do
   defp dispatch({:graph_metadata, graph_iri}, state) do
     case GraphMetadata.read(state.store, graph_iri) do
       {:ok, metadata} -> {:ok, metadata, state}
+      {:error, %Error{} = error} -> {:error, error}
+    end
+  end
+
+  defp dispatch({:catalog_authorization, request}, state) do
+    case QueryExecution.authorize(state.store, state.metadata, request) do
+      {:ok, authorization} -> {:ok, authorization, state}
       {:error, %Error{} = error} -> {:error, error}
     end
   end

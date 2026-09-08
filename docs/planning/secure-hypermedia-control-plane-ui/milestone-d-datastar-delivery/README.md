@@ -33,14 +33,14 @@ remain the only source of displayed semantic truth.
 | HUI-D1 | Per-page signal schemas, request classes, CSRF/CSP rules, coherent fragments, stable roots, and native fallback are implemented | [Phase 1](./phase-01-closed-request-signal-and-fragment-contracts.md) |
 | HUI-D2 | One bounded authorized page/tab stream coordinator owns admission, takeover, lifetime, queues, cleanup, and safe terminal states | [Phase 2](./phase-02-authorized-page-tab-stream-coordinator.md) |
 | HUI-D3 | Existing server-owned subscriptions map hints to authorized re-query/patch or bounded nudges and converge across loss, restart, reconnect, and revocation | [Phase 3](./phase-03-projection-subscription-convergence-and-revocation.md) |
-| HUI-D4 / HUI4 | Production proxy/HTTP2, capacity, resource, browser/accessibility, failure, recovery, and real-adapter evidence accept live delivery | [Phase 4](./phase-04-proxy-capacity-recovery-and-delivery-acceptance.md) |
+| HUI-D4 / HUI4 | Local-first production build, direct-server transport, capacity, resource, browser/accessibility, failure, recovery, and real-adapter evidence accept live delivery; no reverse proxy is required | [Phase 4](./phase-04-proxy-capacity-recovery-and-delivery-acceptance.md) |
 
 ## Phase Order
 
 1. [Phase 1 - Closed Request, Signal, And Fragment Contracts](./phase-01-closed-request-signal-and-fragment-contracts.md)
 2. [Phase 2 - Authorized Page/Tab Stream Coordinator](./phase-02-authorized-page-tab-stream-coordinator.md)
 3. [Phase 3 - Projection Subscription, Convergence, And Revocation](./phase-03-projection-subscription-convergence-and-revocation.md)
-4. [Phase 4 - Proxy, Capacity, Recovery, And Delivery Acceptance](./phase-04-proxy-capacity-recovery-and-delivery-acceptance.md)
+4. [Phase 4 - Local Deployment, Capacity, Recovery, And Delivery Acceptance](./phase-04-proxy-capacity-recovery-and-delivery-acceptance.md)
 
 Receipts use
 `docs/architecture/hypermedia-ui-milestone-d-phase-01-receipt.md` through
@@ -62,4 +62,10 @@ Milestone D completes when every enhanced page retains its native path; all
 signals/requests/patches/connections are closed and bounded; scope changes
 terminate future delivery and reconnect; lost/duplicate/reordered hints
 converge through server-known revisions; focus/overlay state remains usable;
-and production proxy/resource evidence passes at the pinned candidate.
+and local-first production-build transport/resource evidence passes at the
+pinned candidate. The primary deployment is direct browser-to-Phoenix/Bandit
+on a developer machine with a single writable-store owner. Reverse proxies,
+external load balancers, public domains, and clustered deployments are not
+required; any such profile needs separate qualification before support is
+claimed. Local deployment does not relax authentication, authorization,
+revocation, browser security, durable-store, or real-adapter requirements.

@@ -112,12 +112,16 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD3 do
       Enum.reduce(e["source_digests"] || %{}, errors, fn {path, expected}, acc ->
         case File.read(Path.join(root, path)) do
           {:ok, body} ->
-            equal(
-              acc,
-              Base.encode16(:crypto.hash(:sha256, body), case: :lower),
-              expected,
-              "source #{path}"
-            )
+            if HypermediaUISuccessorEvidence.d4_override?(root, path, expected) do
+              acc
+            else
+              equal(
+                acc,
+                Base.encode16(:crypto.hash(:sha256, body), case: :lower),
+                expected,
+                "source #{path}"
+              )
+            end
 
           _ ->
             ["missing source #{path}" | acc]
