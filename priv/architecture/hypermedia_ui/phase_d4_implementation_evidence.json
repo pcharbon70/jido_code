@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "triple_store_candidate": "c243be84decaeaa744d509fbfa8e07c10e2a0988",
   "phase": "HUI-D4",
   "status": "implementation_in_progress",
   "baseline_commit": "8cac85172eeda04a41ee68f4b3a6dbba935ca8eb",
@@ -12,6 +13,8 @@
     "4.3": "e71053b27a3a1982f25bb25e9257bd6895f394f5"
   },
   "source_digests": {
+    "mix.exs": "9047454fefe5a8636e982ccc30fff8e59ecb311822c57efed405967cf4e13c20",
+    "mix.lock": "dc8642d3beb82a6d491baa0cd32b7b8953df2f5e03a89e34bbd4c82f5e0e590b",
     "scripts/qualify_hui_d4_resources.exs": "c44a0b8df996c39e8eb0a26a388321c9a0fd894fc7971d11f561cea3fb0efc37",
     "scripts/qualify_hui_d4_scopes.exs": "e97355201b26bbd2ac72e37bed7aa48b85d28ae1fac16e5e04c20e37427f2d2c",
     "scripts/qualify_hui_d4_scopes.mjs": "28aac26c056153f02a60c40d008ab109bad757b2df43e3a15cca2f19283942bf",
@@ -45,7 +48,7 @@
     "scripts/qualify_hui_d4_local.mjs": "bba9ca59701908c2602cf1bc85517fdb37f3dd3982406a833a5272b11012efa8",
     "lib/jido_code_web/router.ex": "b621287973c8b2f8142ac992b26793ebcb7e896c13d7c8b3ac78a012dea85af9",
     "config/runtime.exs": "1713b701aa2e4b9c9cd876ffb1dafb2529d8cc8be7d405a314a27b740cc86494",
-    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "d1ed71e270171bbb510545a9ff374234881db40f74737522579a1ba67b707b29",
+    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "b743c13f0e6ff2f80e371e985da94bd59e9b92cb650ea3516a3774b50c30e79c",
     "docs/operations/local-hypermedia-delivery.md": "7aaede01c9bde9c643344499dee69c12c04aca1bc5157808e7e8e9e9e69503e3",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/README.md": "26dbee79a82c51529ad9aa1217e8fd004bfe0144883f7daee745caa3715d257c",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-04-proxy-capacity-recovery-and-delivery-acceptance.md": "b8482aa724dc2ef29045f54b0215477a3a35733feaa94ec83858b329ff41738a",
@@ -53,8 +56,8 @@
     "lib/jido_code/architecture/hypermedia_ui_phase_d1.ex": "152d2cb5f6b66e5e29bad418b55bc2720aef3da13860cc8facc908b5f1a9a647",
     "lib/jido_code/architecture/hypermedia_ui_phase_d2.ex": "fc5a12eed0d58f2084e0240c7611cf1cf60c08691d74ee6f6b889b76e59bf381",
     "lib/jido_code/architecture/hypermedia_ui_phase_d3.ex": "3a0b987d7f964ffa7fb8c39c325a555b75aa18c9fee7f8caadabe1bca554c18d",
-    "lib/jido_code/architecture/hypermedia_ui_phase_d4.ex": "bb0d1995285a3f617db1d31985b48a72411e8d1f427d6103f957bf51fd131273",
-    "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "8139f9f12a26c4ba2a26671040495b050be6ecb81a5a11000994d151cad0f18a",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d4.ex": "576303ab0737a96fb943eb320c93576cc1a3c5fdf6dfad63b1e241dc326a4a85",
+    "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "29c119345db7c65da1186d22cba1e0383f2eb67ade67d590ee024ac40410c0ca",
     "lib/jido_code/identity/authority/local_graph.ex": "3d18c3d5c537de76981cd920a260dd4eebaa70643401e9cb7968ed29aa82048f",
     "lib/jido_code/knowledge/query_execution.ex": "02398aab6bcdf28ccc5a02dfcdd663d67e490da790c1689b60925ed87dbbb97b",
     "lib/jido_code/knowledge/query_runner.ex": "e4f354e3432e39462430334159a6fad38c5ab9587e934d2a6ead06ee90ee1f1a",
@@ -65,7 +68,7 @@
     "lib/jido_code_web/plugs/local_transport.ex": "fcef2295ce75d3b6075c57d8eb84efc6d094451a6e1482065b4a6a6f00500755",
     "lib/mix/tasks/architecture.check.ex": "f8dbdca0145342ef14652ce7576c05b964ca967aaeeb69820c0052d8b929773e",
     "lib/mix/tasks/jido_code.local_install.ex": "a3ea2a4fff4fbf25fcc1d27022cefc68c0a50487224b0afac3eceda162ba26fa",
-    "test/jido_code/architecture/hypermedia_ui_phase_d4_test.exs": "70e4e4e72f9861d653a30fdcafc9e7508fb875060f1e286cd6040fb212ad3e0a",
+    "test/jido_code/architecture/hypermedia_ui_phase_d4_test.exs": "698f07027fefa62bdff81a864ab02e4b2577e8f143416895c72cf9f9da1f89cd",
     "test/jido_code/identity/local_graph_authority_test.exs": "971f4759ea3fcf07590fe60c86bac5242cf78aab9c579627bbcd0516e78be30d",
     "test/jido_code/local_deployment_test.exs": "2959d16b78c2f771baaf2d3ed5be59506a85818f03cabd7271b07a5e23cccee4",
     "test/jido_code_web/local_transport_test.exs": "1091e3d7a750201f0d0f113d8db369648e6d7da5f81ef4e4c5d18bd4fa140f60"

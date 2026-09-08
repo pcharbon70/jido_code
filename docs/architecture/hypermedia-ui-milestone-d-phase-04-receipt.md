@@ -181,8 +181,40 @@ revision unchanged, and exited nonzero as required.
 Earlier clean-checkout CI passed PR #135's original candidate; it
 does not qualify these subsequent edits.
 
-Outstanding acceptance evidence includes fixing the retained-iterator regression
-and repeating sustained production capacity qualification, any remaining
+### TripleStore resource repair candidate (2026-09-08)
+
+The separately authorized upstream repair is
+[TripleStore PR #30](https://github.com/pcharbon70/triple_store/pull/30), pinned
+here at `c243be84decaeaa744d509fbfa8e07c10e2a0988`. It adds stream finalization,
+closes direct-scan iterators, and closes exhausted multi-iterator strategies
+before the existing single-iterator fallback. A separate test-only CI repair
+corrects stale helper contracts and adds ExUnit to Dialyzer's analysis data;
+no warnings are suppressed. Upstream dependency constraints, lock and license
+are unchanged; the Mix project change affects analysis configuration only.
+JidoCode's lock changes only the TripleStore Git pin. Historical accepted
+dependency receipts remain records of their original candidates, not evidence
+for this update; the current D4 source inventory binds both changed Mix inputs.
+
+Upstream isolated validation (Elixir 1.19.5 / OTP 28.3.1): 360 query/executor/
+cleanup tests passed, then 112 helper/cleanup tests passed; strict compilation,
+code-doc validation and Dialyzer passed (zero errors or skips). All five new
+resource tests fail on the original dependency and pass on the repair. The
+existing QuadLeapfrog suite has 22 failures on the original and patched modules;
+this is not a claim of full upstream suite acceptance.
+
+A diagnostic production rehearsal loaded the two repaired runtime modules into
+the existing dependency VM (not yet a clean-checkout locked-candidate run):
+50 authorization reads retained zero iterators; all ten sustained-load rounds
+passed with 200 patches, four maximum streams, zero queued protected payload,
+zero query errors and zero memory-pressure entries. Peak BEAM processes were
+404, BEAM memory 386,797,872 bytes and RSS 697,319,424 bytes under the original
+limits and two 64 MiB contention workers. Native rollback passed Chromium,
+Firefox and WebKit. The run exited zero. No guard, deadline or admission limit
+was relaxed. Hosted upstream CI and actual locked-candidate downstream
+qualification are pending; this rehearsal does not close HUI2 or HUI4.
+
+Outstanding acceptance evidence includes locked-candidate dependency and
+sustained production capacity qualification, any remaining
 release-review fault scenarios, actual workstation suspend/resume evidence,
 independent security/accessibility/operations-release review, clean-checkout
 CI, and merged-candidate closure. No exception or waiver is inferred.

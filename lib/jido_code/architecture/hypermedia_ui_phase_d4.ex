@@ -2,7 +2,15 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @moduledoc "D4 candidate inventory; incomplete qualification cannot accept HUI4."
   alias JidoCode.Architecture.HypermediaUISuccessorEvidence
   @manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
+  @store_candidate "c243be84decaeaa744d509fbfa8e07c10e2a0988"
+  @store_predecessor "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"
+  @dependency_baseline %{
+    "mix.exs" => "d66c00f068f43943ed9bd94b0a2c77db152a224ad3e1d6deefee4745df3ffab9",
+    "mix.lock" => "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b"
+  }
   @sources ~w[
+    mix.exs
+    mix.lock
     scripts/qualify_hui_d4_resources.exs
     scripts/qualify_hui_d4_scopes.exs
     scripts/qualify_hui_d4_scopes.mjs
@@ -116,6 +124,25 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
       |> equal(evidence["completed_sections"], [], "unaccepted sections")
       |> equal(evidence["independent_reviews"], "pending", "independent review lifecycle")
       |> equal(evidence["browser_toolchain"], "1.63.0", "qualified browser pin")
+      |> equal(
+        evidence["triple_store_candidate"],
+        @store_candidate,
+        "iterator cleanup dependency candidate"
+      )
+
+    errors =
+      Enum.reduce(@dependency_baseline, errors, fn {path, baseline}, acc ->
+        body = File.read!(Path.join(root, path))
+        restored = String.replace(body, @store_candidate, @store_predecessor)
+
+        acc
+        |> equal(String.contains?(body, @store_candidate), true, "fixed store pin #{path}")
+        |> equal(
+          Base.encode16(:crypto.hash(:sha256, restored), case: :lower),
+          baseline,
+          "only the TripleStore pin may change in #{path}"
+        )
+      end)
 
     package = Path.join(root, "package.json") |> File.read!() |> Jason.decode!()
     lock = Path.join(root, "package-lock.json") |> File.read!() |> Jason.decode!()
