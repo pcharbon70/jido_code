@@ -210,11 +210,33 @@ zero query errors and zero memory-pressure entries. Peak BEAM processes were
 404, BEAM memory 386,797,872 bytes and RSS 697,319,424 bytes under the original
 limits and two 64 MiB contention workers. Native rollback passed Chromium,
 Firefox and WebKit. The run exited zero. No guard, deadline or admission limit
-was relaxed. Hosted upstream CI and actual locked-candidate downstream
-qualification are pending; this rehearsal does not close HUI2 or HUI4.
+was relaxed.
 
-Outstanding acceptance evidence includes locked-candidate dependency and
-sustained production capacity qualification, any remaining
+All 24 upstream candidate checks passed. PR #30 merged on 2026-09-08 as
+`4e55b4872041831c8d63739202c7369f200fefa0`; the pinned tested commit is its
+ancestor. Upstream local main was synced before its feature branch was deleted.
+
+The actual locked-dependency production run (no runtime overrides) at JidoCode
+`5211f25bb59017aa6f5ac0db39e363225a0c274e` also exited zero on 2026-09-08.
+Its checkout was dirty only for an unrelated architecture-document edit, so
+clean-checkout CI remains independently required. It passed all three browser
+engines, exact scope/concealment, fault recovery, invalid-config restart/session
+preservation, non-reading client retirement, and zero retained iterators after
+50 authorization reads. Ten load rounds produced 201 patches in 354,672 ms;
+peak processes 406, BEAM memory 389,115,424 bytes, RSS 737,804,288 bytes,
+connections four and queued protected bytes zero. Query errors and pressure
+entries were zero. One guard failure was recorded with bounded recovery;
+the reconnect burst returned ten 429 and two scoped 200 outcomes, and native
+recovery and all three browser rollback checks passed. The original resource
+limits, graph revision invariants and contention profile remained intact.
+
+The downstream repair and clean-checkout results are tracked in
+[JidoCode PR #137](https://github.com/pcharbon70/jido_code/pull/137).
+Neither these automated results nor the upstream merge close HUI2 or HUI4;
+the remaining release-review and merged-candidate requirements still apply.
+
+Outstanding acceptance evidence includes completion of dependency release review,
+any remaining
 release-review fault scenarios, actual workstation suspend/resume evidence,
 independent security/accessibility/operations-release review, clean-checkout
 CI, and merged-candidate closure. No exception or waiver is inferred.

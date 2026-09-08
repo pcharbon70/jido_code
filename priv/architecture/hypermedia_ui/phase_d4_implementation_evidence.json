@@ -48,7 +48,7 @@
     "scripts/qualify_hui_d4_local.mjs": "bba9ca59701908c2602cf1bc85517fdb37f3dd3982406a833a5272b11012efa8",
     "lib/jido_code_web/router.ex": "b621287973c8b2f8142ac992b26793ebcb7e896c13d7c8b3ac78a012dea85af9",
     "config/runtime.exs": "1713b701aa2e4b9c9cd876ffb1dafb2529d8cc8be7d405a314a27b740cc86494",
-    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "b743c13f0e6ff2f80e371e985da94bd59e9b92cb650ea3516a3774b50c30e79c",
+    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "6cd58812f2ca0d0eec56250e13cb2a8c78c7346a6124ec3cfe2262b0b512e1d0",
     "docs/operations/local-hypermedia-delivery.md": "7aaede01c9bde9c643344499dee69c12c04aca1bc5157808e7e8e9e9e69503e3",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/README.md": "26dbee79a82c51529ad9aa1217e8fd004bfe0144883f7daee745caa3715d257c",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-04-proxy-capacity-recovery-and-delivery-acceptance.md": "b8482aa724dc2ef29045f54b0215477a3a35733feaa94ec83858b329ff41738a",
