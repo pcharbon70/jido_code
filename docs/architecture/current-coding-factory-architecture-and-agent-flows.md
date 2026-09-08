@@ -530,15 +530,15 @@ sequenceDiagram
   participant Verify as Independent Fresh Verifier
 
   Developer->>Catalog: Request scoped offerings
-  Catalog-->>Developer: Native + delegated projections; Codex currently disabled
+  Catalog-->>Developer: Native + delegated projections#59; Codex currently disabled
   Developer->>Graph: Select exact opaque profile and consent to billing
   Graph-->>Controller: Attempt, lease, fence, profile, readiness generation
   Controller->>Broker: Recheck foreground consent and opaque login reference
   Broker-->>VM: Attach bounded credential to parent only
-  Controller->>VM: Materialize exact source; custody of Git control data
-  Controller->>Codex: Fixed argv; compiled prompt on closed stdin
+  Controller->>VM: Materialize exact source#59; custody of Git control data
+  Controller->>Codex: Fixed argv#59; compiled prompt on closed stdin
   Codex-->>Controller: Closed bounded JSONL events
-  Controller->>VM: Inspect every turn; quarantine unsafe effects
+  Controller->>VM: Inspect every turn#59; quarantine unsafe effects
   Controller->>Check: Run only registered checks
   opt one clarification/checkpoint follow-up
     Controller->>Codex: New process, reconstructed turn, same total budget/fence
