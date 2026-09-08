@@ -192,6 +192,19 @@ end
 {fault_runner, _} = Code.eval_file("scripts/qualify_hui_d4_faults.exs")
 :ok = fault_runner.(base, credential)
 
+{scope_runner, _} = Code.eval_file("scripts/qualify_hui_d4_scopes.exs")
+{:ok, scope_commits} = scope_runner.(base, credential)
+Process.sleep(8_000)
+
+{resource_check, _} = Code.eval_file("scripts/qualify_hui_d4_resources.exs")
+:ok = resource_check.(credential)
+
+{restart_runner, _} = Code.eval_file("scripts/qualify_hui_d4_restart.exs")
+:ok = restart_runner.(base, credential)
+
+{slow_reader, _} = Code.eval_file("scripts/qualify_hui_d4_slow_reader.exs")
+:ok = slow_reader.(base, credential)
+
 sample = fn sample, peak, remaining ->
   receive do
     :stop -> peak
@@ -224,13 +237,19 @@ sample = fn sample, peak, remaining ->
           process_sockets: sockets
         }
 
+        true = stats.connections <= 4
+        0 = stats.queued_payload_bytes
+
         next = Map.merge(peak, current, fn _, old, value -> max(old, value) end)
         sample.(sample, next, remaining - 1)
       end
   end
 end
 
-collector = Task.async(fn -> sample.(sample, %{}, 1_200) end)
+load_rounds = String.to_integer(System.get_env("HUI_D4_LOAD_ROUNDS", "3"))
+true = load_rounds in 3..20
+load_budget_ms = (load_rounds * 40 + 60) * 1_000
+collector = Task.async(fn -> sample.(sample, %{}, div(load_budget_ms, 100)) end)
 
 contend = fn contend, buffer, deadline ->
   receive do
@@ -250,12 +269,35 @@ contenders =
       contend.(
         contend,
         :binary.copy(<<0>>, 64 * 1024 * 1024),
-        System.monotonic_time(:millisecond) + 120_000
+        System.monotonic_time(:millisecond) + load_budget_ms
       )
     end)
   end
 
 {cpu_before, _} = :erlang.statistics(:runtime)
+
+# Replay actual committed notifications in bounded duplicate/out-of-order bursts.
+# These are disposable hints; they must not advance graph truth or expose the
+# concealed repository. No synthetic authority or query result is introduced.
+hint_bursts =
+  Task.async(fn ->
+    Enum.reduce_while(1..div(load_budget_ms, 1_000), 0, fn _, count ->
+      receive do
+        :stop -> {:halt, count}
+      after
+        1_000 ->
+          for index <- 1..16 do
+            {command, receipt} = Enum.at(scope_commits, rem(index, length(scope_commits)))
+            :ok = JidoCode.Knowledge.ChangeFeed.publish(command, receipt)
+          end
+
+          {:cont, count + 16}
+      end
+    end)
+  end)
+
+load_revision = JidoCode.Knowledge.StoreServer.summary().dataset_revision
+query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_error
 
 {load_output, load_result} =
   System.cmd("node", ["scripts/qualify_hui_d4_load.mjs"],
@@ -268,6 +310,10 @@ contenders =
   )
 
 {cpu_after, _} = :erlang.statistics(:runtime)
+send(hint_bursts.pid, :stop)
+replayed_hints = Task.await(hint_bursts, 5_000)
+^load_revision = JidoCode.Knowledge.StoreServer.summary().dataset_revision
+^query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_error
 
 for worker <- contenders do
   send(worker.pid, :stop)
@@ -282,7 +328,9 @@ IO.puts(
   Jason.encode!(%{
     peaks: peaks,
     cpu_runtime_ms: cpu_after - cpu_before,
-    contention: "two SHA-256 workers, 64 MiB each; bounded 120-second lifetime",
+    contention: "two SHA-256 workers, 64 MiB each",
+    load_budget_ms: load_budget_ms,
+    replayed_committed_hints: replayed_hints,
     counters: JidoCode.Product.StreamCoordinator.stats().metrics,
     schedulers: System.schedulers_online(),
     otp: System.otp_release(),
@@ -312,6 +360,9 @@ IO.write(native_output)
 {:ok, _} = JidoCode.Identity.Sessions.validate(session.session_ref, touch: false)
 ^before_rollback = JidoCode.Knowledge.StoreServer.summary().dataset_revision
 :ok = Application.stop(:jido_code)
-exit_code = if Enum.all?([result, restarted_result, load_result, native_result], &(&1 == 0)), do: 0, else: 1
+
+exit_code =
+  if Enum.all?([result, restarted_result, load_result, native_result], &(&1 == 0)), do: 0, else: 1
+
 IO.puts("Local production qualification exit=#{exit_code}; disposable evidence data: #{root}")
 if exit_code != 0, do: System.halt(exit_code)

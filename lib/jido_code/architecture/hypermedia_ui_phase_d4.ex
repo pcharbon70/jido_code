@@ -3,6 +3,12 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   alias JidoCode.Architecture.HypermediaUISuccessorEvidence
   @manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
   @sources ~w[
+    scripts/qualify_hui_d4_resources.exs
+    scripts/qualify_hui_d4_scopes.exs
+    scripts/qualify_hui_d4_scopes.mjs
+    scripts/qualify_hui_d4_restart.exs
+    scripts/qualify_hui_d4_slow_reader.exs
+    scripts/qualify_hui_d4_slow_reader.mjs
     lib/jido_code/architecture/hypermedia_ui_phase_c5.ex
     test/jido_code/architecture/hypermedia_ui_phase_c5_operations_test.exs
     package.json

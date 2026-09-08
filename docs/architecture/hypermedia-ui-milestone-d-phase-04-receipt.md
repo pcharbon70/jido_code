@@ -122,9 +122,68 @@ digest (including its ephemeral port), fixed limits, runtime versions, bounded
 resource peaks and privacy-safe counters. Disposable data is never a release
 artifact. CI repeats production qualification after building digested assets.
 
-Outstanding acceptance evidence includes several-scope production corpus/soak
-reconciliation, the remaining storm and
-slow-reader/upgrade-failure matrix, actual workstation suspend/resume evidence,
+### September 8 automated acceptance expansion
+
+The full `mix precommit` regression run passed 1,507 tests with zero failures
+in 825.4 seconds. Subsequent evidence/source inventory edits still require the
+final architecture check and clean-checkout CI on the published candidate.
+
+The production harness now creates a three-repository corpus through real
+semantic commands and registers explicit project memberships through the trusted
+identity administration boundary. Chromium verifies two accessible projects,
+one concealed project (absent links and direct 404), and the current evaluated
+dataset revision. No fixture authority adapter or substituted principal is used.
+
+The new non-reading HTTP client passed: its owner retired in 29,795–29,798 ms
+with zero queued protected bytes. This proves bounded owner cleanup, not OS TCP
+buffer saturation. Invalid relative-store configuration remained unready;
+restoring the original configuration preserved graph revision and an existing
+session. This is deployment-configuration failure recovery, not a destructive
+schema-migration rollback claim.
+
+A three-round scoped run without injected CPU workers passed in 94,545 ms,
+delivering 61 patches / 1,004,731 HTML bytes. All twelve simultaneous reconnect
+attempts against the occupied four-stream ceiling returned 429. The load harness
+now supports 3–20 rounds, checks scope concealment after periodic refresh, and
+replays bounded duplicate/out-of-order notifications from actual committed
+commands without changing graph truth. New browser failure logs retain fixed
+failure classes rather than DOM attributes or signed correlation cursors.
+
+A ten-round contention run and the complete three-browser harness's load stage
+hit slow-owner guards while other qualification/regression workloads ran on the
+same host. Protected content was cleared, and no query errors or queued protected
+payload were recorded. These are failed capacity runs, not acceptance evidence;
+the isolated repeat completed all ten load rounds, then failed the original
+burst assertion requiring twelve 429 responses. Owners can retire while burst
+requests authorize, so newly free slots can legitimately be reused. The burst
+assertion now permits reviewed 200/409/429/503 outcomes, requires scoped content
+for successful newcomers, and verifies native recovery; the server sampler
+continues to assert at most four streams and zero queued protected payload.
+The corrected isolated repeat subsequently entered memory-pressure degradation
+near round ten: peak BEAM memory 545,173,328 bytes, RSS 1,014,501,376 bytes and
+19,643 processes. Four streams and zero queued protected bytes remained bounded;
+query errors were zero and native rollback passed in all three browsers. This
+is a failed sustained-capacity result, not acceptance.
+
+A focused real-read probe identified retained RocksDB iterator processes:
+372 before reads, 844 after 100 authorization checks and 924 after 20 additional
+projection reads. `scripts/qualify_hui_d4_resources.exs` now makes completed-read
+iterator cleanup a hard production qualification assertion. It intentionally
+fails on the current dependency, rather than accepting a short smoke run that
+stays below the degradation threshold. The pinned `pcharbon70/triple_store`
+commit `6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f` was also upstream HEAD when
+checked. No dependency source, guard deadline or admission limit was changed.
+An upstream cleanup fix and dependency update require separately scoped work.
+The final focused regression reproduced exactly 200 additional retained
+iterators after 50 completed authorization reads (444 → 644), with graph
+revision unchanged, and exited nonzero as required.
+
+Earlier clean-checkout CI passed PR #135's original candidate; it
+does not qualify these subsequent edits.
+
+Outstanding acceptance evidence includes fixing the retained-iterator regression
+and repeating sustained production capacity qualification, any remaining
+release-review fault scenarios, actual workstation suspend/resume evidence,
 independent security/accessibility/operations-release review, clean-checkout
 CI, and merged-candidate closure. No exception or waiver is inferred.
 

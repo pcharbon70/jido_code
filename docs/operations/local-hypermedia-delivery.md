@@ -153,3 +153,32 @@ engines and JavaScript-disabled rollback, and leaves its temporary stores for
 failure inspection. `HUI_D4_ORCA=true` also runs isolated Xvfb/Orca speech and
 keyboard checks; it requires Orca, Xvfb, D-Bus and Google Chrome. Generated
 credentials and raw protected stream bodies must never enter retained evidence.
+
+The production runner enrolls three disposable repository scopes through real
+semantic commands. Two receive explicit project membership; the third must
+remain absent from rendered links and return 404. It also rehearses an invalid
+store-path restart and recovery, a non-reading HTTP client, and twelve concurrent
+reconnect attempts against the occupied four-stream ceiling. It replays bounded
+duplicate/out-of-order notifications from those actual commits during load;
+notifications cannot advance the evaluated graph revision.
+
+`HUI_D4_LOAD_ROUNDS=10` extends the default three-round run. Only integers from
+3 through 20 are accepted. Every round checks a fresh read receipt, visible and
+concealed repository links, and connected state. The resource sampler and two
+64-MiB CPU workers have a bounded lifetime derived from the selected round count.
+Run extended qualification without another qualification process or regression
+suite competing on the same host; record any additional workstation workloads.
+Fail-closed guard activation under extra contention is not a passing capacity
+measurement, and does not justify increasing the guard deadline.
+
+The non-reading-client result proves bounded application-owner lifetime and
+zero queued protected payload, not saturation of every OS TCP buffer. The
+failed-restart rehearsal rejects invalid configuration and preserves existing
+graph/session state; it does not claim a destructive schema migration rollback.
+Workstation suspend/resume remains a separately coordinated, disruptive test.
+
+Current D4 blocker: the pinned store dependency retains iterator processes
+after completed real reads. The production runner now fails its resource-cleanup
+regression before proceeding to load qualification. Do not bypass this assertion
+or increase memory/owner deadlines: repair iterator ownership/cleanup, update the
+qualified dependency pin, and repeat the complete production matrix first.
