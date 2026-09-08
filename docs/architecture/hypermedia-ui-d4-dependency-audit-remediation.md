@@ -1,6 +1,25 @@
 # D4 dependency-audit remediation
 
-Status: **blocked on Decimal advisory reconciliation; no waiver**.
+Status: **Decimal 3.1.1 accepted for now by the project maintainer on 2026-09-08; unmodified audit now passes**.
+
+## Maintainer acceptance and audit recheck
+
+The maintainer explicitly requested acceptance of this version for now. During
+implementation of that decision, a fresh unmodified `mix hex.audit` exited zero
+and reported no retired or security advisory packages. Hex also reported that
+the proposed advisory ignore matched no locked dependency finding, so it was
+removed before delivery. No CI suppression or audit exception is needed or
+retained. No upstream report was filed.
+
+Owner: project maintainer. Scope: the existing Decimal 3.1.1 dependency and
+exact lock digest recorded below. This observation does not establish why the
+audit result changed or claim that every upstream advisory record is reconciled.
+CI continues to run unmodified `mix hex.audit` and enforce every finding.
+
+Re-review if the audit finding returns, vulnerability evidence changes, the
+dependency/source/configuration changes, or the bounded regression tests fail.
+CI acceptance and all remaining D4 gates still require their own evidence.
+The original investigation below is historical and explains this decision.
 
 Baseline: merged PR #137, `05f6dcdab0f4a4a7f0494d246908ccbaaa637212`.
 Owner: project maintainer / dependency release reviewer.
@@ -24,7 +43,7 @@ identifies 0.8.4 as fixed. The
 reports no advisories or retirement. The installed source sanitizes every
 publisher-controlled confirmation-panel field before terminal output.
 
-## Decimal conflict remains blocking
+## Original Decimal investigation (historical; before the passing recheck)
 
 Decimal remains at 3.1.1. The
 [maintainer advisory](https://github.com/ericmj/decimal/security/advisories/GHSA-rhv4-8758-jx7v)

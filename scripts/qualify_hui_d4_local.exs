@@ -312,8 +312,8 @@ query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_e
 {cpu_after, _} = :erlang.statistics(:runtime)
 send(hint_bursts.pid, :stop)
 replayed_hints = Task.await(hint_bursts, 5_000)
-^load_revision = JidoCode.Knowledge.StoreServer.summary().dataset_revision
-^query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_error
+load_revision_after = JidoCode.Knowledge.StoreServer.summary().dataset_revision
+load_stats_after = JidoCode.Product.StreamCoordinator.stats()
 
 for worker <- contenders do
   send(worker.pid, :stop)
@@ -323,6 +323,22 @@ end
 send(collector.pid, :stop)
 peaks = Task.await(collector, 5_000)
 IO.write(load_output)
+
+# Emit only bounded, privacy-safe diagnostics before enforcing acceptance.
+# A failed counter assertion must not hide the browser result or resource peaks.
+IO.puts(
+  Jason.encode!(%{
+    qualification: "load diagnostics",
+    browser_exit_status: load_result,
+    graph_revision_unchanged: load_revision_after == load_revision,
+    query_error_delta: load_stats_after.metrics.query_error - query_errors_before,
+    stream_stats: load_stats_after,
+    peaks: peaks
+  })
+)
+
+^load_revision = load_revision_after
+^query_errors_before = load_stats_after.metrics.query_error
 
 IO.puts(
   Jason.encode!(%{

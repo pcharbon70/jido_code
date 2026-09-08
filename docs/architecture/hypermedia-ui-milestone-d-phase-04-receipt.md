@@ -253,6 +253,24 @@ No audit suppression or D4 closure is inferred from the Igniter repair.
 
 ## Gate HUI-D4 / HUI4
 
+### Merged PR #138 clean-checkout follow-up
+
+CI run `34231321393` at `528c2ee69bfc95321704b53abd8ff74ce0315360`
+passed application verification, the browser/proxy matrix, dependency audits,
+and production asset build. Production qualification passed three-browser
+delivery, query/identity/coordinator fault recovery, three-scope concealment,
+zero retained iterators after 50 reads, invalid-configuration restart recovery,
+and non-reading client cleanup. Load then failed the zero-query-error assertion:
+the counter increased by four. This is failed acceptance, not an audit blocker.
+The diagnostic follow-up preserves all assertions and prints bounded counters
+and browser outcome before those assertions can terminate the runner.
+
+On 2026-09-08 the maintainer accepted Decimal 3.1.1 for now. A fresh unmodified
+`mix hex.audit` subsequently passed with no retired or advisory packages, so
+no audit suppression was retained. The linked remediation record documents
+the recheck and re-review conditions. This does not accept D4 or replace clean
+CI and independent review.
+
 **merge-pending**. Milestone E is not authorized.
 
 ## Reopening Conditions
