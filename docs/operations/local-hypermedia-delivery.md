@@ -177,8 +177,10 @@ failed-restart rehearsal rejects invalid configuration and preserves existing
 graph/session state; it does not claim a destructive schema migration rollback.
 Workstation suspend/resume remains a separately coordinated, disruptive test.
 
-Current D4 blocker: the pinned store dependency retains iterator processes
-after completed real reads. The production runner now fails its resource-cleanup
-regression before proceeding to load qualification. Do not bypass this assertion
-or increase memory/owner deadlines: repair iterator ownership/cleanup, update the
-qualified dependency pin, and repeat the complete production matrix first.
+The TripleStore iterator repair is pinned and its cleanup regression passed on
+the merged PR #138 candidate. The latest clean-checkout production qualification
+instead failed during load with four additional query errors. The runner emits
+bounded browser status, resource peaks and fixed-cardinality stream counters
+before enforcing the unchanged zero-query-error and graph-revision assertions.
+Do not bypass either assertion or increase memory/owner deadlines to accept a
+failed run. Repeat the complete production matrix after resolving its cause.
