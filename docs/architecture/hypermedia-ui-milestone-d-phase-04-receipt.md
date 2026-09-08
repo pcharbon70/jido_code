@@ -241,6 +241,16 @@ release-review fault scenarios, actual workstation suspend/resume evidence,
 independent security/accessibility/operations-release review, clean-checkout
 CI, and merged-candidate closure. No exception or waiver is inferred.
 
+### Dependency audit follow-up
+
+PR #137 merged as `05f6dcdab0f4a4a7f0494d246908ccbaaa637212`, but its
+dependency-audit failure prevents acceptance. The subsequent
+[audit remediation record](hypermedia-ui-d4-dependency-audit-remediation.md)
+pins Igniter 0.8.4 and preserves the Decimal 3.1.1 advisory discrepancy as an
+explicit blocker. The exact successor lock is tracked in the current D4
+inventory; earlier lock assertions above describe their historical candidates.
+No audit suppression or D4 closure is inferred from the Igniter repair.
+
 ## Gate HUI-D4 / HUI4
 
 **merge-pending**. Milestone E is not authorized.

@@ -2,7 +2,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4Test do
   use ExUnit.Case, async: true
   alias JidoCode.Architecture.HypermediaUIPhaseD4, as: Phase
 
-  test "dependency candidate admits only the exact TripleStore pin replacement" do
+  test "dependency candidate admits only the exact TripleStore and Igniter repair inputs" do
     for path <- ~w[mix.exs mix.lock] do
       body = File.read!(path)
       assert Phase.dependency_input_valid?(path, body)
@@ -21,6 +21,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4Test do
 
     refute Phase.dependency_input_valid?("unregistered", "anything")
     assert Phase.dependency_digest(File.cwd!(), "unregistered") == nil
+
+    lock = File.read!("mix.lock")
+    refute Phase.dependency_input_valid?("mix.lock", String.replace(lock, "0.8.4", "0.8.3"))
+    refute Phase.dependency_input_valid?("mix.lock", String.replace(lock, "3.1.1", "2.3.0"))
+    refute Phase.dependency_input_valid?("mix.lock", String.replace(lock, "a9b1cbec", "00000000"))
   end
 
   test "candidate source inventory and predecessor evidence remain exact" do

@@ -4,6 +4,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
   @store_candidate "c243be84decaeaa744d509fbfa8e07c10e2a0988"
   @store_predecessor "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"
+  # Exact successor of PR #137: only Igniter's 0.8.3 lock entry changes to 0.8.4.
+  # This candidate identity does not waive the unresolved Decimal audit finding.
+  @audit_lock_digest "185edd5f8bc6a7a82601882c02f08373b8940c2b51770469afa8db644d47acdc"
   @dependency_baseline %{
     "mix.exs" => "d66c00f068f43943ed9bd94b0a2c77db152a224ad3e1d6deefee4745df3ffab9",
     "mix.lock" => "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b"
@@ -11,6 +14,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @sources ~w[
     mix.exs
     mix.lock
+    docs/architecture/hypermedia-ui-d4-dependency-audit-remediation.md
+    test/jido_code/architecture/hypermedia_ui_dependency_security_test.exs
     lib/jido_code/architecture/hypermedia_ui_phase_b2.ex
     lib/jido_code/architecture/hypermedia_ui_phase_b4.ex
     scripts/qualify_hui_d4_resources.exs
@@ -72,6 +77,10 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
     test/jido_code_web/local_transport_test.exs
   ]
   def sources, do: @sources
+
+  def dependency_input_valid?("mix.lock", body) do
+    Base.encode16(:crypto.hash(:sha256, body), case: :lower) == @audit_lock_digest
+  end
 
   def dependency_input_valid?(path, body) do
     baseline = @dependency_baseline[path]
@@ -155,16 +164,15 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
       )
 
     errors =
-      Enum.reduce(@dependency_baseline, errors, fn {path, baseline}, acc ->
+      Enum.reduce(@dependency_baseline, errors, fn {path, _baseline}, acc ->
         body = File.read!(Path.join(root, path))
-        restored = String.replace(body, @store_candidate, @store_predecessor)
 
         acc
         |> equal(String.contains?(body, @store_candidate), true, "fixed store pin #{path}")
         |> equal(
-          Base.encode16(:crypto.hash(:sha256, restored), case: :lower),
-          baseline,
-          "only the TripleStore pin may change in #{path}"
+          dependency_input_valid?(path, body),
+          true,
+          "exact TripleStore and Igniter audit candidate #{path}"
         )
       end)
 
