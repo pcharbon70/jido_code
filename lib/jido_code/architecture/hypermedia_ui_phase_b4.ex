@@ -859,7 +859,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseB4 do
 
   defp validate_digests(errors, root, expected) do
     Enum.reduce(expected, errors, fn {path, digest}, acc ->
-      digest = HypermediaUISuccessorEvidence.digest(root, path) || digest
+      digest =
+        JidoCode.Architecture.HypermediaUIPhaseD4.dependency_digest(root, path) ||
+          HypermediaUISuccessorEvidence.digest(root, path) || digest
 
       case File.read(Path.join(root, path)) do
         {:ok, body} -> require_equal(acc, sha256(body), digest, "digest #{path}")
