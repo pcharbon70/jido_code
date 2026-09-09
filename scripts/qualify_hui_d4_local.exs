@@ -86,6 +86,17 @@ Application.put_env(
 
 stage_metrics = :ets.new(:hui_d4_stages, [:set, :public, write_concurrency: true])
 stage_names = [:authorization, :cohort_query, :detail_query, :resource_lookup, :fleet_row]
+
+:ok =
+  :telemetry.attach(
+    "hui-d4-guard-deadline",
+    [:jido_code, :product_stream, :guard_deadline],
+    fn _, _, metadata, _ ->
+      IO.puts(Jason.encode!(%{qualification: "guard deadline", kind: metadata.kind}))
+    end,
+    nil
+  )
+
 for stage <- stage_names, do: :ets.insert(stage_metrics, {stage, 0, 0, 0})
 
 :ok =
@@ -346,6 +357,7 @@ hint_bursts =
 
 load_revision = JidoCode.Knowledge.StoreServer.summary().dataset_revision
 query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_error
+timing_before = JidoCode.Product.StreamCoordinator.stats().metrics
 for stage <- stage_names, do: :ets.insert(stage_metrics, {stage, 0, 0, 0})
 
 {load_output, load_result} =
@@ -359,6 +371,18 @@ for stage <- stage_names, do: :ets.insert(stage_metrics, {stage, 0, 0, 0})
   )
 
 {cpu_after, _} = :erlang.statistics(:runtime)
+# Include bounded teardown so late watchdog events cannot escape the snapshot.
+true =
+  Enum.any?(1..150, fn _ ->
+    if JidoCode.Product.StreamCoordinator.stats().connections == 0,
+      do: true,
+      else:
+        (
+          Process.sleep(100)
+          false
+        )
+  end)
+
 send(hint_bursts.pid, :stop)
 replayed_hints = Task.await(hint_bursts, 5_000)
 load_revision_after = JidoCode.Knowledge.StoreServer.summary().dataset_revision
@@ -401,6 +425,8 @@ IO.puts(
 
 ^load_revision = load_revision_after
 ^query_errors_before = load_stats_after.metrics.query_error
+true = load_stats_after.metrics.slow_owner == timing_before.slow_owner
+true = load_stats_after.metrics.guard_failure == timing_before.guard_failure
 
 IO.puts(
   Jason.encode!(%{

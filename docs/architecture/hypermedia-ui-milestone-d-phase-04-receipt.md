@@ -82,6 +82,35 @@ for the existing full snapshot. The experimental runtime and test edits were
 removed. Only harness diagnostics remain; the next clean CI run must identify
 its failing projection state and duration before a runtime fix is claimed.
 
+## Strict timing follow-up (qualification pending)
+
+The earlier green CI load still recorded two slow owners and six guard failures;
+it is not evidence of clean timing. A stricter local three-round run completed
+60 patches with zero query errors/slow owners but failed on four guard failures.
+A second traced run failed with two slow owners and six guard failures; all
+seven watchdog deadline observations printed before its final snapshot were
+explicit terminal-cleanup deadlines, not active-work deadlines. These failed
+runs remain evidence, not acceptance.
+
+The watchdog now distinguishes an already-dead owner from an unexpected guard
+exit. Deliberate coordinator-ordered force-stop after terminal grace is counted
+as `forced_terminal_cleanup`, not guard failure. Active deadlines still count
+as failure, with the event emitted before killing the owner to preserve it
+regardless of monitor ordering. Regressions force reversed monitor ordering,
+guard crash, active deadline, and stalled terminal cleanup. No deadline changes.
+
+One duplicate authorization immediately before local frame-budget reservation
+is removed. StreamUpdate still authorizes its rendered frame; write_update
+still reconstructs current authorization after reservation and before any
+protected bytes are sent. No query/render/delivery occurs between reservation
+and that check. Query, field, route and protected-write authorization remain.
+
+The production gate now rejects new query errors, slow owners and genuine guard
+failures and waits up to 15 seconds for owner teardown before sampling. Forced
+terminal cleanup is retained explicitly, not claimed as an active timing failure
+or hidden. Ten-round soak and clean-checkout CI on this candidate are pending;
+no timing-resolution or milestone-closure claim is made yet.
+
 ## Candidate Provenance
 
 CI follow-up: production delivery now runs independently of the application

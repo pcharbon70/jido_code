@@ -187,8 +187,10 @@ defmodule JidoCodeWeb.StreamDelivery do
   defp write_update(conn, frame) do
     lease = conn.private.stream_lease
 
-    with :ok <- reauthorize(conn),
-         :ok <- StreamCoordinator.reserve(lease, byte_size(frame)),
+    # The frame was just authorized by StreamUpdate. Reserve only bounded local
+    # capacity, then repeat current authorization before any protected bytes.
+    # No query, rendering, or delivery occurs between reserve and this check.
+    with :ok <- StreamCoordinator.reserve(lease, byte_size(frame)),
          :ok <- reauthorize(conn),
          :ok <- StreamCoordinator.active(lease),
          {:ok, conn} <- chunk(conn, frame),

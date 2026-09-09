@@ -8,6 +8,7 @@ defmodule JidoCode.Product.StreamMetrics do
     [:jido_code, :product, :read_projection]
   ]
   @ceiling 9_223_372_036_854_775_807
+  @keys @keys ++ [:forced_terminal_cleanup]
   @authorization_keys %{
     caller:
       {:authorization_count, :authorization_duration_ms, :authorization_error,

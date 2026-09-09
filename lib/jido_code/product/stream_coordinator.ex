@@ -136,7 +136,11 @@ defmodule JidoCode.Product.StreamCoordinator do
 
         case DynamicSupervisor.start_child(
                JidoCode.Product.StreamOwnerSupervisor,
-               {StreamOwnerGuard, owner: owner, coordinator: self(), deadline: guard_deadline}
+               {StreamOwnerGuard,
+                owner: owner,
+                coordinator: self(),
+                deadline: guard_deadline,
+                projection: context.projection}
              ) do
           {:ok, guard} ->
             if Map.get(context, :minimum_revision, 0) > 0,
@@ -370,13 +374,18 @@ defmodule JidoCode.Product.StreamCoordinator do
     {:noreply, state}
   end
 
-  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _pid, reason}, state) do
     case state.leases[ref] do
       nil ->
         case Enum.find(state.leases, fn {_, e} -> e.guard_monitor == ref end) do
           {lease, entry} ->
-            Process.exit(entry.owner, :kill)
-            {:noreply, remove(state, lease, :guard_failure)}
+            if reason in [{:shutdown, :owner_down}, {:shutdown, :deadline_enforced}] and
+                 not Process.alive?(entry.owner) do
+              {:noreply, remove(state, lease, :disconnect)}
+            else
+              Process.exit(entry.owner, :kill)
+              {:noreply, remove(state, lease, :guard_failure)}
+            end
 
           nil ->
             {:noreply, state}
@@ -409,7 +418,16 @@ defmodule JidoCode.Product.StreamCoordinator do
     deadlines =
       [entry.deadline, entry.idle_at] ++ if(entry.busy_until, do: [entry.busy_until], else: [])
 
-    send(entry.guard, {:deadline, self(), Enum.min(deadlines) + state.limits.grace_ms})
+    deadline = Enum.min(deadlines)
+
+    kind =
+      cond do
+        deadline == entry.deadline -> :lifetime
+        deadline == entry.idle_at -> :idle
+        true -> :work
+      end
+
+    send(entry.guard, {:deadline, self(), deadline + state.limits.grace_ms, kind})
     %{state | leases: Map.put(state.leases, lease, entry)}
   end
 
@@ -451,7 +469,7 @@ defmodule JidoCode.Product.StreamCoordinator do
 
       entry ->
         send(entry.owner, {:product_stream, lease, {:closed, reason}})
-        send(entry.guard, {:deadline, self(), now() + state.limits.grace_ms})
+        send(entry.guard, {:deadline, self(), now() + state.limits.grace_ms, :terminal})
         emit(reason, entry)
 
         %{

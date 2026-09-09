@@ -15,6 +15,8 @@ defmodule JidoCode.Product.StreamOwnerGuard do
       owner_monitor: Process.monitor(owner),
       coordinator_monitor: Process.monitor(coordinator),
       deadline: Keyword.fetch!(options, :deadline),
+      deadline_kind: :admission,
+      projection: Keyword.get(options, :projection, :factory),
       timer: nil
     }
 
@@ -25,11 +27,16 @@ defmodule JidoCode.Product.StreamOwnerGuard do
   def handle_info({:deadline, coordinator, deadline}, %{coordinator: coordinator} = state),
     do: {:noreply, schedule(%{state | deadline: deadline})}
 
+  def handle_info({:deadline, coordinator, deadline, kind}, %{coordinator: coordinator} = state)
+      when kind in [:work, :lifetime, :idle, :terminal] do
+    {:noreply, schedule(%{state | deadline: deadline, deadline_kind: kind})}
+  end
+
   def handle_info({:retire, coordinator}, %{coordinator: coordinator} = state),
     do: {:stop, :normal, state}
 
   def handle_info({:DOWN, ref, :process, _, _}, %{owner_monitor: ref} = state),
-    do: {:stop, :normal, state}
+    do: {:stop, {:shutdown, :owner_down}, state}
 
   def handle_info({:DOWN, ref, :process, _, _}, %{coordinator_monitor: ref} = state) do
     Process.exit(state.owner, :kill)
@@ -38,8 +45,20 @@ defmodule JidoCode.Product.StreamOwnerGuard do
 
   def handle_info(:check_deadline, state) do
     if System.monotonic_time(:millisecond) >= state.deadline do
+      :telemetry.execute([:jido_code, :product_stream, :guard_deadline], %{count: 1}, %{
+        kind: state.deadline_kind
+      })
+
+      reason =
+        if state.deadline_kind == :terminal, do: :forced_terminal_cleanup, else: :guard_failure
+
+      :telemetry.execute([:jido_code, :product_stream, :lifecycle], %{count: 1}, %{
+        reason: reason,
+        projection: state.projection
+      })
+
       Process.exit(state.owner, :kill)
-      {:stop, :normal, state}
+      {:stop, {:shutdown, :deadline_enforced}, state}
     else
       {:noreply, schedule(state)}
     end

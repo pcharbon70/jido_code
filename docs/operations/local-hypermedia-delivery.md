@@ -124,6 +124,15 @@ not percentiles. Existing lifecycle close observations may exceed unique closed
 connections. Slow-owner/guard failures are cleanup warnings, not proof that a
 zombie remains alive.
 
+`forced_terminal_cleanup` counts watchdog force-stops only after the coordinator
+has explicitly closed a lease and the unchanged terminal grace period expires.
+It is not an active-work timeout. Unexpected watchdog death and admission/work/
+idle/lifetime watchdog expiry remain `guard_failure`; ordinary owner disconnect
+does not. Deadline counters are emitted before killing the owner so monitor
+notification order cannot erase the observation. Qualification also requires
+zero new `slow_owner` and `guard_failure` events and waits for all owners to
+retire before its final counter snapshot. Forced terminal cleanup stays visible.
+
 Authorization diagnostics separate `authorization_*` caller counters from
 `authorization_store_*` counters. Each has `count`, `duration_ms`, `error`, and
 `timeout` totals. Caller time includes waiting in the query runner; store time
