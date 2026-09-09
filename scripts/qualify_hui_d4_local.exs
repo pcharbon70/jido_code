@@ -84,6 +84,29 @@ Application.put_env(
 
 {:ok, _} = Application.ensure_all_started(:jido_code)
 
+# The provider already validates these closed telemetry dimensions. Print only
+# fixed classes on failure; never dump the result, request, graph, or error.
+:ok =
+  :telemetry.attach(
+    "hui-d4-projection-failure",
+    JidoCode.Product.ReadProjectionTelemetry.event(),
+    fn _, measurements, metadata, _ ->
+      if metadata.outcome in [:error, :rejected] do
+        IO.puts(
+          Jason.encode!(%{
+            qualification: "projection failure",
+            surface: metadata.surface,
+            outcome: metadata.outcome,
+            state: metadata.state,
+            cache_status: metadata.cache_status,
+            duration_ms: measurements.duration_ms
+          })
+        )
+      end
+    end,
+    nil
+  )
+
 {:ok, _} =
   JidoCode.LocalInstall.bootstrap(
     %{login: "local-proof@example.test", display_name: "Local qualification human"},

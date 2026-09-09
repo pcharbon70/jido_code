@@ -53,6 +53,35 @@ remains fail-closed and emits only fixed stage/outcome and duration fields.
 Architecture, compilation, formatting, and diff checks passed. This is not a
 full regression-suite result.
 
+## September 9 projection-deadline investigation
+
+PR #142 CI job `102451694580` failed load round one with three projection
+errors and four slow-owner events, but zero graph-grant authorization errors
+or timeouts at either measured boundary. Those counters do not include the
+complete identity/audit/field-shaping pipeline. Live projections explicitly
+use a 1,500-ms surface deadline; ordinary pages use 5,500 ms and stream owners
+have a 2,000-ms work window. No deadline was changed.
+
+The qualification harness now logs only the already validated projection
+telemetry dimensions (surface, outcome, state, cache status, duration) on
+failure; it does not log request, identity, graph, result, or exception payloads.
+A deliberately harsher two-CPU diagnostic run (affinity 0–1, original two
+64-MiB CPU workers) reproduced failure in round one: an unavailable/invalidated
+fleet projection at 3,783 ms and an unavailable/bypass projection at 1,501 ms.
+The latter is consistent with the live projection deadline. This run also
+recorded ten store authorization timeouts and one caller timeout, unlike CI,
+so it is not an exact reproduction of CI's failure mode. Graph revision stayed
+unchanged, protected queued bytes stayed zero, and slow-owner events were zero.
+Browser delivery, faults, isolation, iterator cleanup, and restart recovery had
+passed; final rollback was not reached. No qualification pass is claimed.
+
+An experiment exporting only policy content for grant snapshots, while reading
+target ownership metadata separately, did not demonstrate improvement: the
+20-sample contended fixture probe averaged 130,085 microseconds versus 114,097
+for the existing full snapshot. The experimental runtime and test edits were
+removed. Only harness diagnostics remain; the next clean CI run must identify
+its failing projection state and duration before a runtime fix is claimed.
+
 ## Candidate Provenance
 
 Baseline: `8cac85172eeda04a41ee68f4b3a6dbba935ca8eb`.
