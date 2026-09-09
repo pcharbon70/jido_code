@@ -2,11 +2,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @moduledoc "D4 candidate inventory; incomplete qualification cannot accept HUI4."
   alias JidoCode.Architecture.HypermediaUISuccessorEvidence
   @manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
-  @store_candidate "c243be84decaeaa744d509fbfa8e07c10e2a0988"
+  @store_candidate "660ee1bf3a53e08f8ea3b3f39f1d688f03be5aab"
   @store_predecessor "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"
-  # Exact successor of PR #137: only Igniter's 0.8.3 lock entry changes to 0.8.4.
-  # This candidate identity does not waive the unresolved Decimal audit finding.
-  @audit_lock_digest "185edd5f8bc6a7a82601882c02f08373b8940c2b51770469afa8db644d47acdc"
+  # Exact successor lock: Igniter 0.8.4 and the TripleStore context-type repair.
+  # Candidate identity never waives dependency audit findings.
+  @audit_lock_digest "040a115655f0d086c6ce9754c7987d3d93a5e94dc48d730aec7a76bde68cc462"
   @dependency_baseline %{
     "mix.exs" => "d66c00f068f43943ed9bd94b0a2c77db152a224ad3e1d6deefee4745df3ffab9",
     "mix.lock" => "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b"
@@ -14,6 +14,8 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @sources ~w[
     mix.exs
     mix.lock
+    .dialyzer_ignore.exs
+    test/jido_code/knowledge/backup_restore_integrity_test.exs
     lib/jido_code/knowledge/semantic_snapshot.ex
     lib/jido_code/knowledge/graph_metadata.ex
     test/jido_code/knowledge/semantic_snapshot_test.exs

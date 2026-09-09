@@ -10,7 +10,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4Test do
 
       refute Phase.dependency_input_valid?(
                path,
-               String.replace(body, "c243be84decaeaa744d509fbfa8e07c10e2a0988", "main")
+               String.replace(body, "660ee1bf3a53e08f8ea3b3f39f1d688f03be5aab", "main")
              )
 
       refute Phase.dependency_input_valid?(
