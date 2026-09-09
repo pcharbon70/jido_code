@@ -253,6 +253,55 @@ No audit suppression or D4 closure is inferred from the Igniter repair.
 
 ## Gate HUI-D4 / HUI4
 
+### September 9 snapshot read optimization (qualification in progress)
+
+PR #139 diagnostics exposed five additional query errors and four guard failures
+in the first CI load round, while iterator cleanup, graph revision invariance,
+four-stream bounds and zero queued protected bytes held. This remains failed
+capacity evidence.
+
+The follow-up removes one redundant system-graph revision query per populated
+graph in each semantic snapshot. `GraphMetadata.read` has already read that
+authoritative revision during the same serialized store operation. Reusing it
+does not cache authority across requests or use the graph-local RDF revision
+statement as the authority. Empty graphs retain the independent system-graph
+revision lookup. No admission limit, query timeout or owner deadline changes.
+The real-store regression verifies that a subsequent committed change advances
+both snapshot and metadata revisions, while an absent graph remains revision
+zero. Thirteen focused snapshot, authority, projection and derived-graph tests
+passed; this is not complete clean-checkout acceptance.
+
+The revision-only optimization still failed the three-round qualification
+under CPU affinity 0–3 on the declared i7 workstation: round two, two query
+errors, three guard failures, four maximum streams, zero queued protected bytes,
+and unchanged graph revision. Peak BEAM memory was 368,885,904 bytes with 368
+processes. This is a failed diagnostic run, not proof of improvement over CI's
+different hardware.
+
+The next candidate also decodes graph metadata from the dataset already freshly
+exported during that same serialized snapshot. It retains exact graph/subject
+selection, the 50-statement cutoff, existing field/family validation, and a fresh
+authoritative system-graph revision read. Derived revision-reference validation
+still runs through the original store query path. Tests compare the new path
+with direct metadata reads and reject duplicate ownership and oversized metadata;
+metadata from a different graph is ignored. No cross-request cache is added.
+
+The combined candidate's local production harness exited zero on September 9
+with CPU affinity 0–3 (four schedulers), the original two 64-MiB SHA-256 workers,
+and unchanged limits. Three load rounds delivered 60 patches / 988,260 HTML
+bytes in 115,226 ms. Query errors, slow-owner events, pressure entries and queued
+protected bytes were zero; six guard-failure events remain recorded rather than
+suppressed. Peaks were 376,344,128 BEAM bytes, 590,856,192 RSS bytes, 370 processes,
+four streams, eleven sockets, query queue four and run queue four. The reconnect
+burst returned ten 429 and two scoped 200 responses; native recovery and all
+three browser rollback checks passed. The earlier browser, fault, scope,
+iterator and restart checks also passed. This dirty-checkout local run does not
+substitute for clean-checkout CI, independent review, or extended soak acceptance.
+Its asset manifest digest was
+`2cf3f825314a97ab6f2ef8850d723784d9f861036c633845ac07e78985e550f0`.
+Actual workstation suspend/resume is deferred at the maintainer's request, not
+claimed as passed. HUI4 remains open.
+
 ### Merged PR #138 clean-checkout follow-up
 
 CI run `34231321393` at `528c2ee69bfc95321704b53abd8ff74ce0315360`

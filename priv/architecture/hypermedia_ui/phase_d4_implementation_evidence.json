@@ -52,7 +52,7 @@
     "scripts/qualify_hui_d4_local.mjs": "bba9ca59701908c2602cf1bc85517fdb37f3dd3982406a833a5272b11012efa8",
     "lib/jido_code_web/router.ex": "b621287973c8b2f8142ac992b26793ebcb7e896c13d7c8b3ac78a012dea85af9",
     "config/runtime.exs": "1713b701aa2e4b9c9cd876ffb1dafb2529d8cc8be7d405a314a27b740cc86494",
-    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "fe8562bc5218732b0f168efd109110427c6cd1c8db63eebbd9d05789344e1da0",
+    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "96b847c7676b42d0601b3d04e01f768bd40224f0d9ab0b5f6f90c328b9ac99f1",
     "docs/operations/local-hypermedia-delivery.md": "0ef70d9d9e5d5d933534dc5d1afbdc4701b80410ff20f74d870a141f66ca1c7d",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/README.md": "26dbee79a82c51529ad9aa1217e8fd004bfe0144883f7daee745caa3715d257c",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-04-proxy-capacity-recovery-and-delivery-acceptance.md": "b8482aa724dc2ef29045f54b0215477a3a35733feaa94ec83858b329ff41738a",
@@ -60,7 +60,7 @@
     "lib/jido_code/architecture/hypermedia_ui_phase_d1.ex": "152d2cb5f6b66e5e29bad418b55bc2720aef3da13860cc8facc908b5f1a9a647",
     "lib/jido_code/architecture/hypermedia_ui_phase_d2.ex": "fc5a12eed0d58f2084e0240c7611cf1cf60c08691d74ee6f6b889b76e59bf381",
     "lib/jido_code/architecture/hypermedia_ui_phase_d3.ex": "3a0b987d7f964ffa7fb8c39c325a555b75aa18c9fee7f8caadabe1bca554c18d",
-    "lib/jido_code/architecture/hypermedia_ui_phase_d4.ex": "868473e78e390eb6341d69670807880286a4173c5f882e29b8f4d80e45ec7053",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d4.ex": "efcfe7ba5bfb7fbf54733dec4abad21e80caaf549800ac9dbd00b4731f5208b7",
     "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "622e98f8730c487acd1d945d668a8f641856d35ec32788c5b98ce698a75dbdf0",
     "lib/jido_code/identity/authority/local_graph.ex": "3d18c3d5c537de76981cd920a260dd4eebaa70643401e9cb7968ed29aa82048f",
     "lib/jido_code/knowledge/query_execution.ex": "02398aab6bcdf28ccc5a02dfcdd663d67e490da790c1689b60925ed87dbbb97b",
@@ -75,7 +75,10 @@
     "test/jido_code/architecture/hypermedia_ui_phase_d4_test.exs": "44f2a32140086392a650e4ab36066fd2cb07de48fce2278edc185328d09f430b",
     "test/jido_code/identity/local_graph_authority_test.exs": "971f4759ea3fcf07590fe60c86bac5242cf78aab9c579627bbcd0516e78be30d",
     "test/jido_code/local_deployment_test.exs": "2959d16b78c2f771baaf2d3ed5be59506a85818f03cabd7271b07a5e23cccee4",
-    "test/jido_code_web/local_transport_test.exs": "1091e3d7a750201f0d0f113d8db369648e6d7da5f81ef4e4c5d18bd4fa140f60"
+    "test/jido_code_web/local_transport_test.exs": "1091e3d7a750201f0d0f113d8db369648e6d7da5f81ef4e4c5d18bd4fa140f60",
+    "lib/jido_code/knowledge/graph_metadata.ex": "87623862698f44d556d7ce81ecfba02971d39b85e9cf3255a63191156ef02617",
+    "lib/jido_code/knowledge/semantic_snapshot.ex": "49d1739efe3f5273915c8677460691671c195c366731da3485e734be1c514d2d",
+    "test/jido_code/knowledge/semantic_snapshot_test.exs": "22d51e14e604ff143d7aabb3d254685b7a730d1550ffde565385788b07cb4d3c"
   },
   "predecessor_source_digests": {
     "c1": {

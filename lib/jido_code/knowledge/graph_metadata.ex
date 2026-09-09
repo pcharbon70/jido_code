@@ -154,6 +154,44 @@ defmodule JidoCode.Knowledge.GraphMetadata do
 
   def read(_store, _graph_iri), do: invalid(:read_graph_metadata)
 
+  @doc false
+  # Only use the dataset freshly exported inside the serialized StoreServer
+  # snapshot request. Keep decoding, family validation and authoritative
+  # system-graph revision lookup identical to read/2.
+  def read_from_snapshot(store, graph_iri, %RDF.Dataset{} = dataset) do
+    with {:ok, _family} <- GraphRegistry.identify(graph_iri) do
+      rows =
+        dataset
+        |> RDF.Dataset.quads()
+        |> Enum.flat_map(fn
+          {%RDF.IRI{value: ^graph_iri}, predicate, object, %RDF.IRI{value: ^graph_iri}} ->
+            [
+              %{
+                "predicate" => TripleStore.SPARQL.Term.to_ast(predicate),
+                "object" => TripleStore.SPARQL.Term.to_ast(object)
+              }
+            ]
+
+          _ ->
+            []
+        end)
+
+      case rows do
+        [] ->
+          {:ok, nil}
+
+        rows when length(rows) < @max_metadata_statements ->
+          context = %{db: store.db, dict_manager: store.dict_manager, permit_all: true}
+          read_rows(store, context, graph_iri, rows)
+
+        _ ->
+          {:error, Error.new(:corrupt, :read_graph_metadata)}
+      end
+    end
+  end
+
+  def read_from_snapshot(_, _, _), do: invalid(:read_graph_metadata)
+
   defp read_rows(store, context, graph_iri, rows) do
     with {:ok, metadata} <- metadata_stage(graph_iri, :decode, decode_rows(graph_iri, rows)),
          {:ok, metadata} <-
