@@ -2,6 +2,57 @@
 
 Status: **merge-pending**
 
+## Maintainer deferrals (2026-09-09)
+
+The maintainer explicitly deferred the independent security, accessibility, and
+operations-release reviews, alongside the previously deferred workstation
+suspend/resume test. These reviews are not scheduled prerequisites for the
+current implementation work; no reviewer approval or passing review is claimed.
+The deferrals do not waive the failed production-load gate, clean-checkout CI,
+or any reopening condition. HUI-D4/HUI4 remains unaccepted; deferred evidence
+must be revisited before claiming full qualification.
+
+## September 9 authorization-load diagnostics (not a runtime fix)
+
+Merged PR #141 (`2cca4a90a8f46233a16cccacdeaf31979dc70eb3`) failed
+clean-checkout CI run `34340121037`: five projection errors and four slow-owner
+events during the first load round. The following instrumentation does not
+change authorization, admission, query timeouts, or owner deadlines.
+
+Fixed-cardinality authorization counters distinguish caller and store duration,
+errors, and caught timeouts. Caller duration includes the QueryRunner queue;
+store duration includes its StoreServer request. Neither event contains request,
+principal, graph, query, or error payloads. Counts can differ when callers are
+terminated before a queued operation completes; aggregate duration differences
+are not exact queue-time measurements.
+
+A disposable fixture probe under CPU affinity 0–3 measured mean fresh snapshot
+times of 3,506 microseconds without contention and 67,762 microseconds with the
+original two 64-MiB SHA-256 workers (20 samples each). Contended graph export
+averaged 59,148 microseconds. These exploratory measurements suggest read-path
+contention; they do not establish the cause of the CI failure.
+
+The instrumented dirty-checkout production repeat on the declared i7-12700F
+workstation exited zero with four schedulers and unchanged limits. Three rounds
+delivered 60 patches / 988,260 HTML bytes in 113,040 ms. Projection errors,
+authorization errors/timeouts, slow-owner events, pressure entries, and queued
+protected bytes were zero. Four guard failures remain recorded. Peaks were
+378,697,600 BEAM bytes, 594,591,744 RSS bytes, 369 processes, four streams,
+query queue four, and run queue four. The counter snapshot reported 1,475 caller
+authorizations / 63,303 total ms and 1,481 store authorizations / 46,408 total ms.
+All three browser delivery and native rollback checks, fault recovery, scope
+concealment, iterator cleanup, and restart recovery passed; graph revision was
+unchanged. Asset digest:
+`2cf3f825314a97ab6f2ef8850d723784d9f861036c633845ac07e78985e550f0`.
+This repeat did not reproduce CI's failure and is not a repair or closure claim.
+The instrumented candidate still needs clean-checkout CI and extended soak.
+
+Focused `mix precommit` passed ten D4 architecture, stream-metric, and real graph
+authority tests (seed 837098), including a suspended QueryRunner timeout that
+remains fail-closed and emits only fixed stage/outcome and duration fields.
+Architecture, compilation, formatting, and diff checks passed. This is not a
+full regression-suite result.
+
 ## Candidate Provenance
 
 Baseline: `8cac85172eeda04a41ee68f4b3a6dbba935ca8eb`.

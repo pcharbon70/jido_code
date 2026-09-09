@@ -31,6 +31,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4Test do
   test "candidate source inventory and predecessor evidence remain exact" do
     assert {:ok, []} = Phase.check()
     {:ok, evidence} = Phase.load()
+    assert evidence["independent_reviews"] == "deferred_by_maintainer_2026-09-09"
 
     for {key, value} <- [
           {"source_digests", %{}},
@@ -39,6 +40,7 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4Test do
           {"status", "accepted_at_merged_candidate"},
           {"completed_sections", ["4.1"]},
           {"independent_reviews", "self-approved"},
+          {"independent_reviews", "passed"},
           {"browser_toolchain", "1.62.0"},
           {"triple_store_candidate", "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"},
           {"merged_candidate", "invented"}

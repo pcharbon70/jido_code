@@ -53,6 +53,45 @@ defmodule JidoCode.Product.StreamPressureTest do
     assert :ets.info(table, :size) == length(StreamMetrics.keys())
   end
 
+  test "authorization counters distinguish caller and store timeouts without retaining payloads" do
+    table = StreamMetrics.new()
+    event = [:jido_code, :knowledge, :authorization_read]
+
+    StreamMetrics.handle_event(
+      event,
+      %{duration_ms: 1250},
+      %{stage: :caller, outcome: :timeout},
+      table
+    )
+
+    StreamMetrics.handle_event(
+      event,
+      %{duration_ms: 1000},
+      %{stage: :store, outcome: :timeout},
+      table
+    )
+
+    StreamMetrics.handle_event(event, %{duration_ms: 7}, %{stage: :store, outcome: :ok}, table)
+
+    StreamMetrics.handle_event(
+      event,
+      %{duration_ms: 999},
+      %{stage: :private, outcome: :timeout},
+      table
+    )
+
+    metrics = StreamMetrics.snapshot(table)
+    assert metrics.authorization_count == 1
+    assert metrics.authorization_duration_ms == 1250
+    assert metrics.authorization_timeout == 1
+    assert metrics.authorization_error == 1
+    assert metrics.authorization_store_count == 2
+    assert metrics.authorization_store_duration_ms == 1007
+    assert metrics.authorization_store_timeout == 1
+    assert metrics.authorization_store_error == 1
+    assert :ets.info(table, :size) == length(StreamMetrics.keys())
+  end
+
   test "degraded admission returns unavailable without allocating a stream" do
     server = Module.concat(__MODULE__, Coordinator)
     start_supervised!({StreamCoordinator, name: server})

@@ -160,7 +160,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
       |> equal(evidence["status"], "implementation_in_progress", "qualification lifecycle")
       |> equal(evidence["merged_candidate"], nil, "no invented merge candidate")
       |> equal(evidence["completed_sections"], [], "unaccepted sections")
-      |> equal(evidence["independent_reviews"], "pending", "independent review lifecycle")
+      |> equal(
+        evidence["independent_reviews"],
+        "deferred_by_maintainer_2026-09-09",
+        "independent review lifecycle"
+      )
       |> equal(evidence["browser_toolchain"], "1.63.0", "qualified browser pin")
       |> equal(
         evidence["triple_store_candidate"],

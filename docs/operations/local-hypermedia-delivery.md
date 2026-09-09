@@ -124,6 +124,16 @@ not percentiles. Existing lifecycle close observations may exceed unique closed
 connections. Slow-owner/guard failures are cleanup warnings, not proof that a
 zombie remains alive.
 
+Authorization diagnostics separate `authorization_*` caller counters from
+`authorization_store_*` counters. Each has `count`, `duration_ms`, `error`, and
+`timeout` totals. Caller time includes waiting in the query runner; store time
+starts when that runner dispatches to the store (and includes the store queue).
+Timeouts are a subset of errors. These counters do not identify principals or
+requests, and aggregate durations cannot be subtracted as an exact per-request
+queue time: a caller may time out before its store operation completes. Compare
+timeout counts and durations over an isolated load interval to choose the next
+probe. Existing authorization deadlines and fail-closed outcomes are unchanged.
+
 On pressure, repeated rejections, query failures or slow-owner warnings, stop
 opening live tabs, use native refresh, inspect host CPU/RAM/disk health, and
 confirm graph/identity readiness. Do not raise ceilings, disable authorization
