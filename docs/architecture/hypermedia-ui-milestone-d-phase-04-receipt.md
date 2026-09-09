@@ -253,6 +253,72 @@ No audit suppression or D4 closure is inferred from the Igniter repair.
 
 ## Gate HUI-D4 / HUI4
 
+### TripleStore query type-contract repair
+
+The maintainer authorized fixing and merging the owned TripleStore repository.
+[TripleStore PR #31](https://github.com/pcharbon70/triple_store/pull/31) corrects
+query/property-path context handle types and adds a compiled-typespec regression.
+Its candidate is `660ee1bf3a53e08f8ea3b3f39f1d688f03be5aab`; local validation
+passed 177 query/property-path/context tests, code-doc governance, and Dialyzer
+with zero errors or skips. All 24 hosted checks passed, and PR #31 merged on
+2026-09-09 as `3b86494a3db2a8639f6145c4367011035b264934`. Upstream local main
+was synced before deleting the local and remote feature branches. The pinned
+tested candidate is an ancestor of that merge. No upstream runtime behavior or
+dependency constraints changed.
+
+JidoCode's successor lock changes only the TripleStore pin and has SHA-256
+`040a115655f0d086c6ce9754c7987d3d93a5e94dc48d730aec7a76bde68cc462`.
+The corrected contract removes 105 obsolete downstream warning filters (13
+identified before the dependency repair, then 92 afterward). No new suppression
+is added. Restore validation now rejects missing metadata before the validation
+chain; the redundant raw-error branch is removed because those operations
+return the structured knowledge error contract. These changes do not waive
+the remaining soak finding or any HUI4 gate.
+
+Downstream Dialyzer passed with 62 existing filtered findings, zero unfiltered
+findings, and zero unused filters. The seven backup/restore tests passed,
+including a new checksummed candidate with missing metadata that is rejected
+while the previous dataset remains ready and active. Complete clean-checkout
+downstream CI is still independently required.
+
+Broader downstream `mix precommit` validation passed 613 tests with zero
+failures in 624.9 seconds (seed 967748): the full knowledge test directory,
+local graph authority, and D4/C1/C5 architecture regressions. Architecture,
+formatting and compilation checks passed, as did unmodified `mix hex.audit`.
+This is not a full application/browser run. The previous merged candidate's
+main CI run `34332633033` subsequently failed production qualification; the
+type-only dependency repair does not claim to resolve that runtime finding.
+
+### Merged PR #140 extended qualification (September 9)
+
+The ten-round, four-CPU production run on merged candidate
+`3842f0944b717aebc223b9e7520a8e81fda79d4f` completed the browser load journey
+with 200 patches / 3,294,200 HTML bytes in 382,641 ms, but failed the unchanged
+zero-query-error assertion with one recorded error. Ten guard-failure events
+were recorded; slow-owner events and pressure entries were zero. Graph revision
+was unchanged, streams peaked at four, queued protected bytes stayed zero, and
+peak BEAM/RSS memory was 385,878,696 / 624,201,728 bytes with 370 processes.
+The burst returned ten 429 and two scoped 200 responses. The final rollback
+stage was not reached after the failed assertion. This is failed soak evidence,
+not a passing extension of the earlier three-round run.
+
+The run used unchanged tracked sources, CPU affinity 0–3, the original two
+64-MiB SHA-256 workers, and restored complete production assets with manifest
+digest `2cf3f825314a97ab6f2ef8850d723784d9f861036c633845ac07e78985e550f0`.
+An earlier attempt was deliberately interrupted after detecting missing generated
+assets and is excluded from acceptance. Main Dialyzer run `34332632692` also
+failed, reporting 13 obsolete filters and four unfiltered findings. No gate
+closure follows from the PR merge.
+
+Local analysis reproduced 166 warnings, with 164 filtered and two remaining
+findings: a no-return callback in derived metadata reference reads and an
+apparently unreachable absent-revision branch. The pinned TripleStore query
+context declares `db: reference()` while its RocksDB adapter declares
+`db_ref: pid()`. This inconsistent contract makes real query paths appear
+unreachable in analysis. Thirteen CI-confirmed obsolete filters were removed;
+no new suppression, dynamic-call workaround, or upstream change is introduced.
+The type-contract correction and the remaining soak error are still open.
+
 ### September 9 snapshot read optimization (qualification in progress)
 
 PR #139 diagnostics exposed five additional query errors and four guard failures

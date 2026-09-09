@@ -267,6 +267,32 @@ defmodule JidoCode.Knowledge.BackupRestoreIntegrityTest do
              StoreServer.request(substrate.server, {:graph_counts, [@graph]})
   end
 
+  test "rejects a checksummed candidate with missing metadata and preserves the active dataset",
+       %{config: config} do
+    substrate = start_substrate!(config)
+    commit!(substrate.writer, [quad("missing-metadata", "preserved")], 0, 0)
+    assert {:ok, backup} = Maintenance.backup(substrate.maintenance, [])
+
+    artifact_root = Path.join(config.backup_root, backup.artifact_id)
+    checkpoint_root = Path.join(artifact_root, "checkpoint")
+    {:ok, checkpoint_store} = TripleStore.open(checkpoint_root, schema: :quad)
+    system_graph = JidoCode.Knowledge.Vocabulary.system_graph()
+    assert {:ok, _} = TripleStore.update(checkpoint_store, "CLEAR GRAPH <#{system_graph}>")
+    :ok = TripleStore.close(checkpoint_store)
+    rewrite_manifest_digest!(artifact_root, checkpoint_root)
+
+    assert {:error, %Error{kind: :corrupt, operation: :restore_metadata}} =
+             Maintenance.restore(substrate.maintenance, backup.artifact_id,
+               confirm: backup.artifact_id
+             )
+
+    assert StoreServer.summary(substrate.server).health_state == :ready
+    assert {:ok, %{id: "active"}} = DatasetSelector.current(config)
+
+    assert {:ok, %{@graph => 1}} =
+             StoreServer.request(substrate.server, {:graph_counts, [@graph]})
+  end
+
   test "reports default graph violations without mutating or repairing them", %{config: config} do
     first = start_substrate!(config)
     stop_substrate(first)

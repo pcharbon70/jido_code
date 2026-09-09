@@ -705,7 +705,7 @@ defmodule JidoCode.Knowledge.StoreServer do
         expected = manifest_metadata(manifest)
 
         with :ok <- verify_quad_schema(candidate_store),
-             {:ok, metadata} when not is_nil(metadata) <- Metadata.read(candidate_store),
+             {:ok, metadata} <- read_restore_metadata(candidate_store),
              :ok <- verify_expected_metadata(metadata, expected),
              {:ok, report} <- Integrity.check(candidate_store, expected),
              true <- IntegrityReport.healthy?(report),
@@ -717,13 +717,18 @@ defmodule JidoCode.Knowledge.StoreServer do
           {:ok, candidate_store, restored_metadata}
         else
           false -> close_candidate_error(candidate_store, :restore_integrity)
-          {:ok, nil} -> close_candidate_error(candidate_store, :restore_metadata)
           {:error, %Error{} = error} -> close_candidate_error(candidate_store, error)
-          {:error, _reason} -> close_candidate_error(candidate_store, :restore_candidate)
         end
 
       {:error, %Error{} = error} ->
         {:error, error}
+    end
+  end
+
+  defp read_restore_metadata(store) do
+    case Metadata.read(store) do
+      {:ok, nil} -> {:error, Error.new(:corrupt, :restore_metadata)}
+      result -> result
     end
   end
 
