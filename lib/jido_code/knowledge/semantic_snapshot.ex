@@ -24,8 +24,8 @@ defmodule JidoCode.Knowledge.SemanticSnapshot do
          {:ok, counts} <- graph_counts(store, graphs),
          true <- counts |> Map.values() |> Enum.sum() <= @max_quads,
          {:ok, dataset} <- export_existing(store, counts),
-         {:ok, graph_metadata} <- metadata(store, counts),
-         {:ok, graph_revisions} <- revisions(store, graphs) do
+         {:ok, graph_metadata} <- metadata(store, counts, dataset),
+         {:ok, graph_revisions} <- revisions(store, graphs, graph_metadata) do
       {:ok,
        %{
          dataset_revision: substrate_metadata.dataset_revision,
@@ -85,12 +85,12 @@ defmodule JidoCode.Knowledge.SemanticSnapshot do
     end
   end
 
-  defp metadata(store, counts) do
+  defp metadata(store, counts, dataset) do
     Enum.reduce_while(counts, {:ok, %{}}, fn {graph, count}, {:ok, metadata} ->
       if count == 0 do
         {:cont, {:ok, Map.put(metadata, graph, nil)}}
       else
-        case GraphMetadata.read(store, graph) do
+        case GraphMetadata.read_from_snapshot(store, graph, dataset) do
           {:ok, value} ->
             {:cont, {:ok, Map.put(metadata, graph, value)}}
 
@@ -107,9 +107,22 @@ defmodule JidoCode.Knowledge.SemanticSnapshot do
     end)
   end
 
-  defp revisions(store, graphs) do
+  defp revisions(store, graphs, graph_metadata) do
     Enum.reduce_while(graphs, {:ok, %{}}, fn graph, {:ok, revisions} ->
-      case Metadata.graph_revision(store, graph) do
+      # GraphMetadata already queried the authoritative system-graph
+      # revision during this serialized store request. Reuse that fresh value,
+      # not a cached grant or the potentially older graph-local RDF statement.
+      # Empty graphs still require their independent system-graph lookup.
+      current =
+        case Map.get(graph_metadata, graph) do
+          %{graph_revision: revision} when is_integer(revision) and revision >= 0 ->
+            {:ok, revision}
+
+          _ ->
+            Metadata.graph_revision(store, graph)
+        end
+
+      case current do
         {:ok, revision} when is_integer(revision) and revision >= 0 ->
           {:cont, {:ok, Map.put(revisions, graph, revision)}}
 

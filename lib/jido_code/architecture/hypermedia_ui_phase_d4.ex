@@ -14,6 +14,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @sources ~w[
     mix.exs
     mix.lock
+    lib/jido_code/knowledge/semantic_snapshot.ex
+    lib/jido_code/knowledge/graph_metadata.ex
+    test/jido_code/knowledge/semantic_snapshot_test.exs
     docs/architecture/hypermedia-ui-d4-dependency-audit-remediation.md
     test/jido_code/architecture/hypermedia_ui_dependency_security_test.exs
     lib/jido_code/architecture/hypermedia_ui_phase_b2.ex
