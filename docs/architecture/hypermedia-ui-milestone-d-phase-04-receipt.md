@@ -521,6 +521,46 @@ CI and independent review.
 
 **merge-pending**. Milestone E is not authorized.
 
+### Bounded dictionary-decoding follow-up (qualification pending)
+
+The stricter candidate `9e67eedd1e3c353d3fe2781df46b99336e11155b`
+failed clean production CI run `34370952808`, job `102531725014`: four
+1501-ms projection errors and five slow-owner events. Guard failures were zero;
+five forced terminal cleanups were recorded separately. The local ten-round
+soak also failed: four projection errors, seven slow owners, zero guard failures,
+sixteen forced terminal cleanups, and a browser assertion in round ten.
+Neither result is accepted timing evidence.
+
+Profiling a disposable store identified repeated RDF dictionary decoding:
+178 policy quads caused 712 lookups for only 74 distinct terms. TripleStore
+PR #33, candidate `56873c8b62a2dad5d8d097cfd90926ca033b4e24`, reuses
+successful term decodes within a maximum of 256 quads / 1024 IDs, resetting
+between chunks and calls. It does not cache grants, graph snapshots, or
+authorization decisions. In local four-CPU, non-contention probes, mean quad
+decoding dropped from 2623 to 377 microseconds and full policy snapshots from
+3606 to 1377 microseconds. These are microbenchmarks, not production proof.
+
+The exact dependency lock digest is
+`2399e1a6745d6785241224b685aeafe252354cc18185ed616e9cd3076906075d`.
+Only the TripleStore lock entry changes from the previous candidate. All prior
+deadlines, authorization boundaries, assertions, and reopening conditions remain
+unchanged. Hosted production qualification now runs the same ten load rounds.
+
+The local ten-round run on September 9 exited zero with four schedulers, CPU
+affinity 0–3, and the original two 64-MiB SHA-256 workers: 200 patches /
+3,294,200 HTML bytes in 351,088 ms. Projection errors, slow owners, genuine guard
+failures, authorization errors/timeouts, and queued protected bytes were zero.
+Four deliberate terminal cleanups were recorded separately. All 1,380 measured
+projection authorization spans and all 270 cohort / 540 detail queries completed.
+Peaks were 387,669,976 BEAM bytes, 654,901,248 RSS bytes, 370 processes,
+four streams, eleven sockets, query queue three and run queue four. Native
+recovery, three-browser rollback, and the earlier browser/fault/scope/iterator/
+restart checks passed. This was a dirty-checkout experiment with the exact
+TripleStore candidate above, not clean-checkout acceptance. Focused downstream
+`mix precommit` passed 25 tests with zero failures, and unmodified `mix hex.audit`
+reported no retired or advisory packages for the new lock. Upstream clean CI
+and hosted ten-round qualification remain pending.
+
 ## Reopening Conditions
 
 The gate remains open or reopens, regardless of checkboxes, if:

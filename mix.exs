@@ -86,7 +86,7 @@ defmodule JidoCode.MixProject do
       {:req_llm, "== 1.20.0"},
       {:triple_store,
        git: "https://github.com/pcharbon70/triple_store.git",
-       ref: "660ee1bf3a53e08f8ea3b3f39f1d688f03be5aab"},
+       ref: "56873c8b62a2dad5d8d097cfd90926ca033b4e24"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.2.0",

@@ -2,11 +2,11 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
   @moduledoc "D4 candidate inventory; incomplete qualification cannot accept HUI4."
   alias JidoCode.Architecture.HypermediaUISuccessorEvidence
   @manifest "priv/architecture/hypermedia_ui/phase_d4_implementation_evidence.json"
-  @store_candidate "660ee1bf3a53e08f8ea3b3f39f1d688f03be5aab"
+  @store_candidate "56873c8b62a2dad5d8d097cfd90926ca033b4e24"
   @store_predecessor "6dc1b6d985f4805f9856858e0c0047b9f2d5ad7f"
-  # Exact successor lock: Igniter 0.8.4 and the TripleStore context-type repair.
+  # Exact successor lock: Igniter 0.8.4 and bounded TripleStore quad decoding.
   # Candidate identity never waives dependency audit findings.
-  @audit_lock_digest "040a115655f0d086c6ce9754c7987d3d93a5e94dc48d730aec7a76bde68cc462"
+  @audit_lock_digest "2399e1a6745d6785241224b685aeafe252354cc18185ed616e9cd3076906075d"
   @dependency_baseline %{
     "mix.exs" => "d66c00f068f43943ed9bd94b0a2c77db152a224ad3e1d6deefee4745df3ffab9",
     "mix.lock" => "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b"

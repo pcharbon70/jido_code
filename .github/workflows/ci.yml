@@ -162,6 +162,7 @@ jobs:
       - name: Qualify HUI-D4 direct local production delivery
         env:
           MIX_ENV: prod
+          HUI_D4_LOAD_ROUNDS: "10"
           SECRET_KEY_BASE: "${{ github.sha }}${{ github.sha }}"
           JIDO_CODE_OPERATOR_TOKEN: "ci-only-local-qualification-build-token"
         run: mix run --no-start scripts/qualify_hui_d4_local.exs
