@@ -12,6 +12,9 @@ defmodule JidoCode.Architecture.HypermediaUIPhaseD4 do
     "mix.lock" => "98b302693e9dbf826129aec7bdb85740201fb076096d253d10e4f7ba1660e10b"
   }
   @sources ~w[
+    lib/jido_code/architecture/hypermedia_ui_phase_c4.ex
+    lib/jido_code/product/graph_read_projection_provider.ex
+    test/jido_code/product/graph_read_projection_provider_phase_c4_test.exs
     mix.exs
     mix.lock
     .dialyzer_ignore.exs

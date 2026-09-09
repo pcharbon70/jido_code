@@ -32,7 +32,7 @@
     "lib/jido_code/architecture/hypermedia_ui_phase_b3.ex": "327c6e530cd53c339929f34087a94fb0103c0118c58a8646c8960628cff28f75",
     "scripts/qualify_hui_d4_faults.exs": "76c8eefab65fa483c9317a993986c6d4a055848bcae6ba7bc6d4474847accb2e",
     "scripts/qualify_hui_d4_faults.mjs": "64cd8e8c6f1a484797a676f32b845f2f77020957df03a6d535473790a012b074",
-    ".github/workflows/ci.yml": "651c8d9038a9f2cb2592224ff3a353ba15e0121f103d0c08e504c7b5e0223568",
+    ".github/workflows/ci.yml": "e58c8fa2d41f8ec8adbbcf04514eb8deef832579036ac2377bf6656d5ef84722",
     "test/jido_code_web/local_graph_delivery_test.exs": "ebce5450fb92d37b1463ac0560f8f6fe718fdb8f891e8e3159d4f70113ce12fd",
     "scripts/qualify_hui_d4_native.mjs": "a75c9854f31e3d1ed32be2ae508a149236e0c045ba927b50b6c436732b96ca19",
     "scripts/qualify_hui_d4_orca.sh": "450e1a859a336565a3b355b1f95e9c0c0a051bd2c7eb4a50a9bce411ff593659",
@@ -48,11 +48,11 @@
     "lib/jido_code/product/stream_metrics.ex": "e3b40c848814e9a2c15b188b261cc21ca2c81bece092f345dee4bc470117b211",
     "test/jido_code/product/stream_pressure_test.exs": "36812db3fff94f31efa494a7b4530d8bac25b22e6eeb620c322f355a08bc1b8d",
     "scripts/qualify_hui_d4_load.mjs": "33c9186c2216cde058a91b08c4947a824653748b7481b95c59d26892409fc2f1",
-    "scripts/qualify_hui_d4_local.exs": "fdec66d2aa34695e32e02ba784de877ca594bd53891a84f40f157a1e674ef69a",
+    "scripts/qualify_hui_d4_local.exs": "5de5bab0a2b7430f7468b2cf3f431fb0c6ebeda3f62e26871ce6b9e991a72e66",
     "scripts/qualify_hui_d4_local.mjs": "bba9ca59701908c2602cf1bc85517fdb37f3dd3982406a833a5272b11012efa8",
     "lib/jido_code_web/router.ex": "b621287973c8b2f8142ac992b26793ebcb7e896c13d7c8b3ac78a012dea85af9",
     "config/runtime.exs": "1713b701aa2e4b9c9cd876ffb1dafb2529d8cc8be7d405a314a27b740cc86494",
-    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "14b20b93db6d09dd7a28b67fe8018687d2d85b30f9ccef5f4590652f72dd83ab",
+    "docs/architecture/hypermedia-ui-milestone-d-phase-04-receipt.md": "9ec279c587fc866ccab440ff5464285d4300620acf577a6723bbd4f0ed3b6df5",
     "docs/operations/local-hypermedia-delivery.md": "9a976fae02178627bdb87808b9ab31da411ae5a93bea90c692defae24a43ffbb",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/README.md": "26dbee79a82c51529ad9aa1217e8fd004bfe0144883f7daee745caa3715d257c",
     "docs/planning/secure-hypermedia-control-plane-ui/milestone-d-datastar-delivery/phase-04-proxy-capacity-recovery-and-delivery-acceptance.md": "539e7ce872bdaf91e63d261c9de5cbc2a0200357ba2cbe71888a2d9c9fb63ddd",
@@ -60,8 +60,8 @@
     "lib/jido_code/architecture/hypermedia_ui_phase_d1.ex": "152d2cb5f6b66e5e29bad418b55bc2720aef3da13860cc8facc908b5f1a9a647",
     "lib/jido_code/architecture/hypermedia_ui_phase_d2.ex": "fc5a12eed0d58f2084e0240c7611cf1cf60c08691d74ee6f6b889b76e59bf381",
     "lib/jido_code/architecture/hypermedia_ui_phase_d3.ex": "3a0b987d7f964ffa7fb8c39c325a555b75aa18c9fee7f8caadabe1bca554c18d",
-    "lib/jido_code/architecture/hypermedia_ui_phase_d4.ex": "d650692e31235fed6a74d9019c2aaafddd426a6bdc242e828c2f80025674c49c",
-    "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "622e98f8730c487acd1d945d668a8f641856d35ec32788c5b98ce698a75dbdf0",
+    "lib/jido_code/architecture/hypermedia_ui_phase_d4.ex": "fa1b19e5dbcdc8e0bdd30e5e0c0377b42df5b762632ccc6e83628a652f05a817",
+    "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "f80bd2a93700da68217fe75e2150cfa75d12304c11f7b7706ef8805f490034b1",
     "lib/jido_code/identity/authority/local_graph.ex": "3d18c3d5c537de76981cd920a260dd4eebaa70643401e9cb7968ed29aa82048f",
     "lib/jido_code/knowledge/query_execution.ex": "02398aab6bcdf28ccc5a02dfcdd663d67e490da790c1689b60925ed87dbbb97b",
     "lib/jido_code/knowledge/query_runner.ex": "f85e3ad7699170063c03f5860db3c8596fe33897968812a0886584146276c2b9",
@@ -80,7 +80,10 @@
     "lib/jido_code/knowledge/semantic_snapshot.ex": "49d1739efe3f5273915c8677460691671c195c366731da3485e734be1c514d2d",
     "test/jido_code/knowledge/semantic_snapshot_test.exs": "22d51e14e604ff143d7aabb3d254685b7a730d1550ffde565385788b07cb4d3c",
     ".dialyzer_ignore.exs": "bf206320a08971165b135063cc4a88b8b95a8dfb1c17ea56a6781e0860d030e7",
-    "test/jido_code/knowledge/backup_restore_integrity_test.exs": "93dac5563bb2a08f90c827e3d323f4bb8ef16f3b597c124396eafcb4fff9e9a0"
+    "test/jido_code/knowledge/backup_restore_integrity_test.exs": "93dac5563bb2a08f90c827e3d323f4bb8ef16f3b597c124396eafcb4fff9e9a0",
+    "lib/jido_code/product/graph_read_projection_provider.ex": "26afdbcfbafcf70d85b9ca2a34176da90246a6b0866bb239e21b344e8f6d5eba",
+    "test/jido_code/product/graph_read_projection_provider_phase_c4_test.exs": "2bad5fe7a4a4ffe798d67a6d4400184902bf70c418555f9537745e8af1e674a7",
+    "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "4dc489566f119390d92c7b5ae79e23f0763199007820e7f8a54fc27669c4e1a6"
   },
   "predecessor_source_digests": {
     "c1": {
@@ -103,13 +106,17 @@
     "c4": {
       "lib/jido_code/application.ex": "5ef8dab9a0606ad1d94dc09600c33d09d42c9e98928c8d9b7f9319596f2f8caf",
       "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "10523be8f53d295e6a6fd036f1c9b81aaccc632a9ec0152022a2febaca9c5f99",
-      "lib/mix/tasks/architecture.check.ex": "6c88bdf946530de809f0431739704cbad9a3f3a752f027dd1cccfb3fea06eb47"
+      "lib/mix/tasks/architecture.check.ex": "6c88bdf946530de809f0431739704cbad9a3f3a752f027dd1cccfb3fea06eb47",
+      "lib/jido_code/product/graph_read_projection_provider.ex": "e50c39811e4b348d283dad5ad8f4a7c792cc2819bae6192a7c26f4d4f985e9dd",
+      "test/jido_code/product/graph_read_projection_provider_phase_c4_test.exs": "450520768897bb549b1099d3d7cb0491929fa57e90bbd54e1fbc910680283fa7",
+      "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "56e0b9a49a0602479838f0ac36d522f6f4f30c8113e7160d3058298841d6f82a"
     },
     "c5": {
       "lib/jido_code/architecture/hypermedia_ui_phase_c5.ex": "3acd087ba75297e4fd653cb790dec4db117c151598ca3b19e1a993168a75118a",
       "lib/jido_code/architecture/hypermedia_ui_successor_evidence.ex": "bb3b4200dcb126a04426c8b92fb3cba0723eca8c6e5f7ea32967e69be6b7b1db",
       "lib/mix/tasks/architecture.check.ex": "df31f9882ebce4c5195467cb9006a65d7cdbee7ca475f7699565f20600c97749",
-      "test/jido_code/architecture/hypermedia_ui_phase_c5_operations_test.exs": "70fb23fe0b022eeaf2331c3dc276986c64b3ed1bd86b8181433909c331d9de44"
+      "test/jido_code/architecture/hypermedia_ui_phase_c5_operations_test.exs": "70fb23fe0b022eeaf2331c3dc276986c64b3ed1bd86b8181433909c331d9de44",
+      "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "5659ffe0ee1a299597a8b2d03c6b348c91355c537072be35dd08fe5fa661d3a4"
     },
     "d1": {
       "lib/jido_code/application.ex": "cd2c2e78403d64259518f1f6444d4151c2ac5c89da2752c05ba4bb2610ec9d73",
@@ -122,7 +129,8 @@
       "lib/jido_code_web/read_enhancement.ex": "8039d08fe3d0d65a70a689aaf3c09d6f8d4f52d7ea7df8890254cc8f7abfc1cb",
       "lib/jido_code_web/read_response.ex": "786159b1ff63ae5be066f351f4ecf41c18698107221486d5f31d165c78101135",
       "lib/jido_code_web/router.ex": "7e0c08ee4e846b7a8841a581597ea43f8e2a202421086ff7e8680486521e723e",
-      "lib/mix/tasks/architecture.check.ex": "ea0ffa6afe25ebc995a8e394b0cccf1446912e2f801088a70b1d497b309d285a"
+      "lib/mix/tasks/architecture.check.ex": "ea0ffa6afe25ebc995a8e394b0cccf1446912e2f801088a70b1d497b309d285a",
+      "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "aec8fda78f04d5061e8c59139e5c87a36e7d7c1c9faa39baae4a2db498759a41"
     },
     "d2": {
       "lib/jido_code/application.ex": "f0fd140f629e856b3fa64437a3e04adbd3b4b99ac9f1fd8717362d285445154b",
@@ -135,7 +143,8 @@
       "lib/jido_code_web/read_enhancement.ex": "81973348c7a24fb56bc4d472a0103bfb54688344545a19440f4b65a9625e7231",
       "lib/jido_code_web/router.ex": "3f7f0caf11f5589989fa1df25aff34e15b5e9faa0da374209443061846169eb6",
       "lib/jido_code_web/stream_delivery.ex": "db418192c3dad63391084cbecfc68679b0b59d06279d9d277cee708fff3905ac",
-      "lib/mix/tasks/architecture.check.ex": "65a8cbd79ab1290485bead8212c13d0f1f6acff272c1ce1cac385c598e7da614"
+      "lib/mix/tasks/architecture.check.ex": "65a8cbd79ab1290485bead8212c13d0f1f6acff272c1ce1cac385c598e7da614",
+      "lib/jido_code/architecture/hypermedia_ui_phase_c4.ex": "6bdf4f450f55f6fdf685d5e6e63c2f7a796255bbc46a50f1339c7b214ead0b0c"
     },
     "d3": {
       "lib/jido_code/architecture/hypermedia_ui_phase_d2.ex": "21ebe640b50e81cab96c614040606f4b58930e33ac362cf4837e63bb9462e69e",

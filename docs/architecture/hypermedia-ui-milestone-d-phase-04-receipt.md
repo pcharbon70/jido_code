@@ -84,6 +84,30 @@ its failing projection state and duration before a runtime fix is claimed.
 
 ## Candidate Provenance
 
+CI follow-up: production delivery now runs independently of the application
+and browser/proxy regression job. The original required `verify` check is an
+always-running aggregate requiring both jobs to succeed (including rejecting
+skipped/cancelled jobs). No coverage is removed. Production uses a distinct
+cache write key and can restore the existing compatible dependency cache;
+it cleans application artifacts and builds production assets before qualification.
+The speedup is not yet measured on CI; cold native compilation remains possible.
+
+Projection stage telemetry records only fixed stage/phase and duration fields.
+The qualification reports load-interval starts, completions and aggregate
+microseconds for full authorization, cohort queries, detail queries, resource
+lookup and fleet-row construction. Nested durations overlap; starts without
+completions may indicate killed or still-active work. No authority, query,
+identity, resource, result or error payload is emitted. All runtime deadlines
+and fail-closed behavior remain unchanged. Historical candidate receipts are
+preserved through exact successor source digests.
+
+Local validation includes parsed YAML checks for independent job scheduling,
+retained regression/audit/browser/qualification steps, and the required aggregate
+check. Focused precommit covers projection/cache behavior, closed stage timing
+dimensions, killed-task unfinished spans, and C4/D4 source provenance. Hosted
+job timings and load qualification remain pending; no latency improvement or
+production-load repair is claimed from this scheduling/measurement change.
+
 Baseline: `8cac85172eeda04a41ee68f4b3a6dbba935ca8eb`.
 Accepted D3 implementation: `a25d1ba65138935bbd065e09518bcdc7c7945301`.
 Implementation is in progress; no merged D4 candidate exists.

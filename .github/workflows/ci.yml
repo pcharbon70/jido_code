@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  regression:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -90,6 +90,64 @@ jobs:
         run: |
           mix hex.audit
           npm audit --omit=dev
+  production_delivery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      MIX_ENV: prod
+      ERLANG_ROCKSDB_OPTS: -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      SECRET_KEY_BASE: "${{ github.sha }}${{ github.sha }}"
+      JIDO_CODE_OPERATOR_TOKEN: "ci-only-local-qualification-build-token"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # HUI-A1 reproduces the accepted starting candidate from Git objects.
+          fetch-depth: 0
+
+      - name: Install native build prerequisites
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config
+
+      - uses: erlef/setup-beam@v1
+        id: beam
+        with:
+          otp-version: "28.3.1"
+          elixir-version: "1.19.5"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.92.0"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.3.0"
+          cache: npm
+
+      - name: Restore Beam dependency and build cache
+        id: beam_cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            deps
+            _build/test
+            _build/prod
+          key: beam-d4-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-rust-1.92.0-rocksdb-cmake-3.5-${{ hashFiles('mix.lock', 'mix.exs') }}
+          restore-keys: |
+            beam-v1-ubuntu-24.04-${{ runner.arch }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-rust-1.92.0-rocksdb-cmake-3.5-
+
+      - name: Report Beam cache status
+        run: echo "Beam cache exact hit - ${{ steps.beam_cache.outputs.cache-hit }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install dependencies
+        run: |
+          mix deps.get --check-locked
+          npm ci
+
+      - name: Clean application build artifacts
+        run: mix clean
+
+      - name: Install production qualification browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Build and digest production assets
         env:
@@ -107,3 +165,18 @@ jobs:
           SECRET_KEY_BASE: "${{ github.sha }}${{ github.sha }}"
           JIDO_CODE_OPERATOR_TOKEN: "ci-only-local-qualification-build-token"
         run: mix run --no-start scripts/qualify_hui_d4_local.exs
+
+  # Preserve the existing required check name; neither job may fail or skip.
+  verify:
+    if: always()
+    needs: [regression, production_delivery]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require all acceptance jobs
+        env:
+          REGRESSION_RESULT: ${{ needs.regression.result }}
+          PRODUCTION_RESULT: ${{ needs.production_delivery.result }}
+        run: |
+          test "$REGRESSION_RESULT" = success
+          test "$PRODUCTION_RESULT" = success

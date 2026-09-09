@@ -84,6 +84,31 @@ Application.put_env(
 
 {:ok, _} = Application.ensure_all_started(:jido_code)
 
+stage_metrics = :ets.new(:hui_d4_stages, [:set, :public, write_concurrency: true])
+stage_names = [:authorization, :cohort_query, :detail_query, :resource_lookup, :fleet_row]
+for stage <- stage_names, do: :ets.insert(stage_metrics, {stage, 0, 0, 0})
+
+:ok =
+  :telemetry.attach(
+    "hui-d4-projection-stages",
+    [:jido_code, :product, :projection_stage],
+    fn _, measurements, metadata, {table, stages} ->
+      if metadata[:stage] in stages do
+        case metadata[:phase] do
+          :start ->
+            :ets.update_counter(table, metadata.stage, {2, 1})
+
+          :stop ->
+            :ets.update_counter(table, metadata.stage, [{3, 1}, {4, measurements.duration_us}])
+
+          _ ->
+            :ok
+        end
+      end
+    end,
+    {stage_metrics, stage_names}
+  )
+
 # The provider already validates these closed telemetry dimensions. Print only
 # fixed classes on failure; never dump the result, request, graph, or error.
 :ok =
@@ -321,6 +346,7 @@ hint_bursts =
 
 load_revision = JidoCode.Knowledge.StoreServer.summary().dataset_revision
 query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_error
+for stage <- stage_names, do: :ets.insert(stage_metrics, {stage, 0, 0, 0})
 
 {load_output, load_result} =
   System.cmd("node", ["scripts/qualify_hui_d4_load.mjs"],
@@ -346,6 +372,19 @@ end
 send(collector.pid, :stop)
 peaks = Task.await(collector, 5_000)
 IO.write(load_output)
+
+IO.puts(
+  Jason.encode!(%{
+    qualification: "projection stage totals",
+    stages:
+      Enum.map(stage_names, fn stage ->
+        [{^stage, started, completed, duration}] = :ets.lookup(stage_metrics, stage)
+        %{stage: stage, started: started, completed: completed, duration_us: duration}
+      end),
+    note:
+      "Nested durations overlap; unfinished spans can reflect task termination or active work."
+  })
+)
 
 # Emit only bounded, privacy-safe diagnostics before enforcing acceptance.
 # A failed counter assertion must not hide the browser result or resource peaks.
