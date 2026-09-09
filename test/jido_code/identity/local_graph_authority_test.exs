@@ -57,6 +57,46 @@ defmodule JidoCode.Identity.LocalGraphAuthorityTest do
     %{fixture: fixture, identity: identity, resource: resource}
   end
 
+  test "authorization queue timeout remains fail closed and emits value-free diagnostics",
+       %{identity: identity, resource: resource} do
+    {:ok, request} =
+      AuthorityBuilder.request(:factory_shell, :developer, :page, :factory,
+        reauthorization_point: :before_response_start,
+        correlation_ref: "timeout-proof"
+      )
+
+    handler = {__MODULE__, make_ref()}
+    event = [:jido_code, :knowledge, :authorization_read]
+    caller = self()
+
+    :ok =
+      :telemetry.attach(
+        handler,
+        event,
+        fn _, measurements, metadata, target ->
+          send(target, {:authorization_measurement, measurements, metadata})
+        end,
+        caller
+      )
+
+    :ok = :sys.suspend(QueryRunner)
+
+    try do
+      assert {:error, :unavailable} =
+               Authority.LocalGraph.resolve(identity, [], [], resource, request)
+
+      assert_receive {:authorization_measurement, %{duration_ms: duration} = measurements,
+                      %{stage: :caller, outcome: :timeout} = metadata}
+
+      assert duration >= 1250
+      assert Map.keys(measurements) == [:duration_ms]
+      assert Enum.sort(Map.keys(metadata)) == [:outcome, :stage]
+    after
+      :sys.resume(QueryRunner)
+      :telemetry.detach(handler)
+    end
+  end
+
   test "actual named human receives only a current graph grant; a second human and writes are denied",
        %{identity: identity, resource: resource, fixture: fixture} do
     {:ok, request} =

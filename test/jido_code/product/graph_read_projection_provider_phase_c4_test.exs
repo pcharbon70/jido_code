@@ -1,5 +1,5 @@
 defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias JidoCode.Identity.Resource
   alias JidoCode.Knowledge.AuthorityContext
@@ -9,6 +9,17 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
 
   test "derives bounded attention and fleet rows only from independently authorized projects" do
     test_pid = self()
+    handler = {__MODULE__, make_ref()}
+
+    :ok =
+      :telemetry.attach(
+        handler,
+        [:jido_code, :product, :projection_stage],
+        fn _, measurements, metadata, pid -> send(pid, {:stage, measurements, metadata}) end,
+        test_pid
+      )
+
+    on_exit(fn -> :telemetry.detach(handler) end)
     authority = authority()
     identity = identity()
     resources = resources()
@@ -45,6 +56,15 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
              )
 
     assert projection.state == :ready
+
+    for stage <- [:authorization, :cohort_query, :resource_lookup, :fleet_row, :detail_query] do
+      assert_receive {:stage, %{duration_us: 0}, %{stage: ^stage, phase: :start}}
+      assert_receive {:stage, measurements, %{stage: ^stage, phase: :stop} = metadata}
+      assert Map.keys(measurements) == [:duration_us]
+      assert measurements.duration_us >= 0
+      assert Enum.sort(Map.keys(metadata)) == [:phase, :stage]
+    end
+
     assert projection.dataset_revision == 77
     assert Enum.map(projection.fleet, & &1.project) == ["alpha", "beta"]
     assert Enum.any?(projection.attention, &(&1.title == "Blocked work"))
@@ -91,6 +111,18 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
     assert maintenance.state == :maintenance
     assert maintenance.projects == []
 
+    handler = {__MODULE__, make_ref()}
+
+    :ok =
+      :telemetry.attach(
+        handler,
+        [:jido_code, :product, :projection_stage],
+        fn _, _, metadata, pid -> send(pid, {:timed_stage, metadata}) end,
+        self()
+      )
+
+    on_exit(fn -> :telemetry.detach(handler) end)
+
     assert {:ok, timed_out} =
              GraphReadProjectionProvider.load(context(:fleet),
                surface_timeout_ms: 5,
@@ -106,6 +138,8 @@ defmodule JidoCode.Product.GraphReadProjectionProviderPhaseC4Test do
     assert timed_out.state == :unavailable
     assert timed_out.source_outcome == :error
     assert timed_out.fleet == []
+    assert_receive {:timed_stage, %{stage: :cohort_query, phase: :start}}
+    refute_receive {:timed_stage, %{stage: :cohort_query, phase: :stop}}
   end
 
   defp context(surface, query \\ %{}) do

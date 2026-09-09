@@ -84,6 +84,65 @@ Application.put_env(
 
 {:ok, _} = Application.ensure_all_started(:jido_code)
 
+stage_metrics = :ets.new(:hui_d4_stages, [:set, :public, write_concurrency: true])
+stage_names = [:authorization, :cohort_query, :detail_query, :resource_lookup, :fleet_row]
+
+:ok =
+  :telemetry.attach(
+    "hui-d4-guard-deadline",
+    [:jido_code, :product_stream, :guard_deadline],
+    fn _, _, metadata, _ ->
+      IO.puts(Jason.encode!(%{qualification: "guard deadline", kind: metadata.kind}))
+    end,
+    nil
+  )
+
+for stage <- stage_names, do: :ets.insert(stage_metrics, {stage, 0, 0, 0})
+
+:ok =
+  :telemetry.attach(
+    "hui-d4-projection-stages",
+    [:jido_code, :product, :projection_stage],
+    fn _, measurements, metadata, {table, stages} ->
+      if metadata[:stage] in stages do
+        case metadata[:phase] do
+          :start ->
+            :ets.update_counter(table, metadata.stage, {2, 1})
+
+          :stop ->
+            :ets.update_counter(table, metadata.stage, [{3, 1}, {4, measurements.duration_us}])
+
+          _ ->
+            :ok
+        end
+      end
+    end,
+    {stage_metrics, stage_names}
+  )
+
+# The provider already validates these closed telemetry dimensions. Print only
+# fixed classes on failure; never dump the result, request, graph, or error.
+:ok =
+  :telemetry.attach(
+    "hui-d4-projection-failure",
+    JidoCode.Product.ReadProjectionTelemetry.event(),
+    fn _, measurements, metadata, _ ->
+      if metadata.outcome in [:error, :rejected] do
+        IO.puts(
+          Jason.encode!(%{
+            qualification: "projection failure",
+            surface: metadata.surface,
+            outcome: metadata.outcome,
+            state: metadata.state,
+            cache_status: metadata.cache_status,
+            duration_ms: measurements.duration_ms
+          })
+        )
+      end
+    end,
+    nil
+  )
+
 {:ok, _} =
   JidoCode.LocalInstall.bootstrap(
     %{login: "local-proof@example.test", display_name: "Local qualification human"},
@@ -298,6 +357,8 @@ hint_bursts =
 
 load_revision = JidoCode.Knowledge.StoreServer.summary().dataset_revision
 query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_error
+timing_before = JidoCode.Product.StreamCoordinator.stats().metrics
+for stage <- stage_names, do: :ets.insert(stage_metrics, {stage, 0, 0, 0})
 
 {load_output, load_result} =
   System.cmd("node", ["scripts/qualify_hui_d4_load.mjs"],
@@ -310,6 +371,18 @@ query_errors_before = JidoCode.Product.StreamCoordinator.stats().metrics.query_e
   )
 
 {cpu_after, _} = :erlang.statistics(:runtime)
+# Include bounded teardown so late watchdog events cannot escape the snapshot.
+true =
+  Enum.any?(1..150, fn _ ->
+    if JidoCode.Product.StreamCoordinator.stats().connections == 0,
+      do: true,
+      else:
+        (
+          Process.sleep(100)
+          false
+        )
+  end)
+
 send(hint_bursts.pid, :stop)
 replayed_hints = Task.await(hint_bursts, 5_000)
 load_revision_after = JidoCode.Knowledge.StoreServer.summary().dataset_revision
@@ -323,6 +396,19 @@ end
 send(collector.pid, :stop)
 peaks = Task.await(collector, 5_000)
 IO.write(load_output)
+
+IO.puts(
+  Jason.encode!(%{
+    qualification: "projection stage totals",
+    stages:
+      Enum.map(stage_names, fn stage ->
+        [{^stage, started, completed, duration}] = :ets.lookup(stage_metrics, stage)
+        %{stage: stage, started: started, completed: completed, duration_us: duration}
+      end),
+    note:
+      "Nested durations overlap; unfinished spans can reflect task termination or active work."
+  })
+)
 
 # Emit only bounded, privacy-safe diagnostics before enforcing acceptance.
 # A failed counter assertion must not hide the browser result or resource peaks.
@@ -339,6 +425,8 @@ IO.puts(
 
 ^load_revision = load_revision_after
 ^query_errors_before = load_stats_after.metrics.query_error
+true = load_stats_after.metrics.slow_owner == timing_before.slow_owner
+true = load_stats_after.metrics.guard_failure == timing_before.guard_failure
 
 IO.puts(
   Jason.encode!(%{

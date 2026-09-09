@@ -51,21 +51,27 @@ defmodule JidoCode.Knowledge.QueryRunner do
   end
 
   def authorize(name, version, parameters, authority, scope_iri, options \\ []) do
+    measure_authorization(:caller, fn ->
+      authorize_request(name, version, parameters, authority, scope_iri, options)
+    end)
+  end
+
+  defp authorize_request(name, version, parameters, authority, scope_iri, options) do
     with {:ok, request} <-
            CatalogQueryRequest.new(name, version, parameters, authority, scope_iri, options) do
       server = Keyword.get(options, :server, __MODULE__)
       GenServer.call(server, {:catalog_authorization, request, 1_000}, 1_250)
     end
-  catch
-    :exit, _ -> {:error, Error.new(:unavailable, :catalog_authorization)}
   end
 
   @impl true
   def handle_call({:catalog_authorization, request, timeout}, _from, state) do
-    reply = StoreServer.request(state.store_server, {:catalog_authorization, request}, timeout)
+    reply =
+      measure_authorization(:store, fn ->
+        StoreServer.request(state.store_server, {:catalog_authorization, request}, timeout)
+      end)
+
     {:reply, reply, state}
-  catch
-    :exit, _ -> {:reply, {:error, Error.new(:unavailable, :catalog_authorization)}, state}
   end
 
   def handle_call({:graph_metadata, graph_iri, timeout}, _from, state) do
@@ -76,5 +82,31 @@ defmodule JidoCode.Knowledge.QueryRunner do
   def handle_call({:catalog_query, request, timeout}, _from, state) do
     reply = StoreServer.request(state.store_server, {:catalog_query, request}, timeout)
     {:reply, reply, state}
+  end
+
+  # Fixed stage/outcome dimensions only: no request, principal, graph, or error payload.
+  # Caller duration includes QueryRunner queueing; store duration does not.
+  defp measure_authorization(stage, run) do
+    started = System.monotonic_time(:millisecond)
+
+    {result, outcome} =
+      try do
+        result = run.()
+        {result, if(match?({:ok, _}, result), do: :ok, else: :error)}
+      catch
+        :exit, {:timeout, _} ->
+          {{:error, Error.new(:unavailable, :catalog_authorization)}, :timeout}
+
+        :exit, _ ->
+          {{:error, Error.new(:unavailable, :catalog_authorization)}, :unavailable}
+      end
+
+    :telemetry.execute(
+      [:jido_code, :knowledge, :authorization_read],
+      %{duration_ms: max(System.monotonic_time(:millisecond) - started, 0)},
+      %{stage: stage, outcome: outcome}
+    )
+
+    result
   end
 end

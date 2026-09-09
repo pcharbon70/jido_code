@@ -2,11 +2,22 @@ defmodule JidoCode.Product.StreamMetrics do
   @moduledoc "Fixed-cardinality local counters; no event payload queue or sensitive dimensions."
   @keys ~w[admitted rejected revoked expired closed slow_owner guard_failure event_overflow stream_overflow event_rate duplicate frames_reserved reserved_bytes cursor_reconnect query_count query_error query_duration_ms hint gap reconcile refreshed graph_lag stale_revision query_unavailable recovery_exhausted subscription_lost convergence_ms pressure_enter pressure_exit]a
   @events [
+    [:jido_code, :knowledge, :authorization_read],
     [:jido_code, :product_stream, :lifecycle],
     [:jido_code, :product_stream, :convergence],
     [:jido_code, :product, :read_projection]
   ]
   @ceiling 9_223_372_036_854_775_807
+  @keys @keys ++ [:forced_terminal_cleanup]
+  @authorization_keys %{
+    caller:
+      {:authorization_count, :authorization_duration_ms, :authorization_error,
+       :authorization_timeout},
+    store:
+      {:authorization_store_count, :authorization_store_duration_ms, :authorization_store_error,
+       :authorization_store_timeout}
+  }
+  @keys @keys ++ (@authorization_keys |> Map.values() |> Enum.flat_map(&Tuple.to_list/1))
 
   def keys, do: @keys
 
@@ -51,6 +62,21 @@ defmodule JidoCode.Product.StreamMetrics do
     record(table, :query_count)
     record(table, :query_duration_ms, measurements[:duration_ms])
     if metadata[:outcome] != :ok, do: record(table, :query_error)
+  end
+
+  def handle_event(
+        [:jido_code, :knowledge, :authorization_read],
+        measurements,
+        %{stage: stage, outcome: outcome},
+        table
+      )
+      when stage in [:caller, :store] and outcome in [:ok, :error, :timeout, :unavailable] do
+    {count, duration, error, timeout} = Map.fetch!(@authorization_keys, stage)
+    record(table, count)
+    record(table, duration, measurements[:duration_ms])
+    if outcome != :ok, do: record(table, error)
+    if outcome == :timeout, do: record(table, timeout)
+    :ok
   end
 
   def handle_event(_, _, _, _), do: :ok

@@ -416,7 +416,7 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
 
     details =
       Enum.map(scan_candidates, fn candidate ->
-        load_fleet_row(candidate, options)
+        measure_stage(:fleet_row, fn -> load_fleet_row(candidate, options) end)
       end)
 
     query = context.page.query
@@ -1808,12 +1808,16 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
 
   defp query(options, binding, parameters, authority, scope) do
     query = Keyword.get(options, :query, &Knowledge.query/6)
-    ReadProjectionQuery.execute(query, binding, parameters, authority, scope)
+    stage = if binding == :factory_cohort, do: :cohort_query, else: :detail_query
+
+    measure_stage(stage, fn ->
+      ReadProjectionQuery.execute(query, binding, parameters, authority, scope)
+    end)
   end
 
   defp resources(options, kind, limit) do
     loader = Keyword.get(options, :resources, &Store.registered_resources/2)
-    loader.(kind, limit)
+    measure_stage(:resource_lookup, fn -> loader.(kind, limit) end)
   rescue
     _error -> {:error, :unavailable}
   end
@@ -1836,9 +1840,30 @@ defmodule JidoCode.Product.GraphReadProjectionProvider do
 
   defp authorize_as(context, operation, area, action, point, resource_ref, options) do
     callback = Keyword.get(options, :authorize, &default_authorize/6)
-    callback.(context, operation, area, action, point, resource_ref)
+
+    measure_stage(:authorization, fn ->
+      callback.(context, operation, area, action, point, resource_ref)
+    end)
   rescue
     _error -> {:error, :unavailable}
+  end
+
+  # Closed dimensions only; a brutally killed projection can emit start without
+  # stop. Nested fleet-row/detail-query durations must not be added together.
+  defp measure_stage(stage, run) do
+    started = System.monotonic_time(:microsecond)
+    event = [:jido_code, :product, :projection_stage]
+    :telemetry.execute(event, %{duration_us: 0}, %{stage: stage, phase: :start})
+
+    try do
+      run.()
+    after
+      :telemetry.execute(
+        event,
+        %{duration_us: max(System.monotonic_time(:microsecond) - started, 0)},
+        %{stage: stage, phase: :stop}
+      )
+    end
   end
 
   defp default_authorize(context, operation, area, action, point, resource_ref) do

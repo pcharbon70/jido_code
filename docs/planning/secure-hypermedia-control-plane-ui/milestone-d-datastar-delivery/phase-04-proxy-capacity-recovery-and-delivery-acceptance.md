@@ -30,6 +30,13 @@ existing filename and task anchor are retained for link compatibility.
 
 Back to plan: [README](./README.md)
 
+Maintainer decision (2026-09-09): independent security, accessibility, and
+operations-release reviews are deferred, as is the workstation suspend/resume
+test. Deferred does not mean passed; retain the unchecked acceptance tasks and
+all reopening conditions. Continue the production-load repair and automated
+qualification without waiting for reviewer assignment. See the phase receipt
+for the deferral record.
+
 - [ ] 4 Phase - Accept bounded hypermedia delivery under production operations and faults.
 
   This phase closes HUI-D4 and HUI4 only when native fallback, live delivery,

@@ -2,7 +2,140 @@
 
 Status: **merge-pending**
 
+## Maintainer deferrals (2026-09-09)
+
+The maintainer explicitly deferred the independent security, accessibility, and
+operations-release reviews, alongside the previously deferred workstation
+suspend/resume test. These reviews are not scheduled prerequisites for the
+current implementation work; no reviewer approval or passing review is claimed.
+The deferrals do not waive the failed production-load gate, clean-checkout CI,
+or any reopening condition. HUI-D4/HUI4 remains unaccepted; deferred evidence
+must be revisited before claiming full qualification.
+
+## September 9 authorization-load diagnostics (not a runtime fix)
+
+Merged PR #141 (`2cca4a90a8f46233a16cccacdeaf31979dc70eb3`) failed
+clean-checkout CI run `34340121037`: five projection errors and four slow-owner
+events during the first load round. The following instrumentation does not
+change authorization, admission, query timeouts, or owner deadlines.
+
+Fixed-cardinality authorization counters distinguish caller and store duration,
+errors, and caught timeouts. Caller duration includes the QueryRunner queue;
+store duration includes its StoreServer request. Neither event contains request,
+principal, graph, query, or error payloads. Counts can differ when callers are
+terminated before a queued operation completes; aggregate duration differences
+are not exact queue-time measurements.
+
+A disposable fixture probe under CPU affinity 0–3 measured mean fresh snapshot
+times of 3,506 microseconds without contention and 67,762 microseconds with the
+original two 64-MiB SHA-256 workers (20 samples each). Contended graph export
+averaged 59,148 microseconds. These exploratory measurements suggest read-path
+contention; they do not establish the cause of the CI failure.
+
+The instrumented dirty-checkout production repeat on the declared i7-12700F
+workstation exited zero with four schedulers and unchanged limits. Three rounds
+delivered 60 patches / 988,260 HTML bytes in 113,040 ms. Projection errors,
+authorization errors/timeouts, slow-owner events, pressure entries, and queued
+protected bytes were zero. Four guard failures remain recorded. Peaks were
+378,697,600 BEAM bytes, 594,591,744 RSS bytes, 369 processes, four streams,
+query queue four, and run queue four. The counter snapshot reported 1,475 caller
+authorizations / 63,303 total ms and 1,481 store authorizations / 46,408 total ms.
+All three browser delivery and native rollback checks, fault recovery, scope
+concealment, iterator cleanup, and restart recovery passed; graph revision was
+unchanged. Asset digest:
+`2cf3f825314a97ab6f2ef8850d723784d9f861036c633845ac07e78985e550f0`.
+This repeat did not reproduce CI's failure and is not a repair or closure claim.
+The instrumented candidate still needs clean-checkout CI and extended soak.
+
+Focused `mix precommit` passed ten D4 architecture, stream-metric, and real graph
+authority tests (seed 837098), including a suspended QueryRunner timeout that
+remains fail-closed and emits only fixed stage/outcome and duration fields.
+Architecture, compilation, formatting, and diff checks passed. This is not a
+full regression-suite result.
+
+## September 9 projection-deadline investigation
+
+PR #142 CI job `102451694580` failed load round one with three projection
+errors and four slow-owner events, but zero graph-grant authorization errors
+or timeouts at either measured boundary. Those counters do not include the
+complete identity/audit/field-shaping pipeline. Live projections explicitly
+use a 1,500-ms surface deadline; ordinary pages use 5,500 ms and stream owners
+have a 2,000-ms work window. No deadline was changed.
+
+The qualification harness now logs only the already validated projection
+telemetry dimensions (surface, outcome, state, cache status, duration) on
+failure; it does not log request, identity, graph, result, or exception payloads.
+A deliberately harsher two-CPU diagnostic run (affinity 0–1, original two
+64-MiB CPU workers) reproduced failure in round one: an unavailable/invalidated
+fleet projection at 3,783 ms and an unavailable/bypass projection at 1,501 ms.
+The latter is consistent with the live projection deadline. This run also
+recorded ten store authorization timeouts and one caller timeout, unlike CI,
+so it is not an exact reproduction of CI's failure mode. Graph revision stayed
+unchanged, protected queued bytes stayed zero, and slow-owner events were zero.
+Browser delivery, faults, isolation, iterator cleanup, and restart recovery had
+passed; final rollback was not reached. No qualification pass is claimed.
+
+An experiment exporting only policy content for grant snapshots, while reading
+target ownership metadata separately, did not demonstrate improvement: the
+20-sample contended fixture probe averaged 130,085 microseconds versus 114,097
+for the existing full snapshot. The experimental runtime and test edits were
+removed. Only harness diagnostics remain; the next clean CI run must identify
+its failing projection state and duration before a runtime fix is claimed.
+
+## Strict timing follow-up (qualification pending)
+
+The earlier green CI load still recorded two slow owners and six guard failures;
+it is not evidence of clean timing. A stricter local three-round run completed
+60 patches with zero query errors/slow owners but failed on four guard failures.
+A second traced run failed with two slow owners and six guard failures; all
+seven watchdog deadline observations printed before its final snapshot were
+explicit terminal-cleanup deadlines, not active-work deadlines. These failed
+runs remain evidence, not acceptance.
+
+The watchdog now distinguishes an already-dead owner from an unexpected guard
+exit. Deliberate coordinator-ordered force-stop after terminal grace is counted
+as `forced_terminal_cleanup`, not guard failure. Active deadlines still count
+as failure, with the event emitted before killing the owner to preserve it
+regardless of monitor ordering. Regressions force reversed monitor ordering,
+guard crash, active deadline, and stalled terminal cleanup. No deadline changes.
+
+One duplicate authorization immediately before local frame-budget reservation
+is removed. StreamUpdate still authorizes its rendered frame; write_update
+still reconstructs current authorization after reservation and before any
+protected bytes are sent. No query/render/delivery occurs between reservation
+and that check. Query, field, route and protected-write authorization remain.
+
+The production gate now rejects new query errors, slow owners and genuine guard
+failures and waits up to 15 seconds for owner teardown before sampling. Forced
+terminal cleanup is retained explicitly, not claimed as an active timing failure
+or hidden. Ten-round soak and clean-checkout CI on this candidate are pending;
+no timing-resolution or milestone-closure claim is made yet.
+
 ## Candidate Provenance
+
+CI follow-up: production delivery now runs independently of the application
+and browser/proxy regression job. The original required `verify` check is an
+always-running aggregate requiring both jobs to succeed (including rejecting
+skipped/cancelled jobs). No coverage is removed. Production uses a distinct
+cache write key and can restore the existing compatible dependency cache;
+it cleans application artifacts and builds production assets before qualification.
+The speedup is not yet measured on CI; cold native compilation remains possible.
+
+Projection stage telemetry records only fixed stage/phase and duration fields.
+The qualification reports load-interval starts, completions and aggregate
+microseconds for full authorization, cohort queries, detail queries, resource
+lookup and fleet-row construction. Nested durations overlap; starts without
+completions may indicate killed or still-active work. No authority, query,
+identity, resource, result or error payload is emitted. All runtime deadlines
+and fail-closed behavior remain unchanged. Historical candidate receipts are
+preserved through exact successor source digests.
+
+Local validation includes parsed YAML checks for independent job scheduling,
+retained regression/audit/browser/qualification steps, and the required aggregate
+check. Focused precommit covers projection/cache behavior, closed stage timing
+dimensions, killed-task unfinished spans, and C4/D4 source provenance. Hosted
+job timings and load qualification remain pending; no latency improvement or
+production-load repair is claimed from this scheduling/measurement change.
 
 Baseline: `8cac85172eeda04a41ee68f4b3a6dbba935ca8eb`.
 Accepted D3 implementation: `a25d1ba65138935bbd065e09518bcdc7c7945301`.
@@ -387,6 +520,46 @@ the recheck and re-review conditions. This does not accept D4 or replace clean
 CI and independent review.
 
 **merge-pending**. Milestone E is not authorized.
+
+### Bounded dictionary-decoding follow-up (qualification pending)
+
+The stricter candidate `9e67eedd1e3c353d3fe2781df46b99336e11155b`
+failed clean production CI run `34370952808`, job `102531725014`: four
+1501-ms projection errors and five slow-owner events. Guard failures were zero;
+five forced terminal cleanups were recorded separately. The local ten-round
+soak also failed: four projection errors, seven slow owners, zero guard failures,
+sixteen forced terminal cleanups, and a browser assertion in round ten.
+Neither result is accepted timing evidence.
+
+Profiling a disposable store identified repeated RDF dictionary decoding:
+178 policy quads caused 712 lookups for only 74 distinct terms. TripleStore
+PR #33, candidate `56873c8b62a2dad5d8d097cfd90926ca033b4e24`, reuses
+successful term decodes within a maximum of 256 quads / 1024 IDs, resetting
+between chunks and calls. It does not cache grants, graph snapshots, or
+authorization decisions. In local four-CPU, non-contention probes, mean quad
+decoding dropped from 2623 to 377 microseconds and full policy snapshots from
+3606 to 1377 microseconds. These are microbenchmarks, not production proof.
+
+The exact dependency lock digest is
+`2399e1a6745d6785241224b685aeafe252354cc18185ed616e9cd3076906075d`.
+Only the TripleStore lock entry changes from the previous candidate. All prior
+deadlines, authorization boundaries, assertions, and reopening conditions remain
+unchanged. Hosted production qualification now runs the same ten load rounds.
+
+The local ten-round run on September 9 exited zero with four schedulers, CPU
+affinity 0–3, and the original two 64-MiB SHA-256 workers: 200 patches /
+3,294,200 HTML bytes in 351,088 ms. Projection errors, slow owners, genuine guard
+failures, authorization errors/timeouts, and queued protected bytes were zero.
+Four deliberate terminal cleanups were recorded separately. All 1,380 measured
+projection authorization spans and all 270 cohort / 540 detail queries completed.
+Peaks were 387,669,976 BEAM bytes, 654,901,248 RSS bytes, 370 processes,
+four streams, eleven sockets, query queue three and run queue four. Native
+recovery, three-browser rollback, and the earlier browser/fault/scope/iterator/
+restart checks passed. This was a dirty-checkout experiment with the exact
+TripleStore candidate above, not clean-checkout acceptance. Focused downstream
+`mix precommit` passed 25 tests with zero failures, and unmodified `mix hex.audit`
+reported no retired or advisory packages for the new lock. Upstream clean CI
+and hosted ten-round qualification remain pending.
 
 ## Reopening Conditions
 
